@@ -1,12 +1,12 @@
 use std::io::stdin;
 use std::io::{BufRead, BufReader};
-use std::net::TcpStream;
 
+use internet_relay_chat::client::Client;
 use internet_relay_chat::message::Message;
 use internet_relay_chat::ADDRESS;
 
 fn main() {
-    let mut stream = match TcpStream::connect(ADDRESS) {
+    let mut client = match Client::new(ADDRESS.to_string()) {
         Ok(stream) => stream,
         Err(error) => return eprintln!("Error: Connecting to server: {:?}", error),
     };
@@ -20,11 +20,11 @@ fn main() {
 
         let message = Message::new(line);
 
-        if let Err(error) = message.send_to(&mut stream) {
+        if let Err(error) = client.send_message(message) {
             return eprintln!("Error: Sending message to server: {}", error);
         }
 
-        match Message::read_from(&mut stream) {
+        match client.read_message() {
             Ok(Some(response)) => println!("Response: {}", response),
             Err(error) => return eprintln!("Error: Reading response from server: {}", error),
             Ok(None) => return eprintln!("EOF: Conection with server closed"),
