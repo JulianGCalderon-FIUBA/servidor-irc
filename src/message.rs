@@ -4,10 +4,10 @@ use parse::parse;
 use std::io::{self, BufRead, BufReader, Error, ErrorKind};
 use std::io::{Read, Write};
 pub struct Message {
-    prefix: Option<String>,
-    command: String,
-    parameters: Vec<String>,
-    trailing: Option<String>,
+    pub prefix: Option<String>,
+    pub command: String,
+    pub parameters: Vec<String>,
+    pub trailing: Option<String>,
 }
 
 const CRLF: &[u8] = b"\r\n";
@@ -73,6 +73,17 @@ impl std::fmt::Display for Message {
         } else {
             Ok(())
         }
+    }
+}
+
+impl std::fmt::Debug for Message {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Message")
+            .field("prefix", &self.prefix)
+            .field("command", &self.command)
+            .field("parameters", &self.parameters)
+            .field("trailing", &self.trailing)
+            .finish()
     }
 }
 
@@ -173,5 +184,88 @@ mod tests_to_string {
         let expected = ":prefix COMMAND param1 param2 :trailing";
 
         assert_eq!(&actual, expected);
+    }
+}
+
+#[cfg(test)]
+mod tests_parsing {
+    use super::*;
+
+    // const FULL_MESSAGE: &str = ":prefix COMMAND param1 param2 :trailing with spaces";
+
+    #[test]
+    fn only_command() {
+        let message = Message::new("COMMAND").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(Vec::<String>::new(), message.parameters);
+        assert_eq!(None, message.trailing);
+    }
+
+    #[test]
+    fn w_prefix() {
+        let message = Message::new(":prefix COMMAND").unwrap();
+
+        assert_eq!(Some("prefix".to_string()), message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(Vec::<String>::new(), message.parameters);
+        assert_eq!(None, message.trailing);
+    }
+
+    #[test]
+    fn w_one_parameter() {
+        let message = Message::new("COMMAND param1").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(vec!["param1".to_string()], message.parameters);
+        assert_eq!(None, message.trailing);
+    }
+
+    #[test]
+    fn w_two_parameters() {
+        let message = Message::new("COMMAND param1 param2").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(
+            vec!["param1".to_string(), "param2".to_string()],
+            message.parameters
+        );
+        assert_eq!(None, message.trailing);
+    }
+
+    #[test]
+    fn w_trailing() {
+        let message = Message::new("COMMAND :trailing").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(Vec::<String>::new(), message.parameters);
+        assert_eq!(Some("trailing".to_string()), message.trailing);
+    }
+
+    #[test]
+    fn w_trailing_w_spaces() {
+        let message = Message::new("COMMAND :trailing with spaces").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(Vec::<String>::new(), message.parameters);
+        assert_eq!(Some("trailing with spaces".to_string()), message.trailing);
+    }
+
+    #[test]
+    fn full_mesage() {
+        let message = Message::new(":prefix COMMAND param1 param2 :trailing with spaces").unwrap();
+
+        assert_eq!(Some("prefix".to_string()), message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(
+            vec!["param1".to_string(), "param2".to_string()],
+            message.parameters
+        );
+        assert_eq!(Some("trailing with spaces".to_string()), message.trailing);
     }
 }
