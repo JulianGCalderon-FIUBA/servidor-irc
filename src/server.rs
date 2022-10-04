@@ -28,7 +28,7 @@ impl Server {
     fn handle_client(&self, mut client: TcpStream) -> io::Result<()> {
         let mut response_stream = client.try_clone()?;
 
-        while let Ok(Some(message)) = Message::read_from(&mut client) {
+        while let Ok(message) = Message::read_from(&mut client) {
             println!("Received: {}", message);
             message.send_to(&mut response_stream)?;
         }

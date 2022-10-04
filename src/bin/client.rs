@@ -18,16 +18,21 @@ fn main() {
             Err(error) => return eprint!("Error: Reading from stdin: {}", error),
         };
 
-        let message = Message::new(line);
+        let message = match Message::new(line) {
+            Ok(message) => message,
+            Err(error) => {
+                eprintln!("Error: Creating message: {}", error);
+                continue;
+            }
+        };
 
         if let Err(error) = client.send_message(message) {
             return eprintln!("Error: Sending message to server: {}", error);
         }
 
         match client.read_message() {
-            Ok(Some(response)) => println!("Response: {}", response),
+            Ok(response) => println!("Response: {}", response),
             Err(error) => return eprintln!("Error: Reading response from server: {}", error),
-            Ok(None) => return eprintln!("EOF: Conection with server closed"),
         }
     }
 }

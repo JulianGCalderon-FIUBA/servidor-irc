@@ -1,4 +1,4 @@
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, Error, ErrorKind};
 use std::io::{Read, Write};
 
 pub struct Message {
@@ -12,16 +12,14 @@ type MessageParse = (Option<String>, String, Vec<String>);
 const CRLF: &[u8] = b"\r\n";
 
 impl Message {
-    pub fn new(content: String) -> Self {
-        let parsing = parse(content);
+    pub fn new(content: String) -> io::Result<Self> {
+        let (prefix, command, parameters) = parse(content)?;
 
-        let (prefix, command, parameters) = parsing;
-
-        Self {
+        Ok(Self {
             prefix,
             command,
             parameters,
-        }
+        })
     }
 
     pub fn send_to(&self, stream: &mut dyn Write) -> io::Result<()> {
@@ -34,24 +32,24 @@ impl Message {
         Ok(())
     }
 
-    pub fn read_from(stream: &mut dyn Read) -> io::Result<Option<Self>> {
+    pub fn read_from(stream: &mut dyn Read) -> io::Result<Self> {
         let mut reader = BufReader::new(stream);
 
         let mut content = String::new();
 
         let size = reader.read_line(&mut content)?;
         if size == 0 {
-            return Ok(None);
+            return Err(empty_message_error());
         }
 
         if content.as_bytes().ends_with(CRLF) {
             content.pop();
             content.pop();
         } else {
-            return Ok(None);
+            return Err(no_trailing_crlf_in_message_error());
         }
 
-        Ok(Some(Self::new(content)))
+        Self::new(content)
     }
 }
 
@@ -67,6 +65,14 @@ impl std::fmt::Display for Message {
     }
 }
 
-fn parse(content: String) -> MessageParse {
-    (None, content, Vec::new())
+fn parse(content: String) -> io::Result<MessageParse> {
+    Ok((None, content, Vec::new()))
+}
+
+fn empty_message_error() -> Error {
+    Error::new(ErrorKind::InvalidInput, "message should not be empty")
+}
+
+fn no_trailing_crlf_in_message_error() -> Error {
+    Error::new(ErrorKind::InvalidInput, "message should end in CRLF")
 }

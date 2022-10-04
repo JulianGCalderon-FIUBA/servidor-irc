@@ -22,7 +22,7 @@ impl Client {
         message.send_to(&mut self.server)
     }
 
-    pub fn read_message(&mut self) -> io::Result<Option<Message>> {
+    pub fn read_message(&mut self) -> io::Result<Message> {
         Message::read_from(&mut self.server)
     }
 }
