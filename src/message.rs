@@ -41,7 +41,7 @@ impl Message {
 
         let size = reader.read_line(&mut content)?;
         if size == 0 {
-            return Err(empty_message_error());
+            return Err(eof_error());
         }
 
         if content.as_bytes().ends_with(CRLF) {
@@ -76,7 +76,15 @@ impl std::fmt::Display for Message {
 }
 
 fn parse(content: String) -> io::Result<MessageParse> {
+    if content.is_empty() {
+        return Err(empty_message_error());
+    }
+
     Ok((None, content, Vec::new(), None))
+}
+
+fn eof_error() -> Error {
+    Error::new(ErrorKind::UnexpectedEof, "encountered EOF")
 }
 
 fn empty_message_error() -> Error {
@@ -88,21 +96,12 @@ fn no_trailing_crlf_in_message_error() -> Error {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests_to_string {
 
     use super::*;
 
-    // Messages
-    // const ONLY_COMMAND: &str = "COMMAND";
-    // const W_PREFIX: &str = ":prefix COMMAND";
-    // const W_ONE_PARAMETER: &str = "COMMAND param1";
-    // const W_TWO_PARAMETER: &str = "COMMAND param1 param2";
-    // const W_TRAILING: &str = "COMMAND :trailing";
-    // const W_TRAILING_W_SPACES: &str = "COMMAND :trailing with spaces";
-    // const FULL_MESSAGE: &str = ":prefix COMMAND param1 param2 :trailing with spaces";
-
     #[test]
-    fn only_command_print() {
+    fn only_command() {
         let message = Message {
             prefix: None,
             command: "COMMAND".to_string(),
@@ -117,7 +116,7 @@ mod tests {
     }
 
     #[test]
-    fn with_prefix_print() {
+    fn with_prefix() {
         let message = Message {
             prefix: Some("prefix".to_string()),
             command: "COMMAND".to_string(),
@@ -132,7 +131,7 @@ mod tests {
     }
 
     #[test]
-    fn with_one_parameter_print() {
+    fn with_one_parameter() {
         let message = Message {
             prefix: None,
             command: "COMMAND".to_string(),
@@ -147,7 +146,7 @@ mod tests {
     }
 
     #[test]
-    fn with_two_parameters_print() {
+    fn with_two_parameters() {
         let message = Message {
             prefix: None,
             command: "COMMAND".to_string(),
@@ -162,7 +161,7 @@ mod tests {
     }
 
     #[test]
-    fn with_trailing_print() {
+    fn with_trailing() {
         let message = Message {
             prefix: None,
             command: "COMMAND".to_string(),
@@ -177,7 +176,7 @@ mod tests {
     }
 
     #[test]
-    fn full_message_print() {
+    fn full_message() {
         let message = Message {
             prefix: Some("prefix".to_string()),
             command: "COMMAND".to_string(),
@@ -189,5 +188,36 @@ mod tests {
         let expected = ":prefix COMMAND param1 param2 :trailing";
 
         assert_eq!(&actual, expected);
+    }
+}
+
+#[cfg(test)]
+mod tests_parsing {
+    use super::*;
+
+    // const W_ONE_PARAMETER: &str = "COMMAND param1";
+    // const W_TWO_PARAMETER: &str = "COMMAND param1 param2";
+    // const W_TRAILING: &str = "COMMAND :trailing";
+    // const W_TRAILING_W_SPACES: &str = "COMMAND :trailing with spaces";
+    // const FULL_MESSAGE: &str = ":prefix COMMAND param1 param2 :trailing with spaces";
+
+    #[test]
+    fn only_command() {
+        let message = Message::new("COMMAND".to_string()).unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(Vec::<String>::new(), message.parameters);
+        assert_eq!(None, message.trailing);
+    }
+
+    #[test]
+    fn w_prefix() {
+        let message = Message::new(":prefix COMMAND".to_string()).unwrap();
+
+        assert_eq!(Some("prefix".to_string()), message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(Vec::<String>::new(), message.parameters);
+        assert_eq!(None, message.trailing);
     }
 }
