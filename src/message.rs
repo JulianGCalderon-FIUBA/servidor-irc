@@ -1,7 +1,10 @@
+pub mod creating_message_error;
 mod parse;
 
+use creating_message_error::{CreatingMessageError, ParseError};
 use parse::parse;
-use std::io::{self, BufRead, BufReader, Error, ErrorKind};
+
+use std::io::{self, BufRead, BufReader, ErrorKind};
 use std::io::{Read, Write};
 pub struct Message {
     pub prefix: Option<String>,
@@ -14,7 +17,7 @@ const CRLF: &[u8] = b"\r\n";
 const COLON: u8 = b':';
 
 impl Message {
-    pub fn new(content: &str) -> io::Result<Self> {
+    pub fn new(content: &str) -> Result<Self, CreatingMessageError> {
         let (prefix, command, parameters, trailing) = parse(content)?;
 
         Ok(Self {
@@ -26,8 +29,8 @@ impl Message {
     }
 
     pub fn send_to(&self, stream: &mut dyn Write) -> io::Result<()> {
-        let content = self.to_string();
-        let bytes = content.as_bytes();
+        let string = self.to_string();
+        let bytes = string.as_bytes();
 
         stream.write_all(bytes)?;
         stream.write_all(CRLF)?;
@@ -35,21 +38,21 @@ impl Message {
         Ok(())
     }
 
-    pub fn read_from(stream: &mut dyn Read) -> io::Result<Self> {
+    pub fn read_from(stream: &mut dyn Read) -> Result<Self, CreatingMessageError> {
         let mut reader = BufReader::new(stream);
 
         let mut content = String::new();
 
         let size = reader.read_line(&mut content)?;
         if size == 0 {
-            return Err(format_error());
+            Err(unexpected_eof_error())?;
         }
 
         if content.as_bytes().ends_with(CRLF) {
             content.pop();
             content.pop();
         } else {
-            return Err(format_error());
+            Err(ParseError::NoTrailingCRLF)?;
         }
 
         Self::new(&content)
@@ -87,8 +90,8 @@ impl std::fmt::Debug for Message {
     }
 }
 
-fn format_error() -> Error {
-    Error::new(ErrorKind::InvalidInput, "invalid input")
+fn unexpected_eof_error() -> io::Error {
+    io::Error::new(ErrorKind::UnexpectedEof, "Encountered EOF")
 }
 
 #[cfg(test)]

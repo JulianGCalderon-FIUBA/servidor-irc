@@ -1,6 +1,6 @@
-use super::format_error;
+use super::ParseError;
 use super::COLON;
-use std::io;
+
 use std::iter::Peekable;
 use std::str::SplitWhitespace;
 
@@ -10,9 +10,9 @@ type Parameters = Vec<String>;
 type Trailing = Option<String>;
 type MessageParse = (Prefix, Command, Parameters, Trailing);
 
-pub fn parse(content: &str) -> io::Result<MessageParse> {
+pub fn parse(content: &str) -> Result<MessageParse, ParseError> {
     if content.is_empty() {
-        return Err(format_error());
+        return Err(ParseError::EmptyMessage);
     }
 
     let mut words = content.split_whitespace().peekable();
@@ -25,9 +25,9 @@ pub fn parse(content: &str) -> io::Result<MessageParse> {
     Ok((prefix, command, parameters, trailing))
 }
 
-fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> io::Result<Prefix> {
+fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParseError> {
     let possible_prefix = match split.peek() {
-        None => return Err(format_error()),
+        None => return Err(ParseError::EmptyMessage),
         Some(possible_prefix) => possible_prefix,
     };
 
@@ -38,14 +38,14 @@ fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> io::Result<Prefix> {
             let prefix = &prefix[1..];
             return Ok(Some(prefix.to_string()));
         }
-        return Err(format_error());
+        return Err(ParseError::EmptyPrefix);
     }
 
     Ok(None)
 }
-fn get_command(split: &mut Peekable<SplitWhitespace>) -> io::Result<Command> {
+fn get_command(split: &mut Peekable<SplitWhitespace>) -> Result<Command, ParseError> {
     let possible_command = match split.next() {
-        None => return Err(format_error()),
+        None => return Err(ParseError::NoCommand),
         Some(possible_command) => possible_command,
     };
 
