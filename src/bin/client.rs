@@ -18,7 +18,7 @@ fn main() {
             Err(error) => return eprint!("Error: Reading from stdin: {}", error),
         };
 
-        let message = match Message::new(line) {
+        let message = match Message::new(&line) {
             Ok(message) => message,
             Err(error) => {
                 eprintln!("Error: Creating message: {}", error);

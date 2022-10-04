@@ -1,5 +1,7 @@
 use std::io::{self, BufRead, BufReader, Error, ErrorKind};
 use std::io::{Read, Write};
+use std::iter::Peekable;
+use std::str::SplitWhitespace;
 
 pub struct Message {
     prefix: Option<String>,
@@ -8,12 +10,17 @@ pub struct Message {
     trailing: Option<String>,
 }
 
-type MessageParse = (Option<String>, String, Vec<String>, Option<String>);
+type Prefix = Option<String>;
+type Command = String;
+type Parameters = Vec<String>;
+type Trailing = Option<String>;
+type MessageParse = (Prefix, Command, Parameters, Trailing);
 
 const CRLF: &[u8] = b"\r\n";
+const COLON: u8 = b':';
 
 impl Message {
-    pub fn new(content: String) -> io::Result<Self> {
+    pub fn new(content: &str) -> io::Result<Self> {
         let (prefix, command, parameters, trailing) = parse(content)?;
 
         Ok(Self {
@@ -41,17 +48,17 @@ impl Message {
 
         let size = reader.read_line(&mut content)?;
         if size == 0 {
-            return Err(eof_error());
+            return Err(format_error());
         }
 
         if content.as_bytes().ends_with(CRLF) {
             content.pop();
             content.pop();
         } else {
-            return Err(no_trailing_crlf_in_message_error());
+            return Err(format_error());
         }
 
-        Self::new(content)
+        Self::new(&content)
     }
 }
 
@@ -75,24 +82,56 @@ impl std::fmt::Display for Message {
     }
 }
 
-fn parse(content: String) -> io::Result<MessageParse> {
+fn parse(content: &str) -> io::Result<MessageParse> {
     if content.is_empty() {
-        return Err(empty_message_error());
+        return Err(format_error());
     }
 
-    Ok((None, content, Vec::new(), None))
+    let mut words = content.split_whitespace().peekable();
+
+    let prefix = get_prefix(&mut words)?;
+    let command = get_command(&mut words)?;
+    let parameters = get_parameters(&mut words)?;
+    let trailing = get_trailing(&mut words)?;
+
+    Ok((prefix, command, parameters, trailing))
 }
 
-fn eof_error() -> Error {
-    Error::new(ErrorKind::UnexpectedEof, "encountered EOF")
+fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> io::Result<Prefix> {
+    let possible_prefix = match split.peek() {
+        None => return Err(format_error()),
+        Some(possible_prefix) => possible_prefix,
+    };
+
+    if *possible_prefix.as_bytes().first().unwrap() == COLON {
+        let prefix = split.next().unwrap();
+
+        if prefix.len() > 1 {
+            let prefix = &prefix[1..];
+            return Ok(Some(prefix.to_string()));
+        }
+        return Err(format_error());
+    }
+
+    Ok(None)
+}
+fn get_command(split: &mut Peekable<SplitWhitespace>) -> io::Result<Command> {
+    let possible_command = match split.next() {
+        None => return Err(format_error()),
+        Some(possible_command) => possible_command,
+    };
+
+    Ok(possible_command.to_string())
+}
+fn get_parameters(_split: &mut Peekable<SplitWhitespace>) -> io::Result<Parameters> {
+    Ok(Vec::new())
+}
+fn get_trailing(_split: &mut Peekable<SplitWhitespace>) -> io::Result<Trailing> {
+    Ok(None)
 }
 
-fn empty_message_error() -> Error {
-    Error::new(ErrorKind::InvalidInput, "message should not be empty")
-}
-
-fn no_trailing_crlf_in_message_error() -> Error {
-    Error::new(ErrorKind::InvalidInput, "message should end in CRLF")
+fn format_error() -> Error {
+    Error::new(ErrorKind::InvalidInput, "invalid input")
 }
 
 #[cfg(test)]
@@ -203,7 +242,7 @@ mod tests_parsing {
 
     #[test]
     fn only_command() {
-        let message = Message::new("COMMAND".to_string()).unwrap();
+        let message = Message::new("COMMAND").unwrap();
 
         assert_eq!(None, message.prefix);
         assert_eq!("COMMAND", &message.command);
@@ -213,7 +252,7 @@ mod tests_parsing {
 
     #[test]
     fn w_prefix() {
-        let message = Message::new(":prefix COMMAND".to_string()).unwrap();
+        let message = Message::new(":prefix COMMAND").unwrap();
 
         assert_eq!(Some("prefix".to_string()), message.prefix);
         assert_eq!("COMMAND", &message.command);
