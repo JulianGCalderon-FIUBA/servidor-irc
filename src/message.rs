@@ -2,6 +2,7 @@ use std::io::{self, BufRead, BufReader, Error, ErrorKind};
 use std::io::{Read, Write};
 use std::iter::Peekable;
 use std::str::SplitWhitespace;
+use std::vec;
 
 pub struct Message {
     prefix: Option<String>,
@@ -91,8 +92,8 @@ fn parse(content: &str) -> io::Result<MessageParse> {
 
     let prefix = get_prefix(&mut words)?;
     let command = get_command(&mut words)?;
-    let parameters = get_parameters(&mut words)?;
-    let trailing = get_trailing(&mut words)?;
+    let parameters = get_parameters(&mut words);
+    let trailing = get_trailing(&mut words);
 
     Ok((prefix, command, parameters, trailing))
 }
@@ -123,11 +124,33 @@ fn get_command(split: &mut Peekable<SplitWhitespace>) -> io::Result<Command> {
 
     Ok(possible_command.to_string())
 }
-fn get_parameters(_split: &mut Peekable<SplitWhitespace>) -> io::Result<Parameters> {
-    Ok(Vec::new())
+fn get_parameters(split: &mut Peekable<SplitWhitespace>) -> Parameters {
+    let mut parameters = Vec::new();
+
+    while let Some(possible_parameter) = split.peek() {
+        if *possible_parameter.as_bytes().first().unwrap() == COLON {
+            return parameters;
+        }
+        let parameter = split.next().unwrap();
+
+        parameters.push(parameter.to_string());
+    }
+
+    parameters
 }
-fn get_trailing(_split: &mut Peekable<SplitWhitespace>) -> io::Result<Trailing> {
-    Ok(None)
+fn get_trailing(split: &mut Peekable<SplitWhitespace>) -> Trailing {
+    split.peek()?;
+
+    let string_list: Vec<String> = split.map(|word| word.to_string()).collect();
+    let mut joined_string = string_list.join(" ");
+
+    joined_string.remove(0);
+
+    if joined_string.is_empty() {
+        return None;
+    }
+
+    Some(joined_string)
 }
 
 fn format_error() -> Error {
@@ -234,10 +257,6 @@ mod tests_to_string {
 mod tests_parsing {
     use super::*;
 
-    // const W_ONE_PARAMETER: &str = "COMMAND param1";
-    // const W_TWO_PARAMETER: &str = "COMMAND param1 param2";
-    // const W_TRAILING: &str = "COMMAND :trailing";
-    // const W_TRAILING_W_SPACES: &str = "COMMAND :trailing with spaces";
     // const FULL_MESSAGE: &str = ":prefix COMMAND param1 param2 :trailing with spaces";
 
     #[test]
@@ -258,5 +277,61 @@ mod tests_parsing {
         assert_eq!("COMMAND", &message.command);
         assert_eq!(Vec::<String>::new(), message.parameters);
         assert_eq!(None, message.trailing);
+    }
+
+    #[test]
+    fn w_one_parameter() {
+        let message = Message::new("COMMAND param1").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(vec!["param1".to_string()], message.parameters);
+        assert_eq!(None, message.trailing);
+    }
+
+    #[test]
+    fn w_two_parameters() {
+        let message = Message::new("COMMAND param1 param2").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(
+            vec!["param1".to_string(), "param2".to_string()],
+            message.parameters
+        );
+        assert_eq!(None, message.trailing);
+    }
+
+    #[test]
+    fn w_trailing() {
+        let message = Message::new("COMMAND :trailing").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(Vec::<String>::new(), message.parameters);
+        assert_eq!(Some("trailing".to_string()), message.trailing);
+    }
+
+    #[test]
+    fn w_trailing_w_spaces() {
+        let message = Message::new("COMMAND :trailing with spaces").unwrap();
+
+        assert_eq!(None, message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(Vec::<String>::new(), message.parameters);
+        assert_eq!(Some("trailing with spaces".to_string()), message.trailing);
+    }
+
+    #[test]
+    fn full_mesage() {
+        let message = Message::new(":prefix COMMAND param1 param2 :trailing with spaces").unwrap();
+
+        assert_eq!(Some("prefix".to_string()), message.prefix);
+        assert_eq!("COMMAND", &message.command);
+        assert_eq!(
+            vec!["param1".to_string(), "param2".to_string()],
+            message.parameters
+        );
+        assert_eq!(Some("trailing with spaces".to_string()), message.trailing);
     }
 }
