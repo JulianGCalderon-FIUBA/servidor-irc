@@ -31,8 +31,13 @@ fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParseErro
         Some(possible_prefix) => possible_prefix,
     };
 
-    if *possible_prefix.as_bytes().first().unwrap() == COLON {
-        let prefix = split.next().unwrap();
+    let first_character = *possible_prefix
+        .as_bytes()
+        .first()
+        .expect("SplitWhitespace does not generate empty elements");
+
+    if first_character == COLON {
+        let prefix = split.next().expect("Existance was verified on peek");
 
         if prefix.len() > 1 {
             let prefix = &prefix[1..];
@@ -55,10 +60,15 @@ fn get_parameters(split: &mut Peekable<SplitWhitespace>) -> Parameters {
     let mut parameters = Vec::new();
 
     while let Some(possible_parameter) = split.peek() {
-        if *possible_parameter.as_bytes().first().unwrap() == COLON {
+        let first_character = *possible_parameter
+            .as_bytes()
+            .first()
+            .expect("SplitWhitespace does not generate empty elements");
+
+        if first_character == COLON {
             return parameters;
         }
-        let parameter = split.next().unwrap();
+        let parameter = split.next().expect("Existance was verified on peek");
 
         parameters.push(parameter.to_string());
     }
@@ -72,10 +82,6 @@ fn get_trailing(split: &mut Peekable<SplitWhitespace>) -> Trailing {
     let mut joined_string = string_list.join(" ");
 
     joined_string.remove(0);
-
-    if joined_string.is_empty() {
-        return None;
-    }
 
     Some(joined_string)
 }

@@ -1,8 +1,8 @@
-pub mod creating_message_error;
-mod parse;
+mod message_creation_error;
+mod parsing;
 
-use creating_message_error::{CreatingMessageError, ParseError};
-use parse::parse;
+pub use message_creation_error::{MessageCreationError, ParseError};
+use parsing::parse;
 
 use std::io::{self, BufRead, BufReader, ErrorKind};
 use std::io::{Read, Write};
@@ -17,7 +17,7 @@ const CRLF: &[u8] = b"\r\n";
 const COLON: u8 = b':';
 
 impl Message {
-    pub fn new(content: &str) -> Result<Self, CreatingMessageError> {
+    pub fn new(content: &str) -> Result<Self, ParseError> {
         let (prefix, command, parameters, trailing) = parse(content)?;
 
         Ok(Self {
@@ -38,7 +38,7 @@ impl Message {
         Ok(())
     }
 
-    pub fn read_from(stream: &mut dyn Read) -> Result<Self, CreatingMessageError> {
+    pub fn read_from(stream: &mut dyn Read) -> Result<Self, MessageCreationError> {
         let mut reader = BufReader::new(stream);
 
         let mut content = String::new();
@@ -55,8 +55,12 @@ impl Message {
             Err(ParseError::NoTrailingCRLF)?;
         }
 
-        Self::new(&content)
+        Ok(Self::new(&content)?)
     }
+}
+
+fn unexpected_eof_error() -> io::Error {
+    io::Error::new(ErrorKind::UnexpectedEof, "Encountered EOF")
 }
 
 impl std::fmt::Display for Message {
@@ -88,10 +92,6 @@ impl std::fmt::Debug for Message {
             .field("trailing", &self.trailing)
             .finish()
     }
-}
-
-fn unexpected_eof_error() -> io::Error {
-    io::Error::new(ErrorKind::UnexpectedEof, "Encountered EOF")
 }
 
 #[cfg(test)]

@@ -1,7 +1,7 @@
 use std::{io, net::TcpStream};
 
-use crate::message::creating_message_error::CreatingMessageError;
 use crate::message::Message;
+use crate::message::MessageCreationError;
 
 pub struct Client {
     // nickname: String,
@@ -23,7 +23,7 @@ impl Client {
         message.send_to(&mut self.server)
     }
 
-    pub fn read_message(&mut self) -> Result<Message, CreatingMessageError> {
+    pub fn read_message(&mut self) -> Result<Message, MessageCreationError> {
         Message::read_from(&mut self.server)
     }
 }
