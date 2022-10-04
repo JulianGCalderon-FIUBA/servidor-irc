@@ -4,11 +4,11 @@ use std::io;
 #[derive(Debug)]
 pub enum MessageCreationError {
     IoError(io::Error),
-    ParseError(ParseError),
+    ParsingError(ParsingError),
 }
 
 #[derive(Debug)]
-pub enum ParseError {
+pub enum ParsingError {
     NoTrailingCRLF,
     EmptyMessage,
     EmptyPrefix,
@@ -20,7 +20,7 @@ impl fmt::Display for MessageCreationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::IoError(err) => write!(f, "IoError: {}", err),
-            Self::ParseError(err) => write!(f, "ParseError: {}", err),
+            Self::ParsingError(err) => write!(f, "ParseError: {}", err),
         }
     }
 }
@@ -31,13 +31,13 @@ impl From<io::Error> for MessageCreationError {
     }
 }
 
-impl From<ParseError> for MessageCreationError {
-    fn from(error: ParseError) -> Self {
-        Self::ParseError(error)
+impl From<ParsingError> for MessageCreationError {
+    fn from(error: ParsingError) -> Self {
+        Self::ParsingError(error)
     }
 }
 
-impl fmt::Display for ParseError {
+impl fmt::Display for ParsingError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::NoTrailingCRLF => write!(f, "message should have trailing CRLF"),

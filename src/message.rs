@@ -1,7 +1,7 @@
 mod message_creation_error;
 mod parsing;
 
-pub use message_creation_error::{MessageCreationError, ParseError};
+pub use message_creation_error::{MessageCreationError, ParsingError};
 use parsing::parse;
 
 use std::io::{self, BufRead, BufReader, ErrorKind};
@@ -17,7 +17,7 @@ const CRLF: &[u8] = b"\r\n";
 const COLON: u8 = b':';
 
 impl Message {
-    pub fn new(content: &str) -> Result<Self, ParseError> {
+    pub fn new(content: &str) -> Result<Self, ParsingError> {
         let (prefix, command, parameters, trailing) = parse(content)?;
 
         Ok(Self {
@@ -52,7 +52,7 @@ impl Message {
             content.pop();
             content.pop();
         } else {
-            Err(ParseError::NoTrailingCRLF)?;
+            Err(ParsingError::NoTrailingCRLF)?;
         }
 
         Ok(Self::new(&content)?)
