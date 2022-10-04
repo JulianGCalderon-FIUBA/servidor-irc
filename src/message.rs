@@ -63,18 +63,7 @@ impl std::fmt::Display for Message {
 
         write!(f, "{}", self.command)?;
 
-        let mut parameters = self.parameters.iter();
-        let last = parameters.next();
-        let last = match last {
-            None => "",
-            Some(parameter) => parameter,
-        };
-
-        for parameter in parameters {
-            write!(f, " {}", parameter)?;
-        }
-
-        write!(f, " :{}", last)
+        Ok(())
     }
 }
 
