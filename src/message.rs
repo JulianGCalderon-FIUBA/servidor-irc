@@ -2,7 +2,6 @@ use std::io::{self, BufRead, BufReader, Error, ErrorKind};
 use std::io::{Read, Write};
 use std::iter::Peekable;
 use std::str::SplitWhitespace;
-use std::vec;
 
 pub struct Message {
     prefix: Option<String>,
