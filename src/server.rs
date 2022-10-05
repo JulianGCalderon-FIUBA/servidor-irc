@@ -2,7 +2,7 @@ use std::io;
 
 use std::net::{TcpListener, TcpStream};
 
-use crate::message::Message;
+use crate::message::{CreationError, Message, ParsingError};
 
 pub struct Server {
     // id
@@ -19,20 +19,35 @@ impl Server {
 
     pub fn listen(&mut self) -> io::Result<()> {
         for client in self.listener.incoming() {
-            self.handle_client(client?)?
+            if let Err(err) = self.handle_client(client?) {
+                eprintln!("Conection ended: {err}");
+            }
         }
 
         Ok(())
     }
 
     fn handle_client(&self, mut client: TcpStream) -> io::Result<()> {
-        let mut response_stream = client.try_clone()?;
+        loop {
+            let message = match Message::read_from(&mut client) {
+                Ok(message) => message,
+                Err(error) => match error {
+                    CreationError::IoError(error) => return Err(error),
+                    CreationError::ParsingError(error) => {
+                        send_response_for_parsing_error(error, &mut client)?;
+                        continue;
+                    }
+                },
+            };
 
-        while let Ok(message) = Message::read_from(&mut client) {
             println!("Received: {}", message);
-            message.send_to(&mut response_stream)?;
+            message.send_to(&mut client)?;
         }
-
-        Ok(())
     }
+}
+
+fn send_response_for_parsing_error(error: ParsingError, client: &mut TcpStream) -> io::Result<()> {
+    let error_string = format!("PARSINGERROR :{}", error);
+    let error_message = Message::new(&error_string).expect("Is always valid");
+    error_message.send_to(client)
 }
