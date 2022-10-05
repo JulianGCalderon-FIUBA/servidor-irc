@@ -1,8 +1,10 @@
-mod message_creation_error;
+mod creation_error;
 mod parsing;
+mod parsing_error;
 
-pub use message_creation_error::{MessageCreationError, ParsingError};
+pub use creation_error::CreationError;
 use parsing::parse;
+pub use parsing_error::ParsingError;
 
 use std::io::{self, BufRead, BufReader, ErrorKind};
 use std::io::{Read, Write};
@@ -38,7 +40,7 @@ impl Message {
         Ok(())
     }
 
-    pub fn read_from(stream: &mut dyn Read) -> Result<Self, MessageCreationError> {
+    pub fn read_from(stream: &mut dyn Read) -> Result<Self, CreationError> {
         let mut reader = BufReader::new(stream);
 
         let mut content = String::new();
