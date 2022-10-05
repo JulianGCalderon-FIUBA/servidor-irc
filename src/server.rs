@@ -2,7 +2,7 @@ use std::io;
 
 use std::net::{TcpListener, TcpStream};
 
-use crate::message::{CreationError, Message, ParsingError};
+use crate::message::{CreationError, Message};
 
 pub struct Server {
     // id
