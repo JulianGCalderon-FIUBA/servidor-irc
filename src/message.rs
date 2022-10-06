@@ -57,7 +57,9 @@ impl Message {
             Err(ParsingError::NoTrailingCRLF)?;
         }
 
-        Ok(Self::new(&content)?)
+        let message = Self::new(&content)?;
+
+        Ok(message)
     }
 }
 
