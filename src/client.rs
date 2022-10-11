@@ -1,15 +1,9 @@
-use std::io::Write;
 use std::{io, net::TcpStream};
 
 use crate::message::CreationError;
 use crate::message::Message;
 
 pub struct Client {
-    // nickname: String,
-    // hostname: String,
-    // username: String,
-    // tipo?
-    // canales?
     server: TcpStream,
 }
 

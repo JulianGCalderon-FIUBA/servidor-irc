@@ -39,11 +39,12 @@ fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParsingEr
     if first_character == COLON {
         let prefix = split.next().expect("Existance was verified on peek");
 
-        if prefix.len() > 1 {
-            let prefix = &prefix[1..];
-            return Ok(Some(prefix.to_string()));
+        if prefix.len() == 1 {
+            return Err(ParsingError::EmptyPrefix);
         }
-        return Err(ParsingError::EmptyPrefix);
+
+        let prefix = &prefix[1..];
+        return Ok(Some(prefix.to_string()));
     }
 
     Ok(None)
@@ -68,8 +69,8 @@ fn get_parameters(split: &mut Peekable<SplitWhitespace>) -> Parameters {
         if first_character == COLON {
             return parameters;
         }
-        let parameter = split.next().expect("Existance was verified on peek");
 
+        let parameter = split.next().expect("Existance was verified on peek");
         parameters.push(parameter.to_string());
     }
 

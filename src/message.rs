@@ -3,7 +3,6 @@ mod parsing;
 mod parsing_error;
 
 pub use creation_error::CreationError;
-use parsing::parse;
 pub use parsing_error::ParsingError;
 
 use std::io::{self, BufRead, BufReader, ErrorKind};
@@ -20,7 +19,7 @@ const COLON: u8 = b':';
 
 impl Message {
     pub fn new(content: &str) -> Result<Self, ParsingError> {
-        let (prefix, command, parameters, trailing) = parse(content)?;
+        let (prefix, command, parameters, trailing) = parsing::parse(content)?;
 
         Ok(Self {
             prefix,
@@ -47,14 +46,14 @@ impl Message {
 
         let size = reader.read_line(&mut content)?;
         if size == 0 {
-            Err(unexpected_eof_error())?;
+            return Err(CreationError::IoError(unexpected_eof_error()));
         }
 
         if content.as_bytes().ends_with(CRLF) {
             content.pop();
             content.pop();
         } else {
-            Err(ParsingError::NoTrailingCRLF)?;
+            return Err(CreationError::ParsingError(ParsingError::NoTrailingCRLF));
         }
 
         let message = Self::new(&content)?;

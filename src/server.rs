@@ -5,8 +5,6 @@ use std::net::{TcpListener, TcpStream};
 use crate::message::{CreationError, Message};
 
 pub struct Server {
-    // id
-    // base de datos
     listener: TcpListener,
 }
 
