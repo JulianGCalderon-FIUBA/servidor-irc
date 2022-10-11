@@ -27,12 +27,4 @@ impl Client {
     pub fn read_message(&mut self) -> Result<Message, CreationError> {
         Message::read_from(&mut self.server)
     }
-
-    // FOR TESTING ONLY
-    pub fn send_raw(&mut self, message: &str) -> io::Result<()> {
-        self.server.write_all(message.as_bytes())?;
-        self.server.write_all(b"\r\n")?;
-
-        Ok(())
-    }
 }
