@@ -36,7 +36,11 @@ impl ThreadPool {
     {
         let job = Box::new(f);
 
-        self.sender.as_ref().unwrap().send(job).unwrap();
+        if let Some(sender) = self.sender.as_ref() {
+            if let Err(error) = sender.send(job) {
+                eprintln!("Error: {:?}", error);
+            }
+        }
     }
 }
 
@@ -46,7 +50,9 @@ impl Drop for ThreadPool {
 
         for worker in &mut self.workers {
             if let Some(thread) = worker.thread.take() {
-                thread.join().unwrap();
+                if let Err(error) = thread.join() {
+                    eprintln!("Error: {:?}", error);
+                }
             }
         }
     }
