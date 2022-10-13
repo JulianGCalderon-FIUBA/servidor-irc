@@ -7,8 +7,10 @@ pub struct ClientHandler<'a> {
     /// en el futuro puede ser:
     ///     - Arc<Mutex<Server>>
     ///     - Arc<RwLock<Server>>
+    ///         + la exclusividad solo es necesaria para la escritura, para evitar condiciones de carrera.
     ///     - Arc<Server> donde cada campo particular contenga su lock.
-    ///          (tiene mejor performance, pero mas tedioso de implementar)
+    ///         + tiene mejor performance, pero mas tedioso de implementar
+    ///         + algunos campos podrian ser de solo lectura, por lo que seria innecesaria un lock
     _server: &'a mut Server,
     client: ClientInfo,
 }
