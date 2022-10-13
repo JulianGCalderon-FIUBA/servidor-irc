@@ -4,14 +4,19 @@ use crate::server::Server;
 use std::{io, net::TcpStream};
 
 pub struct ClientHandler<'a> {
-    //en el futuro tiene que ser un Arc<Mutex<Server>>
+    /// en el futuro puede ser:
+    ///     - Arc<Mutex<Server>>
+    ///     - Arc<RwLock<Server>>
+    ///     - Arc<Server> donde cada campo particular contenga su lock.
+    ///          (tiene mejor performance, pero mas tedioso de implementar)
     _server: &'a mut Server,
     client: ClientInfo,
 }
 
 impl<'a> ClientHandler<'a> {
-    pub fn new(server: &'a mut Server, stream: TcpStream) -> ClientHandler<'a> {
+    pub fn new(server: &'a mut Server, stream: TcpStream) -> Self {
         let client = ClientInfo { stream };
+
         Self {
             _server: server,
             client,
