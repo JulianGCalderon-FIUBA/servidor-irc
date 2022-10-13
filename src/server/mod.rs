@@ -4,6 +4,7 @@ use std::net::TcpListener;
 use client_handler::ClientHandler;
 
 pub mod client_handler;
+pub mod client_info;
 
 pub struct Server {}
 
