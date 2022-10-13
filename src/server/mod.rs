@@ -11,6 +11,8 @@ use crate::thread_pool::ThreadPool;
 pub mod client_handler;
 pub mod client_info;
 
+pub const MAX_CLIENTS: usize = 5;
+
 pub struct Server {}
 
 impl Server {
@@ -25,7 +27,7 @@ impl Server {
 
         let pool = ThreadPool::create();
 
-        for client in listener.incoming() {
+        for client in listener.incoming().take(MAX_CLIENTS) {
             let server_lock_clone = Arc::clone(&server_lock);
 
             if let Ok(client) = client {

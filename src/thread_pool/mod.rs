@@ -1,5 +1,8 @@
 use crate::thread_pool::worker::Worker;
 use std::sync::{mpsc, Arc, Mutex};
+
+use crate::server::MAX_CLIENTS;
+
 pub mod worker;
 
 pub struct ThreadPool {
@@ -11,15 +14,13 @@ type Job = Box<dyn FnOnce() + Send + 'static>;
 
 impl ThreadPool {
     pub fn create() -> Self {
-        let size = 5;
-
         let (sender, receiver) = mpsc::channel();
 
         let receiver = Arc::new(Mutex::new(receiver));
 
-        let mut workers = Vec::with_capacity(size);
+        let mut workers = Vec::with_capacity(MAX_CLIENTS);
 
-        for id in 0..size {
+        for id in 0..MAX_CLIENTS {
             workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 

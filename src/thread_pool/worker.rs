@@ -14,6 +14,7 @@ impl Worker {
     pub fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Self {
         let thread = thread::spawn(move || loop {
             if let Ok(job) = receiver.lock().unwrap().recv() {
+                println!("Worker {id} started");
                 job();
             }
         });
