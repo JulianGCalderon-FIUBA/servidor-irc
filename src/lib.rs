@@ -10,4 +10,6 @@ pub mod server;
 /// This module contains a message's functionality. A message can be sent to and read from a stream.
 pub mod message;
 
+pub mod thread_pool;
+
 pub const ADDRESS: &str = "127.0.0.1:9001";
