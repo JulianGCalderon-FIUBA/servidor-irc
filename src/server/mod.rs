@@ -27,7 +27,7 @@ impl Server {
 
         let pool = ThreadPool::create();
 
-        for client in listener.incoming().take(MAX_CLIENTS) {
+        for client in listener.incoming() {
             let server_lock_clone = Arc::clone(&server_lock);
 
             if let Ok(client) = client {
