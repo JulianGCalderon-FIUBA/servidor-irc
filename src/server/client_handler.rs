@@ -4,20 +4,14 @@ use crate::server::Server;
 use std::sync::{Arc, RwLock};
 use std::{io, net::TcpStream};
 
+/// A ClientHandler handles the client's request.
 pub struct ClientHandler {
-    /// en el futuro puede ser:
-    ///     - Arc<Mutex<Server>>
-    ///     - Arc<RwLock<Server>>
-    ///         + la exclusividad solo es necesaria para la escritura, para evitar condiciones de carrera.
-    ///     - Arc<Server> donde cada campo particular contenga su lock.
-    ///         + tiene mejor performance, pero mas tedioso de implementar
-    ///         + algunos campos podrian ser de solo lectura, por lo que seria innecesario un lock
-    //_server: &'a mut Server,
     _server: Arc<RwLock<Server>>,
     client: ClientInfo,
 }
 
 impl ClientHandler {
+    /// Returns new clientHandler.
     pub fn new(server: Arc<RwLock<Server>>, stream: TcpStream) -> Self {
         let client = ClientInfo { stream };
 
@@ -27,12 +21,20 @@ impl ClientHandler {
         }
     }
 
+    /// Prints error if `try_handle` fails.
+    ///
     pub fn handle(self) {
         if let Err(error) = self.try_handle() {
             eprintln!("Error handling client: {:?}", error);
         }
     }
 
+    /// Tries to handle the received request.
+    ///
+    /// # Panics
+    ///
+    /// `try_handle` fails if there is an IOError when reading the Message the client sent.
+    ///
     fn try_handle(mut self) -> io::Result<()> {
         loop {
             let message = match Message::read_from(&mut self.client.stream) {

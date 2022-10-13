@@ -3,23 +3,27 @@ use std::{
     net::TcpListener,
     sync::{Arc, RwLock},
 };
+/// This module contains the functionality to handle a client's request.
+pub mod client_handler;
 
-use client_handler::ClientHandler;
+/// This module contains a client's information.
+pub mod client_info;
 
 use crate::thread_pool::ThreadPool;
-
-pub mod client_handler;
-pub mod client_info;
+use client_handler::ClientHandler;
 
 pub const MAX_CLIENTS: usize = 5;
 
+/// Represents a Server clients can connect to.
 pub struct Server {}
 
 impl Server {
+    /// Starts new Server.
     pub fn start() -> Self {
         Self {}
     }
 
+    /// Listens for incoming clients and handles each request in a new thread.
     pub fn listen_to(self, address: String) -> io::Result<()> {
         let listener = TcpListener::bind(address)?;
 
