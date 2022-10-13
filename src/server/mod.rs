@@ -1,7 +1,7 @@
 use std::io;
 use std::net::TcpListener;
 
-use self::client_handler::ClientHandler;
+use client_handler::ClientHandler;
 
 pub mod client_handler;
 
@@ -16,9 +16,11 @@ impl Server {
         Ok(Self { listener })
     }
 
-    pub fn listen(self) -> io::Result<()> {
-        for client in self.listener.incoming() {
-            let mut handler = ClientHandler::new(&self, client?);
+    pub fn listen(mut self) -> io::Result<()> {
+        let listener_clone = self.listener.try_clone()?;
+
+        for client in listener_clone.incoming() {
+            let handler = ClientHandler::new(&mut self, client?);
             handler.handle();
         }
 
