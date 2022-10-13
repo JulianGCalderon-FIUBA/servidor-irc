@@ -18,10 +18,9 @@ impl<'a> ClientHandler<'a> {
     }
 
     pub fn handle(self) {
-        match self.try_handle() {
-            Ok(_) => (),
-            Err(_) => eprintln!("Error handling client"),
-        };
+        if let Err(error) = self.try_handle() {
+            eprintln!("Error handling client: {:?}", error);
+        }
     }
 
     fn try_handle(mut self) -> io::Result<()> {
