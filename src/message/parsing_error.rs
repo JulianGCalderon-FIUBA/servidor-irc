@@ -6,7 +6,8 @@ pub enum ParsingError {
     EmptyMessage,
     EmptyPrefix,
     NoCommand,
-    // InvalidCharacter,
+    InvalidCharacter,
+    TooManyParameters,
 }
 
 impl fmt::Display for ParsingError {
@@ -16,7 +17,8 @@ impl fmt::Display for ParsingError {
             Self::EmptyMessage => write!(f, "message should not be empty"),
             Self::EmptyPrefix => write!(f, "prefix should not be empty"),
             Self::NoCommand => write!(f, "message should have a command"),
-            // Self::InvalidCharacter => write!(f, "encountered ilegal character"),
+            Self::InvalidCharacter => write!(f, "encountered ilegal character"),
+            Self::TooManyParameters => write!(f, "encountered too many parameters"),
         }
     }
 }

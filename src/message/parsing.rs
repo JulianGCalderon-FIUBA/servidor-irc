@@ -1,5 +1,7 @@
 use super::ParsingError;
-use super::COLON;
+use super::INVALID_CHARACTERS;
+use super::MAX_LENGTH;
+use super::PREFIX_CHARACTER;
 
 use std::iter::Peekable;
 use std::str::SplitWhitespace;
@@ -15,15 +17,28 @@ pub fn parse(content: &str) -> Result<MessageParse, ParsingError> {
         return Err(ParsingError::EmptyMessage);
     }
 
+    if content.len() > MAX_LENGTH {
+        return Err(ParsingError::TooManyParameters);
+    }
+
+    if content.contains(INVALID_CHARACTERS) {
+        return Err(ParsingError::InvalidCharacter);
+    }
+
     let mut words = content.split_whitespace().peekable();
 
     let prefix = get_prefix(&mut words)?;
+
     let command = get_command(&mut words)?;
-    let parameters = get_parameters(&mut words);
-    let trailing = get_trailing(&mut words);
+
+    let parameters = get_parameters(&mut words)?;
+
+    let trailing = get_trailing(&mut words)?;
 
     Ok((prefix, command, parameters, trailing))
 }
+
+// GET FUNCTIONS
 
 fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParsingError> {
     let possible_prefix = match split.peek() {
@@ -36,7 +51,7 @@ fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParsingEr
         .first()
         .expect("SplitWhitespace does not generate empty elements");
 
-    if first_character == COLON {
+    if first_character == PREFIX_CHARACTER {
         let prefix = split.next().expect("Existance was verified on peek");
 
         if prefix.len() == 1 {
@@ -44,11 +59,13 @@ fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParsingEr
         }
 
         let prefix = &prefix[1..];
+
         return Ok(Some(prefix.to_string()));
     }
 
     Ok(None)
 }
+
 fn get_command(split: &mut Peekable<SplitWhitespace>) -> Result<Command, ParsingError> {
     let possible_command = match split.next() {
         None => return Err(ParsingError::NoCommand),
@@ -57,7 +74,8 @@ fn get_command(split: &mut Peekable<SplitWhitespace>) -> Result<Command, Parsing
 
     Ok(possible_command.to_string())
 }
-fn get_parameters(split: &mut Peekable<SplitWhitespace>) -> Parameters {
+
+fn get_parameters(split: &mut Peekable<SplitWhitespace>) -> Result<Parameters, ParsingError> {
     let mut parameters = Vec::new();
 
     while let Some(possible_parameter) = split.peek() {
@@ -66,23 +84,32 @@ fn get_parameters(split: &mut Peekable<SplitWhitespace>) -> Parameters {
             .first()
             .expect("SplitWhitespace does not generate empty elements");
 
-        if first_character == COLON {
-            return parameters;
+        if first_character == PREFIX_CHARACTER {
+            break;
         }
 
         let parameter = split.next().expect("Existance was verified on peek");
         parameters.push(parameter.to_string());
     }
 
-    parameters
+    if parameters.len() > 15 {
+        return Err(ParsingError::TooManyParameters);
+    }
+
+    Ok(parameters)
 }
-fn get_trailing(split: &mut Peekable<SplitWhitespace>) -> Trailing {
-    split.peek()?;
+
+fn get_trailing(split: &mut Peekable<SplitWhitespace>) -> Result<Trailing, ParsingError> {
+    if split.peek().is_none() {
+        return Ok(None);
+    }
 
     let string_list: Vec<String> = split.map(|word| word.to_string()).collect();
     let mut joined_string = string_list.join(" ");
 
     joined_string.remove(0);
 
-    Some(joined_string)
+    Ok(Some(joined_string))
 }
+
+// VALIDATING FUNCTIONS

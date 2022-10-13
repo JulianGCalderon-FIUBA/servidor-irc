@@ -15,7 +15,9 @@ pub struct Message {
 }
 
 const CRLF: &[u8] = b"\r\n";
-const COLON: u8 = b':';
+const PREFIX_CHARACTER: u8 = b':';
+const MAX_LENGTH: usize = 510;
+const INVALID_CHARACTERS: [char; 3] = ['\r', '\n', '\0'];
 
 impl Message {
     pub fn new(content: &str) -> Result<Self, ParsingError> {
@@ -178,6 +180,21 @@ mod tests_to_string {
     }
 
     #[test]
+    fn with_trailing_with_spaces() {
+        let message = Message {
+            prefix: None,
+            command: "COMMAND".to_string(),
+            parameters: vec![],
+            trailing: Some("trailing with spaces".to_string()),
+        };
+
+        let actual = message.to_string();
+        let expected = "COMMAND :trailing with spaces";
+
+        assert_eq!(&actual, expected);
+    }
+
+    #[test]
     fn full_message() {
         let message = Message {
             prefix: Some("prefix".to_string()),
@@ -263,7 +280,7 @@ mod tests_parsing {
     }
 
     #[test]
-    fn full_mesage() {
+    fn full_message() {
         let message = Message::new(":prefix COMMAND param1 param2 :trailing with spaces").unwrap();
 
         assert_eq!(Some("prefix".to_string()), message.prefix);
