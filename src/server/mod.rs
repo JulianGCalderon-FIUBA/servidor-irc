@@ -5,25 +5,23 @@ use client_handler::ClientHandler;
 
 pub mod client_handler;
 
-pub struct Server {
-    listener: TcpListener,
-}
+pub struct Server {}
 
 impl Server {
-    pub fn new(address: String) -> io::Result<Self> {
+    pub fn listening_to(address: String) -> io::Result<()> {
+        let mut server = Server::new();
+
         let listener = TcpListener::bind(address)?;
 
-        Ok(Self { listener })
-    }
-
-    pub fn listen(mut self) -> io::Result<()> {
-        let listener_clone = self.listener.try_clone()?;
-
-        for client in listener_clone.incoming() {
-            let handler = ClientHandler::new(&mut self, client?);
+        for client in listener.incoming() {
+            let handler = ClientHandler::new(&mut server, client?);
             handler.handle();
         }
 
         Ok(())
+    }
+
+    fn new() -> Self {
+        Self {}
     }
 }
