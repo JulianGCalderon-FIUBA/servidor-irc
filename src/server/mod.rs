@@ -1,7 +1,12 @@
-use std::io;
-use std::net::TcpListener;
+use std::{
+    io,
+    net::TcpListener,
+    sync::{Arc, RwLock},
+};
 
 use client_handler::ClientHandler;
+
+use crate::thread_pool::ThreadPool;
 
 pub mod client_handler;
 pub mod client_info;
@@ -13,12 +18,22 @@ impl Server {
         Self {}
     }
 
-    pub fn listen_to(mut self, address: String) -> io::Result<()> {
+    pub fn listen_to(self, address: String) -> io::Result<()> {
         let listener = TcpListener::bind(address)?;
 
+        let server_lock = Arc::new(RwLock::new(self));
+
+        let pool = ThreadPool::create();
+
         for client in listener.incoming() {
-            let handler = ClientHandler::new(&mut self, client?);
-            handler.handle();
+            let server_lock_clone = Arc::clone(&server_lock);
+
+            if let Ok(client) = client {
+                pool.execute(|| {
+                    let handler = ClientHandler::new(server_lock_clone, client);
+                    handler.handle();
+                })
+            }
         }
 
         Ok(())

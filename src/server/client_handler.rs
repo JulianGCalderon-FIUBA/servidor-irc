@@ -1,9 +1,10 @@
 use crate::message::{CreationError, Message};
 use crate::server::client_info::ClientInfo;
 use crate::server::Server;
+use std::sync::{Arc, RwLock};
 use std::{io, net::TcpStream};
 
-pub struct ClientHandler<'a> {
+pub struct ClientHandler {
     /// en el futuro puede ser:
     ///     - Arc<Mutex<Server>>
     ///     - Arc<RwLock<Server>>
@@ -11,12 +12,13 @@ pub struct ClientHandler<'a> {
     ///     - Arc<Server> donde cada campo particular contenga su lock.
     ///         + tiene mejor performance, pero mas tedioso de implementar
     ///         + algunos campos podrian ser de solo lectura, por lo que seria innecesario un lock
-    _server: &'a mut Server,
+    //_server: &'a mut Server,
+    _server: Arc<RwLock<Server>>,
     client: ClientInfo,
 }
 
-impl<'a> ClientHandler<'a> {
-    pub fn new(server: &'a mut Server, stream: TcpStream) -> Self {
+impl ClientHandler {
+    pub fn new(server: Arc<RwLock<Server>>, stream: TcpStream) -> Self {
         let client = ClientInfo { stream };
 
         Self {
