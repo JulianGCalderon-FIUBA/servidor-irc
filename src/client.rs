@@ -1,13 +1,9 @@
 use std::{io, net::TcpStream};
 
+use crate::message::CreationError;
 use crate::message::Message;
 
 pub struct Client {
-    // nickname: String,
-    // hostname: String,
-    // username: String,
-    // tipo?
-    // canales?
     server: TcpStream,
 }
 
@@ -22,7 +18,7 @@ impl Client {
         message.send_to(&mut self.server)
     }
 
-    pub fn read_message(&mut self) -> io::Result<Option<Message>> {
+    pub fn read_message(&mut self) -> Result<Message, CreationError> {
         Message::read_from(&mut self.server)
     }
 }
