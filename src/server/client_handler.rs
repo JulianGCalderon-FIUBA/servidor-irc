@@ -10,7 +10,7 @@ pub struct ClientHandler<'a> {
     ///         + la exclusividad solo es necesaria para la escritura, para evitar condiciones de carrera.
     ///     - Arc<Server> donde cada campo particular contenga su lock.
     ///         + tiene mejor performance, pero mas tedioso de implementar
-    ///         + algunos campos podrian ser de solo lectura, por lo que seria innecesaria un lock
+    ///         + algunos campos podrian ser de solo lectura, por lo que seria innecesario un lock
     _server: &'a mut Server,
     client: ClientInfo,
 }
