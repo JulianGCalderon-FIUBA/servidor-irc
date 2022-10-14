@@ -34,7 +34,7 @@ impl<'a> ClientHandler<'a> {
 
     fn try_handle(mut self) -> io::Result<()> {
         loop {
-            let message = match Message::read_from(&mut self.client.stream) {
+            let _message = match Message::read_from(&mut self.client.stream) {
                 Ok(message) => message,
                 Err(CreationError::IoError(error)) => return Err(error),
                 Err(CreationError::ParsingError(error)) => {
@@ -52,9 +52,6 @@ impl<'a> ClientHandler<'a> {
             //     "QUIT" => self.quit_command(prefix, parameters, trailing),
             //     _ => self.on_unknown_command(&command),
             // }
-
-            println!("Received: {message}");
-            message.send_to(&mut self.client.stream)?;
         }
     }
 
