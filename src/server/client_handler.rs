@@ -54,9 +54,13 @@ impl<'a> ClientHandler<'a> {
             }
         }
     }
-    fn on_parsing_error(&self, _error: &ParsingError) {}
+    fn on_parsing_error(&self, _error: &ParsingError) {
+        // todo!()
+    }
 
-    fn on_unknown_command(&self, _command: &str) {}
+    fn on_unknown_command(&self, _command: &str) {
+        // todo!()
+    }
 }
 
 impl<'a> ClientHandler<'a> {
