@@ -2,18 +2,18 @@ use std::io;
 use std::net::TcpListener;
 
 use client_handler::ClientHandler;
-// use client_info::ClientInfo;
+use client_info::ClientInfo;
 
 pub mod client_handler;
 pub mod client_info;
 
 pub struct Server {
-    // clients: Vec<ClientInfo>,
+    _clients: Vec<ClientInfo>,
 }
 
 impl Server {
     pub fn start() -> Self {
-        Self {}
+        Self { _clients: vec![] }
     }
 
     pub fn listen_to(mut self, address: String) -> io::Result<()> {
