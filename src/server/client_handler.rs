@@ -18,7 +18,7 @@ pub struct ClientHandler<'a> {
 
 impl<'a> ClientHandler<'a> {
     pub fn new(server: &'a mut Server, stream: TcpStream) -> Self {
-        let client = ClientInfo { stream };
+        let client = ClientInfo::with_stream(stream);
 
         Self {
             _server: server,
@@ -34,7 +34,7 @@ impl<'a> ClientHandler<'a> {
 
     fn try_handle(mut self) -> io::Result<()> {
         loop {
-            let _message = match Message::read_from(&mut self.client.stream) {
+            let message = match Message::read_from(&mut self.client.stream) {
                 Ok(message) => message,
                 Err(CreationError::IoError(error)) => return Err(error),
                 Err(CreationError::ParsingError(error)) => {
@@ -43,27 +43,65 @@ impl<'a> ClientHandler<'a> {
                 }
             };
 
-            // let (prefix, command, parameters, trailing) = message.unpack();
-            // match &command[..] {
-            //     "PASS" => self.pass_command(prefix, parameters, trailing),
-            //     "NICK" => self.nick_command(prefix, parameters, trailing),
-            //     "USER" => self.user_command(prefix, parameters, trailing),
-            //     "OPER" => self.oper_command(prefix, parameters, trailing),
-            //     "QUIT" => self.quit_command(prefix, parameters, trailing),
-            //     _ => self.on_unknown_command(&command),
-            // }
+            let (prefix, command, parameters, trailing) = message.unpack();
+            match &command[..] {
+                "PASS" => self.pass_command(prefix, parameters, trailing),
+                "NICK" => self.nick_command(prefix, parameters, trailing),
+                "USER" => self.user_command(prefix, parameters, trailing),
+                "OPER" => self.oper_command(prefix, parameters, trailing),
+                "QUIT" => self.quit_command(prefix, parameters, trailing),
+                _ => self.on_unknown_command(&command),
+            }
         }
     }
-
     fn on_parsing_error(&self, _error: &ParsingError) {}
 
-    // fn on_unknown_command(&self, _command: &str) {}
+    fn on_unknown_command(&self, _command: &str) {}
 }
 
 impl<'a> ClientHandler<'a> {
-    // fn pass_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
-    // fn nick_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
-    // fn user_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
-    // fn oper_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
-    // fn quit_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
+    fn pass_command(
+        &mut self,
+        _prefix: Option<String>,
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) {
+        todo!()
+    }
+
+    fn nick_command(
+        &mut self,
+        _prefix: Option<String>,
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) {
+        todo!()
+    }
+
+    fn user_command(
+        &mut self,
+        _prefix: Option<String>,
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) {
+        todo!()
+    }
+
+    fn oper_command(
+        &mut self,
+        _prefix: Option<String>,
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) {
+        todo!()
+    }
+
+    fn quit_command(
+        &mut self,
+        _prefix: Option<String>,
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) {
+        todo!()
+    }
 }

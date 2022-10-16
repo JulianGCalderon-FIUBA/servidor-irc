@@ -26,4 +26,8 @@ impl Server {
 
         Ok(())
     }
+
+    pub fn backup() {
+        todo!()
+    }
 }
