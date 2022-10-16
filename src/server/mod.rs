@@ -2,11 +2,14 @@ use std::io;
 use std::net::TcpListener;
 
 use client_handler::ClientHandler;
+// use client_info::ClientInfo;
 
 pub mod client_handler;
 pub mod client_info;
 
-pub struct Server {}
+pub struct Server {
+    // clients: Vec<ClientInfo>,
+}
 
 impl Server {
     pub fn start() -> Self {

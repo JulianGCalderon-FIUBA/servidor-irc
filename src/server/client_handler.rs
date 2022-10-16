@@ -59,3 +59,11 @@ impl<'a> ClientHandler<'a> {
 
     // fn on_unknown_command(&self, _command: &str) {}
 }
+
+impl<'a> ClientHandler<'a> {
+    // fn pass_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
+    // fn nick_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
+    // fn user_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
+    // fn oper_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
+    // fn quit_command(prefix: Option<String>, parameters: Vec<String>, trailing: Option<String>) {}
+}
