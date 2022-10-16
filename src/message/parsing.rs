@@ -28,17 +28,12 @@ pub fn parse(content: &str) -> Result<MessageParse, ParsingError> {
     let mut words = content.split_whitespace().peekable();
 
     let prefix = get_prefix(&mut words)?;
-
     let command = get_command(&mut words)?;
-
     let parameters = get_parameters(&mut words)?;
-
     let trailing = get_trailing(&mut words)?;
 
     Ok((prefix, command, parameters, trailing))
 }
-
-// GET FUNCTIONS
 
 fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParsingError> {
     let possible_prefix = match split.peek() {
@@ -111,5 +106,3 @@ fn get_trailing(split: &mut Peekable<SplitWhitespace>) -> Result<Trailing, Parsi
 
     Ok(Some(joined_string))
 }
-
-// VALIDATING FUNCTIONS
