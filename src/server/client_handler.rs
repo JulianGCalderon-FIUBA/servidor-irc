@@ -46,10 +46,10 @@ impl<'a> ClientHandler<'a> {
             let (prefix, command, parameters, trailing) = message.unpack();
             match &command[..] {
                 "PASS" => self.pass_command(prefix, parameters, trailing),
-                "NICK" => self.nick_command(prefix, parameters, trailing),
-                "USER" => self.user_command(prefix, parameters, trailing),
-                "OPER" => self.oper_command(prefix, parameters, trailing),
-                "QUIT" => self.quit_command(prefix, parameters, trailing),
+                // "NICK" => self.nick_command(prefix, parameters, trailing),
+                // "USER" => self.user_command(prefix, parameters, trailing),
+                // "OPER" => self.oper_command(prefix, parameters, trailing),
+                // "QUIT" => self.quit_command(prefix, parameters, trailing),
                 _ => self.on_unknown_command(&command),
             }
         }
@@ -73,39 +73,6 @@ impl<'a> ClientHandler<'a> {
         todo!()
     }
 
-    fn nick_command(
-        &mut self,
-        _prefix: Option<String>,
-        _parameters: Vec<String>,
-        _trailing: Option<String>,
-    ) {
-        todo!()
-    }
-
-    fn user_command(
-        &mut self,
-        _prefix: Option<String>,
-        _parameters: Vec<String>,
-        _trailing: Option<String>,
-    ) {
-        todo!()
-    }
-
-    fn oper_command(
-        &mut self,
-        _prefix: Option<String>,
-        _parameters: Vec<String>,
-        _trailing: Option<String>,
-    ) {
-        todo!()
-    }
-
-    fn quit_command(
-        &mut self,
-        _prefix: Option<String>,
-        _parameters: Vec<String>,
-        _trailing: Option<String>,
-    ) {
-        todo!()
-    }
+    // ...
+    // ...
 }
