@@ -27,13 +27,10 @@ pub struct ClientHandler<'a> {
 }
 
 impl<'a> ClientHandler<'a> {
-    pub fn new(server: &'a mut Server, stream: TcpStream) -> Self {
+    pub fn new(_server: &'a mut Server, stream: TcpStream) -> Self {
         let client = ClientInfo::with_stream(stream);
 
-        Self {
-            _server: server,
-            client,
-        }
+        Self { _server, client }
     }
 
     pub fn handle(mut self) {
@@ -54,28 +51,32 @@ impl<'a> ClientHandler<'a> {
                 Ok(message) => message,
                 Err(CreationError::IoError(error)) => return Err(error),
                 Err(CreationError::ParsingError(error)) => {
-                    self.on_parsing_error(&error);
+                    self.on_parsing_error(&error)?;
                     continue;
                 }
             };
 
             let (_prefix, command, parameters, trailing) = message.unpack();
             match &command[..] {
-                PASS_COMMAND => self.pass_command(/*prefix, */ &parameters, &trailing)?,
-                NICK_COMMAND => self.nick_command(/*prefix, */ &parameters, &trailing)?,
-                USER_COMMAND => self.user_command(/*prefix, */ &parameters, &trailing)?,
-                // "OPER" => self.oper_command(prefix, parameters, trailing),
-                QUIT_COMMAND => self.quit_command(/*prefix, */ &parameters, &trailing)?,
+                PASS_COMMAND => self.pass_command(&parameters, &trailing)?,
+                NICK_COMMAND => self.nick_command(&parameters, &trailing)?,
+                USER_COMMAND => self.user_command(&parameters, &trailing)?,
+                QUIT_COMMAND => {
+                    self.quit_command(&parameters, &trailing)?;
+                    return Ok(());
+                }
                 _ => self.on_unknown_command(&command)?,
             };
         }
     }
-    fn on_parsing_error(&self, _error: &ParsingError) {
-        // todo!()
+
+    fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
+        let response = Message::new("Mensaje no pudo ser parseado!").unwrap();
+        response.send_to(&mut self.client.stream)
     }
 
     fn on_unknown_command(&mut self, _command: &str) -> io::Result<()> {
-        let message = Message::new("Comando no entendido!").unwrap();
-        message.send_to(&mut self.client.stream)
+        let response = Message::new("Comando no entendido!").unwrap();
+        response.send_to(&mut self.client.stream)
     }
 }

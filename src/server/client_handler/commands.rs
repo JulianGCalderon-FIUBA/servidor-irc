@@ -13,7 +13,6 @@ pub const QUIT_COMMAND: &str = "QUIT";
 
 const MENSAJE_COMANDO_ENVIADO: &str = "Comando enviado!";
 const MENSAJE_ERROR_ENVIO_COMANDO: &str = "Error en el envío del comando :(";
-// use super::Message;
 
 impl<'a> ClientHandler<'a> {
     pub fn execute_pass_command(&mut self, parameters: &[String]) {
@@ -66,6 +65,9 @@ impl<'a> ClientHandler<'a> {
     ) -> io::Result<()> {
         let message = if user_command_is_valid(parameters, trailing) {
             self.execute_user_command(parameters, trailing);
+
+            println!("Cliente fue registrado correctamente:\n{:?}", self.client);
+
             Message::new(MENSAJE_COMANDO_ENVIADO).unwrap()
         } else {
             Message::new(MENSAJE_ERROR_ENVIO_COMANDO).unwrap()

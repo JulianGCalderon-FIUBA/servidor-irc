@@ -1,4 +1,6 @@
 use std::net::TcpStream;
+
+#[derive(Debug)]
 pub struct ClientInfo {
     pub stream: TcpStream,
     pub password: Option<String>,
