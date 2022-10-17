@@ -4,8 +4,8 @@ use std::net::TcpListener;
 use client_handler::ClientHandler;
 use client_info::ClientInfo;
 
-pub mod client_handler;
-pub mod client_info;
+mod client_handler;
+mod client_info;
 
 pub struct Server {
     _clients: Vec<ClientInfo>,

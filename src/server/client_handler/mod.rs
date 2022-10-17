@@ -1,9 +1,9 @@
 mod commands;
 mod responses;
 
+use super::ClientInfo;
+use super::Server;
 use crate::message::{CreationError, Message, ParsingError};
-use crate::server::client_info::ClientInfo;
-use crate::server::Server;
 use std::io;
 use std::net::TcpStream;
 
