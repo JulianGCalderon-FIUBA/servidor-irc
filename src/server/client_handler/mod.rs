@@ -35,7 +35,7 @@ impl<'a> ClientHandler<'a> {
         match conection_result {
             Ok(()) => println!("Closing conection with client [{:?}]", self.client.nickname),
             Err(error) => eprint!(
-                "Handling client [{:?}] failed with error [{:?}]",
+                "Conection with client [{:?}] failed with error [{:?}]",
                 self.client.nickname, error
             ),
         }
