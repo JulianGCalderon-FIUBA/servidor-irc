@@ -36,13 +36,19 @@ impl<'a> ClientHandler<'a> {
         }
     }
 
-    pub fn handle(self) {
-        if let Err(error) = self.try_handle() {
-            eprintln!("Error handling client: {:?}", error);
+    pub fn handle(mut self) {
+        let conection_result = self.try_handle();
+
+        match conection_result {
+            Ok(()) => println!("Closing conection with client [{:?}]", self.client.nickname),
+            Err(error) => eprint!(
+                "Conection with client [{:?}] failed with error [{:?}]",
+                self.client.nickname, error
+            ),
         }
     }
 
-    fn try_handle(mut self) -> io::Result<()> {
+    fn try_handle(&mut self) -> io::Result<()> {
         loop {
             let message = match Message::read_from(&mut self.client.stream) {
                 Ok(message) => message,
