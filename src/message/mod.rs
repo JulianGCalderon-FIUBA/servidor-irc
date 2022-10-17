@@ -66,6 +66,18 @@ impl Message {
     pub fn unpack(self) -> (Option<String>, String, Vec<String>, Option<String>) {
         (self.prefix, self.command, self.parameters, self.trailing)
     }
+
+    pub fn get_command(&self) -> &String {
+        &self.command
+    }
+
+    pub fn get_parameters(&self) -> &Vec<String> {
+        &self.parameters
+    }
+
+    pub fn get_trailing(&self) -> &Option<String> {
+        &self.trailing
+    }
 }
 
 fn unexpected_eof_error() -> io::Error {

@@ -48,9 +48,9 @@ impl<'a> ClientHandler<'a> {
 
             let (prefix, command, parameters, trailing) = message.unpack();
             match &command[..] {
-                "PASS" => self.pass_command(prefix, parameters, trailing),
-                // "NICK" => self.nick_command(prefix, parameters, trailing),
-                // "USER" => self.user_command(prefix, parameters, trailing),
+                "PASS" => self.pass_command(/*prefix, */ &parameters, &trailing),
+                "NICK" => self.nick_command(/*prefix, */ &parameters, &trailing),
+                "USER" => self.user_command(/*prefix, */ &parameters, &trailing),
                 // "OPER" => self.oper_command(prefix, parameters, trailing),
                 // "QUIT" => self.quit_command(prefix, parameters, trailing),
                 _ => self.on_unknown_command(&command),
