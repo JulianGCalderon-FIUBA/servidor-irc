@@ -85,7 +85,7 @@ impl<'a> ClientHandler<'a> {
                 Message::new(MENSAJE_COMANDO_ENVIADO).unwrap()
             }
         } else {
-            Message::new("Error en el comando pass").unwrap()
+            Message::new(MENSAJE_ERROR_ENVIO_COMANDO).unwrap()
         };
         message.send_to(&mut self.client.stream)
     }
