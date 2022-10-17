@@ -52,7 +52,10 @@ impl<'a> ClientHandler<'a> {
                 // "NICK" => self.nick_command(prefix, parameters, trailing),
                 // "USER" => self.user_command(prefix, parameters, trailing),
                 // "OPER" => self.oper_command(prefix, parameters, trailing),
-                // "QUIT" => self.quit_command(prefix, parameters, trailing),
+                // "QUIT" => {
+                //     self.quit_command(prefix, parameters, trailing);
+                //     return Ok(());
+                // }
                 _ => self.on_unknown_command(&command),
             }
         }
