@@ -1,5 +1,12 @@
 mod commands;
+mod commands_utils;
+
 mod responses;
+
+use self::commands::NICK_COMMAND;
+use self::commands::PASS_COMMAND;
+use self::commands::QUIT_COMMAND;
+use self::commands::USER_COMMAND;
 
 use super::ClientInfo;
 use super::Server;
@@ -46,22 +53,23 @@ impl<'a> ClientHandler<'a> {
                 }
             };
 
-            let (prefix, command, parameters, trailing) = message.unpack();
+            let (_prefix, command, parameters, trailing) = message.unpack();
             match &command[..] {
-                "PASS" => self.pass_command(/*prefix, */ &parameters, &trailing),
-                "NICK" => self.nick_command(/*prefix, */ &parameters, &trailing),
-                "USER" => self.user_command(/*prefix, */ &parameters, &trailing),
+                PASS_COMMAND => self.pass_command(/*prefix, */ &parameters, &trailing)?,
+                NICK_COMMAND => self.nick_command(/*prefix, */ &parameters, &trailing)?,
+                USER_COMMAND => self.user_command(/*prefix, */ &parameters, &trailing)?,
                 // "OPER" => self.oper_command(prefix, parameters, trailing),
-                // "QUIT" => self.quit_command(prefix, parameters, trailing),
-                _ => self.on_unknown_command(&command),
-            }
+                QUIT_COMMAND => self.quit_command(/*prefix, */ &parameters, &trailing)?,
+                _ => self.on_unknown_command(&command)?,
+            };
         }
     }
     fn on_parsing_error(&self, _error: &ParsingError) {
         // todo!()
     }
 
-    fn on_unknown_command(&self, _command: &str) {
-        // todo!()
+    fn on_unknown_command(&mut self, _command: &str) -> io::Result<()> {
+        let message = Message::new("Comando no entendido!").unwrap();
+        message.send_to(&mut self.client.stream)
     }
 }
