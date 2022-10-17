@@ -1,3 +1,6 @@
+mod commands;
+mod responses;
+
 use crate::message::{CreationError, Message, ParsingError};
 use crate::server::client_info::ClientInfo;
 use crate::server::Server;
@@ -61,18 +64,4 @@ impl<'a> ClientHandler<'a> {
     fn on_unknown_command(&self, _command: &str) {
         // todo!()
     }
-}
-
-impl<'a> ClientHandler<'a> {
-    fn pass_command(
-        &mut self,
-        _prefix: Option<String>,
-        _parameters: Vec<String>,
-        _trailing: Option<String>,
-    ) {
-        todo!()
-    }
-
-    // ...
-    // ...
 }
