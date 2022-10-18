@@ -31,7 +31,7 @@ fn main() {
         }
 
         match client.read_message() {
-            Ok(response) => println!("Response: {}", response),
+            Ok(response) => println!("{}", response),
             Err(error) => return eprintln!("Error reading response from server: {}", error),
         }
     }

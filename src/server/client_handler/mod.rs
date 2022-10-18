@@ -58,25 +58,19 @@ impl<'a> ClientHandler<'a> {
 
             let (_prefix, command, parameters, trailing) = message.unpack();
             match &command[..] {
-                PASS_COMMAND => self.pass_command(&parameters, &trailing)?,
-                NICK_COMMAND => self.nick_command(&parameters, &trailing)?,
-                USER_COMMAND => self.user_command(&parameters, &trailing)?,
+                PASS_COMMAND => self.pass_command(parameters)?,
+                NICK_COMMAND => self.nick_command(parameters)?,
+                USER_COMMAND => self.user_command(parameters, trailing)?,
                 QUIT_COMMAND => {
-                    self.quit_command(&parameters, &trailing)?;
+                    self.quit_command(trailing)?;
                     return Ok(());
                 }
-                _ => self.on_unknown_command(&command)?,
+                _ => self.unknown_command_error(&command)?,
             };
         }
     }
 
     fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
-        let response = Message::new("Mensaje no pudo ser parseado!").unwrap();
-        response.send_to(&mut self.client.stream)
-    }
-
-    fn on_unknown_command(&mut self, _command: &str) -> io::Result<()> {
-        let response = Message::new("Comando no entendido!").unwrap();
-        response.send_to(&mut self.client.stream)
+        self.send_response("300 :parsing error")
     }
 }
