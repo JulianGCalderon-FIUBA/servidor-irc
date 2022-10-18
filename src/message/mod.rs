@@ -8,10 +8,10 @@ pub use parsing_error::ParsingError;
 use std::io::{self, BufRead, BufReader, ErrorKind};
 use std::io::{Read, Write};
 pub struct Message {
-    pub prefix: Option<String>,
-    pub command: String,
-    pub parameters: Vec<String>,
-    pub trailing: Option<String>,
+    prefix: Option<String>,
+    command: String,
+    parameters: Vec<String>,
+    trailing: Option<String>,
 }
 
 const CRLF: &[u8] = b"\r\n";
@@ -61,6 +61,22 @@ impl Message {
         let message = Self::new(&content)?;
 
         Ok(message)
+    }
+
+    pub fn unpack(self) -> (Option<String>, String, Vec<String>, Option<String>) {
+        (self.prefix, self.command, self.parameters, self.trailing)
+    }
+
+    pub fn get_command(&self) -> &String {
+        &self.command
+    }
+
+    pub fn get_parameters(&self) -> &Vec<String> {
+        &self.parameters
+    }
+
+    pub fn get_trailing(&self) -> &Option<String> {
+        &self.trailing
     }
 }
 

@@ -1,8 +1,6 @@
 use crate::thread_pool::worker::Worker;
 use std::sync::{mpsc, Arc, Mutex};
 
-use crate::server::MAX_CLIENTS;
-
 /// This module contains a worker's functionality. A worker manages a single thread.
 pub mod worker;
 
@@ -19,15 +17,17 @@ type Job = Box<dyn FnOnce() + Send + 'static>;
 impl ThreadPool {
     /// Creates a new ThreadPool with n workers.
     ///  
-    pub fn create() -> Self {
+    pub fn create(pool_size: usize) -> Self {
+        assert!(pool_size != 0);
+
         let (sender, receiver) = mpsc::channel();
 
         let receiver = Arc::new(Mutex::new(receiver));
 
-        let mut workers = Vec::with_capacity(MAX_CLIENTS);
+        let mut workers = Vec::with_capacity(pool_size);
 
-        for id in 0..MAX_CLIENTS {
-            workers.push(Worker::new(id, Arc::clone(&receiver)));
+        for _ in 0..pool_size {
+            workers.push(Worker::new(Arc::clone(&receiver)));
         }
 
         Self {
