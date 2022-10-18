@@ -2,6 +2,7 @@ mod commands;
 mod commands_utils;
 
 mod responses;
+mod validations;
 
 use commands::NICK_COMMAND;
 use commands::PASS_COMMAND;

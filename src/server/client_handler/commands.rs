@@ -9,12 +9,8 @@ pub const QUIT_COMMAND: &str = "QUIT";
 
 impl ClientHandler {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
-        if parameters.len() != 1 {
-            return self.need_more_params_error(PASS_COMMAND);
-        }
-
-        if self.client.registration_state != RegistrationState::NotInitialized {
-            return self.already_registered_response();
+        if !self.validate_pass_command(&parameters)? {
+            return Ok(());
         }
 
         let password = parameters.pop().unwrap();
@@ -24,8 +20,8 @@ impl ClientHandler {
     }
 
     pub fn nick_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
-        if parameters.is_empty() {
-            return self.no_nickname_given_error();
+        if !self.validate_nick_command(&parameters)? {
+            return Ok(());
         }
 
         let nickname = parameters.pop().unwrap();
@@ -43,12 +39,8 @@ impl ClientHandler {
         mut parameters: Vec<String>,
         trailing: Option<String>,
     ) -> io::Result<()> {
-        if parameters.len() != 3 || trailing.is_none() {
-            return self.need_more_params_error(USER_COMMAND);
-        }
-
-        if self.client.registration_state != RegistrationState::NicknameSent {
-            return self.no_nickname_error();
+        if !self.validate_user_command(&parameters, &trailing)? {
+            return Ok(());
         }
 
         let realname = trailing.unwrap();
