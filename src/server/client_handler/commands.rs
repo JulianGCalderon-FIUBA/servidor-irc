@@ -56,11 +56,7 @@ impl<'a> ClientHandler<'a> {
             return self.quit_reply(&trailing);
         }
 
-        let nickname = self.client.nickname.clone();
-        if let Some(nickname) = nickname {
-            return self.quit_reply(&nickname);
-        }
-
-        self.quit_reply("")
+        let nickname = self.client.nickname.clone().unwrap_or_default();
+        self.quit_reply(&nickname)
     }
 }

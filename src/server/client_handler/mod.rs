@@ -3,10 +3,10 @@ mod commands_utils;
 
 mod responses;
 
-use self::commands::NICK_COMMAND;
-use self::commands::PASS_COMMAND;
-use self::commands::QUIT_COMMAND;
-use self::commands::USER_COMMAND;
+use commands::NICK_COMMAND;
+use commands::PASS_COMMAND;
+use commands::QUIT_COMMAND;
+use commands::USER_COMMAND;
 
 use super::ClientInfo;
 use super::Server;
@@ -37,10 +37,14 @@ impl<'a> ClientHandler<'a> {
         let conection_result = self.try_handle();
 
         match conection_result {
-            Ok(()) => println!("Closing conection with client [{:?}]", self.client.nickname),
+            Ok(()) => println!(
+                "Closing conection with client [{}]",
+                self.client.nickname.unwrap_or_default()
+            ),
             Err(error) => eprint!(
-                "Conection with client [{:?}] failed with error [{:?}]",
-                self.client.nickname, error
+                "Conection with client [{}] failed with error [{}]",
+                self.client.nickname.unwrap_or_default(),
+                error
             ),
         }
     }
