@@ -1,4 +1,8 @@
-use std::{io, net::TcpListener, sync::Arc};
+use std::{
+    io,
+    net::TcpListener,
+    sync::{Arc, RwLock},
+};
 
 use crate::thread_pool::ThreadPool;
 use client_handler::ClientHandler;
@@ -26,7 +30,7 @@ impl Server {
     pub fn listen_to(self, address: String) -> io::Result<()> {
         let listener = TcpListener::bind(address)?;
 
-        let database_arc = Arc::new(self.database);
+        let database_arc = Arc::new(RwLock::new(self.database));
 
         let pool = ThreadPool::create(MAX_CLIENTS);
 

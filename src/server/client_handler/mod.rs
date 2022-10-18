@@ -1,5 +1,5 @@
 mod commands;
-mod commands_utils;
+mod utils;
 
 mod responses;
 mod validations;
@@ -15,19 +15,20 @@ use crate::message::{CreationError, Message, ParsingError};
 use std::io;
 use std::net::TcpStream;
 use std::sync::Arc;
+use std::sync::RwLock;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler {
-    _database: Arc<Database>,
+    database: Arc<RwLock<Database>>,
     client: ConnectionInfo,
 }
 
 impl ClientHandler {
     /// Returns new clientHandler.
-    pub fn new(_database: Arc<Database>, stream: TcpStream) -> Self {
+    pub fn new(database: Arc<RwLock<Database>>, stream: TcpStream) -> Self {
         let client = ConnectionInfo::with_stream(stream);
 
-        Self { _database, client }
+        Self { database, client }
     }
 
     ///
