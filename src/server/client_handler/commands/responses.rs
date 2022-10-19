@@ -1,13 +1,12 @@
 use std::io;
 
-use super::commands::QUIT_COMMAND;
-use super::ClientHandler;
-use super::Message;
+use super::{ClientHandler, QUIT_COMMAND};
+use crate::message::Message;
 
 impl ClientHandler {
     pub fn send_response(&mut self, response: &str) -> io::Result<()> {
         let response = Message::new(response).unwrap();
-        response.send_to(&mut self.client.stream)
+        response.send_to(&mut self.connection.stream)
     }
 
     pub fn ok_reply(&mut self) -> io::Result<()> {

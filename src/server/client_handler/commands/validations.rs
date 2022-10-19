@@ -1,9 +1,9 @@
+use super::super::connection_info::RegistrationState;
 use super::ClientHandler;
-use crate::server::database::RegistrationState;
 use std::io;
 
-use super::commands::PASS_COMMAND;
-use super::commands::USER_COMMAND;
+use super::PASS_COMMAND;
+use super::USER_COMMAND;
 
 impl ClientHandler {
     pub fn validate_pass_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
@@ -12,7 +12,7 @@ impl ClientHandler {
             return Ok(false);
         }
 
-        if self.client.registration_state != RegistrationState::NotInitialized {
+        if self.connection.registration_state != RegistrationState::NotInitialized {
             self.already_registered_response()?;
             return Ok(false);
         }
@@ -39,7 +39,7 @@ impl ClientHandler {
             return Ok(false);
         }
 
-        if self.client.registration_state != RegistrationState::NicknameSent {
+        if self.connection.registration_state != RegistrationState::NicknameSent {
             self.no_nickname_error()?;
             return Ok(false);
         }

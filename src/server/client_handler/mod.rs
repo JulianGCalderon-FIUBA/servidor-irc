@@ -1,48 +1,48 @@
 mod commands;
-mod utils;
-
-mod responses;
-mod validations;
+mod connection_info;
 
 use commands::NICK_COMMAND;
 use commands::PASS_COMMAND;
 use commands::QUIT_COMMAND;
 use commands::USER_COMMAND;
 
-use super::database::ConnectionInfo;
-use super::database::Database;
-use crate::message::{CreationError, Message, ParsingError};
 use std::io;
 use std::net::TcpStream;
 use std::sync::Arc;
-use std::sync::RwLock;
+
+use super::database::Database;
+use crate::message::{CreationError, Message, ParsingError};
+use connection_info::ConnectionInfo;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler {
-    database: Arc<RwLock<Database>>,
-    client: ConnectionInfo,
+    database: Arc<Database>,
+    connection: ConnectionInfo,
 }
 
 impl ClientHandler {
     /// Returns new clientHandler.
-    pub fn new(database: Arc<RwLock<Database>>, stream: TcpStream) -> Self {
-        let client = ConnectionInfo::with_stream(stream);
+    pub fn new(database: Arc<Database>, stream: TcpStream) -> Self {
+        let connection = ConnectionInfo::with_stream(stream);
 
-        Self { database, client }
+        Self {
+            database,
+            connection,
+        }
     }
 
-    ///
+    /// Handles the received requests with error handling
     pub fn handle(mut self) {
         let conection_result = self.try_handle();
 
         match conection_result {
             Ok(()) => println!(
                 "Closing conection with client [{}]",
-                self.client.nickname.unwrap_or_default()
+                self.connection.nickname.unwrap_or_default()
             ),
             Err(error) => eprint!(
                 "Conection with client [{}] failed with error [{}]",
-                self.client.nickname.unwrap_or_default(),
+                self.connection.nickname.unwrap_or_default(),
                 error
             ),
         }
@@ -56,7 +56,7 @@ impl ClientHandler {
     ///
     fn try_handle(&mut self) -> io::Result<()> {
         loop {
-            let message = match Message::read_from(&mut self.client.stream) {
+            let message = match Message::read_from(&mut self.connection.stream) {
                 Ok(message) => message,
                 Err(CreationError::IoError(error)) => return Err(error),
                 Err(CreationError::ParsingError(error)) => {
