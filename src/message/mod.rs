@@ -44,6 +44,10 @@ impl Message {
     pub fn read_from(stream: &mut dyn Read) -> Result<Self, CreationError> {
         let mut reader = BufReader::new(stream);
 
+        Self::read_from_buffer(&mut reader)
+    }
+
+    pub fn read_from_buffer(reader: &mut BufReader<&mut dyn Read>) -> Result<Self, CreationError> {
         let mut content = String::new();
 
         let size = reader.read_line(&mut content)?;

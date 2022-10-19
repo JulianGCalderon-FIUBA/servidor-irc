@@ -1,5 +1,5 @@
-use std::io;
-use std::io::Write;
+use std::io::{self, BufReader};
+use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::thread;
 
@@ -28,11 +28,14 @@ impl Client {
     pub fn async_read(&mut self) {
         let read_stream = self.read_stream.take();
         if let Some(mut read_stream) = read_stream {
-            thread::spawn(move || loop {
-                let message = Message::read_from(&mut read_stream);
-                match message {
-                    Ok(message) => println!("{}", message),
-                    Err(error) => eprintln!("Error reading message: {}", error),
+            thread::spawn(move || {
+                let mut reader: BufReader<&mut dyn Read> = BufReader::new(&mut read_stream);
+                loop {
+                    let message = Message::read_from_buffer(&mut reader);
+                    match message {
+                        Ok(message) => println!("{}", message),
+                        Err(error) => eprintln!("Error reading message: {}", error),
+                    }
                 }
             });
         }
