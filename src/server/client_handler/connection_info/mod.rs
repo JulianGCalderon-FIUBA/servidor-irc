@@ -34,7 +34,11 @@ impl ConnectionInfo {
         self.registration_state = self.registration_state.next();
     }
 
-    pub fn get_client_info(&self) -> io::Result<ClientInfo> {
+    pub fn get_client_info(&self) -> io::Result<Option<ClientInfo>> {
+        if self.registration_state != RegistrationState::Registered {
+            return Ok(None);
+        }
+
         let mut client_builder = ClientInfoBuilder::new_with(
             self.nickname.clone().unwrap(),
             self.username.clone().unwrap(),
@@ -42,13 +46,12 @@ impl ConnectionInfo {
             self.servername.clone().unwrap(),
             self.realname.clone().unwrap(),
         );
-
         client_builder.with_stream(self.stream.try_clone()?);
 
         if let Some(password) = self.password.clone() {
             client_builder.with_password(password);
         }
 
-        Ok(client_builder.build())
+        Ok(Some(client_builder.build()))
     }
 }
