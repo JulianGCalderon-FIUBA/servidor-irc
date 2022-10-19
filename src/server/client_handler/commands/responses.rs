@@ -1,13 +1,12 @@
 use std::io;
 
-use super::commands::QUIT_COMMAND;
-use super::ClientHandler;
-use super::Message;
+use super::{ClientHandler, QUIT_COMMAND};
+use crate::message::Message;
 
-impl<'a> ClientHandler<'a> {
+impl ClientHandler {
     pub fn send_response(&mut self, response: &str) -> io::Result<()> {
         let response = Message::new(response).unwrap();
-        response.send_to(&mut self.client.stream)
+        response.send_to(&mut self.connection.stream)
     }
 
     pub fn ok_reply(&mut self) -> io::Result<()> {
@@ -35,18 +34,23 @@ impl<'a> ClientHandler<'a> {
         self.send_response(&response)
     }
 
-    // pub fn nickname_collision_response(&mut self) -> io::Result<()> {
-    //     let response = format!("436 :nickname collision KILL");
-    //     self.send_response(&response)
-    // }
+    pub fn nickname_collision_response(&mut self) -> io::Result<()> {
+        let response = "436 :nickname collision KILL".to_string();
+        self.send_response(&response)
+    }
 
     // pub fn nickname_in_use_response(&mut self) -> io::Result<()> {
     //     let response = format!("433 :nickname is already in use");
     //     self.send_response(&response)
     // }
 
-    // pub fn already_registered_response(&mut self) -> io::Result<()> {
-    //     let response = "462 :may not reregister".to_string();
-    //     self.send_response(&response)
-    // }
+    pub fn already_registered_response(&mut self) -> io::Result<()> {
+        let response = "462 :may not reregister".to_string();
+        self.send_response(&response)
+    }
+
+    pub fn no_nickname_error(&mut self) -> io::Result<()> {
+        let response = "300 :no nickname registered".to_string();
+        self.send_response(&response)
+    }
 }

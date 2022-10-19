@@ -1,57 +1,62 @@
 mod commands;
-mod commands_utils;
-
-mod responses;
+mod connection_info;
 
 use commands::NICK_COMMAND;
 use commands::PASS_COMMAND;
 use commands::QUIT_COMMAND;
 use commands::USER_COMMAND;
 
-use super::ClientInfo;
-use super::Server;
-use crate::message::{CreationError, Message, ParsingError};
 use std::io;
 use std::net::TcpStream;
+use std::sync::Arc;
 
-pub struct ClientHandler<'a> {
-    /// en el futuro puede ser:
-    ///     - Arc<Mutex<Server>>
-    ///     - Arc<RwLock<Server>>
-    ///         + la exclusividad solo es necesaria para la escritura, para evitar condiciones de carrera.
-    ///     - Arc<Server> donde cada campo particular contenga su lock.
-    ///         + tiene mejor performance, pero mas tedioso de implementar
-    ///         + algunos campos podrian ser de solo lectura, por lo que seria innecesario un lock
-    _server: &'a mut Server,
-    client: ClientInfo,
+use super::database::Database;
+use crate::message::{CreationError, Message, ParsingError};
+use connection_info::ConnectionInfo;
+
+/// A ClientHandler handles the client's request.
+pub struct ClientHandler {
+    database: Arc<Database>,
+    connection: ConnectionInfo,
 }
 
-impl<'a> ClientHandler<'a> {
-    pub fn new(_server: &'a mut Server, stream: TcpStream) -> Self {
-        let client = ClientInfo::with_stream(stream);
+impl ClientHandler {
+    /// Returns new clientHandler.
+    pub fn new(database: Arc<Database>, stream: TcpStream) -> Self {
+        let connection = ConnectionInfo::with_stream(stream);
 
-        Self { _server, client }
+        Self {
+            database,
+            connection,
+        }
     }
 
+    /// Handles the received requests with error handling
     pub fn handle(mut self) {
         let conection_result = self.try_handle();
 
         match conection_result {
             Ok(()) => println!(
                 "Closing conection with client [{}]",
-                self.client.nickname.unwrap_or_default()
+                self.connection.nickname.unwrap_or_default()
             ),
-            Err(error) => eprint!(
+            Err(error) => eprintln!(
                 "Conection with client [{}] failed with error [{}]",
-                self.client.nickname.unwrap_or_default(),
+                self.connection.nickname.unwrap_or_default(),
                 error
             ),
         }
     }
 
+    /// Tries to handle the received request.
+    ///
+    /// # Panics
+    ///
+    /// `try_handle` fails if there is an IOError when reading the Message the client sent.
+    ///
     fn try_handle(&mut self) -> io::Result<()> {
         loop {
-            let message = match Message::read_from(&mut self.client.stream) {
+            let message = match Message::read_from(&mut self.connection.stream) {
                 Ok(message) => message,
                 Err(CreationError::IoError(error)) => return Err(error),
                 Err(CreationError::ParsingError(error)) => {

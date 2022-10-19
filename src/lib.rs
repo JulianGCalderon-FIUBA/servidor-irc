@@ -10,4 +10,7 @@ pub mod server;
 /// This module contains a message's functionality. A message can be sent to and read from a stream.
 pub mod message;
 
-pub const ADDRESS: &str = "127.0.0.1:9001";
+/// This module contains a threadPool's functionality. A threadPool creates n threads to handle n requests simultaneously.
+pub mod thread_pool;
+
+pub const ADDRESS: &str = "127.0.0.1:9002";
