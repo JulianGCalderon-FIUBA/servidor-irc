@@ -52,18 +52,18 @@ impl Database {
         todo!()
     }
 
-    pub fn _set_server_operator(&mut self, _nickname: &str) {
+    pub fn _set_server_operator(&self, _nickname: &str) {
         todo!()
     }
 
-    pub fn _add_client_to_channel(&mut self, _nickname: &str, _channel: &str) {
+    pub fn _add_client_to_channel(&self, _nickname: &str, _channel: &str) {
         todo!()
     }
-    pub fn _remove_client_to_channel(&mut self, _nickname: &str, _channel: &str) {
+    pub fn _remove_client_to_channel(&self, _nickname: &str, _channel: &str) {
         todo!()
     }
 
-    pub fn _disconnect_client(&mut self, _nickname: &str) {
+    pub fn _disconnect_client(&self, _nickname: &str) {
         todo!()
     }
 }
