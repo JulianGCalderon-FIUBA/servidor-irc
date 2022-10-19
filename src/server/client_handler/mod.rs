@@ -12,17 +12,16 @@ use connection_info::ConnectionInfo;
 use std::io;
 use std::net::TcpStream;
 use std::sync::Arc;
-use std::sync::RwLock;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler {
-    database: Arc<RwLock<Database>>,
+    database: Arc<Database>,
     client: ConnectionInfo,
 }
 
 impl ClientHandler {
     /// Returns new clientHandler.
-    pub fn new(database: Arc<RwLock<Database>>, stream: TcpStream) -> Self {
+    pub fn new(database: Arc<Database>, stream: TcpStream) -> Self {
         let client = ConnectionInfo::with_stream(stream);
 
         Self { database, client }

@@ -13,7 +13,7 @@ impl Database {
         }
     }
 
-    pub fn save_client(&mut self, client: ClientInfo) {
+    pub fn save_client(&self, client: ClientInfo) {
         let mut clients_lock = self.clients.write().unwrap();
         clients_lock.push(client)
     }

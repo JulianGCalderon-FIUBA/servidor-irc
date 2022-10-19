@@ -66,8 +66,6 @@ impl ClientHandler {
     }
 
     fn add_client(&mut self) {
-        let mut database_arc_lock = self.database.write().unwrap();
-
         let client = ClientInfo::new_with_stream(
             self.client.stream.try_clone().unwrap(),
             self.client.password.clone().unwrap(),
@@ -78,7 +76,7 @@ impl ClientHandler {
             self.client.realname.clone().unwrap(),
         );
 
-        database_arc_lock.save_client(client);
+        self.database.save_client(client);
     }
 
     pub fn quit_command(&mut self, trailing: Option<String>) -> io::Result<()> {
