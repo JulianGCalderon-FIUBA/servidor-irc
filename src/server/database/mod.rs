@@ -40,30 +40,30 @@ impl Database {
         clients_lock.contains_key(nickname)
     }
 
-    pub fn get_stream(&self, nickname: &str) -> Arc<Mutex<TcpStream>> {
+    pub fn _get_stream(&self, _nickname: &str) -> Arc<Mutex<TcpStream>> {
         todo!()
     }
 
-    pub fn get_clients(&self, channel: &str) -> Vec<String> {
+    pub fn _get_clients(&self, _channel: &str) -> Vec<String> {
         todo!()
     }
 
-    pub fn get_channels(&self) -> Vec<String> {
+    pub fn _get_channels(&self) -> Vec<String> {
         todo!()
     }
 
-    pub fn set_server_operator(&mut self, nickname: &str) {
+    pub fn _set_server_operator(&mut self, _nickname: &str) {
         todo!()
     }
 
-    pub fn add_client_to_channel(&mut self, nickname: &str, channel: &str) {
+    pub fn _add_client_to_channel(&mut self, _nickname: &str, _channel: &str) {
         todo!()
     }
-    pub fn remove_client_to_channel(&mut self, nickname: &str, channel: &str) {
+    pub fn _remove_client_to_channel(&mut self, _nickname: &str, _channel: &str) {
         todo!()
     }
 
-    pub fn disconnect_client(&mut self, nickname: &str) {
+    pub fn _disconnect_client(&mut self, _nickname: &str) {
         todo!()
     }
 }

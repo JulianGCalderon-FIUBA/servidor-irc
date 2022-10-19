@@ -5,7 +5,7 @@ use std::{
 };
 
 pub struct ClientInfoBuilder {
-    stream: Option<TcpStream>,
+    stream: Option<Arc<Mutex<TcpStream>>>,
     password: Option<String>,
     nickname: String,
     username: String,
@@ -33,7 +33,7 @@ impl ClientInfoBuilder {
         }
     }
 
-    pub fn with_stream(&mut self, stream: TcpStream) {
+    pub fn with_stream(&mut self, stream: Arc<Mutex<TcpStream>>) {
         self.stream = Some(stream);
     }
 
@@ -43,7 +43,7 @@ impl ClientInfoBuilder {
 
     pub fn build(self) -> ClientInfo {
         ClientInfo {
-            stream: Arc::new(Mutex::new(self.stream)),
+            stream: self.stream,
             password: self.password,
             nickname: self.nickname,
             username: self.username,

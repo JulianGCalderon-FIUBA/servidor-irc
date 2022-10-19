@@ -40,13 +40,7 @@ impl Server {
             };
 
             let database_clone = Arc::clone(&self.database);
-            let handler = match ClientHandler::new(database_clone, client) {
-                Ok(handler) => handler,
-                Err(error) => {
-                    eprintln!("Could not handle client, with error: {error:?}");
-                    continue;
-                }
-            };
+            let handler = ClientHandler::new(database_clone, client);
 
             pool.execute(|| {
                 handler.handle();
@@ -54,9 +48,5 @@ impl Server {
         }
 
         Ok(())
-    }
-
-    pub fn backup() {
-        todo!()
     }
 }

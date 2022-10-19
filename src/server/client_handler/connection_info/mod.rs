@@ -1,4 +1,7 @@
-use std::net::TcpStream;
+use std::{
+    net::TcpStream,
+    sync::{Arc, Mutex},
+};
 
 mod registration_state;
 
@@ -7,7 +10,6 @@ pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
 pub struct ConnectionInfo {
-    pub stream: Option<TcpStream>,
     pub password: Option<String>,
     pub nickname: Option<String>,
     pub username: Option<String>,
@@ -18,9 +20,8 @@ pub struct ConnectionInfo {
 }
 
 impl ConnectionInfo {
-    pub fn new_with_stream(stream: TcpStream) -> Self {
+    pub fn new() -> Self {
         Self {
-            stream: Some(stream),
             password: None,
             nickname: None,
             username: None,
@@ -34,7 +35,7 @@ impl ConnectionInfo {
         self.registration_state = self.registration_state.next();
     }
 
-    pub fn build_client_info(&mut self) -> Option<ClientInfo> {
+    pub fn build_client_info(&mut self, stream: Arc<Mutex<TcpStream>>) -> Option<ClientInfo> {
         let mut client_builder = ClientInfoBuilder::new_with(
             self.nickname.clone()?,
             self.username.clone()?,
@@ -43,7 +44,7 @@ impl ConnectionInfo {
             self.realname.clone()?,
         );
 
-        client_builder.with_stream(self.stream.take()?);
+        client_builder.with_stream(stream);
 
         if let Some(password) = self.password.clone() {
             client_builder.with_password(password);
