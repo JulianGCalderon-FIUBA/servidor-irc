@@ -2,6 +2,7 @@ use super::connection_info::RegistrationState;
 use super::ClientHandler;
 
 use std::io;
+use std::sync::Arc;
 
 mod responses;
 mod validations;
@@ -59,9 +60,10 @@ impl ClientHandler {
 
         self.connection.advance_state();
 
-        if let Some(client_info) = self.connection.get_client_info()? {
-            self.database.add_client(client_info);
-        }
+        let stream_clone = Arc::clone(&self.stream);
+
+        let client_info = self.connection.build_client_info(stream_clone).unwrap();
+        self.database.add_client(client_info);
 
         self.ok_reply()
     }
