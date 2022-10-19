@@ -2,6 +2,7 @@ use std::io::stdin;
 use std::io::{BufRead, BufReader};
 
 use internet_relay_chat::client::Client;
+use internet_relay_chat::message::Message;
 use internet_relay_chat::ADDRESS;
 
 fn main() {
@@ -10,7 +11,7 @@ fn main() {
         Err(error) => return eprintln!("Error connecting to server: {:?}", error),
     };
 
-    client.async_read();
+    client.async_read(on_message);
 
     let reader = BufReader::new(stdin());
     for line in reader.lines() {
@@ -23,4 +24,8 @@ fn main() {
             return eprintln!("Error sending message to server: {}", error);
         }
     }
+}
+
+fn on_message(message: Message) {
+    println!("{}", message);
 }

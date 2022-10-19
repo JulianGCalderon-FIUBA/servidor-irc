@@ -3,7 +3,7 @@ use std::io::{Read, Write};
 use std::net::TcpStream;
 use std::thread;
 
-use crate::message::Message;
+use crate::message::{CreationError, Message};
 
 /// Represents a client that can connect to a Server.
 pub struct Client {
@@ -25,16 +25,22 @@ impl Client {
         })
     }
 
-    pub fn async_read(&mut self) {
+    pub fn async_read<F>(&mut self, on_message: F)
+    where
+        F: Fn(Message) + Send + 'static,
+    {
+        let on_message = Box::new(on_message);
+
         let read_stream = self.read_stream.take();
         if let Some(mut read_stream) = read_stream {
             thread::spawn(move || {
                 let mut reader: BufReader<&mut dyn Read> = BufReader::new(&mut read_stream);
                 loop {
                     let message = Message::read_from_buffer(&mut reader);
-                    match message {
-                        Ok(message) => println!("{}", message),
-                        Err(error) => eprintln!("Error reading message: {}", error),
+                    if let Ok(message) = message {
+                        on_message(message);
+                    } else if let Err(CreationError::IoError(_)) = message {
+                        return;
                     }
                 }
             });
