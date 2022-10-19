@@ -2,7 +2,7 @@ use std::net::TcpStream;
 
 pub struct ClientInfo {
     pub stream: Option<TcpStream>,
-    pub password: String,
+    pub password: Option<String>,
     pub nickname: String,
     pub username: String,
     pub hostname: String,
@@ -13,7 +13,7 @@ pub struct ClientInfo {
 impl ClientInfo {
     pub fn new_with_stream(
         stream: TcpStream,
-        password: String,
+        password: Option<String>,
         nickname: String,
         username: String,
         hostname: String,

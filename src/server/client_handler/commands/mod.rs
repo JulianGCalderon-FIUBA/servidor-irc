@@ -68,7 +68,7 @@ impl ClientHandler {
     fn add_client(&mut self) {
         let client = ClientInfo::new_with_stream(
             self.connection.stream.try_clone().unwrap(),
-            self.connection.password.clone().unwrap(),
+            self.connection.password.clone(),
             self.connection.nickname.clone().unwrap(),
             self.connection.username.clone().unwrap(),
             self.connection.hostname.clone().unwrap(),
