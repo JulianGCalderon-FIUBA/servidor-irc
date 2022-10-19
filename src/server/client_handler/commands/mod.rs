@@ -74,11 +74,11 @@ impl ClientHandler {
             self.connection.realname.clone().unwrap(),
         );
 
+        client_builder.with_stream(self.connection.stream.try_clone()?);
+
         if let Some(password) = self.connection.password.clone() {
             client_builder.with_password(password);
         }
-
-        client_builder.with_stream(self.connection.stream.try_clone()?);
 
         self.database.add_client(client_builder.build());
 
