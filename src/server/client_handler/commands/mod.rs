@@ -1,7 +1,6 @@
 use super::connection_info::RegistrationState;
 use super::ClientHandler;
 
-use crate::server::database::ClientInfoBuilder;
 use std::io;
 
 mod responses;
@@ -60,29 +59,11 @@ impl ClientHandler {
 
         self.connection.advance_state();
 
-        self.add_client_to_database()?;
-
-        self.ok_reply()
-    }
-
-    fn add_client_to_database(&mut self) -> io::Result<()> {
-        let mut client_builder = ClientInfoBuilder::new_with(
-            self.connection.nickname.clone().unwrap(),
-            self.connection.username.clone().unwrap(),
-            self.connection.hostname.clone().unwrap(),
-            self.connection.servername.clone().unwrap(),
-            self.connection.realname.clone().unwrap(),
-        );
-
-        client_builder.with_stream(self.connection.stream.try_clone()?);
-
-        if let Some(password) = self.connection.password.clone() {
-            client_builder.with_password(password);
+        if let Some(client_info) = self.connection.get_client_info()? {
+            self.database.add_client(client_info);
         }
 
-        self.database.add_client(client_builder.build());
-
-        Ok(())
+        self.ok_reply()
     }
 
     pub fn quit_command(&mut self, trailing: Option<String>) -> io::Result<()> {
