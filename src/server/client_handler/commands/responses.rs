@@ -6,7 +6,7 @@ use crate::message::Message;
 impl ClientHandler {
     pub fn send_response(&mut self, response: &str) -> io::Result<()> {
         let response = Message::new(response).unwrap();
-        response.send_to(&mut self.connection.stream)
+        response.send_to(&mut self.stream)
     }
 
     pub fn ok_reply(&mut self) -> io::Result<()> {

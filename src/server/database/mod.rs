@@ -1,20 +1,21 @@
 mod channel_info;
 mod client_info;
 
+use std::collections::HashMap;
 use std::sync::RwLock;
 
 pub use channel_info::_ChannelInfo;
 pub use client_info::ClientInfo;
 pub use client_info::ClientInfoBuilder;
 pub struct Database {
-    pub clients: RwLock<Vec<ClientInfo>>,
+    pub clients: RwLock<HashMap<String, ClientInfo>>,
     pub channels: RwLock<Vec<_ChannelInfo>>,
 }
 
 impl Database {
     pub fn new() -> Self {
         Self {
-            clients: RwLock::new(vec![]),
+            clients: RwLock::new(HashMap::new()),
             channels: RwLock::new(vec![]),
         }
     }
@@ -26,18 +27,14 @@ impl Database {
             "Client registered: \npassword: {:?}\nnickname: {}\nrealname: {}",
             client.password, client.nickname, client.realname
         );
-        clients_lock.push(client)
+
+        clients_lock.insert(client.nickname.clone(), client);
     }
 
     pub fn has_nickname_collision(&self, nickname: &str) -> bool {
         let clients_lock = self.clients.read().unwrap();
 
-        for client in clients_lock.iter() {
-            if client.nickname == nickname {
-                return true;
-            }
-        }
-        false
+        clients_lock.contains_key(nickname)
     }
 }
 
