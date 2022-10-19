@@ -1,17 +1,14 @@
 mod commands;
-mod utils;
-
-mod responses;
-mod validations;
+mod connection_info;
 
 use commands::NICK_COMMAND;
 use commands::PASS_COMMAND;
 use commands::QUIT_COMMAND;
 use commands::USER_COMMAND;
 
-use super::database::ConnectionInfo;
-use super::database::Database;
 use crate::message::{CreationError, Message, ParsingError};
+use crate::server::database::Database;
+use connection_info::ConnectionInfo;
 use std::io;
 use std::net::TcpStream;
 use std::sync::Arc;

@@ -1,8 +1,7 @@
 use std::io;
 
-use super::commands::QUIT_COMMAND;
-use super::ClientHandler;
-use super::Message;
+use super::{ClientHandler, QUIT_COMMAND};
+use crate::message::Message;
 
 impl ClientHandler {
     pub fn send_response(&mut self, response: &str) -> io::Result<()> {

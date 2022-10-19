@@ -1,11 +1,7 @@
 mod client_info;
-mod connection_info;
 use std::sync::RwLock;
 
 pub use client_info::ClientInfo;
-pub use connection_info::ConnectionInfo;
-pub use connection_info::RegistrationState;
-
 pub struct Database {
     pub clients: RwLock<Vec<ClientInfo>>,
 }

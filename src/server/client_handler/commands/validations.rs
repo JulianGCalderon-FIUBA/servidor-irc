@@ -1,9 +1,9 @@
+use super::super::connection_info::RegistrationState;
 use super::ClientHandler;
-use crate::server::database::RegistrationState;
 use std::io;
 
-use super::commands::PASS_COMMAND;
-use super::commands::USER_COMMAND;
+use super::PASS_COMMAND;
+use super::USER_COMMAND;
 
 impl ClientHandler {
     pub fn validate_pass_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {

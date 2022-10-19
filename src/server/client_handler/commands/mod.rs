@@ -1,6 +1,11 @@
+use super::connection_info::RegistrationState;
 use super::ClientHandler;
-use crate::server::database::{ClientInfo, RegistrationState};
+
+use crate::server::database::ClientInfo;
 use std::io;
+
+mod responses;
+mod validations;
 
 pub const PASS_COMMAND: &str = "PASS";
 pub const NICK_COMMAND: &str = "NICK";
