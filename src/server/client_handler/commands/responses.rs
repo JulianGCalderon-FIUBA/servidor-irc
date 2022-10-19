@@ -34,10 +34,10 @@ impl ClientHandler {
         self.send_response(&response)
     }
 
-    // pub fn nickname_collision_response(&mut self) -> io::Result<()> {
-    //     let response = format!("436 :nickname collision KILL");
-    //     self.send_response(&response)
-    // }
+    pub fn nickname_collision_response(&mut self) -> io::Result<()> {
+        let response = "436 :nickname collision KILL".to_string();
+        self.send_response(&response)
+    }
 
     // pub fn nickname_in_use_response(&mut self) -> io::Result<()> {
     //     let response = format!("433 :nickname is already in use");

@@ -17,7 +17,23 @@ impl Database {
 
     pub fn add_client(&self, client: ClientInfo) {
         let mut clients_lock = self.clients.write().unwrap();
+
+        println!(
+            "Client registered: \npassword: {:?}\nnickname: {}\nrealname: {}",
+            client.password, client.nickname, client.realname
+        );
         clients_lock.push(client)
+    }
+
+    pub fn has_nickname_collision(&self, nickname: &str) -> bool {
+        let clients_lock = self.clients.read().unwrap();
+
+        for client in clients_lock.iter() {
+            if client.nickname == nickname {
+                return true;
+            }
+        }
+        false
     }
 }
 

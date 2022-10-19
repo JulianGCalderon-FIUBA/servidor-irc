@@ -26,6 +26,13 @@ impl ClientHandler {
             return Ok(false);
         }
 
+        let nickname = &parameters[0];
+
+        if self.database.has_nickname_collision(nickname) {
+            self.nickname_collision_response()?;
+            return Ok(false);
+        }
+
         Ok(true)
     }
 

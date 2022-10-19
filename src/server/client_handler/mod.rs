@@ -40,7 +40,7 @@ impl ClientHandler {
                 "Closing conection with client [{}]",
                 self.connection.nickname.unwrap_or_default()
             ),
-            Err(error) => eprint!(
+            Err(error) => eprintln!(
                 "Conection with client [{}] failed with error [{}]",
                 self.connection.nickname.unwrap_or_default(),
                 error
