@@ -1,6 +1,9 @@
 mod channel_info;
 mod client_info;
 
+use std::net::TcpStream;
+use std::sync::Arc;
+use std::sync::Mutex;
 use std::sync::RwLock;
 
 pub use channel_info::_ChannelInfo;
@@ -29,7 +32,7 @@ impl Database {
         clients_lock.push(client)
     }
 
-    pub fn has_nickname_collision(&self, nickname: &str) -> bool {
+    pub fn contains_client(&self, nickname: &str) -> bool {
         let clients_lock = self.clients.read().unwrap();
 
         for client in clients_lock.iter() {
@@ -38,6 +41,33 @@ impl Database {
             }
         }
         false
+    }
+
+    pub fn get_stream(&self, nickname: &str) -> Arc<Mutex<TcpStream>> {
+        todo!()
+    }
+
+    pub fn get_clients(&self, channel: &str) -> Vec<String> {
+        todo!()
+    }
+
+    pub fn get_channels(&self) -> Vec<String> {
+        todo!()
+    }
+
+    pub fn set_server_operator(&mut self, nickname: &str) {
+        todo!()
+    }
+
+    pub fn add_client_to_channel(&mut self, nickname: &str, channel: &str) {
+        todo!()
+    }
+    pub fn remove_client_to_channel(&mut self, nickname: &str, channel: &str) {
+        todo!()
+    }
+
+    pub fn disconnect_client(&mut self, nickname: &str) {
+        todo!()
     }
 }
 

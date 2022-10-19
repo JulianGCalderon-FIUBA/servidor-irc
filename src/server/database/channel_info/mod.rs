@@ -16,7 +16,7 @@ impl _ChannelInfo {
         todo!()
     }
 
-    pub fn _add_client(&mut self) {
+    pub fn _add_client(&mut self, _client: String) {
         todo!()
     }
 

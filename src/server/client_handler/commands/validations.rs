@@ -28,7 +28,7 @@ impl ClientHandler {
 
         let nickname = &parameters[0];
 
-        if self.database.has_nickname_collision(nickname) {
+        if self.database.contains_client(nickname) {
             self.nickname_collision_response()?;
             return Ok(false);
         }

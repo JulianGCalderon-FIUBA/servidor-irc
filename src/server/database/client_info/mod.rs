@@ -1,10 +1,13 @@
 mod client_info_builder;
 
 pub use client_info_builder::ClientInfoBuilder;
-use std::net::TcpStream;
+use std::{
+    net::TcpStream,
+    sync::{Arc, Mutex},
+};
 
 pub struct ClientInfo {
-    pub stream: Option<TcpStream>,
+    pub stream: Arc<Mutex<Option<TcpStream>>>,
     pub password: Option<String>,
     pub nickname: String,
     pub username: String,
@@ -15,7 +18,11 @@ pub struct ClientInfo {
 }
 
 impl ClientInfo {
-    pub fn _set_operator(&mut self) {
+    pub fn set_server_operator(&mut self) {
+        todo!()
+    }
+
+    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<TcpStream>>> {
         todo!()
     }
 }
