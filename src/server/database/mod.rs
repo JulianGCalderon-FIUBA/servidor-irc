@@ -1,17 +1,21 @@
+mod channel_info;
 mod client_info;
 
 use std::sync::RwLock;
 
+pub use channel_info::_ChannelInfo;
 pub use client_info::ClientInfo;
 pub use client_info::ClientInfoBuilder;
 pub struct Database {
     pub clients: RwLock<Vec<ClientInfo>>,
+    pub channels: RwLock<Vec<_ChannelInfo>>,
 }
 
 impl Database {
     pub fn new() -> Self {
         Self {
             clients: RwLock::new(vec![]),
+            channels: RwLock::new(vec![]),
         }
     }
 

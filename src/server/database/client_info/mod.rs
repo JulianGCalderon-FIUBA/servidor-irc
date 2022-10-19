@@ -11,6 +11,11 @@ pub struct ClientInfo {
     pub hostname: String,
     pub servername: String,
     pub realname: String,
+    pub operator: bool,
 }
 
-impl ClientInfo {}
+impl ClientInfo {
+    pub fn _set_operator(&mut self) {
+        todo!()
+    }
+}

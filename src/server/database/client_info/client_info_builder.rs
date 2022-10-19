@@ -46,6 +46,7 @@ impl ClientInfoBuilder {
             hostname: self.hostname,
             servername: self.servername,
             realname: self.realname,
+            operator: false,
         }
     }
 }
