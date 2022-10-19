@@ -4,12 +4,12 @@ mod client_info;
 use std::collections::HashMap;
 use std::sync::RwLock;
 
-pub use channel_info::_ChannelInfo;
+pub use channel_info::ChannelInfo;
 pub use client_info::ClientInfo;
 pub use client_info::ClientInfoBuilder;
 pub struct Database {
     pub clients: RwLock<HashMap<String, ClientInfo>>,
-    pub channels: RwLock<Vec<_ChannelInfo>>,
+    pub channels: RwLock<Vec<ChannelInfo>>,
 }
 
 impl Database {
