@@ -18,4 +18,12 @@ impl ClientInfo {
     pub fn _set_operator(&mut self) {
         todo!()
     }
+
+    pub fn _disconnect(&mut self) {
+        todo!()
+    }
+
+    pub fn _get_stream(&self) {
+        todo!()
+    }
 }
