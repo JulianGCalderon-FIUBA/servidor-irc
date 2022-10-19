@@ -59,9 +59,8 @@ impl ClientHandler {
 
         self.connection.advance_state();
 
-        if let Some(client_info) = self.connection.get_client_info()? {
-            self.database.add_client(client_info);
-        }
+        let client_info = self.connection.build_client_info().unwrap();
+        self.database.add_client(client_info);
 
         self.ok_reply()
     }

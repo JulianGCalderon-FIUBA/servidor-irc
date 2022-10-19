@@ -1,4 +1,4 @@
-use std::{io, net::TcpStream};
+use std::net::TcpStream;
 
 mod registration_state;
 
@@ -7,7 +7,7 @@ pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
 pub struct ConnectionInfo {
-    pub stream: TcpStream,
+    pub stream: Option<TcpStream>,
     pub password: Option<String>,
     pub nickname: Option<String>,
     pub username: Option<String>,
@@ -18,9 +18,9 @@ pub struct ConnectionInfo {
 }
 
 impl ConnectionInfo {
-    pub fn with_stream(stream: TcpStream) -> Self {
+    pub fn new_with_stream(stream: TcpStream) -> Self {
         Self {
-            stream,
+            stream: Some(stream),
             password: None,
             nickname: None,
             username: None,
@@ -34,24 +34,21 @@ impl ConnectionInfo {
         self.registration_state = self.registration_state.next();
     }
 
-    pub fn get_client_info(&self) -> io::Result<Option<ClientInfo>> {
-        if self.registration_state != RegistrationState::Registered {
-            return Ok(None);
-        }
-
+    pub fn build_client_info(&mut self) -> Option<ClientInfo> {
         let mut client_builder = ClientInfoBuilder::new_with(
-            self.nickname.clone().unwrap(),
-            self.username.clone().unwrap(),
-            self.hostname.clone().unwrap(),
-            self.servername.clone().unwrap(),
-            self.realname.clone().unwrap(),
+            self.nickname.clone()?,
+            self.username.clone()?,
+            self.hostname.clone()?,
+            self.servername.clone()?,
+            self.realname.clone()?,
         );
-        client_builder.with_stream(self.stream.try_clone()?);
+
+        client_builder.with_stream(self.stream.take()?);
 
         if let Some(password) = self.password.clone() {
             client_builder.with_password(password);
         }
 
-        Ok(Some(client_builder.build()))
+        Some(client_builder.build())
     }
 }
