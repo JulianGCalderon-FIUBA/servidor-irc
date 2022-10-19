@@ -32,6 +32,7 @@ impl ClientInfoBuilder {
             realname,
         }
     }
+
     pub fn with_stream(&mut self, stream: TcpStream) {
         self.stream = Some(stream);
     }

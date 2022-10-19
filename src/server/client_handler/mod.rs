@@ -17,18 +17,20 @@ use connection_info::ConnectionInfo;
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler {
     database: Arc<Database>,
+    stream: TcpStream,
     connection: ConnectionInfo,
 }
 
 impl ClientHandler {
     /// Returns new clientHandler.
-    pub fn new(database: Arc<Database>, stream: TcpStream) -> Self {
-        let connection = ConnectionInfo::with_stream(stream);
+    pub fn new(database: Arc<Database>, stream: TcpStream) -> io::Result<Self> {
+        let connection = ConnectionInfo::new_with_stream(stream.try_clone()?);
 
-        Self {
+        Ok(Self {
             database,
+            stream,
             connection,
-        }
+        })
     }
 
     /// Handles the received requests with error handling
@@ -56,7 +58,7 @@ impl ClientHandler {
     ///
     fn try_handle(&mut self) -> io::Result<()> {
         loop {
-            let message = match Message::read_from(&mut self.connection.stream) {
+            let message = match Message::read_from(&mut self.stream) {
                 Ok(message) => message,
                 Err(CreationError::IoError(error)) => return Err(error),
                 Err(CreationError::ParsingError(error)) => {

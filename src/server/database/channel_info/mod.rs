@@ -1,4 +1,4 @@
-pub struct _ChannelInfo {
+pub struct ChannelInfo {
     pub name: String,
     //vector de nicknames
     _clients: Vec<String>,
@@ -6,7 +6,7 @@ pub struct _ChannelInfo {
     _operator: Option<String>,
 }
 
-impl _ChannelInfo {
+impl ChannelInfo {
     /// Creates a new [`_ChannelInfo`].
     pub fn _new(_name: String, _creator: String) -> Self {
         todo!()

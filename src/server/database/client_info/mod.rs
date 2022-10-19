@@ -25,4 +25,12 @@ impl ClientInfo {
     pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<TcpStream>>> {
         todo!()
     }
+
+    pub fn _disconnect(&mut self) {
+        todo!()
+    }
+
+    pub fn _get_stream(&self) {
+        todo!()
+    }
 }

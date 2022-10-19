@@ -1,24 +1,25 @@
 mod channel_info;
 mod client_info;
 
+use std::collections::HashMap;
 use std::net::TcpStream;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::RwLock;
 
-pub use channel_info::_ChannelInfo;
+pub use channel_info::ChannelInfo;
 pub use client_info::ClientInfo;
 pub use client_info::ClientInfoBuilder;
 pub struct Database {
-    pub clients: RwLock<Vec<ClientInfo>>,
-    pub channels: RwLock<Vec<_ChannelInfo>>,
+    pub clients: RwLock<HashMap<String, ClientInfo>>,
+    pub channels: RwLock<HashMap<String, ChannelInfo>>,
 }
 
 impl Database {
     pub fn new() -> Self {
         Self {
-            clients: RwLock::new(vec![]),
-            channels: RwLock::new(vec![]),
+            clients: RwLock::new(HashMap::new()),
+            channels: RwLock::new(HashMap::new()),
         }
     }
 
@@ -29,18 +30,14 @@ impl Database {
             "Client registered: \npassword: {:?}\nnickname: {}\nrealname: {}",
             client.password, client.nickname, client.realname
         );
-        clients_lock.push(client)
+
+        clients_lock.insert(client.nickname.clone(), client);
     }
 
     pub fn contains_client(&self, nickname: &str) -> bool {
         let clients_lock = self.clients.read().unwrap();
 
-        for client in clients_lock.iter() {
-            if client.nickname == nickname {
-                return true;
-            }
-        }
-        false
+        clients_lock.contains_key(nickname)
     }
 
     pub fn get_stream(&self, nickname: &str) -> Arc<Mutex<TcpStream>> {
