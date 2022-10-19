@@ -1,13 +1,15 @@
-use std::{io, net::TcpListener, sync::Arc};
+mod client_handler;
+mod database;
+
+use std::io;
+use std::net::TcpListener;
+use std::sync::Arc;
 
 use crate::thread_pool::ThreadPool;
 use client_handler::ClientHandler;
-pub use database::Database;
+use database::Database;
 
 pub const MAX_CLIENTS: usize = 26;
-
-mod client_handler;
-mod database;
 
 /// Represents a Server clients can connect to.
 pub struct Server {

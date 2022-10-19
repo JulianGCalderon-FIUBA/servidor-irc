@@ -11,24 +11,6 @@ pub struct ClientInfo {
 }
 
 impl ClientInfo {
-    pub fn new(
-        password: String,
-        nickname: String,
-        username: String,
-        hostname: String,
-        servername: String,
-        realname: String,
-    ) -> Self {
-        Self {
-            stream: None,
-            password,
-            nickname,
-            username,
-            hostname,
-            servername,
-            realname,
-        }
-    }
     pub fn new_with_stream(
         stream: TcpStream,
         password: String,

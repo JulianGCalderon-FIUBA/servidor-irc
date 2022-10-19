@@ -12,7 +12,7 @@ impl ClientHandler {
             return Ok(false);
         }
 
-        if self.client.registration_state != RegistrationState::NotInitialized {
+        if self.connection.registration_state != RegistrationState::NotInitialized {
             self.already_registered_response()?;
             return Ok(false);
         }
@@ -39,7 +39,7 @@ impl ClientHandler {
             return Ok(false);
         }
 
-        if self.client.registration_state != RegistrationState::NicknameSent {
+        if self.connection.registration_state != RegistrationState::NicknameSent {
             self.no_nickname_error()?;
             return Ok(false);
         }

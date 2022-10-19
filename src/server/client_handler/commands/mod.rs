@@ -19,7 +19,7 @@ impl ClientHandler {
         }
 
         let password = parameters.pop().unwrap();
-        self.client.password = Some(password);
+        self.connection.password = Some(password);
 
         self.ok_reply()
     }
@@ -30,10 +30,10 @@ impl ClientHandler {
         }
 
         let nickname = parameters.pop().unwrap();
-        self.client.nickname = Some(nickname);
+        self.connection.nickname = Some(nickname);
 
-        if self.client.registration_state == RegistrationState::NotInitialized {
-            self.client.advance_state();
+        if self.connection.registration_state == RegistrationState::NotInitialized {
+            self.connection.advance_state();
         }
 
         self.ok_reply()
@@ -53,12 +53,12 @@ impl ClientHandler {
         let hostname = parameters.pop().unwrap();
         let servername = parameters.pop().unwrap();
 
-        self.client.username = Some(username);
-        self.client.hostname = Some(hostname);
-        self.client.servername = Some(servername);
-        self.client.realname = Some(realname);
+        self.connection.username = Some(username);
+        self.connection.hostname = Some(hostname);
+        self.connection.servername = Some(servername);
+        self.connection.realname = Some(realname);
 
-        self.client.advance_state();
+        self.connection.advance_state();
 
         self.add_client();
 
@@ -67,13 +67,13 @@ impl ClientHandler {
 
     fn add_client(&mut self) {
         let client = ClientInfo::new_with_stream(
-            self.client.stream.try_clone().unwrap(),
-            self.client.password.clone().unwrap(),
-            self.client.nickname.clone().unwrap(),
-            self.client.username.clone().unwrap(),
-            self.client.hostname.clone().unwrap(),
-            self.client.servername.clone().unwrap(),
-            self.client.realname.clone().unwrap(),
+            self.connection.stream.try_clone().unwrap(),
+            self.connection.password.clone().unwrap(),
+            self.connection.nickname.clone().unwrap(),
+            self.connection.username.clone().unwrap(),
+            self.connection.hostname.clone().unwrap(),
+            self.connection.servername.clone().unwrap(),
+            self.connection.realname.clone().unwrap(),
         );
 
         self.database.save_client(client);
@@ -84,7 +84,7 @@ impl ClientHandler {
             return self.quit_reply(&trailing);
         }
 
-        let nickname = self.client.nickname.clone().unwrap_or_default();
+        let nickname = self.connection.nickname.clone().unwrap_or_default();
         self.quit_reply(&nickname)
     }
 }
