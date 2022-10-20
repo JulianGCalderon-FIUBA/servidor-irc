@@ -5,8 +5,7 @@ mod parsing_error;
 pub use creation_error::CreationError;
 pub use parsing_error::ParsingError;
 
-use std::io::{self, BufRead, BufReader, ErrorKind};
-use std::io::{Read, Write};
+use std::io::{self, Read, Write};
 pub struct Message {
     prefix: Option<String>,
     command: String,
@@ -15,6 +14,7 @@ pub struct Message {
 }
 
 const CRLF: &[u8] = b"\r\n";
+const LF: &[u8] = b"\n";
 const PREFIX_CHARACTER: u8 = b':';
 const MAX_LENGTH: usize = 510;
 const INVALID_CHARACTERS: [char; 3] = ['\r', '\n', '\0'];
@@ -42,18 +42,9 @@ impl Message {
     }
 
     pub fn read_from(stream: &mut dyn Read) -> Result<Self, CreationError> {
-        let mut reader = BufReader::new(stream);
-
-        Self::read_from_buffer(&mut reader)
-    }
-
-    pub fn read_from_buffer(reader: &mut BufReader<&mut dyn Read>) -> Result<Self, CreationError> {
         let mut content = String::new();
 
-        let size = reader.read_line(&mut content)?;
-        if size == 0 {
-            return Err(CreationError::IoError(unexpected_eof_error()));
-        }
+        Self::read_line(stream, &mut content)?;
 
         if content.as_bytes().ends_with(CRLF) {
             content.pop();
@@ -66,6 +57,39 @@ impl Message {
 
         Ok(message)
     }
+
+    fn read_line(stream: &mut dyn Read, buffer: &mut String) -> io::Result<()> {
+        let mut content = String::new();
+        while !content.as_bytes().ends_with(LF) {
+            let mut buffer = [0; 1];
+            stream.read_exact(&mut buffer)?;
+            content.push(buffer[0] as char)
+        }
+
+        buffer.push_str(&content);
+
+        Ok(())
+    }
+
+    // pub fn read_from_buffer(reader: &mut BufReader<&mut dyn Read>) -> Result<Self, CreationError> {
+    //     let mut content = String::new();
+
+    //     let size = reader.read_line(&mut content)?;
+    //     if size == 0 {
+    //         return Err(CreationError::IoError(unexpected_eof_error()));
+    //     }
+
+    //     if content.as_bytes().ends_with(CRLF) {
+    //         content.pop();
+    //         content.pop();
+    //     } else {
+    //         return Err(CreationError::ParsingError(ParsingError::NoTrailingCRLF));
+    //     }
+
+    //     let message = Self::new(&content)?;
+
+    //     Ok(message)
+    // }
 
     pub fn unpack(self) -> (Option<String>, String, Vec<String>, Option<String>) {
         (self.prefix, self.command, self.parameters, self.trailing)
@@ -82,10 +106,6 @@ impl Message {
     pub fn get_trailing(&self) -> &Option<String> {
         &self.trailing
     }
-}
-
-fn unexpected_eof_error() -> io::Error {
-    io::Error::new(ErrorKind::UnexpectedEof, "Encountered EOF")
 }
 
 impl std::fmt::Display for Message {
