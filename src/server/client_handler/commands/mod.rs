@@ -21,10 +21,6 @@ impl ClientHandler {
         let password = parameters.pop().unwrap();
         self.connection.password = Some(password);
 
-        self.ok_reply()?;
-        self.ok_reply()?;
-        self.ok_reply()?;
-        self.ok_reply()?;
         self.ok_reply()
     }
 

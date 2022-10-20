@@ -71,26 +71,6 @@ impl Message {
         Ok(())
     }
 
-    // pub fn read_from_buffer(reader: &mut BufReader<&mut dyn Read>) -> Result<Self, CreationError> {
-    //     let mut content = String::new();
-
-    //     let size = reader.read_line(&mut content)?;
-    //     if size == 0 {
-    //         return Err(CreationError::IoError(unexpected_eof_error()));
-    //     }
-
-    //     if content.as_bytes().ends_with(CRLF) {
-    //         content.pop();
-    //         content.pop();
-    //     } else {
-    //         return Err(CreationError::ParsingError(ParsingError::NoTrailingCRLF));
-    //     }
-
-    //     let message = Self::new(&content)?;
-
-    //     Ok(message)
-    // }
-
     pub fn unpack(self) -> (Option<String>, String, Vec<String>, Option<String>) {
         (self.prefix, self.command, self.parameters, self.trailing)
     }

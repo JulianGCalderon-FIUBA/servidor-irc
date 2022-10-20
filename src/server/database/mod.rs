@@ -34,6 +34,22 @@ impl Database {
         clients_lock.insert(client.nickname.clone(), client);
     }
 
+    pub fn _disconnect_client(&self, _nickname: &str) {
+        todo!()
+    }
+
+    pub fn _set_server_operator(&self, _nickname: &str) {
+        todo!()
+    }
+
+    pub fn _add_client_to_channel(&self, _nickname: &str, _channel: &str) {
+        todo!()
+    }
+
+    pub fn _remove_client_to_channel(&self, _nickname: &str, _channel: &str) {
+        todo!()
+    }
+
     pub fn contains_client(&self, nickname: &str) -> bool {
         let clients_lock = self.clients.read().unwrap();
 
@@ -49,21 +65,6 @@ impl Database {
     }
 
     pub fn _get_channels(&self) -> Vec<String> {
-        todo!()
-    }
-
-    pub fn _set_server_operator(&self, _nickname: &str) {
-        todo!()
-    }
-
-    pub fn _add_client_to_channel(&self, _nickname: &str, _channel: &str) {
-        todo!()
-    }
-    pub fn _remove_client_to_channel(&self, _nickname: &str, _channel: &str) {
-        todo!()
-    }
-
-    pub fn _disconnect_client(&self, _nickname: &str) {
         todo!()
     }
 }
