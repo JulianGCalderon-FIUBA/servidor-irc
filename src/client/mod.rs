@@ -27,7 +27,7 @@ impl Client {
 
     pub fn async_read<F>(&mut self, on_message: F)
     where
-        F: Fn(Message) + Send + 'static,
+        F: Fn(Result<Message, CreationError>) + Send + 'static,
     {
         let on_message = Box::new(on_message);
 
@@ -37,11 +37,11 @@ impl Client {
                 let mut reader: BufReader<&mut dyn Read> = BufReader::new(&mut read_stream);
                 loop {
                     let message = Message::read_from_buffer(&mut reader);
-                    if let Ok(message) = message {
+                    if let Err(CreationError::IoError(_)) = message {
                         on_message(message);
-                    } else if let Err(CreationError::IoError(_)) = message {
                         return;
                     }
+                    on_message(message);
                 }
             });
         }
