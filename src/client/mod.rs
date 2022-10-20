@@ -1,7 +1,7 @@
-use std::io;
 use std::io::Write;
 use std::net::TcpStream;
 use std::thread;
+use std::{io, thread::JoinHandle};
 
 use crate::message::{CreationError, Message};
 
@@ -9,6 +9,7 @@ use crate::message::{CreationError, Message};
 pub struct Client {
     write_stream: TcpStream,
     read_stream: Option<TcpStream>,
+    read_thread: Option<JoinHandle<()>>,
 }
 
 const CRLF: &[u8; 2] = b"\r\n";
@@ -22,6 +23,7 @@ impl Client {
         Ok(Self {
             write_stream,
             read_stream,
+            read_thread: None,
         })
     }
 
@@ -33,7 +35,7 @@ impl Client {
 
         let read_stream = self.read_stream.take();
         if let Some(mut read_stream) = read_stream {
-            thread::spawn(move || loop {
+            let handle = thread::spawn(move || loop {
                 let message = Message::read_from(&mut read_stream);
                 if let Err(CreationError::IoError(_)) = message {
                     on_message(message);
@@ -41,6 +43,7 @@ impl Client {
                 }
                 on_message(message);
             });
+            self.read_thread = Some(handle);
         }
     }
 
@@ -50,5 +53,15 @@ impl Client {
 
         self.write_stream.write_all(bytes)?;
         self.write_stream.write_all(CRLF)
+    }
+}
+
+impl Drop for Client {
+    fn drop(&mut self) {
+        if let Some(handler) = self.read_thread.take() {
+            if let Err(error) = handler.join() {
+                eprintln!("Error: {:?}", error);
+            }
+        }
     }
 }
