@@ -77,8 +77,10 @@ impl Database {
         }
     }
 
-    pub fn _get_channels(&self) -> Vec<String> {
-        todo!()
+    pub fn get_channels(&self) -> Vec<String> {
+        let channels_lock = self.channels.read().unwrap();
+        
+        channels_lock.keys().cloned().collect()
     }
 }
 

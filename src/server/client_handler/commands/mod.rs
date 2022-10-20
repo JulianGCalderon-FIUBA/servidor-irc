@@ -11,6 +11,7 @@ pub const NICK_COMMAND: &str = "NICK";
 pub const USER_COMMAND: &str = "USER";
 pub const QUIT_COMMAND: &str = "QUIT";
 pub const NAMES_COMMAND: &str = "NAMES";
+pub const LIST_COMMAND: &str = "LIST";
 
 impl ClientHandler {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
@@ -75,9 +76,13 @@ impl ClientHandler {
         self.quit_reply(&nickname)
     }
 
-    pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_names_command(&parameters)? {
+    pub fn names_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
+        if !self.validate_names_command()? {
             return Ok(());
+        }
+
+        if parameters.is_empty() {
+            parameters = self.database.get_channels();
         }
 
         for channel in parameters {
@@ -94,7 +99,16 @@ impl ClientHandler {
                 } 
             }
         }
-
         Ok(())
+    }
+
+    pub fn list_command(&mut self) -> io::Result<()> {
+        if !self.validate_list_command()? {
+            return Ok(());
+        }
+
+        let channels = self.database.get_channels();
+
+        self.list_reply(channels)
     }
 }

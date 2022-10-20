@@ -68,4 +68,9 @@ impl ClientHandler {
         let response = "300 :".to_string() + &channel + " :" + &clients.join(", ");
         self.send_response(&response)
     }
+
+    pub fn list_reply(&mut self, channels: Vec<String>) -> io::Result<()> {
+        let response = "300 :".to_string() + &channels.join(", ");
+        self.send_response(&response)
+    }
 }

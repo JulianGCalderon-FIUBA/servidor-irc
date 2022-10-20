@@ -55,17 +55,19 @@ impl ClientHandler {
         Ok(true)
     }
 
-    pub fn validate_names_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+    pub fn validate_names_command(&mut self) -> io::Result<bool> {
         if self.connection.registration_state != RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
 
-        let channel = &parameters[0];
+        Ok(true)
+    }
 
-        if !self.database.contains_channel(channel) {
-            // self.no_such_channel_response()?;
-            // return Ok(false);
+    pub fn validate_list_command(&mut self) -> io::Result<bool> {
+        if self.connection.registration_state != RegistrationState::Registered {
+            self.unregistered_error()?;
+            return Ok(false);
         }
 
         Ok(true)
