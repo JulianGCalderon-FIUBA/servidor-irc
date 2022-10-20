@@ -10,6 +10,7 @@ pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
 pub struct ConnectionInfo {
+    pub stream: Option<TcpStream>,
     pub password: Option<String>,
     pub nickname: Option<String>,
     pub username: Option<String>,
@@ -20,8 +21,9 @@ pub struct ConnectionInfo {
 }
 
 impl ConnectionInfo {
-    pub fn new() -> Self {
+    pub fn new_with_stream(stream: TcpStream) -> Self {
         Self {
+            stream: Some(stream),
             password: None,
             nickname: None,
             username: None,
@@ -35,7 +37,7 @@ impl ConnectionInfo {
         self.registration_state = self.registration_state.next();
     }
 
-    pub fn build_client_info(&mut self, stream: Arc<Mutex<TcpStream>>) -> Option<ClientInfo> {
+    pub fn build_client_info(&mut self) -> Option<ClientInfo> {
         let mut client_builder = ClientInfoBuilder::new_with(
             self.nickname.clone()?,
             self.username.clone()?,
@@ -44,7 +46,7 @@ impl ConnectionInfo {
             self.realname.clone()?,
         );
 
-        client_builder.with_stream(stream);
+        client_builder.with_stream(Arc::new(Mutex::new(self.stream.take()?)));
 
         if let Some(password) = self.password.clone() {
             client_builder.with_password(password);

@@ -40,7 +40,13 @@ impl Server {
             };
 
             let database_clone = Arc::clone(&self.database);
-            let handler = ClientHandler::new(database_clone, client);
+            let handler = match ClientHandler::new(database_clone, client) {
+                Ok(handler) => handler,
+                Err(error) => {
+                    eprintln!("Could not create handler for client, with error: {error:?}");
+                    continue;
+                }
+            };
 
             pool.execute(|| {
                 handler.handle();
