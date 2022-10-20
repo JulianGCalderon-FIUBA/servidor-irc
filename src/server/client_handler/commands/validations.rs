@@ -2,6 +2,7 @@ use super::super::connection_info::RegistrationState;
 use super::ClientHandler;
 use std::io;
 
+use super::JOIN_COMMAND;
 use super::PART_COMMAND;
 use super::PASS_COMMAND;
 use super::USER_COMMAND;
@@ -64,7 +65,7 @@ impl ClientHandler {
         Ok(true)
     }
 
-    pub fn _validate_part_command(
+    pub fn validate_part_command(
         &mut self,
         parameters: &Vec<String>,
         _nickname: &str,
@@ -85,6 +86,14 @@ impl ClientHandler {
         //         self.not_on_channel_error(channel)?;
         //     }
         // }
+        Ok(true)
+    }
+
+    pub fn validate_join_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+        if parameters.is_empty() {
+            self.need_more_params_error(JOIN_COMMAND)?;
+            return Ok(false);
+        }
         Ok(true)
     }
 }

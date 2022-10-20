@@ -78,4 +78,9 @@ impl ClientHandler {
     //     let response = format!("475 {} :cannot join channel (+k)", channel);
     //     self.send_response(&response)
     // }
+
+    pub fn no_topic_reply(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("331 {} :no topic is set", channel);
+        self.send_response(&response)
+    }
 }

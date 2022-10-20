@@ -78,7 +78,7 @@ impl ClientHandler {
 
     pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         let nickname = self.connection.nickname.clone().unwrap();
-        if !self._validate_part_command(&parameters, &nickname)? {
+        if !self.validate_part_command(&parameters, &nickname)? {
             return Ok(());
         }
 
@@ -98,8 +98,16 @@ impl ClientHandler {
     }
 
     pub fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        if parameters.is_empty() {
-            return self.need_more_params_error(JOIN_COMMAND);
+        if !self.validate_join_command(&parameters)? {
+            return Ok(());
+        }
+        let nickname = self.connection.nickname.clone().unwrap();
+
+        let channels = &parameters[0];
+
+        for channel in channels.split(',') {
+            self.database.add_client_to_channel(&nickname, channel);
+            self.no_topic_reply(channel)?
         }
 
         Ok(())

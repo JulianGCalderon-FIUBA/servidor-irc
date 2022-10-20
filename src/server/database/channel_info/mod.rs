@@ -1,7 +1,7 @@
 pub struct ChannelInfo {
     pub name: String,
     //vector de nicknames
-    _clients: Vec<String>,
+    clients: Vec<String>,
     //nickname del operador
     _operator: Option<String>,
 }
@@ -16,16 +16,20 @@ impl ChannelInfo {
         todo!()
     }
 
-    pub fn _add_client(&mut self, _client: String) {
-        todo!()
+    pub fn add_client(&mut self, client: String) {
+        self.clients.push(client);
     }
 
-    pub fn _remove_client(&mut self, _client: String) {
+    // pub fn get_number_of_clients(&self) -> usize {
+    //     self.clients.len()
+    // }
+
+    pub fn remove_client(&mut self, _client: String) {
         let index = self
-            ._clients
+            .clients
             .iter()
             .position(|client| *client == _client)
             .unwrap();
-        self._clients.remove(index);
+        self.clients.remove(index);
     }
 }
