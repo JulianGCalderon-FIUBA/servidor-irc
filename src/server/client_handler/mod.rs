@@ -8,9 +8,7 @@ use commands::USER_COMMAND;
 
 use std::io;
 use std::net::TcpStream;
-use std::ops::DerefMut;
 use std::sync::Arc;
-use std::sync::Mutex;
 
 use super::database::Database;
 use crate::message::{CreationError, Message, ParsingError};
@@ -19,22 +17,20 @@ use connection_info::ConnectionInfo;
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler {
     database: Arc<Database>,
-    stream: Arc<Mutex<TcpStream>>,
+    stream: TcpStream,
     connection: ConnectionInfo,
 }
 
 impl ClientHandler {
     /// Returns new clientHandler.
-    pub fn new(database: Arc<Database>, stream: TcpStream) -> Self {
-        let stream = Arc::new(Mutex::new(stream));
+    pub fn new(database: Arc<Database>, stream: TcpStream) -> io::Result<Self> {
+        let connection = ConnectionInfo::new_with_stream(stream.try_clone()?);
 
-        let connection = ConnectionInfo::new();
-
-        Self {
+        Ok(Self {
             database,
             stream,
             connection,
-        }
+        })
     }
 
     /// Handles the received requests with error handling
@@ -62,7 +58,7 @@ impl ClientHandler {
     ///
     fn try_handle(&mut self) -> io::Result<()> {
         loop {
-            let message = Message::read_from(self.stream.lock().unwrap().deref_mut());
+            let message = Message::read_from(&mut self.stream);
 
             let message = match message {
                 Ok(message) => message,
