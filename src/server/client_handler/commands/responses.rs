@@ -63,4 +63,19 @@ impl ClientHandler {
         let response = format!("442 {} :you're not on that channel", channel);
         self.send_response(&response)
     }
+
+    // pub fn invite_only_channel_error(&mut self, channel: &str) -> io::Result<()> {
+    //     let response = format!("473 {} :cannot join channel (+i)", channel);
+    //     self.send_response(&response)
+    // }
+
+    // pub fn banned_from_channel_error(&mut self, channel: &str) -> io::Result<()> {
+    //     let response = format!("474 {} :cannot join channel (+b)", channel);
+    //     self.send_response(&response)
+    // }
+
+    // pub fn bad_channel_key_error(&mut self, channel: &str) -> io::Result<()> {
+    //     let response = format!("475 {} :cannot join channel (+k)", channel);
+    //     self.send_response(&response)
+    // }
 }

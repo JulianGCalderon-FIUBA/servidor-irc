@@ -55,6 +55,15 @@ impl ClientHandler {
         Ok(true)
     }
 
+    pub fn validate_channel(&mut self, channel: &str) -> io::Result<bool> {
+        let channels_database = self.database._get_channels();
+        if !channels_database.contains(&channel.to_string()) {
+            return Ok(false);
+        }
+
+        Ok(true)
+    }
+
     pub fn _validate_part_command(
         &mut self,
         parameters: &Vec<String>,
@@ -64,21 +73,17 @@ impl ClientHandler {
             self.need_more_params_error(PART_COMMAND)?;
             return Ok(false);
         }
-        // let channels = self.database._get_channels();
-        // for (i, channel) in parameters.iter().enumerate() {
-        //     if !channels.contains(&channel) {
-        //         self.no_such_channel_error(&channel)?;
-        //         parameters.remove(i);
-        //     }
+        // let channels_database = self.database._get_channels();
+        // let channels = &parameters[0];
 
-        //     let clients = self.database._get_clients(&channel);
-        //     if !clients.contains(&nickname.to_string()) {
-        //         self.not_on_channel_error(&channel)?;
-        //         parameters.remove(i);
+        // for channel in channels.split(',') {
+        //     if !channels_database.contains(&channel.to_string()) {
+        //         self.no_such_channel_error(channel)?;
         //     }
-        // }
-        // if parameters.is_empty() {
-        //     return Ok(false);
+        //     let clients = self.database._get_clients(channel);
+        //     if !clients.contains(&_nickname.to_string()) {
+        //         self.not_on_channel_error(channel)?;
+        //     }
         // }
         Ok(true)
     }
