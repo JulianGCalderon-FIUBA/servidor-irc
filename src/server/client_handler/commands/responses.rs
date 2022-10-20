@@ -53,4 +53,14 @@ impl ClientHandler {
         let response = "300 :no nickname registered".to_string();
         self.send_response(&response)
     }
+
+    pub fn no_such_channel_error(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("403 {} :no such channel", channel);
+        self.send_response(&response)
+    }
+
+    pub fn not_on_channel_error(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("442 {} :you're not on that channel", channel);
+        self.send_response(&response)
+    }
 }

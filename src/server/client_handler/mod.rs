@@ -2,6 +2,7 @@ mod commands;
 mod connection_info;
 
 use commands::NICK_COMMAND;
+use commands::PART_COMMAND;
 use commands::PASS_COMMAND;
 use commands::QUIT_COMMAND;
 use commands::USER_COMMAND;
@@ -78,6 +79,7 @@ impl ClientHandler {
                     self.quit_command(trailing)?;
                     return Ok(());
                 }
+                PART_COMMAND => self.part_command(parameters)?,
                 _ => self.unknown_command_error(&command)?,
             };
         }

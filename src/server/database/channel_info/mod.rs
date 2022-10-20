@@ -21,6 +21,11 @@ impl ChannelInfo {
     }
 
     pub fn _remove_client(&mut self, _client: String) {
-        todo!()
+        let index = self
+            ._clients
+            .iter()
+            .position(|client| *client == _client)
+            .unwrap();
+        self._clients.remove(index);
     }
 }

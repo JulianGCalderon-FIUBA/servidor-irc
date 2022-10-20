@@ -10,6 +10,7 @@ pub const PASS_COMMAND: &str = "PASS";
 pub const NICK_COMMAND: &str = "NICK";
 pub const USER_COMMAND: &str = "USER";
 pub const QUIT_COMMAND: &str = "QUIT";
+pub const PART_COMMAND: &str = "PART";
 
 impl ClientHandler {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
@@ -72,5 +73,25 @@ impl ClientHandler {
 
         let nickname = self.connection.nickname.clone().unwrap_or_default();
         self.quit_reply(&nickname)
+    }
+
+    pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        let nickname = self.connection.nickname.clone().unwrap();
+        if !self._validate_part_command(&parameters, &nickname)? {
+            return Ok(());
+        }
+        let channels = self.database._get_channels();
+
+        for channel in parameters {
+            if !channels.contains(&channel) {
+                return self.no_such_channel_error(&channel);
+            }
+            let clients = self.database._get_clients(&channel);
+            if !clients.contains(&nickname.to_string()) {
+                return self.not_on_channel_error(&channel);
+            }
+            self.database.remove_client_of_channel(&nickname, &channel)
+        }
+        Ok(())
     }
 }
