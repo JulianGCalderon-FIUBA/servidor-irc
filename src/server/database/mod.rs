@@ -56,12 +56,25 @@ impl Database {
         clients_lock.contains_key(nickname)
     }
 
+    pub fn contains_channel(&self, channel: &str) -> bool {
+        let channels_lock = self.channels.read().unwrap();
+
+        channels_lock.contains_key(channel)
+    }
+
     pub fn _get_stream(&self, _nickname: &str) -> Arc<Mutex<TcpStream>> {
         todo!()
     }
 
-    pub fn _get_clients(&self, _channel: &str) -> Vec<String> {
-        todo!()
+    pub fn get_clients(&self, channel: &str) -> Vec<String> {
+        let channels_lock = self.channels.read().unwrap();
+
+        let client_info = channels_lock.get(channel);
+
+        match client_info {
+            Some(client_info) => client_info.get_clients(),
+            None => vec![]
+        }
     }
 
     pub fn _get_channels(&self) -> Vec<String> {

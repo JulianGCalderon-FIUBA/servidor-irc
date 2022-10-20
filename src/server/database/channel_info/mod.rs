@@ -1,7 +1,7 @@
 pub struct ChannelInfo {
     pub name: String,
     //vector de nicknames
-    _clients: Vec<String>,
+    clients: Vec<String>,
     //nickname del operador
     _operator: Option<String>,
 }
@@ -12,8 +12,8 @@ impl ChannelInfo {
         todo!()
     }
 
-    pub fn _get_clients(&self) -> Vec<String> {
-        todo!()
+    pub fn get_clients(&self) -> Vec<String> {
+        self.clients.clone()
     }
 
     pub fn _add_client(&mut self, _client: String) {
