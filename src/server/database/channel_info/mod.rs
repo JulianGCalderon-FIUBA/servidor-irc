@@ -20,10 +20,6 @@ impl ChannelInfo {
         self.clients.push(client);
     }
 
-    // pub fn get_number_of_clients(&self) -> usize {
-    //     self.clients.len()
-    // }
-
     pub fn remove_client(&mut self, _client: String) {
         let index = self
             .clients

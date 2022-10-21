@@ -79,8 +79,18 @@ impl ClientHandler {
     //     self.send_response(&response)
     // }
 
+    // pub fn channel_is_full_error(&mut self, channel: &str) -> io::Result<()> {
+    //     let response = format!("471 {} :cannot join channel (+l)", channel);
+    //     self.send_response(&response)
+    // }
+
     pub fn no_topic_reply(&mut self, channel: &str) -> io::Result<()> {
         let response = format!("331 {} :no topic is set", channel);
+        self.send_response(&response)
+    }
+
+    pub fn too_many_channels_error(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("405 {} :you have joined too many channels", channel);
         self.send_response(&response)
     }
 }

@@ -103,11 +103,14 @@ impl ClientHandler {
         }
         let nickname = self.connection.nickname.clone().unwrap();
 
-        let channels = &parameters[0];
-
-        for channel in channels.split(',') {
-            self.database.add_client_to_channel(&nickname, channel);
-            self.no_topic_reply(channel)?
+        for param in parameters {
+            for channel in param.split(',') {
+                if !self.validate_can_join_channel(channel, &nickname)? {
+                    break;
+                }
+                self.database.add_client_to_channel(&nickname, channel);
+                self.no_topic_reply(channel)?
+            }
         }
 
         Ok(())

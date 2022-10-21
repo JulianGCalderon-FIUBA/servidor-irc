@@ -7,6 +7,9 @@ use super::PART_COMMAND;
 use super::PASS_COMMAND;
 use super::USER_COMMAND;
 
+const MAX_CHANNELS: usize = 10;
+const INVALID_CHARACTERS: [char; 3] = [' ', ',', '\''];
+
 impl ClientHandler {
     pub fn validate_pass_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
         if parameters.len() != 1 {
@@ -94,6 +97,31 @@ impl ClientHandler {
             self.need_more_params_error(JOIN_COMMAND)?;
             return Ok(false);
         }
+        Ok(true)
+    }
+
+    fn validate_channel_name(&mut self, channel: &str) -> io::Result<bool> {
+        if (channel.as_bytes()[0] != b'#') && (channel.as_bytes()[0] != b'&')
+            || channel.contains(INVALID_CHARACTERS)
+        {
+            return Ok(false);
+        }
+
+        Ok(true)
+    }
+
+    pub fn validate_can_join_channel(&mut self, channel: &str, nickname: &str) -> io::Result<bool> {
+        let channels_for_nickname = self.database.get_channels_for_client(nickname);
+        if channels_for_nickname.len() == MAX_CHANNELS {
+            self.too_many_channels_error(channel)?;
+            return Ok(false);
+        }
+
+        if !self.validate_channel_name(channel)? {
+            self.no_such_channel_error(channel)?;
+            return Ok(false);
+        }
+
         Ok(true)
     }
 }

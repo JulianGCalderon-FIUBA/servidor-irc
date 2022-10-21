@@ -73,6 +73,13 @@ impl Database {
     pub fn _get_channels(&self) -> Vec<String> {
         todo!()
     }
+
+    pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
+        let clients_lock = self.clients.read().unwrap();
+
+        let client = clients_lock.get(nickname).unwrap();
+        client.channels.clone()
+    }
 }
 
 impl Default for Database {
