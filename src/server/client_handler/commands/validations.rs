@@ -77,18 +77,6 @@ impl ClientHandler {
             self.need_more_params_error(PART_COMMAND)?;
             return Ok(false);
         }
-        // let channels_database = self.database._get_channels();
-        // let channels = &parameters[0];
-
-        // for channel in channels.split(',') {
-        //     if !channels_database.contains(&channel.to_string()) {
-        //         self.no_such_channel_error(channel)?;
-        //     }
-        //     let clients = self.database._get_clients(channel);
-        //     if !clients.contains(&_nickname.to_string()) {
-        //         self.not_on_channel_error(channel)?;
-        //     }
-        // }
         Ok(true)
     }
 

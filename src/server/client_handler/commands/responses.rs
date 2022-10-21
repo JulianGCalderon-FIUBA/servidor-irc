@@ -84,6 +84,11 @@ impl ClientHandler {
     //     self.send_response(&response)
     // }
 
+    // pub fn topic_reply(&mut self, channel: &str, topic: &str) -> io::Result<()> {
+    //     let response = format!("332 {} :{}", channel, topic);
+    //     self.send_response(&response)
+    // }
+
     pub fn no_topic_reply(&mut self, channel: &str) -> io::Result<()> {
         let response = format!("331 {} :no topic is set", channel);
         self.send_response(&response)
