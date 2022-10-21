@@ -10,6 +10,9 @@ use super::USER_COMMAND;
 const MAX_CHANNELS: usize = 10;
 const INVALID_CHARACTERS: [char; 3] = [' ', ',', '\''];
 
+const LOCAL_CHANNEL: char = '&';
+const DISTRIBUTED_CHANNEL: char = '#';
+
 impl ClientHandler {
     pub fn validate_pass_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
         if parameters.len() != 1 {
@@ -89,7 +92,9 @@ impl ClientHandler {
     }
 
     pub fn validate_is_channel(&mut self, channel: &str) -> io::Result<bool> {
-        if (channel.as_bytes()[0] == b'#') || (channel.as_bytes()[0] == b'&') {
+        if (channel.as_bytes()[0] == LOCAL_CHANNEL as u8)
+            || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL as u8)
+        {
             return Ok(true);
         }
         Ok(false)
