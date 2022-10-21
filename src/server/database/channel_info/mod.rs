@@ -8,8 +8,14 @@ pub struct ChannelInfo {
 
 impl ChannelInfo {
     /// Creates a new [`_ChannelInfo`].
-    pub fn _new(_name: String, _creator: String) -> Self {
-        todo!()
+    pub fn new(name: String, creator: String) -> Self {
+        let clients = vec![creator];
+
+        Self {
+            name,
+            clients,
+            _operator: None,
+        }
     }
 
     pub fn _get_clients(&self) -> Vec<String> {

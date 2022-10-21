@@ -44,8 +44,11 @@ impl Database {
 
     pub fn add_client_to_channel(&self, nickname: &str, channel: &str) {
         let mut channels_lock = self.channels.write().unwrap();
-        if let Some(channel) = channels_lock.get_mut(&channel.to_string()) {
-            channel.add_client(nickname.to_string());
+        match channels_lock.get_mut(&channel.to_string()) {
+            Some(channel) => channel.add_client(nickname.to_string()),
+            None => {
+                ChannelInfo::new(channel.to_string(), nickname.to_string());
+            }
         }
     }
 

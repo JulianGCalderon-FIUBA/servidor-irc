@@ -59,7 +59,7 @@ impl ClientHandler {
         Ok(true)
     }
 
-    pub fn validate_channel(&mut self, channel: &str) -> io::Result<bool> {
+    pub fn validate_channel_exists(&mut self, channel: &str) -> io::Result<bool> {
         let channels_database = self.database._get_channels();
         if !channels_database.contains(&channel.to_string()) {
             return Ok(false);
@@ -88,14 +88,11 @@ impl ClientHandler {
         Ok(true)
     }
 
-    fn validate_channel_name(&mut self, channel: &str) -> io::Result<bool> {
-        if (channel.as_bytes()[0] != b'#') && (channel.as_bytes()[0] != b'&')
-            || channel.contains(INVALID_CHARACTERS)
-        {
-            return Ok(false);
+    pub fn validate_is_channel(&mut self, channel: &str) -> io::Result<bool> {
+        if (channel.as_bytes()[0] == b'#') || (channel.as_bytes()[0] == b'&') {
+            return Ok(true);
         }
-
-        Ok(true)
+        Ok(false)
     }
 
     pub fn validate_can_join_channel(&mut self, channel: &str, nickname: &str) -> io::Result<bool> {
@@ -105,7 +102,7 @@ impl ClientHandler {
             return Ok(false);
         }
 
-        if !self.validate_channel_name(channel)? {
+        if channel.contains(INVALID_CHARACTERS) {
             self.no_such_channel_error(channel)?;
             return Ok(false);
         }

@@ -85,7 +85,7 @@ impl ClientHandler {
         let channels = &parameters[0];
 
         for channel in channels.split(',') {
-            if !self.validate_channel(channel)? {
+            if !self.validate_channel_exists(channel)? {
                 return self.no_such_channel_error(channel);
             }
             let clients = self.database._get_clients(channel);
@@ -103,11 +103,13 @@ impl ClientHandler {
         }
         let nickname = self.connection.nickname.clone().unwrap();
 
-        //arreglar parseo para diferenciar key de nombre de canal -> ahora si es key solo lo ignora
         for param in parameters {
             for channel in param.split(',') {
+                if !self.validate_is_channel(channel)? {
+                    continue;
+                }
                 if !self.validate_can_join_channel(channel, &nickname)? {
-                    break;
+                    continue;
                 }
                 self.database.add_client_to_channel(&nickname, channel);
                 self.no_topic_reply(channel)?
