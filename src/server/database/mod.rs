@@ -42,12 +42,14 @@ impl Database {
         todo!()
     }
 
-    pub fn add_client_to_channel(&self, nickname: &str, channel: &str) {
+    pub fn add_client_to_channel(&self, nickname: &str, channel_name: &str) {
         let mut channels_lock = self.channels.write().unwrap();
-        match channels_lock.get_mut(&channel.to_string()) {
+        let channel: Option<&mut ChannelInfo> = channels_lock.get_mut(&channel_name.to_string());
+        match channel {
             Some(channel) => channel.add_client(nickname.to_string()),
             None => {
-                ChannelInfo::new(channel.to_string(), nickname.to_string());
+                let new_channel = ChannelInfo::new(channel_name.to_string(), nickname.to_string());
+                channels_lock.insert(channel_name.to_string(), new_channel);
             }
         }
     }
