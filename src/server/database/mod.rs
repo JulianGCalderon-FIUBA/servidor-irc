@@ -34,12 +34,17 @@ impl Database {
         clients_lock.insert(client.nickname.clone(), client);
     }
 
-    pub fn _disconnect_client(&self, _nickname: &str) {
-        todo!()
+    pub fn disconnect_client(&self, nickname: &str) {
+        if let Some(client) = self.clients.write().unwrap().get_mut(nickname) {
+            client.disconnect();
+        }
     }
 
-    pub fn _set_server_operator(&self, _nickname: &str) {
-        todo!()
+    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<TcpStream>>> {
+        let clients_rlock = self.clients.read().unwrap();
+        let client = clients_rlock.get(nickname)?;
+
+        client.get_stream()
     }
 
     pub fn _add_client_to_channel(&self, _nickname: &str, _channel: &str) {
@@ -56,16 +61,12 @@ impl Database {
         clients_lock.contains_key(nickname)
     }
 
-    pub fn _get_stream(&self, _nickname: &str) -> Arc<Mutex<TcpStream>> {
-        todo!()
+    pub fn get_clients(&self, _channel: &str) -> Vec<String> {
+        vec![]
     }
 
-    pub fn _get_clients(&self, _channel: &str) -> Vec<String> {
-        todo!()
-    }
-
-    pub fn _get_channels(&self) -> Vec<String> {
-        todo!()
+    pub fn get_channels(&self) -> Vec<String> {
+        vec![]
     }
 }
 

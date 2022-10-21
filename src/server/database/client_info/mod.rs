@@ -22,11 +22,13 @@ impl ClientInfo {
         todo!()
     }
 
-    pub fn _get_stream(&self, _nickname: &str) -> Option<Arc<Mutex<TcpStream>>> {
-        todo!()
+    pub fn get_stream(&self) -> Option<Arc<Mutex<TcpStream>>> {
+        let stream = self.stream.as_ref()?;
+
+        Some(Arc::clone(stream))
     }
 
-    pub fn _disconnect(&mut self) {
-        todo!()
+    pub fn disconnect(&mut self) {
+        self.stream = None;
     }
 }
