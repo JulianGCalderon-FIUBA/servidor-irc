@@ -1,25 +1,17 @@
-mod channel_info;
 mod client_info;
 
-use std::collections::HashMap;
-use std::net::TcpStream;
-use std::sync::Arc;
-use std::sync::Mutex;
 use std::sync::RwLock;
 
-pub use channel_info::ChannelInfo;
 pub use client_info::ClientInfo;
 pub use client_info::ClientInfoBuilder;
 pub struct Database {
-    pub clients: RwLock<HashMap<String, ClientInfo>>,
-    pub channels: RwLock<HashMap<String, ChannelInfo>>,
+    pub clients: RwLock<Vec<ClientInfo>>,
 }
 
 impl Database {
     pub fn new() -> Self {
         Self {
-            clients: RwLock::new(HashMap::new()),
-            channels: RwLock::new(HashMap::new()),
+            clients: RwLock::new(vec![]),
         }
     }
 
@@ -30,57 +22,18 @@ impl Database {
             "Client registered: \npassword: {:?}\nnickname: {}\nrealname: {}",
             client.password, client.nickname, client.realname
         );
-
-        clients_lock.insert(client.nickname.clone(), client);
+        clients_lock.push(client)
     }
 
-    pub fn _disconnect_client(&self, _nickname: &str) {
-        todo!()
-    }
-
-    pub fn _set_server_operator(&self, _nickname: &str) {
-        todo!()
-    }
-
-    pub fn _add_client_to_channel(&self, _nickname: &str, _channel: &str) {
-        todo!()
-    }
-
-    pub fn _remove_client_to_channel(&self, _nickname: &str, _channel: &str) {
-        todo!()
-    }
-
-    pub fn contains_client(&self, nickname: &str) -> bool {
+    pub fn has_nickname_collision(&self, nickname: &str) -> bool {
         let clients_lock = self.clients.read().unwrap();
 
-        clients_lock.contains_key(nickname)
-    }
-
-    pub fn contains_channel(&self, channel: &str) -> bool {
-        let channels_lock = self.channels.read().unwrap();
-
-        channels_lock.contains_key(channel)
-    }
-
-    pub fn _get_stream(&self, _nickname: &str) -> Arc<Mutex<TcpStream>> {
-        todo!()
-    }
-
-    pub fn get_clients(&self, channel: &str) -> Vec<String> {
-        let channels_lock = self.channels.read().unwrap();
-
-        let client_info = channels_lock.get(channel);
-
-        match client_info {
-            Some(client_info) => client_info.get_clients(),
-            None => vec![]
+        for client in clients_lock.iter() {
+            if client.nickname == nickname {
+                return true;
+            }
         }
-    }
-
-    pub fn get_channels(&self) -> Vec<String> {
-        let channels_lock = self.channels.read().unwrap();
-        
-        channels_lock.keys().cloned().collect()
+        false
     }
 }
 
