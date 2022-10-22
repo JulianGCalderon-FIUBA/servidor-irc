@@ -1,5 +1,6 @@
 mod channel_info;
 mod client_info;
+mod utils;
 
 use std::collections::HashMap;
 use std::net::TcpStream;
@@ -32,6 +33,13 @@ impl Database {
         );
 
         clients_lock.insert(client.nickname.clone(), client);
+    }
+
+    pub fn set_server_operator(&self, nickname: &str) {
+        let mut clients_lock = self.clients.write().unwrap();
+        if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
+            client.set_server_operator();
+        }
     }
 
     pub fn disconnect_client(&self, nickname: &str) {

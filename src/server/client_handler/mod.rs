@@ -1,23 +1,23 @@
+use std::{io, ops::DerefMut};
+
+use crate::message::Message;
+
 mod commands;
 mod connection_info;
 
-use commands::JOIN_COMMAND;
-use commands::LIST_COMMAND;
-use commands::NAMES_COMMAND;
-use commands::NICK_COMMAND;
-use commands::NOTICE_COMMAND;
-use commands::PART_COMMAND;
-use commands::PASS_COMMAND;
-use commands::PRIVMSG_COMMAND;
-use commands::QUIT_COMMAND;
-use commands::USER_COMMAND;
+use commands::channel_operations::{
+    INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, PART_COMMAND,
+};
+use commands::connection_registration::{
+    NICK_COMMAND, OPER_COMMAND, PASS_COMMAND, QUIT_COMMAND, USER_COMMAND,
+};
+use commands::sending_messages::{NOTICE_COMMAND, PRIVMSG_COMMAND};
 
-use std::io;
 use std::net::TcpStream;
 use std::sync::Arc;
 
 use super::database::Database;
-use crate::message::{CreationError, Message, ParsingError};
+use crate::message::{CreationError, ParsingError};
 use connection_info::ConnectionInfo;
 
 /// A ClientHandler handles the client's request.
@@ -96,12 +96,54 @@ impl ClientHandler {
                     self.quit_command(trailing)?;
                     return Ok(());
                 }
+                OPER_COMMAND => self.oper_command(parameters)?,
+                INVITE_COMMAND => self.invite_command(parameters /* , trailing*/)?,
                 _ => self.unknown_command_error(&command)?,
             };
         }
     }
 
+    pub fn build_text_message(&self, command: &str, receiver: &str, content: &str) -> Message {
+        let message = format!(
+            ":{} {} {} :{}",
+            self.connection.nickname.as_ref().unwrap(),
+            command,
+            receiver,
+            content
+        );
+
+        Message::new(&message).unwrap()
+    }
+
     fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
         self.send_response("300 :parsing error")
+    }
+
+    pub fn send_message_to(&mut self, receiver: &str, message: &Message) -> io::Result<()> {
+        if self.database.contains_client(receiver) {
+            if self.send_message_to_client(receiver, message).is_err() {
+                self.disconnected_error(receiver)?;
+            }
+        } else {
+            self.send_message_to_channel(receiver, message);
+        }
+
+        Ok(())
+    }
+
+    pub fn send_message_to_channel(&self, channel: &str, message: &Message) {
+        let clients = self.database.get_clients(channel);
+
+        for client in clients {
+            if self.send_message_to_client(&client, message).is_err() {
+                eprintln!("{} is offline", client);
+            };
+        }
+    }
+
+    pub fn send_message_to_client(&self, client: &str, message: &Message) -> io::Result<()> {
+        let stream_ref = self.database.get_stream(client).unwrap();
+        let mut stream = stream_ref.lock().unwrap();
+        message.send_to(stream.deref_mut())
     }
 }

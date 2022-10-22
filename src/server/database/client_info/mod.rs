@@ -18,8 +18,8 @@ pub struct ClientInfo {
 }
 
 impl ClientInfo {
-    pub fn _set_server_operator(&mut self) {
-        todo!()
+    pub fn set_server_operator(&mut self) {
+        self.operator = true;
     }
 
     pub fn get_stream(&self) -> Option<Arc<Mutex<TcpStream>>> {
