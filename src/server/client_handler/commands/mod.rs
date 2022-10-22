@@ -4,12 +4,15 @@ use super::ClientHandler;
 use std::io;
 
 mod responses;
+mod utils;
 mod validations;
 
 pub const PASS_COMMAND: &str = "PASS";
 pub const NICK_COMMAND: &str = "NICK";
 pub const USER_COMMAND: &str = "USER";
 pub const QUIT_COMMAND: &str = "QUIT";
+pub const PRIVMSG_COMMAND: &str = "PRIVMSG";
+pub const NOTICE_COMMAND: &str = "NOTICE";
 pub const PART_COMMAND: &str = "PART";
 pub const JOIN_COMMAND: &str = "JOIN";
 pub const NAMES_COMMAND: &str = "NAMES";
@@ -78,6 +81,51 @@ impl ClientHandler {
         self.quit_reply(&nickname)
     }
 
+    pub fn privmsg_command(
+        &mut self,
+        parameters: Vec<String>,
+        trailing: Option<String>,
+    ) -> io::Result<()> {
+        if !self.validate_privmsg_command(&parameters, &trailing)? {
+            return Ok(());
+        }
+
+        let content = trailing.unwrap();
+
+        let targets = &parameters[0];
+        for target in targets.split(',') {
+            let message = self.build_text_message(PRIVMSG_COMMAND, target, &content);
+            self.send_message_to(target, &message)?;
+            if self.database.contains_client(target) {
+                // let away = self.database.away_message_from_client(target);
+                // if let Some(away) = away {
+                //     self.away_reply(target, away)?;
+                // }
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn notice_command(
+        &mut self,
+        parameters: Vec<String>,
+        trailing: Option<String>,
+    ) -> io::Result<()> {
+        if !self.validate_privmsg_command(&parameters, &trailing)? {
+            return Ok(());
+        }
+
+        let content = trailing.unwrap();
+
+        let targets = &parameters[0];
+        for target in targets.split(',') {
+            let message = self.build_text_message(NOTICE_COMMAND, target, &content);
+            self.send_message_to(target, &message)?;
+        }
+        Ok(())
+    }
+
     pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         let nickname = self.connection.nickname.clone().unwrap();
         if !self.validate_part_command(&parameters, &nickname)? {
@@ -137,8 +185,8 @@ impl ClientHandler {
                 continue;
             }
             self.database.add_client_to_channel(&nickname, channel);
-            self.no_topic_reply(channel)?
-            //self.names_reply(channel, self.database.get_clients(channel))?
+            self.no_topic_reply(channel)?;
+            self.names_reply(channel.to_string(), self.database.get_clients(channel))?
         }
 
         Ok(())
