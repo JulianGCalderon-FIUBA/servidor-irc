@@ -10,6 +10,8 @@ pub const PASS_COMMAND: &str = "PASS";
 pub const NICK_COMMAND: &str = "NICK";
 pub const USER_COMMAND: &str = "USER";
 pub const QUIT_COMMAND: &str = "QUIT";
+pub const NAMES_COMMAND: &str = "NAMES";
+pub const LIST_COMMAND: &str = "LIST";
 
 impl ClientHandler {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
@@ -59,9 +61,8 @@ impl ClientHandler {
 
         self.connection.advance_state();
 
-        if let Some(client_info) = self.connection.get_client_info()? {
-            self.database.add_client(client_info);
-        }
+        let client_info = self.connection.build_client_info().unwrap();
+        self.database.add_client(client_info);
 
         self.ok_reply()
     }
@@ -73,5 +74,41 @@ impl ClientHandler {
 
         let nickname = self.connection.nickname.clone().unwrap_or_default();
         self.quit_reply(&nickname)
+    }
+
+    pub fn names_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
+        if !self.validate_names_command()? {
+            return Ok(());
+        }
+
+        if parameters.is_empty() {
+            parameters = self.database.get_channels();
+        }
+
+        for channel in parameters {
+            if self.database.contains_channel(&channel) {
+                let clients = self.database.get_clients(&channel);
+                match self.names_reply(channel, clients) {
+                    Ok(()) => (),
+                    Err(e) => return Err(e)
+                }
+            } else {
+                match self.no_such_channel_response(channel) {
+                    Ok(()) => (),
+                    Err(e) => return Err(e)
+                } 
+            }
+        }
+        Ok(())
+    }
+
+    pub fn list_command(&mut self) -> io::Result<()> {
+        if !self.validate_list_command()? {
+            return Ok(());
+        }
+
+        let channels = self.database.get_channels();
+
+        self.list_reply(channels)
     }
 }
