@@ -1,7 +1,9 @@
 mod commands;
 mod connection_info;
 
+use commands::JOIN_COMMAND;
 use commands::NICK_COMMAND;
+use commands::PART_COMMAND;
 use commands::PASS_COMMAND;
 use commands::QUIT_COMMAND;
 use commands::USER_COMMAND;
@@ -76,6 +78,8 @@ impl ClientHandler {
                 PASS_COMMAND => self.pass_command(parameters)?,
                 NICK_COMMAND => self.nick_command(parameters)?,
                 USER_COMMAND => self.user_command(parameters, trailing)?,
+                PART_COMMAND => self.part_command(parameters)?,
+                JOIN_COMMAND => self.join_command(parameters)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());

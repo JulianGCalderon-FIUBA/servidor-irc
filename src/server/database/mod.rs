@@ -42,12 +42,23 @@ impl Database {
         todo!()
     }
 
-    pub fn _add_client_to_channel(&self, _nickname: &str, _channel: &str) {
-        todo!()
+    pub fn add_client_to_channel(&self, nickname: &str, channel_name: &str) {
+        let mut channels_lock = self.channels.write().unwrap();
+        let channel: Option<&mut ChannelInfo> = channels_lock.get_mut(&channel_name.to_string());
+        match channel {
+            Some(channel) => channel.add_client(nickname.to_string()),
+            None => {
+                let new_channel = ChannelInfo::new(channel_name.to_string(), nickname.to_string());
+                channels_lock.insert(channel_name.to_string(), new_channel);
+            }
+        }
     }
 
-    pub fn _remove_client_to_channel(&self, _nickname: &str, _channel: &str) {
-        todo!()
+    pub fn remove_client_of_channel(&self, nickname: &str, channel: &str) {
+        let mut channels_lock = self.channels.write().unwrap();
+        if let Some(channel) = channels_lock.get_mut(&channel.to_string()) {
+            channel.remove_client(nickname.to_string());
+        }
     }
 
     pub fn contains_client(&self, nickname: &str) -> bool {
@@ -73,14 +84,27 @@ impl Database {
 
         match client_info {
             Some(client_info) => client_info.get_clients(),
-            None => vec![]
+            None => vec![],
         }
     }
 
     pub fn get_channels(&self) -> Vec<String> {
         let channels_lock = self.channels.read().unwrap();
-        
+
         channels_lock.keys().cloned().collect()
+    }
+
+    pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
+        let channels_lock = self.clients.read().unwrap();
+        let mut channels = vec![];
+
+        for (channel_name, _) in channels_lock.iter() {
+            let clients = self.get_clients(channel_name);
+            if clients.contains(&nickname.to_string()) {
+                channels.push(channel_name.clone());
+            }
+        }
+        channels
     }
 }
 

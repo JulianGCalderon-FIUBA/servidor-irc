@@ -54,18 +54,57 @@ impl ClientHandler {
         self.send_response(&response)
     }
 
+    pub fn no_such_channel_error(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("403 {} :no such channel", channel);
+        self.send_response(&response)
+    }
+
+    pub fn not_on_channel_error(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("442 {} :you're not on that channel", channel);
+        self.send_response(&response)
+    }
+
+    // pub fn invite_only_channel_error(&mut self, channel: &str) -> io::Result<()> {
+    //     let response = format!("473 {} :cannot join channel (+i)", channel);
+    //     self.send_response(&response)
+    // }
+
+    // pub fn banned_from_channel_error(&mut self, channel: &str) -> io::Result<()> {
+    //     let response = format!("474 {} :cannot join channel (+b)", channel);
+    //     self.send_response(&response)
+    // }
+
+    // pub fn bad_channel_key_error(&mut self, channel: &str) -> io::Result<()> {
+    //     let response = format!("475 {} :cannot join channel (+k)", channel);
+    //     self.send_response(&response)
+    // }
+
+    // pub fn channel_is_full_error(&mut self, channel: &str) -> io::Result<()> {
+    //     let response = format!("471 {} :cannot join channel (+l)", channel);
+    //     self.send_response(&response)
+    // }
+
+    // pub fn topic_reply(&mut self, channel: &str, topic: &str) -> io::Result<()> {
+    //     let response = format!("332 {} :{}", channel, topic);
+    //     self.send_response(&response)
+    // }
+
+    pub fn no_topic_reply(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("331 {} :no topic is set", channel);
+        self.send_response(&response)
+    }
+
+    pub fn too_many_channels_error(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("405 {} :you have joined too many channels", channel);
+        self.send_response(&response)
+    }
     pub fn unregistered_error(&mut self) -> io::Result<()> {
         let response = "300 :unregistered".to_string();
         self.send_response(&response)
     }
 
-    pub fn no_such_channel_response(&mut self, channel: String) -> io::Result<()> {
-        let response = "300 :no such channel ".to_string() + &channel;
-        self.send_response(&response)
-    }
-
     pub fn names_reply(&mut self, channel: String, clients: Vec<String>) -> io::Result<()> {
-        let response = "300 :".to_string() + &channel + " :" + &clients.join(", ");
+        let response = "353 :".to_string() + &channel + " :" + &clients.join(", ");
         self.send_response(&response)
     }
 

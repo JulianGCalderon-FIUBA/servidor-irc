@@ -10,6 +10,8 @@ pub const PASS_COMMAND: &str = "PASS";
 pub const NICK_COMMAND: &str = "NICK";
 pub const USER_COMMAND: &str = "USER";
 pub const QUIT_COMMAND: &str = "QUIT";
+pub const PART_COMMAND: &str = "PART";
+pub const JOIN_COMMAND: &str = "JOIN";
 pub const NAMES_COMMAND: &str = "NAMES";
 pub const LIST_COMMAND: &str = "LIST";
 
@@ -76,6 +78,26 @@ impl ClientHandler {
         self.quit_reply(&nickname)
     }
 
+    pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        let nickname = self.connection.nickname.clone().unwrap();
+        if !self.validate_part_command(&parameters, &nickname)? {
+            return Ok(());
+        }
+
+        let channels = &parameters[0];
+
+        for channel in channels.split(',') {
+            if !self.validate_channel_exists(channel)? {
+                return self.no_such_channel_error(channel);
+            }
+            let clients = self.database.get_clients(channel);
+            if !clients.contains(&nickname.to_string()) {
+                return self.not_on_channel_error(channel);
+            }
+            self.database.remove_client_of_channel(&nickname, channel)
+        }
+        Ok(())
+    }
     pub fn names_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_names_command()? {
             return Ok(());
@@ -83,25 +105,44 @@ impl ClientHandler {
 
         if parameters.is_empty() {
             parameters = self.database.get_channels();
+        } else {
+            parameters = parameters[0]
+                .split(',')
+                .map(|string| string.to_string())
+                .collect();
         }
 
         for channel in parameters {
             if self.database.contains_channel(&channel) {
                 let clients = self.database.get_clients(&channel);
-                match self.names_reply(channel, clients) {
-                    Ok(()) => (),
-                    Err(e) => return Err(e)
-                }
+                self.names_reply(channel, clients)?;
             } else {
-                match self.no_such_channel_response(channel) {
-                    Ok(()) => (),
-                    Err(e) => return Err(e)
-                } 
+                self.no_such_channel_error(&channel)?;
             }
         }
         Ok(())
     }
 
+    pub fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        if !self.validate_join_command(&parameters)? {
+            return Ok(());
+        }
+        let nickname = self.connection.nickname.clone().unwrap();
+
+        let channels = &parameters[0];
+        //let keys = &parameters[1];
+
+        for channel in channels.split(',') {
+            if !self.validate_can_join_channel(channel, &nickname)? {
+                continue;
+            }
+            self.database.add_client_to_channel(&nickname, channel);
+            self.no_topic_reply(channel)?
+            //self.names_reply(channel, self.database.get_clients(channel))?
+        }
+
+        Ok(())
+    }
     pub fn list_command(&mut self) -> io::Result<()> {
         if !self.validate_list_command()? {
             return Ok(());
