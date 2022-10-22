@@ -31,28 +31,20 @@ impl Server {
         let pool = ThreadPool::create(MAX_CLIENTS);
 
         for client in listener.incoming() {
-            let client = match client {
-                Ok(client) => client,
-                Err(error) => {
-                    eprintln!("Could not establish connection with client, with error: {error:?}");
-                    continue;
-                }
-            };
-
             let database_clone = Arc::clone(&self.database);
-            let handler = match ClientHandler::new(database_clone, client) {
-                Ok(handler) => handler,
-                Err(error) => {
-                    eprintln!("Could not create handler for client, with error: {error:?}");
-                    continue;
-                }
-            };
 
-            pool.execute(|| {
-                handler.handle();
-            })
+            if let Ok(client) = client {
+                pool.execute(|| {
+                    let handler = ClientHandler::new(database_clone, client);
+                    handler.handle();
+                })
+            }
         }
 
         Ok(())
+    }
+
+    pub fn backup() {
+        todo!()
     }
 }

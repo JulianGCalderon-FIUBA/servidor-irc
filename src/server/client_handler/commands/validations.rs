@@ -1,7 +1,6 @@
 use super::super::connection_info::RegistrationState;
 use super::ClientHandler;
 use std::io;
-// use std::sync::mpsc::channel;
 
 use super::PASS_COMMAND;
 use super::USER_COMMAND;
@@ -29,7 +28,7 @@ impl ClientHandler {
 
         let nickname = &parameters[0];
 
-        if self.database.contains_client(nickname) {
+        if self.database.has_nickname_collision(nickname) {
             self.nickname_collision_response()?;
             return Ok(false);
         }
@@ -49,24 +48,6 @@ impl ClientHandler {
 
         if self.connection.registration_state != RegistrationState::NicknameSent {
             self.no_nickname_error()?;
-            return Ok(false);
-        }
-
-        Ok(true)
-    }
-
-    pub fn validate_names_command(&mut self) -> io::Result<bool> {
-        if self.connection.registration_state != RegistrationState::Registered {
-            self.unregistered_error()?;
-            return Ok(false);
-        }
-
-        Ok(true)
-    }
-
-    pub fn validate_list_command(&mut self) -> io::Result<bool> {
-        if self.connection.registration_state != RegistrationState::Registered {
-            self.unregistered_error()?;
             return Ok(false);
         }
 
