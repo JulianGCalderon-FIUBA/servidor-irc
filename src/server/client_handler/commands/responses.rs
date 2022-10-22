@@ -53,4 +53,24 @@ impl ClientHandler {
         let response = "300 :no nickname registered".to_string();
         self.send_response(&response)
     }
+
+    pub fn unregistered_error(&mut self) -> io::Result<()> {
+        let response = "300 :unregistered".to_string();
+        self.send_response(&response)
+    }
+
+    pub fn no_such_channel_response(&mut self, channel: String) -> io::Result<()> {
+        let response = "300 :no such channel ".to_string() + &channel;
+        self.send_response(&response)
+    }
+
+    pub fn names_reply(&mut self, channel: String, clients: Vec<String>) -> io::Result<()> {
+        let response = "300 :".to_string() + &channel + " :" + &clients.join(", ");
+        self.send_response(&response)
+    }
+
+    pub fn list_reply(&mut self, channels: Vec<String>) -> io::Result<()> {
+        let response = "300 :".to_string() + &channels.join(", ");
+        self.send_response(&response)
+    }
 }
