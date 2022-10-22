@@ -1,8 +1,12 @@
 mod commands;
 mod connection_info;
 
+use commands::JOIN_COMMAND;
+use commands::LIST_COMMAND;
+use commands::NAMES_COMMAND;
 use commands::NICK_COMMAND;
 use commands::NOTICE_COMMAND;
+use commands::PART_COMMAND;
 use commands::PASS_COMMAND;
 use commands::PRIVMSG_COMMAND;
 use commands::QUIT_COMMAND;
@@ -84,6 +88,10 @@ impl ClientHandler {
                 USER_COMMAND => self.user_command(parameters, trailing)?,
                 PRIVMSG_COMMAND => self.privmsg_command(parameters, trailing)?,
                 NOTICE_COMMAND => self.notice_command(parameters, trailing)?,
+                PART_COMMAND => self.part_command(parameters)?,
+                JOIN_COMMAND => self.join_command(parameters)?,
+                NAMES_COMMAND => self.names_command(parameters)?,
+                LIST_COMMAND => self.list_command()?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
