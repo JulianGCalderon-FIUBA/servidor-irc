@@ -105,20 +105,19 @@ impl ClientHandler {
 
         if parameters.is_empty() {
             parameters = self.database.get_channels();
+        } else {
+            parameters = parameters[0]
+                .split(',')
+                .map(|string| string.to_string())
+                .collect();
         }
 
         for channel in parameters {
             if self.database.contains_channel(&channel) {
                 let clients = self.database.get_clients(&channel);
-                match self.names_reply(channel, clients) {
-                    Ok(()) => (),
-                    Err(e) => return Err(e),
-                }
+                self.names_reply(channel, clients)?;
             } else {
-                match self.no_such_channel_response(channel) {
-                    Ok(()) => (),
-                    Err(e) => return Err(e),
-                }
+                self.no_such_channel_error(&channel)?;
             }
         }
         Ok(())
