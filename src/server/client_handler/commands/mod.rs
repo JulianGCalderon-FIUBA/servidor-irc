@@ -12,6 +12,8 @@ pub const USER_COMMAND: &str = "USER";
 pub const QUIT_COMMAND: &str = "QUIT";
 pub const PART_COMMAND: &str = "PART";
 pub const JOIN_COMMAND: &str = "JOIN";
+pub const NAMES_COMMAND: &str = "NAMES";
+pub const LIST_COMMAND: &str = "LIST";
 
 impl ClientHandler {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
@@ -88,11 +90,36 @@ impl ClientHandler {
             if !self.validate_channel_exists(channel)? {
                 return self.no_such_channel_error(channel);
             }
-            let clients = self.database._get_clients(channel);
+            let clients = self.database.get_clients(channel);
             if !clients.contains(&nickname.to_string()) {
                 return self.not_on_channel_error(channel);
             }
             self.database.remove_client_of_channel(&nickname, channel)
+        }
+        Ok(())
+    }
+    pub fn names_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
+        if !self.validate_names_command()? {
+            return Ok(());
+        }
+
+        if parameters.is_empty() {
+            parameters = self.database.get_channels();
+        }
+
+        for channel in parameters {
+            if self.database.contains_channel(&channel) {
+                let clients = self.database.get_clients(&channel);
+                match self.names_reply(channel, clients) {
+                    Ok(()) => (),
+                    Err(e) => return Err(e),
+                }
+            } else {
+                match self.no_such_channel_response(channel) {
+                    Ok(()) => (),
+                    Err(e) => return Err(e),
+                }
+            }
         }
         Ok(())
     }
@@ -116,5 +143,14 @@ impl ClientHandler {
         }
 
         Ok(())
+    }
+    pub fn list_command(&mut self) -> io::Result<()> {
+        if !self.validate_list_command()? {
+            return Ok(());
+        }
+
+        let channels = self.database.get_channels();
+
+        self.list_reply(channels)
     }
 }

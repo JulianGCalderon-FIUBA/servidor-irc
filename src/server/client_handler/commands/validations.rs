@@ -1,6 +1,7 @@
 use super::super::connection_info::RegistrationState;
 use super::ClientHandler;
 use std::io;
+// use std::sync::mpsc::channel;
 
 use super::JOIN_COMMAND;
 use super::PART_COMMAND;
@@ -63,8 +64,15 @@ impl ClientHandler {
     }
 
     pub fn validate_channel_exists(&mut self, channel: &str) -> io::Result<bool> {
-        let channels_database = self.database._get_channels();
+        let channels_database = self.database.get_channels();
         if !channels_database.contains(&channel.to_string()) {
+            return Ok(false);
+        }
+        Ok(true)
+    }
+    pub fn validate_names_command(&mut self) -> io::Result<bool> {
+        if self.connection.registration_state != RegistrationState::Registered {
+            self.unregistered_error()?;
             return Ok(false);
         }
 
@@ -110,6 +118,14 @@ impl ClientHandler {
 
         if !self.validate_channel_name(channel)? {
             self.no_such_channel_error(channel)?;
+            return Ok(false);
+        }
+        Ok(true)
+    }
+
+    pub fn validate_list_command(&mut self) -> io::Result<bool> {
+        if self.connection.registration_state != RegistrationState::Registered {
+            self.unregistered_error()?;
             return Ok(false);
         }
 

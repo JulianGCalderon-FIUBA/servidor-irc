@@ -18,8 +18,8 @@ impl ChannelInfo {
         }
     }
 
-    pub fn _get_clients(&self) -> Vec<String> {
-        todo!()
+    pub fn get_clients(&self) -> Vec<String> {
+        self.clients.clone()
     }
 
     pub fn add_client(&mut self, client: String) {

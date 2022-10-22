@@ -7,6 +7,8 @@ use commands::PART_COMMAND;
 use commands::PASS_COMMAND;
 use commands::QUIT_COMMAND;
 use commands::USER_COMMAND;
+use commands::NAMES_COMMAND;
+use commands::LIST_COMMAND;
 
 use std::io;
 use std::net::TcpStream;
@@ -81,7 +83,9 @@ impl ClientHandler {
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
-                }
+                },
+                NAMES_COMMAND => self.names_command(parameters)?,
+                LIST_COMMAND => self.list_command()?,
                 _ => self.unknown_command_error(&command)?,
             };
         }
