@@ -1,8 +1,14 @@
 mod commands;
 mod connection_info;
 
+use commands::JOIN_COMMAND;
+use commands::LIST_COMMAND;
+use commands::NAMES_COMMAND;
 use commands::NICK_COMMAND;
+use commands::NOTICE_COMMAND;
+use commands::PART_COMMAND;
 use commands::PASS_COMMAND;
+use commands::PRIVMSG_COMMAND;
 use commands::QUIT_COMMAND;
 use commands::USER_COMMAND;
 
@@ -37,14 +43,20 @@ impl ClientHandler {
     pub fn handle(mut self) {
         let conection_result = self.try_handle();
 
+        let nickname = self.connection.nickname;
+
+        if let Some(nickname) = nickname.as_ref() {
+            self.database.disconnect_client(nickname);
+        }
+
         match conection_result {
             Ok(()) => println!(
                 "Closing conection with client [{}]",
-                self.connection.nickname.unwrap_or_default()
+                nickname.unwrap_or_default()
             ),
             Err(error) => eprintln!(
                 "Conection with client [{}] failed with error [{}]",
-                self.connection.nickname.unwrap_or_default(),
+                nickname.unwrap_or_default(),
                 error
             ),
         }
@@ -74,6 +86,12 @@ impl ClientHandler {
                 PASS_COMMAND => self.pass_command(parameters)?,
                 NICK_COMMAND => self.nick_command(parameters)?,
                 USER_COMMAND => self.user_command(parameters, trailing)?,
+                PRIVMSG_COMMAND => self.privmsg_command(parameters, trailing)?,
+                NOTICE_COMMAND => self.notice_command(parameters, trailing)?,
+                PART_COMMAND => self.part_command(parameters)?,
+                JOIN_COMMAND => self.join_command(parameters)?,
+                NAMES_COMMAND => self.names_command(parameters)?,
+                LIST_COMMAND => self.list_command()?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
