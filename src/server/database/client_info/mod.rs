@@ -15,7 +15,6 @@ pub struct ClientInfo {
     pub servername: String,
     pub realname: String,
     pub operator: bool,
-    pub channels: Vec<String>,
 }
 
 impl ClientInfo {

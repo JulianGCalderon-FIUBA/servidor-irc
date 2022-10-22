@@ -80,10 +80,16 @@ impl Database {
     }
 
     pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
-        let clients_lock = self.clients.read().unwrap();
+        let channels_lock = self.clients.read().unwrap();
+        let mut channels = vec![];
 
-        let client = clients_lock.get(nickname).unwrap();
-        client.channels.clone()
+        for (channel_name, _) in channels_lock.iter() {
+            let clients = self._get_clients(channel_name);
+            if clients.contains(&nickname.to_string()) {
+                channels.push(channel_name.clone());
+            }
+        }
+        channels
     }
 }
 

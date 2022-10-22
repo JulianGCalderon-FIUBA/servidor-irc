@@ -103,19 +103,18 @@ impl ClientHandler {
         }
         let nickname = self.connection.nickname.clone().unwrap();
 
-        for param in parameters {
-            for channel in param.split(',') {
-                if !self.validate_is_channel(channel)? {
-                    continue;
-                }
-                if !self.validate_can_join_channel(channel, &nickname)? {
-                    continue;
-                }
-                self.database.add_client_to_channel(&nickname, channel);
-                self.no_topic_reply(channel)?
-                //self.names_reply(channel, self.database.get_clients(channel))?
+        let channels = &parameters[0];
+        //let keys = &parameters[1];
+
+        for channel in channels.split(',') {
+            if !self.validate_can_join_channel(channel, &nickname)? {
+                continue;
             }
+            self.database.add_client_to_channel(&nickname, channel);
+            self.no_topic_reply(channel)?
+            //self.names_reply(channel, self.database.get_clients(channel))?
         }
+
         Ok(())
     }
 }

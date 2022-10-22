@@ -51,7 +51,6 @@ impl ClientInfoBuilder {
             servername: self.servername,
             realname: self.realname,
             operator: false,
-            channels: vec![],
         }
     }
 }

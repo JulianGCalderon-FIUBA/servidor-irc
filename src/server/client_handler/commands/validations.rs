@@ -8,7 +8,7 @@ use super::PASS_COMMAND;
 use super::USER_COMMAND;
 
 const MAX_CHANNELS: usize = 10;
-const INVALID_CHARACTERS: [char; 3] = [' ', ',', '\''];
+const INVALID_CHARACTER: char = '\'';
 
 const LOCAL_CHANNEL: char = '&';
 const DISTRIBUTED_CHANNEL: char = '#';
@@ -91,9 +91,10 @@ impl ClientHandler {
         Ok(true)
     }
 
-    pub fn validate_is_channel(&mut self, channel: &str) -> io::Result<bool> {
+    fn validate_channel_name(&mut self, channel: &str) -> io::Result<bool> {
         if (channel.as_bytes()[0] == LOCAL_CHANNEL as u8)
             || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL as u8)
+            || !channel.contains(INVALID_CHARACTER)
         {
             return Ok(true);
         }
@@ -107,7 +108,7 @@ impl ClientHandler {
             return Ok(false);
         }
 
-        if channel.contains(INVALID_CHARACTERS) {
+        if !self.validate_channel_name(channel)? {
             self.no_such_channel_error(channel)?;
             return Ok(false);
         }
