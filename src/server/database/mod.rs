@@ -67,10 +67,13 @@ impl Database {
         }
     }
 
-    pub fn remove_client_of_channel(&self, nickname: &str, channel: &str) {
+    pub fn remove_client_of_channel(&self, nickname: &str, channel_name: &str) {
         let mut channels_lock = self.channels.write().unwrap();
-        if let Some(channel) = channels_lock.get_mut(&channel.to_string()) {
+        if let Some(channel) = channels_lock.get_mut(&channel_name.to_string()) {
             channel.remove_client(nickname.to_string());
+            if channel.get_clients().is_empty() {
+                channels_lock.remove(channel_name);
+            }
         }
     }
 

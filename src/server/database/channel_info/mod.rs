@@ -28,7 +28,7 @@ impl ChannelInfo {
         self.clients.push(client);
     }
 
-    pub fn remove_client(&mut self, _client: String) {
-        self.clients.remove(index_of(_client, &self.clients));
+    pub fn remove_client(&mut self, client: String) {
+        self.clients.remove(index_of(client, &self.clients));
     }
 }
