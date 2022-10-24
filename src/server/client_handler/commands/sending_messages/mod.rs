@@ -1,3 +1,4 @@
+mod utils;
 mod validations;
 
 use crate::server::ClientHandler;

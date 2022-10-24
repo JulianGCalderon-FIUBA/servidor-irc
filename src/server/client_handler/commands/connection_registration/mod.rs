@@ -1,6 +1,6 @@
 use crate::server::client_handler::connection_info::RegistrationState;
 
-use super::{utils::pop_times, ClientHandler};
+use super::ClientHandler;
 
 use std::io;
 
@@ -39,13 +39,13 @@ impl ClientHandler {
         self.ok_reply()
     }
 
-    pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+    pub fn oper_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
         // let user = self.database.password.clone().unwrap();
         // let password = self.database.password.clone().unwrap();
         if !self.validate_oper_command(&parameters /*, &user, &password */)? {
             return Ok(());
         }
-        let nickname: String = pop_times(parameters, 2);
+        let nickname = parameters.remove(2);
 
         self.database.set_server_operator(&nickname);
 

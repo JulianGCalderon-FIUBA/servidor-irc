@@ -54,4 +54,8 @@ impl ConnectionInfo {
 
         Some(client_builder.build())
     }
+
+    pub fn nickname(&self) -> String {
+        self.nickname.clone().unwrap()
+    }
 }
