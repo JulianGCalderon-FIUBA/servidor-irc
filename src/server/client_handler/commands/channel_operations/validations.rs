@@ -60,8 +60,8 @@ impl ClientHandler {
     pub fn validate_user_is_in_channel(&mut self, channel: &str) -> io::Result<bool> {
         if !self
             .database
-            .get_channels()
-            .contains(&String::from(channel))
+            .get_clients(channel)
+            .contains(&self.connection.nickname())
         {
             return Ok(false);
         }
