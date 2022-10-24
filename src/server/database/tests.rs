@@ -142,7 +142,7 @@ fn after_removing_last_client_from_channel_it_no_longer_exists() {
     database.add_client_to_channel("nickname1", "channel");
     database.remove_client_of_channel("nickname1", "channel");
 
-    assert!(database.contains_channel("channel"));
+    assert!(!database.contains_channel("channel"));
 }
 
 #[test]
