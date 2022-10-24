@@ -2,6 +2,9 @@ mod channel_info;
 mod client_info;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 use std::collections::HashMap;
 use std::net::TcpStream;
 use std::sync::Arc;
@@ -40,6 +43,15 @@ impl Database {
         if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
             client.set_server_operator();
         }
+    }
+
+    pub fn _is_server_operator(&self, nickname: &str) -> bool {
+        let mut clients_lock = self.clients.write().unwrap();
+        if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
+            return client._is_server_operator();
+        }
+
+        false
     }
 
     pub fn disconnect_client(&self, nickname: &str) {
@@ -108,11 +120,10 @@ impl Database {
     }
 
     pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
-        let channels_lock = self.clients.read().unwrap();
         let mut channels = vec![];
 
-        for (channel_name, _) in channels_lock.iter() {
-            let clients = self.get_clients(channel_name);
+        for channel_name in self.get_channels() {
+            let clients = self.get_clients(&channel_name);
             if clients.contains(&nickname.to_string()) {
                 channels.push(channel_name.clone());
             }
