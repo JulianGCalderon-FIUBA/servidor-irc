@@ -92,18 +92,16 @@ impl ClientHandler {
                 JOIN_COMMAND => self.join_command(parameters)?,
                 NAMES_COMMAND => self.names_command(parameters)?,
                 LIST_COMMAND => self.list_command()?,
+                OPER_COMMAND => self.oper_command(parameters)?,
+                INVITE_COMMAND => self.invite_command(parameters /* , trailing*/)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
                 }
-                OPER_COMMAND => self.oper_command(parameters)?,
-                INVITE_COMMAND => self.invite_command(parameters /* , trailing*/)?,
                 _ => self.unknown_command_error(&command)?,
             };
         }
     }
-
-   
 
     fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
         self.send_response("300 :parsing error")
