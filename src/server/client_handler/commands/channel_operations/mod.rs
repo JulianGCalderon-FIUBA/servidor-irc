@@ -114,6 +114,7 @@ impl ClientHandler {
             }
             self.database.remove_client_of_channel(&nickname, channel)
         }
-        Ok(())
+
+        self.ok_reply()
     }
 }

@@ -38,7 +38,6 @@ impl Client {
             let handle = thread::spawn(move || loop {
                 let message = Message::read_from(&mut read_stream);
                 if let Err(CreationError::IoError(_)) = message {
-                    on_message(message);
                     return;
                 }
                 on_message(message);
