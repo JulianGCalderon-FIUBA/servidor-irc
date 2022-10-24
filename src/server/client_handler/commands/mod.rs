@@ -2,7 +2,6 @@ use crate::server::ClientHandler;
 
 pub(crate) mod channel_operations;
 pub(crate) mod connection_registration;
-mod responses;
 pub(crate) mod sending_messages;
 mod utils;
 
