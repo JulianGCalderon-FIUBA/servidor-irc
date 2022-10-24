@@ -12,19 +12,17 @@ impl ClientHandler {
         let targets = &parameters[0];
         for target in targets.split(',') {
             let is_client = self.database.contains_client(target);
-            let is_channel = self.database.get_channels().contains(&target.to_string());
+            let is_channel = self.database.contains_channel(target);
 
             if !(is_client || is_channel) {
                 self.no_such_nickname_error(target)?;
                 valid = false;
             }
 
-            if is_channel {
-                let clients = self.database.get_clients(target);
-                if !clients.contains(self.connection.nickname.as_ref().unwrap()) {
-                    self.cannot_send_to_chan_error(target)?;
-                    valid = false;
-                }
+            let nickname = self.connection.nickname();
+            if is_channel && !self.database.is_client_in_channel(&nickname, target) {
+                self.cannot_send_to_chan_error(target)?;
+                valid = false;
             }
         }
 

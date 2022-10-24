@@ -86,6 +86,10 @@ impl Database {
         channels_lock.contains_key(channel)
     }
 
+    pub fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
+        self.get_clients(channel).contains(&nickname.to_string())
+    }
+
     pub fn get_clients(&self, channel: &str) -> Vec<String> {
         let channels_lock = self.channels.read().unwrap();
 
