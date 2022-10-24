@@ -3,7 +3,8 @@ mod client_info;
 mod utils;
 
 use std::collections::HashMap;
-use std::net::TcpStream;
+use std::io::Read;
+use std::io::Write;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::RwLock;
@@ -11,12 +12,12 @@ use std::sync::RwLock;
 pub use channel_info::ChannelInfo;
 pub use client_info::ClientInfo;
 pub use client_info::ClientInfoBuilder;
-pub struct Database {
-    pub clients: RwLock<HashMap<String, ClientInfo>>,
+pub struct Database<T: Read + Write> {
+    pub clients: RwLock<HashMap<String, ClientInfo<T>>>,
     pub channels: RwLock<HashMap<String, ChannelInfo>>,
 }
 
-impl Database {
+impl<T: Read + Write> Database<T> {
     pub fn new() -> Self {
         Self {
             clients: RwLock::new(HashMap::new()),
@@ -24,7 +25,7 @@ impl Database {
         }
     }
 
-    pub fn add_client(&self, client: ClientInfo) {
+    pub fn add_client(&self, client: ClientInfo<T>) {
         let mut clients_lock = self.clients.write().unwrap();
 
         println!(
@@ -48,7 +49,7 @@ impl Database {
         }
     }
 
-    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<TcpStream>>> {
+    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<T>>> {
         let clients_rlock = self.clients.read().unwrap();
         let client = clients_rlock.get(nickname)?;
 
@@ -124,7 +125,7 @@ impl Database {
     }
 }
 
-impl Default for Database {
+impl<T: Read + Write> Default for Database<T> {
     fn default() -> Self {
         Self::new()
     }

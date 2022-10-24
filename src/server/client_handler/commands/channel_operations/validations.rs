@@ -4,12 +4,11 @@ use crate::server::client_handler::{
 };
 
 use super::{ClientHandler, JOIN_COMMAND, PART_COMMAND};
-use std::io;
+use std::io::{self, Read, Write};
 // use std::sync::mpsc::channel;
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     // GENERAL
-
     pub fn validate_channel_exists(&mut self, channel: &str) -> io::Result<bool> {
         let channels_database = self.database.get_channels();
         if !channels_database.contains(&channel.to_string()) {

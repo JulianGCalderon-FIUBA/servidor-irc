@@ -1,13 +1,13 @@
 use crate::server::client_handler::commands::connection_registration::QUIT_COMMAND;
-use std::io;
+use std::io::{self, Read, Write};
 
 use super::ClientHandler;
 use crate::message::Message;
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     pub fn send_response(&mut self, response: &str) -> io::Result<()> {
         let response = Message::new(response).unwrap();
-        response.send_to(&mut self.stream)
+        response.send_to(&mut self.stream_client_handler)
     }
 
     pub fn quit_reply(&mut self, message: &str) -> io::Result<()> {
