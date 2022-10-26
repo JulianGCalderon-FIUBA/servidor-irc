@@ -49,19 +49,23 @@ impl ClientHandler {
             return Ok(false);
         }
 
-        if self.validate_user_is_in_channel(channel)? {
-            self.user_on_channel_error(nickname, channel)?;
+        if self.validate_user_is_in_channel(channel, nickname)? {
+            //El error ya es lanzado
             return Ok(false);
         }
 
         Ok(true)
     }
 
-    pub fn validate_user_is_in_channel(&mut self, channel: &str) -> io::Result<bool> {
+    pub fn validate_user_is_in_channel(
+        &mut self,
+        channel: &str,
+        nickname: &str,
+    ) -> io::Result<bool> {
         if !self
             .database
             .get_clients(channel)
-            .contains(&self.connection.nickname())
+            .contains(&String::from(nickname))
         {
             return Ok(false);
         }

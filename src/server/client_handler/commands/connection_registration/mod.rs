@@ -49,7 +49,7 @@ impl ClientHandler {
         self.database
             .set_server_operator(&self.connection.nickname());
 
-        self.ok_reply()
+        self.oper_reply()
     }
 
     pub fn user_command(
