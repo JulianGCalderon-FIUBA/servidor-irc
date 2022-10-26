@@ -4,7 +4,9 @@ use super::*;
 fn list_fails_with_unregistered_client() {
     let mut handler = dummy_client_handler();
 
-    handler.list_command().unwrap();
+    let parameters = vec![];
+
+    handler.list_command(parameters).unwrap();
 
     assert_eq!(
         "200 :unregistered\r\n",

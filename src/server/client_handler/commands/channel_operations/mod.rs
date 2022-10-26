@@ -73,12 +73,19 @@ impl<T: Read + Write> ClientHandler<T> {
         Ok(())
     }
 
-    pub fn list_command(&mut self) -> io::Result<()> {
+    pub fn list_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_list_command()? {
             return Ok(());
         }
 
-        let channels = self.database.get_channels();
+        let channels: Vec<String> = if parameters.is_empty() {
+            self.database.get_channels()
+        } else {
+            parameters[0]
+                .split(',')
+                .map(|string| string.to_string())
+                .collect()
+        };
 
         self.list_reply(channels)
     }
