@@ -1,3 +1,5 @@
+use crate::server::mock_stream::MockTcpStream;
+
 use super::*;
 
 fn dummy_client(nickname: &str) -> ClientInfo<MockTcpStream> {
@@ -9,37 +11,6 @@ fn dummy_client(nickname: &str) -> ClientInfo<MockTcpStream> {
         "real name".to_string(),
     )
     .build()
-}
-
-#[derive(Clone)]
-struct MockTcpStream {
-    read_buffer: Vec<u8>,
-    write_buffer: Vec<u8>,
-}
-
-impl Read for MockTcpStream {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
-        self.read_buffer.as_slice().read(buf)
-    }
-}
-
-impl Write for MockTcpStream {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.write_buffer.write(buf)
-    }
-
-    fn flush(&mut self) -> std::io::Result<()> {
-        self.write_buffer.flush()
-    }
-}
-
-impl MockTcpStream {
-    fn new() -> Self {
-        MockTcpStream {
-            read_buffer: vec![],
-            write_buffer: vec![],
-        }
-    }
 }
 
 fn add_stream_to_client(client_info: &mut ClientInfo<MockTcpStream>, stream: MockTcpStream) {
