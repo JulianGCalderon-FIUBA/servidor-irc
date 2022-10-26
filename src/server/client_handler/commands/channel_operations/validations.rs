@@ -50,11 +50,23 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         if self.validate_user_is_in_channel(channel, nickname)? {
-            self.user_on_channel_error(channel, nickname)?;
-            //El error ya es lanzado
+            self.user_on_channel_error(nickname, channel)?;
             return Ok(false);
         }
 
+        Ok(true)
+    }
+
+    pub fn validate_can_part_channel(&mut self, channel: &str, nickname: &str) -> io::Result<bool> {
+        if !self.validate_channel_exists(channel)? || !self.validate_channel_name(channel)? {
+            self.no_such_channel_error(channel)?;
+            return Ok(false);
+        }
+        let clients = self.database.get_clients(channel);
+        if !clients.contains(&nickname.to_string()) {
+            self.not_on_channel_error(channel)?;
+            return Ok(false);
+        }
         Ok(true)
     }
 
@@ -116,11 +128,7 @@ impl<T: Read + Write> ClientHandler<T> {
         Ok(true)
     }
 
-    pub fn validate_part_command(
-        &mut self,
-        parameters: &Vec<String>,
-        _nickname: &str,
-    ) -> io::Result<bool> {
+    pub fn validate_part_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
         if parameters.is_empty() {
             self.need_more_params_error(PART_COMMAND)?;
             return Ok(false);
