@@ -78,7 +78,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return Ok(());
         }
 
-        let channels: Vec<String> = if parameters.is_empty() {
+        let mut channels: Vec<String> = if parameters.is_empty() {
             self.database.get_channels()
         } else {
             parameters[0]
@@ -87,6 +87,18 @@ impl<T: Read + Write> ClientHandler<T> {
                 .collect()
         };
 
+        if channels.is_empty() {
+            self.list_start_reply()?;
+            return self.list_end_reply();
+        }
+
+        for (i, channel) in channels.clone().iter().enumerate() {
+            if !self.validate_can_list_channel(channel)? {
+                channels.remove(i);
+                continue;
+            }
+        }
+        channels.sort();
         self.list_reply(channels)
     }
 

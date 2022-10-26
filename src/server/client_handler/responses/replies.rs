@@ -29,12 +29,12 @@ impl<T: Read + Write> ClientHandler<T> {
         self.send_response(&response)
     }
 
-    fn list_start_reply(&mut self) -> io::Result<()> {
+    pub fn list_start_reply(&mut self) -> io::Result<()> {
         let response = "321 :Channel :Users Name".to_string();
         self.send_response(&response)
     }
 
-    fn list_end_reply(&mut self) -> io::Result<()> {
+    pub fn list_end_reply(&mut self) -> io::Result<()> {
         let response = "323 :End of /LIST".to_string();
         self.send_response(&response)
     }
