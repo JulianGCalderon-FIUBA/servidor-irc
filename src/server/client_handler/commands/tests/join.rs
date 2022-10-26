@@ -42,8 +42,9 @@ fn join_fails_with_invalid_channel_name() {
         handler.stream_client_handler.read_wbuf_to_string()
     );
 }
+
 #[test]
-fn join_fails_with_user_already_in_channel() {
+fn join_fails_with_user_in_too_many_channels() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler);
 
@@ -60,4 +61,64 @@ fn join_fails_with_user_already_in_channel() {
         "405 #once :you have joined too many channels\r\n",
         handler.stream_client_handler.read_wbuf_to_string()
     )
+}
+
+#[test]
+fn join_fails_if_user_already_in_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler);
+
+    let parameters = vec!["#hola".to_string()];
+    handler.join_command(parameters).unwrap();
+
+    handler.stream_client_handler.clear();
+
+    let parameters2 = vec!["#hola".to_string()];
+    handler.join_command(parameters2).unwrap();
+
+    assert_eq!(
+        "443 nick #hola :is already on channel\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    )
+}
+
+#[test]
+fn can_join_one_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler);
+
+    let parameters = vec!["#channel".to_string()];
+    handler.join_command(parameters).unwrap();
+
+    let channels = vec!["#channel".to_string()];
+
+    assert_eq!(
+        "331 #channel :no topic is set\r\n353 #channel :nick\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+    assert_eq!(handler.database.get_channels_for_client("nick"), channels);
+}
+
+#[test]
+fn can_join_multiple_channels() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler);
+
+    let parameters = vec!["#channel1,#channel2,#channel3".to_string()];
+    handler.join_command(parameters).unwrap();
+
+    assert_eq!(
+        "331 #channel1 :no topic is set\r\n353 #channel1 :nick\r\n331 #channel2 :no topic is set\r\n353 #channel2 :nick\r\n331 #channel3 :no topic is set\r\n353 #channel3 :nick\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+
+    let mut channels = vec![
+        "#channel1".to_string(),
+        "#channel2".to_string(),
+        "#channel3".to_string(),
+    ];
+    channels.sort();
+    let mut channels_for_client = handler.database.get_channels_for_client("nick");
+    channels_for_client.sort();
+    assert_eq!(channels_for_client, channels);
 }
