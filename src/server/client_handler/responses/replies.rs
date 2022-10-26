@@ -41,7 +41,7 @@ impl<T: Read + Write> ClientHandler<T> {
 
     pub fn list_reply(&mut self, channels: Vec<String>) -> io::Result<()> {
         self.list_start_reply()?;
-        let response = format!("322 : {}", channels.join(", "));
+        let response = format!("322 : {}", channels.join(" "));
         self.send_response(&response)?;
         self.list_end_reply()
     }

@@ -36,7 +36,7 @@ fn list_with_no_parameters_returns_all_channels() {
     handler.list_command(parameters).unwrap();
 
     assert_eq!(
-        "321 :Channel :Users Name\r\n322 : #chau, #hola\r\n323 :End of /LIST\r\n",
+        "321 :Channel :Users Name\r\n322 : #chau #hola\r\n323 :End of /LIST\r\n",
         handler.stream_client_handler.read_wbuf_to_string()
     );
 }
