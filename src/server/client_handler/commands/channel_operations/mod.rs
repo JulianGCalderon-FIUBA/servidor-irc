@@ -67,7 +67,7 @@ impl<T: Read + Write> ClientHandler<T> {
             }
             self.database.add_client_to_channel(&nickname, channel);
             self.no_topic_reply(channel)?;
-            self.names_reply(channel.to_string(), self.database.get_clients(channel))?
+            self.names_reply(channel, self.database.get_clients(channel))?
         }
 
         Ok(())
@@ -119,7 +119,7 @@ impl<T: Read + Write> ClientHandler<T> {
         for channel in parameters {
             if self.database.contains_channel(&channel) {
                 let clients = self.database.get_clients(&channel);
-                self.names_reply(channel, clients)?;
+                self.names_reply(&channel, clients)?;
             } else {
                 self.no_such_channel_error(&channel)?;
             }
