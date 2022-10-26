@@ -39,17 +39,51 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     ClientHandler::new(Arc::new(database), mock.clone(), mock).unwrap()
 }
 
+fn dummy_client(handler: &mut ClientHandler<MockTcpStream>) -> () {
+    let parameters = vec!["nick".to_string()];
+    handler.nick_command(parameters).unwrap();
+    let parameters2 = vec!["user".to_string(), "".to_string(), "".to_string()];
+    let trailing = Some("sol".to_string());
+    handler.user_command(parameters2, trailing).unwrap();
+}
+
+#[test]
+fn join_fails_if_client_not_registered() {
+    let mut handler = dummy_client_handler();
+    let parameters = vec!["sol".to_string()];
+
+    handler.join_command(parameters).unwrap();
+
+    assert_eq!(
+        "300 :unregistered\r\n".to_string(),
+        String::from_utf8(handler.stream_client_handler.write_buffer).unwrap()
+    )
+}
 #[test]
 fn join_with_empty_params_returns_need_more_params_error() {
     let mut handler = dummy_client_handler();
-    let params = vec![];
+    let parameters = vec![];
     let channels: Vec<String> = vec![];
 
-    handler.join_command(params).unwrap();
+    handler.join_command(parameters).unwrap();
 
     assert_eq!(
         "461 JOIN :not enough parameters\r\n".to_string(),
         String::from_utf8(handler.stream_client_handler.write_buffer).unwrap()
     );
     assert_eq!(handler.database.get_channels(), channels);
+}
+#[test]
+fn join_fails_with_invalid_channel_name() {
+    let mut handler = dummy_client_handler();
+    dummy_client(&mut handler);
+
+    let parameters = vec!["hola,#ho'la".to_string()];
+
+    handler.join_command(parameters).unwrap();
+
+    assert_eq!(
+        "300 :success\r\n300 :success\r\n403 hola :no such channel\r\n403 #ho'la :no such channel\r\n".to_string(),
+        String::from_utf8(handler.stream_client_handler.write_buffer).unwrap()
+    );
 }

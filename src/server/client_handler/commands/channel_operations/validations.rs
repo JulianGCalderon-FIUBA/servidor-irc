@@ -73,12 +73,20 @@ impl<T: Read + Write> ClientHandler<T> {
         if parameters.len() != 2 {
             return Ok(false);
         }
+        if self.connection.registration_state != RegistrationState::Registered {
+            self.unregistered_error()?;
+            return Ok(false);
+        }
         Ok(true)
     }
 
     pub fn validate_join_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
         if parameters.is_empty() {
             self.need_more_params_error(JOIN_COMMAND)?;
+            return Ok(false);
+        }
+        if self.connection.registration_state != RegistrationState::Registered {
+            self.unregistered_error()?;
             return Ok(false);
         }
         Ok(true)
@@ -109,6 +117,10 @@ impl<T: Read + Write> ClientHandler<T> {
     ) -> io::Result<bool> {
         if parameters.is_empty() {
             self.need_more_params_error(PART_COMMAND)?;
+            return Ok(false);
+        }
+        if self.connection.registration_state != RegistrationState::Registered {
+            self.unregistered_error()?;
             return Ok(false);
         }
         Ok(true)
