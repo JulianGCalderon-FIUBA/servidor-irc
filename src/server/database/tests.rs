@@ -1,22 +1,6 @@
-use crate::server::mock_stream::MockTcpStream;
+use crate::server::testing_utils::dummy_client;
 
 use super::*;
-
-fn dummy_client(nickname: &str) -> ClientInfo<MockTcpStream> {
-    ClientInfoBuilder::new_with(
-        nickname.to_string(),
-        "username".to_string(),
-        "hostname".to_string(),
-        "servername".to_string(),
-        "real name".to_string(),
-    )
-    .build()
-}
-
-fn add_stream_to_client(client_info: &mut ClientInfo<MockTcpStream>, stream: MockTcpStream) {
-    let stream = Arc::new(Mutex::new(stream));
-    client_info.stream = Some(stream);
-}
 
 #[test]
 fn after_adding_client_database_contains_client() {
@@ -46,9 +30,7 @@ fn after_setting_server_operator_client_is_server_operator() {
 fn get_stream_returns_reference_to_client_stream() {
     let database = Database::new();
 
-    let mut client = dummy_client("nickname");
-    let stream = MockTcpStream::new();
-    add_stream_to_client(&mut client, stream);
+    let client = dummy_client("nickname");
 
     let stream_ref_expected = client.get_stream().unwrap();
 
@@ -72,10 +54,7 @@ fn when_offline_get_stream_returns_none() {
 fn disconnect_client_sets_stream_to_none() {
     let database = Database::new();
 
-    let mut client = dummy_client("nickname");
-    let stream = MockTcpStream::new();
-
-    add_stream_to_client(&mut client, stream);
+    let client = dummy_client("nickname");
 
     database.add_client(client);
 

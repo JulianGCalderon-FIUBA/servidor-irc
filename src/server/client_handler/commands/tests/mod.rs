@@ -6,28 +6,13 @@ mod pass;
 mod privmsg;
 mod user;
 
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
-use crate::server::{
-    database::{ClientInfo, ClientInfoBuilder, Database},
-    mock_stream::MockTcpStream,
-};
+use crate::server::database::Database;
+use crate::server::testing_utils::dummy_client;
+use crate::server::testing_utils::mock_stream::MockTcpStream;
 
 use super::*;
-
-fn dummy_client(nickname: &str) -> ClientInfo<MockTcpStream> {
-    let mut builder = ClientInfoBuilder::new_with(
-        nickname.to_string(),
-        "username".to_string(),
-        "hostname".to_string(),
-        "servername".to_string(),
-        "real name".to_string(),
-    );
-
-    builder.with_stream(Arc::new(Mutex::new(MockTcpStream::new())));
-
-    builder.build()
-}
 
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let database = Database::new();
@@ -41,8 +26,8 @@ fn register_client(handler: &mut ClientHandler<MockTcpStream>, nick: &str) {
     let parameters = vec![nick.to_string()];
     handler.nick_command(parameters).unwrap();
 
-    let parameters = vec!["user".to_string(), "".to_string(), "".to_string()];
-    let trailing = Some("sol".to_string());
+    let parameters = vec!["user".to_string(), "host".to_string(), "server".to_string()];
+    let trailing = Some("real".to_string());
     handler.user_command(parameters, trailing).unwrap();
 
     handler.stream_client_handler.clear()

@@ -6,15 +6,11 @@ mod utils;
 mod tests;
 
 use std::collections::HashMap;
-use std::io::Read;
-use std::io::Write;
-use std::sync::Arc;
-use std::sync::Mutex;
-use std::sync::RwLock;
+use std::io::{Read, Write};
+use std::sync::{Arc, Mutex, RwLock};
 
 pub use channel_info::ChannelInfo;
-pub use client_info::ClientInfo;
-pub use client_info::ClientInfoBuilder;
+pub use client_info::{ClientInfo, ClientInfoBuilder};
 pub struct Database<T: Read + Write> {
     pub clients: RwLock<HashMap<String, ClientInfo<T>>>,
     pub channels: RwLock<HashMap<String, ChannelInfo>>,
