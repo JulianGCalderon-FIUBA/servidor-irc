@@ -1,11 +1,11 @@
 use super::ClientInfo;
 use std::{
-    net::TcpStream,
+    io::{Read, Write},
     sync::{Arc, Mutex},
 };
 
-pub struct ClientInfoBuilder {
-    stream: Option<Arc<Mutex<TcpStream>>>,
+pub struct ClientInfoBuilder<T: Read + Write> {
+    stream: Option<Arc<Mutex<T>>>,
     password: Option<String>,
     nickname: String,
     username: String,
@@ -14,7 +14,7 @@ pub struct ClientInfoBuilder {
     realname: String,
 }
 
-impl ClientInfoBuilder {
+impl<T: Read + Write> ClientInfoBuilder<T> {
     pub fn new_with(
         nickname: String,
         username: String,
@@ -33,7 +33,7 @@ impl ClientInfoBuilder {
         }
     }
 
-    pub fn with_stream(&mut self, stream: Arc<Mutex<TcpStream>>) {
+    pub fn with_stream(&mut self, stream: Arc<Mutex<T>>) {
         self.stream = Some(stream);
     }
 
@@ -41,7 +41,7 @@ impl ClientInfoBuilder {
         self.password = Some(password);
     }
 
-    pub fn build(self) -> ClientInfo {
+    pub fn build(self) -> ClientInfo<T> {
         ClientInfo {
             stream: self.stream,
             password: self.password,

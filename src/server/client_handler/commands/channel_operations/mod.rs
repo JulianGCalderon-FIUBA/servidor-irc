@@ -4,7 +4,7 @@ use crate::message::Message;
 
 use super::ClientHandler;
 
-use std::io;
+use std::io::{self, Read, Write};
 
 pub const INVITE_COMMAND: &str = "INVITE";
 pub const JOIN_COMMAND: &str = "JOIN";
@@ -12,7 +12,7 @@ pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
 pub const PART_COMMAND: &str = "PART";
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_invite_command(&parameters)? {
             self.need_more_params_error(INVITE_COMMAND)?;

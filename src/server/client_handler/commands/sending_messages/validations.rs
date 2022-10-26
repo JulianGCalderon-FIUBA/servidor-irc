@@ -1,10 +1,10 @@
 use super::ClientHandler;
-use std::io;
+use std::io::{self, Read, Write};
 // use std::sync::mpsc::channel;
 
 use super::PRIVMSG_COMMAND;
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     // GENERAL
 
     pub fn validate_targets(&mut self, parameters: &[String]) -> io::Result<bool> {

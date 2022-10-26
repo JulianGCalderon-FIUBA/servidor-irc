@@ -1,8 +1,11 @@
 mod client_handler;
 mod database;
 
-use std::io;
-use std::net::TcpListener;
+#[cfg(test)]
+mod mock_stream;
+
+use std::io::{self};
+use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
 
 use crate::thread_pool::ThreadPool;
@@ -13,7 +16,7 @@ pub const MAX_CLIENTS: usize = 26;
 
 /// Represents a Server clients can connect to.
 pub struct Server {
-    database: Arc<Database>,
+    database: Arc<Database<TcpStream>>,
 }
 
 impl Server {
@@ -39,14 +42,15 @@ impl Server {
                 }
             };
 
-            let database_clone = Arc::clone(&self.database);
-            let handler = match ClientHandler::new(database_clone, client) {
-                Ok(handler) => handler,
-                Err(error) => {
-                    eprintln!("Could not create handler for client, with error: {error:?}");
-                    continue;
-                }
-            };
+            let database_clone: Arc<Database<TcpStream>> = Arc::clone(&self.database);
+            let handler: ClientHandler<TcpStream> =
+                match ClientHandler::<TcpStream>::new_from_stream(database_clone, client) {
+                    Ok(handler) => handler,
+                    Err(error) => {
+                        eprintln!("Could not create handler for client, with error: {error:?}");
+                        continue;
+                    }
+                };
 
             pool.execute(|| {
                 handler.handle();

@@ -1,9 +1,9 @@
 use crate::server::client_handler::{
     commands::connection_registration::QUIT_COMMAND, ClientHandler,
 };
-use std::io;
+use std::io::{self, Read, Write};
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     pub fn nickname_in_use_reply(&mut self) -> io::Result<()> {
         let response = "433 :nickname is already in use".to_string();
         self.send_response(&response)

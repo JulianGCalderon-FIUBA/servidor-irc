@@ -5,6 +5,9 @@ pub(crate) mod connection_registration;
 pub(crate) mod sending_messages;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 pub const INVALID_CHARACTER: char = '\'';
 pub const MAX_CHANNELS: usize = 10;
 

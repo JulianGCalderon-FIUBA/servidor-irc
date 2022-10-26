@@ -1,5 +1,5 @@
 use std::{
-    net::TcpStream,
+    io::{Read, Write},
     sync::{Arc, Mutex},
 };
 
@@ -9,8 +9,8 @@ use crate::server::database::{ClientInfo, ClientInfoBuilder};
 pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
-pub struct ConnectionInfo {
-    pub stream: Option<TcpStream>,
+pub struct ConnectionInfo<T> {
+    pub stream: Option<T>,
     pub password: Option<String>,
     pub nickname: Option<String>,
     pub username: Option<String>,
@@ -20,8 +20,8 @@ pub struct ConnectionInfo {
     pub registration_state: RegistrationState,
 }
 
-impl ConnectionInfo {
-    pub fn new_with_stream(stream: TcpStream) -> Self {
+impl<T: Read + Write> ConnectionInfo<T> {
+    pub fn new_with_stream(stream: T) -> Self {
         Self {
             stream: Some(stream),
             password: None,
@@ -37,7 +37,7 @@ impl ConnectionInfo {
         self.registration_state = self.registration_state.next();
     }
 
-    pub fn build_client_info(&mut self) -> Option<ClientInfo> {
+    pub fn build_client_info(&mut self) -> Option<ClientInfo<T>> {
         let mut client_builder = ClientInfoBuilder::new_with(
             self.nickname.clone()?,
             self.username.clone()?,

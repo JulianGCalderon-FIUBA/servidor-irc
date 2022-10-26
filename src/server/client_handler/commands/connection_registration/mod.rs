@@ -2,7 +2,7 @@ use crate::server::client_handler::connection_info::RegistrationState;
 
 use super::ClientHandler;
 
-use std::io;
+use std::io::{self, Read, Write};
 
 mod validations;
 
@@ -12,7 +12,7 @@ pub const PASS_COMMAND: &str = "PASS";
 pub const QUIT_COMMAND: &str = "QUIT";
 pub const USER_COMMAND: &str = "USER";
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_pass_command(&parameters)? {
             return Ok(());
