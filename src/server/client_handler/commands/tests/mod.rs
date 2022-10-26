@@ -1,5 +1,6 @@
 use std::sync::Arc;
 mod join;
+mod part;
 
 use crate::server::{database::Database, mock_stream::MockTcpStream};
 
