@@ -1,10 +1,28 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 mod join;
 mod part;
+mod privmsg;
 
-use crate::server::{database::Database, mock_stream::MockTcpStream};
+use crate::server::{
+    database::{ClientInfo, ClientInfoBuilder, Database},
+    mock_stream::MockTcpStream,
+};
 
 use super::*;
+
+fn dummy_client(nickname: &str) -> ClientInfo<MockTcpStream> {
+    let mut builder = ClientInfoBuilder::new_with(
+        nickname.to_string(),
+        "username".to_string(),
+        "hostname".to_string(),
+        "servername".to_string(),
+        "real name".to_string(),
+    );
+
+    builder.with_stream(Arc::new(Mutex::new(MockTcpStream::new())));
+
+    builder.build()
+}
 
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let database = Database::new();

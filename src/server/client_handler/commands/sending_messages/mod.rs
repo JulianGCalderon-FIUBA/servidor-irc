@@ -31,7 +31,7 @@ impl<T: Read + Write> ClientHandler<T> {
             }
         }
 
-        Ok(())
+        self.ok_reply()
     }
 
     pub fn notice_command(
