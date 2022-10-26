@@ -31,7 +31,7 @@ fn part_with_empty_params() {
 #[test]
 fn part_fails_with_invalid_channel_name() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters = vec!["hola,#ho'la,#hola".to_string()];
 
@@ -46,7 +46,7 @@ fn part_fails_with_invalid_channel_name() {
 #[test]
 fn part_fails_with_user_not_on_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters = vec!["#hola".to_string()];
     handler
@@ -59,4 +59,44 @@ fn part_fails_with_user_not_on_channel() {
         "442 #hola :you're not on that channel\r\n",
         handler.stream_client_handler.read_wbuf_to_string()
     )
+}
+
+#[test]
+fn can_part_one_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    let parameters = vec!["#hola".to_string()];
+    handler.join_command(parameters.clone()).unwrap();
+
+    handler.stream_client_handler.clear();
+
+    handler.part_command(parameters).unwrap();
+
+    assert_eq!(
+        "200 :success\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+    assert!(handler.database.get_channels().is_empty());
+}
+
+#[test]
+fn can_part_existing_channels() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+    let parameters = vec!["#hola,#chau".to_string()];
+    handler.join_command(parameters.clone()).unwrap();
+
+    register_client(&mut handler, "nick2");
+    handler.join_command(parameters.clone()).unwrap();
+    handler.stream_client_handler.clear();
+
+    handler.part_command(parameters).unwrap();
+
+    assert_eq!(
+        "200 :success\r\n200 :success\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+    println!("channels {:?}", handler.database.get_channels());
+    assert!(!handler.database.get_channels().is_empty())
 }

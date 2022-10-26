@@ -120,7 +120,8 @@ impl<T: Read + Write> ClientHandler<T> {
             if !self.validate_can_part_channel(channel, &nickname)? {
                 continue;
             }
-            self.database.remove_client_of_channel(&nickname, channel)
+            self.database.remove_client_of_channel(&nickname, channel);
+            self.ok_reply()?;
         }
         Ok(())
     }

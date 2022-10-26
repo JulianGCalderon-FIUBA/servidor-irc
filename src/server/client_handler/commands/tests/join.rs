@@ -31,7 +31,7 @@ fn join_with_empty_params() {
 #[test]
 fn join_fails_with_invalid_channel_name() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters = vec!["hola,#ho'la".to_string()];
 
@@ -46,7 +46,7 @@ fn join_fails_with_invalid_channel_name() {
 #[test]
 fn join_fails_with_user_in_too_many_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters =
         vec!["#uno,#dos,#tres,&cuatro,&cinco,&seis,#siete,#ocho,#nueve,&diez".to_string()];
@@ -66,7 +66,7 @@ fn join_fails_with_user_in_too_many_channels() {
 #[test]
 fn join_fails_if_user_already_in_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters = vec!["#hola".to_string()];
     handler.join_command(parameters).unwrap();
@@ -85,7 +85,7 @@ fn join_fails_if_user_already_in_channel() {
 #[test]
 fn can_join_one_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters = vec!["#channel".to_string()];
     handler.join_command(parameters).unwrap();
@@ -102,7 +102,7 @@ fn can_join_one_channel() {
 #[test]
 fn can_join_multiple_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters = vec!["#channel1,#channel2,#channel3".to_string()];
     handler.join_command(parameters).unwrap();
@@ -121,4 +121,26 @@ fn can_join_multiple_channels() {
     let mut channels_for_client = handler.database.get_channels_for_client("nick");
     channels_for_client.sort();
     assert_eq!(channels_for_client, channels);
+}
+
+#[test]
+fn can_join_existing_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    let parameters = vec!["#channel".to_string()];
+    handler.join_command(parameters.clone()).unwrap();
+
+    register_client(&mut handler, "nick2");
+
+    let channels = vec!["#channel".to_string()];
+
+    handler.join_command(parameters).unwrap();
+
+    assert_eq!(
+        "331 #channel :no topic is set\r\n353 #channel :nick nick2\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+    assert_eq!(handler.database.get_channels_for_client("nick"), channels);
+    assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
 }
