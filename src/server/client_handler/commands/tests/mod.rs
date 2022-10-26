@@ -1,8 +1,12 @@
-use std::sync::{Arc, Mutex};
 mod join;
+mod nick;
+mod oper;
 mod part;
+mod pass;
 mod privmsg;
-mod registration;
+mod user;
+
+use std::sync::{Arc, Mutex};
 
 use crate::server::{
     database::{ClientInfo, ClientInfoBuilder, Database},
