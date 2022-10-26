@@ -1,6 +1,7 @@
 use std::{
     io::{Read, Write},
     sync::Arc,
+    vec,
 };
 
 use crate::server::database::Database;
@@ -55,7 +56,7 @@ fn dummy_client(handler: &mut ClientHandler<MockTcpStream>) {
 }
 
 #[test]
-fn join_fails_if_client_not_registered() {
+fn join_fails_with_unregistered_client() {
     let mut handler = dummy_client_handler();
     let parameters = vec!["sol".to_string()];
 
@@ -67,7 +68,7 @@ fn join_fails_if_client_not_registered() {
     )
 }
 #[test]
-fn join_with_empty_params_returns_need_more_params_error() {
+fn join_with_empty_params() {
     let mut handler = dummy_client_handler();
     let parameters = vec![];
     let channels: Vec<String> = vec![];
@@ -95,4 +96,23 @@ fn join_fails_with_invalid_channel_name() {
         "403 hola :no such channel\r\n403 #ho'la :no such channel\r\n".to_string(),
         String::from_utf8(handler.stream_client_handler.write_buffer).unwrap()
     );
+}
+#[test]
+fn join_fails_with_user_already_in_channel() {
+    let mut handler = dummy_client_handler();
+    dummy_client(&mut handler);
+
+    let parameters =
+        vec!["#uno,#dos,#tres,&cuatro,&cinco,&seis,#siete,#ocho,#nueve,&diez".to_string()];
+    handler.join_command(parameters).unwrap();
+
+    handler.stream_client_handler.clear();
+
+    let parameters2 = vec!["#once".to_string()];
+    handler.join_command(parameters2).unwrap();
+
+    assert_eq!(
+        "405 #once :you have joined too many channels\r\n".to_string(),
+        String::from_utf8(handler.stream_client_handler.write_buffer).unwrap()
+    )
 }

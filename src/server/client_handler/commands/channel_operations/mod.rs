@@ -26,7 +26,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         if self.validate_channel_exists(channel)? {
-            if !self.validate_user_is_in_channel(channel)? {
+            if !self.validate_user_is_in_channel(channel, nickname)? {
                 self.not_on_channel_error(channel)?;
                 return Ok(());
             }

@@ -38,6 +38,7 @@ impl<T: Read + Write> ClientHandler<T> {
 
     pub fn validate_can_join_channel(&mut self, channel: &str, nickname: &str) -> io::Result<bool> {
         let channels_for_nickname = self.database.get_channels_for_client(nickname);
+        println!("channels: {:?}", channels_for_nickname);
         if channels_for_nickname.len() == MAX_CHANNELS {
             self.too_many_channels_error(channel)?;
             return Ok(false);
@@ -48,7 +49,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return Ok(false);
         }
 
-        if self.validate_user_is_in_channel(channel)? {
+        if self.validate_user_is_in_channel(channel, nickname)? {
             self.user_on_channel_error(nickname, channel)?;
             return Ok(false);
         }
@@ -56,11 +57,15 @@ impl<T: Read + Write> ClientHandler<T> {
         Ok(true)
     }
 
-    pub fn validate_user_is_in_channel(&mut self, channel: &str) -> io::Result<bool> {
+    pub fn validate_user_is_in_channel(
+        &mut self,
+        channel: &str,
+        nickname: &str,
+    ) -> io::Result<bool> {
         if !self
             .database
-            .get_channels()
-            .contains(&String::from(channel))
+            .get_clients(channel)
+            .contains(&String::from(nickname))
         {
             return Ok(false);
         }

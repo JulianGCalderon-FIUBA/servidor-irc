@@ -112,11 +112,11 @@ impl<T: Read + Write> Database<T> {
     }
 
     pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
-        let channels_lock = self.clients.read().unwrap();
+        let channels_lock = self.channels.read().unwrap();
         let mut channels = vec![];
 
-        for (channel_name, _) in channels_lock.iter() {
-            let clients = self.get_clients(channel_name);
+        for (channel_name, channel) in channels_lock.iter() {
+            let clients = channel.get_clients();
             if clients.contains(&nickname.to_string()) {
                 channels.push(channel_name.clone());
             }
