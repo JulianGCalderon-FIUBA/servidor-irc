@@ -2,6 +2,7 @@ use std::sync::{Arc, Mutex};
 mod join;
 mod part;
 mod privmsg;
+mod registration;
 
 use crate::server::{
     database::{ClientInfo, ClientInfoBuilder, Database},
