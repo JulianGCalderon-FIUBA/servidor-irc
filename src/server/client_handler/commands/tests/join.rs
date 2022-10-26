@@ -4,7 +4,7 @@ use super::*;
 fn join_fails_with_unregistered_client() {
     let mut handler = dummy_client_handler();
 
-    let parameters = vec!["sol".to_string()];
+    let parameters = vec!["#sol".to_string()];
     handler.join_command(parameters).unwrap();
 
     assert_eq!(

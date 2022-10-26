@@ -1,4 +1,5 @@
 mod join;
+mod list;
 mod nick;
 mod oper;
 mod part;

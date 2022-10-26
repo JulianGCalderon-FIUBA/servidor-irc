@@ -73,13 +73,32 @@ impl<T: Read + Write> ClientHandler<T> {
         Ok(())
     }
 
-    pub fn list_command(&mut self) -> io::Result<()> {
+    pub fn list_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_list_command()? {
             return Ok(());
         }
 
-        let channels = self.database.get_channels();
+        let mut channels: Vec<String> = if parameters.is_empty() {
+            self.database.get_channels()
+        } else {
+            parameters[0]
+                .split(',')
+                .map(|string| string.to_string())
+                .collect()
+        };
 
+        if channels.is_empty() {
+            self.list_start_reply()?;
+            return self.list_end_reply();
+        }
+
+        for (i, channel) in channels.clone().iter().enumerate() {
+            if !self.validate_can_list_channel(channel)? {
+                channels.remove(i);
+                continue;
+            }
+        }
+        channels.sort();
         self.list_reply(channels)
     }
 

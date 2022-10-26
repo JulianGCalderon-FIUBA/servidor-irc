@@ -71,6 +71,13 @@ impl<T: Read + Write> ClientHandler<T> {
         Ok(true)
     }
 
+    pub fn validate_can_list_channel(&mut self, channel: &str) -> io::Result<bool> {
+        if !self.validate_channel_exists(channel)? || !self.validate_channel_name(channel)? {
+            return Ok(false);
+        }
+        Ok(true)
+    }
+
     pub fn validate_user_is_in_channel(
         &mut self,
         channel: &str,

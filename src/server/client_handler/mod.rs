@@ -104,7 +104,7 @@ impl<T: Read + Write> ClientHandler<T> {
                 PART_COMMAND => self.part_command(parameters)?,
                 JOIN_COMMAND => self.join_command(parameters)?,
                 NAMES_COMMAND => self.names_command(parameters)?,
-                LIST_COMMAND => self.list_command()?,
+                LIST_COMMAND => self.list_command(parameters)?,
                 OPER_COMMAND => self.oper_command(parameters)?,
                 INVITE_COMMAND => self.invite_command(parameters /* , trailing*/)?,
                 QUIT_COMMAND => {
