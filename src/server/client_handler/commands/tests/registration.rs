@@ -66,7 +66,7 @@ fn registering_used_nick_returns_collision_error() {
 #[test]
 fn changing_nick_used_nick_returns_in_use_error() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick2"));
 
@@ -117,7 +117,7 @@ fn user_is_only_valid_after_nick() {
 #[test]
 fn oper_with_valid_credential_sets_client_as_operator() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters = vec!["admin".to_string(), "admin".to_string()];
     handler.oper_command(parameters).unwrap();
