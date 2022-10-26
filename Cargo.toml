@@ -12,3 +12,4 @@ name = "client"
 name = "server"
 
 [dependencies]
+gtk = "0.16.0"
