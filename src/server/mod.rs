@@ -1,6 +1,9 @@
 mod client_handler;
 mod database;
 
+#[cfg(test)]
+mod mock_stream;
+
 use std::io::{self};
 use std::net::{TcpListener, TcpStream};
 use std::sync::Arc;
