@@ -63,7 +63,7 @@ fn join_fails_with_unregistered_client() {
     handler.join_command(parameters).unwrap();
 
     assert_eq!(
-        "300 :unregistered\r\n".to_string(),
+        "200 :unregistered\r\n".to_string(),
         String::from_utf8(handler.stream_client_handler.write_buffer).unwrap()
     )
 }
