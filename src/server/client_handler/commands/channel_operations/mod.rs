@@ -1,8 +1,10 @@
 mod validations;
 
+use crate::message::Message;
+
 use super::ClientHandler;
 
-use std::io;
+use std::io::{self, Read, Write};
 
 pub const INVITE_COMMAND: &str = "INVITE";
 pub const JOIN_COMMAND: &str = "JOIN";
@@ -10,41 +12,51 @@ pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
 pub const PART_COMMAND: &str = "PART";
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_invite_command(&parameters)? {
             self.need_more_params_error(INVITE_COMMAND)?;
             return Ok(());
         }
 
-        let nickname = &parameters[0];
+        let nickname_client_to_invite = &parameters[0];
+        let nickname_current_client = &(self.connection.nickname());
         let channel = &parameters[1];
 
-        if !self.validate_nickname_exits(nickname)? {
-            self.no_such_nickname_error(nickname)?;
+        if !self.validate_nickname_exits(nickname_client_to_invite)? {
+            self.no_such_nickname_error(nickname_client_to_invite)?;
             return Ok(());
         }
 
         if self.validate_channel_exists(channel)? {
-            if !self.validate_user_is_in_channel(channel)? {
+            if !self.validate_user_is_in_channel(channel, nickname_current_client)? {
                 self.not_on_channel_error(channel)?;
                 return Ok(());
             }
-            if !self.validate_can_join_channel(channel, nickname)? {
-                self.user_on_channel_error(nickname, channel)?;
+            if !self.validate_can_join_channel(channel, nickname_client_to_invite)? {
+                self.user_on_channel_error(nickname_client_to_invite, channel)?;
                 return Ok(());
             }
             // si el canal es invite only: validar que el usuario es operador del canal
         }
 
-        self.invite_reply(channel, nickname)
+        let prefix = self.connection.nickname();
+
+        let invitation_text: String =
+            format!("{prefix} {INVITE_COMMAND} {nickname_client_to_invite} {channel}");
+        self.send_message_to_client(
+            nickname_client_to_invite,
+            &Message::new(&invitation_text).unwrap(),
+        );
+
+        self.invite_reply(channel, nickname_client_to_invite)
     }
 
     pub fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_join_command(&parameters)? {
             return Ok(());
         }
-        let nickname = self.connection.nickname.clone().unwrap();
+        let nickname = self.connection.nickname();
 
         let channels = &parameters[0];
         //let keys = &parameters[1];
@@ -97,7 +109,7 @@ impl ClientHandler {
     }
 
     pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        let nickname = self.connection.nickname.clone().unwrap();
+        let nickname = self.connection.nickname();
         if !self.validate_part_command(&parameters, &nickname)? {
             return Ok(());
         }
@@ -114,6 +126,7 @@ impl ClientHandler {
             }
             self.database.remove_client_of_channel(&nickname, channel)
         }
-        Ok(())
+
+        self.ok_reply()
     }
 }

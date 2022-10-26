@@ -1,9 +1,11 @@
-use std::io;
+use std::io::{self, Read, Write};
+use std::net::TcpStream;
 
 use crate::message::Message;
 
 mod commands;
 mod connection_info;
+mod responses;
 
 use commands::channel_operations::{
     INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, PART_COMMAND,
@@ -13,7 +15,6 @@ use commands::connection_registration::{
 };
 use commands::sending_messages::{NOTICE_COMMAND, PRIVMSG_COMMAND};
 
-use std::net::TcpStream;
 use std::sync::Arc;
 
 use super::database::Database;
@@ -21,22 +22,34 @@ use crate::message::{CreationError, ParsingError};
 use connection_info::ConnectionInfo;
 
 /// A ClientHandler handles the client's request.
-pub struct ClientHandler {
-    database: Arc<Database>,
-    stream: TcpStream,
-    connection: ConnectionInfo,
+pub struct ClientHandler<T: Read + Write> {
+    database: Arc<Database<T>>,
+    stream_client_handler: T,
+    connection: ConnectionInfo<T>,
 }
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     /// Returns new clientHandler.
-    pub fn new(database: Arc<Database>, stream: TcpStream) -> io::Result<Self> {
-        let connection = ConnectionInfo::new_with_stream(stream.try_clone()?);
+    pub fn new(
+        database: Arc<Database<T>>,
+        stream_client_handler: T,
+        stream_database: T,
+    ) -> io::Result<Self> {
+        let connection = ConnectionInfo::new_with_stream(stream_database);
 
         Ok(Self {
             database,
-            stream,
+            stream_client_handler,
             connection,
         })
+    }
+
+    pub fn new_from_stream(
+        database: Arc<Database<TcpStream>>,
+        stream: TcpStream,
+    ) -> io::Result<ClientHandler<TcpStream>> {
+        let database_stream = stream.try_clone()?;
+        ClientHandler::<TcpStream>::new(database, stream, database_stream)
     }
 
     /// Handles the received requests with error handling
@@ -70,7 +83,7 @@ impl ClientHandler {
     ///
     fn try_handle(&mut self) -> io::Result<()> {
         loop {
-            let message = Message::read_from(&mut self.stream);
+            let message = Message::read_from(&mut self.stream_client_handler);
 
             let message = match message {
                 Ok(message) => message,

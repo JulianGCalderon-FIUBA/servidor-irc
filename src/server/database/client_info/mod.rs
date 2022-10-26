@@ -2,12 +2,12 @@ mod client_info_builder;
 
 pub use client_info_builder::ClientInfoBuilder;
 use std::{
-    net::TcpStream,
+    io::{Read, Write},
     sync::{Arc, Mutex},
 };
 
-pub struct ClientInfo {
-    pub stream: Option<Arc<Mutex<TcpStream>>>,
+pub struct ClientInfo<T: Read + Write> {
+    pub stream: Option<Arc<Mutex<T>>>,
     pub password: Option<String>,
     pub nickname: String,
     pub username: String,
@@ -17,7 +17,7 @@ pub struct ClientInfo {
     pub operator: bool,
 }
 
-impl ClientInfo {
+impl<T: Read + Write> ClientInfo<T> {
     pub fn set_server_operator(&mut self) {
         self.operator = true;
     }
@@ -26,7 +26,7 @@ impl ClientInfo {
         self.operator
     }
 
-    pub fn get_stream(&self) -> Option<Arc<Mutex<TcpStream>>> {
+    pub fn get_stream(&self) -> Option<Arc<Mutex<T>>> {
         let stream = self.stream.as_ref()?;
 
         Some(Arc::clone(stream))

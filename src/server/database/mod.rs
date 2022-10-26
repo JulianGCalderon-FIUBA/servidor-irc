@@ -6,7 +6,8 @@ mod utils;
 mod tests;
 
 use std::collections::HashMap;
-use std::net::TcpStream;
+use std::io::Read;
+use std::io::Write;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::RwLock;
@@ -14,12 +15,12 @@ use std::sync::RwLock;
 pub use channel_info::ChannelInfo;
 pub use client_info::ClientInfo;
 pub use client_info::ClientInfoBuilder;
-pub struct Database {
-    pub clients: RwLock<HashMap<String, ClientInfo>>,
+pub struct Database<T: Read + Write> {
+    pub clients: RwLock<HashMap<String, ClientInfo<T>>>,
     pub channels: RwLock<HashMap<String, ChannelInfo>>,
 }
 
-impl Database {
+impl<T: Read + Write> Database<T> {
     pub fn new() -> Self {
         Self {
             clients: RwLock::new(HashMap::new()),
@@ -27,7 +28,7 @@ impl Database {
         }
     }
 
-    pub fn add_client(&self, client: ClientInfo) {
+    pub fn add_client(&self, client: ClientInfo<T>) {
         let mut clients_lock = self.clients.write().unwrap();
 
         println!(
@@ -39,6 +40,8 @@ impl Database {
     }
 
     pub fn set_server_operator(&self, nickname: &str) {
+        println!("Setting {} as operator", nickname);
+
         let mut clients_lock = self.clients.write().unwrap();
         if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
             client.set_server_operator();
@@ -55,12 +58,14 @@ impl Database {
     }
 
     pub fn disconnect_client(&self, nickname: &str) {
+        println!("Disconnecting {} ", nickname);
+
         if let Some(client) = self.clients.write().unwrap().get_mut(nickname) {
             client.disconnect();
         }
     }
 
-    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<TcpStream>>> {
+    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<T>>> {
         let clients_rlock = self.clients.read().unwrap();
         let client = clients_rlock.get(nickname)?;
 
@@ -68,6 +73,8 @@ impl Database {
     }
 
     pub fn add_client_to_channel(&self, nickname: &str, channel_name: &str) {
+        println!("Adding {} to channel {}", nickname, channel_name);
+
         let mut channels_lock = self.channels.write().unwrap();
         let channel: Option<&mut ChannelInfo> = channels_lock.get_mut(&channel_name.to_string());
         match channel {
@@ -80,6 +87,8 @@ impl Database {
     }
 
     pub fn remove_client_of_channel(&self, nickname: &str, channel_name: &str) {
+        println!("Removing {} from channel {}", nickname, channel_name);
+
         let mut channels_lock = self.channels.write().unwrap();
         if let Some(channel) = channels_lock.get_mut(&channel_name.to_string()) {
             channel.remove_client(nickname.to_string());
@@ -123,10 +132,11 @@ impl Database {
     }
 
     pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
+        let channels_lock = self.channels.read().unwrap();
         let mut channels = vec![];
 
-        for channel_name in self.get_channels() {
-            let clients = self.get_clients(&channel_name);
+        for (channel_name, channel) in channels_lock.iter() {
+            let clients = channel.get_clients();
             if clients.contains(&nickname.to_string()) {
                 channels.push(channel_name.clone());
             }
@@ -135,7 +145,7 @@ impl Database {
     }
 }
 
-impl Default for Database {
+impl<T: Read + Write> Default for Database<T> {
     fn default() -> Self {
         Self::new()
     }

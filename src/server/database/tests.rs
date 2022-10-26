@@ -1,8 +1,8 @@
-use std::{fs::File, os::unix::prelude::OwnedFd};
+use std::{fs::File, net::TcpStream, os::unix::prelude::OwnedFd};
 
 use super::*;
 
-fn dummy_client(nickname: &str) -> ClientInfo {
+fn dummy_client(nickname: &str) -> ClientInfo<TcpStream> {
     ClientInfoBuilder::new_with(
         nickname.to_string(),
         "username".to_string(),
@@ -13,7 +13,7 @@ fn dummy_client(nickname: &str) -> ClientInfo {
     .build()
 }
 
-fn add_stream_to_client(client_info: &mut ClientInfo, stream: TcpStream) {
+fn add_stream_to_client(client_info: &mut ClientInfo<TcpStream>, stream: TcpStream) {
     let stream = Arc::new(Mutex::new(stream));
     client_info.stream = Some(stream);
 }

@@ -2,12 +2,14 @@ use crate::server::client_handler::connection_info::RegistrationState;
 
 use super::ClientHandler;
 use std::io;
+use std::io::Read;
+use std::io::Write;
 
 use super::OPER_COMMAND;
 use super::PASS_COMMAND;
 use super::USER_COMMAND;
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     pub fn validate_pass_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
         if parameters.len() != 1 {
             self.need_more_params_error(PASS_COMMAND)?;
@@ -15,7 +17,7 @@ impl ClientHandler {
         }
 
         if self.connection.registration_state != RegistrationState::NotInitialized {
-            self.already_registered_response()?;
+            self.already_registered_reply()?;
             return Ok(false);
         }
 
@@ -32,9 +34,9 @@ impl ClientHandler {
 
         if self.database.contains_client(nickname) {
             if self.connection.registration_state == RegistrationState::Registered {
-                self.nickname_in_use_response()?;
+                self.nickname_in_use_reply()?;
             } else {
-                self.nickname_collision_response()?;
+                self.nickname_collision_reply()?;
             }
             return Ok(false);
         }

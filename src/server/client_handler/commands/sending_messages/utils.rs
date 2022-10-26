@@ -1,8 +1,11 @@
-use std::{io, ops::DerefMut};
+use std::{
+    io::{self, Read, Write},
+    ops::DerefMut,
+};
 
 use crate::{message::Message, server::client_handler::ClientHandler};
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     pub fn build_text_message(&self, command: &str, receiver: &str, content: &str) -> Message {
         let message = format!(
             ":{} {} {} :{}",
