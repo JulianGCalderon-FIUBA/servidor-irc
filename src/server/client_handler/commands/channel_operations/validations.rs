@@ -51,6 +51,7 @@ impl<T: Read + Write> ClientHandler<T> {
 
         if self.validate_user_is_in_channel(channel, nickname)? {
             self.user_on_channel_error(nickname, channel)?;
+            //El error ya es lanzado
             return Ok(false);
         }
 
