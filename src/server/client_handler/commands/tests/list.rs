@@ -39,10 +39,20 @@ fn list_with_no_parameters_prints_all_channels() {
     handler.database.add_client_to_channel("nick", "#hola");
     handler.database.add_client_to_channel("nick", "#chau");
 
-    handler.list_command(parameters).unwrap();
+    handler.list_command(parameters.clone()).unwrap();
 
     assert_eq!(
         "321 :Channel :Users Name\r\n322 : #chau #hola\r\n323 :End of /LIST\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+
+    handler.database.add_client_to_channel("nick2", "#canal");
+    handler.stream_client_handler.clear();
+
+    handler.list_command(parameters).unwrap();
+
+    assert_eq!(
+        "321 :Channel :Users Name\r\n322 : #canal #chau #hola\r\n323 :End of /LIST\r\n",
         handler.stream_client_handler.read_wbuf_to_string()
     );
 }
