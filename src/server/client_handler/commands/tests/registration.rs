@@ -1,7 +1,7 @@
 use super::*;
 
 #[test]
-fn pass_works_as_expected() {
+fn pass_sets_connection_password() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec!["pass".to_string()];
@@ -35,7 +35,7 @@ fn pass_is_only_valid_as_first_command() {
 }
 
 #[test]
-fn nick_works_as_expected() {
+fn nick_sets_connection_nickname() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec!["nick".to_string()];
@@ -50,7 +50,7 @@ fn nick_works_as_expected() {
 }
 
 #[test]
-fn registering_nick_in_use_returns_collision_error() {
+fn registering_used_nick_returns_collision_error() {
     let mut handler = dummy_client_handler();
     handler.database.add_client(dummy_client("nick"));
 
@@ -64,7 +64,7 @@ fn registering_nick_in_use_returns_collision_error() {
 }
 
 #[test]
-fn changing_nick_to_in_use_nick_returns_in_use_error() {
+fn changing_nick_used_nick_returns_in_use_error() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler);
 
@@ -80,7 +80,7 @@ fn changing_nick_to_in_use_nick_returns_in_use_error() {
 }
 
 #[test]
-fn user_works_as_expected() {
+fn user_adds_client_to_database() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec!["nick".to_string()];
