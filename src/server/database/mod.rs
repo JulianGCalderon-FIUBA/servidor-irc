@@ -37,6 +37,8 @@ impl<T: Read + Write> Database<T> {
     }
 
     pub fn set_server_operator(&self, nickname: &str) {
+        println!("Setting {} as operator", nickname);
+
         let mut clients_lock = self.clients.write().unwrap();
         if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
             client.set_server_operator();
@@ -44,6 +46,8 @@ impl<T: Read + Write> Database<T> {
     }
 
     pub fn disconnect_client(&self, nickname: &str) {
+        println!("Disconnecting {} ", nickname);
+
         if let Some(client) = self.clients.write().unwrap().get_mut(nickname) {
             client.disconnect();
         }
@@ -57,6 +61,8 @@ impl<T: Read + Write> Database<T> {
     }
 
     pub fn add_client_to_channel(&self, nickname: &str, channel_name: &str) {
+        println!("Adding {} to channel {}", nickname, channel_name);
+
         let mut channels_lock = self.channels.write().unwrap();
         let channel: Option<&mut ChannelInfo> = channels_lock.get_mut(&channel_name.to_string());
         match channel {
@@ -69,6 +75,8 @@ impl<T: Read + Write> Database<T> {
     }
 
     pub fn remove_client_of_channel(&self, nickname: &str, channel_name: &str) {
+        println!("Removing {} from channel {}", nickname, channel_name);
+
         let mut channels_lock = self.channels.write().unwrap();
         if let Some(channel) = channels_lock.get_mut(&channel_name.to_string()) {
             channel.remove_client(nickname.to_string());

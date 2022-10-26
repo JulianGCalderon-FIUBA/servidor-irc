@@ -5,6 +5,7 @@ use crate::message::Message;
 
 mod commands;
 mod connection_info;
+mod responses;
 
 use commands::channel_operations::{
     INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, PART_COMMAND,

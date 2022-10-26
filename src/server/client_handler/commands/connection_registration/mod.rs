@@ -39,17 +39,17 @@ impl<T: Read + Write> ClientHandler<T> {
         self.ok_reply()
     }
 
-    pub fn oper_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
+    pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         // let user = self.database.password.clone().unwrap();
         // let password = self.database.password.clone().unwrap();
         if !self.validate_oper_command(&parameters /*, &user, &password */)? {
             return Ok(());
         }
-        let nickname = parameters.remove(2);
 
-        self.database.set_server_operator(&nickname);
+        self.database
+            .set_server_operator(&self.connection.nickname());
 
-        self.ok_reply()
+        self.oper_reply()
     }
 
     pub fn user_command(
