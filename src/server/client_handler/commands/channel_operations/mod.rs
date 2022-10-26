@@ -102,27 +102,35 @@ impl<T: Read + Write> ClientHandler<T> {
         self.list_reply(channels)
     }
 
-    pub fn names_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
+    pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_names_command()? {
             return Ok(());
         }
 
-        if parameters.is_empty() {
-            parameters = self.database.get_channels();
+        let channels: Vec<String> = if parameters.is_empty() {
+            self.database.get_channels()
         } else {
-            parameters = parameters[0]
+            parameters[0]
                 .split(',')
                 .map(|string| string.to_string())
-                .collect();
+                .collect()
+        };
+
+        if channels.is_empty() {
+            return self.end_of_names_reply("");
         }
 
-        for channel in parameters {
+        for channel in channels {
             if self.database.contains_channel(&channel) {
                 let clients = self.database.get_clients(&channel);
                 self.names_reply(&channel, clients)?;
-            } else {
-                self.no_such_channel_error(&channel)?;
+                if !parameters.is_empty() {
+                    self.end_of_names_reply(&channel)?;
+                }
             }
+        }
+        if parameters.is_empty() {
+            self.end_of_names_reply("")?;
         }
         Ok(())
     }
