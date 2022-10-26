@@ -41,16 +41,6 @@ fn get_stream_returns_reference_to_client_stream() {
 }
 
 #[test]
-fn when_offline_get_stream_returns_none() {
-    let database = Database::new();
-
-    let client = dummy_client("nickname");
-    database.add_client(client);
-
-    assert!(database.get_stream("nickname").is_none());
-}
-
-#[test]
 fn disconnect_client_sets_stream_to_none() {
     let database = Database::new();
 
