@@ -29,6 +29,13 @@ impl Write for MockTcpStream {
     }
 }
 
+impl MockTcpStream {
+    fn clear(&mut self) {
+        let empty_buffer: Vec<u8> = vec![];
+        self.write_buffer = empty_buffer;
+    }
+}
+
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let database = Database::new();
     let mock = MockTcpStream {
@@ -39,7 +46,7 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     ClientHandler::new(Arc::new(database), mock.clone(), mock).unwrap()
 }
 
-fn dummy_client(handler: &mut ClientHandler<MockTcpStream>) -> () {
+fn dummy_client(handler: &mut ClientHandler<MockTcpStream>) {
     let parameters = vec!["nick".to_string()];
     handler.nick_command(parameters).unwrap();
     let parameters2 = vec!["user".to_string(), "".to_string(), "".to_string()];
@@ -78,12 +85,14 @@ fn join_fails_with_invalid_channel_name() {
     let mut handler = dummy_client_handler();
     dummy_client(&mut handler);
 
+    handler.stream_client_handler.clear();
+
     let parameters = vec!["hola,#ho'la".to_string()];
 
     handler.join_command(parameters).unwrap();
 
     assert_eq!(
-        "300 :success\r\n300 :success\r\n403 hola :no such channel\r\n403 #ho'la :no such channel\r\n".to_string(),
+        "403 hola :no such channel\r\n403 #ho'la :no such channel\r\n".to_string(),
         String::from_utf8(handler.stream_client_handler.write_buffer).unwrap()
     );
 }
