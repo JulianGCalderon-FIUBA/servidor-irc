@@ -11,7 +11,6 @@ pub const JOIN_COMMAND: &str = "JOIN";
 pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
 pub const PART_COMMAND: &str = "PART";
-const INVITATION_MESSAGE: &str = "is inviting you to join";
 
 impl<T: Read + Write> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
@@ -21,7 +20,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let nickname_client_to_invite = &parameters[0];
-        let nickname_current_client = &(self.connection.nickname.clone().unwrap());
+        let nickname_current_client = &(self.connection.nickname());
         let channel = &parameters[1];
 
         if !self.validate_nickname_exits(nickname_client_to_invite)? {
@@ -41,8 +40,10 @@ impl<T: Read + Write> ClientHandler<T> {
             // si el canal es invite only: validar que el usuario es operador del canal
         }
 
+        let prefix = self.connection.nickname();
+
         let invitation_text: String =
-            format!("{nickname_current_client} {INVITATION_MESSAGE} {channel}");
+            format!("{prefix} {INVITE_COMMAND} {nickname_client_to_invite} {channel}");
         self.send_message_to_client(
             nickname_client_to_invite,
             &Message::new(&invitation_text).unwrap(),
@@ -55,7 +56,7 @@ impl<T: Read + Write> ClientHandler<T> {
         if !self.validate_join_command(&parameters)? {
             return Ok(());
         }
-        let nickname = self.connection.nickname.clone().unwrap();
+        let nickname = self.connection.nickname();
 
         let channels = &parameters[0];
         //let keys = &parameters[1];
@@ -108,7 +109,7 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        let nickname = self.connection.nickname.clone().unwrap();
+        let nickname = self.connection.nickname();
         if !self.validate_part_command(&parameters, &nickname)? {
             return Ok(());
         }
