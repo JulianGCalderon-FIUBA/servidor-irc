@@ -17,7 +17,7 @@ fn privmsg_fails_with_unregistered_client() {
 #[test]
 fn privmsg_fails_with_invalid_target() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
@@ -32,7 +32,7 @@ fn privmsg_fails_with_invalid_target() {
 #[test]
 fn privmsg_works_with_valid_target_client() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
 
@@ -60,7 +60,7 @@ fn privmsg_works_with_valid_target_client() {
 #[test]
 fn privmsg_works_with_valid_target_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
@@ -103,7 +103,7 @@ fn privmsg_works_with_valid_target_channel() {
 #[test]
 fn privmsg_works_with_multiple_targets() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
@@ -143,7 +143,7 @@ fn privmsg_works_with_multiple_targets() {
 #[test]
 fn privmsg_fails_when_not_on_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler);
+    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
