@@ -88,6 +88,9 @@ fn can_join_one_channel() {
     register_client(&mut handler, "nick");
 
     let parameters = vec!["#channel".to_string()];
+
+    assert!(handler.database.get_channels().is_empty());
+
     handler.join_command(parameters).unwrap();
 
     let channels = vec!["#channel".to_string()];
