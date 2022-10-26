@@ -109,24 +109,20 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        let nickname = self.connection.nickname();
-        if !self.validate_part_command(&parameters, &nickname)? {
+        if !self.validate_part_command(&parameters)? {
             return Ok(());
         }
 
         let channels = &parameters[0];
+        let nickname = self.connection.nickname();
 
         for channel in channels.split(',') {
-            if !self.validate_channel_exists(channel)? {
-                return self.no_such_channel_error(channel);
+            if !self.validate_can_part_channel(channel, &nickname)? {
+                continue;
             }
-            let clients = self.database.get_clients(channel);
-            if !clients.contains(&nickname.to_string()) {
-                return self.not_on_channel_error(channel);
-            }
-            self.database.remove_client_of_channel(&nickname, channel)
+            self.database.remove_client_of_channel(&nickname, channel);
+            self.ok_reply()?;
         }
-
-        self.ok_reply()
+        Ok(())
     }
 }
