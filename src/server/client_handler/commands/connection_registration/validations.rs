@@ -69,7 +69,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         if self.connection.registration_state != RegistrationState::Registered {
-            self.no_nickname_error()?;
+            self.unregistered_error()?;
             return Ok(false);
         }
 
