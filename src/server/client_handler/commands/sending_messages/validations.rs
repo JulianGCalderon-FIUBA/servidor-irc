@@ -1,3 +1,5 @@
+use crate::server::client_handler::connection_info::RegistrationState;
+
 use super::ClientHandler;
 use std::io::{self, Read, Write};
 // use std::sync::mpsc::channel;
@@ -43,6 +45,11 @@ impl<T: Read + Write> ClientHandler<T> {
 
         if trailing.is_none() {
             self.no_text_to_send_error()?;
+            return Ok(false);
+        }
+
+        if self.connection.registration_state != RegistrationState::Registered {
+            self.unregistered_error()?;
             return Ok(false);
         }
 
