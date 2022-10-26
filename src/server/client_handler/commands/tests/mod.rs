@@ -7,6 +7,8 @@ mod pass;
 mod privmsg;
 mod user;
 
+mod names;
+
 use std::sync::Arc;
 
 use crate::server::database::Database;
