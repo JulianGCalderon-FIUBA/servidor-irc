@@ -19,6 +19,8 @@ fn register_client(handler: &mut ClientHandler<MockTcpStream>) {
     let parameters = vec!["user".to_string(), "".to_string(), "".to_string()];
     let trailing = Some("sol".to_string());
     handler.user_command(parameters, trailing).unwrap();
+
+    handler.stream_client_handler.clear()
 }
 
 #[test]
@@ -51,8 +53,6 @@ fn join_with_empty_params() {
 fn join_fails_with_invalid_channel_name() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler);
-
-    handler.stream_client_handler.clear();
 
     let parameters = vec!["hola,#ho'la".to_string()];
 
