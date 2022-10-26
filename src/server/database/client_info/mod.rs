@@ -22,6 +22,10 @@ impl<T: Read + Write> ClientInfo<T> {
         self.operator = true;
     }
 
+    pub fn _is_server_operator(&mut self) -> bool {
+        self.operator
+    }
+
     pub fn get_stream(&self) -> Option<Arc<Mutex<T>>> {
         let stream = self.stream.as_ref()?;
 

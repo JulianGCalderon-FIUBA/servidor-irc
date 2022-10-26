@@ -2,6 +2,9 @@ mod channel_info;
 mod client_info;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 use std::collections::HashMap;
 use std::io::Read;
 use std::io::Write;
@@ -43,6 +46,15 @@ impl<T: Read + Write> Database<T> {
         if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
             client.set_server_operator();
         }
+    }
+
+    pub fn _is_server_operator(&self, nickname: &str) -> bool {
+        let mut clients_lock = self.clients.write().unwrap();
+        if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
+            return client._is_server_operator();
+        }
+
+        false
     }
 
     pub fn disconnect_client(&self, nickname: &str) {
