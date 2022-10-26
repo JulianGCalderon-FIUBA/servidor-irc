@@ -1,8 +1,6 @@
-use std::{fs::File, net::TcpStream, os::unix::prelude::OwnedFd};
-
 use super::*;
 
-fn dummy_client(nickname: &str) -> ClientInfo<TcpStream> {
+fn dummy_client(nickname: &str) -> ClientInfo<MockTcpStream> {
     ClientInfoBuilder::new_with(
         nickname.to_string(),
         "username".to_string(),
@@ -13,15 +11,40 @@ fn dummy_client(nickname: &str) -> ClientInfo<TcpStream> {
     .build()
 }
 
-fn add_stream_to_client(client_info: &mut ClientInfo<TcpStream>, stream: TcpStream) {
-    let stream = Arc::new(Mutex::new(stream));
-    client_info.stream = Some(stream);
+#[derive(Clone)]
+struct MockTcpStream {
+    read_buffer: Vec<u8>,
+    write_buffer: Vec<u8>,
 }
 
-fn dummy_stream() -> TcpStream {
-    let file = File::open("LICENSE").unwrap();
-    let owned_fd = OwnedFd::from(file);
-    TcpStream::from(owned_fd)
+impl Read for MockTcpStream {
+    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+        self.read_buffer.as_slice().read(buf)
+    }
+}
+
+impl Write for MockTcpStream {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.write_buffer.write(buf)
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        self.write_buffer.flush()
+    }
+}
+
+impl MockTcpStream {
+    fn new() -> Self {
+        MockTcpStream {
+            read_buffer: vec![],
+            write_buffer: vec![],
+        }
+    }
+}
+
+fn add_stream_to_client(client_info: &mut ClientInfo<MockTcpStream>, stream: MockTcpStream) {
+    let stream = Arc::new(Mutex::new(stream));
+    client_info.stream = Some(stream);
 }
 
 #[test]
@@ -53,7 +76,7 @@ fn get_stream_returns_reference_to_client_stream() {
     let database = Database::new();
 
     let mut client = dummy_client("nickname");
-    let stream = dummy_stream();
+    let stream = MockTcpStream::new();
     add_stream_to_client(&mut client, stream);
 
     let stream_ref_expected = client.get_stream().unwrap();
@@ -79,7 +102,7 @@ fn disconnect_client_sets_stream_to_none() {
     let database = Database::new();
 
     let mut client = dummy_client("nickname");
-    let stream = dummy_stream();
+    let stream = MockTcpStream::new();
 
     add_stream_to_client(&mut client, stream);
 
