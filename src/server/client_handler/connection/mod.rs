@@ -36,10 +36,10 @@ impl<T: Read + Write> Connection<T> {
 
     pub fn set_nickname(&mut self, nickname: String) {
         self.nickname = Some(nickname);
-    }
 
-    pub fn advance_state(&mut self) {
-        self.state = self.state.next();
+        if self.state != RegistrationState::Registered {
+            self.state = RegistrationState::NicknameSent;
+        }
     }
 
     pub fn nickname(&self) -> Option<String> {
@@ -51,14 +51,18 @@ impl<T: Read + Write> Connection<T> {
     }
 
     pub fn build(&mut self) -> Option<Client<T>> {
-        ClientBuilder::new()
-            .stream(self.stream.take()?)
+        let client = ClientBuilder::new()
             .nickname(self.nickname()?)
             .password(self.get_attribute("nickname"))
             .username(self.get_attribute("username")?)
             .hostname(self.get_attribute("hostname")?)
             .servername(self.get_attribute("servername")?)
             .realname(self.get_attribute("realname")?)
-            .build()
+            .stream(self.stream.take()?)
+            .build();
+
+        self.state = RegistrationState::Registered;
+
+        client
     }
 }

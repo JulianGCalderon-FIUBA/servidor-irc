@@ -1,5 +1,3 @@
-use crate::server::client_handler::connection::RegistrationState;
-
 use super::ClientHandler;
 
 use std::io::{self, Read, Write};
@@ -31,10 +29,6 @@ impl<T: Read + Write> ClientHandler<T> {
 
         let nickname = parameters.pop().unwrap();
         self.connection.set_nickname(nickname);
-
-        if self.connection.state() == &RegistrationState::NotInitialized {
-            self.connection.advance_state();
-        }
 
         self.ok_reply()
     }
@@ -70,8 +64,6 @@ impl<T: Read + Write> ClientHandler<T> {
         self.connection.set_attribute("hostname", hostname);
         self.connection.set_attribute("servername", servername);
         self.connection.set_attribute("realname", realname);
-
-        self.connection.advance_state();
 
         self.database.add_client(self.connection.build().unwrap());
 
