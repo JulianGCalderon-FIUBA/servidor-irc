@@ -2,21 +2,21 @@ mod channel_info;
 mod client_info;
 mod utils;
 
+#[cfg(test)]
+mod tests;
+
 use std::collections::HashMap;
-use std::net::TcpStream;
-use std::sync::Arc;
-use std::sync::Mutex;
-use std::sync::RwLock;
+use std::io::{Read, Write};
+use std::sync::{Arc, Mutex, RwLock};
 
 pub use channel_info::ChannelInfo;
-pub use client_info::ClientInfo;
-pub use client_info::ClientInfoBuilder;
-pub struct Database {
-    pub clients: RwLock<HashMap<String, ClientInfo>>,
+pub use client_info::{ClientInfo, ClientInfoBuilder};
+pub struct Database<T: Read + Write> {
+    pub clients: RwLock<HashMap<String, ClientInfo<T>>>,
     pub channels: RwLock<HashMap<String, ChannelInfo>>,
 }
 
-impl Database {
+impl<T: Read + Write> Database<T> {
     pub fn new() -> Self {
         Self {
             clients: RwLock::new(HashMap::new()),
@@ -24,7 +24,7 @@ impl Database {
         }
     }
 
-    pub fn add_client(&self, client: ClientInfo) {
+    pub fn add_client(&self, client: ClientInfo<T>) {
         let mut clients_lock = self.clients.write().unwrap();
 
         println!(
@@ -44,6 +44,15 @@ impl Database {
         }
     }
 
+    pub fn _is_server_operator(&self, nickname: &str) -> bool {
+        let mut clients_lock = self.clients.write().unwrap();
+        if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
+            return client._is_server_operator();
+        }
+
+        false
+    }
+
     pub fn disconnect_client(&self, nickname: &str) {
         println!("Disconnecting {} ", nickname);
 
@@ -52,7 +61,7 @@ impl Database {
         }
     }
 
-    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<TcpStream>>> {
+    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<T>>> {
         let clients_rlock = self.clients.read().unwrap();
         let client = clients_rlock.get(nickname)?;
 
@@ -119,11 +128,11 @@ impl Database {
     }
 
     pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
-        let channels_lock = self.clients.read().unwrap();
+        let channels_lock = self.channels.read().unwrap();
         let mut channels = vec![];
 
-        for (channel_name, _) in channels_lock.iter() {
-            let clients = self.get_clients(channel_name);
+        for (channel_name, channel) in channels_lock.iter() {
+            let clients = channel.get_clients();
             if clients.contains(&nickname.to_string()) {
                 channels.push(channel_name.clone());
             }
@@ -132,7 +141,7 @@ impl Database {
     }
 }
 
-impl Default for Database {
+impl<T: Read + Write> Default for Database<T> {
     fn default() -> Self {
         Self::new()
     }

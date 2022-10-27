@@ -1,8 +1,10 @@
-use std::io;
+use std::io::{self, Read, Write};
 
 use crate::server::client_handler::ClientHandler;
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
+    // REPLY o ERROR
+
     pub fn no_nickname_error(&mut self) -> io::Result<()> {
         let response = "200 :no nickname registered".to_string();
         self.send_response(&response)

@@ -1,10 +1,12 @@
+use crate::server::client_handler::connection_info::RegistrationState;
+
 use super::ClientHandler;
-use std::io;
+use std::io::{self, Read, Write};
 // use std::sync::mpsc::channel;
 
 use super::PRIVMSG_COMMAND;
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     // GENERAL
 
     pub fn validate_targets(&mut self, parameters: &[String]) -> io::Result<bool> {
@@ -43,6 +45,11 @@ impl ClientHandler {
 
         if trailing.is_none() {
             self.no_text_to_send_error()?;
+            return Ok(false);
+        }
+
+        if self.connection.registration_state != RegistrationState::Registered {
+            self.unregistered_error()?;
             return Ok(false);
         }
 

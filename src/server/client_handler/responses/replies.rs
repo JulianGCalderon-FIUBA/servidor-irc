@@ -1,9 +1,9 @@
 use crate::server::client_handler::{
     commands::connection_registration::QUIT_COMMAND, ClientHandler,
 };
-use std::io;
+use std::io::{self, Read, Write};
 
-impl ClientHandler {
+impl<T: Read + Write> ClientHandler<T> {
     pub fn nickname_in_use_reply(&mut self) -> io::Result<()> {
         let response = "433 :nickname is already in use".to_string();
         self.send_response(&response)
@@ -29,9 +29,21 @@ impl ClientHandler {
         self.send_response(&response)
     }
 
-    pub fn list_reply(&mut self, channels: Vec<String>) -> io::Result<()> {
-        let response = format!("322 : {}", channels.join(", "));
+    pub fn list_start_reply(&mut self) -> io::Result<()> {
+        let response = "321 :Channel :Users Name".to_string();
         self.send_response(&response)
+    }
+
+    pub fn list_end_reply(&mut self) -> io::Result<()> {
+        let response = "323 :End of /LIST".to_string();
+        self.send_response(&response)
+    }
+
+    pub fn list_reply(&mut self, channels: Vec<String>) -> io::Result<()> {
+        self.list_start_reply()?;
+        let response = format!("322 : {}", channels.join(" "));
+        self.send_response(&response)?;
+        self.list_end_reply()
     }
 
     // pub fn away_reply(&mut self, nickname: &str, message: &str) -> io::Result<()> {
@@ -54,8 +66,13 @@ impl ClientHandler {
         self.send_response(&response)
     }
 
-    pub fn names_reply(&mut self, channel: String, clients: Vec<String>) -> io::Result<()> {
-        let response = format!("353 {} :{}", channel, clients.join(" "));
+    pub fn end_of_names_reply(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("366 {channel} :End of /NAMES list");
+        self.send_response(&response)
+    }
+
+    pub fn names_reply(&mut self, channel: &str, clients: Vec<String>) -> io::Result<()> {
+        let response = format!("353 {channel} :{}", clients.join(" "));
         self.send_response(&response)
     }
 
