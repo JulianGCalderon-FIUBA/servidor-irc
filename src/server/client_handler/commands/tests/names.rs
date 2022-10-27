@@ -57,20 +57,49 @@ fn names_with_no_parameters_prints_all_channels() {
     );
 }
 
-// #[test]
-// fn names_with_parameters_prints_requested_channels() {
-//     let mut handler = dummy_client_handler();
-//     register_client(&mut handler, "nick");
+#[test]
+fn names_with_parameters_prints_requested_channels() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
 
-//     let parameters = vec!["#hola".to_string()];
+    let parameters = vec!["#hola".to_string()];
 
-//     handler.database.add_client_to_channel("nick", "#hola");
-//     handler.database.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#chau");
 
-//     handler.names_command(parameters).unwrap();
+    handler.names_command(parameters).unwrap();
 
-//     assert_eq!(
-//         "321 :Channel :Users Name\r\n322 : #hola\r\n323 :End of /LIST\r\n",
-//         handler.stream_client_handler.read_wbuf_to_string()
-//     );
-// }
+    assert_eq!(
+        "353 #hola :nick\r\n366 #hola :End of /NAMES list\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+
+    handler.stream_client_handler.clear();
+
+    let parameters2 = vec!["#hola,#chau".to_string()];
+
+    handler.names_command(parameters2).unwrap();
+
+    assert_eq!(
+        "353 #hola :nick\r\n366 #hola :End of /NAMES list\r\n353 #chau :nick\r\n366 #chau :End of /NAMES list\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn names_ignores_invalid_channels() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    let parameters = vec!["#hola,#invalido,#chau".to_string()];
+
+    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#chau");
+
+    handler.names_command(parameters).unwrap();
+
+    assert_eq!(
+        "353 #hola :nick\r\n366 #hola :End of /NAMES list\r\n353 #chau :nick\r\n366 #chau :End of /NAMES list\r\n",
+        handler.stream_client_handler.read_wbuf_to_string()
+    );
+}

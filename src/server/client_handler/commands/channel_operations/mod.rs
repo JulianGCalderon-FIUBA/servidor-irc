@@ -79,7 +79,9 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let mut channels: Vec<String> = if parameters.is_empty() {
-            self.database.get_channels()
+            let mut list = self.database.get_channels();
+            list.sort();
+            list
         } else {
             parameters[0]
                 .split(',')
@@ -98,7 +100,6 @@ impl<T: Read + Write> ClientHandler<T> {
                 continue;
             }
         }
-        channels.sort();
         self.list_reply(channels)
     }
 
