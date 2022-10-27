@@ -13,9 +13,7 @@ use gtk::subclass::widget::WidgetImpl;
 
 #[derive(Default)]
 pub struct Sidebar {
-    button1: gtk::Button,
-    button2: gtk::Button,
-    button3: gtk::Button,
+    // buttons: Vec<gtk::Button>
 }
 
 #[glib::object_subclass]
@@ -29,11 +27,27 @@ impl ObjectImpl for Sidebar {
     fn constructed(&self, obj: &Self::Type) {
         self.parent_constructed(obj);
 
-        
+        // CONSEGUIR LISTA CANALES CON CONTROLER
+        for channel in vec!["#canal1", "#canal2"] {
+            let button = create_button(channel);
+            obj.append(&button);
+        }
 
-        obj.append(&self.button1);
-        obj.append(&self.button2);
-        obj.append(&self.button3);
+        let button = create_button("+");
+        obj.append(&button);
+
+        for conv in vec!["juli", "sol", "ana"] {
+            let button = create_button(conv);
+            obj.append(&button);
+        }
+
+        let button = create_button("+");
+        obj.append(&button);
+        
+        obj.set_margin_top(12);
+        obj.set_margin_bottom(12);
+        obj.set_margin_start(12);
+        obj.set_margin_end(12);
     }
 
     fn properties() -> &'static [glib::ParamSpec] {
@@ -61,7 +75,7 @@ impl WidgetImpl for Sidebar {}
 
 impl BoxImpl for Sidebar {}
 
-fn _create_button(label: &str) -> Button {
+fn create_button(label: &str) -> Button {
     let button = Button::builder()
     .label(label)
     .margin_top(12)

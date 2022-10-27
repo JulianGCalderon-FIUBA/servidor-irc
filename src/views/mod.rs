@@ -26,24 +26,17 @@ fn build_ui(app: &Application) {
     .application(app)
     .title("Lemon Pie IRC")
     .default_height(600)
-    .default_width(700)
+    .default_width(1200)
     .build();
 
-    // let main_box = Box::builder()
-    // .orientation(Orientation::Horizontal)
-    // .build();
-
-    // let box1 = create_box("Box1");
-    // let box2 = create_box("Box2");
-    // let box3 = create_box("Box3");
-
-    // main_box.add(&box1);
-    // main_box.add(&box2);
-    // main_box.add(&box3);
+    let main_box = Box::builder()
+    .orientation(Orientation::Horizontal)
+    .build();
 
     let sidebar = Sidebar::new();
+    main_box.append(&sidebar);
 
-    window.set_child(Some(&sidebar));
+    window.set_child(Some(&main_box));
     
     window.show();
 }
