@@ -1,5 +1,7 @@
 mod sidebar;
 
+use gtk4 as gtk;
+
 use gtk::Align;
 use gtk::ApplicationWindow;
 use gtk::Button;
@@ -43,14 +45,14 @@ fn build_ui(app: &Application) {
 
     window.set_child(Some(&sidebar));
     
-    window.show_all();
+    window.show();
 }
     
-fn say_hi() {
+fn _say_hi() {
     println!("Hi");
 }
 
-fn create_button(label: &str) -> Button {
+fn _create_button(label: &str) -> Button {
     let button = Button::builder()
     .label(label)
     .margin_top(12)
@@ -61,12 +63,12 @@ fn create_button(label: &str) -> Button {
     .valign(Align::Center)
     .build();
 
-    button.connect_clicked(|_| say_hi());
+    button.connect_clicked(|_| _say_hi());
 
     button
 }
 
-fn create_label(label: &str) -> Label {
+fn _create_label(label: &str) -> Label {
     Label::builder()
     .label(label)
     .margin_top(12)
@@ -78,17 +80,17 @@ fn create_label(label: &str) -> Label {
     .build()
 }
 
-fn create_box(label: &str) -> Box {
+fn _create_box(label: &str) -> Box {
     let gtk_box = Box::builder()
     .orientation(Orientation::Vertical)
     .build();
 
-    let button = create_button(label);
+    let button = _create_button(label);
 
-    let label = create_label(label);
+    let label = _create_label(label);
 
-    gtk_box.add(&button);
-    gtk_box.add(&label);
+    gtk_box.append(&button);
+    gtk_box.append(&label);
 
     gtk_box
 }
