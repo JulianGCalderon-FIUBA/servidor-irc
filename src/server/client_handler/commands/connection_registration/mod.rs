@@ -1,5 +1,3 @@
-use crate::server::client_handler::connection_info::RegistrationState;
-
 use super::ClientHandler;
 
 use std::io::{self, Read, Write};
@@ -19,7 +17,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let password = parameters.pop().unwrap();
-        self.connection.password = Some(password);
+        self.registration.set_attribute("password", password);
 
         self.ok_reply()
     }
@@ -30,11 +28,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let nickname = parameters.pop().unwrap();
-        self.connection.nickname = Some(nickname);
-
-        if self.connection.registration_state == RegistrationState::NotInitialized {
-            self.connection.advance_state();
-        }
+        self.registration.set_nickname(nickname);
 
         self.ok_reply()
     }
@@ -47,7 +41,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         self.database
-            .set_server_operator(&self.connection.nickname());
+            .set_server_operator(&self.registration.nickname().unwrap());
 
         self.oper_reply()
     }
@@ -62,19 +56,16 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let realname = trailing.unwrap();
-        let username = parameters.pop().unwrap();
-        let hostname = parameters.pop().unwrap();
         let servername = parameters.pop().unwrap();
+        let hostname = parameters.pop().unwrap();
+        let username = parameters.pop().unwrap();
 
-        self.connection.username = Some(username);
-        self.connection.hostname = Some(hostname);
-        self.connection.servername = Some(servername);
-        self.connection.realname = Some(realname);
+        self.registration.set_attribute("username", username);
+        self.registration.set_attribute("hostname", hostname);
+        self.registration.set_attribute("servername", servername);
+        self.registration.set_attribute("realname", realname);
 
-        self.connection.advance_state();
-
-        let client_info = self.connection.build_client_info().unwrap();
-        self.database.add_client(client_info);
+        self.database.add_client(self.registration.build().unwrap());
 
         self.ok_reply()
     }
@@ -84,7 +75,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return self.quit_reply(&trailing);
         }
 
-        let nickname = self.connection.nickname.clone().unwrap_or_default();
+        let nickname = self.registration.nickname().unwrap();
         self.quit_reply(&nickname)
     }
 }

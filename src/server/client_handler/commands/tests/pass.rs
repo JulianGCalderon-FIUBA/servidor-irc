@@ -12,10 +12,13 @@ fn pass_sets_connection_password() {
 
     assert_eq!(
         "200 :success\r\n200 :success\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
 
-    assert_eq!(handler.connection.password, Some("pass2".to_string()));
+    assert_eq!(
+        handler.registration.get_attribute("password").unwrap(),
+        "pass2"
+    )
 }
 
 #[test]
@@ -30,6 +33,6 @@ fn pass_is_only_valid_as_first_command() {
 
     assert_eq!(
         "200 :success\r\n462 :may not reregister\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }

@@ -1,6 +1,6 @@
 use crate::server::client_handler::{
     commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
-    connection_info::RegistrationState,
+    registration::RegistrationState,
 };
 
 use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
@@ -101,7 +101,7 @@ impl<T: Read + Write> ClientHandler<T> {
             self.need_more_params_error(INVITE_COMMAND)?;
             return Ok(false);
         }
-        if self.connection.registration_state != RegistrationState::Registered {
+        if self.registration.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
@@ -113,7 +113,7 @@ impl<T: Read + Write> ClientHandler<T> {
             self.need_more_params_error(JOIN_COMMAND)?;
             return Ok(false);
         }
-        if self.connection.registration_state != RegistrationState::Registered {
+        if self.registration.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
@@ -121,7 +121,7 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn validate_list_command(&mut self) -> io::Result<bool> {
-        if self.connection.registration_state != RegistrationState::Registered {
+        if self.registration.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
@@ -130,7 +130,7 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn validate_names_command(&mut self) -> io::Result<bool> {
-        if self.connection.registration_state != RegistrationState::Registered {
+        if self.registration.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
@@ -143,7 +143,7 @@ impl<T: Read + Write> ClientHandler<T> {
             self.need_more_params_error(PART_COMMAND)?;
             return Ok(false);
         }
-        if self.connection.registration_state != RegistrationState::Registered {
+        if self.registration.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }

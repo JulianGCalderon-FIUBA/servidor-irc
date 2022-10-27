@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod testing_utils;
+
 mod client_handler;
 mod database;
 
@@ -8,9 +11,6 @@ use std::sync::Arc;
 use crate::thread_pool::ThreadPool;
 use client_handler::ClientHandler;
 use database::Database;
-
-#[cfg(test)]
-mod testing_utils;
 
 pub const MAX_CLIENTS: usize = 26;
 
