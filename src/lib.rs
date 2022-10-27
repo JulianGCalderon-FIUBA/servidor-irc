@@ -13,4 +13,6 @@ pub mod message;
 /// This module contains a threadPool's functionality. A threadPool creates n threads to handle n requests simultaneously.
 pub mod thread_pool;
 
+pub mod views;
+
 pub const ADDRESS: &str = "127.0.0.1:9002";
