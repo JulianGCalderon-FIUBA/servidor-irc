@@ -19,7 +19,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let password = parameters.pop().unwrap();
-        self.connection.set_password(password);
+        self.connection.set_attribute("password", password);
 
         self.ok_reply()
     }
@@ -62,12 +62,14 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let realname = trailing.unwrap();
-        let username = parameters.pop().unwrap();
-        let hostname = parameters.pop().unwrap();
         let servername = parameters.pop().unwrap();
+        let hostname = parameters.pop().unwrap();
+        let username = parameters.pop().unwrap();
 
-        self.connection
-            .set_info(username, hostname, servername, realname);
+        self.connection.set_attribute("username", username);
+        self.connection.set_attribute("hostname", hostname);
+        self.connection.set_attribute("servername", servername);
+        self.connection.set_attribute("realname", realname);
 
         self.connection.advance_state();
 

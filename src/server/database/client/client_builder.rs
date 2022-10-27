@@ -32,8 +32,8 @@ impl<T: Read + Write> ClientBuilder<T> {
         self
     }
 
-    pub fn password(mut self, password: String) -> Self {
-        self.password = Some(password);
+    pub fn password(mut self, password: Option<String>) -> Self {
+        self.password = password;
         self
     }
 

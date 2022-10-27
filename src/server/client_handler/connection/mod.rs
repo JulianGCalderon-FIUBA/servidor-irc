@@ -1,4 +1,7 @@
-use std::io::{Read, Write};
+use std::{
+    collections::HashMap,
+    io::{Read, Write},
+};
 
 mod registration_state;
 
@@ -7,55 +10,44 @@ pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
 pub struct Connection<T: Read + Write> {
+    stream: Option<T>,
     nickname: Option<String>,
     state: RegistrationState,
-    builder: Option<ClientBuilder<T>>,
+    attributes: HashMap<&'static str, String>,
 }
 
 impl<T: Read + Write> Connection<T> {
     pub fn with_stream(stream: T) -> Self {
         Self {
+            stream: Some(stream),
             nickname: None,
             state: RegistrationState::NotInitialized,
-            builder: Some(ClientBuilder::new().stream(stream)),
+            attributes: HashMap::new(),
         }
     }
 
     pub fn build(&mut self) -> Option<Client<T>> {
-        self.builder.take()?.build()
+        ClientBuilder::new()
+            .stream(self.stream.take()?)
+            .nickname(self.nickname()?)
+            .password(self.get_attribute("nickname"))
+            .username(self.get_attribute("username")?)
+            .hostname(self.get_attribute("hostname")?)
+            .servername(self.get_attribute("servername")?)
+            .realname(self.get_attribute("realname")?)
+            .build()
     }
 
     pub fn set_nickname(&mut self, nickname: String) {
-        if self.builder.is_some() {
-            self.nickname = Some(nickname.clone());
-            self.builder = Some(self.builder.take().unwrap().nickname(nickname));
-        }
+        self.nickname = Some(nickname);
     }
 
-    pub fn set_password(&mut self, password: String) {
-        if self.builder.is_some() {
-            self.builder = Some(self.builder.take().unwrap().password(password));
-        }
+    pub fn set_attribute(&mut self, key: &'static str, value: String) {
+        self.attributes.insert(key, value);
     }
 
-    pub fn set_info(
-        &mut self,
-        username: String,
-        hostname: String,
-        servername: String,
-        realname: String,
-    ) {
-        if self.builder.is_some() {
-            self.builder = Some(
-                self.builder
-                    .take()
-                    .unwrap()
-                    .username(username)
-                    .hostname(hostname)
-                    .servername(servername)
-                    .realname(realname),
-            );
-        }
+    pub fn get_attribute(&mut self, key: &'static str) -> Option<String> {
+        self.attributes.get(key).map(|s| s.to_owned())
     }
 
     pub fn advance_state(&mut self) {
