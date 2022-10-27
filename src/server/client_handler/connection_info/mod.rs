@@ -7,9 +7,9 @@ pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
 pub struct ConnectionInfo<T: Read + Write> {
-    pub nickname: Option<String>,
-    pub state: RegistrationState,
-    pub builder: Option<ClientInfoBuilder<T>>,
+    nickname: Option<String>,
+    state: RegistrationState,
+    builder: Option<ClientInfoBuilder<T>>,
 }
 
 impl<T: Read + Write> ConnectionInfo<T> {
@@ -21,17 +21,21 @@ impl<T: Read + Write> ConnectionInfo<T> {
         }
     }
 
-    pub fn build(&mut self) -> ClientInfo<T> {
-        self.builder.take().unwrap().build().unwrap()
+    pub fn build(&mut self) -> Option<ClientInfo<T>> {
+        self.builder.take()?.build()
     }
 
     pub fn set_nickname(&mut self, nickname: String) {
-        self.nickname = Some(nickname.clone());
-        self.builder = Some(self.builder.take().unwrap().nickname(nickname));
+        if self.builder.is_some() {
+            self.nickname = Some(nickname.clone());
+            self.builder = Some(self.builder.take().unwrap().nickname(nickname));
+        }
     }
 
     pub fn set_password(&mut self, password: String) {
-        self.builder = Some(self.builder.take().unwrap().password(password));
+        if self.builder.is_some() {
+            self.builder = Some(self.builder.take().unwrap().password(password));
+        }
     }
 
     pub fn set_info(
@@ -41,22 +45,28 @@ impl<T: Read + Write> ConnectionInfo<T> {
         servername: String,
         realname: String,
     ) {
-        self.builder = Some(
-            self.builder
-                .take()
-                .unwrap()
-                .username(username)
-                .hostname(hostname)
-                .servername(servername)
-                .realname(realname),
-        );
+        if self.builder.is_some() {
+            self.builder = Some(
+                self.builder
+                    .take()
+                    .unwrap()
+                    .username(username)
+                    .hostname(hostname)
+                    .servername(servername)
+                    .realname(realname),
+            );
+        }
     }
 
     pub fn advance_state(&mut self) {
         self.state = self.state.next();
     }
 
-    pub fn nickname(&self) -> String {
-        self.nickname.clone().unwrap()
+    pub fn nickname(&self) -> Option<String> {
+        self.nickname.clone()
+    }
+
+    pub fn state(&self) -> &RegistrationState {
+        &self.state
     }
 }

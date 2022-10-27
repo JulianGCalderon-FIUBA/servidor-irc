@@ -56,7 +56,7 @@ impl<T: Read + Write> ClientHandler<T> {
     pub fn handle(mut self) {
         let conection_result = self.try_handle();
 
-        let nickname = self.connection.nickname;
+        let nickname = self.connection.nickname();
 
         if let Some(nickname) = nickname.as_ref() {
             self.database.disconnect_client(nickname);

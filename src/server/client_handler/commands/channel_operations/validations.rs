@@ -99,7 +99,7 @@ impl<T: Read + Write> ClientHandler<T> {
         if parameters.len() != 2 {
             return Ok(false);
         }
-        if self.connection.state != RegistrationState::Registered {
+        if self.connection.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
@@ -111,7 +111,7 @@ impl<T: Read + Write> ClientHandler<T> {
             self.need_more_params_error(JOIN_COMMAND)?;
             return Ok(false);
         }
-        if self.connection.state != RegistrationState::Registered {
+        if self.connection.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
@@ -119,7 +119,7 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn validate_list_command(&mut self) -> io::Result<bool> {
-        if self.connection.state != RegistrationState::Registered {
+        if self.connection.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
@@ -128,7 +128,7 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn validate_names_command(&mut self) -> io::Result<bool> {
-        if self.connection.state != RegistrationState::Registered {
+        if self.connection.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
@@ -141,7 +141,7 @@ impl<T: Read + Write> ClientHandler<T> {
             self.need_more_params_error(PART_COMMAND)?;
             return Ok(false);
         }
-        if self.connection.state != RegistrationState::Registered {
+        if self.connection.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }

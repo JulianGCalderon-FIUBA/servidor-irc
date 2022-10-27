@@ -16,7 +16,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return Ok(false);
         }
 
-        if self.connection.state != RegistrationState::NotInitialized {
+        if self.connection.state() != &RegistrationState::NotInitialized {
             self.already_registered_reply()?;
             return Ok(false);
         }
@@ -33,7 +33,7 @@ impl<T: Read + Write> ClientHandler<T> {
         let nickname = &parameters[0];
 
         if self.database.contains_client(nickname) {
-            if self.connection.state == RegistrationState::Registered {
+            if self.connection.state() == &RegistrationState::Registered {
                 self.nickname_in_use_reply()?;
             } else {
                 self.nickname_collision_reply()?;
@@ -54,7 +54,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return Ok(false);
         }
 
-        if self.connection.state != RegistrationState::NicknameSent {
+        if self.connection.state() != &RegistrationState::NicknameSent {
             self.no_nickname_error()?;
             return Ok(false);
         }
@@ -68,7 +68,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return Ok(false);
         }
 
-        if self.connection.state != RegistrationState::Registered {
+        if self.connection.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }

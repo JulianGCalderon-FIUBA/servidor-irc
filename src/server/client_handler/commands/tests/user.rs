@@ -18,11 +18,11 @@ fn user_adds_client_to_database() {
         handler.stream_client_handler.read_wbuf_to_string()
     );
 
-    assert_eq!(handler.connection.nickname(), "nick");
+    assert_eq!(handler.connection.nickname().unwrap(), "nick");
 
     assert!(handler.database.contains_client("nick"));
 
-    assert!(handler.connection.state == RegistrationState::Registered);
+    assert!(handler.connection.state() == &RegistrationState::Registered);
 }
 
 #[test]

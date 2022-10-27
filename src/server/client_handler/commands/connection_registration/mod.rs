@@ -32,7 +32,7 @@ impl<T: Read + Write> ClientHandler<T> {
         let nickname = parameters.pop().unwrap();
         self.connection.set_nickname(nickname);
 
-        if self.connection.state == RegistrationState::NotInitialized {
+        if self.connection.state() == &RegistrationState::NotInitialized {
             self.connection.advance_state();
         }
 
@@ -47,7 +47,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         self.database
-            .set_server_operator(&self.connection.nickname());
+            .set_server_operator(&self.connection.nickname().unwrap());
 
         self.oper_reply()
     }
@@ -71,7 +71,7 @@ impl<T: Read + Write> ClientHandler<T> {
 
         self.connection.advance_state();
 
-        self.database.add_client(self.connection.build());
+        self.database.add_client(self.connection.build().unwrap());
 
         self.ok_reply()
     }
@@ -81,7 +81,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return self.quit_reply(&trailing);
         }
 
-        let nickname = self.connection.nickname();
+        let nickname = self.connection.nickname().unwrap();
         self.quit_reply(&nickname)
     }
 }

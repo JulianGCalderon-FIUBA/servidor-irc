@@ -14,8 +14,8 @@ fn nick_sets_connection_nickname() {
         handler.stream_client_handler.read_wbuf_to_string()
     );
 
-    assert_eq!(handler.connection.nickname(), "nick");
-    assert!(handler.connection.state == RegistrationState::NicknameSent);
+    assert_eq!(handler.connection.nickname().unwrap(), "nick");
+    assert!(handler.connection.state() == &RegistrationState::NicknameSent);
 }
 
 #[test]

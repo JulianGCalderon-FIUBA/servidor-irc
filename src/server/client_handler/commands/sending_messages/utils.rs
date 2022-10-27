@@ -9,7 +9,7 @@ impl<T: Read + Write> ClientHandler<T> {
     pub fn build_text_message(&self, command: &str, receiver: &str, content: &str) -> Message {
         let message = format!(
             ":{} {} {} :{}",
-            self.connection.nickname.as_ref().unwrap(),
+            self.connection.nickname().unwrap(),
             command,
             receiver,
             content
