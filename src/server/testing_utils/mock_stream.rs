@@ -5,8 +5,8 @@ use std::sync::{Arc, Mutex, MutexGuard};
 use crate::server::client_trait::ClientTrait;
 
 pub struct MockTcpStream {
-    pub read_buffer: Arc<Mutex<Vec<u8>>>,
-    pub write_buffer: Arc<Mutex<Vec<u8>>>,
+    read_buffer: Arc<Mutex<Vec<u8>>>,
+    write_buffer: Arc<Mutex<Vec<u8>>>,
 }
 
 impl Read for MockTcpStream {

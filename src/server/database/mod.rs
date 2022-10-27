@@ -13,8 +13,8 @@ pub use client::{Client, ClientBuilder};
 
 use super::client_trait::ClientTrait;
 pub struct Database<T: ClientTrait> {
-    pub clients: RwLock<HashMap<String, Client<T>>>,
-    pub channels: RwLock<HashMap<String, Channel>>,
+    clients: RwLock<HashMap<String, Client<T>>>,
+    channels: RwLock<HashMap<String, Channel>>,
 }
 
 impl<T: ClientTrait> Database<T> {
