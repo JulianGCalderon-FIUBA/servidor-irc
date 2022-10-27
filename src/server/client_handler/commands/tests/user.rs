@@ -3,7 +3,7 @@ use crate::server::client_handler::connection::RegistrationState;
 use super::*;
 
 #[test]
-fn user_adds_client_to_database() {
+fn user_adds_registers_client_correctly() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec!["nick".to_string()];
@@ -18,7 +18,22 @@ fn user_adds_client_to_database() {
         handler.stream_client_handler.read_wbuf_to_string()
     );
 
-    assert_eq!(handler.connection.nickname().unwrap(), "nick");
+    assert_eq!(
+        handler.connection.get_attribute("username").unwrap(),
+        "user"
+    );
+    assert_eq!(
+        handler.connection.get_attribute("servername").unwrap(),
+        "server"
+    );
+    assert_eq!(
+        handler.connection.get_attribute("hostname").unwrap(),
+        "host"
+    );
+    assert_eq!(
+        handler.connection.get_attribute("realname").unwrap(),
+        "real"
+    );
 
     assert!(handler.database.contains_client("nick"));
 

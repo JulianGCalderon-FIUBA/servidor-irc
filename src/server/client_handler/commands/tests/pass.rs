@@ -14,6 +14,11 @@ fn pass_sets_connection_password() {
         "200 :success\r\n200 :success\r\n",
         handler.stream_client_handler.read_wbuf_to_string()
     );
+
+    assert_eq!(
+        handler.connection.get_attribute("password").unwrap(),
+        "pass2"
+    )
 }
 
 #[test]
