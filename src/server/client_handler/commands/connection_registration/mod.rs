@@ -1,4 +1,4 @@
-use crate::server::client_handler::connection_info::RegistrationState;
+use crate::server::client_handler::connection::RegistrationState;
 
 use super::ClientHandler;
 

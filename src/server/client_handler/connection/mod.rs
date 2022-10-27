@@ -6,13 +6,13 @@ use crate::server::database::{ClientInfo, ClientInfoBuilder};
 pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
-pub struct ConnectionInfo<T: Read + Write> {
+pub struct Connection<T: Read + Write> {
     nickname: Option<String>,
     state: RegistrationState,
     builder: Option<ClientInfoBuilder<T>>,
 }
 
-impl<T: Read + Write> ConnectionInfo<T> {
+impl<T: Read + Write> Connection<T> {
     pub fn with_stream(stream: T) -> Self {
         Self {
             nickname: None,

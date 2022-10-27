@@ -1,6 +1,6 @@
 use crate::server::client_handler::{
     commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
-    connection_info::RegistrationState,
+    connection::RegistrationState,
 };
 
 use super::{ClientHandler, JOIN_COMMAND, PART_COMMAND};
