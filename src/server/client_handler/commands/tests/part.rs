@@ -83,12 +83,14 @@ fn can_part_one_channel() {
 #[test]
 fn can_part_existing_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
+    register_client(&mut handler, "nick2");
     let parameters = vec!["#hola,#chau".to_string()];
+
+    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#chau");
+
     handler.join_command(parameters.clone()).unwrap();
 
-    register_client(&mut handler, "nick2");
-    handler.join_command(parameters.clone()).unwrap();
     handler.stream_client_handler.clear();
 
     handler.part_command(parameters).unwrap();

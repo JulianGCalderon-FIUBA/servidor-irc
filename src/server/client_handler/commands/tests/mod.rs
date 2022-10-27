@@ -1,13 +1,13 @@
+mod invite;
 mod join;
 mod list;
+mod names;
 mod nick;
 mod oper;
 mod part;
 mod pass;
 mod privmsg;
 mod user;
-
-mod names;
 
 use std::sync::Arc;
 
