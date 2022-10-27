@@ -1,10 +1,9 @@
-use super::Client;
-use std::{
-    io::{Read, Write},
-    sync::{Arc, Mutex},
-};
+use crate::server::client_trait::ClientTrait;
 
-pub struct ClientBuilder<T: Read + Write> {
+use super::Client;
+use std::sync::{Arc, Mutex};
+
+pub struct ClientBuilder<T: ClientTrait> {
     stream: Option<T>,
     password: Option<String>,
     nickname: Option<String>,
@@ -14,7 +13,7 @@ pub struct ClientBuilder<T: Read + Write> {
     realname: Option<String>,
 }
 
-impl<T: Read + Write> ClientBuilder<T> {
+impl<T: ClientTrait> ClientBuilder<T> {
     pub fn new() -> Self {
         Self {
             stream: None,
@@ -69,9 +68,9 @@ impl<T: Read + Write> ClientBuilder<T> {
             stream: Some(stream),
             password: self.password,
             nickname: self.nickname?,
-            username: self.username?,
-            hostname: self.hostname?,
-            servername: self.servername?,
+            _username: self.username?,
+            _hostname: self.hostname?,
+            _servername: self.servername?,
             realname: self.realname?,
             operator: false,
         };

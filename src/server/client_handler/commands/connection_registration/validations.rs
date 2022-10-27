@@ -1,15 +1,14 @@
 use crate::server::client_handler::registration::RegistrationState;
+use crate::server::client_trait::ClientTrait;
 
 use super::ClientHandler;
 use std::io;
-use std::io::Read;
-use std::io::Write;
 
 use super::OPER_COMMAND;
 use super::PASS_COMMAND;
 use super::USER_COMMAND;
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     pub fn validate_pass_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
         if parameters.len() != 1 {
             self.need_more_params_error(PASS_COMMAND)?;

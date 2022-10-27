@@ -1,23 +1,22 @@
 mod client_builder;
 
 pub use client_builder::ClientBuilder;
-use std::{
-    io::{Read, Write},
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
-pub struct Client<T: Read + Write> {
-    pub stream: Option<Arc<Mutex<T>>>,
-    pub password: Option<String>,
-    pub nickname: String,
-    pub username: String,
-    pub hostname: String,
-    pub servername: String,
-    pub realname: String,
-    pub operator: bool,
+use crate::server::client_trait::ClientTrait;
+
+pub struct Client<T: ClientTrait> {
+    stream: Option<Arc<Mutex<T>>>,
+    password: Option<String>,
+    nickname: String,
+    _username: String,
+    _hostname: String,
+    _servername: String,
+    realname: String,
+    operator: bool,
 }
 
-impl<T: Read + Write> Client<T> {
+impl<T: ClientTrait> Client<T> {
     pub fn set_server_operator(&mut self) {
         self.operator = true;
     }
@@ -34,5 +33,17 @@ impl<T: Read + Write> Client<T> {
 
     pub fn disconnect(&mut self) {
         self.stream = None;
+    }
+
+    pub fn password(&self) -> Option<String> {
+        self.password.clone()
+    }
+
+    pub fn nickname(&self) -> String {
+        self.nickname.clone()
+    }
+
+    pub fn realname(&self) -> String {
+        self.realname.clone()
     }
 }

@@ -19,10 +19,9 @@ use super::*;
 
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let database = Database::new();
-    let handler_stream = MockTcpStream::new();
-    let database_stream = handler_stream.clone();
+    let stream = MockTcpStream::new();
 
-    ClientHandler::new(Arc::new(database), handler_stream, database_stream).unwrap()
+    ClientHandler::from_stream(Arc::new(database), stream).unwrap()
 }
 
 fn register_client(handler: &mut ClientHandler<MockTcpStream>, nick: &str) {

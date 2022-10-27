@@ -1,13 +1,13 @@
 mod utils;
 mod validations;
 
-use crate::server::ClientHandler;
-use std::io::{self, Read, Write};
+use crate::server::{client_trait::ClientTrait, ClientHandler};
+use std::io;
 
 pub const NOTICE_COMMAND: &str = "NOTICE";
 pub const PRIVMSG_COMMAND: &str = "PRIVMSG";
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     pub fn privmsg_command(
         &mut self,
         parameters: Vec<String>,

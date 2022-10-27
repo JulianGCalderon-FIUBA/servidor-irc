@@ -1,12 +1,12 @@
-use crate::server::client_handler::registration::RegistrationState;
+use crate::server::{client_handler::registration::RegistrationState, client_trait::ClientTrait};
 
 use super::ClientHandler;
-use std::io::{self, Read, Write};
+use std::io;
 // use std::sync::mpsc::channel;
 
 use super::PRIVMSG_COMMAND;
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     // GENERAL
 
     pub fn validate_targets(&mut self, parameters: &[String]) -> io::Result<bool> {

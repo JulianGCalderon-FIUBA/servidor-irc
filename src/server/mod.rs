@@ -2,6 +2,7 @@
 mod testing_utils;
 
 mod client_handler;
+mod client_trait;
 mod database;
 
 use std::io;
@@ -44,7 +45,7 @@ impl Server {
 
             let database_clone: Arc<Database<TcpStream>> = Arc::clone(&self.database);
             let handler: ClientHandler<TcpStream> =
-                match ClientHandler::<TcpStream>::new_from_stream(database_clone, client) {
+                match ClientHandler::<TcpStream>::from_stream(database_clone, client) {
                     Ok(handler) => handler,
                     Err(error) => {
                         eprintln!("Could not create handler for client, with error: {error:?}");
