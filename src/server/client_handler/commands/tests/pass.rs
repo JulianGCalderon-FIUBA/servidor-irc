@@ -32,7 +32,7 @@ fn pass_is_only_valid_as_first_command() {
     handler.pass_command(parameters).unwrap();
 
     assert_eq!(
-        "200 :success\r\n462 :may not reregister\r\n",
+        "200 :success\r\n462 :you may not reregister\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }

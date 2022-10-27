@@ -14,8 +14,8 @@ pub const USER_COMMAND: &str = "USER";
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_pass_command(&parameters)? {
-            return Ok(());
+        if let Some(error) = self.assert_pass_command_is_valid(&parameters) {
+            return self.send_response_for_error(error);
         }
 
         let password = parameters.pop().unwrap();
@@ -25,8 +25,8 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     pub fn nick_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_nick_command(&parameters)? {
-            return Ok(());
+        if let Some(error) = self.assert_nick_command_is_valid(&parameters) {
+            return self.send_response_for_error(error);
         }
 
         let nickname = parameters.pop().unwrap();
@@ -35,26 +35,13 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.ok_reply()
     }
 
-    pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        // let user = self.database.password.clone().unwrap();
-        // let password = self.database.password.clone().unwrap();
-        if !self.validate_oper_command(&parameters /*, &user, &password */)? {
-            return Ok(());
-        }
-
-        self.database
-            .set_server_operator(&self.registration.nickname().unwrap());
-
-        self.oper_reply()
-    }
-
     pub fn user_command(
         &mut self,
         mut parameters: Vec<String>,
         trailing: Option<String>,
     ) -> io::Result<()> {
-        if !self.validate_user_command(&parameters, &trailing)? {
-            return Ok(());
+        if let Some(error) = self.assert_user_command_is_valid(&parameters, &trailing) {
+            return self.send_response_for_error(error);
         }
 
         let realname = trailing.unwrap();
@@ -70,6 +57,19 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.database.add_client(self.registration.build().unwrap());
 
         self.ok_reply()
+    }
+
+    pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        // let user = self.database.password.clone().unwrap();
+        // let password = self.database.password.clone().unwrap();
+        if !self.validate_oper_command(&parameters /*, &user, &password */)? {
+            return Ok(());
+        }
+
+        self.database
+            .set_server_operator(&self.registration.nickname().unwrap());
+
+        self.oper_reply()
     }
 
     pub fn quit_command(&mut self, trailing: Option<String>) -> io::Result<()> {

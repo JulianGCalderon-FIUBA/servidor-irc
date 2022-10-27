@@ -24,7 +24,7 @@ fn privmsg_fails_with_invalid_target() {
     handler.privmsg_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        "401 nick1 :No such nick/channel\r\n",
+        "401 nick1 :No such nick/channel\r\n200 :success\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -147,7 +147,7 @@ fn privmsg_fails_when_not_on_channel() {
     handler.privmsg_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        "404 #channel :cannot send to channel\r\n",
+        "404 #channel :cannot send to channel\r\n200 :success\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }

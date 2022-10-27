@@ -5,6 +5,8 @@ use crate::{
     server::{client_handler::ClientHandler, client_trait::ClientTrait},
 };
 
+use crate::server::client_handler::responses::errors::ErrorReply;
+
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn build_text_message(&self, command: &str, receiver: &str, content: &str) -> Message {
         let message = format!(
@@ -20,8 +22,8 @@ impl<T: ClientTrait> ClientHandler<T> {
 
     pub fn send_message_to(&mut self, receiver: &str, message: &Message) -> io::Result<()> {
         if self.database.contains_client(receiver) {
-            if !self.send_message_to_client(receiver, message) {
-                self.disconnected_error(receiver)?;
+            if let Some(error) = self.send_message_to_client(receiver, message) {
+                self.send_response_for_error(error)?;
             }
         } else {
             self.send_message_to_channel(receiver, message);
@@ -38,13 +40,23 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
     }
 
-    pub fn send_message_to_client(&self, client: &str, message: &Message) -> bool {
-        let stream_ref = match self.database.get_stream(client) {
+    pub fn send_message_to_client(&self, nickname: &str, message: &Message) -> Option<ErrorReply> {
+        let stream_ref = match self.database.get_stream(nickname) {
             Some(stream_ref) => stream_ref,
-            None => return false,
+            None => {
+                return Some(ErrorReply::ClientOffline {
+                    nickname: nickname.to_string(),
+                })
+            }
         };
 
         let mut stream = stream_ref.lock().unwrap();
-        message.send_to(stream.deref_mut()).is_ok()
+        if message.send_to(stream.deref_mut()).is_err() {
+            return Some(ErrorReply::ClientOffline {
+                nickname: nickname.to_string(),
+            });
+        };
+
+        None
     }
 }
