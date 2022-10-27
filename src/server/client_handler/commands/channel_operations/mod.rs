@@ -15,7 +15,6 @@ pub const PART_COMMAND: &str = "PART";
 impl<T: Read + Write> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_invite_command(&parameters)? {
-            self.need_more_params_error(INVITE_COMMAND)?;
             return Ok(());
         }
 
@@ -24,7 +23,6 @@ impl<T: Read + Write> ClientHandler<T> {
         let channel = &parameters[1];
 
         if !self.validate_nickname_exits(nickname_client_to_invite)? {
-            self.no_such_nickname_error(nickname_client_to_invite)?;
             return Ok(());
         }
 
