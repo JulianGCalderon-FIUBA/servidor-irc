@@ -1,4 +1,5 @@
 mod sidebar;
+mod chat;
 
 use gtk4 as gtk;
 
@@ -12,6 +13,7 @@ use gtk::prelude::*;
 use gtk::Application;
 
 use sidebar::Sidebar;
+use chat::Chat;
 
 pub fn run() {
     let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
@@ -35,6 +37,9 @@ fn build_ui(app: &Application) {
 
     let sidebar = Sidebar::new();
     main_box.append(&sidebar);
+
+    let chat = Chat::new();
+    main_box.append(&chat);
 
     window.set_child(Some(&main_box));
     
