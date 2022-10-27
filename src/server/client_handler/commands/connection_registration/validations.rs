@@ -1,4 +1,4 @@
-use crate::server::client_handler::connection::RegistrationState;
+use crate::server::client_handler::registration::RegistrationState;
 
 use super::ClientHandler;
 use std::io;

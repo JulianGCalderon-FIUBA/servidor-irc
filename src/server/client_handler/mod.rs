@@ -4,7 +4,7 @@ use std::net::TcpStream;
 use crate::message::Message;
 
 mod commands;
-mod connection;
+mod registration;
 mod responses;
 
 use commands::channel_operations::{
@@ -19,13 +19,13 @@ use std::sync::Arc;
 
 use super::database::Database;
 use crate::message::{CreationError, ParsingError};
-use connection::Connection;
+use registration::Registration;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<T: Read + Write> {
     database: Arc<Database<T>>,
     stream_client_handler: T,
-    connection: Connection<T>,
+    connection: Registration<T>,
 }
 
 impl<T: Read + Write> ClientHandler<T> {
@@ -35,7 +35,7 @@ impl<T: Read + Write> ClientHandler<T> {
         stream_client_handler: T,
         stream_database: T,
     ) -> io::Result<Self> {
-        let connection = Connection::with_stream(stream_database);
+        let connection = Registration::with_stream(stream_database);
 
         Ok(Self {
             database,

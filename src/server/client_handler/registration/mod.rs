@@ -9,14 +9,14 @@ use crate::server::database::{Client, ClientBuilder};
 pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
-pub struct Connection<T: Read + Write> {
+pub struct Registration<T: Read + Write> {
     stream: Option<T>,
     nickname: Option<String>,
     state: RegistrationState,
     attributes: HashMap<&'static str, String>,
 }
 
-impl<T: Read + Write> Connection<T> {
+impl<T: Read + Write> Registration<T> {
     pub fn with_stream(stream: T) -> Self {
         Self {
             stream: Some(stream),
