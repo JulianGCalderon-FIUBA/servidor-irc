@@ -1,7 +1,4 @@
-use std::{
-    io::{Read, Write},
-    sync::{Arc, Mutex},
-};
+use std::io::{Read, Write};
 
 mod registration_state;
 
@@ -38,21 +35,19 @@ impl<T: Read + Write> ConnectionInfo<T> {
     }
 
     pub fn build_client_info(&mut self) -> Option<ClientInfo<T>> {
-        let mut client_builder = ClientInfoBuilder::new_with(
-            self.nickname.clone()?,
-            self.username.clone()?,
-            self.hostname.clone()?,
-            self.servername.clone()?,
-            self.realname.clone()?,
-        );
-
-        client_builder.with_stream(Arc::new(Mutex::new(self.stream.take()?)));
+        let mut client_builder = ClientInfoBuilder::new()
+            .nickname(self.nickname.clone()?)
+            .username(self.username.clone()?)
+            .hostname(self.hostname.clone()?)
+            .servername(self.servername.clone()?)
+            .realname(self.realname.clone()?)
+            .stream(self.stream.take().unwrap());
 
         if let Some(password) = self.password.clone() {
-            client_builder.with_password(password);
+            client_builder = client_builder.password(password);
         }
 
-        Some(client_builder.build())
+        client_builder.build()
     }
 
     pub fn nickname(&self) -> String {
