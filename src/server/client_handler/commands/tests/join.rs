@@ -132,16 +132,15 @@ fn can_join_existing_channel() {
     register_client(&mut handler, "nick");
 
     let parameters = vec!["#channel".to_string()];
-    handler.join_command(parameters.clone()).unwrap();
 
-    register_client(&mut handler, "nick2");
+    handler.database.add_client_to_channel("nick2", "#channel");
 
     let channels = vec!["#channel".to_string()];
 
     handler.join_command(parameters).unwrap();
 
     assert_eq!(
-        "331 #channel :no topic is set\r\n353 #channel :nick nick2\r\n",
+        "331 #channel :no topic is set\r\n353 #channel :nick2 nick\r\n",
         handler.stream_client_handler.read_wbuf_to_string()
     );
     assert_eq!(handler.database.get_channels_for_client("nick"), channels);

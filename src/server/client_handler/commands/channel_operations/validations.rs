@@ -3,7 +3,7 @@ use crate::server::client_handler::{
     connection::RegistrationState,
 };
 
-use super::{ClientHandler, JOIN_COMMAND, PART_COMMAND};
+use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
 use std::io::{self, Read, Write};
 // use std::sync::mpsc::channel;
 
@@ -20,6 +20,7 @@ impl<T: Read + Write> ClientHandler<T> {
 
     pub fn validate_nickname_exits(&mut self, nickname: &str) -> io::Result<bool> {
         if !self.database.contains_client(nickname) {
+            self.no_such_nickname_error(nickname)?;
             return Ok(false);
         }
 
@@ -97,6 +98,7 @@ impl<T: Read + Write> ClientHandler<T> {
 
     pub fn validate_invite_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
         if parameters.len() != 2 {
+            self.need_more_params_error(INVITE_COMMAND)?;
             return Ok(false);
         }
         if self.connection.state() != &RegistrationState::Registered {

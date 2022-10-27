@@ -66,8 +66,13 @@ impl<T: Read + Write> ClientHandler<T> {
         self.send_response(&response)
     }
 
-    pub fn names_reply(&mut self, channel: String, clients: Vec<String>) -> io::Result<()> {
-        let response = format!("353 {} :{}", channel, clients.join(" "));
+    pub fn end_of_names_reply(&mut self, channel: &str) -> io::Result<()> {
+        let response = format!("366 {channel} :End of /NAMES list");
+        self.send_response(&response)
+    }
+
+    pub fn names_reply(&mut self, channel: &str, clients: Vec<String>) -> io::Result<()> {
+        let response = format!("353 {channel} :{}", clients.join(" "));
         self.send_response(&response)
     }
 
