@@ -1,3 +1,5 @@
+mod sidebar;
+
 use gtk::Align;
 use gtk::ApplicationWindow;
 use gtk::Button;
@@ -7,6 +9,7 @@ use gtk::Box;
 use gtk::prelude::*;
 use gtk::Application;
 
+use sidebar::Sidebar;
 
 pub fn run() {
     let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
@@ -24,19 +27,21 @@ fn build_ui(app: &Application) {
     .default_width(700)
     .build();
 
-    let main_box = Box::builder()
-    .orientation(Orientation::Horizontal)
-    .build();
+    // let main_box = Box::builder()
+    // .orientation(Orientation::Horizontal)
+    // .build();
 
-    let box1 = create_box("Box1");
-    let box2 = create_box("Box2");
-    let box3 = create_box("Box3");
+    // let box1 = create_box("Box1");
+    // let box2 = create_box("Box2");
+    // let box3 = create_box("Box3");
 
-    main_box.add(&box1);
-    main_box.add(&box2);
-    main_box.add(&box3);
+    // main_box.add(&box1);
+    // main_box.add(&box2);
+    // main_box.add(&box3);
 
-    window.set_child(Some(&main_box));
+    let sidebar = Sidebar::new();
+
+    window.set_child(Some(&sidebar));
     
     window.show_all();
 }

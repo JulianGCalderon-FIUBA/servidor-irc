@@ -15,4 +15,4 @@ name = "server"
 name = "view"
 
 [dependencies]
-gtk = "0.16.0"
+gtk4 = "0.4.7"
