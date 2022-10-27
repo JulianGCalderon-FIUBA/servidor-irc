@@ -24,18 +24,17 @@ fn build_ui(app: &Application) {
     .default_width(700)
     .build();
 
-    let button = create_button("Boton1");
-
-    let label = create_label("Hello");
-
-    button.connect_clicked(|_| say_hi());
-
     let main_box = Box::builder()
-    .orientation(Orientation::Vertical)
+    .orientation(Orientation::Horizontal)
     .build();
 
-    main_box.add(&button);
-    main_box.add(&label);
+    let box1 = create_box("Box1");
+    let box2 = create_box("Box2");
+    let box3 = create_box("Box3");
+
+    main_box.add(&box1);
+    main_box.add(&box2);
+    main_box.add(&box3);
 
     window.set_child(Some(&main_box));
     
@@ -47,7 +46,7 @@ fn say_hi() {
 }
 
 fn create_button(label: &str) -> Button {
-    Button::builder()
+    let button = Button::builder()
     .label(label)
     .margin_top(12)
     .margin_bottom(12)
@@ -55,7 +54,11 @@ fn create_button(label: &str) -> Button {
     .margin_end(12)
     .halign(Align::Center)
     .valign(Align::Center)
-    .build()
+    .build();
+
+    button.connect_clicked(|_| say_hi());
+
+    button
 }
 
 fn create_label(label: &str) -> Label {
@@ -68,5 +71,20 @@ fn create_label(label: &str) -> Label {
     .halign(Align::Center)
     .valign(Align::Center)
     .build()
+}
+
+fn create_box(label: &str) -> Box {
+    let gtk_box = Box::builder()
+    .orientation(Orientation::Vertical)
+    .build();
+
+    let button = create_button(label);
+
+    let label = create_label(label);
+
+    gtk_box.add(&button);
+    gtk_box.add(&label);
+
+    gtk_box
 }
 
