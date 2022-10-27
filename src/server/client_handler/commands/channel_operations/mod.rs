@@ -31,7 +31,7 @@ impl<T: Read + Write> ClientHandler<T> {
                 self.not_on_channel_error(channel)?;
                 return Ok(());
             }
-            if !self.validate_can_join_channel(channel, nickname_client_to_invite)? {
+            if self.validate_user_is_in_channel(channel, nickname_client_to_invite)? {
                 self.user_on_channel_error(nickname_client_to_invite, channel)?;
                 return Ok(());
             }
@@ -41,13 +41,13 @@ impl<T: Read + Write> ClientHandler<T> {
         let prefix = self.connection.nickname();
 
         let invitation_text: String =
-            format!("{prefix} {INVITE_COMMAND} {nickname_client_to_invite} {channel}");
+            format!(":{prefix} {INVITE_COMMAND} {nickname_client_to_invite} {channel}");
         self.send_message_to_client(
             nickname_client_to_invite,
             &Message::new(&invitation_text).unwrap(),
         );
 
-        self.invite_reply(channel, nickname_client_to_invite)
+        self.invite_reply(channel, nickname_current_client)
     }
 
     pub fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
