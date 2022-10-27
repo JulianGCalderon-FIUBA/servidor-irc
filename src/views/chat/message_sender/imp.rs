@@ -1,5 +1,4 @@
-use gtk::Align;
-use gtk::Label;
+use gtk::Entry;
 use gtk4 as gtk;
 
 use gtk::Button;
@@ -29,8 +28,14 @@ impl ObjectImpl for MessageSender {
     fn constructed(&self, obj: &Self::Type) {
         self.parent_constructed(obj);
 
-        let info_conv = create_label("message_sender");
-        obj.append(&info_conv);
+        let info_button = create_button("Info Personal");
+        obj.append(&info_button);
+
+        let input = create_entry("Message...");
+        obj.append(&input);
+
+        let send_button = create_button("Send");
+        obj.append(&send_button);
 
         
         
@@ -65,7 +70,7 @@ impl WidgetImpl for MessageSender {}
 
 impl BoxImpl for MessageSender {}
 
-fn _create_button(label: &str) -> Button {
+fn create_button(label: &str) -> Button {
     let button = Button::builder()
     .label(label)
     .margin_top(12)
@@ -81,14 +86,16 @@ fn _create_button(label: &str) -> Button {
     button
 }
 
-fn create_label(label: &str) -> Label {
-    Label::builder()
-    .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(Align::Center)
-    .valign(Align::Center)
-    .build()
+fn create_entry(placeholder: &str) -> Entry {
+    Entry::builder().placeholder_text(placeholder).build()
+    
+    // Label::builder()
+    // .label(label)
+    // .margin_top(12)
+    // .margin_bottom(12)
+    // .margin_start(12)
+    // .margin_end(12)
+    // .halign(Align::Center)
+    // .valign(Align::Center)
+    // .build()
 }

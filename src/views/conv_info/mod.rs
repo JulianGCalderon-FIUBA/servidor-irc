@@ -14,7 +14,7 @@ glib::wrapper! {
 
 impl ConvInfo {
     pub fn new() -> Self {
-        Object::new(&[("orientation", &gtk::Orientation::Horizontal)])
+        Object::new(&[("orientation", &gtk::Orientation::Vertical)])
                                 .expect("Could not be created")
     }
 }

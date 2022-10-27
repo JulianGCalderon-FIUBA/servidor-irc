@@ -29,8 +29,16 @@ impl ObjectImpl for ConvInfo {
     fn constructed(&self, obj: &Self::Type) {
         self.parent_constructed(obj);
 
-        let info_conv = create_label("Channel info");
-        obj.append(&info_conv);
+        let leave_button = create_button("X");
+        obj.append(&leave_button);
+
+        let channel_info = create_button("Channel Info");
+        obj.append(&channel_info);
+
+        let functions_button = create_button("Functions");
+        obj.append(&functions_button);
+
+
 
         
         
@@ -65,7 +73,7 @@ impl WidgetImpl for ConvInfo {}
 
 impl BoxImpl for ConvInfo {}
 
-fn _create_button(label: &str) -> Button {
+fn create_button(label: &str) -> Button {
     let button = Button::builder()
     .label(label)
     .margin_top(12)
@@ -81,7 +89,7 @@ fn _create_button(label: &str) -> Button {
     button
 }
 
-fn create_label(label: &str) -> Label {
+fn _create_label(label: &str) -> Label {
     Label::builder()
     .label(label)
     .margin_top(12)

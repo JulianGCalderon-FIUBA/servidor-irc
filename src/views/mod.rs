@@ -1,5 +1,6 @@
 mod sidebar;
 mod chat;
+mod conv_info;
 
 use gtk4 as gtk;
 
@@ -14,6 +15,7 @@ use gtk::Application;
 
 use sidebar::Sidebar;
 use chat::Chat;
+use conv_info::ConvInfo;
 
 pub fn run() {
     let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
@@ -40,6 +42,9 @@ fn build_ui(app: &Application) {
 
     let chat = Chat::new();
     main_box.append(&chat);
+
+    let conv_info = ConvInfo::new();
+    main_box.append(&conv_info);
 
     window.set_child(Some(&main_box));
     

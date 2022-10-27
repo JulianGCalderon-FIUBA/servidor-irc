@@ -29,7 +29,10 @@ impl ObjectImpl for Messages {
     fn constructed(&self, obj: &Self::Type) {
         self.parent_constructed(obj);
 
-        let info_conv = create_label("messages");
+        let info_conv = create_message("sol: Hola chicos!");
+        obj.append(&info_conv);
+
+        let info_conv = create_message("juli: Como estan?");
         obj.append(&info_conv);
 
         
@@ -81,7 +84,7 @@ fn _create_button(label: &str) -> Button {
     button
 }
 
-fn create_label(label: &str) -> Label {
+fn create_message(label: &str) -> Label {
     Label::builder()
     .label(label)
     .margin_top(12)

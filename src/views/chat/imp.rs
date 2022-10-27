@@ -13,7 +13,6 @@ use gtk::subclass::prelude::ObjectImplExt;
 use gtk::subclass::prelude::ObjectSubclass;
 use gtk::subclass::widget::WidgetImpl;
 
-use super::conv_info::ConvInfo;
 use super::messages::Messages;
 use super::message_sender::MessageSender;
 
@@ -34,14 +33,12 @@ impl ObjectImpl for Chat {
     fn constructed(&self, obj: &Self::Type) {
         self.parent_constructed(obj);
 
-        let conv_info = ConvInfo::new();
-        obj.append(&conv_info);
+        let messages = Messages::new();
+        obj.append(&messages);
 
         let message_sender = MessageSender::new();
         obj.append(&message_sender);
 
-        let messages = Messages::new();
-        obj.append(&messages);
         
         obj.set_margin_top(12);
         obj.set_margin_bottom(12);

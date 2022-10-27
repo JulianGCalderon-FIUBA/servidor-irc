@@ -1,5 +1,4 @@
 mod imp;
-mod conv_info;
 mod messages;
 mod message_sender;
 
