@@ -11,5 +11,8 @@ name = "client"
 [[bin]]
 name = "server"
 
+[[bin]]
+name = "view"
+
 [dependencies]
 gtk = "0.16.0"

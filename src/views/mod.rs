@@ -5,7 +5,7 @@ use gtk::Application;
 
 
 pub fn run() {
-    let app = Application::builder().application_id("com.lemon-pie.demo").build();
+    let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
     
     app.connect_activate(build_ui);
     app.run();
@@ -13,13 +13,17 @@ pub fn run() {
     
 fn build_ui(app: &Application) {
     
-    
-    let window = ApplicationWindow::builder().title("Lemon Pie").application(app).build();
+    let window = ApplicationWindow::new(app);
+
+    window.set_title("Lemon Pie IRC");
+    window.set_border_width(10);
+    window.set_position(gtk::WindowPosition::Center);
+    window.set_default_size(600, 700);
     
     let button = Button::builder().label("Click Me").margin_top(12).margin_bottom(12).margin_start(12).margin_end(12).build();
-    button.connect_clicked(move |_| say_hi());
+    button.connect_clicked(|_| say_hi());
 
-    window.add(&button);    
+    window.set_child(Some(&button));
     
     window.show_all();
 }
