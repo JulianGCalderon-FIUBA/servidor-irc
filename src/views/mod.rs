@@ -1,5 +1,9 @@
+use gtk::Align;
 use gtk::ApplicationWindow;
 use gtk::Button;
+use gtk::Label;
+use gtk::Orientation;
+use gtk::Box;
 use gtk::prelude::*;
 use gtk::Application;
 
@@ -13,17 +17,41 @@ pub fn run() {
     
 fn build_ui(app: &Application) {
     
-    let window = ApplicationWindow::new(app);
+    let window = ApplicationWindow::builder()
+    .application(app)
+    .title("Lemon Pie IRC")
+    .default_height(600)
+    .default_width(700)
+    .build();
 
-    window.set_title("Lemon Pie IRC");
-    window.set_border_width(10);
-    window.set_position(gtk::WindowPosition::Center);
-    window.set_default_size(600, 700);
-    
-    let button = Button::builder().label("Click Me").margin_top(12).margin_bottom(12).margin_start(12).margin_end(12).build();
+    let button = Button::builder()
+    .label("Click Me")
+    .margin_top(12)
+    .margin_bottom(12)
+    .margin_start(12)
+    .margin_end(12)
+    .halign(Align::Center)
+    .valign(Align::Center)
+    .build();
+
+    let label = Label::builder()
+    .label("Hello")
+    .margin_top(12)
+    .margin_bottom(12)
+    .margin_start(12)
+    .margin_end(12)
+    .halign(Align::Center)
+    .valign(Align::Center)
+    .build();
+
     button.connect_clicked(|_| say_hi());
 
-    window.set_child(Some(&button));
+    let main_box = Box::builder().orientation(Orientation::Vertical).build();
+
+    main_box.add(&button);
+    main_box.add(&label);
+
+    window.set_child(Some(&main_box));
     
     window.show_all();
 }
