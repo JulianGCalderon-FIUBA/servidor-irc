@@ -31,7 +31,7 @@ impl<T: Read + Write> Connection<T> {
     }
 
     pub fn get_attribute(&mut self, key: &'static str) -> Option<String> {
-        self.attributes.get(key).map(|s| s.to_owned())
+        self.attributes.get(key).map(|attr| attr.to_owned())
     }
 
     pub fn set_nickname(&mut self, nickname: String) {
