@@ -21,7 +21,7 @@ impl<T: Read + Write> ClientHandler<T> {
                 valid = false;
             }
 
-            let nickname = self.connection.nickname().unwrap();
+            let nickname = self.registration.nickname().unwrap();
             if is_channel && !self.database.is_client_in_channel(&nickname, target) {
                 self.cannot_send_to_chan_error(target)?;
                 valid = false;
@@ -48,7 +48,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return Ok(false);
         }
 
-        if self.connection.state() != &RegistrationState::Registered {
+        if self.registration.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }

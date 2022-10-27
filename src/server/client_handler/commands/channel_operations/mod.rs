@@ -19,7 +19,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let nickname_client_to_invite = &parameters[0];
-        let nickname_current_client = &(self.connection.nickname().unwrap());
+        let nickname_current_client = &(self.registration.nickname().unwrap());
         let channel = &parameters[1];
 
         if !self.validate_nickname_exits(nickname_client_to_invite)? {
@@ -38,7 +38,7 @@ impl<T: Read + Write> ClientHandler<T> {
             // si el canal es invite only: validar que el usuario es operador del canal
         }
 
-        let prefix = self.connection.nickname().unwrap();
+        let prefix = self.registration.nickname().unwrap();
 
         let invitation_text: String =
             format!(":{prefix} {INVITE_COMMAND} {nickname_client_to_invite} {channel}");
@@ -54,7 +54,7 @@ impl<T: Read + Write> ClientHandler<T> {
         if !self.validate_join_command(&parameters)? {
             return Ok(());
         }
-        let nickname = self.connection.nickname().unwrap();
+        let nickname = self.registration.nickname().unwrap();
 
         let channels = &parameters[0];
         //let keys = &parameters[1];
@@ -142,7 +142,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let channels = &parameters[0];
-        let nickname = self.connection.nickname().unwrap();
+        let nickname = self.registration.nickname().unwrap();
 
         for channel in channels.split(',') {
             if !self.validate_can_part_channel(channel, &nickname)? {

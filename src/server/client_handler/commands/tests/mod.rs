@@ -33,5 +33,5 @@ fn register_client(handler: &mut ClientHandler<MockTcpStream>, nick: &str) {
     let trailing = Some("real".to_string());
     handler.user_command(parameters, trailing).unwrap();
 
-    handler.stream_client_handler.clear()
+    handler.stream.clear()
 }

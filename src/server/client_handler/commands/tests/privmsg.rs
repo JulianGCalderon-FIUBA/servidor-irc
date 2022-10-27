@@ -10,7 +10,7 @@ fn privmsg_fails_with_unregistered_client() {
 
     assert_eq!(
         "200 :unregistered\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -25,7 +25,7 @@ fn privmsg_fails_with_invalid_target() {
 
     assert_eq!(
         "401 nick1 :No such nick/channel\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -40,10 +40,7 @@ fn privmsg_works_with_valid_target_client() {
     let trailing = Some("message!".to_string());
     handler.privmsg_command(parameters, trailing).unwrap();
 
-    assert_eq!(
-        "200 :success\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
-    );
+    assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
 
     assert_eq!(
         ":nick PRIVMSG nick1 :message!\r\n",
@@ -74,7 +71,7 @@ fn privmsg_works_with_valid_target_channel() {
 
     assert_eq!(
         ":nick PRIVMSG #channel :message!\r\n200 :success\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
 
     assert_eq!(
@@ -112,10 +109,7 @@ fn privmsg_works_with_multiple_targets() {
     let trailing = Some("message!".to_string());
     handler.privmsg_command(parameters, trailing).unwrap();
 
-    assert_eq!(
-        "200 :success\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
-    );
+    assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
 
     assert_eq!(
         ":nick PRIVMSG nick1 :message!\r\n",
@@ -154,6 +148,6 @@ fn privmsg_fails_when_not_on_channel() {
 
     assert_eq!(
         "404 #channel :cannot send to channel\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
 }

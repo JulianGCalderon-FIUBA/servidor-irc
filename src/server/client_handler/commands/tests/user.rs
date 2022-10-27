@@ -15,29 +15,29 @@ fn user_adds_registers_client_correctly() {
 
     assert_eq!(
         "200 :success\r\n200 :success\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
 
     assert_eq!(
-        handler.connection.get_attribute("username").unwrap(),
+        handler.registration.get_attribute("username").unwrap(),
         "user"
     );
     assert_eq!(
-        handler.connection.get_attribute("servername").unwrap(),
+        handler.registration.get_attribute("servername").unwrap(),
         "server"
     );
     assert_eq!(
-        handler.connection.get_attribute("hostname").unwrap(),
+        handler.registration.get_attribute("hostname").unwrap(),
         "host"
     );
     assert_eq!(
-        handler.connection.get_attribute("realname").unwrap(),
+        handler.registration.get_attribute("realname").unwrap(),
         "real"
     );
 
     assert!(handler.database.contains_client("nick"));
 
-    assert!(handler.connection.state() == &RegistrationState::Registered);
+    assert!(handler.registration.state() == &RegistrationState::Registered);
 }
 
 #[test]
@@ -50,6 +50,6 @@ fn user_is_only_valid_after_nick() {
 
     assert_eq!(
         "200 :no nickname registered\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
 }

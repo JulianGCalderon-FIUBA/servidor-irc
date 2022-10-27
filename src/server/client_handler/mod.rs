@@ -24,23 +24,19 @@ use registration::Registration;
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<T: Read + Write> {
     database: Arc<Database<T>>,
-    stream_client_handler: T,
-    connection: Registration<T>,
+    stream: T,
+    registration: Registration<T>,
 }
 
 impl<T: Read + Write> ClientHandler<T> {
     /// Returns new clientHandler.
-    pub fn new(
-        database: Arc<Database<T>>,
-        stream_client_handler: T,
-        stream_database: T,
-    ) -> io::Result<Self> {
-        let connection = Registration::with_stream(stream_database);
+    pub fn new(database: Arc<Database<T>>, stream: T, stream_database: T) -> io::Result<Self> {
+        let registration = Registration::with_stream(stream_database);
 
         Ok(Self {
             database,
-            stream_client_handler,
-            connection,
+            stream,
+            registration,
         })
     }
 
@@ -49,14 +45,14 @@ impl<T: Read + Write> ClientHandler<T> {
         stream: TcpStream,
     ) -> io::Result<ClientHandler<TcpStream>> {
         let database_stream = stream.try_clone()?;
-        ClientHandler::<TcpStream>::new(database, stream, database_stream)
+        ClientHandler::new(database, stream, database_stream)
     }
 
     /// Handles the received requests with error handling
     pub fn handle(mut self) {
         let conection_result = self.try_handle();
 
-        let nickname = self.connection.nickname();
+        let nickname = self.registration.nickname();
 
         if let Some(nickname) = nickname.as_ref() {
             self.database.disconnect_client(nickname);
@@ -83,7 +79,7 @@ impl<T: Read + Write> ClientHandler<T> {
     ///
     fn try_handle(&mut self) -> io::Result<()> {
         loop {
-            let message = Message::read_from(&mut self.stream_client_handler);
+            let message = Message::read_from(&mut self.stream);
 
             let message = match message {
                 Ok(message) => message,
@@ -106,7 +102,7 @@ impl<T: Read + Write> ClientHandler<T> {
                 NAMES_COMMAND => self.names_command(parameters)?,
                 LIST_COMMAND => self.list_command(parameters)?,
                 OPER_COMMAND => self.oper_command(parameters)?,
-                INVITE_COMMAND => self.invite_command(parameters /* , trailing*/)?,
+                INVITE_COMMAND => self.invite_command(parameters)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
@@ -117,6 +113,6 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
-        self.send_response("300 :parsing error")
+        self.send_response("200 :parsing error")
     }
 }
