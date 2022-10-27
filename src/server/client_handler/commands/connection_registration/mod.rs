@@ -1,6 +1,8 @@
+use crate::server::client_trait::ClientTrait;
+
 use super::ClientHandler;
 
-use std::io::{self, Read, Write};
+use std::io;
 
 mod validations;
 
@@ -10,7 +12,7 @@ pub const PASS_COMMAND: &str = "PASS";
 pub const QUIT_COMMAND: &str = "QUIT";
 pub const USER_COMMAND: &str = "USER";
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_pass_command(&parameters)? {
             return Ok(());

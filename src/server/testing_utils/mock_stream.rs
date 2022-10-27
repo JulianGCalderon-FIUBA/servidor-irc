@@ -1,5 +1,8 @@
+use std::io;
 use std::io::{Read, Write};
 use std::sync::{Arc, Mutex, MutexGuard};
+
+use crate::server::client_trait::ClientTrait;
 
 pub struct MockTcpStream {
     pub read_buffer: Arc<Mutex<Vec<u8>>>,
@@ -7,27 +10,29 @@ pub struct MockTcpStream {
 }
 
 impl Read for MockTcpStream {
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.read_lock().as_slice().read(buf)
     }
 }
 
 impl Write for MockTcpStream {
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
         self.write_lock().write(buf)
     }
 
-    fn flush(&mut self) -> std::io::Result<()> {
+    fn flush(&mut self) -> io::Result<()> {
         self.write_lock().flush()
     }
 }
 
-impl Clone for MockTcpStream {
-    fn clone(&self) -> Self {
-        Self {
+impl ClientTrait for MockTcpStream {
+    fn try_clone(&self) -> io::Result<Self> {
+        let clone = Self {
             read_buffer: Arc::clone(&self.read_buffer),
             write_buffer: Arc::clone(&self.write_buffer),
-        }
+        };
+
+        Ok(clone)
     }
 }
 

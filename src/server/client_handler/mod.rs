@@ -1,5 +1,4 @@
-use std::io::{self, Read, Write};
-use std::net::TcpStream;
+use std::io;
 
 use crate::message::Message;
 
@@ -17,35 +16,29 @@ use commands::sending_messages::{NOTICE_COMMAND, PRIVMSG_COMMAND};
 
 use std::sync::Arc;
 
+use super::client_trait::ClientTrait;
 use super::database::Database;
 use crate::message::{CreationError, ParsingError};
 use registration::Registration;
 
 /// A ClientHandler handles the client's request.
-pub struct ClientHandler<T: Read + Write> {
+pub struct ClientHandler<T: ClientTrait> {
     database: Arc<Database<T>>,
     stream: T,
     registration: Registration<T>,
 }
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     /// Returns new clientHandler.
-    pub fn new(database: Arc<Database<T>>, stream: T, stream_database: T) -> io::Result<Self> {
-        let registration = Registration::with_stream(stream_database);
+
+    pub fn from_stream(database: Arc<Database<T>>, stream: T) -> io::Result<ClientHandler<T>> {
+        let registration = Registration::with_stream(stream.try_clone()?);
 
         Ok(Self {
             database,
             stream,
             registration,
         })
-    }
-
-    pub fn new_from_stream(
-        database: Arc<Database<TcpStream>>,
-        stream: TcpStream,
-    ) -> io::Result<ClientHandler<TcpStream>> {
-        let database_stream = stream.try_clone()?;
-        ClientHandler::new(database, stream, database_stream)
     }
 
     /// Handles the received requests with error handling

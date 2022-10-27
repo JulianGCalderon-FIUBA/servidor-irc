@@ -1,12 +1,11 @@
 mod client_builder;
 
 pub use client_builder::ClientBuilder;
-use std::{
-    io::{Read, Write},
-    sync::{Arc, Mutex},
-};
+use std::sync::{Arc, Mutex};
 
-pub struct Client<T: Read + Write> {
+use crate::server::client_trait::ClientTrait;
+
+pub struct Client<T: ClientTrait> {
     pub stream: Option<Arc<Mutex<T>>>,
     pub password: Option<String>,
     pub nickname: String,
@@ -17,7 +16,7 @@ pub struct Client<T: Read + Write> {
     pub operator: bool,
 }
 
-impl<T: Read + Write> Client<T> {
+impl<T: ClientTrait> Client<T> {
     pub fn set_server_operator(&mut self) {
         self.operator = true;
     }

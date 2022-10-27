@@ -1,10 +1,10 @@
 mod validations;
 
-use crate::message::Message;
+use crate::{message::Message, server::client_trait::ClientTrait};
 
 use super::ClientHandler;
 
-use std::io::{self, Read, Write};
+use std::io;
 
 pub const INVITE_COMMAND: &str = "INVITE";
 pub const JOIN_COMMAND: &str = "JOIN";
@@ -12,7 +12,7 @@ pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
 pub const PART_COMMAND: &str = "PART";
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_invite_command(&parameters)? {
             return Ok(());

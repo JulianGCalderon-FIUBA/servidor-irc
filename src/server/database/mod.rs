@@ -6,17 +6,18 @@ mod utils;
 mod tests;
 
 use std::collections::HashMap;
-use std::io::{Read, Write};
 use std::sync::{Arc, Mutex, RwLock};
 
 pub use channel::Channel;
 pub use client::{Client, ClientBuilder};
-pub struct Database<T: Read + Write> {
+
+use super::client_trait::ClientTrait;
+pub struct Database<T: ClientTrait> {
     pub clients: RwLock<HashMap<String, Client<T>>>,
     pub channels: RwLock<HashMap<String, Channel>>,
 }
 
-impl<T: Read + Write> Database<T> {
+impl<T: ClientTrait> Database<T> {
     pub fn new() -> Self {
         Self {
             clients: RwLock::new(HashMap::new()),
@@ -141,7 +142,7 @@ impl<T: Read + Write> Database<T> {
     }
 }
 
-impl<T: Read + Write> Default for Database<T> {
+impl<T: ClientTrait> Default for Database<T> {
     fn default() -> Self {
         Self::new()
     }

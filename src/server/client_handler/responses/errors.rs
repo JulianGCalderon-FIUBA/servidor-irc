@@ -1,8 +1,8 @@
-use std::io::{self, Read, Write};
+use std::io;
 
-use crate::server::client_handler::ClientHandler;
+use crate::server::{client_handler::ClientHandler, client_trait::ClientTrait};
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     // REPLY o ERROR
 
     pub fn no_nickname_error(&mut self) -> io::Result<()> {

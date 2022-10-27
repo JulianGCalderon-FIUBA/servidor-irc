@@ -1,22 +1,22 @@
-use std::{
-    collections::HashMap,
-    io::{Read, Write},
-};
+use std::collections::HashMap;
 
 mod registration_state;
 
-use crate::server::database::{Client, ClientBuilder};
+use crate::server::{
+    client_trait::ClientTrait,
+    database::{Client, ClientBuilder},
+};
 pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
-pub struct Registration<T: Read + Write> {
+pub struct Registration<T: ClientTrait> {
     stream: Option<T>,
     nickname: Option<String>,
     state: RegistrationState,
     attributes: HashMap<&'static str, String>,
 }
 
-impl<T: Read + Write> Registration<T> {
+impl<T: ClientTrait> Registration<T> {
     pub fn with_stream(stream: T) -> Self {
         Self {
             stream: Some(stream),

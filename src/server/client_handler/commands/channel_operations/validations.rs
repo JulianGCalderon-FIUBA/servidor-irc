@@ -1,13 +1,16 @@
-use crate::server::client_handler::{
-    commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
-    registration::RegistrationState,
+use crate::server::{
+    client_handler::{
+        commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
+        registration::RegistrationState,
+    },
+    client_trait::ClientTrait,
 };
 
 use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
-use std::io::{self, Read, Write};
+use std::io;
 // use std::sync::mpsc::channel;
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     // GENERAL
     pub fn validate_channel_exists(&mut self, channel: &str) -> io::Result<bool> {
         let channels_database = self.database.get_channels();
