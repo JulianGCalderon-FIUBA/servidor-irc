@@ -24,29 +24,15 @@ fn build_ui(app: &Application) {
     .default_width(700)
     .build();
 
-    let button = Button::builder()
-    .label("Click Me")
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(Align::Center)
-    .valign(Align::Center)
-    .build();
+    let button = create_button("Boton1");
 
-    let label = Label::builder()
-    .label("Hello")
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(Align::Center)
-    .valign(Align::Center)
-    .build();
+    let label = create_label("Hello");
 
     button.connect_clicked(|_| say_hi());
 
-    let main_box = Box::builder().orientation(Orientation::Vertical).build();
+    let main_box = Box::builder()
+    .orientation(Orientation::Vertical)
+    .build();
 
     main_box.add(&button);
     main_box.add(&label);
@@ -60,4 +46,27 @@ fn say_hi() {
     println!("Hi");
 }
 
+fn create_button(label: &str) -> Button {
+    Button::builder()
+    .label(label)
+    .margin_top(12)
+    .margin_bottom(12)
+    .margin_start(12)
+    .margin_end(12)
+    .halign(Align::Center)
+    .valign(Align::Center)
+    .build()
+}
+
+fn create_label(label: &str) -> Label {
+    Label::builder()
+    .label(label)
+    .margin_top(12)
+    .margin_bottom(12)
+    .margin_start(12)
+    .margin_end(12)
+    .halign(Align::Center)
+    .valign(Align::Center)
+    .build()
+}
 
