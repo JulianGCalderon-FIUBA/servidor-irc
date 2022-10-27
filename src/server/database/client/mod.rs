@@ -1,12 +1,12 @@
-mod client_info_builder;
+mod client_builder;
 
-pub use client_info_builder::ClientInfoBuilder;
+pub use client_builder::ClientBuilder;
 use std::{
     io::{Read, Write},
     sync::{Arc, Mutex},
 };
 
-pub struct ClientInfo<T: Read + Write> {
+pub struct Client<T: Read + Write> {
     pub stream: Option<Arc<Mutex<T>>>,
     pub password: Option<String>,
     pub nickname: String,
@@ -17,7 +17,7 @@ pub struct ClientInfo<T: Read + Write> {
     pub operator: bool,
 }
 
-impl<T: Read + Write> ClientInfo<T> {
+impl<T: Read + Write> Client<T> {
     pub fn set_server_operator(&mut self) {
         self.operator = true;
     }

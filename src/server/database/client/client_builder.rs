@@ -1,10 +1,10 @@
-use super::ClientInfo;
+use super::Client;
 use std::{
     io::{Read, Write},
     sync::{Arc, Mutex},
 };
 
-pub struct ClientInfoBuilder<T: Read + Write> {
+pub struct ClientBuilder<T: Read + Write> {
     stream: Option<T>,
     password: Option<String>,
     nickname: Option<String>,
@@ -14,7 +14,7 @@ pub struct ClientInfoBuilder<T: Read + Write> {
     realname: Option<String>,
 }
 
-impl<T: Read + Write> ClientInfoBuilder<T> {
+impl<T: Read + Write> ClientBuilder<T> {
     pub fn new() -> Self {
         Self {
             stream: None,
@@ -62,10 +62,10 @@ impl<T: Read + Write> ClientInfoBuilder<T> {
         self
     }
 
-    pub fn build(self) -> Option<ClientInfo<T>> {
+    pub fn build(self) -> Option<Client<T>> {
         let stream = Arc::new(Mutex::new(self.stream?));
 
-        let client_info = ClientInfo {
+        let client_info = Client {
             stream: Some(stream),
             password: self.password,
             nickname: self.nickname?,

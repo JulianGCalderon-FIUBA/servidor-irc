@@ -2,14 +2,14 @@ use std::io::{Read, Write};
 
 mod registration_state;
 
-use crate::server::database::{ClientInfo, ClientInfoBuilder};
+use crate::server::database::{Client, ClientBuilder};
 pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
 pub struct Connection<T: Read + Write> {
     nickname: Option<String>,
     state: RegistrationState,
-    builder: Option<ClientInfoBuilder<T>>,
+    builder: Option<ClientBuilder<T>>,
 }
 
 impl<T: Read + Write> Connection<T> {
@@ -17,11 +17,11 @@ impl<T: Read + Write> Connection<T> {
         Self {
             nickname: None,
             state: RegistrationState::NotInitialized,
-            builder: Some(ClientInfoBuilder::new().stream(stream)),
+            builder: Some(ClientBuilder::new().stream(stream)),
         }
     }
 
-    pub fn build(&mut self) -> Option<ClientInfo<T>> {
+    pub fn build(&mut self) -> Option<Client<T>> {
         self.builder.take()?.build()
     }
 
