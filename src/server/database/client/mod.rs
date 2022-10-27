@@ -6,14 +6,14 @@ use std::sync::{Arc, Mutex};
 use crate::server::client_trait::ClientTrait;
 
 pub struct Client<T: ClientTrait> {
-    pub stream: Option<Arc<Mutex<T>>>,
-    pub password: Option<String>,
-    pub nickname: String,
-    pub username: String,
-    pub hostname: String,
-    pub servername: String,
-    pub realname: String,
-    pub operator: bool,
+    stream: Option<Arc<Mutex<T>>>,
+    password: Option<String>,
+    nickname: String,
+    _username: String,
+    _hostname: String,
+    _servername: String,
+    realname: String,
+    operator: bool,
 }
 
 impl<T: ClientTrait> Client<T> {
@@ -33,5 +33,17 @@ impl<T: ClientTrait> Client<T> {
 
     pub fn disconnect(&mut self) {
         self.stream = None;
+    }
+
+    pub fn password(&self) -> Option<String> {
+        self.password.clone()
+    }
+
+    pub fn nickname(&self) -> String {
+        self.nickname.clone()
+    }
+
+    pub fn realname(&self) -> String {
+        self.realname.clone()
     }
 }

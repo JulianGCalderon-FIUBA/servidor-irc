@@ -30,10 +30,12 @@ impl<T: ClientTrait> Database<T> {
 
         println!(
             "Client registered: \npassword: {:?}\nnickname: {}\nrealname: {}",
-            client.password, client.nickname, client.realname
+            client.password(),
+            client.nickname(),
+            client.realname()
         );
 
-        clients_lock.insert(client.nickname.clone(), client);
+        clients_lock.insert(client.nickname(), client);
     }
 
     pub fn set_server_operator(&self, nickname: &str) {
