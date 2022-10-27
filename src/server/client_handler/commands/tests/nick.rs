@@ -15,7 +15,7 @@ fn nick_sets_connection_nickname() {
     );
 
     assert_eq!(handler.connection.nickname(), "nick");
-    assert!(handler.connection.registration_state == RegistrationState::NicknameSent);
+    assert!(handler.connection.state == RegistrationState::NicknameSent);
 }
 
 #[test]

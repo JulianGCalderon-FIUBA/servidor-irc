@@ -35,7 +35,7 @@ impl<T: Read + Write> ClientHandler<T> {
         stream_client_handler: T,
         stream_database: T,
     ) -> io::Result<Self> {
-        let connection = ConnectionInfo::new_with_stream(stream_database);
+        let connection = ConnectionInfo::with_stream(stream_database);
 
         Ok(Self {
             database,

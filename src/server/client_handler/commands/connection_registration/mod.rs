@@ -19,7 +19,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let password = parameters.pop().unwrap();
-        self.connection.password = Some(password);
+        self.connection.set_password(password);
 
         self.ok_reply()
     }
@@ -30,9 +30,9 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         let nickname = parameters.pop().unwrap();
-        self.connection.nickname = Some(nickname);
+        self.connection.set_nickname(nickname);
 
-        if self.connection.registration_state == RegistrationState::NotInitialized {
+        if self.connection.state == RegistrationState::NotInitialized {
             self.connection.advance_state();
         }
 
@@ -66,15 +66,12 @@ impl<T: Read + Write> ClientHandler<T> {
         let hostname = parameters.pop().unwrap();
         let servername = parameters.pop().unwrap();
 
-        self.connection.username = Some(username);
-        self.connection.hostname = Some(hostname);
-        self.connection.servername = Some(servername);
-        self.connection.realname = Some(realname);
+        self.connection
+            .set_info(username, hostname, servername, realname);
 
         self.connection.advance_state();
 
-        let client_info = self.connection.build_client_info().unwrap();
-        self.database.add_client(client_info);
+        self.database.add_client(self.connection.build());
 
         self.ok_reply()
     }
@@ -84,7 +81,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return self.quit_reply(&trailing);
         }
 
-        let nickname = self.connection.nickname.clone().unwrap_or_default();
+        let nickname = self.connection.nickname();
         self.quit_reply(&nickname)
     }
 }

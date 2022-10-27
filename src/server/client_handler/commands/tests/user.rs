@@ -22,7 +22,7 @@ fn user_adds_client_to_database() {
 
     assert!(handler.database.contains_client("nick"));
 
-    assert!(handler.connection.registration_state == RegistrationState::Registered);
+    assert!(handler.connection.state == RegistrationState::Registered);
 }
 
 #[test]

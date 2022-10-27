@@ -48,7 +48,7 @@ impl<T: Read + Write> ClientHandler<T> {
             return Ok(false);
         }
 
-        if self.connection.registration_state != RegistrationState::Registered {
+        if self.connection.state != RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }

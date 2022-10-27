@@ -6,48 +6,54 @@ use crate::server::database::{ClientInfo, ClientInfoBuilder};
 pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information.
-pub struct ConnectionInfo<T> {
-    pub stream: Option<T>,
-    pub password: Option<String>,
+pub struct ConnectionInfo<T: Read + Write> {
     pub nickname: Option<String>,
-    pub username: Option<String>,
-    pub hostname: Option<String>,
-    pub servername: Option<String>,
-    pub realname: Option<String>,
-    pub registration_state: RegistrationState,
+    pub state: RegistrationState,
+    pub builder: Option<ClientInfoBuilder<T>>,
 }
 
 impl<T: Read + Write> ConnectionInfo<T> {
-    pub fn new_with_stream(stream: T) -> Self {
+    pub fn with_stream(stream: T) -> Self {
         Self {
-            stream: Some(stream),
-            password: None,
             nickname: None,
-            username: None,
-            hostname: None,
-            servername: None,
-            realname: None,
-            registration_state: RegistrationState::NotInitialized,
+            state: RegistrationState::NotInitialized,
+            builder: Some(ClientInfoBuilder::new().stream(stream)),
         }
     }
+
+    pub fn build(&mut self) -> ClientInfo<T> {
+        self.builder.take().unwrap().build().unwrap()
+    }
+
+    pub fn set_nickname(&mut self, nickname: String) {
+        self.nickname = Some(nickname.clone());
+        self.builder = Some(self.builder.take().unwrap().nickname(nickname));
+    }
+
+    pub fn set_password(&mut self, password: String) {
+        self.builder = Some(self.builder.take().unwrap().password(password));
+    }
+
+    pub fn set_info(
+        &mut self,
+        username: String,
+        hostname: String,
+        servername: String,
+        realname: String,
+    ) {
+        self.builder = Some(
+            self.builder
+                .take()
+                .unwrap()
+                .username(username)
+                .hostname(hostname)
+                .servername(servername)
+                .realname(realname),
+        );
+    }
+
     pub fn advance_state(&mut self) {
-        self.registration_state = self.registration_state.next();
-    }
-
-    pub fn build_client_info(&mut self) -> Option<ClientInfo<T>> {
-        let mut client_builder = ClientInfoBuilder::new()
-            .nickname(self.nickname.clone()?)
-            .username(self.username.clone()?)
-            .hostname(self.hostname.clone()?)
-            .servername(self.servername.clone()?)
-            .realname(self.realname.clone()?)
-            .stream(self.stream.take().unwrap());
-
-        if let Some(password) = self.password.clone() {
-            client_builder = client_builder.password(password);
-        }
-
-        client_builder.build()
+        self.state = self.state.next();
     }
 
     pub fn nickname(&self) -> String {
