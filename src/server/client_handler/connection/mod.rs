@@ -26,28 +26,16 @@ impl<T: Read + Write> Connection<T> {
         }
     }
 
-    pub fn build(&mut self) -> Option<Client<T>> {
-        ClientBuilder::new()
-            .stream(self.stream.take()?)
-            .nickname(self.nickname()?)
-            .password(self.get_attribute("nickname"))
-            .username(self.get_attribute("username")?)
-            .hostname(self.get_attribute("hostname")?)
-            .servername(self.get_attribute("servername")?)
-            .realname(self.get_attribute("realname")?)
-            .build()
-    }
-
-    pub fn set_nickname(&mut self, nickname: String) {
-        self.nickname = Some(nickname);
-    }
-
     pub fn set_attribute(&mut self, key: &'static str, value: String) {
         self.attributes.insert(key, value);
     }
 
     pub fn get_attribute(&mut self, key: &'static str) -> Option<String> {
         self.attributes.get(key).map(|s| s.to_owned())
+    }
+
+    pub fn set_nickname(&mut self, nickname: String) {
+        self.nickname = Some(nickname);
     }
 
     pub fn advance_state(&mut self) {
@@ -60,5 +48,17 @@ impl<T: Read + Write> Connection<T> {
 
     pub fn state(&self) -> &RegistrationState {
         &self.state
+    }
+
+    pub fn build(&mut self) -> Option<Client<T>> {
+        ClientBuilder::new()
+            .stream(self.stream.take()?)
+            .nickname(self.nickname()?)
+            .password(self.get_attribute("nickname"))
+            .username(self.get_attribute("username")?)
+            .hostname(self.get_attribute("hostname")?)
+            .servername(self.get_attribute("servername")?)
+            .realname(self.get_attribute("realname")?)
+            .build()
     }
 }
