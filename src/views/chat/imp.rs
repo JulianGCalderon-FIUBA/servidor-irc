@@ -40,10 +40,7 @@ impl ObjectImpl for Chat {
         obj.append(&message_sender);
 
         
-        obj.set_margin_top(12);
-        obj.set_margin_bottom(12);
-        obj.set_margin_start(12);
-        obj.set_margin_end(12);
+        obj.set_valign(gtk::Align::End);
     }
 
     fn properties() -> &'static [glib::ParamSpec] {
