@@ -64,8 +64,9 @@ impl<T: ClientTrait> ClientHandler<T> {
     pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         // let user = self.database.password.clone().unwrap();
         // let password = self.database.password.clone().unwrap();
-        if !self.validate_oper_command(&parameters /*, &user, &password */)? {
-            return Ok(());
+
+        if let Some(error) = self.assert_oper_command_is_valid(&parameters) {
+            return self.send_response_for_error(error);
         }
 
         self.database

@@ -3,7 +3,6 @@ use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_trait::ClientTrait;
 
 use super::ClientHandler;
-use std::io;
 
 use super::OPER_COMMAND;
 use super::PASS_COMMAND;
@@ -63,17 +62,17 @@ impl<T: ClientTrait> ClientHandler<T> {
         None
     }
 
-    pub fn validate_oper_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+    pub fn assert_oper_command_is_valid(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.len() != 2 {
-            self.need_more_params_error(OPER_COMMAND)?;
-            return Ok(false);
+            return Some(ErrorReply::NeedMoreParameters461 {
+                command: OPER_COMMAND.to_string(),
+            });
         }
 
         if self.registration.state() != &RegistrationState::Registered {
-            self.unregistered_error()?;
-            return Ok(false);
+            return Some(ErrorReply::UnregisteredClient);
         }
 
-        Ok(true)
+        None
     }
 }

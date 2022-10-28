@@ -8,19 +8,11 @@ use crate::server::{
 };
 
 use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
-use std::io;
+
 // use std::sync::mpsc::channel;
 
 impl<T: ClientTrait> ClientHandler<T> {
     // GENERAL
-    pub fn validate_nickname_exits(&mut self, nickname: &str) -> io::Result<bool> {
-        if !self.database.contains_client(nickname) {
-            self.no_such_nickname_error(nickname)?;
-            return Ok(false);
-        }
-
-        Ok(true)
-    }
 
     fn channel_name_is_valid(&mut self, channel: &str) -> bool {
         return ((channel.as_bytes()[0] == LOCAL_CHANNEL)
@@ -80,16 +72,40 @@ impl<T: ClientTrait> ClientHandler<T> {
 
     // COMMANDS
 
-    pub fn validate_invite_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+    pub fn assert_invite_is_valid(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.len() != 2 {
-            self.need_more_params_error(INVITE_COMMAND)?;
-            return Ok(false);
+            return Some(ErrorReply::NeedMoreParameters461 {
+                command: INVITE_COMMAND.to_string(),
+            });
         }
         if self.registration.state() != &RegistrationState::Registered {
-            self.unregistered_error()?;
-            return Ok(false);
+            return Some(ErrorReply::UnregisteredClient);
         }
-        Ok(true)
+
+        let nickname_client_to_invite = &parameters[0];
+        let nickname_current_client = self.registration.nickname().unwrap();
+        let channel = &parameters[1];
+
+        if !self.database.contains_client(nickname_client_to_invite) {
+            return Some(ErrorReply::NoSuchNickname401 {
+                nickname: nickname_client_to_invite.to_string(),
+            });
+        }
+
+        if self.database.contains_channel(channel) {
+            if !self.user_is_in_channel(channel, &nickname_current_client) {
+                return Some(ErrorReply::NotOnChannel442 {
+                    channel: channel.to_string(),
+                });
+            }
+            if self.user_is_in_channel(channel, nickname_client_to_invite) {
+                return Some(ErrorReply::UserOnChannel443 {
+                    nickname: nickname_client_to_invite.to_string(),
+                    channel: channel.to_string(),
+                });
+            }
+        }
+        None
     }
 
     pub fn assert_join_is_valid(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {

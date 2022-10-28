@@ -1,6 +1,4 @@
-use std::{fmt::Display, io};
-
-use crate::server::{client_handler::ClientHandler, client_trait::ClientTrait};
+use std::fmt::Display;
 
 pub enum ErrorReply {
     NoSuchNickname401 { nickname: String },
@@ -75,39 +73,5 @@ impl Display for ErrorReply {
             }
         };
         write!(f, "{string}")
-    }
-}
-
-impl<T: ClientTrait> ClientHandler<T> {
-    // REPLY o ERROR
-
-    pub fn unregistered_error(&mut self) -> io::Result<()> {
-        let response = "200 :unregistered".to_string();
-        self.send_response(&response)
-    }
-
-    pub fn no_such_nickname_error(&mut self, nickname: &str) -> io::Result<()> {
-        let response = format!("401 {nickname} :No such nick/channel");
-        self.send_response(&response)
-    }
-    pub fn not_on_channel_error(&mut self, channel: &str) -> io::Result<()> {
-        let response = format!("442 {channel} :you're not on that channel");
-        self.send_response(&response)
-    }
-
-    pub fn user_on_channel_error(&mut self, user: &str, channel: &str) -> io::Result<()> {
-        let response = format!("443 {user} {channel} :is already on channel");
-        self.send_response(&response)
-    }
-
-    pub fn unknown_command_error(&mut self, command: &str) -> io::Result<()> {
-        self.send_response_for_error(ErrorReply::UnknownCommand421 {
-            command: command.to_string(),
-        })
-    }
-
-    pub fn need_more_params_error(&mut self, command: &str) -> io::Result<()> {
-        let response = format!("461 {command} :not enough parameters");
-        self.send_response(&response)
     }
 }

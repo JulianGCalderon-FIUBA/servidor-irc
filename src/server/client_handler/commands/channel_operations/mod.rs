@@ -17,29 +17,12 @@ pub const PART_COMMAND: &str = "PART";
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_invite_command(&parameters)? {
-            return Ok(());
+        if let Some(error) = self.assert_invite_is_valid(&parameters) {
+            return self.send_response_for_error(error);
         }
-
         let nickname_client_to_invite = &parameters[0];
         let nickname_current_client = &(self.registration.nickname().unwrap());
         let channel = &parameters[1];
-
-        if !self.validate_nickname_exits(nickname_client_to_invite)? {
-            return Ok(());
-        }
-
-        if self.database.contains_channel(channel) {
-            if !self.user_is_in_channel(channel, nickname_current_client) {
-                self.not_on_channel_error(channel)?;
-                return Ok(());
-            }
-            if self.user_is_in_channel(channel, nickname_client_to_invite) {
-                self.user_on_channel_error(nickname_client_to_invite, channel)?;
-                return Ok(());
-            }
-            // si el canal es invite only: validar que el usuario es operador del canal
-        }
 
         let prefix = self.registration.nickname().unwrap();
 

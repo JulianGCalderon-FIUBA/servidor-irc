@@ -16,6 +16,8 @@ use commands::sending_messages::{NOTICE_COMMAND, PRIVMSG_COMMAND};
 
 use std::sync::Arc;
 
+use self::responses::errors::ErrorReply;
+
 use super::client_trait::ClientTrait;
 use super::database::Database;
 use crate::message::{CreationError, ParsingError};
@@ -100,12 +102,18 @@ impl<T: ClientTrait> ClientHandler<T> {
                     self.quit_command(trailing)?;
                     return Ok(());
                 }
-                _ => self.unknown_command_error(&command)?,
+                _ => self.unknown_command(&command)?,
             };
         }
     }
 
     fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
         self.send_response("200 :parsing error")
+    }
+
+    fn unknown_command(&mut self, command: &str) -> io::Result<()> {
+        self.send_response_for_error(ErrorReply::UnknownCommand421 {
+            command: command.to_string(),
+        })
     }
 }
