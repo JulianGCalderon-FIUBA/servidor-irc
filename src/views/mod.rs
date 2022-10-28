@@ -4,10 +4,7 @@ mod conv_info;
 
 use gtk4 as gtk;
 
-use gtk::Align;
 use gtk::ApplicationWindow;
-use gtk::Button;
-use gtk::Label;
 use gtk::Orientation;
 use gtk::Box;
 use gtk::prelude::*;
@@ -51,50 +48,50 @@ fn build_ui(app: &Application) {
     window.show();
 }
     
-fn _say_hi() {
-    println!("Hi");
-}
+// fn _say_hi() {
+//     println!("Hi");
+// }
 
-fn _create_button(label: &str) -> Button {
-    let button = Button::builder()
-    .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(Align::Center)
-    .valign(Align::Center)
-    .build();
+// fn _create_button(label: &str) -> Button {
+//     let button = Button::builder()
+//     .label(label)
+//     .margin_top(12)
+//     .margin_bottom(12)
+//     .margin_start(12)
+//     .margin_end(12)
+//     .halign(Align::Center)
+//     .valign(Align::Center)
+//     .build();
 
-    button.connect_clicked(|_| _say_hi());
+//     button.connect_clicked(|_| _say_hi());
 
-    button
-}
+//     button
+// }
 
-fn _create_label(label: &str) -> Label {
-    Label::builder()
-    .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(Align::Center)
-    .valign(Align::Center)
-    .build()
-}
+// fn _create_label(label: &str) -> Label {
+//     Label::builder()
+//     .label(label)
+//     .margin_top(12)
+//     .margin_bottom(12)
+//     .margin_start(12)
+//     .margin_end(12)
+//     .halign(Align::Center)
+//     .valign(Align::Center)
+//     .build()
+// }
 
-fn _create_box(label: &str) -> Box {
-    let gtk_box = Box::builder()
-    .orientation(Orientation::Vertical)
-    .build();
+// fn _create_box(label: &str) -> Box {
+//     let gtk_box = Box::builder()
+//     .orientation(Orientation::Vertical)
+//     .build();
 
-    let button = _create_button(label);
+//     let button = _create_button(label);
 
-    let label = _create_label(label);
+//     let label = _create_label(label);
 
-    gtk_box.append(&button);
-    gtk_box.append(&label);
+//     gtk_box.append(&button);
+//     gtk_box.append(&label);
 
-    gtk_box
-}
+//     gtk_box
+// }
 

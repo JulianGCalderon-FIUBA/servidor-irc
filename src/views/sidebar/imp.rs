@@ -1,6 +1,7 @@
 use gtk4 as gtk;
 
 use gtk::Button;
+use gtk::Separator;
 use gtk::glib;
 use gtk::glib::ParamSpec;
 use gtk::glib::once_cell::sync::Lazy;
@@ -10,6 +11,7 @@ use gtk::subclass::prelude::ObjectImpl;
 use gtk::subclass::prelude::ObjectImplExt;
 use gtk::subclass::prelude::ObjectSubclass;
 use gtk::subclass::widget::WidgetImpl;
+use gtk::Orientation;
 
 #[derive(Default)]
 pub struct Sidebar {
@@ -36,6 +38,12 @@ impl ObjectImpl for Sidebar {
         let button = create_button("+");
         obj.append(&button);
 
+        let separator = Separator::builder()
+        .orientation(Orientation::Horizontal)
+        .build();
+        obj.append(&separator);
+
+        button.connect_clicked(|_| println!("Hi"));
         for conv in vec!["juli", "sol", "ana"] {
             let button = create_button(conv);
             obj.append(&button);
