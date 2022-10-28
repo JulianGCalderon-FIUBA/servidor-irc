@@ -8,7 +8,7 @@ pub enum CommandResponse {
     Ok200,
     ListStart321,
     List322 {
-        channels: Vec<String>,
+        channel: String,
     },
     ListEnd323,
     NoTopic331 {
@@ -33,8 +33,8 @@ pub enum CommandResponse {
 impl Display for CommandResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
-            CommandResponse::List322 { channels } => {
-                format!("322 : {}", channels.join(" "))
+            CommandResponse::List322 { channel } => {
+                format!("322 : {channel}")
             }
             CommandResponse::NoTopic331 { channel } => {
                 format!("331 {channel} :no topic is set")

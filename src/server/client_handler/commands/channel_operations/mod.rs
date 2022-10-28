@@ -88,7 +88,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             return self.send_response_for_error(error);
         }
 
-        let mut channels: Vec<String> = if parameters.is_empty() {
+        let channels: Vec<String> = if parameters.is_empty() {
             let mut list = self.database.get_channels();
             list.sort();
             list
@@ -100,13 +100,11 @@ impl<T: ClientTrait> ClientHandler<T> {
         };
         self.send_response_for_reply(CommandResponse::ListStart321)?;
 
-        for (i, channel) in channels.clone().iter().enumerate() {
-            if !self.assert_can_list_channel(channel) {
-                channels.remove(i);
-                continue;
+        for channel in channels {
+            if self.assert_can_list_channel(&channel) {
+                self.send_response_for_reply(CommandResponse::List322 { channel })?;
             }
         }
-        self.send_response_for_reply(CommandResponse::List322 { channels })?;
         self.send_response_for_reply(CommandResponse::ListEnd323)
     }
 
