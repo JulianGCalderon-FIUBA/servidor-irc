@@ -10,7 +10,7 @@ fn invite_fails_with_unregistered_client() {
 
     assert_eq!(
         "200 :unregistered\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -25,9 +25,9 @@ fn invite_fails_with_less_than_two_parameters() {
 
     assert_eq!(
         "461 INVITE :not enough parameters\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
-    handler.stream_client_handler.clear();
+    handler.stream.clear();
 
     let parameters2 = vec!["nick2".to_string()];
 
@@ -35,7 +35,7 @@ fn invite_fails_with_less_than_two_parameters() {
 
     assert_eq!(
         "461 INVITE :not enough parameters\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -50,7 +50,7 @@ fn invite_fails_with_invalid_nickname() {
 
     assert_eq!(
         "401 nick2 :No such nick/channel\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -69,7 +69,7 @@ fn invite_fails_with_user_already_on_channel() {
 
     assert_eq!(
         "443 nick2 #hola :is already on channel\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -87,7 +87,7 @@ fn invite_fails_with_sending_user_not_on_channel() {
 
     assert_eq!(
         "442 #hola :you're not on that channel\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -103,10 +103,7 @@ fn can_invite_one_user() {
 
     handler.invite_command(parameters).unwrap();
 
-    assert_eq!(
-        "341 #hola nick\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
-    );
+    assert_eq!("341 #hola nick\r\n", handler.stream.read_wbuf_to_string());
 
     assert_eq!(
         ":nick INVITE nick2 #hola\r\n",

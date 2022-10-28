@@ -1,10 +1,10 @@
 mod validations;
 
-use crate::message::Message;
+use crate::{message::Message, server::client_trait::ClientTrait};
 
 use super::ClientHandler;
 
-use std::io::{self, Read, Write};
+use std::io;
 
 pub const INVITE_COMMAND: &str = "INVITE";
 pub const JOIN_COMMAND: &str = "JOIN";
@@ -12,33 +12,33 @@ pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
 pub const PART_COMMAND: &str = "PART";
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if !self.validate_invite_command(&parameters)? {
             return Ok(());
         }
 
         let nickname_client_to_invite = &parameters[0];
-        let nickname_current_client = &(self.connection.nickname());
+        let nickname_current_client = &(self.registration.nickname().unwrap());
         let channel = &parameters[1];
 
         if !self.validate_nickname_exits(nickname_client_to_invite)? {
             return Ok(());
         }
 
-        if self.validate_channel_exists(channel)? {
-            if !self.validate_user_is_in_channel(channel, nickname_current_client)? {
+        if self.database.contains_channel(channel) {
+            if !self.user_is_in_channel(channel, nickname_current_client) {
                 self.not_on_channel_error(channel)?;
                 return Ok(());
             }
-            if self.validate_user_is_in_channel(channel, nickname_client_to_invite)? {
+            if self.user_is_in_channel(channel, nickname_client_to_invite) {
                 self.user_on_channel_error(nickname_client_to_invite, channel)?;
                 return Ok(());
             }
             // si el canal es invite only: validar que el usuario es operador del canal
         }
 
-        let prefix = self.connection.nickname();
+        let prefix = self.registration.nickname().unwrap();
 
         let invitation_text: String =
             format!(":{prefix} {INVITE_COMMAND} {nickname_client_to_invite} {channel}");
@@ -51,29 +51,29 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_join_command(&parameters)? {
-            return Ok(());
+        if let Some(error) = self.assert_join_is_valid(&parameters) {
+            return self.send_response_for_error(error);
         }
-        let nickname = self.connection.nickname();
+        let nickname = self.registration.nickname().unwrap();
 
         let channels = &parameters[0];
         //let keys = &parameters[1];
 
         for channel in channels.split(',') {
-            if !self.validate_can_join_channel(channel, &nickname)? {
+            if let Some(error) = self.assert_can_join_channel(channel, &nickname) {
+                self.send_response_for_error(error)?;
                 continue;
             }
             self.database.add_client_to_channel(&nickname, channel);
             self.no_topic_reply(channel)?;
             self.names_reply(channel, self.database.get_clients(channel))?
         }
-
         Ok(())
     }
 
     pub fn list_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_list_command()? {
-            return Ok(());
+        if let Some(error) = self.assert_registration_is_valid() {
+            return self.send_response_for_error(error);
         }
 
         let mut channels: Vec<String> = if parameters.is_empty() {
@@ -93,7 +93,7 @@ impl<T: Read + Write> ClientHandler<T> {
         }
 
         for (i, channel) in channels.clone().iter().enumerate() {
-            if !self.validate_can_list_channel(channel)? {
+            if !self.assert_can_list_channel(channel) {
                 channels.remove(i);
                 continue;
             }
@@ -102,8 +102,8 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_names_command()? {
-            return Ok(());
+        if let Some(error) = self.assert_registration_is_valid() {
+            return self.send_response_for_error(error);
         }
 
         let channels: Vec<String> = if parameters.is_empty() {
@@ -137,15 +137,16 @@ impl<T: Read + Write> ClientHandler<T> {
     }
 
     pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_part_command(&parameters)? {
-            return Ok(());
+        if let Some(error) = self.assert_part_is_valid(&parameters) {
+            return self.send_response_for_error(error);
         }
 
         let channels = &parameters[0];
-        let nickname = self.connection.nickname();
+        let nickname = self.registration.nickname().unwrap();
 
         for channel in channels.split(',') {
-            if !self.validate_can_part_channel(channel, &nickname)? {
+            if let Some(error) = self.assert_can_part_channel(channel, &nickname) {
+                self.send_response_for_error(error)?;
                 continue;
             }
             self.database.remove_client_of_channel(&nickname, channel);

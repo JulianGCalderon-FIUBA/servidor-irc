@@ -10,7 +10,7 @@ fn oper_with_valid_credential_sets_client_as_operator() {
 
     assert_eq!(
         "381 :You are now an IRC operator\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
 
     assert!(handler.database._is_server_operator("nick"));
@@ -25,6 +25,6 @@ fn oper_is_only_valid_after_registration() {
 
     assert_eq!(
         "200 :unregistered\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
 }

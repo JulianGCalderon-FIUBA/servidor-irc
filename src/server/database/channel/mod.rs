@@ -1,20 +1,20 @@
 use super::utils::index_of;
 
-pub struct ChannelInfo {
-    pub name: String,
+pub struct Channel {
+    _name: String,
     //vector de nicknames
     clients: Vec<String>,
     //nickname del operador
     _operator: Option<String>,
 }
 
-impl ChannelInfo {
+impl Channel {
     /// Creates a new [`_ChannelInfo`].
-    pub fn new(name: String, creator: String) -> Self {
+    pub fn new(_name: String, creator: String) -> Self {
         let clients = vec![creator];
 
         Self {
-            name,
+            _name,
             clients,
             _operator: None,
         }

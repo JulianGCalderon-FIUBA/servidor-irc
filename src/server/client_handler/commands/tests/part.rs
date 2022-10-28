@@ -9,7 +9,7 @@ fn part_fails_with_unregistered_client() {
 
     assert_eq!(
         "200 :unregistered\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -23,7 +23,7 @@ fn part_with_empty_params() {
 
     assert_eq!(
         "461 PART :not enough parameters\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
     assert_eq!(handler.database.get_channels(), channels);
 }
@@ -39,7 +39,7 @@ fn part_fails_with_invalid_channel_name() {
 
     assert_eq!(
         "403 hola :no such channel\r\n403 #ho'la :no such channel\r\n403 #hola :no such channel\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
 }
 
@@ -57,7 +57,7 @@ fn part_fails_with_user_not_on_channel() {
 
     assert_eq!(
         "442 #hola :you're not on that channel\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     )
 }
 
@@ -69,14 +69,11 @@ fn can_part_one_channel() {
     let parameters = vec!["#hola".to_string()];
     handler.join_command(parameters.clone()).unwrap();
 
-    handler.stream_client_handler.clear();
+    handler.stream.clear();
 
     handler.part_command(parameters).unwrap();
 
-    assert_eq!(
-        "200 :success\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
-    );
+    assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
     assert!(handler.database.get_channels().is_empty());
 }
 
@@ -91,13 +88,13 @@ fn can_part_existing_channels() {
 
     handler.join_command(parameters.clone()).unwrap();
 
-    handler.stream_client_handler.clear();
+    handler.stream.clear();
 
     handler.part_command(parameters).unwrap();
 
     assert_eq!(
         "200 :success\r\n200 :success\r\n",
-        handler.stream_client_handler.read_wbuf_to_string()
+        handler.stream.read_wbuf_to_string()
     );
     println!("channels {:?}", handler.database.get_channels());
     assert!(!handler.database.get_channels().is_empty())

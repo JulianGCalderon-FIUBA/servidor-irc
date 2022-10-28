@@ -1,23 +1,18 @@
-use crate::server::client_handler::{
-    commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
-    connection_info::RegistrationState,
+use crate::server::{
+    client_handler::{
+        commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
+        registration::RegistrationState,
+        responses::errors::ErrorReply,
+    },
+    client_trait::ClientTrait,
 };
 
 use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
-use std::io::{self, Read, Write};
+use std::io;
 // use std::sync::mpsc::channel;
 
-impl<T: Read + Write> ClientHandler<T> {
+impl<T: ClientTrait> ClientHandler<T> {
     // GENERAL
-    pub fn validate_channel_exists(&mut self, channel: &str) -> io::Result<bool> {
-        let channels_database = self.database.get_channels();
-        if !channels_database.contains(&channel.to_string()) {
-            return Ok(false);
-        }
-
-        Ok(true)
-    }
-
     pub fn validate_nickname_exits(&mut self, nickname: &str) -> io::Result<bool> {
         if !self.database.contains_client(nickname) {
             self.no_such_nickname_error(nickname)?;
@@ -27,71 +22,60 @@ impl<T: Read + Write> ClientHandler<T> {
         Ok(true)
     }
 
-    fn validate_channel_name(&mut self, channel: &str) -> io::Result<bool> {
-        if ((channel.as_bytes()[0] == LOCAL_CHANNEL)
+    fn channel_name_is_valid(&mut self, channel: &str) -> bool {
+        return ((channel.as_bytes()[0] == LOCAL_CHANNEL)
             || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
-            && !channel.contains(INVALID_CHARACTER)
-        {
-            return Ok(true);
-        }
-        Ok(false)
+            && !channel.contains(INVALID_CHARACTER);
     }
 
-    pub fn validate_can_join_channel(&mut self, channel: &str, nickname: &str) -> io::Result<bool> {
+    pub fn assert_can_join_channel(&mut self, channel: &str, nickname: &str) -> Option<ErrorReply> {
         let channels_for_nickname = self.database.get_channels_for_client(nickname);
-        println!("channels: {:?}", channels_for_nickname);
+
         if channels_for_nickname.len() == MAX_CHANNELS {
-            self.too_many_channels_error(channel)?;
-            return Ok(false);
+            return Some(ErrorReply::TooManyChannels405 {
+                channel: channel.to_string(),
+            });
         }
-
-        if !self.validate_channel_name(channel)? {
-            self.no_such_channel_error(channel)?;
-            return Ok(false);
+        if !self.channel_name_is_valid(channel) {
+            return Some(ErrorReply::NoSuchChannel403 {
+                channel: channel.to_string(),
+            });
         }
-
-        if self.validate_user_is_in_channel(channel, nickname)? {
-            self.user_on_channel_error(nickname, channel)?;
-            //El error ya es lanzado
-            return Ok(false);
+        if self.user_is_in_channel(channel, nickname) {
+            return Some(ErrorReply::UserOnChannel443 {
+                nickname: nickname.to_string(),
+                channel: channel.to_string(),
+            });
         }
-
-        Ok(true)
+        None
     }
 
-    pub fn validate_can_part_channel(&mut self, channel: &str, nickname: &str) -> io::Result<bool> {
-        if !self.validate_channel_exists(channel)? || !self.validate_channel_name(channel)? {
-            self.no_such_channel_error(channel)?;
-            return Ok(false);
+    pub fn assert_can_part_channel(&mut self, channel: &str, nickname: &str) -> Option<ErrorReply> {
+        if !self.database.contains_channel(channel) || !self.channel_name_is_valid(channel) {
+            return Some(ErrorReply::NoSuchChannel403 {
+                channel: channel.to_string(),
+            });
         }
         let clients = self.database.get_clients(channel);
         if !clients.contains(&nickname.to_string()) {
-            self.not_on_channel_error(channel)?;
-            return Ok(false);
+            return Some(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
         }
-        Ok(true)
+        None
     }
 
-    pub fn validate_can_list_channel(&mut self, channel: &str) -> io::Result<bool> {
-        if !self.validate_channel_exists(channel)? || !self.validate_channel_name(channel)? {
-            return Ok(false);
+    pub fn assert_can_list_channel(&mut self, channel: &str) -> bool {
+        if !self.database.contains_channel(channel) || !self.channel_name_is_valid(channel) {
+            return false;
         }
-        Ok(true)
+        true
     }
 
-    pub fn validate_user_is_in_channel(
-        &mut self,
-        channel: &str,
-        nickname: &str,
-    ) -> io::Result<bool> {
-        if !self
-            .database
+    pub fn user_is_in_channel(&mut self, channel: &str, nickname: &str) -> bool {
+        self.database
             .get_clients(channel)
             .contains(&String::from(nickname))
-        {
-            return Ok(false);
-        }
-        Ok(true)
     }
 
     // COMMANDS
@@ -101,52 +85,35 @@ impl<T: Read + Write> ClientHandler<T> {
             self.need_more_params_error(INVITE_COMMAND)?;
             return Ok(false);
         }
-        if self.connection.registration_state != RegistrationState::Registered {
+        if self.registration.state() != &RegistrationState::Registered {
             self.unregistered_error()?;
             return Ok(false);
         }
         Ok(true)
     }
 
-    pub fn validate_join_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+    pub fn assert_join_is_valid(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
-            self.need_more_params_error(JOIN_COMMAND)?;
-            return Ok(false);
+            return Some(ErrorReply::NeedMoreParameters461 {
+                command: JOIN_COMMAND.to_string(),
+            });
         }
-        if self.connection.registration_state != RegistrationState::Registered {
-            self.unregistered_error()?;
-            return Ok(false);
-        }
-        Ok(true)
+        self.assert_registration_is_valid()
     }
 
-    pub fn validate_list_command(&mut self) -> io::Result<bool> {
-        if self.connection.registration_state != RegistrationState::Registered {
-            self.unregistered_error()?;
-            return Ok(false);
-        }
-
-        Ok(true)
-    }
-
-    pub fn validate_names_command(&mut self) -> io::Result<bool> {
-        if self.connection.registration_state != RegistrationState::Registered {
-            self.unregistered_error()?;
-            return Ok(false);
-        }
-
-        Ok(true)
-    }
-
-    pub fn validate_part_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+    pub fn assert_part_is_valid(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
-            self.need_more_params_error(PART_COMMAND)?;
-            return Ok(false);
+            return Some(ErrorReply::NeedMoreParameters461 {
+                command: PART_COMMAND.to_string(),
+            });
         }
-        if self.connection.registration_state != RegistrationState::Registered {
-            self.unregistered_error()?;
-            return Ok(false);
+        self.assert_registration_is_valid()
+    }
+
+    pub fn assert_registration_is_valid(&mut self) -> Option<ErrorReply> {
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient);
         }
-        Ok(true)
+        None
     }
 }

@@ -1,22 +1,23 @@
-mod channel_info;
-mod client_info;
+mod channel;
+mod client;
 mod utils;
 
 #[cfg(test)]
 mod tests;
 
 use std::collections::HashMap;
-use std::io::{Read, Write};
 use std::sync::{Arc, Mutex, RwLock};
 
-pub use channel_info::ChannelInfo;
-pub use client_info::{ClientInfo, ClientInfoBuilder};
-pub struct Database<T: Read + Write> {
-    pub clients: RwLock<HashMap<String, ClientInfo<T>>>,
-    pub channels: RwLock<HashMap<String, ChannelInfo>>,
+pub use channel::Channel;
+pub use client::{Client, ClientBuilder};
+
+use super::client_trait::ClientTrait;
+pub struct Database<T: ClientTrait> {
+    clients: RwLock<HashMap<String, Client<T>>>,
+    channels: RwLock<HashMap<String, Channel>>,
 }
 
-impl<T: Read + Write> Database<T> {
+impl<T: ClientTrait> Database<T> {
     pub fn new() -> Self {
         Self {
             clients: RwLock::new(HashMap::new()),
@@ -24,15 +25,17 @@ impl<T: Read + Write> Database<T> {
         }
     }
 
-    pub fn add_client(&self, client: ClientInfo<T>) {
+    pub fn add_client(&self, client: Client<T>) {
         let mut clients_lock = self.clients.write().unwrap();
 
         println!(
             "Client registered: \npassword: {:?}\nnickname: {}\nrealname: {}",
-            client.password, client.nickname, client.realname
+            client.password(),
+            client.nickname(),
+            client.realname()
         );
 
-        clients_lock.insert(client.nickname.clone(), client);
+        clients_lock.insert(client.nickname(), client);
     }
 
     pub fn set_server_operator(&self, nickname: &str) {
@@ -72,11 +75,11 @@ impl<T: Read + Write> Database<T> {
         println!("Adding {} to channel {}", nickname, channel_name);
 
         let mut channels_lock = self.channels.write().unwrap();
-        let channel: Option<&mut ChannelInfo> = channels_lock.get_mut(&channel_name.to_string());
+        let channel: Option<&mut Channel> = channels_lock.get_mut(&channel_name.to_string());
         match channel {
             Some(channel) => channel.add_client(nickname.to_string()),
             None => {
-                let new_channel = ChannelInfo::new(channel_name.to_string(), nickname.to_string());
+                let new_channel = Channel::new(channel_name.to_string(), nickname.to_string());
                 channels_lock.insert(channel_name.to_string(), new_channel);
             }
         }
@@ -141,7 +144,7 @@ impl<T: Read + Write> Database<T> {
     }
 }
 
-impl<T: Read + Write> Default for Database<T> {
+impl<T: ClientTrait> Default for Database<T> {
     fn default() -> Self {
         Self::new()
     }
