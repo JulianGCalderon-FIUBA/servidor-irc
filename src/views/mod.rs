@@ -7,6 +7,7 @@ use gtk4 as gtk;
 use gtk::ApplicationWindow;
 use gtk::Orientation;
 use gtk::Box;
+use gtk::Separator;
 use gtk::prelude::*;
 use gtk::Application;
 
@@ -39,8 +40,14 @@ fn build_ui(app: &Application) {
     let sidebar = Sidebar::new();
     main_box.append(&sidebar);
 
+    let separator = create_separator();
+    main_box.append(&separator);
+    
     let chat = Chat::new();
     main_box.append(&chat);
+
+    let separator = create_separator();
+    main_box.append(&separator);
 
     let conv_info = ConvInfo::new();
     main_box.append(&conv_info);
@@ -97,3 +104,8 @@ fn build_ui(app: &Application) {
 //     gtk_box
 // }
 
+fn create_separator() -> Separator{
+    Separator::builder()
+    .orientation(Orientation::Vertical)
+    .build()
+}

@@ -83,6 +83,8 @@ fn create_button(label: &str, margin: i32) -> Button {
     .label(label)
     .margin_top(margin)
     .margin_bottom(margin)
+    .margin_start(margin)
+    .margin_end(margin)
     .valign(gtk::Align::Center)
     .build();
 
@@ -96,5 +98,6 @@ fn create_separator() -> Separator{
     .orientation(Orientation::Horizontal)
     .margin_top(20)
     .margin_bottom(20)
+    .hexpand(true)
     .build()
 }
