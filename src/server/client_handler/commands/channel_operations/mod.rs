@@ -1,6 +1,9 @@
 mod validations;
 
-use crate::{message::Message, server::client_trait::ClientTrait};
+use crate::{
+    message::Message,
+    server::{client_handler::responses::replies::CommandResponse, client_trait::ClientTrait},
+};
 
 use super::ClientHandler;
 
@@ -47,7 +50,10 @@ impl<T: ClientTrait> ClientHandler<T> {
             &Message::new(&invitation_text).unwrap(),
         );
 
-        self.invite_reply(channel, nickname_current_client)
+        self.send_response_for_reply(CommandResponse::Inviting341 {
+            channel: channel.to_string(),
+            nickname: nickname_current_client.to_string(),
+        })
     }
 
     pub fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
@@ -65,8 +71,14 @@ impl<T: ClientTrait> ClientHandler<T> {
                 continue;
             }
             self.database.add_client_to_channel(&nickname, channel);
-            self.no_topic_reply(channel)?;
-            self.names_reply(channel, self.database.get_clients(channel))?
+
+            self.send_response_for_reply(CommandResponse::NoTopic331 {
+                channel: channel.to_string(),
+            })?;
+            self.send_response_for_reply(CommandResponse::NameReply353 {
+                channel: channel.to_string(),
+                clients: self.database.get_clients(channel),
+            })?;
         }
         Ok(())
     }
@@ -86,11 +98,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 .map(|string| string.to_string())
                 .collect()
         };
-
-        if channels.is_empty() {
-            self.list_start_reply()?;
-            return self.list_end_reply();
-        }
+        self.send_response_for_reply(CommandResponse::ListStart321)?;
 
         for (i, channel) in channels.clone().iter().enumerate() {
             if !self.assert_can_list_channel(channel) {
@@ -98,7 +106,8 @@ impl<T: ClientTrait> ClientHandler<T> {
                 continue;
             }
         }
-        self.list_reply(channels)
+        self.send_response_for_reply(CommandResponse::List322 { channels })?;
+        self.send_response_for_reply(CommandResponse::ListEnd323)
     }
 
     pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
@@ -117,21 +126,23 @@ impl<T: ClientTrait> ClientHandler<T> {
                 .collect()
         };
 
-        if channels.is_empty() {
-            return self.end_of_names_reply("");
-        }
-
         for channel in channels {
             if self.database.contains_channel(&channel) {
                 let clients = self.database.get_clients(&channel);
-                self.names_reply(&channel, clients)?;
+                self.send_response_for_reply(CommandResponse::NameReply353 {
+                    channel: channel.clone(),
+                    clients,
+                })?;
+
                 if !parameters.is_empty() {
-                    self.end_of_names_reply(&channel)?;
+                    self.send_response_for_reply(CommandResponse::EndOfNames366 { channel })?
                 }
             }
         }
         if parameters.is_empty() {
-            self.end_of_names_reply("")?;
+            return self.send_response_for_reply(CommandResponse::EndOfNames366 {
+                channel: "".to_string(),
+            });
         }
         Ok(())
     }
@@ -150,7 +161,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 continue;
             }
             self.database.remove_client_of_channel(&nickname, channel);
-            self.ok_reply()?;
+            self.send_response_for_reply(CommandResponse::Ok200)?
         }
         Ok(())
     }

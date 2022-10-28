@@ -1,7 +1,9 @@
 mod utils;
 mod validations;
 
-use crate::server::{client_trait::ClientTrait, ClientHandler};
+use crate::server::{
+    client_handler::responses::replies::CommandResponse, client_trait::ClientTrait, ClientHandler,
+};
 use std::io;
 
 pub const NOTICE_COMMAND: &str = "NOTICE";
@@ -29,7 +31,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             self.send_message_to(target, &message)?;
         }
 
-        self.ok_reply()
+        self.send_response_for_reply(CommandResponse::Ok200)
     }
 
     pub fn notice_command(
@@ -53,6 +55,6 @@ impl<T: ClientTrait> ClientHandler<T> {
             self.send_message_to(target, &message)?;
         }
 
-        self.ok_reply()
+        self.send_response_for_reply(CommandResponse::Ok200)
     }
 }

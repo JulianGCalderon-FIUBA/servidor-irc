@@ -1,69 +1,62 @@
-use crate::server::{
-    client_handler::{commands::connection_registration::QUIT_COMMAND, ClientHandler},
-    client_trait::ClientTrait,
-};
-use std::io;
+use crate::server::client_handler::commands::connection_registration::QUIT_COMMAND;
+use std::fmt::Display;
 
-impl<T: ClientTrait> ClientHandler<T> {
-    pub fn quit_reply(&mut self, message: &str) -> io::Result<()> {
-        let response = format!("{QUIT_COMMAND} :{message}");
-        self.send_response(&response)
-    }
+pub enum CommandResponse {
+    Quit {
+        message: String,
+    },
+    Ok200,
+    ListStart321,
+    List322 {
+        channels: Vec<String>,
+    },
+    ListEnd323,
+    NoTopic331 {
+        channel: String,
+    },
+    Inviting341 {
+        channel: String,
+        nickname: String,
+    },
+    NameReply353 {
+        channel: String,
+        clients: Vec<String>,
+    },
+    EndOfNames366 {
+        channel: String,
+    },
+    YouAreOper381,
+    //Away301 {nickname: String, message: String},
+    //Topic332 {channel: String, topic: String},
+}
 
-    pub fn ok_reply(&mut self) -> io::Result<()> {
-        let response = "200 :success".to_string();
-        self.send_response(&response)
-    }
-
-    pub fn list_start_reply(&mut self) -> io::Result<()> {
-        let response = "321 :Channel :Users Name".to_string();
-        self.send_response(&response)
-    }
-
-    pub fn list_end_reply(&mut self) -> io::Result<()> {
-        let response = "323 :End of /LIST".to_string();
-        self.send_response(&response)
-    }
-
-    pub fn list_reply(&mut self, channels: Vec<String>) -> io::Result<()> {
-        self.list_start_reply()?;
-        let response = format!("322 : {}", channels.join(" "));
-        self.send_response(&response)?;
-        self.list_end_reply()
-    }
-
-    // pub fn away_reply(&mut self, nickname: &str, message: &str) -> io::Result<()> {
-    //     let response = format!("301 {nickname} :{message}");
-    //     self.send_response(&response)
-    // }
-
-    pub fn no_topic_reply(&mut self, channel: &str) -> io::Result<()> {
-        let response = format!("331 {channel} :no topic is set");
-        self.send_response(&response)
-    }
-
-    // pub fn topic_reply(&mut self, channel: &str, topic: &str) -> io::Result<()> {
-    //     let response = format!("332 {} :{}", channel, topic);
-    //     self.send_response(&response)
-    // }
-
-    pub fn invite_reply(&mut self, channel: &str, nickname: &str) -> io::Result<()> {
-        let response = format!("341 {channel} {nickname}");
-        self.send_response(&response)
-    }
-
-    pub fn end_of_names_reply(&mut self, channel: &str) -> io::Result<()> {
-        let response = format!("366 {channel} :End of /NAMES list");
-        self.send_response(&response)
-    }
-
-    pub fn names_reply(&mut self, channel: &str, clients: Vec<String>) -> io::Result<()> {
-        let response = format!("353 {channel} :{}", clients.join(" "));
-        self.send_response(&response)
-    }
-
-    pub fn oper_reply(&mut self) -> io::Result<()> {
-        let response = "381 :You are now an IRC operator".to_string();
-        self.send_response(&response)
+impl Display for CommandResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let string = match self {
+            CommandResponse::List322 { channels } => {
+                format!("322 : {}", channels.join(" "))
+            }
+            CommandResponse::NoTopic331 { channel } => {
+                format!("331 {channel} :no topic is set")
+            }
+            CommandResponse::Inviting341 { channel, nickname } => {
+                format!("341 {channel} {nickname}")
+            }
+            CommandResponse::NameReply353 { channel, clients } => {
+                format!("353 {channel} :{}", clients.join(" "))
+            }
+            CommandResponse::EndOfNames366 { channel } => {
+                format!("366 {channel} :End of /NAMES list")
+            }
+            CommandResponse::Ok200 => "200 :success".to_string(),
+            CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
+            CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
+            CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
+            CommandResponse::Quit { message } => {
+                format!("{QUIT_COMMAND} :{message}")
+            } //CommandResponse::Away301 {nickname, message} => {format!("301 {nickname} :{message}")}
+              //CommandResponse::Topic332 {channel, topic} => {format!("332 {} :{}", channel, topic)}
+        };
+        write!(f, "{string}")
     }
 }

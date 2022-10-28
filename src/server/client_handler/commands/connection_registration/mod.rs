@@ -1,4 +1,6 @@
-use crate::server::client_trait::ClientTrait;
+use crate::server::{
+    client_handler::responses::replies::CommandResponse, client_trait::ClientTrait,
+};
 
 use super::ClientHandler;
 
@@ -21,7 +23,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let password = parameters.pop().unwrap();
         self.registration.set_attribute("password", password);
 
-        self.ok_reply()
+        self.send_response_for_reply(CommandResponse::Ok200)
     }
 
     pub fn nick_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
@@ -32,7 +34,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let nickname = parameters.pop().unwrap();
         self.registration.set_nickname(nickname);
 
-        self.ok_reply()
+        self.send_response_for_reply(CommandResponse::Ok200)
     }
 
     pub fn user_command(
@@ -56,7 +58,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         self.database.add_client(self.registration.build().unwrap());
 
-        self.ok_reply()
+        self.send_response_for_reply(CommandResponse::Ok200)
     }
 
     pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
@@ -69,15 +71,12 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.database
             .set_server_operator(&self.registration.nickname().unwrap());
 
-        self.oper_reply()
+        self.send_response_for_reply(CommandResponse::YouAreOper381)
     }
 
     pub fn quit_command(&mut self, trailing: Option<String>) -> io::Result<()> {
-        if let Some(trailing) = trailing {
-            return self.quit_reply(&trailing);
-        }
+        let message = trailing.unwrap_or_else(|| self.registration.nickname().unwrap_or_default());
 
-        let nickname = self.registration.nickname().unwrap();
-        self.quit_reply(&nickname)
+        self.send_response_for_reply(CommandResponse::Quit { message })
     }
 }
