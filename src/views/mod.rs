@@ -28,10 +28,12 @@ fn build_ui(app: &Application) {
     .title("Lemon Pie IRC")
     .default_height(600)
     .default_width(1200)
+    .margin_start(20)
     .build();
 
     let main_box = Box::builder()
     .orientation(Orientation::Horizontal)
+    .halign(gtk::Align::Center)
     .build();
 
     let sidebar = Sidebar::new();

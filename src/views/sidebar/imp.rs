@@ -31,31 +31,26 @@ impl ObjectImpl for Sidebar {
 
         // CONSEGUIR LISTA CANALES CON CONTROLER
         for channel in vec!["#canal1", "#canal2"] {
-            let button = create_button(channel);
+            let button = create_button(channel, 12);
             obj.append(&button);
         }
 
-        let button = create_button("+");
+        let button = create_button("+", 12);
         obj.append(&button);
 
-        let separator = Separator::builder()
-        .orientation(Orientation::Horizontal)
-        .build();
+        let separator = create_separator();
         obj.append(&separator);
 
-        button.connect_clicked(|_| println!("Hi"));
         for conv in vec!["juli", "sol", "ana"] {
-            let button = create_button(conv);
+            let button = create_button(conv, 12);
             obj.append(&button);
         }
 
-        let button = create_button("+");
+        let button = create_button("+", 12);
         obj.append(&button);
         
         obj.set_margin_top(12);
-        obj.set_margin_bottom(12);
-        obj.set_margin_start(12);
-        obj.set_margin_end(12);
+        
     }
 
     fn properties() -> &'static [glib::ParamSpec] {
@@ -83,18 +78,23 @@ impl WidgetImpl for Sidebar {}
 
 impl BoxImpl for Sidebar {}
 
-fn create_button(label: &str) -> Button {
+fn create_button(label: &str, margin: i32) -> Button {
     let button = Button::builder()
     .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(gtk::Align::Center)
+    .margin_top(margin)
+    .margin_bottom(margin)
     .valign(gtk::Align::Center)
     .build();
 
     button.connect_clicked(|_| println!("Hi"));
 
     button
+}
+
+fn create_separator() -> Separator{
+    Separator::builder()
+    .orientation(Orientation::Horizontal)
+    .margin_top(20)
+    .margin_bottom(20)
+    .build()
 }
