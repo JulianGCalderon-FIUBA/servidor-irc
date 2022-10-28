@@ -26,8 +26,14 @@ pub enum CommandResponse {
         channel: String,
     },
     YouAreOper381,
-    //Away301 {nickname: String, message: String},
-    //Topic332 {channel: String, topic: String},
+    // Away301 {
+    //     nickname: String,
+    //     message: String,
+    // },
+    // Topic332 {
+    //     channel: String,
+    //     topic: String,
+    // },
 }
 
 impl Display for CommandResponse {
@@ -48,14 +54,19 @@ impl Display for CommandResponse {
             CommandResponse::EndOfNames366 { channel } => {
                 format!("366 {channel} :End of /NAMES list")
             }
+            CommandResponse::Quit { message } => {
+                format!("{QUIT_COMMAND} :{message}")
+            }
             CommandResponse::Ok200 => "200 :success".to_string(),
             CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
             CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
-            CommandResponse::Quit { message } => {
-                format!("{QUIT_COMMAND} :{message}")
-            } //CommandResponse::Away301 {nickname, message} => {format!("301 {nickname} :{message}")}
-              //CommandResponse::Topic332 {channel, topic} => {format!("332 {} :{}", channel, topic)}
+            // CommandResponse::Away301 { nickname, message } => {
+            //     format!("301 {nickname} :{message}")
+            // }
+            // CommandResponse::Topic332 { channel, topic } => {
+            //     format!("332 {} :{}", channel, topic)
+            // }
         };
         write!(f, "{string}")
     }
