@@ -27,8 +27,8 @@ pub fn run() {
     let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
     app.connect_startup(|_| load_css());
-    app.connect_activate(build_ui1);
-    //app.connect_activate(build_ui2);
+    //app.connect_activate(build_ui1);
+    app.connect_activate(build_ui2);
     app.run();
 }
 
