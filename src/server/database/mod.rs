@@ -191,20 +191,29 @@ fn matches(base: &str, pattern: &str) -> bool {
     let mut glob_pattern_index = -1;
 
     while base_index < base.len() {
-        if pattern_index < pattern.len() && glob_pattern_index != -1 {
+        if pattern_index < pattern.len() {
+            if base[base_index] == pattern[pattern_index] || pattern[pattern_index] == b'?' {
+                base_index += 1;
+                pattern_index += 1;
+                continue;
+            }
+
+            if pattern[pattern_index] == b'*' {
+                glob_base_index = base_index as isize;
+                glob_pattern_index = pattern_index as isize;
+                pattern_index += 1;
+                continue;
+            }
+        }
+
+        if glob_pattern_index != -1 {
             base_index = (glob_base_index + 1) as usize;
             pattern_index = (glob_pattern_index + 1) as usize;
             glob_base_index += 1;
-        } else if base[base_index] == pattern[pattern_index] || pattern[pattern_index] == b'?' {
-            base_index += 1;
-            pattern_index += 1;
-        } else if pattern[pattern_index] == b'*' {
-            glob_base_index = base_index as isize;
-            glob_pattern_index = pattern_index as isize;
-            pattern_index += 1;
-        } else {
-            return false;
+            continue;
         }
+
+        return false;
     }
 
     while pattern_index < pattern.len() && pattern[pattern_index] == b'*' {
