@@ -176,60 +176,39 @@ fn client_matches_query<T: ClientTrait>(client: &Client<T>, query: &str) -> bool
     false
 }
 
-fn matches(stack: &str, needle: &str) -> bool {
-    let mut splits = needle.split('*');
+// DYNAMIC PROGRAMMING APPROACH
+fn matches(base: &str, pattern: &str) -> bool {
+    if pattern.is_empty() {
+        return base.is_empty();
+    }
 
-    println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-    println!("does {needle} matches {stack}");
-    println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    let mut lookup = vec![vec![false; pattern.len() + 1]; base.len() + 1];
 
-    let mut temp_stack = &stack.to_owned()[..];
+    lookup[0][0] = true;
 
-    if !needle.starts_with('*') {
-        let first = splits.next().unwrap();
-
-        println!("finding: {first}");
-        println!("in: {temp_stack}");
-
-        let index = temp_stack.find(first);
-        let index = match index {
-            Some(index) => index,
-            None => return false,
-        };
-        temp_stack = &temp_stack[first.len()..];
-
-        println!("left: {temp_stack}");
-        println!("==================================");
-
-        if index != 0 {
-            return false;
+    for j in 1..=pattern.len() {
+        if pattern.as_bytes()[j - 1] == b'*' {
+            lookup[0][j] = lookup[0][j - 1];
         }
     }
 
-    for split in splits {
-        println!("finding: {split}");
-        println!("in: {temp_stack}");
+    for i in 1..=base.len() {
+        for j in 1..=pattern.len() {
+            if pattern.as_bytes()[j - 1] == b'*' {
+                lookup[i][j] = lookup[i][j - 1] || lookup[i - 1][j];
+                continue;
+            }
 
-        if split.is_empty() {
-            continue;
+            if pattern.as_bytes()[j - 1] == b'?'
+                || base.as_bytes()[i - 1] == pattern.as_bytes()[j - 1]
+            {
+                lookup[i][j] = lookup[i - 1][j - 1];
+                continue;
+            }
+
+            lookup[i][j] = false;
         }
-
-        let index = temp_stack.find(split);
-        let index = match index {
-            Some(index) => index,
-            None => return false,
-        };
-        temp_stack = &temp_stack[index + split.len()..];
-
-        println!("left: {temp_stack}");
-        println!("==================================");
     }
 
-    println!("end of loop!!");
-
-    if !needle.ends_with('*') && !temp_stack.is_empty() {
-        return false;
-    }
-
-    true
+    lookup[base.len()][pattern.len()]
 }
