@@ -13,6 +13,7 @@ use commands::connection_registration::{
     NICK_COMMAND, OPER_COMMAND, PASS_COMMAND, QUIT_COMMAND, USER_COMMAND,
 };
 use commands::sending_messages::{NOTICE_COMMAND, PRIVMSG_COMMAND};
+use commands::user_based_queries::WHOIS_COMMAND;
 
 use std::sync::Arc;
 
@@ -98,6 +99,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 INVITE_COMMAND => self.invite_command(parameters)?,
                 NAMES_COMMAND => self.names_command(parameters)?,
                 LIST_COMMAND => self.list_command(parameters)?,
+                WHOIS_COMMAND => self.whois_command(parameters)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
