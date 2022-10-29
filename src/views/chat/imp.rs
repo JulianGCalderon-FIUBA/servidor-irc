@@ -62,11 +62,10 @@ impl ObjectImpl for Chat {
         message_sender_box.append(&input);
 
         let send_button = create_button("Send");
-        let text = input.text().clone();
+        let input_clone = input.clone();
         let _obj_clone = obj.clone();
         send_button.connect_clicked(move |_| {
-            println!("{}", text);
-            message_7.set_text("hola");
+            message_7.set_text(&input_clone.text());
             message_7.add_css_class("message");
             // _obj_clone.append(&message);
         });
