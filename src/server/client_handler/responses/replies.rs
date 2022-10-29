@@ -2,9 +2,6 @@ use crate::server::client_handler::commands::connection_registration::QUIT_COMMA
 use std::fmt::Display;
 
 pub enum CommandResponse {
-    Quit {
-        message: String,
-    },
     Ok200,
     ListStart321,
     List322 {
@@ -26,6 +23,9 @@ pub enum CommandResponse {
         channel: String,
     },
     YouAreOper381,
+    Quit {
+        message: String,
+    },
     // Away301 {
     //     nickname: String,
     //     message: String,

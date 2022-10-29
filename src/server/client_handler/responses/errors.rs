@@ -14,9 +14,7 @@ pub enum ErrorReply {
     NotOnChannel442 { channel: String },
     UserOnChannel443 { nickname: String, channel: String },
     NeedMoreParameters461 { command: String },
-
     AlreadyRegistered462,
-    //PasswordMismatch464,
     NoNickname,
     UnregisteredClient,
     ClientOffline { nickname: String },
@@ -24,6 +22,7 @@ pub enum ErrorReply {
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },
     // BadChannelKey475 { channel: String },
+    //PasswordMismatch464,
 }
 
 impl Display for ErrorReply {
@@ -56,21 +55,21 @@ impl Display for ErrorReply {
             ErrorReply::NeedMoreParameters461 { command } => {
                 format!("461 {command} :not enough parameters")
             }
-            ErrorReply::ClientOffline { nickname } => {
-                format!("200 {nickname} :client is offline")
-            }
-            ErrorReply::NoTextToSend412 => "412 :no text to send".to_string(),
-            ErrorReply::NoNicknameGiven431 => "431 :no nickname given".to_string(),
-            ErrorReply::AlreadyRegistered462 => "462 :you may not reregister".to_string(),
-            //ErrorReply::PasswordMismatch464 => "464 :password incorrect".to_string(),
-            ErrorReply::NoNickname => "200 :no nickname registered".to_string(),
-            ErrorReply::UnregisteredClient => "200 :unregistered".to_string(),
             ErrorReply::NicknameInUse433 { nickname } => {
                 format!("433 {nickname} :nickname is already in use")
             }
             ErrorReply::NickCollision436 { nickname } => {
                 format!("436 {nickname} :nickname collision KILL")
             }
+            ErrorReply::ClientOffline { nickname } => {
+                format!("200 {nickname} :client is offline")
+            }
+            ErrorReply::NoTextToSend412 => "412 :no text to send".to_string(),
+            ErrorReply::NoNicknameGiven431 => "431 :no nickname given".to_string(),
+            ErrorReply::AlreadyRegistered462 => "462 :you may not reregister".to_string(),
+            ErrorReply::NoNickname => "200 :no nickname registered".to_string(),
+            ErrorReply::UnregisteredClient => "200 :unregistered".to_string(),
+            //ErrorReply::PasswordMismatch464 => "464 :password incorrect".to_string(),
         };
         write!(f, "{string}")
     }
