@@ -2,15 +2,8 @@ use gtk::Align;
 use gtk::Label;
 use gtk4 as gtk;
 
-use gtk::Button;
-use gtk::glib;
-use gtk::glib::ParamSpec;
-use gtk::glib::once_cell::sync::Lazy;
-use gtk::prelude::*;
-use gtk::subclass::prelude::BoxImpl;
-use gtk::subclass::prelude::ObjectImpl;
-use gtk::subclass::prelude::ObjectImplExt;
-use gtk::subclass::prelude::ObjectSubclass;
+use gtk::{glib, glib::once_cell::sync::Lazy, glib::ParamSpec, prelude::*};
+use gtk::subclass::prelude::{BoxImpl, ObjectImpl, ObjectImplExt, ObjectSubclass};
 use gtk::subclass::widget::WidgetImpl;
 
 #[derive(Default)]
@@ -41,6 +34,31 @@ impl ObjectImpl for Messages {
         let info_conv = create_message("juli: Como estan?");
         info_conv.add_css_class("message");
         obj.append(&info_conv);
+
+        let info_conv = create_message("");
+        info_conv.add_css_class("empty_message");
+        obj.append(&info_conv);
+
+        let info_conv = create_message("");
+        info_conv.add_css_class("empty_message");
+        obj.append(&info_conv);
+
+        let info_conv = create_message("");
+        info_conv.add_css_class("empty_message");
+        obj.append(&info_conv);
+
+        let info_conv = create_message("");
+        info_conv.add_css_class("empty_message");
+        obj.append(&info_conv);
+
+        let info_conv = create_message("");
+        info_conv.add_css_class("empty_message");
+        obj.append(&info_conv);
+
+        let info_conv = create_message("");
+        info_conv.add_css_class("empty_message");
+        obj.append(&info_conv);
+
 
         obj.set_margin_top(12);
         obj.set_margin_bottom(12);

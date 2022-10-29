@@ -1,16 +1,7 @@
-use gtk::Align;
-use gtk::Label;
 use gtk4 as gtk;
 
-use gtk::Button;
-use gtk::glib;
-use gtk::glib::ParamSpec;
-use gtk::glib::once_cell::sync::Lazy;
-use gtk::prelude::*;
-use gtk::subclass::prelude::BoxImpl;
-use gtk::subclass::prelude::ObjectImpl;
-use gtk::subclass::prelude::ObjectImplExt;
-use gtk::subclass::prelude::ObjectSubclass;
+use gtk::{glib, glib::once_cell::sync::Lazy, glib::ParamSpec, prelude::*};
+use gtk::subclass::prelude::{BoxImpl, ObjectImpl, ObjectImplExt, ObjectSubclass};
 use gtk::subclass::widget::WidgetImpl;
 
 use super::messages::Messages;

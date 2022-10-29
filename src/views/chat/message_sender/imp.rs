@@ -39,11 +39,11 @@ impl ObjectImpl for MessageSender {
 
         let send_button = create_button("Send");
         let text = input.text().clone();
-        let obj_clone = obj.clone();
+        let _obj_clone = obj.clone();
         send_button.connect_clicked(move |_| {
             println!("{}", text);
             // let message = create_message(&text);
-            // obj_clone.append(&message);
+            // _obj_clone.append(&message);
         });
         obj.append(&send_button);
 
@@ -96,7 +96,7 @@ fn create_entry(placeholder: &str) -> Entry {
     Entry::builder().placeholder_text(placeholder).build()
 }
 
-fn create_message(label: &str) -> Label {
+fn _create_message(label: &str) -> Label {
     Label::builder()
     .label(label)
     .margin_top(12)
