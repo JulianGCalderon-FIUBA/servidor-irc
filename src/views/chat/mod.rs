@@ -1,6 +1,4 @@
 mod imp;
-mod messages;
-mod message_sender;
 
 use gtk4 as gtk;
 

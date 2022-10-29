@@ -1,31 +1,25 @@
-.main_box {
-    border: solid 2px #270c17; 
-    //border: solid 5px #eae3ea; // SLATE
-    border-radius: 5px;
-}
-
 .sidebar {
-    background-color: #B56357; // RUST
+    background-color: #020311; // RUST
 }
 
 button {
-    color: #e6cbe6;   
-    border: solid 2px #B56357; // RUST
+    color: white;   
+    border: solid 1px white; // RUST
 }
 
 .add{
     color: white;
-    background-color: #b4dbc0; // MINT
+    background-color: #346d45; // MINT
 }
 
-
 label{
-    font-family: 'Courier New', Courier, monospace;
+    font-family: Helvetica;
     font-weight: bold;
 }
 
 .message {
     border-radius: 5px;
+    max-width: 50px;
     padding: 10px;
     background-color: #A7B3A5; // SEA-FORM
 }
@@ -33,5 +27,4 @@ label{
 .empty_message {
     border-radius: 5px;
     padding: 10px;
-    background-color: transparent;
 }

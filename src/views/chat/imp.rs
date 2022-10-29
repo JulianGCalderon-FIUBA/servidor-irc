@@ -1,9 +1,19 @@
 use gtk4 as gtk;
 
-use gtk::{Align, Box, Button, Entry, glib, glib::once_cell::sync::Lazy, glib::ParamSpec, Label, Orientation, prelude::*};
-use gtk::subclass::prelude::{BoxImpl, ObjectImpl, ObjectImplExt, ObjectSubclass};
+use gtk::{
+    Align,
+    Box,
+    Button,
+    Entry,
+    glib,
+    glib::once_cell::sync::Lazy,
+    glib::ParamSpec,
+    Label,
+    Orientation,
+    prelude::*,
+};
+use gtk::subclass::prelude::{ BoxImpl, ObjectImpl, ObjectImplExt, ObjectSubclass };
 use gtk::subclass::widget::WidgetImpl;
-
 
 #[derive(Default)]
 pub struct Chat {
@@ -21,12 +31,10 @@ impl ObjectImpl for Chat {
     fn constructed(&self, obj: &Self::Type) {
         self.parent_constructed(obj);
 
-        let message_1 = create_message("sol: Hola chicos!");
-        message_1.add_css_class("message");
+        let message_1 = create_empty_message();
         obj.append(&message_1);
 
-        let message_2 = create_message("juli: Como estan?");
-        message_2.add_css_class("message");
+        let message_2 = create_empty_message();
         obj.append(&message_2);
 
         let message_3 = create_empty_message();
@@ -47,51 +55,91 @@ impl ObjectImpl for Chat {
         let message_8 = create_empty_message();
         obj.append(&message_8);
 
-        let message_sender_box = Box::builder()
-        .orientation(Orientation::Horizontal)
-        .margin_top(20)
-        .margin_bottom(20)
-        .halign(gtk::Align::Center)
-        .build();
+        let message_9 = create_empty_message();
+        obj.append(&message_9);
 
-        let info_button = create_button("Info Personal");
+        let message_10 = create_empty_message();
+        obj.append(&message_10);
+
+        let message_11 = create_empty_message();
+        obj.append(&message_11);
+
+        let message_12 = create_empty_message();
+        obj.append(&message_12);
+
+        let message_13 = create_empty_message();
+        obj.append(&message_13);
+
+        let message_14 = create_empty_message();
+        obj.append(&message_14);
+
+        let message_15 = create_empty_message();
+        obj.append(&message_15);
+
+        let messages = vec![
+            message_1,
+            message_2,
+            message_3,
+            message_4,
+            message_5,
+            message_6,
+            message_7,
+            message_8,
+            message_9,
+            message_10,
+            message_11,
+            message_12,
+            message_13,
+            message_14,
+            message_15
+        ];
+
+        let message_sender_box = Box::builder()
+            .orientation(Orientation::Horizontal)
+            .margin_top(20)
+            .margin_bottom(20)
+            .halign(gtk::Align::Start)
+            .build();
+
+        let info_button = create_button("info");
         info_button.connect_clicked(|_| println!("Hi"));
+        info_button.set_width_request(100);
         message_sender_box.append(&info_button);
 
         let input = create_entry("Message...");
+        input.set_hexpand(true);
         message_sender_box.append(&input);
 
-        let send_button = create_button("Send");
-        let input_clone = input.clone();
-        let _obj_clone = obj.clone();
-        send_button.connect_clicked(move |_| {
-            message_7.set_text(&input_clone.text());
-            message_7.add_css_class("message");
-            // _obj_clone.append(&message);
-        });
+        let send_button = create_send_button(input.clone(), messages.clone());
+        send_button.set_width_request(100);
         message_sender_box.append(&send_button);
 
         obj.append(&message_sender_box);
 
         obj.set_halign(gtk::Align::Start);
         obj.set_valign(gtk::Align::End);
+        obj.set_hexpand(true);
+        obj.set_width_request(1420);
     }
 
     fn properties() -> &'static [glib::ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> =
-        Lazy::new(|| {
-            vec![]
-        });
+        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| { vec![] });
         PROPERTIES.as_ref()
     }
 
-    fn set_property(&self,_obj: &Self::Type,_id: usize, _value: &glib::Value, pspec: &glib::ParamSpec) {
+    fn set_property(
+        &self,
+        _obj: &Self::Type,
+        _id: usize,
+        _value: &glib::Value,
+        pspec: &glib::ParamSpec
+    ) {
         match pspec.name() {
             _ => unimplemented!(),
         }
     }
 
-    fn property(&self,_obj: &Self::Type, _id: usize, pspec: &glib::ParamSpec) -> glib::Value {
+    fn property(&self, _obj: &Self::Type, _id: usize, pspec: &glib::ParamSpec) -> glib::Value {
         match pspec.name() {
             _ => unimplemented!(),
         }
@@ -104,13 +152,15 @@ impl BoxImpl for Chat {}
 
 fn create_message(label: &str) -> Label {
     Label::builder()
-    .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(Align::Start)
-    .build()
+        .label(label)
+        .margin_top(12)
+        .margin_bottom(12)
+        .margin_start(12)
+        .margin_end(12)
+        .max_width_chars(10)
+        .valign(Align::Start)
+        .halign(Align::Start)
+        .build()
 }
 
 fn create_empty_message() -> Label {
@@ -121,18 +171,47 @@ fn create_empty_message() -> Label {
 
 fn create_button(label: &str) -> Button {
     let button = Button::builder()
-    .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(gtk::Align::Center)
-    .valign(gtk::Align::Center)
-    .build();
+        .label(label)
+        .margin_top(12)
+        .margin_bottom(12)
+        .margin_start(12)
+        .margin_end(12)
+        .halign(gtk::Align::Center)
+        .valign(gtk::Align::Center)
+        .build();
 
     button
 }
 
 fn create_entry(placeholder: &str) -> Entry {
-    Entry::builder().placeholder_text(placeholder).build()
+    Entry::builder()
+    .placeholder_text(placeholder)
+    .width_request(1150)
+    .build()
+}
+
+fn entry_is_valid(entry_text: &str) -> bool {
+    entry_text != ""
+}
+
+fn create_send_button(input: Entry, messages: Vec<Label>) -> Button {
+    let send_button = create_button("Send!");
+    
+    send_button.connect_clicked(move |_| {
+        let entry_text = input.text();
+        if !entry_is_valid(&entry_text) { return }
+
+        if messages.iter().any(|message| message.text() == "") {
+            let new_message = messages.iter().find(|message| message.text() == "").unwrap();
+            new_message.add_css_class("message");
+            new_message.set_text(&entry_text);   
+        } else {
+            for i in 0..messages.len()-1 {
+                messages[i].set_text(&messages[i+1].text());
+            }
+            messages[messages.len()-1].set_text(&entry_text);
+        }
+    });
+
+    send_button
 }

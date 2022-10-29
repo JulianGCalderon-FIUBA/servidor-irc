@@ -50,6 +50,7 @@ impl ObjectImpl for Sidebar {
         let add_user_button = create_button("+", 12);
         add_user_button.add_css_class("add");
         obj.append(&add_user_button);        
+        obj.set_width_request(250);
     }
 
     fn properties() -> &'static [glib::ParamSpec] {

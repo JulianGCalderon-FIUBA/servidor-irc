@@ -38,10 +38,6 @@ impl ObjectImpl for ConvInfo {
         let functions_button = create_button("Functions");
         obj.append(&functions_button);
 
-
-
-        
-        
         obj.set_margin_top(12);
         obj.set_margin_bottom(12);
         obj.set_margin_start(12);
