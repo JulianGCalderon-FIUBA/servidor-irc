@@ -176,7 +176,6 @@ fn client_matches_query<T: ClientTrait>(client: &Client<T>, query: &str) -> bool
     false
 }
 
-// DYNAMIC PROGRAMMING APPROACH
 fn matches(base: &str, pattern: &str) -> bool {
     if pattern.is_empty() {
         return base.is_empty();
@@ -222,3 +221,43 @@ fn matches(base: &str, pattern: &str) -> bool {
 
     pattern_index == pattern.len()
 }
+
+// fn matches(stack: &str, needle: &str) -> bool {
+//     let mut splits = needle.split('*');
+
+//     let mut temp_stack = &stack.to_owned()[..];
+
+//     if !needle.starts_with('*') {
+//         let first = splits.next().unwrap();
+
+//         let index = temp_stack.find(first);
+//         let index = match index {
+//             Some(index) => index,
+//             None => return false,
+//         };
+//         temp_stack = &temp_stack[first.len()..];
+
+//         if index != 0 {
+//             return false;
+//         }
+//     }
+
+//     for split in splits {
+//         if split.is_empty() {
+//             continue;
+//         }
+
+//         let index = temp_stack.find(split);
+//         let index = match index {
+//             Some(index) => index,
+//             None => return false,
+//         };
+//         temp_stack = &temp_stack[index + split.len()..];
+//     }
+
+//     if !needle.ends_with('*') && !temp_stack.is_empty() {
+//         return false;
+//     }
+
+//     true
+// }
