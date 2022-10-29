@@ -124,6 +124,24 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
+    pub fn get_all_clients(&self) -> Vec<String> {
+        let clients_lock = self.clients.read().unwrap();
+
+        let queried = clients_lock.values();
+
+        queried.map(|client| client.nickname()).collect()
+    }
+
+    pub fn get_clients_for_query(&self, query: &str) -> Vec<String> {
+        let clients_lock = self.clients.read().unwrap();
+
+        let queried = clients_lock
+            .values()
+            .filter(|client| client_matches_query(client, query));
+
+        queried.map(|client| client.nickname()).collect()
+    }
+
     pub fn get_channels(&self) -> Vec<String> {
         let channels_lock = self.channels.read().unwrap();
 
@@ -148,4 +166,70 @@ impl<T: ClientTrait> Default for Database<T> {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn client_matches_query<T: ClientTrait>(client: &Client<T>, query: &str) -> bool {
+    if matches(&client.nickname(), query) {
+        return true;
+    }
+
+    false
+}
+
+fn matches(stack: &str, needle: &str) -> bool {
+    let mut splits = needle.split('*');
+
+    println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    println!("does {needle} matches {stack}");
+    println!("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+    let mut temp_stack = &stack.to_owned()[..];
+
+    if !needle.starts_with('*') {
+        let first = splits.next().unwrap();
+
+        println!("finding: {first}");
+        println!("in: {temp_stack}");
+
+        let index = temp_stack.find(first);
+        let index = match index {
+            Some(index) => index,
+            None => return false,
+        };
+        temp_stack = &temp_stack[first.len()..];
+
+        println!("left: {temp_stack}");
+        println!("==================================");
+
+        if index != 0 {
+            return false;
+        }
+    }
+
+    for split in splits {
+        println!("finding: {split}");
+        println!("in: {temp_stack}");
+
+        if split.is_empty() {
+            continue;
+        }
+
+        let index = temp_stack.find(split);
+        let index = match index {
+            Some(index) => index,
+            None => return false,
+        };
+        temp_stack = &temp_stack[index + split.len()..];
+
+        println!("left: {temp_stack}");
+        println!("==================================");
+    }
+
+    println!("end of loop!!");
+
+    if !needle.ends_with('*') && !temp_stack.is_empty() {
+        return false;
+    }
+
+    true
 }

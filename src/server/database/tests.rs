@@ -162,3 +162,18 @@ fn get_channels_for_client_returns_all_channels_for_client() {
 
     assert_eq!(channels_expected, channels_real);
 }
+
+#[test]
+fn matches_works_for_inner_wilcard() {
+    let stack = "hola_como_estas";
+
+    assert!(matches(stack, "hola*estas"));
+    assert!(matches(stack, "hola*como*estas"));
+    assert!(!matches(stack, "Xola*como*estas"));
+    assert!(!matches(stack, "hola*Xomo*estas"));
+    assert!(!matches(stack, "hola*como*Xstas"));
+    assert!(!matches(stack, "ola*como*estas"));
+    assert!(!matches(stack, "hola*como*esta"));
+    assert!(matches(stack, "*ola*como*estas"));
+    assert!(matches(stack, "hola*como*esta*"));
+}

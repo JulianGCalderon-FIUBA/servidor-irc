@@ -17,6 +17,7 @@ use commands::user_based_queries::WHOIS_COMMAND;
 
 use std::sync::Arc;
 
+use self::commands::user_based_queries::WHO_COMMAND;
 use self::responses::errors::ErrorReply;
 
 use super::client_trait::ClientTrait;
@@ -99,6 +100,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 INVITE_COMMAND => self.invite_command(parameters)?,
                 NAMES_COMMAND => self.names_command(parameters)?,
                 LIST_COMMAND => self.list_command(parameters)?,
+                WHO_COMMAND => self.who_command(parameters)?,
                 WHOIS_COMMAND => self.whois_command(parameters)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;

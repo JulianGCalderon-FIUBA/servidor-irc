@@ -3,6 +3,9 @@ use std::fmt::Display;
 
 pub enum CommandResponse {
     Ok200,
+    EndOfWho315 {
+        name: String,
+    },
     ListStart321,
     List322 {
         channel: String,
@@ -14,6 +17,9 @@ pub enum CommandResponse {
     Inviting341 {
         channel: String,
         nickname: String,
+    },
+    WhoReply352 {
+        client: String,
     },
     NameReply353 {
         channel: String,
@@ -39,6 +45,9 @@ pub enum CommandResponse {
 impl Display for CommandResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
+            CommandResponse::EndOfWho315 { name } => {
+                format!("315 {name} :End of /WHO list")
+            }
             CommandResponse::List322 { channel } => {
                 format!("322 : {channel}")
             }
@@ -47,6 +56,9 @@ impl Display for CommandResponse {
             }
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")
+            }
+            CommandResponse::WhoReply352 { client } => {
+                format!("352 :{client}")
             }
             CommandResponse::NameReply353 { channel, clients } => {
                 format!("353 {channel} :{}", clients.join(" "))
