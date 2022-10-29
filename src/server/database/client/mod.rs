@@ -31,6 +31,17 @@ impl<T: ClientTrait> Client<T> {
         Some(Arc::clone(stream))
     }
 
+    pub fn get_info(&self) -> Option<Client<T>> {
+        ClientBuilder::new()
+            .password(self.password())
+            .nickname(self.nickname())
+            .username(self.username())
+            .hostname(self.hostname())
+            .servername(self.servername())
+            .realname(self.realname())
+            .build()
+    }
+
     pub fn disconnect(&mut self) {
         self.stream = None;
     }
@@ -45,5 +56,16 @@ impl<T: ClientTrait> Client<T> {
 
     pub fn realname(&self) -> String {
         self.realname.clone()
+    }
+
+    pub fn username(&self) -> String {
+        self._username.clone()
+    }
+
+    pub fn hostname(&self) -> String {
+        self._hostname.clone()
+    }
+    pub fn servername(&self) -> String {
+        self._servername.clone()
     }
 }

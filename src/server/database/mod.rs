@@ -116,10 +116,10 @@ impl<T: ClientTrait> Database<T> {
     pub fn get_clients(&self, channel: &str) -> Vec<String> {
         let channels_lock = self.channels.read().unwrap();
 
-        let client_info = channels_lock.get(channel);
+        let channel_info = channels_lock.get(channel);
 
-        match client_info {
-            Some(client_info) => client_info.get_clients(),
+        match channel_info {
+            Some(channel_info) => channel_info.get_clients(),
             None => vec![],
         }
     }
@@ -141,6 +141,13 @@ impl<T: ClientTrait> Database<T> {
             }
         }
         channels
+    }
+
+    pub fn get_client_info(&self, nickname: &str) -> Option<Client<T>> {
+        let clients_lock = self.clients.read().unwrap();
+        let client = clients_lock.get(nickname)?;
+
+        client.get_info()
     }
 }
 
