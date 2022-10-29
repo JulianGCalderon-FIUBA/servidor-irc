@@ -182,33 +182,34 @@ fn matches(base: &str, pattern: &str) -> bool {
         return base.is_empty();
     }
 
-    let mut lookup = vec![vec![false; pattern.len() + 1]; base.len() + 1];
+    let base = base.as_bytes();
+    let pattern = pattern.as_bytes();
 
-    lookup[0][0] = true;
+    let mut base_index = 0;
+    let mut pattern_index = 0;
+    let mut glob_base_index = -1;
+    let mut glob_pattern_index = -1;
 
-    for j in 1..=pattern.len() {
-        if pattern.as_bytes()[j - 1] == b'*' {
-            lookup[0][j] = lookup[0][j - 1];
+    while base_index < base.len() {
+        if pattern_index < pattern.len() && glob_pattern_index != -1 {
+            base_index = (glob_base_index + 1) as usize;
+            pattern_index = (glob_pattern_index + 1) as usize;
+            glob_base_index += 1;
+        } else if base[base_index] == pattern[pattern_index] || pattern[pattern_index] == b'?' {
+            base_index += 1;
+            pattern_index += 1;
+        } else if pattern[pattern_index] == b'*' {
+            glob_base_index = base_index as isize;
+            glob_pattern_index = pattern_index as isize;
+            pattern_index += 1;
+        } else {
+            return false;
         }
     }
 
-    for i in 1..=base.len() {
-        for j in 1..=pattern.len() {
-            if pattern.as_bytes()[j - 1] == b'*' {
-                lookup[i][j] = lookup[i][j - 1] || lookup[i - 1][j];
-                continue;
-            }
-
-            if pattern.as_bytes()[j - 1] == b'?'
-                || base.as_bytes()[i - 1] == pattern.as_bytes()[j - 1]
-            {
-                lookup[i][j] = lookup[i - 1][j - 1];
-                continue;
-            }
-
-            lookup[i][j] = false;
-        }
+    while pattern_index < pattern.len() && pattern[pattern_index] == b'*' {
+        pattern_index += 1;
     }
 
-    lookup[base.len()][pattern.len()]
+    pattern_index == pattern.len()
 }
