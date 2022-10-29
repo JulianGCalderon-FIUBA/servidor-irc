@@ -70,7 +70,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             return self.send_response_for_error(error);
         }
 
-        let channels = self.get_channels(&parameters);
+        let channels = self.get_channels_for_query(parameters.get(0));
 
         self.send_response_for_reply(CommandResponse::ListStart321)?;
 
@@ -82,14 +82,15 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.send_response_for_reply(CommandResponse::ListEnd323)
     }
 
-    fn get_channels(&mut self, parameters: &Vec<String>) -> Vec<String> {
-        if parameters.is_empty() {
+    fn get_channels_for_query(&mut self, channels: Option<&String>) -> Vec<String> {
+        if channels.is_none() {
             let mut channels = self.database.get_channels();
             channels.sort();
             return channels;
         }
 
-        parameters[0]
+        channels
+            .unwrap()
             .split(',')
             .map(|string| string.to_string())
             .collect()
@@ -100,7 +101,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             return self.send_response_for_error(error);
         }
 
-        let channels = self.get_channels(&parameters);
+        let channels = self.get_channels_for_query(parameters.get(0));
 
         for channel in channels {
             if !self.database.contains_channel(&channel) {
