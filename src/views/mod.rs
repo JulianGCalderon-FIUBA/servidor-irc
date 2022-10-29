@@ -5,11 +5,15 @@ mod conv_info;
 use gtk4 as gtk;
 
 use gtk::ApplicationWindow;
+use gtk::StyleContext;
+use gtk::CssProvider;
 use gtk::Orientation;
 use gtk::Box;
 use gtk::Separator;
 use gtk::prelude::*;
 use gtk::Application;
+
+use gtk::gdk::Display;
 
 use sidebar::Sidebar;
 use chat::Chat;
@@ -18,8 +22,22 @@ use conv_info::ConvInfo;
 pub fn run() {
     let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
     
+    app.connect_startup(|_| load_css());
     app.connect_activate(build_ui);
     app.run();
+}
+
+fn load_css() {
+    // Load the CSS file and add it to the provider
+    let provider = CssProvider::new();
+    provider.load_from_data(include_bytes!("style.css"));
+
+    // Add the provider to the default screen
+    StyleContext::add_provider_for_display(
+        &Display::default().expect("Could not connect to a display."),
+        &provider,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
 }
     
 fn build_ui(app: &Application) {

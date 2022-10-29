@@ -2,6 +2,8 @@ use gtk::Entry;
 use gtk4 as gtk;
 
 use gtk::Button;
+use gtk::Label;
+use gtk::Align;
 use gtk::glib;
 use gtk::glib::ParamSpec;
 use gtk::glib::once_cell::sync::Lazy;
@@ -29,16 +31,22 @@ impl ObjectImpl for MessageSender {
         self.parent_constructed(obj);
 
         let info_button = create_button("Info Personal");
+        info_button.connect_clicked(|_| println!("Hi"));
         obj.append(&info_button);
 
         let input = create_entry("Message...");
         obj.append(&input);
 
         let send_button = create_button("Send");
+        let text = input.text().clone();
+        let obj_clone = obj.clone();
+        send_button.connect_clicked(move |_| {
+            println!("{}", text);
+            // let message = create_message(&text);
+            // obj_clone.append(&message);
+        });
         obj.append(&send_button);
 
-        
-        
         obj.set_margin_top(12);
         obj.set_margin_bottom(12);
         obj.set_margin_start(12);
@@ -81,21 +89,21 @@ fn create_button(label: &str) -> Button {
     .valign(gtk::Align::Center)
     .build();
 
-    button.connect_clicked(|_| println!("Hi"));
-
     button
 }
 
 fn create_entry(placeholder: &str) -> Entry {
     Entry::builder().placeholder_text(placeholder).build()
-    
-    // Label::builder()
-    // .label(label)
-    // .margin_top(12)
-    // .margin_bottom(12)
-    // .margin_start(12)
-    // .margin_end(12)
-    // .halign(Align::Center)
-    // .valign(Align::Center)
-    // .build()
+}
+
+fn create_message(label: &str) -> Label {
+    Label::builder()
+    .label(label)
+    .margin_top(12)
+    .margin_bottom(12)
+    .margin_start(12)
+    .margin_end(12)
+    .halign(Align::Center)
+    .valign(Align::Center)
+    .build()
 }

@@ -38,8 +38,8 @@ impl ObjectImpl for Chat {
 
         let message_sender = MessageSender::new();
         obj.append(&message_sender);
-
         
+        obj.set_halign(gtk::Align::Start);
         obj.set_valign(gtk::Align::End);
     }
 
@@ -67,31 +67,3 @@ impl ObjectImpl for Chat {
 impl WidgetImpl for Chat {}
 
 impl BoxImpl for Chat {}
-
-fn _create_button(label: &str) -> Button {
-    let button = Button::builder()
-    .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(gtk::Align::Center)
-    .valign(gtk::Align::Center)
-    .build();
-
-    button.connect_clicked(|_| println!("Hi"));
-
-    button
-}
-
-fn _create_label(label: &str) -> Label {
-    Label::builder()
-    .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(Align::Center)
-    .valign(Align::Center)
-    .build()
-}

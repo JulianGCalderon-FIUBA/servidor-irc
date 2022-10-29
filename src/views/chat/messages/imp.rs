@@ -26,8 +26,13 @@ impl ObjectSubclass for Messages {
 }
 
 impl ObjectImpl for Messages {
-    fn constructed(&self, obj: &Self::Type) {
+    fn constructed(&self, obj: &Self::Type/*, messages: usize*/) {
         self.parent_constructed(obj);
+
+        // for message in messages {
+        //     let info_conv = create_message(message);
+        //     obj.append(&info_conv);
+        // }
 
         let info_conv = create_message("sol: Hola chicos!");
         obj.append(&info_conv);
@@ -35,13 +40,17 @@ impl ObjectImpl for Messages {
         let info_conv = create_message("juli: Como estan?");
         obj.append(&info_conv);
 
-        
-        
         obj.set_margin_top(12);
         obj.set_margin_bottom(12);
         obj.set_margin_start(12);
         obj.set_margin_end(12);
+        obj.set_halign(gtk::Align::Start);
     }
+
+    // fn add_message(&self, text: str){
+    //     let info_conv = create_message(text);
+    //     obj.append(&info_conv);
+    // }
 
     fn properties() -> &'static [glib::ParamSpec] {
         static PROPERTIES: Lazy<Vec<ParamSpec>> =
@@ -67,22 +76,6 @@ impl ObjectImpl for Messages {
 impl WidgetImpl for Messages {}
 
 impl BoxImpl for Messages {}
-
-fn _create_button(label: &str) -> Button {
-    let button = Button::builder()
-    .label(label)
-    .margin_top(12)
-    .margin_bottom(12)
-    .margin_start(12)
-    .margin_end(12)
-    .halign(gtk::Align::Center)
-    .valign(gtk::Align::Center)
-    .build();
-
-    button.connect_clicked(|_| println!("Hi"));
-
-    button
-}
 
 fn create_message(label: &str) -> Label {
     Label::builder()
