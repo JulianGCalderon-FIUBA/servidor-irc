@@ -1,0 +1,30 @@
+box.main_box {
+    border: solid 2px rgb(168, 154, 250);
+    border-radius: 5px;
+}
+
+box.sidebar {
+    background-color: #B56357;
+}
+
+button {
+    color: #e6cbe6;   
+    border: solid 2px #B56357;
+}
+
+.add{
+    color: white;
+    background-color: #b4dbc0;
+}
+
+
+label{
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}
+
+.message {
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #A7B3A5;
+}

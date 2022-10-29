@@ -35,9 +35,11 @@ impl ObjectImpl for Messages {
         // }
 
         let info_conv = create_message("sol: Hola chicos!");
+        info_conv.add_css_class("message");
         obj.append(&info_conv);
 
         let info_conv = create_message("juli: Como estan?");
+        info_conv.add_css_class("message");
         obj.append(&info_conv);
 
         obj.set_margin_top(12);

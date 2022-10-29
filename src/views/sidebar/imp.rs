@@ -35,8 +35,9 @@ impl ObjectImpl for Sidebar {
             obj.append(&button);
         }
 
-        let button = create_button("+", 12);
-        obj.append(&button);
+        let add_channel_button = create_button("+", 12);
+        add_channel_button.add_css_class("add");
+        obj.append(&add_channel_button);
 
         let separator = create_separator();
         obj.append(&separator);
@@ -46,11 +47,9 @@ impl ObjectImpl for Sidebar {
             obj.append(&button);
         }
 
-        let button = create_button("+", 12);
-        obj.append(&button);
-        
-        obj.set_margin_top(12);
-        
+        let add_user_button = create_button("+", 12);
+        add_user_button.add_css_class("add");
+        obj.append(&add_user_button);        
     }
 
     fn properties() -> &'static [glib::ParamSpec] {
