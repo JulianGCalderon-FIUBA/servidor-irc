@@ -29,33 +29,32 @@ impl<T: ClientTrait> ClientHandler<T> {
                 })?;
                 continue;
             }
-            match self.database.get_client_info(nick) {
-                Some(info) => {
-                    self.send_response_for_reply(CommandResponse::WhoisUser311 {
-                        nickname: info.nickname(),
-                        username: info.username(),
-                        host: info.hostname(),
-                        real_name: info.realname(),
-                    })?;
-                    if self.database._is_server_operator(nick) {
-                        self.send_response_for_reply(CommandResponse::WhoisOperator313 {
-                            nickname: info.nickname(),
-                        })?;
-                    }
-                }
-                None => {
-                    eprintln!("Error consiguiendo info del cliente")
-                }
+            let info = self.database.get_client_info(nick).unwrap();
+
+            self.send_response_for_reply(CommandResponse::WhoisUser311 {
+                nickname: info.nickname(),
+                username: info.username(),
+                host: info.hostname(),
+                real_name: info.realname(),
+            })?;
+            if self.database._is_server_operator(nick) {
+                self.send_response_for_reply(CommandResponse::WhoisOperator313 {
+                    nickname: info.nickname(),
+                })?;
             }
 
             // self.send_response_for_reply(CommandResponse::WhoisIdle317 {
             //     nickname: nick.to_string(),
             //     seconds: (),
             // })?;
-            self.send_response_for_reply(CommandResponse::WhoisChannels319 {
-                nickname: nick.to_string(),
-                channels: self.database.get_channels_for_client(nick),
-            })?;
+            let channels = self.database.get_channels_for_client(nick);
+            if !channels.is_empty() {
+                self.send_response_for_reply(CommandResponse::WhoisChannels319 {
+                    nickname: nick.to_string(),
+                    channels,
+                })?;
+            }
+
             self.send_response_for_reply(CommandResponse::EndOfWhois318 {
                 nickname: nick.to_string(),
             })?;

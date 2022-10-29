@@ -32,14 +32,16 @@ impl<T: ClientTrait> Client<T> {
     }
 
     pub fn get_info(&self) -> Option<Client<T>> {
-        ClientBuilder::new()
-            .password(self.password())
-            .nickname(self.nickname())
-            .username(self.username())
-            .hostname(self.hostname())
-            .servername(self.servername())
-            .realname(self.realname())
-            .build()
+        Some(Self {
+            stream: None,
+            password: self.password(),
+            nickname: self.nickname(),
+            _username: self.username(),
+            _hostname: self.hostname(),
+            _servername: self.servername(),
+            realname: self.realname(),
+            operator: self.operator,
+        })
     }
 
     pub fn disconnect(&mut self) {
