@@ -22,7 +22,7 @@ pub enum ErrorReply {
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },
     // BadChannelKey475 { channel: String },
-    //PasswordMismatch464,
+    // PasswordMismatch464,
 }
 
 impl Display for ErrorReply {

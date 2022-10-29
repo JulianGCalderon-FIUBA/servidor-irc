@@ -7,7 +7,7 @@ use super::ClientHandler;
 use super::PRIVMSG_COMMAND;
 
 impl<T: ClientTrait> ClientHandler<T> {
-    pub fn assert_target_is_valid(&mut self, target: &str) -> Option<ErrorReply> {
+    pub fn assert_target_is_valid(&self, target: &str) -> Option<ErrorReply> {
         let target = target.to_string();
 
         let is_client = self.database.contains_client(&target);
@@ -26,7 +26,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     pub fn assert_privmsg_command_is_valid(
-        &mut self,
+        &self,
         parameters: &Vec<String>,
         trailing: &Option<String>,
     ) -> Option<ErrorReply> {

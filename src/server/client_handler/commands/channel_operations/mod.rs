@@ -20,22 +20,20 @@ impl<T: ClientTrait> ClientHandler<T> {
         if let Some(error) = self.assert_invite_is_valid(&parameters) {
             return self.send_response_for_error(error);
         }
-        let nickname_client_to_invite = &parameters[0];
-        let nickname_current_client = &(self.registration.nickname().unwrap());
-        let channel = &parameters[1];
+
+        let invited_client = &parameters[0];
+        let inviting_client = self.registration.nickname().unwrap();
+        let channel = parameters[1].to_string();
 
         let prefix = self.registration.nickname().unwrap();
 
-        let invitation_text: String =
-            format!(":{prefix} {INVITE_COMMAND} {nickname_client_to_invite} {channel}");
-        self.send_message_to_client(
-            nickname_client_to_invite,
-            &Message::new(&invitation_text).unwrap(),
-        );
+        let invitation_text = format!(":{prefix} {INVITE_COMMAND} {invited_client} {channel}");
+        let message = Message::new(&invitation_text).unwrap();
+        self.send_message_to_client(invited_client, &message);
 
         self.send_response_for_reply(CommandResponse::Inviting341 {
-            channel: channel.to_string(),
-            nickname: nickname_current_client.to_string(),
+            nickname: inviting_client,
+            channel,
         })
     }
 
@@ -63,6 +61,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 clients: self.database.get_clients(channel),
             })?;
         }
+
         Ok(())
     }
 
@@ -71,24 +70,29 @@ impl<T: ClientTrait> ClientHandler<T> {
             return self.send_response_for_error(error);
         }
 
-        let channels: Vec<String> = if parameters.is_empty() {
-            let mut list = self.database.get_channels();
-            list.sort();
-            list
-        } else {
-            parameters[0]
-                .split(',')
-                .map(|string| string.to_string())
-                .collect()
-        };
+        let channels = self.get_channels(&parameters);
+
         self.send_response_for_reply(CommandResponse::ListStart321)?;
 
         for channel in channels {
-            if self.assert_can_list_channel(&channel) {
+            if self.can_list_channel(&channel) {
                 self.send_response_for_reply(CommandResponse::List322 { channel })?;
             }
         }
         self.send_response_for_reply(CommandResponse::ListEnd323)
+    }
+
+    fn get_channels(&mut self, parameters: &Vec<String>) -> Vec<String> {
+        if parameters.is_empty() {
+            let mut channels = self.database.get_channels();
+            channels.sort();
+            return channels;
+        }
+
+        parameters[0]
+            .split(',')
+            .map(|string| string.to_string())
+            .collect()
     }
 
     pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
@@ -96,35 +100,30 @@ impl<T: ClientTrait> ClientHandler<T> {
             return self.send_response_for_error(error);
         }
 
-        let channels: Vec<String> = if parameters.is_empty() {
-            let mut list = self.database.get_channels();
-            list.sort();
-            list
-        } else {
-            parameters[0]
-                .split(',')
-                .map(|string| string.to_string())
-                .collect()
-        };
+        let channels = self.get_channels(&parameters);
 
         for channel in channels {
-            if self.database.contains_channel(&channel) {
-                let clients = self.database.get_clients(&channel);
-                self.send_response_for_reply(CommandResponse::NameReply353 {
-                    channel: channel.clone(),
-                    clients,
-                })?;
+            if !self.database.contains_channel(&channel) {
+                continue;
+            }
 
-                if !parameters.is_empty() {
-                    self.send_response_for_reply(CommandResponse::EndOfNames366 { channel })?
-                }
+            let clients = self.database.get_clients(&channel);
+            self.send_response_for_reply(CommandResponse::NameReply353 {
+                channel: channel.clone(),
+                clients,
+            })?;
+
+            if !parameters.is_empty() {
+                self.send_response_for_reply(CommandResponse::EndOfNames366 { channel })?
             }
         }
+
         if parameters.is_empty() {
             return self.send_response_for_reply(CommandResponse::EndOfNames366 {
                 channel: "".to_string(),
             });
         }
+
         Ok(())
     }
 

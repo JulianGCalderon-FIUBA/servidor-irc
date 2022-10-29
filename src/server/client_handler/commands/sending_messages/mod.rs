@@ -25,6 +25,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         for target in targets.split(',') {
             if let Some(error) = self.assert_target_is_valid(target) {
                 self.send_response_for_error(error)?;
+                continue;
             }
 
             let message = self.build_text_message(PRIVMSG_COMMAND, target, &content);
@@ -49,6 +50,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         for target in targets.split(',') {
             if let Some(error) = self.assert_target_is_valid(target) {
                 self.send_response_for_error(error)?;
+                continue;
             }
 
             let message = self.build_text_message(PRIVMSG_COMMAND, target, &content);

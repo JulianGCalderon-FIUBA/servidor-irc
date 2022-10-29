@@ -90,19 +90,19 @@ impl<T: ClientTrait> ClientHandler<T> {
                 PASS_COMMAND => self.pass_command(parameters)?,
                 NICK_COMMAND => self.nick_command(parameters)?,
                 USER_COMMAND => self.user_command(parameters, trailing)?,
+                OPER_COMMAND => self.oper_command(parameters)?,
                 PRIVMSG_COMMAND => self.privmsg_command(parameters, trailing)?,
                 NOTICE_COMMAND => self.notice_command(parameters, trailing)?,
-                PART_COMMAND => self.part_command(parameters)?,
                 JOIN_COMMAND => self.join_command(parameters)?,
+                PART_COMMAND => self.part_command(parameters)?,
+                INVITE_COMMAND => self.invite_command(parameters)?,
                 NAMES_COMMAND => self.names_command(parameters)?,
                 LIST_COMMAND => self.list_command(parameters)?,
-                OPER_COMMAND => self.oper_command(parameters)?,
-                INVITE_COMMAND => self.invite_command(parameters)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
                 }
-                _ => self.unknown_command(&command)?,
+                _ => self.on_unknown_command(&command)?,
             };
         }
     }
@@ -111,7 +111,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.send_response("200 :parsing error")
     }
 
-    fn unknown_command(&mut self, command: &str) -> io::Result<()> {
+    fn on_unknown_command(&mut self, command: &str) -> io::Result<()> {
         self.send_response_for_error(ErrorReply::UnknownCommand421 {
             command: command.to_string(),
         })

@@ -14,57 +14,55 @@ use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
 impl<T: ClientTrait> ClientHandler<T> {
     // GENERAL
 
-    fn channel_name_is_valid(&mut self, channel: &str) -> bool {
+    fn channel_name_is_valid(&self, channel: &str) -> bool {
         return ((channel.as_bytes()[0] == LOCAL_CHANNEL)
             || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
             && !channel.contains(INVALID_CHARACTER);
     }
 
-    pub fn assert_can_join_channel(&mut self, channel: &str, nickname: &str) -> Option<ErrorReply> {
-        let channels_for_nickname = self.database.get_channels_for_client(nickname);
+    pub fn assert_can_join_channel(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
+        let nickname = nickname.to_string();
+        let channel = channel.to_string();
 
+        let channels_for_nickname = self.database.get_channels_for_client(&nickname);
         if channels_for_nickname.len() == MAX_CHANNELS {
-            return Some(ErrorReply::TooManyChannels405 {
-                channel: channel.to_string(),
-            });
+            return Some(ErrorReply::TooManyChannels405 { channel });
         }
-        if !self.channel_name_is_valid(channel) {
-            return Some(ErrorReply::NoSuchChannel403 {
-                channel: channel.to_string(),
-            });
+
+        if !self.channel_name_is_valid(&channel) {
+            return Some(ErrorReply::NoSuchChannel403 { channel });
         }
-        if self.user_is_in_channel(channel, nickname) {
-            return Some(ErrorReply::UserOnChannel443 {
-                nickname: nickname.to_string(),
-                channel: channel.to_string(),
-            });
+
+        if self.user_is_in_channel(&channel, &nickname) {
+            return Some(ErrorReply::UserOnChannel443 { nickname, channel });
         }
+
         None
     }
 
-    pub fn assert_can_part_channel(&mut self, channel: &str, nickname: &str) -> Option<ErrorReply> {
-        if !self.database.contains_channel(channel) || !self.channel_name_is_valid(channel) {
-            return Some(ErrorReply::NoSuchChannel403 {
-                channel: channel.to_string(),
-            });
+    pub fn assert_can_part_channel(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
+        let channel = channel.to_string();
+
+        if !self.database.contains_channel(&channel) || !self.channel_name_is_valid(&channel) {
+            return Some(ErrorReply::NoSuchChannel403 { channel });
         }
-        let clients = self.database.get_clients(channel);
+
+        let clients = self.database.get_clients(&channel);
         if !clients.contains(&nickname.to_string()) {
-            return Some(ErrorReply::NotOnChannel442 {
-                channel: channel.to_string(),
-            });
+            return Some(ErrorReply::NotOnChannel442 { channel });
         }
+
         None
     }
 
-    pub fn assert_can_list_channel(&mut self, channel: &str) -> bool {
+    pub fn can_list_channel(&self, channel: &str) -> bool {
         if !self.database.contains_channel(channel) || !self.channel_name_is_valid(channel) {
             return false;
         }
         true
     }
 
-    pub fn user_is_in_channel(&mut self, channel: &str, nickname: &str) -> bool {
+    pub fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
         self.database
             .get_clients(channel)
             .contains(&String::from(nickname))
@@ -72,64 +70,64 @@ impl<T: ClientTrait> ClientHandler<T> {
 
     // COMMANDS
 
-    pub fn assert_invite_is_valid(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {
+    pub fn assert_invite_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.len() != 2 {
-            return Some(ErrorReply::NeedMoreParameters461 {
-                command: INVITE_COMMAND.to_string(),
-            });
+            let command = INVITE_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
         }
+
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
         }
 
-        let nickname_client_to_invite = &parameters[0];
-        let nickname_current_client = self.registration.nickname().unwrap();
-        let channel = &parameters[1];
+        let invited_client = parameters[0].to_string();
+        let inviting_client = self.registration.nickname().unwrap();
+        let channel = parameters[1].to_string();
 
-        if !self.database.contains_client(nickname_client_to_invite) {
+        if !self.database.contains_client(&invited_client) {
             return Some(ErrorReply::NoSuchNickname401 {
-                nickname: nickname_client_to_invite.to_string(),
+                nickname: invited_client,
             });
         }
 
-        if self.database.contains_channel(channel) {
-            if !self.user_is_in_channel(channel, &nickname_current_client) {
-                return Some(ErrorReply::NotOnChannel442 {
-                    channel: channel.to_string(),
-                });
+        if self.database.contains_channel(&channel) {
+            if !self.user_is_in_channel(&channel, &inviting_client) {
+                return Some(ErrorReply::NotOnChannel442 { channel });
             }
-            if self.user_is_in_channel(channel, nickname_client_to_invite) {
+            if self.user_is_in_channel(&channel, &invited_client) {
                 return Some(ErrorReply::UserOnChannel443 {
-                    nickname: nickname_client_to_invite.to_string(),
-                    channel: channel.to_string(),
+                    nickname: invited_client,
+                    channel,
                 });
             }
         }
         None
     }
 
-    pub fn assert_join_is_valid(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {
+    pub fn assert_join_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
-            return Some(ErrorReply::NeedMoreParameters461 {
-                command: JOIN_COMMAND.to_string(),
-            });
+            let command = JOIN_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
         }
+
         self.assert_registration_is_valid()
     }
 
-    pub fn assert_part_is_valid(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {
+    pub fn assert_part_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
             return Some(ErrorReply::NeedMoreParameters461 {
                 command: PART_COMMAND.to_string(),
             });
         }
+
         self.assert_registration_is_valid()
     }
 
-    pub fn assert_registration_is_valid(&mut self) -> Option<ErrorReply> {
+    pub fn assert_registration_is_valid(&self) -> Option<ErrorReply> {
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
         }
+
         None
     }
 }
