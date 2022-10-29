@@ -56,10 +56,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     pub fn can_list_channel(&self, channel: &str) -> bool {
-        if !self.database.contains_channel(channel) || !self.channel_name_is_valid(channel) {
-            return false;
-        }
-        true
+        self.database.contains_channel(channel) && !self.channel_name_is_valid(channel)
     }
 
     pub fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
