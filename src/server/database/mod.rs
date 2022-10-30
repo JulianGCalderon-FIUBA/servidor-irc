@@ -223,39 +223,27 @@ fn matches(base: &str, pattern: &str) -> bool {
 }
 
 // fn matches(stack: &str, needle: &str) -> bool {
-//     let mut splits = needle.split('*');
+//     let splits = needle.split('*');
 
 //     let mut temp_stack = &stack.to_owned()[..];
 
-//     if !needle.starts_with('*') {
-//         let first = splits.next().unwrap();
+//     let has_starting_glob = needle.starts_with('*');
+//     let has_ending_glob = needle.ends_with('*');
 
-//         let index = temp_stack.find(first);
-//         let index = match index {
-//             Some(index) => index,
-//             None => return false,
-//         };
-//         temp_stack = &temp_stack[first.len()..];
-
-//         if index != 0 {
-//             return false;
-//         }
-//     }
-
-//     for split in splits {
-//         if split.is_empty() {
-//             continue;
-//         }
-
+//     for (i, split) in splits.enumerate() {
 //         let index = temp_stack.find(split);
 //         let index = match index {
 //             Some(index) => index,
 //             None => return false,
 //         };
 //         temp_stack = &temp_stack[index + split.len()..];
+
+//         if i == 0 && !has_starting_glob && index != 0 {
+//             return false;
+//         }
 //     }
 
-//     if !needle.ends_with('*') && !temp_stack.is_empty() {
+//     if !has_ending_glob && !temp_stack.is_empty() {
 //         return false;
 //     }
 
