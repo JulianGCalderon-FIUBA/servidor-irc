@@ -14,7 +14,8 @@ use gtk::{
 pub struct RegisterView {
     nick_entry: Entry,
     username_entry: Entry,
-    pass_entry: Entry
+    pass_entry: Entry,
+    login_button: Button
 }
 
 impl RegisterView {
@@ -22,7 +23,8 @@ impl RegisterView {
         Self { 
             nick_entry: create_entry(), 
             username_entry: create_entry(), 
-            pass_entry: create_entry() 
+            pass_entry: create_entry(),
+            login_button: create_button("login"),
         }
     }
 
@@ -71,8 +73,7 @@ impl RegisterView {
         password_box.set_margin_bottom(20);
         main_box.append(&password_box);
 
-        let button = create_button("login");
-        main_box.append(&button);
+        main_box.append(&self.login_button);
         main_box.set_margin_top(20);
         main_box.set_margin_bottom(20);
         main_box.set_margin_start(20);

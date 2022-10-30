@@ -1,6 +1,6 @@
 use gtk4 as gtk;
 
-use crate::view::RegisterView;
+use crate::view_register::RegisterView;
 use gtk::prelude::*;
 
 pub struct RegisterController {

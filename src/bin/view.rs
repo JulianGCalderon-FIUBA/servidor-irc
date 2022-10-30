@@ -4,7 +4,7 @@
 //     run();
 // }
 
-use internet_relay_chat::controller::RegisterController;
+use internet_relay_chat::controller_register::RegisterController;
 use gtk4 as gtk;
 
 use gtk::{
