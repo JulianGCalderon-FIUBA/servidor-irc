@@ -51,7 +51,7 @@ impl ObjectImpl for Chat {
         message_sender_box.append(&info_button);
 
         let input = create_entry("Message...");
-        input.set_hexpand(true);
+        // input.set_hexpand(true);
         message_sender_box.append(&input);
 
         let send_button = create_send_button(message_box.clone(), input.clone());
@@ -64,7 +64,7 @@ impl ObjectImpl for Chat {
         obj.set_halign(gtk::Align::Start);
         obj.set_valign(gtk::Align::End);
         obj.set_hexpand(true);
-        obj.set_width_request(1420);
+        obj.set_width_request(600);
     }
 
     fn properties() -> &'static [glib::ParamSpec] {
@@ -107,7 +107,7 @@ fn create_message(label: &str) -> Label {
         .build()
 }
 
-fn create_empty_message() -> Label {
+fn _create_empty_message() -> Label {
     let message = create_message("");
     message.add_css_class("empty_message");
     message
@@ -130,7 +130,7 @@ fn create_button(label: &str) -> Button {
 fn create_entry(placeholder: &str) -> Entry {
     Entry::builder()
     .placeholder_text(placeholder)
-    .width_request(1150)
+    .width_request(600)
     .build()
 }
 

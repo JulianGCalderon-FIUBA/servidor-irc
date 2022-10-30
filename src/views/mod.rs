@@ -27,8 +27,14 @@ pub fn run() {
     let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
     app.connect_startup(|_| load_css());
-    //app.connect_activate(build_ui1);
-    app.connect_activate(build_ui2);
+    let x = 0;
+    if x == 0 {
+        app.connect_activate(build_ui1);
+    } else {
+        app.connect_activate(build_ui2);
+    }
+    
+    
     app.run();
 }
 
@@ -88,8 +94,7 @@ fn build_ui1(app: &Application) {
     password_box.set_margin_bottom(20);
     main_box.append(&password_box);
 
-    let clone = app.clone();
-    let button = create_button("login", clone);
+    let button = create_button("login");
     main_box.append(&button);
     main_box.set_margin_top(20);
     main_box.set_margin_bottom(20);
@@ -117,7 +122,7 @@ fn create_entry() -> Entry {
     Entry::builder().build()
 }
 
-fn create_button(label: &str, app: Application) -> Button {
+fn create_button(label: &str) -> Button {
     let button = Button::builder()
         .label(label)
         .margin_top(12)
@@ -162,9 +167,9 @@ fn build_ui2(app: &Application) {
     let conv_info = ConvInfo::new();
     main_box.append(&conv_info);
 
-    main_box.set_height_request(1015);
+    // main_box.set_height_request(1015);
     window.set_child(Some(&main_box));
-
+    window.fullscreen();
     window.show();
 }
 

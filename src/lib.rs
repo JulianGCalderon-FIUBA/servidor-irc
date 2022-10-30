@@ -15,4 +15,8 @@ pub mod thread_pool;
 
 pub mod views;
 
+pub mod controller;
+
+pub mod view;
+
 pub const ADDRESS: &str = "127.0.0.1:9002";
