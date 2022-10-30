@@ -4,17 +4,17 @@ use crate::view_register::RegisterView;
 use gtk::prelude::*;
 
 pub struct RegisterController {
-    view: gtk::ApplicationWindow
+    view: RegisterView,
 }
 
 impl RegisterController {
-    pub fn new(app: &gtk::Application) -> Self {
+    pub fn new() -> Self {
         Self {
-            view: RegisterView::new().get_view(app),
+            view: RegisterView::new()
         }
     }
 
-    pub fn start(&mut self) {
-        self.view.show();
+    pub fn start(&mut self, app: &gtk::Application) {
+        self.view.get_view(app).show();
     }
 }

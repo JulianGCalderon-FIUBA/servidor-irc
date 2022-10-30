@@ -11,6 +11,7 @@ use gtk::{
     prelude::*
 };
 
+
 pub struct RegisterView {
     nick_entry: Entry,
     username_entry: Entry,
@@ -24,7 +25,7 @@ impl RegisterView {
             nick_entry: create_entry(), 
             username_entry: create_entry(), 
             pass_entry: create_entry(),
-            login_button: create_button("login"),
+            login_button: create_login_button("login"),
         }
     }
 
@@ -83,6 +84,11 @@ impl RegisterView {
 
         window
     }
+
+    // pub fn on_login_click(&self, event: fn()) {
+    //     println!("srg");
+    //     self.login_button.connect_clicked(move |_| {event});
+    // }
 }
 
 fn create_label(label: &str) -> Label {
@@ -101,7 +107,7 @@ fn create_entry() -> Entry {
     Entry::builder().build()
 }
 
-fn create_button(label: &str) -> Button {
+fn create_login_button(label: &str) -> Button {
     let button = Button::builder()
         .label(label)
         .margin_top(12)
@@ -111,12 +117,9 @@ fn create_button(label: &str) -> Button {
         .halign(gtk::Align::Center)
         .valign(gtk::Align::Center)
         .build();
-
-    button.connect_clicked(move |_| {
-        // app.connect_activate(build_ui2);
-        // app.run();
-    });
     
+    button.connect_clicked(move |_| {println!("Hi")});
+
     button
 }
 

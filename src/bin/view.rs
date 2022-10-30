@@ -26,12 +26,12 @@ fn main() {
     
     app.connect_activate(build_ui);
 
-    app.run();   
+    app.run();
 }
 
 fn build_ui(app: &Application) {
-    let mut controller = RegisterController::new(&app);
-    controller.start();
+    let mut controller = RegisterController::new();
+    controller.start(&app);
 }
 
 // fn load_css() {
