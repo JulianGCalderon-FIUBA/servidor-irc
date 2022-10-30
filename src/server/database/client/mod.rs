@@ -9,9 +9,9 @@ pub struct Client<T: ClientTrait> {
     stream: Option<Arc<Mutex<T>>>,
     password: Option<String>,
     nickname: String,
-    _username: String,
-    _hostname: String,
-    _servername: String,
+    username: String,
+    hostname: String,
+    servername: String,
     realname: String,
     operator: bool,
 }
@@ -45,5 +45,17 @@ impl<T: ClientTrait> Client<T> {
 
     pub fn realname(&self) -> String {
         self.realname.clone()
+    }
+
+    pub fn username(&self) -> String {
+        self.username.clone()
+    }
+
+    pub fn hostname(&self) -> String {
+        self.hostname.clone()
+    }
+
+    pub fn servername(&self) -> String {
+        self.servername.clone()
     }
 }

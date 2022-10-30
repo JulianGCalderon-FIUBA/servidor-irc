@@ -172,6 +172,18 @@ fn client_matches_query<T: ClientTrait>(client: &Client<T>, query: &str) -> bool
     if matches(&client.nickname(), query) {
         return true;
     }
+    if matches(&client.realname(), query) {
+        return true;
+    }
+    if matches(&client.username(), query) {
+        return true;
+    }
+    if matches(&client.hostname(), query) {
+        return true;
+    }
+    if matches(&client.servername(), query) {
+        return true;
+    }
 
     false
 }

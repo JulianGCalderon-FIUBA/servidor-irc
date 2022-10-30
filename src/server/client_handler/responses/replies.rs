@@ -4,7 +4,7 @@ use std::fmt::Display;
 pub enum CommandResponse {
     Ok200,
     EndOfWho315 {
-        name: String,
+        name: Option<String>,
     },
     ListStart321,
     List322 {
@@ -46,7 +46,11 @@ impl Display for CommandResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
             CommandResponse::EndOfWho315 { name } => {
-                format!("315 {name} :End of /WHO list")
+                if let Some(name) = name {
+                    format!("315 {name} :End of /WHO list")
+                } else {
+                    "315 :End of /WHO list".to_string()
+                }
             }
             CommandResponse::List322 { channel } => {
                 format!("322 : {channel}")

@@ -47,7 +47,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             self.send_response_for_reply(CommandResponse::WhoReply352 { client })?;
         }
 
-        let name = "*****".to_string();
+        let name = parameters.get(0).map(|s| s.to_owned());
         self.send_response_for_reply(CommandResponse::EndOfWho315 { name })
     }
 }
