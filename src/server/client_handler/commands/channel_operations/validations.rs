@@ -124,7 +124,6 @@ impl<T: ClientTrait> ClientHandler<T> {
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
         }
-
         None
     }
 }
