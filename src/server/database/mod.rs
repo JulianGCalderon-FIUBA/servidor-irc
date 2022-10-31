@@ -233,31 +233,3 @@ fn matches(base: &str, pattern: &str) -> bool {
 
     pattern_index == pattern.len()
 }
-
-// fn matches(stack: &str, needle: &str) -> bool {
-//     let splits = needle.split('*');
-
-//     let mut temp_stack = &stack.to_owned()[..];
-
-//     let has_starting_glob = needle.starts_with('*');
-//     let has_ending_glob = needle.ends_with('*');
-
-//     for (i, split) in splits.enumerate() {
-//         let index = temp_stack.find(split);
-//         let index = match index {
-//             Some(index) => index,
-//             None => return false,
-//         };
-//         temp_stack = &temp_stack[index + split.len()..];
-
-//         if i == 0 && !has_starting_glob && index != 0 {
-//             return false;
-//         }
-//     }
-
-//     if !has_ending_glob && !temp_stack.is_empty() {
-//         return false;
-//     }
-
-//     true
-// }
