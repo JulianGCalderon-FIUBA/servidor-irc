@@ -1,9 +1,9 @@
 use crate::server::ClientHandler;
 
-pub(crate) mod channel_operations;
-pub(crate) mod connection_registration;
-pub(crate) mod sending_messages;
-pub(crate) mod user_based_queries;
+pub mod channel_operations;
+pub mod connection_registration;
+pub mod sending_messages;
+pub mod user_based_queries;
 
 #[cfg(test)]
 mod tests;

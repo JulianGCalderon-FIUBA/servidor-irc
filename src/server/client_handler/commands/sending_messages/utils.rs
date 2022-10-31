@@ -34,7 +34,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             // }
         }
 
-        self.send_response_for_reply(CommandResponse::Ok200)
+        self.send_response_for_reply(CommandResponse::Ok)
     }
 
     pub fn send_message_to_target(&mut self, message: &Message, receiver: &str) -> io::Result<()> {

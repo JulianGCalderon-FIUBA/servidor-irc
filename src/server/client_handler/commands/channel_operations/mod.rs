@@ -142,7 +142,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 continue;
             }
             self.database.remove_client_of_channel(&nickname, channel);
-            self.send_response_for_reply(CommandResponse::Ok200)?
+            self.send_response_for_reply(CommandResponse::Ok)?
         }
         Ok(())
     }

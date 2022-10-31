@@ -1,7 +1,8 @@
 mod utils;
 mod validations;
 
-use crate::server::{client_trait::ClientTrait, ClientHandler};
+use crate::server::client_trait::ClientTrait;
+use crate::server::ClientHandler;
 use std::io;
 
 pub const NOTICE_COMMAND: &str = "NOTICE";

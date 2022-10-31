@@ -4,16 +4,28 @@ use crate::server::{
 use std::fmt::Display;
 
 pub enum CommandResponse {
-    Ok200,
-    EndOfWho315 {
-        name: Option<String>,
-    },
+    // Away301 {
+    //     nickname: String,
+    //     message: String,
+    // },
     WhoisUser311 {
         client_info: ClientInfo,
     },
+    // WhoisServer312 {
+    //     nickname: String,
+    //     server: String,
+    //     server_info: String,
+    // },
     WhoisOperator313 {
         nickname: String,
     },
+    EndOfWho315 {
+        name: Option<String>,
+    },
+    // WhoisIdle317 {
+    //     nickname: String,
+    //     seconds: u8,
+    // },
     EndOfWhois318 {
         nickname: String,
     },
@@ -29,6 +41,10 @@ pub enum CommandResponse {
     NoTopic331 {
         channel: String,
     },
+    // Topic332 {
+    //     channel: String,
+    //     topic: String,
+    // },
     Inviting341 {
         channel: String,
         nickname: String,
@@ -48,40 +64,60 @@ pub enum CommandResponse {
     Quit {
         message: String,
     },
-    // WhoisIdle317 {
-    //     nickname: String,
-    //     seconds: u8,
-    // },
-    // WhoisServer312 {
-    //     nickname: String,
-    //     server: String,
-    //     server_info: String,
-    // },
-    // Away301 {
-    //     nickname: String,
-    //     message: String,
-    // },
-    // Topic332 {
-    //     channel: String,
-    //     topic: String,
-    // },
+    Ok,
 }
 
 impl Display for CommandResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
+            // CommandResponse::Away301 { nickname, message } => {
+            //     format!("301 {nickname} :{message}")
+            // }
+            CommandResponse::WhoisUser311 { client_info } => {
+                format!(
+                    "311 {} {} {} *: {}",
+                    client_info.nickname,
+                    client_info.username,
+                    client_info.hostname,
+                    client_info.realname,
+                )
+            }
+            // CommandResponse::WhoisServer312 {
+            //     nickname,
+            //     server,
+            //     server_info,
+            // } => {
+            //     format!("312 {nickname} {server} :{server_info}")
+            // }
+            CommandResponse::WhoisOperator313 { nickname } => {
+                format!("313 {nickname} :is an IRC operator")
+            }
             CommandResponse::EndOfWho315 { name } => {
                 format!(
                     "315 {} :End of /WHO list",
                     name.to_owned().unwrap_or_default()
                 )
             }
+            // CommandResponse::WhoisIdle317 { nickname, seconds } => {
+            //     format!("317 {nickname} {seconds} :seconds idle")
+            // }
+            CommandResponse::EndOfWhois318 { nickname } => {
+                format!("318 {nickname} :End of /WHOIS list")
+            }
+            CommandResponse::WhoisChannels319 { nickname, channels } => {
+                format!("319 {nickname} : {}", channels.join(" "))
+            }
+            CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
             CommandResponse::List322 { channel } => {
                 format!("322 : {channel}")
             }
+            CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
             CommandResponse::NoTopic331 { channel } => {
                 format!("331 {channel} :no topic is set")
             }
+            // CommandResponse::Topic332 { channel, topic } => {
+            //     format!("332 {} :{}", channel, topic)
+            // }
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")
             }
@@ -105,47 +141,11 @@ impl Display for CommandResponse {
             CommandResponse::EndOfNames366 { channel } => {
                 format!("366 {channel} :End of /NAMES list")
             }
+            CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
             CommandResponse::Quit { message } => {
                 format!("{QUIT_COMMAND} :{message}")
             }
-            CommandResponse::WhoisUser311 { client_info } => {
-                format!(
-                    "311 {} {} {} *: {}",
-                    client_info.nickname,
-                    client_info.username,
-                    client_info.hostname,
-                    client_info.realname,
-                )
-            }
-            CommandResponse::Ok200 => "200 :success".to_string(),
-            CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
-            CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
-            CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
-
-            CommandResponse::WhoisOperator313 { nickname } => {
-                format!("313 {nickname} :is an IRC operator")
-            }
-            CommandResponse::EndOfWhois318 { nickname } => {
-                format!("318 {nickname} :End of /WHOIS list")
-            }
-            CommandResponse::WhoisChannels319 { nickname, channels } => {
-                format!("319 {nickname} : {}", channels.join(" "))
-            } // CommandResponse::WhoisServer312 {
-              //     nickname,
-              //     server,
-              //     server_info,
-              // } => {
-              //     format!("312 {nickname} {server} :{server_info}")
-              // }
-              // CommandResponse::Away301 { nickname, message } => {
-              //     format!("301 {nickname} :{message}")
-              // }
-              // CommandResponse::Topic332 { channel, topic } => {
-              //     format!("332 {} :{}", channel, topic)
-              // }
-              // CommandResponse::WhoisIdle317 { nickname, seconds } => {
-              //     format!("317 {nickname} {seconds} :seconds idle")
-              // }
+            CommandResponse::Ok => "200 :success".to_string(),
         };
         write!(f, "{string}")
     }

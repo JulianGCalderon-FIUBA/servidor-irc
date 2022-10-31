@@ -15,15 +15,16 @@ pub enum ErrorReply {
     UserOnChannel443 { nickname: String, channel: String },
     NeedMoreParameters461 { command: String },
     AlreadyRegistered462,
-    NoNickname,
-    UnregisteredClient,
-    ClientOffline { nickname: String },
-    // NoSuchServer { server: String},
+    // PasswordMismatch464,
     // ChannelIsFull471 { channel: String },
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },
     // BadChannelKey475 { channel: String },
-    // PasswordMismatch464,
+    //
+    NoNickname,
+    UnregisteredClient,
+    ClientOffline { nickname: String },
+    // NoSuchServer { server: String},
 }
 
 impl Display for ErrorReply {
@@ -44,8 +45,16 @@ impl Display for ErrorReply {
             ErrorReply::NoRecipient411 { command } => {
                 format!("411 :no recipient given ({command})")
             }
+            ErrorReply::NoTextToSend412 => "412 :no text to send".to_string(),
             ErrorReply::UnknownCommand421 { command } => {
                 format!("421 {command} :unknown command")
+            }
+            ErrorReply::NoNicknameGiven431 => "431 :no nickname given".to_string(),
+            ErrorReply::NicknameInUse433 { nickname } => {
+                format!("433 {nickname} :nickname is already in use")
+            }
+            ErrorReply::NickCollision436 { nickname } => {
+                format!("436 {nickname} :nickname collision KILL")
             }
             ErrorReply::NotOnChannel442 { channel } => {
                 format!("442 {channel} :you're not on that channel")
@@ -56,21 +65,13 @@ impl Display for ErrorReply {
             ErrorReply::NeedMoreParameters461 { command } => {
                 format!("461 {command} :not enough parameters")
             }
-            ErrorReply::NicknameInUse433 { nickname } => {
-                format!("433 {nickname} :nickname is already in use")
-            }
-            ErrorReply::NickCollision436 { nickname } => {
-                format!("436 {nickname} :nickname collision KILL")
-            }
+            ErrorReply::AlreadyRegistered462 => "462 :you may not reregister".to_string(),
+            //ErrorReply::PasswordMismatch464 => "464 :password incorrect".to_string(),
             ErrorReply::ClientOffline { nickname } => {
                 format!("200 {nickname} :client is offline")
             }
-            ErrorReply::NoTextToSend412 => "412 :no text to send".to_string(),
-            ErrorReply::NoNicknameGiven431 => "431 :no nickname given".to_string(),
-            ErrorReply::AlreadyRegistered462 => "462 :you may not reregister".to_string(),
             ErrorReply::NoNickname => "200 :no nickname registered".to_string(),
             ErrorReply::UnregisteredClient => "200 :unregistered".to_string(),
-            //ErrorReply::PasswordMismatch464 => "464 :password incorrect".to_string(),
         };
         write!(f, "{string}")
     }

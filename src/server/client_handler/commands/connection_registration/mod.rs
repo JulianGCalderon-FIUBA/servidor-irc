@@ -23,7 +23,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let password = parameters.pop().unwrap();
         self.registration.set_attribute("password", password);
 
-        self.send_response_for_reply(CommandResponse::Ok200)
+        self.send_response_for_reply(CommandResponse::Ok)
     }
 
     pub fn nick_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
@@ -34,7 +34,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let nickname = parameters.pop().unwrap();
         self.registration.set_nickname(nickname);
 
-        self.send_response_for_reply(CommandResponse::Ok200)
+        self.send_response_for_reply(CommandResponse::Ok)
     }
 
     pub fn user_command(
@@ -58,7 +58,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         self.database.add_client(self.registration.build().unwrap());
 
-        self.send_response_for_reply(CommandResponse::Ok200)
+        self.send_response_for_reply(CommandResponse::Ok)
     }
 
     pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
