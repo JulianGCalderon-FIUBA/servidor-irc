@@ -35,29 +35,6 @@ impl<T: ClientTrait> ClientHandler<T> {
         Ok(())
     }
 
-    fn send_whois_responses(
-        &mut self,
-        client_info: crate::server::database::ClientInfo,
-        nick: &str,
-        nickname: String,
-    ) -> Result<(), io::Error> {
-        self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
-        if self.database._is_server_operator(nick) {
-            self.send_response_for_reply(CommandResponse::WhoisOperator313 { nickname })?;
-        }
-        let channels = self.database.get_channels_for_client(nick);
-        if !channels.is_empty() {
-            self.send_response_for_reply(CommandResponse::WhoisChannels319 {
-                nickname: nick.to_string(),
-                channels,
-            })?;
-        }
-        self.send_response_for_reply(CommandResponse::EndOfWhois318 {
-            nickname: nick.to_string(),
-        })?;
-        Ok(())
-    }
-
     pub fn who_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_who_is_valid(&parameters) {
             return self.send_response_for_error(error);
