@@ -53,7 +53,7 @@ impl<T: ClientTrait> Registration<T> {
     pub fn build(&mut self) -> Option<Client<T>> {
         let client = ClientBuilder::new()
             .nickname(self.nickname()?)
-            .password(self.get_attribute("nickname"))
+            .password(self.get_attribute("password"))
             .username(self.get_attribute("username")?)
             .hostname(self.get_attribute("hostname")?)
             .servername(self.get_attribute("servername")?)

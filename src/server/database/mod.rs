@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
 
 pub use channel::Channel;
-pub use client::{Client, ClientBuilder};
+pub use client::{Client, ClientBuilder, ClientInfo};
 
 use super::client_trait::ClientTrait;
 pub struct Database<T: ClientTrait> {
@@ -50,7 +50,7 @@ impl<T: ClientTrait> Database<T> {
     pub fn _is_server_operator(&self, nickname: &str) -> bool {
         let mut clients_lock = self.clients.write().unwrap();
         if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
-            return client._is_server_operator();
+            return client.is_server_operator();
         }
 
         false
@@ -116,10 +116,10 @@ impl<T: ClientTrait> Database<T> {
     pub fn get_clients(&self, channel: &str) -> Vec<String> {
         let channels_lock = self.channels.read().unwrap();
 
-        let client_info = channels_lock.get(channel);
+        let channel_info = channels_lock.get(channel);
 
-        match client_info {
-            Some(client_info) => client_info.get_clients(),
+        match channel_info {
+            Some(channel_info) => channel_info.get_clients(),
             None => vec![],
         }
     }
@@ -141,6 +141,13 @@ impl<T: ClientTrait> Database<T> {
             }
         }
         channels
+    }
+
+    pub fn get_client_info(&self, nickname: &str) -> Option<ClientInfo> {
+        let clients_lock = self.clients.read().unwrap();
+        let client = clients_lock.get(nickname)?;
+
+        Some(client.get_info())
     }
 }
 

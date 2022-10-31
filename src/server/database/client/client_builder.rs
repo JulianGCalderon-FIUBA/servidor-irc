@@ -68,9 +68,9 @@ impl<T: ClientTrait> ClientBuilder<T> {
             stream: Some(stream),
             password: self.password,
             nickname: self.nickname?,
-            _username: self.username?,
-            _hostname: self.hostname?,
-            _servername: self.servername?,
+            username: self.username?,
+            hostname: self.hostname?,
+            servername: self.servername?,
             realname: self.realname?,
             operator: false,
         };

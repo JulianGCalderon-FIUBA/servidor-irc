@@ -8,6 +8,7 @@ mod part;
 mod pass;
 mod privmsg;
 mod user;
+mod whois;
 
 use std::sync::Arc;
 

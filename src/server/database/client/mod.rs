@@ -1,6 +1,8 @@
 mod client_builder;
+mod client_info;
 
 pub use client_builder::ClientBuilder;
+pub use client_info::ClientInfo;
 use std::sync::{Arc, Mutex};
 
 use crate::server::client_trait::ClientTrait;
@@ -9,9 +11,9 @@ pub struct Client<T: ClientTrait> {
     stream: Option<Arc<Mutex<T>>>,
     password: Option<String>,
     nickname: String,
-    _username: String,
-    _hostname: String,
-    _servername: String,
+    username: String,
+    hostname: String,
+    servername: String,
     realname: String,
     operator: bool,
 }
@@ -21,7 +23,7 @@ impl<T: ClientTrait> Client<T> {
         self.operator = true;
     }
 
-    pub fn _is_server_operator(&mut self) -> bool {
+    pub fn is_server_operator(&mut self) -> bool {
         self.operator
     }
 
@@ -29,6 +31,17 @@ impl<T: ClientTrait> Client<T> {
         let stream = self.stream.as_ref()?;
 
         Some(Arc::clone(stream))
+    }
+
+    pub fn get_info(&self) -> ClientInfo {
+        ClientInfo {
+            nickname: self.nickname(),
+            username: self.username(),
+            hostname: self.hostname(),
+            servername: self.servername(),
+            realname: self.realname(),
+            operator: self.operator,
+        }
     }
 
     pub fn disconnect(&mut self) {
@@ -45,5 +58,16 @@ impl<T: ClientTrait> Client<T> {
 
     pub fn realname(&self) -> String {
         self.realname.clone()
+    }
+
+    pub fn username(&self) -> String {
+        self.username.clone()
+    }
+
+    pub fn hostname(&self) -> String {
+        self.hostname.clone()
+    }
+    pub fn servername(&self) -> String {
+        self.servername.clone()
     }
 }
