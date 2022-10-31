@@ -11,8 +11,5 @@ name = "client"
 [[bin]]
 name = "server"
 
-[[bin]]
-name = "view"
-
 [dependencies]
 gtk4 = "0.4.7"

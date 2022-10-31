@@ -4,35 +4,35 @@
 //     run();
 // }
 
-use internet_relay_chat::controller_register::RegisterController;
-use gtk4 as gtk;
+// use internet_relay_chat::controller_register::RegisterController;
+// use gtk4 as gtk;
 
-use gtk::{
-    Application,
-    prelude::*, 
+// use gtk::{
+//     Application,
+//     prelude::*, 
     // CssProvider, StyleContext, gdk::Display,
-};
+// };
 
-fn main() {
-    let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
+// fn main() {
+    // let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
-    // app.connect_startup(|_| load_css());
-    // let x = 0;
-    // if x == 0 {
-    //     app.connect_activate(build_ui1);
-    // } else {
-    //     app.connect_activate(build_ui2);
-    // }    
+    // // app.connect_startup(|_| load_css());
+    // // let x = 0;
+    // // if x == 0 {
+    // //     app.connect_activate(build_ui1);
+    // // } else {
+    // //     app.connect_activate(build_ui2);
+    // // }    
     
-    app.connect_activate(build_ui);
+    // app.connect_activate(build_ui);
 
-    app.run();
-}
+    // app.run();
+// }
 
-fn build_ui(app: &Application) {
-    let mut controller = RegisterController::new();
-    controller.start(&app);
-}
+// fn build_ui(app: &Application) {
+//     let mut controller = RegisterController::new();
+//     controller.start(&app);
+// }
 
 // fn load_css() {
 //     let provider = CssProvider::new();
@@ -45,3 +45,4 @@ fn build_ui(app: &Application) {
 //     );
 // }
 
+fn main() {}

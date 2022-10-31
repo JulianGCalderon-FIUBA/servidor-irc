@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{cell::Cell, sync::mpsc::Sender};
 
 use gtk4 as gtk;
 use gtk::{
@@ -13,7 +13,7 @@ use gtk::{
     prelude::*
 };
 
-use crate::controller_register::RegisterController;
+use crate::client::Client;
 
 
 pub struct RegisterView {
@@ -21,22 +21,18 @@ pub struct RegisterView {
     pub username_entry: Entry,
     pub pass_entry: Entry,
     pub login_button: Button,
-    controller: Option<Rc<RegisterController>>
+    sender: Sender<String>
 }
 
 impl RegisterView {
-    pub fn new() -> Self {
+    pub fn new(sender: Sender<String>) -> Self {
         Self { 
             nick_entry: create_entry(), 
             username_entry: create_entry(), 
             pass_entry: create_entry(),
             login_button: create_login_button("login"),
-            controller: None
+            sender
         }
-    }
-
-    pub fn set_controller(&mut self) {
-        self.controller = Some(Rc::new(RegisterController::new()))
     }
 
     pub fn get_view(&mut self, app: &Application) -> ApplicationWindow {
@@ -90,21 +86,23 @@ impl RegisterView {
         main_box.set_margin_start(20);
         main_box.set_margin_end(20);
         
+        
+
         self.connect_button(self.pass_entry.clone(), 
                             self.nick_entry.clone(), 
                         self.username_entry.clone(),
-                    self.controller.as_ref().unwrap().clone());
+                        self.sender.clone());
 
         window.set_child(Some(&main_box));
 
         window
     }
 
-    fn connect_button(&self, pass_entry: Entry, nick_entry: Entry, username_entry: Entry, controller: Rc<RegisterController>) {
+    fn connect_button(&self, _pass_entry: Entry, _nick_entry: Entry, _username_entry: Entry, sender: Sender<String>) {
+        // let client = self.client.get_mut();
         self.login_button.connect_clicked(move |_| {
-            controller.login_clicked(pass_entry.text(), nick_entry.text(), username_entry.text())
+            sender.send("Hola".to_string()).expect("Error message");
         });
-        
     }
 
     pub fn get_pass(&self) -> Entry {

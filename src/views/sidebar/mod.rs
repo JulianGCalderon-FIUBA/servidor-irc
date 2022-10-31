@@ -11,8 +11,6 @@ glib::wrapper! {
         @implements gtk::Actionable, gtk::Buildable, gtk::Orientable;
 }
 
-// pub struct Sidebar {}
-
 impl Sidebar {
     pub fn new() -> Self {
         Object::new(&[("orientation", &gtk::Orientation::Vertical)])
