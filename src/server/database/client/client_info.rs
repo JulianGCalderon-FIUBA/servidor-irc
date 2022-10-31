@@ -1,3 +1,4 @@
+#[derive(PartialEq, Eq, Debug, PartialOrd, Ord)]
 pub struct ClientInfo {
     pub nickname: String,
     pub username: String,

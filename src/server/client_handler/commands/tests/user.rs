@@ -17,7 +17,6 @@ fn user_adds_registers_client_correctly() {
         "200 :success\r\n200 :success\r\n",
         handler.stream.read_wbuf_to_string()
     );
-
     assert_eq!(
         handler.registration.get_attribute("username").unwrap(),
         "user"

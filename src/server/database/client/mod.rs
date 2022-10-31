@@ -9,7 +9,7 @@ use crate::server::client_trait::ClientTrait;
 
 pub struct Client<T: ClientTrait> {
     stream: Option<Arc<Mutex<T>>>,
-    password: Option<String>,
+    _password: Option<String>,
     nickname: String,
     username: String,
     hostname: String,
@@ -35,11 +35,11 @@ impl<T: ClientTrait> Client<T> {
 
     pub fn get_info(&self) -> ClientInfo {
         ClientInfo {
-            nickname: self.nickname(),
-            username: self.username(),
-            hostname: self.hostname(),
-            servername: self.servername(),
-            realname: self.realname(),
+            nickname: self.nickname.clone(),
+            username: self.username.clone(),
+            hostname: self.hostname.clone(),
+            servername: self.servername.clone(),
+            realname: self.realname.clone(),
             operator: self.operator,
         }
     }
@@ -48,26 +48,7 @@ impl<T: ClientTrait> Client<T> {
         self.stream = None;
     }
 
-    pub fn password(&self) -> Option<String> {
-        self.password.clone()
-    }
-
-    pub fn nickname(&self) -> String {
-        self.nickname.clone()
-    }
-
-    pub fn realname(&self) -> String {
-        self.realname.clone()
-    }
-
-    pub fn username(&self) -> String {
-        self.username.clone()
-    }
-
-    pub fn hostname(&self) -> String {
-        self.hostname.clone()
-    }
-    pub fn servername(&self) -> String {
-        self.servername.clone()
+    pub fn _password(&mut self) -> Option<String> {
+        self._password.clone()
     }
 }
