@@ -71,11 +71,10 @@ impl Display for CommandResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
             CommandResponse::EndOfWho315 { name } => {
-                if let Some(name) = name {
-                    format!("315 {name} :End of /WHO list")
-                } else {
-                    "315 :End of /WHO list".to_string()
-                }
+                format!(
+                    "315 {} :End of /WHO list",
+                    name.to_owned().unwrap_or_default()
+                )
             }
             CommandResponse::List322 { channel } => {
                 format!("322 : {channel}")
