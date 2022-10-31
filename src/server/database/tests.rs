@@ -167,21 +167,23 @@ fn get_channels_for_client_returns_all_channels_for_client() {
 fn get_clients_for_query_returns_all_matching_clients() {
     let database = Database::new();
 
-    database.add_client(
-        ClientBuilder::new()
-            .nickname("nickAname".to_string())
-            .username("userBname".to_string())
-            .hostname("hostCname".to_string())
-            .servername("serverDname".to_string())
-            .realname("realEname".to_string())
-            .stream(MockTcpStream::new())
-            .build()
-            .unwrap(),
-    );
+    let client = ClientBuilder::new()
+        .nickname("nickAname".to_string())
+        .username("userBname".to_string())
+        .hostname("hostCname".to_string())
+        .servername("serverDname".to_string())
+        .realname("realEname".to_string())
+        .stream(MockTcpStream::new())
+        .build()
+        .unwrap();
+
+    let clientinfo = client.get_info();
+
+    database.add_client(client);
 
     database.add_client(dummy_client("othernick"));
 
-    let expected = vec!["nickAname".to_string()];
+    let expected = vec![clientinfo];
 
     assert_eq!(database.get_clients_for_query("*A*"), expected);
     assert_eq!(database.get_clients_for_query("*B*"), expected);
@@ -194,10 +196,16 @@ fn get_clients_for_query_returns_all_matching_clients() {
 fn get_all_clients_returns_all_clients() {
     let database = Database::new();
 
-    database.add_client(dummy_client("nick1"));
-    database.add_client(dummy_client("nick2"));
+    let client1 = dummy_client("nick1");
+    let client2 = dummy_client("nick2");
 
-    let expected = vec!["nick1".to_string(), "nick2".to_string()];
+    let clientinfo1 = client1.get_info();
+    let clientinfo2 = client2.get_info();
+
+    database.add_client(client1);
+    database.add_client(client2);
+
+    let expected = vec![clientinfo1, clientinfo2];
     let mut real = database.get_all_clients();
     real.sort();
 

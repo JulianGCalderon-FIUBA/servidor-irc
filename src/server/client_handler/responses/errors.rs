@@ -18,6 +18,7 @@ pub enum ErrorReply {
     NoNickname,
     UnregisteredClient,
     ClientOffline { nickname: String },
+    // NoSuchServer { server: String},
     // ChannelIsFull471 { channel: String },
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },

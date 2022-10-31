@@ -1,10 +1,25 @@
-use crate::server::client_handler::commands::connection_registration::QUIT_COMMAND;
+use crate::server::{
+    client_handler::commands::connection_registration::QUIT_COMMAND, database::ClientInfo,
+};
 use std::fmt::Display;
 
 pub enum CommandResponse {
     Ok200,
     EndOfWho315 {
         name: Option<String>,
+    },
+    WhoisUser311 {
+        client_info: ClientInfo,
+    },
+    WhoisOperator313 {
+        nickname: String,
+    },
+    EndOfWhois318 {
+        nickname: String,
+    },
+    WhoisChannels319 {
+        nickname: String,
+        channels: Vec<String>,
     },
     ListStart321,
     List322 {
@@ -19,7 +34,7 @@ pub enum CommandResponse {
         nickname: String,
     },
     WhoReply352 {
-        client: String,
+        client_info: ClientInfo,
     },
     NameReply353 {
         channel: String,
@@ -32,6 +47,15 @@ pub enum CommandResponse {
     Quit {
         message: String,
     },
+    // WhoisIdle317 {
+    //     nickname: String,
+    //     seconds: u8,
+    // },
+    // WhoisServer312 {
+    //     nickname: String,
+    //     server: String,
+    //     server_info: String,
+    // },
     // Away301 {
     //     nickname: String,
     //     message: String,
@@ -61,8 +85,15 @@ impl Display for CommandResponse {
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")
             }
-            CommandResponse::WhoReply352 { client } => {
-                format!("352 :{client}")
+            CommandResponse::WhoReply352 { client_info } => {
+                format!(
+                    "352 CHANNEL {} {} {} {} \\MODOS :HOPCOUNT {}",
+                    client_info.username,
+                    client_info.hostname,
+                    client_info.servername,
+                    client_info.nickname,
+                    client_info.realname,
+                )
             }
             CommandResponse::NameReply353 { channel, clients } => {
                 format!("353 {channel} :{}", clients.join(" "))
@@ -73,16 +104,44 @@ impl Display for CommandResponse {
             CommandResponse::Quit { message } => {
                 format!("{QUIT_COMMAND} :{message}")
             }
+            CommandResponse::WhoisUser311 { client_info } => {
+                format!(
+                    "311 {} {} {} *: {}",
+                    client_info.nickname,
+                    client_info.username,
+                    client_info.hostname,
+                    client_info.realname,
+                )
+            }
             CommandResponse::Ok200 => "200 :success".to_string(),
             CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
             CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
-            // CommandResponse::Away301 { nickname, message } => {
-            //     format!("301 {nickname} :{message}")
-            // }
-            // CommandResponse::Topic332 { channel, topic } => {
-            //     format!("332 {} :{}", channel, topic)
-            // }
+
+            CommandResponse::WhoisOperator313 { nickname } => {
+                format!("313 {nickname} :is an IRC operator")
+            }
+            CommandResponse::EndOfWhois318 { nickname } => {
+                format!("318 {nickname} :End of /WHOIS list")
+            }
+            CommandResponse::WhoisChannels319 { nickname, channels } => {
+                format!("319 {nickname} : {}", channels.join(" "))
+            } // CommandResponse::WhoisServer312 {
+              //     nickname,
+              //     server,
+              //     server_info,
+              // } => {
+              //     format!("312 {nickname} {server} :{server_info}")
+              // }
+              // CommandResponse::Away301 { nickname, message } => {
+              //     format!("301 {nickname} :{message}")
+              // }
+              // CommandResponse::Topic332 { channel, topic } => {
+              //     format!("332 {} :{}", channel, topic)
+              // }
+              // CommandResponse::WhoisIdle317 { nickname, seconds } => {
+              //     format!("317 {nickname} {seconds} :seconds idle")
+              // }
         };
         write!(f, "{string}")
     }
