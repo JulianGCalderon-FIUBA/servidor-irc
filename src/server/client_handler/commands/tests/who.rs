@@ -24,6 +24,7 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
     handler.database.add_client(dummy_client("nick3"));
     handler.database.add_client_to_channel("nick", "#channel");
     handler.database.add_client_to_channel("nick3", "#channel");
+    handler.database.add_client_to_channel("nick1", "#channel2");
 
     let parameters = vec![];
 
@@ -33,11 +34,11 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
     let mut responses = read.split("\r\n");
 
     assert_eq!(
-        "352 CHANNEL username hostname servername nick1 \\MODOS :HOPCOUNT realname",
+        "352 #channel2 username hostname servername nick1 \\MODOS :HOPCOUNT realname",
         responses.next().unwrap()
     );
     assert_eq!(
-        "352 CHANNEL username hostname servername nick2 \\MODOS :HOPCOUNT realname",
+        "352 * username hostname servername nick2 \\MODOS :HOPCOUNT realname",
         responses.next().unwrap()
     );
     assert_eq!("315 :End of /WHO list", responses.next().unwrap());
@@ -58,7 +59,7 @@ fn who_with_mask_returns_all_public_clients_matching_mask() {
     let mut responses = read.split("\r\n");
 
     assert_eq!(
-        "352 CHANNEL username hostname servername nick1name \\MODOS :HOPCOUNT realname",
+        "352 * username hostname servername nick1name \\MODOS :HOPCOUNT realname",
         responses.next().unwrap()
     );
     assert_eq!("315 *1* :End of /WHO list", responses.next().unwrap());

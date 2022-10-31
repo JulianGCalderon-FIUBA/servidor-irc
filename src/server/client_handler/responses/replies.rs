@@ -34,6 +34,7 @@ pub enum CommandResponse {
         nickname: String,
     },
     WhoReply352 {
+        channel: Option<String>,
         client_info: ClientInfo,
     },
     NameReply353 {
@@ -70,11 +71,10 @@ impl Display for CommandResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
             CommandResponse::EndOfWho315 { name } => {
-                if let Some(name) = name {
-                    format!("315 {name} :End of /WHO list")
-                } else {
-                    "315 :End of /WHO list".to_string()
-                }
+                format!(
+                    "315 {} :End of /WHO list",
+                    name.to_owned().unwrap_or_default()
+                )
             }
             CommandResponse::List322 { channel } => {
                 format!("322 : {channel}")
@@ -85,9 +85,13 @@ impl Display for CommandResponse {
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")
             }
-            CommandResponse::WhoReply352 { client_info } => {
+            CommandResponse::WhoReply352 {
+                channel,
+                client_info,
+            } => {
                 format!(
-                    "352 CHANNEL {} {} {} {} \\MODOS :HOPCOUNT {}",
+                    "352 {} {} {} {} {} \\MODOS :HOPCOUNT {}",
+                    channel.as_ref().unwrap_or(&"*".to_string()),
                     client_info.username,
                     client_info.hostname,
                     client_info.servername,
