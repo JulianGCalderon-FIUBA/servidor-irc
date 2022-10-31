@@ -1,13 +1,12 @@
-use crate::server::client_handler::commands::connection_registration::QUIT_COMMAND;
+use crate::server::{
+    client_handler::commands::connection_registration::QUIT_COMMAND, database::ClientInfo,
+};
 use std::fmt::Display;
 
 pub enum CommandResponse {
     Ok200,
     WhoisUser311 {
-        nickname: String,
-        username: String,
-        host: String,
-        real_name: String,
+        client_info: ClientInfo,
     },
     WhoisOperator313 {
         nickname: String,
@@ -82,12 +81,15 @@ impl Display for CommandResponse {
             CommandResponse::Quit { message } => {
                 format!("{QUIT_COMMAND} :{message}")
             }
-            CommandResponse::WhoisUser311 {
-                nickname,
-                username,
-                host,
-                real_name,
-            } => format!("311 {nickname} {username} {host} *: {real_name}"),
+            CommandResponse::WhoisUser311 { client_info } => {
+                format!(
+                    "311 {} {} {} *: {}",
+                    client_info.nickname,
+                    client_info.username,
+                    client_info.hostname,
+                    client_info.realname,
+                )
+            }
             CommandResponse::Ok200 => "200 :success".to_string(),
             CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
             CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),

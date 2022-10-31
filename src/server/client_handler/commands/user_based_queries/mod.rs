@@ -29,18 +29,12 @@ impl<T: ClientTrait> ClientHandler<T> {
                 })?;
                 continue;
             }
-            let info = self.database.get_client_info(nick).unwrap();
+            let client_info = self.database.get_client_info(nick).unwrap();
+            let nickname = client_info.nickname.clone();
 
-            self.send_response_for_reply(CommandResponse::WhoisUser311 {
-                nickname: info.nickname(),
-                username: info.username(),
-                host: info.hostname(),
-                real_name: info.realname(),
-            })?;
+            self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
             if self.database._is_server_operator(nick) {
-                self.send_response_for_reply(CommandResponse::WhoisOperator313 {
-                    nickname: info.nickname(),
-                })?;
+                self.send_response_for_reply(CommandResponse::WhoisOperator313 { nickname })?;
             }
 
             // self.send_response_for_reply(CommandResponse::WhoisIdle317 {
