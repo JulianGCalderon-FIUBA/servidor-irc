@@ -28,14 +28,13 @@ impl<T: ClientTrait> ClientHandler<T> {
             }
             let client_info = self.database.get_client_info(nick).unwrap();
             let nickname = client_info.nickname.clone();
-
-            self.send_responses(client_info, nick, nickname)?;
+            self.send_whois_responses(client_info, nick, nickname)?;
         }
 
         Ok(())
     }
 
-    fn send_responses(
+    fn send_whois_responses(
         &mut self,
         client_info: crate::server::database::ClientInfo,
         nick: &str,
