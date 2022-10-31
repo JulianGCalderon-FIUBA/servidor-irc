@@ -29,28 +29,32 @@ impl<T: ClientTrait> ClientHandler<T> {
             let client_info = self.database.get_client_info(nick).unwrap();
             let nickname = client_info.nickname.clone();
 
-            self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
-            if self.database._is_server_operator(nick) {
-                self.send_response_for_reply(CommandResponse::WhoisOperator313 { nickname })?;
-            }
-
-            // self.send_response_for_reply(CommandResponse::WhoisIdle317 {
-            //     nickname: nick.to_string(),
-            //     seconds: (),
-            // })?;
-            let channels = self.database.get_channels_for_client(nick);
-            if !channels.is_empty() {
-                self.send_response_for_reply(CommandResponse::WhoisChannels319 {
-                    nickname: nick.to_string(),
-                    channels,
-                })?;
-            }
-
-            self.send_response_for_reply(CommandResponse::EndOfWhois318 {
-                nickname: nick.to_string(),
-            })?;
+            self.send_responses(client_info, nick, nickname)?;
         }
 
+        Ok(())
+    }
+
+    fn send_responses(
+        &mut self,
+        client_info: crate::server::database::ClientInfo,
+        nick: &str,
+        nickname: String,
+    ) -> Result<(), io::Error> {
+        self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
+        if self.database._is_server_operator(nick) {
+            self.send_response_for_reply(CommandResponse::WhoisOperator313 { nickname })?;
+        }
+        let channels = self.database.get_channels_for_client(nick);
+        if !channels.is_empty() {
+            self.send_response_for_reply(CommandResponse::WhoisChannels319 {
+                nickname: nick.to_string(),
+                channels,
+            })?;
+        }
+        self.send_response_for_reply(CommandResponse::EndOfWhois318 {
+            nickname: nick.to_string(),
+        })?;
         Ok(())
     }
 
