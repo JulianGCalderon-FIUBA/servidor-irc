@@ -34,6 +34,7 @@ pub enum CommandResponse {
         nickname: String,
     },
     WhoReply352 {
+        channel: Option<String>,
         client_info: ClientInfo,
     },
     NameReply353 {
@@ -85,9 +86,13 @@ impl Display for CommandResponse {
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")
             }
-            CommandResponse::WhoReply352 { client_info } => {
+            CommandResponse::WhoReply352 {
+                channel,
+                client_info,
+            } => {
                 format!(
-                    "352 CHANNEL {} {} {} {} \\MODOS :HOPCOUNT {}",
+                    "352 {} {} {} {} {} \\MODOS :HOPCOUNT {}",
+                    channel.as_ref().unwrap_or(&"*".to_string()),
                     client_info.username,
                     client_info.hostname,
                     client_info.servername,

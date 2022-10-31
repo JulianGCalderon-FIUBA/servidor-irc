@@ -1,4 +1,5 @@
 use std::io;
+mod utils;
 mod validations;
 
 use crate::server::client_handler::responses::replies::CommandResponse;
@@ -60,22 +61,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         let mut clients = if parameters.is_empty() {
-            let clients = self.database.get_all_clients();
-
-            clients
-                .into_iter()
-                .filter(|client_info| {
-                    self.database
-                        .get_channels_for_client(&client_info.nickname)
-                        .iter()
-                        .all(|channel| {
-                            !self
-                                .database
-                                .get_channels_for_client(&self.registration.nickname().unwrap())
-                                .contains(channel)
-                        })
-                })
-                .collect()
+            self.filtered_clients_for_default_who_command(self.database.get_all_clients())
         } else {
             self.database.get_clients_for_query(&parameters[0])
         };
@@ -83,10 +69,10 @@ impl<T: ClientTrait> ClientHandler<T> {
         clients.sort();
 
         for client_info in clients {
-            self.send_response_for_reply(CommandResponse::WhoReply352 { client_info })?;
+            self.send_whoreply_for_client(client_info)?;
         }
 
-        let name = parameters.get(0).map(|s| s.to_owned());
+        let name = parameters.get(0).map(|string| string.to_owned());
         self.send_response_for_reply(CommandResponse::EndOfWho315 { name })
     }
 }
