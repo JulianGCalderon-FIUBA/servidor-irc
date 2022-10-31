@@ -1,4 +1,4 @@
-use std::{cell::Cell, sync::mpsc::Sender};
+use std::sync::mpsc::Sender;
 
 use gtk4 as gtk;
 use gtk::{
@@ -12,8 +12,6 @@ use gtk::{
     Orientation,
     prelude::*
 };
-
-use crate::client::Client;
 
 
 pub struct RegisterView {
@@ -98,10 +96,14 @@ impl RegisterView {
         window
     }
 
-    fn connect_button(&self, _pass_entry: Entry, _nick_entry: Entry, _username_entry: Entry, sender: Sender<String>) {
-        // let client = self.client.get_mut();
+    fn connect_button(&self, pass_entry: Entry, nick_entry: Entry, username_entry: Entry, sender: Sender<String>) {
         self.login_button.connect_clicked(move |_| {
-            sender.send("Hola".to_string()).expect("Error message");
+            let pass_command = format!("PASS {}", pass_entry.text());
+            let nick_command = format!("NICK {}", nick_entry.text());
+            let user_command = format!("USER {} {} {} :{}", username_entry.text(), username_entry.text(), username_entry.text(), username_entry.text());
+            sender.send(pass_command).expect("Error: pass command");
+            sender.send(nick_command).expect("Error: nick command");
+            sender.send(user_command).expect("Error: user command");
         });
     }
 

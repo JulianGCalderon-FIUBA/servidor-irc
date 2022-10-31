@@ -2,7 +2,6 @@ use std::sync::mpsc::channel;
 use std::thread;
 
 use gtk4::Application;
-use gtk4::glib::{Sender, Receiver};
 use gtk4::prelude::{ApplicationExt, ApplicationExtManual};
 use internet_relay_chat::client::Client;
 use internet_relay_chat::controller_register::RegisterController;
@@ -55,7 +54,7 @@ fn build_ui(app: &Application) {
         client.async_read(print_message);
 
         for command in receiver {
-            println!("{}", command);
+            client.send_raw(&command).expect("Failed sending message");
         }
     });
 }
