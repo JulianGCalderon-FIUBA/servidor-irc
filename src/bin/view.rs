@@ -1,48 +1,47 @@
-// use internet_relay_chat::views::run;
+use std::sync::mpsc::channel;
+use std::thread;
 
-// fn main() {
-//     run();
-// }
+use gtk4::Application;
+use gtk4::prelude::{ApplicationExt, ApplicationExtManual};
+use internet_relay_chat::client::Client;
+use internet_relay_chat::controller_register::RegisterController;
+use internet_relay_chat::message::{CreationError, Message};
+use internet_relay_chat::ADDRESS;
+use internet_relay_chat::view_register::RegisterView;
 
-// use internet_relay_chat::controller_register::RegisterController;
-// use gtk4 as gtk;
-
-// use gtk::{
-//     Application,
-//     prelude::*, 
-    // CssProvider, StyleContext, gdk::Display,
-// };
-
-// fn main() {
-    // let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
-
-    // // app.connect_startup(|_| load_css());
-    // // let x = 0;
-    // // if x == 0 {
-    // //     app.connect_activate(build_ui1);
-    // // } else {
-    // //     app.connect_activate(build_ui2);
-    // // }    
+fn main() {
     
-    // app.connect_activate(build_ui);
+    let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
+    app.connect_activate(build_ui);
+    app.run();
+}
 
-    // app.run();
-// }
+fn print_message(message: Result<Message, CreationError>) {
+    match message {
+        Ok(message) => println!("{}", message),
+        Err(error) => eprintln!("Failed to read message: {}", error),
+    };
+}
 
-// fn build_ui(app: &Application) {
-//     let mut controller = RegisterController::new();
-//     controller.start(&app);
-// }
+fn build_ui(app: &Application) {
+    let mut client = match Client::new(ADDRESS.to_string()) {
+        Ok(stream) => stream,
+        Err(error) => return eprintln!("Error connecting to server: {:?}", error),
+    };
 
-// fn load_css() {
-//     let provider = CssProvider::new();
-//     provider.load_from_data(include_bytes!("src/views/style.css"));
+    let (sender, receiver) = channel();
 
-//     StyleContext::add_provider_for_display(
-//         &Display::default().expect("Could not connect to a display."),
-//         &provider,
-//         gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
-//     );
-// }
+    let view = RegisterView::new(sender);
+    let mut controller = RegisterController::new(view);
 
-fn main() {}
+    controller.start(&app);
+
+    thread::spawn(move || {
+        client.async_read(print_message);
+
+        for command in receiver {
+            println!("{}", &command);
+            client.send_raw(&command).expect("Failed sending message");
+        }
+    });
+}

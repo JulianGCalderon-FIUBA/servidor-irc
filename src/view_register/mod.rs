@@ -84,8 +84,6 @@ impl RegisterView {
         main_box.set_margin_start(20);
         main_box.set_margin_end(20);
         
-        
-
         self.connect_button(self.pass_entry.clone(), 
                             self.nick_entry.clone(), 
                         self.username_entry.clone(),
