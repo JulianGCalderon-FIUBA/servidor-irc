@@ -1,0 +1,30 @@
+.sidebar {
+    background-color: #020311; // RUST
+}
+
+button {
+    color: white;   
+    border: solid 1px white; // RUST
+}
+
+.add{
+    color: white;
+    background-color: #346d45; // MINT
+}
+
+label{
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
+.message {
+    border-radius: 5px;
+    max-width: 50px;
+    padding: 10px;
+    background-color: #A7B3A5; // SEA-FORM
+}
+
+.empty_message {
+    border-radius: 5px;
+    padding: 10px;
+}
