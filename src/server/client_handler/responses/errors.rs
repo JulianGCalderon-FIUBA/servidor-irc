@@ -9,17 +9,17 @@ impl ClientHandler {
     }
 
     pub fn unregistered_error(&mut self) -> io::Result<()> {
-        let response = "300 :unregistered".to_string();
+        let response = "200 :unregistered".to_string();
         self.send_response(&response)
     }
 
     pub fn no_such_nickname_error(&mut self, nickname: &str) -> io::Result<()> {
-        let response = format!("401 {} :No such nick/channel", nickname);
+        let response = format!("401 {nickname} :No such nick/channel");
         self.send_response(&response)
     }
 
     pub fn no_such_channel_error(&mut self, channel: &str) -> io::Result<()> {
-        let response = format!("403 {} :no such channel", channel);
+        let response = format!("403 {channel} :no such channel");
         self.send_response(&response)
     }
 
@@ -29,7 +29,7 @@ impl ClientHandler {
     }
 
     pub fn too_many_channels_error(&mut self, channel: &str) -> io::Result<()> {
-        let response = format!("405 {} :you have joined too many channels", channel);
+        let response = format!("405 {channel} :you have joined too many channels");
         self.send_response(&response)
     }
 
@@ -54,12 +54,12 @@ impl ClientHandler {
     }
 
     pub fn not_on_channel_error(&mut self, channel: &str) -> io::Result<()> {
-        let response = format!("442 {} :you're not on that channel", channel);
+        let response = format!("442 {channel} :you're not on that channel");
         self.send_response(&response)
     }
 
     pub fn user_on_channel_error(&mut self, user: &str, channel: &str) -> io::Result<()> {
-        let response = format!("443 {} {} :is already on channel", user, channel);
+        let response = format!("443 {user} {channel} :is already on channel");
         self.send_response(&response)
     }
 
@@ -94,7 +94,7 @@ impl ClientHandler {
     // }
 
     pub fn disconnected_error(&mut self, nickname: &str) -> io::Result<()> {
-        let response = format!("300 {} :client is offline", nickname);
+        let response = format!("200 {nickname} :client is offline");
         self.send_response(&response)
     }
 }
