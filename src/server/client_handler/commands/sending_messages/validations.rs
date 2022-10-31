@@ -4,8 +4,6 @@ use crate::server::client_handler::responses::errors::ErrorReply;
 
 use super::ClientHandler;
 
-use super::PRIVMSG_COMMAND;
-
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn assert_target_is_valid(&self, target: &str) -> Option<ErrorReply> {
         let target = target.to_string();
@@ -25,15 +23,15 @@ impl<T: ClientTrait> ClientHandler<T> {
         None
     }
 
-    pub fn assert_privmsg_command_is_valid(
+    pub fn assert_message_command_is_valid(
         &self,
+        command: &str,
         parameters: &Vec<String>,
         trailing: &Option<String>,
     ) -> Option<ErrorReply> {
         if parameters.is_empty() {
-            return Some(ErrorReply::NoRecipient411 {
-                command: PRIVMSG_COMMAND.to_string(),
-            });
+            let command = command.to_string();
+            return Some(ErrorReply::NoRecipient411 { command });
         }
 
         if trailing.is_none() {

@@ -8,19 +8,14 @@ use crate::{
 use crate::server::client_handler::responses::errors::ErrorReply;
 
 impl<T: ClientTrait> ClientHandler<T> {
-    pub fn build_text_message(&self, command: &str, receiver: &str, content: &str) -> Message {
-        let message = format!(
-            ":{} {} {} :{}",
-            self.registration.nickname().unwrap(),
-            command,
-            receiver,
-            content
-        );
+    pub fn message_for_command(&self, command: &str, receiver: &str, content: &str) -> Message {
+        let nickname = self.registration.nickname().unwrap();
+        let message = format!(":{nickname} {command} {receiver} :{content}",);
 
         Message::new(&message).unwrap()
     }
 
-    pub fn send_message_to(&mut self, receiver: &str, message: &Message) -> io::Result<()> {
+    pub fn send_message_to_target(&mut self, message: &Message, receiver: &str) -> io::Result<()> {
         if self.database.contains_client(receiver) {
             if let Some(error) = self.send_message_to_client(receiver, message) {
                 self.send_response_for_error(error)?;
@@ -31,6 +26,8 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         Ok(())
     }
+
+    // pub fn away_response_for_client(&mut self, nickname: &str) {}
 
     pub fn send_message_to_channel(&self, channel: &str, message: &Message) {
         let clients = self.database.get_clients(channel);
