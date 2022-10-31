@@ -2,17 +2,39 @@ use std::{io, ops::DerefMut};
 
 use crate::{
     message::Message,
-    server::{client_handler::ClientHandler, client_trait::ClientTrait},
+    server::{
+        client_handler::{responses::replies::CommandResponse, ClientHandler},
+        client_trait::ClientTrait,
+    },
 };
 
 use crate::server::client_handler::responses::errors::ErrorReply;
 
 impl<T: ClientTrait> ClientHandler<T> {
-    pub fn message_for_command(&self, command: &str, receiver: &str, content: &str) -> Message {
-        let nickname = self.registration.nickname().unwrap();
-        let message = format!(":{nickname} {command} {receiver} :{content}",);
+    pub fn message_command_to_targets(
+        &mut self,
+        command: &str,
+        targets: String,
+        content: String,
+    ) -> io::Result<()> {
+        for target in targets.split(',') {
+            if let Some(error) = self.assert_target_is_valid(target) {
+                self.send_response_for_error(error)?;
+                continue;
+            }
 
-        Message::new(&message).unwrap()
+            let nickname = self.registration.nickname().unwrap();
+            let message = format!(":{nickname} {command} {target} :{content}");
+
+            let message = Message::new(&message).unwrap();
+            self.send_message_to_target(&message, target)?;
+
+            // if command == PRIVMSG_COMMAND && self.database.contains_client(target) {
+            //     self.away_response_for_client(target);
+            // }
+        }
+
+        self.send_response_for_reply(CommandResponse::Ok200)
     }
 
     pub fn send_message_to_target(&mut self, message: &Message, receiver: &str) -> io::Result<()> {
