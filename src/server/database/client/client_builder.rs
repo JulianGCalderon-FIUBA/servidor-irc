@@ -66,11 +66,11 @@ impl<T: ClientTrait> ClientBuilder<T> {
 
         let client_info = Client {
             stream: Some(stream),
-            password: self.password,
+            _password: self.password,
             nickname: self.nickname?,
-            _username: self.username?,
-            _hostname: self.hostname?,
-            _servername: self.servername?,
+            username: self.username?,
+            hostname: self.hostname?,
+            servername: self.servername?,
             realname: self.realname?,
             operator: false,
         };

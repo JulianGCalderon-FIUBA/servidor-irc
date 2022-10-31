@@ -1,84 +1,148 @@
 use crate::server::{
-    client_handler::{commands::connection_registration::QUIT_COMMAND, ClientHandler},
-    client_trait::ClientTrait,
+    client_handler::commands::connection_registration::QUIT_COMMAND, database::ClientInfo,
 };
-use std::io;
+use std::fmt::Display;
 
-impl<T: ClientTrait> ClientHandler<T> {
-    pub fn nickname_in_use_reply(&mut self) -> io::Result<()> {
-        let response = "433 :nickname is already in use".to_string();
-        self.send_response(&response)
-    }
+pub enum CommandResponse {
+    Ok200,
+    EndOfWho315 {
+        name: Option<String>,
+    },
+    WhoisUser311 {
+        client_info: ClientInfo,
+    },
+    WhoisOperator313 {
+        nickname: String,
+    },
+    EndOfWhois318 {
+        nickname: String,
+    },
+    WhoisChannels319 {
+        nickname: String,
+        channels: Vec<String>,
+    },
+    ListStart321,
+    List322 {
+        channel: String,
+    },
+    ListEnd323,
+    NoTopic331 {
+        channel: String,
+    },
+    Inviting341 {
+        channel: String,
+        nickname: String,
+    },
+    WhoReply352 {
+        client_info: ClientInfo,
+    },
+    NameReply353 {
+        channel: String,
+        clients: Vec<String>,
+    },
+    EndOfNames366 {
+        channel: String,
+    },
+    YouAreOper381,
+    Quit {
+        message: String,
+    },
+    // WhoisIdle317 {
+    //     nickname: String,
+    //     seconds: u8,
+    // },
+    // WhoisServer312 {
+    //     nickname: String,
+    //     server: String,
+    //     server_info: String,
+    // },
+    // Away301 {
+    //     nickname: String,
+    //     message: String,
+    // },
+    // Topic332 {
+    //     channel: String,
+    //     topic: String,
+    // },
+}
 
-    pub fn nickname_collision_reply(&mut self) -> io::Result<()> {
-        let response = "436 :nickname collision KILL".to_string();
-        self.send_response(&response)
-    }
+impl Display for CommandResponse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let string = match self {
+            CommandResponse::EndOfWho315 { name } => {
+                if let Some(name) = name {
+                    format!("315 {name} :End of /WHO list")
+                } else {
+                    "315 :End of /WHO list".to_string()
+                }
+            }
+            CommandResponse::List322 { channel } => {
+                format!("322 : {channel}")
+            }
+            CommandResponse::NoTopic331 { channel } => {
+                format!("331 {channel} :no topic is set")
+            }
+            CommandResponse::Inviting341 { channel, nickname } => {
+                format!("341 {channel} {nickname}")
+            }
+            CommandResponse::WhoReply352 { client_info } => {
+                format!(
+                    "352 CHANNEL {} {} {} {} \\MODOS :HOPCOUNT {}",
+                    client_info.username,
+                    client_info.hostname,
+                    client_info.servername,
+                    client_info.nickname,
+                    client_info.realname,
+                )
+            }
+            CommandResponse::NameReply353 { channel, clients } => {
+                format!("353 {channel} :{}", clients.join(" "))
+            }
+            CommandResponse::EndOfNames366 { channel } => {
+                format!("366 {channel} :End of /NAMES list")
+            }
+            CommandResponse::Quit { message } => {
+                format!("{QUIT_COMMAND} :{message}")
+            }
+            CommandResponse::WhoisUser311 { client_info } => {
+                format!(
+                    "311 {} {} {} *: {}",
+                    client_info.nickname,
+                    client_info.username,
+                    client_info.hostname,
+                    client_info.realname,
+                )
+            }
+            CommandResponse::Ok200 => "200 :success".to_string(),
+            CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
+            CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
+            CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
 
-    pub fn already_registered_reply(&mut self) -> io::Result<()> {
-        let response = "462 :may not reregister".to_string();
-        self.send_response(&response)
-    }
-
-    pub fn quit_reply(&mut self, message: &str) -> io::Result<()> {
-        let response = format!("{QUIT_COMMAND} :{message}");
-        self.send_response(&response)
-    }
-
-    pub fn ok_reply(&mut self) -> io::Result<()> {
-        let response = "200 :success".to_string();
-        self.send_response(&response)
-    }
-
-    pub fn list_start_reply(&mut self) -> io::Result<()> {
-        let response = "321 :Channel :Users Name".to_string();
-        self.send_response(&response)
-    }
-
-    pub fn list_end_reply(&mut self) -> io::Result<()> {
-        let response = "323 :End of /LIST".to_string();
-        self.send_response(&response)
-    }
-
-    pub fn list_reply(&mut self, channels: Vec<String>) -> io::Result<()> {
-        self.list_start_reply()?;
-        let response = format!("322 : {}", channels.join(" "));
-        self.send_response(&response)?;
-        self.list_end_reply()
-    }
-
-    // pub fn away_reply(&mut self, nickname: &str, message: &str) -> io::Result<()> {
-    //     let response = format!("301 {nickname} :{message}");
-    //     self.send_response(&response)
-    // }
-
-    pub fn no_topic_reply(&mut self, channel: &str) -> io::Result<()> {
-        let response = format!("331 {channel} :no topic is set");
-        self.send_response(&response)
-    }
-
-    // pub fn topic_reply(&mut self, channel: &str, topic: &str) -> io::Result<()> {
-    //     let response = format!("332 {} :{}", channel, topic);
-    //     self.send_response(&response)
-    // }
-
-    pub fn invite_reply(&mut self, channel: &str, nickname: &str) -> io::Result<()> {
-        let response = format!("341 {channel} {nickname}");
-        self.send_response(&response)
-    }
-
-    pub fn end_of_names_reply(&mut self, channel: &str) -> io::Result<()> {
-        let response = format!("366 {channel} :End of /NAMES list");
-        self.send_response(&response)
-    }
-
-    pub fn names_reply(&mut self, channel: &str, clients: Vec<String>) -> io::Result<()> {
-        let response = format!("353 {channel} :{}", clients.join(" "));
-        self.send_response(&response)
-    }
-
-    pub fn oper_reply(&mut self) -> io::Result<()> {
-        let response = "381 :You are now an IRC operator".to_string();
-        self.send_response(&response)
+            CommandResponse::WhoisOperator313 { nickname } => {
+                format!("313 {nickname} :is an IRC operator")
+            }
+            CommandResponse::EndOfWhois318 { nickname } => {
+                format!("318 {nickname} :End of /WHOIS list")
+            }
+            CommandResponse::WhoisChannels319 { nickname, channels } => {
+                format!("319 {nickname} : {}", channels.join(" "))
+            } // CommandResponse::WhoisServer312 {
+              //     nickname,
+              //     server,
+              //     server_info,
+              // } => {
+              //     format!("312 {nickname} {server} :{server_info}")
+              // }
+              // CommandResponse::Away301 { nickname, message } => {
+              //     format!("301 {nickname} :{message}")
+              // }
+              // CommandResponse::Topic332 { channel, topic } => {
+              //     format!("332 {} :{}", channel, topic)
+              // }
+              // CommandResponse::WhoisIdle317 { nickname, seconds } => {
+              //     format!("317 {nickname} {seconds} :seconds idle")
+              // }
+        };
+        write!(f, "{string}")
     }
 }

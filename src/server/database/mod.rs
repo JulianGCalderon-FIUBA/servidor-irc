@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex, RwLock};
 
 pub use channel::Channel;
-pub use client::{Client, ClientBuilder};
+pub use client::{Client, ClientBuilder, ClientInfo};
 
 use super::client_trait::ClientTrait;
 pub struct Database<T: ClientTrait> {
@@ -28,14 +28,11 @@ impl<T: ClientTrait> Database<T> {
     pub fn add_client(&self, client: Client<T>) {
         let mut clients_lock = self.clients.write().unwrap();
 
-        println!(
-            "Client registered: \npassword: {:?}\nnickname: {}\nrealname: {}",
-            client.password(),
-            client.nickname(),
-            client.realname()
-        );
+        let clientinfo = client.get_info();
 
-        clients_lock.insert(client.nickname(), client);
+        println!("Client registered: {clientinfo:?}",);
+
+        clients_lock.insert(clientinfo.nickname, client);
     }
 
     pub fn set_server_operator(&self, nickname: &str) {
@@ -50,7 +47,7 @@ impl<T: ClientTrait> Database<T> {
     pub fn _is_server_operator(&self, nickname: &str) -> bool {
         let mut clients_lock = self.clients.write().unwrap();
         if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
-            return client._is_server_operator();
+            return client.is_server_operator();
         }
 
         false
@@ -116,12 +113,31 @@ impl<T: ClientTrait> Database<T> {
     pub fn get_clients(&self, channel: &str) -> Vec<String> {
         let channels_lock = self.channels.read().unwrap();
 
-        let client_info = channels_lock.get(channel);
+        let channel_info = channels_lock.get(channel);
 
-        match client_info {
-            Some(client_info) => client_info.get_clients(),
+        match channel_info {
+            Some(channel_info) => channel_info.get_clients(),
             None => vec![],
         }
+    }
+
+    pub fn get_all_clients(&self) -> Vec<ClientInfo> {
+        let clients_lock = self.clients.read().unwrap();
+
+        clients_lock
+            .values()
+            .map(|client| client.get_info())
+            .collect()
+    }
+
+    pub fn get_clients_for_query(&self, query: &str) -> Vec<ClientInfo> {
+        let clients_lock = self.clients.read().unwrap();
+
+        clients_lock
+            .values()
+            .map(|client| client.get_info())
+            .filter(|client| client_matches_query(client, query))
+            .collect()
     }
 
     pub fn get_channels(&self) -> Vec<String> {
@@ -142,10 +158,83 @@ impl<T: ClientTrait> Database<T> {
         }
         channels
     }
+
+    pub fn get_client_info(&self, nickname: &str) -> Option<ClientInfo> {
+        let clients_lock = self.clients.read().unwrap();
+        let client = clients_lock.get(nickname)?;
+
+        Some(client.get_info())
+    }
 }
 
 impl<T: ClientTrait> Default for Database<T> {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn client_matches_query(client: &ClientInfo, query: &str) -> bool {
+    if matches(&client.nickname, query) {
+        return true;
+    }
+    if matches(&client.realname, query) {
+        return true;
+    }
+    if matches(&client.username, query) {
+        return true;
+    }
+    if matches(&client.hostname, query) {
+        return true;
+    }
+    if matches(&client.servername, query) {
+        return true;
+    }
+
+    false
+}
+
+fn matches(base: &str, pattern: &str) -> bool {
+    if pattern.is_empty() {
+        return base.is_empty();
+    }
+
+    let base = base.as_bytes();
+    let pattern = pattern.as_bytes();
+
+    let mut base_index = 0;
+    let mut pattern_index = 0;
+    let mut glob_base_index = -1;
+    let mut glob_pattern_index = -1;
+
+    while base_index < base.len() {
+        if pattern_index < pattern.len() {
+            if base[base_index] == pattern[pattern_index] || pattern[pattern_index] == b'?' {
+                base_index += 1;
+                pattern_index += 1;
+                continue;
+            }
+
+            if pattern[pattern_index] == b'*' {
+                glob_base_index = base_index as isize;
+                glob_pattern_index = pattern_index as isize;
+                pattern_index += 1;
+                continue;
+            }
+        }
+
+        if glob_pattern_index != -1 {
+            base_index = (glob_base_index + 1) as usize;
+            pattern_index = (glob_pattern_index + 1) as usize;
+            glob_base_index += 1;
+            continue;
+        }
+
+        return false;
+    }
+
+    while pattern_index < pattern.len() && pattern[pattern_index] == b'*' {
+        pattern_index += 1;
+    }
+
+    pattern_index == pattern.len()
 }

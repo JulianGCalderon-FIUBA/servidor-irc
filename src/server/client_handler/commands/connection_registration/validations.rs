@@ -1,77 +1,71 @@
 use crate::server::client_handler::registration::RegistrationState;
+use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_trait::ClientTrait;
 
 use super::ClientHandler;
-use std::io;
 
 use super::OPER_COMMAND;
 use super::PASS_COMMAND;
 use super::USER_COMMAND;
 
 impl<T: ClientTrait> ClientHandler<T> {
-    pub fn validate_pass_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+    pub fn assert_pass_command_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.len() != 1 {
-            self.need_more_params_error(PASS_COMMAND)?;
-            return Ok(false);
+            let command = PASS_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
         }
 
         if self.registration.state() != &RegistrationState::NotInitialized {
-            self.already_registered_reply()?;
-            return Ok(false);
+            return Some(ErrorReply::AlreadyRegistered462);
         }
 
-        Ok(true)
+        None
     }
 
-    pub fn validate_nick_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+    pub fn assert_nick_command_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
-            self.no_nickname_given_error()?;
-            return Ok(false);
+            return Some(ErrorReply::NoNicknameGiven431);
         }
 
-        let nickname = &parameters[0];
-
-        if self.database.contains_client(nickname) {
+        let nickname = parameters[0].to_string();
+        if self.database.contains_client(&nickname) {
             if self.registration.state() == &RegistrationState::Registered {
-                self.nickname_in_use_reply()?;
+                return Some(ErrorReply::NicknameInUse433 { nickname });
             } else {
-                self.nickname_collision_reply()?;
+                return Some(ErrorReply::NickCollision436 { nickname });
             }
-            return Ok(false);
         }
 
-        Ok(true)
+        None
     }
 
-    pub fn validate_user_command(
-        &mut self,
+    pub fn assert_user_command_is_valid(
+        &self,
         parameters: &Vec<String>,
         trailing: &Option<String>,
-    ) -> io::Result<bool> {
+    ) -> Option<ErrorReply> {
         if parameters.len() != 3 || trailing.is_none() {
-            self.need_more_params_error(USER_COMMAND)?;
-            return Ok(false);
+            let command = USER_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
         }
 
         if self.registration.state() != &RegistrationState::NicknameSent {
-            self.no_nickname_error()?;
-            return Ok(false);
+            return Some(ErrorReply::NoNickname);
         }
 
-        Ok(true)
+        None
     }
 
-    pub fn validate_oper_command(&mut self, parameters: &Vec<String>) -> io::Result<bool> {
+    pub fn assert_oper_command_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.len() != 2 {
-            self.need_more_params_error(OPER_COMMAND)?;
-            return Ok(false);
+            let command = OPER_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
         }
 
         if self.registration.state() != &RegistrationState::Registered {
-            self.unregistered_error()?;
-            return Ok(false);
+            return Some(ErrorReply::UnregisteredClient);
         }
 
-        Ok(true)
+        None
     }
 }

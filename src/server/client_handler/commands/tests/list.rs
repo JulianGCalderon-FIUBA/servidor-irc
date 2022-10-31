@@ -42,7 +42,7 @@ fn list_with_no_parameters_prints_all_channels() {
     handler.list_command(parameters.clone()).unwrap();
 
     assert_eq!(
-        "321 :Channel :Users Name\r\n322 : #chau #hola\r\n323 :End of /LIST\r\n",
+        "321 :Channel :Users Name\r\n322 : #chau\r\n322 : #hola\r\n323 :End of /LIST\r\n",
         handler.stream.read_wbuf_to_string()
     );
 
@@ -52,7 +52,7 @@ fn list_with_no_parameters_prints_all_channels() {
     handler.list_command(parameters).unwrap();
 
     assert_eq!(
-        "321 :Channel :Users Name\r\n322 : #canal #chau #hola\r\n323 :End of /LIST\r\n",
+        "321 :Channel :Users Name\r\n322 : #canal\r\n322 : #chau\r\n322 : #hola\r\n323 :End of /LIST\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -81,7 +81,7 @@ fn list_with_parameters_prints_requested_channels() {
     handler.list_command(parameters2).unwrap();
 
     assert_eq!(
-        "321 :Channel :Users Name\r\n322 : #hola #chau\r\n323 :End of /LIST\r\n",
+        "321 :Channel :Users Name\r\n322 : #hola\r\n322 : #chau\r\n323 :End of /LIST\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -99,7 +99,7 @@ fn list_ignores_invalid_channels() {
     handler.list_command(parameters).unwrap();
 
     assert_eq!(
-        "321 :Channel :Users Name\r\n322 : #hola #chau\r\n323 :End of /LIST\r\n",
+        "321 :Channel :Users Name\r\n322 : #hola\r\n322 : #chau\r\n323 :End of /LIST\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
