@@ -21,9 +21,9 @@ fn after_setting_server_operator_client_is_server_operator() {
 
     database.add_client(dummy_client("nickname"));
 
-    assert!(!database._is_server_operator("nickname"));
+    assert!(!database.is_server_operator("nickname"));
     database.set_server_operator("nickname");
-    assert!(database._is_server_operator("nickname"));
+    assert!(database.is_server_operator("nickname"));
 }
 
 #[test]

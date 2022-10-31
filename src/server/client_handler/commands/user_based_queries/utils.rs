@@ -51,7 +51,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         nickname: String,
     ) -> Result<(), io::Error> {
         self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
-        if self.database._is_server_operator(nick) {
+        if self.database.is_server_operator(nick) {
             self.send_response_for_reply(CommandResponse::WhoisOperator313 { nickname })?;
         }
         let channels = self.database.get_channels_for_client(nick);

@@ -13,7 +13,7 @@ fn oper_with_valid_credential_sets_client_as_operator() {
         handler.stream.read_wbuf_to_string()
     );
 
-    assert!(handler.database._is_server_operator("nick"));
+    assert!(handler.database.is_server_operator("nick"));
 }
 
 #[test]

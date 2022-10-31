@@ -44,7 +44,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    pub fn _is_server_operator(&self, nickname: &str) -> bool {
+    pub fn is_server_operator(&self, nickname: &str) -> bool {
         let mut clients_lock = self.clients.write().unwrap();
         if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
             return client.is_server_operator();
