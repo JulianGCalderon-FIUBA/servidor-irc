@@ -41,22 +41,17 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     pub fn send_message_to_client(&self, nickname: &str, message: &Message) -> Option<ErrorReply> {
-        let stream_ref = match self.database.get_stream(nickname) {
-            Some(stream_ref) => stream_ref,
-            None => {
-                return Some(ErrorReply::ClientOffline {
-                    nickname: nickname.to_string(),
-                })
-            }
-        };
-
-        let mut stream = stream_ref.lock().unwrap();
-        if message.send_to(stream.deref_mut()).is_err() {
-            return Some(ErrorReply::ClientOffline {
-                nickname: nickname.to_string(),
-            });
-        };
+        if self.try_send_message_to_client(nickname, message).is_none() {
+            let nickname = nickname.to_string();
+            return Some(ErrorReply::ClientOffline { nickname });
+        }
 
         None
+    }
+
+    fn try_send_message_to_client(&self, nickname: &str, message: &Message) -> Option<()> {
+        let stream_ref = self.database.get_stream(nickname)?;
+        let mut stream = stream_ref.lock().unwrap();
+        message.send_to(stream.deref_mut()).ok()
     }
 }
