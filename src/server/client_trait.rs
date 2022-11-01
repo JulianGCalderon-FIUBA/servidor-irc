@@ -2,7 +2,7 @@ use std::io;
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
-pub trait ClientTrait: Read + Write + Sized {
+pub trait ClientTrait: Read + Write + Sized + Send {
     fn try_clone(&self) -> io::Result<Self>;
 }
 

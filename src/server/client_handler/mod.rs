@@ -16,8 +16,6 @@ use commands::connection_registration::{
 use commands::sending_messages::{NOTICE_COMMAND, PRIVMSG_COMMAND};
 use commands::user_based_queries::WHOIS_COMMAND;
 
-use std::sync::Arc;
-
 use self::commands::user_based_queries::WHO_COMMAND;
 use self::responses::errors::ErrorReply;
 
@@ -27,7 +25,7 @@ use registration::Registration;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<T: ClientTrait> {
-    database: Sender<DatabaseEvent>,
+    database: Sender<DatabaseRequest>,
     stream: T,
     registration: Registration<T>,
 }
@@ -35,7 +33,10 @@ pub struct ClientHandler<T: ClientTrait> {
 impl<T: ClientTrait> ClientHandler<T> {
     /// Returns new clientHandler.
 
-    pub fn from_stream(database: Sender<DatabaseEvent>, stream: T) -> io::Result<ClientHandler<T>> {
+    pub fn from_stream(
+        database: Sender<DatabaseRequest>,
+        stream: T,
+    ) -> io::Result<ClientHandler<T>> {
         let registration = Registration::with_stream(stream.try_clone()?);
 
         Ok(Self {

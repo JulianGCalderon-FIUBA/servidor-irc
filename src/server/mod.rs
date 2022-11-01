@@ -8,17 +8,18 @@ mod database;
 use std::io;
 use std::net::{TcpListener, TcpStream};
 use std::sync::mpsc;
-use std::sync::Arc;
 
 use crate::thread_pool::ThreadPool;
 use client_handler::ClientHandler;
 use database::Database;
 
+use self::database::DatabaseRequest;
+
 pub const MAX_CLIENTS: usize = 26;
 
 /// Represents a Server clients can connect to.
 pub struct Server {
-    database: mpsc::Sender<DatabaseRequest>,
+    database: mpsc::Sender<DatabaseRequest<TcpStream>>,
 }
 
 impl Server {
