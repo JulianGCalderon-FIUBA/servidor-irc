@@ -65,6 +65,13 @@ impl MockTcpStream {
         String::from_utf8(self.read_wbuf()).unwrap()
     }
 
+    pub fn get_responses(&self) -> Vec<String> {
+        self.read_wbuf_to_string()
+            .split("\r\n")
+            .map(|string| string.to_string())
+            .collect()
+    }
+
     // pub fn write_rbuf(&self, buf: &[u8]) -> std::io::Result<usize> {
     //     self.read_lock().write(buf)
     // }

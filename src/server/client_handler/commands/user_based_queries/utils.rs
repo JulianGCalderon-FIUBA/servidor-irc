@@ -44,26 +44,23 @@ impl<T: ClientTrait> ClientHandler<T> {
         })
     }
 
-    pub fn send_whois_responses(
-        &mut self,
-        client_info: ClientInfo,
-        nick: &str,
-        nickname: String,
-    ) -> Result<(), io::Error> {
+    pub fn send_whois_responses(&mut self, client_info: ClientInfo) -> Result<(), io::Error> {
+        let nickname = client_info.nickname.clone();
+
         self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
-        if self.database.is_server_operator(nick) {
-            self.send_response_for_reply(CommandResponse::WhoisOperator313 { nickname })?;
+        if self.database.is_server_operator(&nickname) {
+            self.send_response_for_reply(CommandResponse::WhoisOperator313 {
+                nickname: nickname.to_string(),
+            })?;
         }
-        let channels = self.database.get_channels_for_client(nick);
+        let channels = self.database.get_channels_for_client(&nickname);
         if !channels.is_empty() {
             self.send_response_for_reply(CommandResponse::WhoisChannels319 {
-                nickname: nick.to_string(),
+                nickname: nickname.to_string(),
                 channels,
             })?;
         }
-        self.send_response_for_reply(CommandResponse::EndOfWhois318 {
-            nickname: nick.to_string(),
-        })?;
+        self.send_response_for_reply(CommandResponse::EndOfWhois318 { nickname })?;
         Ok(())
     }
 }

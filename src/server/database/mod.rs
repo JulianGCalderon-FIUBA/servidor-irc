@@ -130,14 +130,12 @@ impl<T: ClientTrait> Database<T> {
             .collect()
     }
 
-    pub fn get_clients_for_query(&self, query: &str) -> Vec<ClientInfo> {
-        let clients_lock = self.clients.read().unwrap();
+    pub fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
+        self.filtered_clients(mask, client_matches_mask)
+    }
 
-        clients_lock
-            .values()
-            .map(|client| client.get_info())
-            .filter(|client| client_matches_query(client, query))
-            .collect()
+    pub fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
+        self.filtered_clients(mask, client_matches_nickmask)
     }
 
     pub fn get_channels(&self) -> Vec<String> {
@@ -158,12 +156,13 @@ impl<T: ClientTrait> Database<T> {
         }
         channels
     }
-
-    pub fn get_client_info(&self, nickname: &str) -> Option<ClientInfo> {
+    fn filtered_clients(&self, mask: &str, f: fn(&ClientInfo, &str) -> bool) -> Vec<ClientInfo> {
         let clients_lock = self.clients.read().unwrap();
-        let client = clients_lock.get(nickname)?;
-
-        Some(client.get_info())
+        clients_lock
+            .values()
+            .map(|client| client.get_info())
+            .filter(|client| f(client, mask))
+            .collect()
     }
 }
 
@@ -173,7 +172,11 @@ impl<T: ClientTrait> Default for Database<T> {
     }
 }
 
-fn client_matches_query(client: &ClientInfo, query: &str) -> bool {
+fn client_matches_nickmask(client: &ClientInfo, mask: &str) -> bool {
+    matches(&client.nickname, mask)
+}
+
+fn client_matches_mask(client: &ClientInfo, query: &str) -> bool {
     if matches(&client.nickname, query) {
         return true;
     }
