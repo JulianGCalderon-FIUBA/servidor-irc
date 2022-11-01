@@ -117,3 +117,25 @@ fn whois_returns_complete_nick_info() {
         handler.stream.read_wbuf_to_string()
     )
 }
+
+#[test]
+fn whois_works_with_nickmask() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    let parameters = vec!["nic*".to_string()];
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client(dummy_client("nick3"));
+
+    handler.whois_command(parameters).unwrap();
+
+    let split = handler.stream.get_responses();
+
+    assert_eq!("311 nick user host *: real", split[0]);
+    assert_eq!("318 nick :End of /WHOIS list", split[1]);
+    assert_eq!("311 nick2 username hostname *: realname", split[2]);
+    assert_eq!("318 nick2 :End of /WHOIS list", split[3]);
+    assert_eq!("311 nick3 username hostname *: realname", split[4]);
+    assert_eq!("318 nick3 :End of /WHOIS list", split[5]);
+}
