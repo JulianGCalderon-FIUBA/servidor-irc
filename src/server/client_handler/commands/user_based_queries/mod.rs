@@ -46,7 +46,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let mut clients = if parameters.is_empty() {
             self.filtered_clients_for_default_who_command(self.database.get_all_clients())
         } else {
-            self.database.get_clients_for_query(&parameters[0])
+            self.database.get_clients_for_mask(&parameters[0])
         };
 
         clients.sort();

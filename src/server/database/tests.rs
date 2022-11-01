@@ -185,11 +185,11 @@ fn get_clients_for_query_returns_all_matching_clients() {
 
     let expected = vec![clientinfo];
 
-    assert_eq!(database.get_clients_for_query("*A*"), expected);
-    assert_eq!(database.get_clients_for_query("*B*"), expected);
-    assert_eq!(database.get_clients_for_query("*C*"), expected);
-    assert_eq!(database.get_clients_for_query("*D*"), expected);
-    assert_eq!(database.get_clients_for_query("*E*"), expected);
+    assert_eq!(database.get_clients_for_mask("*A*"), expected);
+    assert_eq!(database.get_clients_for_mask("*B*"), expected);
+    assert_eq!(database.get_clients_for_mask("*C*"), expected);
+    assert_eq!(database.get_clients_for_mask("*D*"), expected);
+    assert_eq!(database.get_clients_for_mask("*E*"), expected);
 }
 
 #[test]
