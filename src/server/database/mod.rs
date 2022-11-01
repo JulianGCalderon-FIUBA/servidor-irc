@@ -1,22 +1,23 @@
-mod channel_info;
-mod client_info;
+mod channel;
+mod client;
 mod utils;
 
-use std::collections::HashMap;
-use std::net::TcpStream;
-use std::sync::Arc;
-use std::sync::Mutex;
-use std::sync::RwLock;
+#[cfg(test)]
+mod tests;
 
-pub use channel_info::ChannelInfo;
-pub use client_info::ClientInfo;
-pub use client_info::ClientInfoBuilder;
-pub struct Database {
-    pub clients: RwLock<HashMap<String, ClientInfo>>,
-    pub channels: RwLock<HashMap<String, ChannelInfo>>,
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex, RwLock};
+
+pub use channel::Channel;
+pub use client::{Client, ClientBuilder, ClientInfo};
+
+use super::client_trait::ClientTrait;
+pub struct Database<T: ClientTrait> {
+    clients: RwLock<HashMap<String, Client<T>>>,
+    channels: RwLock<HashMap<String, Channel>>,
 }
 
-impl Database {
+impl<T: ClientTrait> Database<T> {
     pub fn new() -> Self {
         Self {
             clients: RwLock::new(HashMap::new()),
@@ -24,15 +25,14 @@ impl Database {
         }
     }
 
-    pub fn add_client(&self, client: ClientInfo) {
+    pub fn add_client(&self, client: Client<T>) {
         let mut clients_lock = self.clients.write().unwrap();
 
-        println!(
-            "Client registered: \npassword: {:?}\nnickname: {}\nrealname: {}",
-            client.password, client.nickname, client.realname
-        );
+        let clientinfo = client.get_info();
 
-        clients_lock.insert(client.nickname.clone(), client);
+        println!("Client registered: {clientinfo:?}",);
+
+        clients_lock.insert(clientinfo.nickname, client);
     }
 
     pub fn set_server_operator(&self, nickname: &str) {
@@ -44,6 +44,15 @@ impl Database {
         }
     }
 
+    pub fn is_server_operator(&self, nickname: &str) -> bool {
+        let mut clients_lock = self.clients.write().unwrap();
+        if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
+            return client.is_server_operator();
+        }
+
+        false
+    }
+
     pub fn disconnect_client(&self, nickname: &str) {
         println!("Disconnecting {} ", nickname);
 
@@ -52,7 +61,7 @@ impl Database {
         }
     }
 
-    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<TcpStream>>> {
+    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<T>>> {
         let clients_rlock = self.clients.read().unwrap();
         let client = clients_rlock.get(nickname)?;
 
@@ -63,11 +72,11 @@ impl Database {
         println!("Adding {} to channel {}", nickname, channel_name);
 
         let mut channels_lock = self.channels.write().unwrap();
-        let channel: Option<&mut ChannelInfo> = channels_lock.get_mut(&channel_name.to_string());
+        let channel: Option<&mut Channel> = channels_lock.get_mut(&channel_name.to_string());
         match channel {
             Some(channel) => channel.add_client(nickname.to_string()),
             None => {
-                let new_channel = ChannelInfo::new(channel_name.to_string(), nickname.to_string());
+                let new_channel = Channel::new(channel_name.to_string(), nickname.to_string());
                 channels_lock.insert(channel_name.to_string(), new_channel);
             }
         }
@@ -104,12 +113,29 @@ impl Database {
     pub fn get_clients(&self, channel: &str) -> Vec<String> {
         let channels_lock = self.channels.read().unwrap();
 
-        let client_info = channels_lock.get(channel);
+        let channel_info = channels_lock.get(channel);
 
-        match client_info {
-            Some(client_info) => client_info.get_clients(),
+        match channel_info {
+            Some(channel_info) => channel_info.get_clients(),
             None => vec![],
         }
+    }
+
+    pub fn get_all_clients(&self) -> Vec<ClientInfo> {
+        let clients_lock = self.clients.read().unwrap();
+
+        clients_lock
+            .values()
+            .map(|client| client.get_info())
+            .collect()
+    }
+
+    pub fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
+        self.filtered_clients(mask, client_matches_mask)
+    }
+
+    pub fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
+        self.filtered_clients(mask, client_matches_nickmask)
     }
 
     pub fn get_channels(&self) -> Vec<String> {
@@ -119,21 +145,99 @@ impl Database {
     }
 
     pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
-        let channels_lock = self.clients.read().unwrap();
+        let channels_lock = self.channels.read().unwrap();
         let mut channels = vec![];
 
-        for (channel_name, _) in channels_lock.iter() {
-            let clients = self.get_clients(channel_name);
+        for (channel_name, channel) in channels_lock.iter() {
+            let clients = channel.get_clients();
             if clients.contains(&nickname.to_string()) {
                 channels.push(channel_name.clone());
             }
         }
         channels
     }
+    fn filtered_clients(&self, mask: &str, f: fn(&ClientInfo, &str) -> bool) -> Vec<ClientInfo> {
+        let clients_lock = self.clients.read().unwrap();
+        clients_lock
+            .values()
+            .map(|client| client.get_info())
+            .filter(|client| f(client, mask))
+            .collect()
+    }
 }
 
-impl Default for Database {
+impl<T: ClientTrait> Default for Database<T> {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn client_matches_nickmask(client: &ClientInfo, mask: &str) -> bool {
+    matches(&client.nickname, mask)
+}
+
+fn client_matches_mask(client: &ClientInfo, query: &str) -> bool {
+    if matches(&client.nickname, query) {
+        return true;
+    }
+    if matches(&client.realname, query) {
+        return true;
+    }
+    if matches(&client.username, query) {
+        return true;
+    }
+    if matches(&client.hostname, query) {
+        return true;
+    }
+    if matches(&client.servername, query) {
+        return true;
+    }
+
+    false
+}
+
+fn matches(base: &str, pattern: &str) -> bool {
+    if pattern.is_empty() {
+        return base.is_empty();
+    }
+
+    let base = base.as_bytes();
+    let pattern = pattern.as_bytes();
+
+    let mut base_index = 0;
+    let mut pattern_index = 0;
+    let mut glob_base_index = -1;
+    let mut glob_pattern_index = -1;
+
+    while base_index < base.len() {
+        if pattern_index < pattern.len() {
+            if base[base_index] == pattern[pattern_index] || pattern[pattern_index] == b'?' {
+                base_index += 1;
+                pattern_index += 1;
+                continue;
+            }
+
+            if pattern[pattern_index] == b'*' {
+                glob_base_index = base_index as isize;
+                glob_pattern_index = pattern_index as isize;
+                pattern_index += 1;
+                continue;
+            }
+        }
+
+        if glob_pattern_index != -1 {
+            base_index = (glob_base_index + 1) as usize;
+            pattern_index = (glob_pattern_index + 1) as usize;
+            glob_base_index += 1;
+            continue;
+        }
+
+        return false;
+    }
+
+    while pattern_index < pattern.len() && pattern[pattern_index] == b'*' {
+        pattern_index += 1;
+    }
+
+    pattern_index == pattern.len()
 }

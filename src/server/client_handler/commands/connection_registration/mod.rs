@@ -1,4 +1,6 @@
-use crate::server::client_handler::connection_info::RegistrationState;
+use crate::server::{
+    client_handler::responses::replies::CommandResponse, client_trait::ClientTrait,
+};
 
 use super::ClientHandler;
 
@@ -12,44 +14,27 @@ pub const PASS_COMMAND: &str = "PASS";
 pub const QUIT_COMMAND: &str = "QUIT";
 pub const USER_COMMAND: &str = "USER";
 
-impl ClientHandler {
+impl<T: ClientTrait> ClientHandler<T> {
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_pass_command(&parameters)? {
-            return Ok(());
+        if let Some(error) = self.assert_pass_command_is_valid(&parameters) {
+            return self.send_response_for_error(error);
         }
 
         let password = parameters.pop().unwrap();
-        self.connection.password = Some(password);
+        self.registration.set_attribute("password", password);
 
-        self.ok_reply()
+        self.send_response_for_reply(CommandResponse::Ok)
     }
 
     pub fn nick_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
-        if !self.validate_nick_command(&parameters)? {
-            return Ok(());
+        if let Some(error) = self.assert_nick_command_is_valid(&parameters) {
+            return self.send_response_for_error(error);
         }
 
         let nickname = parameters.pop().unwrap();
-        self.connection.nickname = Some(nickname);
+        self.registration.set_nickname(nickname);
 
-        if self.connection.registration_state == RegistrationState::NotInitialized {
-            self.connection.advance_state();
-        }
-
-        self.ok_reply()
-    }
-
-    pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        // let user = self.database.password.clone().unwrap();
-        // let password = self.database.password.clone().unwrap();
-        if !self.validate_oper_command(&parameters /*, &user, &password */)? {
-            return Ok(());
-        }
-
-        self.database
-            .set_server_operator(&self.connection.nickname());
-
-        self.oper_reply()
+        self.send_response_for_reply(CommandResponse::Ok)
     }
 
     pub fn user_command(
@@ -57,34 +42,42 @@ impl ClientHandler {
         mut parameters: Vec<String>,
         trailing: Option<String>,
     ) -> io::Result<()> {
-        if !self.validate_user_command(&parameters, &trailing)? {
-            return Ok(());
+        if let Some(error) = self.assert_user_command_is_valid(&parameters, &trailing) {
+            return self.send_response_for_error(error);
         }
 
         let realname = trailing.unwrap();
-        let username = parameters.pop().unwrap();
-        let hostname = parameters.pop().unwrap();
         let servername = parameters.pop().unwrap();
+        let hostname = parameters.pop().unwrap();
+        let username = parameters.pop().unwrap();
 
-        self.connection.username = Some(username);
-        self.connection.hostname = Some(hostname);
-        self.connection.servername = Some(servername);
-        self.connection.realname = Some(realname);
+        self.registration.set_attribute("username", username);
+        self.registration.set_attribute("hostname", hostname);
+        self.registration.set_attribute("servername", servername);
+        self.registration.set_attribute("realname", realname);
 
-        self.connection.advance_state();
+        self.database.add_client(self.registration.build().unwrap());
 
-        let client_info = self.connection.build_client_info().unwrap();
-        self.database.add_client(client_info);
+        self.send_response_for_reply(CommandResponse::Ok)
+    }
 
-        self.ok_reply()
+    pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        // let user = self.database.password.clone().unwrap();
+        // let password = self.database.password.clone().unwrap();
+
+        if let Some(error) = self.assert_oper_command_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+
+        self.database
+            .set_server_operator(&self.registration.nickname().unwrap());
+
+        self.send_response_for_reply(CommandResponse::YouAreOper381)
     }
 
     pub fn quit_command(&mut self, trailing: Option<String>) -> io::Result<()> {
-        if let Some(trailing) = trailing {
-            return self.quit_reply(&trailing);
-        }
+        let message = trailing.unwrap_or_else(|| self.registration.nickname().unwrap_or_default());
 
-        let nickname = self.connection.nickname.clone().unwrap_or_default();
-        self.quit_reply(&nickname)
+        self.send_response_for_reply(CommandResponse::Quit { message })
     }
 }
