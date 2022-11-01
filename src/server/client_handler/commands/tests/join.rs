@@ -37,10 +37,10 @@ fn join_fails_with_invalid_channel_name() {
 
     handler.join_command(parameters).unwrap();
 
-    assert_eq!(
-        "403 hola :no such channel\r\n403 #ho'la :no such channel\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("403 hola :no such channel", responses[0]);
+    assert_eq!("403 #ho'la :no such channel", responses[1]);
 }
 
 #[test]
@@ -95,10 +95,10 @@ fn can_join_one_channel() {
 
     let channels = vec!["#channel".to_string()];
 
-    assert_eq!(
-        "331 #channel :no topic is set\r\n353 #channel :nick\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("331 #channel :no topic is set", responses[0]);
+    assert_eq!("353 #channel :nick", responses[1]);
     assert_eq!(handler.database.get_channels_for_client("nick"), channels);
 }
 
@@ -110,10 +110,14 @@ fn can_join_multiple_channels() {
     let parameters = vec!["#channel1,#channel2,#channel3".to_string()];
     handler.join_command(parameters).unwrap();
 
-    assert_eq!(
-        "331 #channel1 :no topic is set\r\n353 #channel1 :nick\r\n331 #channel2 :no topic is set\r\n353 #channel2 :nick\r\n331 #channel3 :no topic is set\r\n353 #channel3 :nick\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("331 #channel1 :no topic is set", responses[0]);
+    assert_eq!("353 #channel1 :nick", responses[1]);
+    assert_eq!("331 #channel2 :no topic is set", responses[2]);
+    assert_eq!("353 #channel2 :nick", responses[3]);
+    assert_eq!("331 #channel3 :no topic is set", responses[4]);
+    assert_eq!("353 #channel3 :nick", responses[5]);
 
     let mut channels = vec![
         "#channel1".to_string(),
@@ -139,10 +143,11 @@ fn can_join_existing_channel() {
 
     handler.join_command(parameters).unwrap();
 
-    assert_eq!(
-        "331 #channel :no topic is set\r\n353 #channel :nick2 nick\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("331 #channel :no topic is set", responses[0]);
+    assert_eq!("353 #channel :nick2 nick", responses[1]);
+
     assert_eq!(handler.database.get_channels_for_client("nick"), channels);
     assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
 }

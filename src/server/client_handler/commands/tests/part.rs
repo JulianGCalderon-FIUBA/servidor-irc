@@ -37,10 +37,11 @@ fn part_fails_with_invalid_channel_name() {
 
     handler.part_command(parameters).unwrap();
 
-    assert_eq!(
-        "403 hola :no such channel\r\n403 #ho'la :no such channel\r\n403 #hola :no such channel\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("403 hola :no such channel", responses[0]);
+    assert_eq!("403 #ho'la :no such channel", responses[1]);
+    assert_eq!("403 #hola :no such channel", responses[2]);
 }
 
 #[test]
@@ -92,10 +93,10 @@ fn can_part_existing_channels() {
 
     handler.part_command(parameters).unwrap();
 
-    assert_eq!(
-        "200 :success\r\n200 :success\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
-    println!("channels {:?}", handler.database.get_channels());
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("200 :success", responses[0]);
+    assert_eq!("200 :success", responses[1]);
+
     assert!(!handler.database.get_channels().is_empty())
 }

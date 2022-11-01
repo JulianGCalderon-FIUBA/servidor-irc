@@ -51,10 +51,12 @@ fn names_with_no_parameters_prints_all_channels() {
 
     handler.names_command(parameters).unwrap();
 
-    assert_eq!(
-        "353 #canal :nick2\r\n353 #chau :nick\r\n353 #hola :nick\r\n366 :End of /NAMES list\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("353 #canal :nick2", responses[0]);
+    assert_eq!("353 #chau :nick", responses[1]);
+    assert_eq!("353 #hola :nick", responses[2]);
+    assert_eq!("366 :End of /NAMES list", responses[3]);
 }
 
 #[test]
@@ -80,10 +82,12 @@ fn names_with_parameters_prints_requested_channels() {
 
     handler.names_command(parameters2).unwrap();
 
-    assert_eq!(
-        "353 #hola :nick\r\n366 #hola :End of /NAMES list\r\n353 #chau :nick\r\n366 #chau :End of /NAMES list\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("353 #hola :nick", responses[0]);
+    assert_eq!("366 #hola :End of /NAMES list", responses[1]);
+    assert_eq!("353 #chau :nick", responses[2]);
+    assert_eq!("366 #chau :End of /NAMES list", responses[3]);
 }
 
 #[test]
@@ -98,8 +102,10 @@ fn names_ignores_invalid_channels() {
 
     handler.names_command(parameters).unwrap();
 
-    assert_eq!(
-        "353 #hola :nick\r\n366 #hola :End of /NAMES list\r\n353 #chau :nick\r\n366 #chau :End of /NAMES list\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("353 #hola :nick", responses[0]);
+    assert_eq!("366 #hola :End of /NAMES list", responses[1]);
+    assert_eq!("353 #chau :nick", responses[2]);
+    assert_eq!("366 #chau :End of /NAMES list", responses[3]);
 }

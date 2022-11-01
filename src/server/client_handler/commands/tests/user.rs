@@ -13,29 +13,28 @@ fn user_adds_registers_client_correctly() {
     let trailing = Some("real".to_string());
     handler.user_command(parameters, trailing).unwrap();
 
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("200 :success", responses[0]);
+    assert_eq!("200 :success", responses[1]);
     assert_eq!(
-        "200 :success\r\n200 :success\r\n",
-        handler.stream.read_wbuf_to_string()
+        "user",
+        handler.registration.get_attribute("username").unwrap()
     );
     assert_eq!(
-        handler.registration.get_attribute("username").unwrap(),
-        "user"
+        "server",
+        handler.registration.get_attribute("servername").unwrap()
     );
     assert_eq!(
-        handler.registration.get_attribute("servername").unwrap(),
-        "server"
+        "host",
+        handler.registration.get_attribute("hostname").unwrap()
     );
     assert_eq!(
-        handler.registration.get_attribute("hostname").unwrap(),
-        "host"
-    );
-    assert_eq!(
-        handler.registration.get_attribute("realname").unwrap(),
-        "real"
+        "real",
+        handler.registration.get_attribute("realname").unwrap()
     );
 
     assert!(handler.database.contains_client("nick"));
-
     assert!(handler.registration.state() == &RegistrationState::Registered);
 }
 

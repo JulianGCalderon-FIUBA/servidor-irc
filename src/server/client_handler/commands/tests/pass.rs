@@ -10,14 +10,14 @@ fn pass_sets_connection_password() {
     let parameters = vec!["pass2".to_string()];
     handler.pass_command(parameters).unwrap();
 
-    assert_eq!(
-        "200 :success\r\n200 :success\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("200 :success", responses[0]);
+    assert_eq!("200 :success", responses[1]);
 
     assert_eq!(
-        handler.registration.get_attribute("password").unwrap(),
-        "pass2"
+        "pass2",
+        handler.registration.get_attribute("password").unwrap()
     )
 }
 
@@ -31,8 +31,8 @@ fn pass_is_only_valid_as_first_command() {
     let parameters = vec!["pass".to_string()];
     handler.pass_command(parameters).unwrap();
 
-    assert_eq!(
-        "200 :success\r\n462 :you may not reregister\r\n",
-        handler.stream.read_wbuf_to_string()
-    )
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("200 :success", responses[0]);
+    assert_eq!("462 :you may not reregister", responses[1]);
 }
