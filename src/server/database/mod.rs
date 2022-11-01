@@ -122,13 +122,13 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    // fn is_online(&self, nickname: &str) -> bool {
-    //     if let Some(client) = self.clients.get(nickname) {
-    //         return client.is_online();
-    //     }
+    fn _is_online(&self, nickname: &str) -> bool {
+        if let Some(client) = self.clients.get(nickname) {
+            return client._is_online();
+        }
 
-    //     false
-    // }
+        false
+    }
 
     fn get_stream(&self, nickname: &str) -> io::Result<T> {
         if let Some(client) = self.clients.get(nickname) {

@@ -50,18 +50,18 @@ fn get_stream_returns_reference_to_client_stream() {
     assert_eq!(stream_ref_expected, stream_ref_actual);
 }
 
-// #[test]
-// fn disconnect_client_sets_stream_to_none() {
-//     let mut database = dummy_database();
+#[test]
+fn disconnect_client_sets_stream_to_none() {
+    let mut database = dummy_database();
 
-//     let client = dummy_client("nickname");
+    let client = dummy_client("nickname");
 
-//     database.add_client(client);
+    database.add_client(client);
 
-//     assert!(database.is_online("nickname"));
-//     database.disconnect_client("nickname");
-//     assert!(!database.is_online("nickname"));
-// }
+    assert!(database._is_online("nickname"));
+    database.disconnect_client("nickname");
+    assert!(!database._is_online("nickname"));
+}
 
 #[test]
 fn after_adding_client_to_channel_it_exists() {

@@ -47,9 +47,9 @@ impl<T: ClientTrait> Client<T> {
         self.online = false;
     }
 
-    // pub fn is_online(&self) -> bool {
-    //     self.online
-    // }
+    pub fn _is_online(&self) -> bool {
+        self.online
+    }
 
     pub fn _password(&mut self) -> Option<String> {
         self._password.clone()
