@@ -4,9 +4,6 @@ use crate::server::client_trait::ClientTrait;
 
 use super::{Client, ClientInfo};
 
-type Nickname = String;
-type Channel = String;
-
 pub enum DatabaseRequest<T: ClientTrait> {
     AddClient {
         client: Client<T>,
@@ -25,7 +22,10 @@ pub enum DatabaseRequest<T: ClientTrait> {
         nickname: String,
         response: Sender<bool>,
     },
-
+    // IsOnline {
+    //     nickname: String,
+    //     response: Sender<bool>,
+    // },
     ContainsClient {
         nickname: String,
         response: Sender<bool>,
@@ -58,8 +58,12 @@ pub enum DatabaseRequest<T: ClientTrait> {
         response: Sender<Vec<String>>,
     },
 
-    GetAllClients {response: Sender<Vec<ClientInfo>>},
-    GetAllChannels {response: Sender<Vec<String>>},
+    GetAllClients {
+        response: Sender<Vec<ClientInfo>>,
+    },
+    GetAllChannels {
+        response: Sender<Vec<String>>,
+    },
     GetClientsForMask {
         mask: String,
         response: Sender<Vec<ClientInfo>>,

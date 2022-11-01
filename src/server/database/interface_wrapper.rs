@@ -5,15 +5,15 @@ use crate::server::client_trait::ClientTrait;
 use super::{ClientInfo, Database};
 
 impl<T: ClientTrait> Database<T> {
-    pub fn is_server_operator_request(&self, nickname: &str, sender: Sender<bool>) {
+    pub fn is_server_operator_request(&mut self, nickname: &str, sender: Sender<bool>) {
         let response = self.is_server_operator(nickname);
         sender.send(response).unwrap();
     }
 
-    pub fn is_online_request(&self, nickname: &str, sender: Sender<bool>) {
-        let response = self.is_online(nickname);
-        sender.send(response).unwrap();
-    }
+    // pub fn is_online_request(&self, nickname: &str, sender: Sender<bool>) {
+    //     let response = self.is_online(nickname);
+    //     sender.send(response).unwrap();
+    // }
 
     pub fn get_stream_request(&self, nickname: &str, sender: Sender<io::Result<T>>) {
         let response = self.get_stream(nickname);

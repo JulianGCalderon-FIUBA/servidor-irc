@@ -28,7 +28,8 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         let nickname = parameters[0].to_string();
-        if self.database.contains_client(&nickname) {
+
+        if self.contains_client(&nickname) {
             if self.registration.state() == &RegistrationState::Registered {
                 return Some(ErrorReply::NicknameInUse433 { nickname });
             } else {

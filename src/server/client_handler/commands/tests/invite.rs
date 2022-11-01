@@ -59,9 +59,9 @@ fn invite_fails_with_user_already_on_channel() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
-    handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
-    handler.database.add_client_to_channel("nick", "#hola");
+    handler.add_client(dummy_client("nick2"));
+    handler.add_client_to_channel("nick2", "#hola");
+    handler.add_client_to_channel("nick", "#hola");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -78,8 +78,8 @@ fn invite_fails_with_sending_user_not_on_channel() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
-    handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
+    handler.add_client(dummy_client("nick2"));
+    handler.add_client_to_channel("nick2", "#hola");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -96,8 +96,8 @@ fn can_invite_one_user() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
-    handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick", "#hola");
+    handler.add_client(dummy_client("nick2"));
+    handler.add_client_to_channel("nick", "#hola");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -107,12 +107,6 @@ fn can_invite_one_user() {
 
     assert_eq!(
         ":nick INVITE nick2 #hola\r\n",
-        handler
-            .database
-            .get_stream("nick2")
-            .unwrap()
-            .lock()
-            .unwrap()
-            .read_wbuf_to_string()
+        handler.get_stream("nick2").unwrap().read_wbuf_to_string()
     );
 }

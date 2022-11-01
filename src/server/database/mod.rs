@@ -44,7 +44,7 @@ impl<T: ClientTrait> Database<T> {
         sender
     }
 
-    fn run(self) {
+    fn run(mut self) {
         while let Ok(request) = self.receiver.recv() {
             match request {
                 AddClient { client } => self.add_client(client),
@@ -54,6 +54,7 @@ impl<T: ClientTrait> Database<T> {
                 IsServerOperator { nickname, response } => {
                     self.is_server_operator_request(&nickname, response)
                 }
+                //IsOnline { nickname, response } => self.is_online_request(&nickname, response),
                 ContainsClient { nickname, response } => {
                     self.contains_client_request(&nickname, response)
                 }
@@ -89,7 +90,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    fn add_client(&self, client: Client<T>) {
+    fn add_client(&mut self, client: Client<T>) {
         let clientinfo = client.get_info();
 
         println!("Client registered: {clientinfo:?}",);
@@ -97,7 +98,7 @@ impl<T: ClientTrait> Database<T> {
         self.clients.insert(clientinfo.nickname, client);
     }
 
-    fn set_server_operator(&self, nickname: &str) {
+    fn set_server_operator(&mut self, nickname: &str) {
         println!("Setting {} as operator", nickname);
 
         if let Some(client) = self.clients.get_mut(nickname) {
@@ -105,7 +106,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    fn is_server_operator(&self, nickname: &str) -> bool {
+    fn is_server_operator(&mut self, nickname: &str) -> bool {
         if let Some(client) = self.clients.get_mut(&nickname.to_string()) {
             return client.is_server_operator();
         }
@@ -113,7 +114,7 @@ impl<T: ClientTrait> Database<T> {
         false
     }
 
-    fn disconnect_client(&self, nickname: &str) {
+    fn disconnect_client(&mut self, nickname: &str) {
         println!("Disconnecting {} ", nickname);
 
         if let Some(client) = self.clients.get_mut(nickname) {
@@ -121,13 +122,13 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    fn is_online(&self, nickname: &str) -> bool {
-        if let Some(client) = self.clients.get(nickname) {
-            return client.is_online();
-        }
+    // fn is_online(&self, nickname: &str) -> bool {
+    //     if let Some(client) = self.clients.get(nickname) {
+    //         return client.is_online();
+    //     }
 
-        false
-    }
+    //     false
+    // }
 
     fn get_stream(&self, nickname: &str) -> io::Result<T> {
         if let Some(client) = self.clients.get(nickname) {
@@ -140,7 +141,7 @@ impl<T: ClientTrait> Database<T> {
         ))
     }
 
-    fn add_client_to_channel(&self, nickname: &str, channel_name: &str) {
+    fn add_client_to_channel(&mut self, nickname: &str, channel_name: &str) {
         println!("Adding {} to channel {}", nickname, channel_name);
 
         let channel: Option<&mut Channel> = self.channels.get_mut(&channel_name.to_string());
@@ -153,7 +154,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    fn remove_client_from_channel(&self, nickname: &str, channel_name: &str) {
+    fn remove_client_from_channel(&mut self, nickname: &str, channel_name: &str) {
         println!("Removing {} from channel {}", nickname, channel_name);
 
         if let Some(channel) = self.channels.get_mut(&channel_name.to_string()) {
@@ -216,6 +217,7 @@ impl<T: ClientTrait> Database<T> {
         }
         channels
     }
+
     fn filtered_clients(&self, mask: &str, f: fn(&ClientInfo, &str) -> bool) -> Vec<ClientInfo> {
         self.clients
             .values()

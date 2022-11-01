@@ -5,6 +5,7 @@ use crate::message::Message;
 
 mod commands;
 mod registration;
+mod requests;
 mod responses;
 
 use commands::channel_operations::{
@@ -20,12 +21,13 @@ use self::commands::user_based_queries::WHO_COMMAND;
 use self::responses::errors::ErrorReply;
 
 use super::client_trait::ClientTrait;
+use super::database::DatabaseRequest;
 use crate::message::{CreationError, ParsingError};
 use registration::Registration;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<T: ClientTrait> {
-    database: Sender<DatabaseRequest>,
+    database: Sender<DatabaseRequest<T>>,
     stream: T,
     registration: Registration<T>,
 }
@@ -34,7 +36,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     /// Returns new clientHandler.
 
     pub fn from_stream(
-        database: Sender<DatabaseRequest>,
+        database: Sender<DatabaseRequest<T>>,
         stream: T,
     ) -> io::Result<ClientHandler<T>> {
         let registration = Registration::with_stream(stream.try_clone()?);
@@ -53,7 +55,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let nickname = self.registration.nickname();
 
         if let Some(nickname) = nickname.as_ref() {
-            self.database.disconnect_client(nickname);
+            self.disconnect_client(nickname)
         }
 
         match conection_result {

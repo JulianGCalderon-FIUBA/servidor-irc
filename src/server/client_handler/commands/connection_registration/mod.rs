@@ -56,21 +56,22 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.registration.set_attribute("servername", servername);
         self.registration.set_attribute("realname", realname);
 
-        self.database.add_client(self.registration.build().unwrap());
+        let client = self.registration.build().unwrap();
+        self.add_client(client);
 
         self.send_response_for_reply(CommandResponse::Ok)
     }
 
     pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
-        // let user = self.database.password.clone().unwrap();
-        // let password = self.database.password.clone().unwrap();
+        // let user = self.password.clone().unwrap();
+        // let password = self.password.clone().unwrap();
 
         if let Some(error) = self.assert_oper_command_is_valid(&parameters) {
             return self.send_response_for_error(error);
         }
 
-        self.database
-            .set_server_operator(&self.registration.nickname().unwrap());
+        let nickname = self.registration.nickname().unwrap();
+        self.set_server_operator(&nickname);
 
         self.send_response_for_reply(CommandResponse::YouAreOper381)
     }

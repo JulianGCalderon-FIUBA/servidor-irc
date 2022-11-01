@@ -51,14 +51,14 @@ impl<T: ClientTrait> ClientHandler<T> {
                 self.send_response_for_error(error)?;
                 continue;
             }
-            self.database.add_client_to_channel(&nickname, channel);
+            self.add_client_to_channel(&nickname, channel);
 
             self.send_response_for_reply(CommandResponse::NoTopic331 {
                 channel: channel.to_string(),
             })?;
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.to_string(),
-                clients: self.database.get_clients(channel),
+                clients: self.get_clients_for_channel(channel),
             })?;
         }
 
@@ -84,7 +84,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
     fn get_channels_for_query(&mut self, channels: Option<&String>) -> Vec<String> {
         if channels.is_none() {
-            let mut channels = self.database.get_channels();
+            let mut channels = self.get_channels();
             channels.sort();
             return channels;
         }
@@ -104,11 +104,11 @@ impl<T: ClientTrait> ClientHandler<T> {
         let channels = self.get_channels_for_query(parameters.get(0));
 
         for channel in channels {
-            if !self.database.contains_channel(&channel) {
+            if !self.contains_channel(&channel) {
                 continue;
             }
 
-            let clients = self.database.get_clients(&channel);
+            let clients = self.get_clients_for_channel(&channel);
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.clone(),
                 clients,
@@ -141,7 +141,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 self.send_response_for_error(error)?;
                 continue;
             }
-            self.database.remove_client_of_channel(&nickname, channel);
+            self.remove_client_from_channel(&nickname, channel);
             self.send_response_for_reply(CommandResponse::Ok)?
         }
         Ok(())
