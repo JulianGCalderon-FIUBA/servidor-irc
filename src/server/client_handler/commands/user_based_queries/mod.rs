@@ -5,6 +5,7 @@ mod validations;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_handler::{responses::errors::ErrorReply, ClientHandler};
 use crate::server::client_trait::ClientTrait;
+use crate::server::database::ClientInfo;
 
 pub const WHOIS_COMMAND: &str = "WHOIS";
 pub const WHO_COMMAND: &str = "WHO";
@@ -20,16 +21,18 @@ impl<T: ClientTrait> ClientHandler<T> {
             nickmasks = &parameters[1];
         }
 
-        for nick in nickmasks.split(',') {
-            if !self.database.contains_client(nick) {
+        for mask in nickmasks.split(',') {
+            let clients: Vec<ClientInfo> = self.database.get_clients_for_nickmask(mask);
+
+            if clients.is_empty() {
                 self.send_response_for_error(ErrorReply::NoSuchNickname401 {
-                    nickname: nick.to_string(),
+                    nickname: mask.to_string(),
                 })?;
                 continue;
             }
-            let client_info = self.database.get_client_info(nick).unwrap();
-            let nickname = client_info.nickname.clone();
-            self.send_whois_responses(client_info, nick, nickname)?;
+            for client in clients {
+                self.send_whois_responses(client)?;
+            }
         }
 
         Ok(())
