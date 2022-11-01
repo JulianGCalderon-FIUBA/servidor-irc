@@ -30,8 +30,12 @@ fn register_client(handler: &mut ClientHandler<MockTcpStream>, nick: &str) {
     let parameters = vec![nick.to_string()];
     handler.nick_command(parameters).unwrap();
 
-    let parameters = vec!["user".to_string(), "host".to_string(), "server".to_string()];
-    let trailing = Some("real".to_string());
+    let parameters = vec![
+        "username".to_string(),
+        "hostname".to_string(),
+        "servername".to_string(),
+    ];
+    let trailing = Some("realname".to_string());
     handler.user_command(parameters, trailing).unwrap();
 
     handler.stream.clear()
