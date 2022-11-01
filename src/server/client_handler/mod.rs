@@ -1,4 +1,5 @@
 use std::io;
+use std::sync::mpsc::Sender;
 
 use crate::message::Message;
 
@@ -21,13 +22,12 @@ use self::commands::user_based_queries::WHO_COMMAND;
 use self::responses::errors::ErrorReply;
 
 use super::client_trait::ClientTrait;
-use super::database::Database;
 use crate::message::{CreationError, ParsingError};
 use registration::Registration;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<T: ClientTrait> {
-    database: Arc<Database<T>>,
+    database: Sender<DatabaseEvent>,
     stream: T,
     registration: Registration<T>,
 }
@@ -35,7 +35,7 @@ pub struct ClientHandler<T: ClientTrait> {
 impl<T: ClientTrait> ClientHandler<T> {
     /// Returns new clientHandler.
 
-    pub fn from_stream(database: Arc<Database<T>>, stream: T) -> io::Result<ClientHandler<T>> {
+    pub fn from_stream(database: Sender<DatabaseEvent>, stream: T) -> io::Result<ClientHandler<T>> {
         let registration = Registration::with_stream(stream.try_clone()?);
 
         Ok(Self {

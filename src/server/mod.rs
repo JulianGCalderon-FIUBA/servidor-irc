@@ -7,6 +7,7 @@ mod database;
 
 use std::io;
 use std::net::{TcpListener, TcpStream};
+use std::sync::mpsc;
 use std::sync::Arc;
 
 use crate::thread_pool::ThreadPool;
@@ -17,15 +18,15 @@ pub const MAX_CLIENTS: usize = 26;
 
 /// Represents a Server clients can connect to.
 pub struct Server {
-    database: Arc<Database<TcpStream>>,
+    database: mpsc::Sender<DatabaseRequest>,
 }
 
 impl Server {
     /// Starts new Server.
     pub fn start() -> Self {
-        Self {
-            database: Arc::new(Database::new()),
-        }
+        let database = Database::start();
+
+        Self { database }
     }
 
     /// Listens for incoming clients and handles each request in a new thread.
@@ -43,9 +44,9 @@ impl Server {
                 }
             };
 
-            let database_clone: Arc<Database<TcpStream>> = Arc::clone(&self.database);
+            let database = mpsc::Sender::clone(&self.database);
             let handler: ClientHandler<TcpStream> =
-                match ClientHandler::<TcpStream>::from_stream(database_clone, client) {
+                match ClientHandler::<TcpStream>::from_stream(database, client) {
                     Ok(handler) => handler,
                     Err(error) => {
                         eprintln!("Could not create handler for client, with error: {error:?}");

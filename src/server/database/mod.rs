@@ -6,114 +6,118 @@ mod utils;
 mod tests;
 
 use std::collections::HashMap;
+use std::sync::mpsc::{Sender, Receiver, self};
 use std::sync::{Arc, Mutex, RwLock};
+use std::thread;
 
 pub use channel::Channel;
 pub use client::{Client, ClientBuilder, ClientInfo};
 
 use super::client_trait::ClientTrait;
 pub struct Database<T: ClientTrait> {
-    clients: RwLock<HashMap<String, Client<T>>>,
-    channels: RwLock<HashMap<String, Channel>>,
+    receiver: Receiver<DatabaseEvent>
+    clients: HashMap<String, Client<T>>,
+    channels: HashMap<String, Channel>,
 }
 
 impl<T: ClientTrait> Database<T> {
-    pub fn new() -> Self {
-        Self {
-            clients: RwLock::new(HashMap::new()),
-            channels: RwLock::new(HashMap::new()),
+    pub fn start() -> Sender<DatabaseEvent> {
+        let (sender, receiver) = mpsc::channel();
+
+        let database = Self {
+            receiver,
+            clients: HashMap::new(),
+            channels: HashMap::new(),
+        };
+
+        thread::spawn( || database.run());
+
+        sender
+    }
+
+    fn run(self) {
+        while let Ok(event) = self.receiver.recv() {
+            // HANDLE EVENT
         }
     }
 
-    pub fn add_client(&self, client: Client<T>) {
-        let mut clients_lock = self.clients.write().unwrap();
-
+    fn add_client(&self, client: Client<T>) {
         let clientinfo = client.get_info();
 
         println!("Client registered: {clientinfo:?}",);
 
-        clients_lock.insert(clientinfo.nickname, client);
+        self.clients.insert(clientinfo.nickname, client);
+
     }
 
-    pub fn set_server_operator(&self, nickname: &str) {
+    fn set_server_operator(&self, nickname: &str) {
         println!("Setting {} as operator", nickname);
 
-        let mut clients_lock = self.clients.write().unwrap();
-        if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
+        if let Some(client) = self.clients.get_mut(&nickname.to_string()) {
             client.set_server_operator();
         }
     }
 
-    pub fn is_server_operator(&self, nickname: &str) -> bool {
-        let mut clients_lock = self.clients.write().unwrap();
-        if let Some(client) = clients_lock.get_mut(&nickname.to_string()) {
+    fn is_server_operator(&self, nickname: &str) -> bool {
+        if let Some(client) = self.clients.get_mut(&nickname.to_string()) {
             return client.is_server_operator();
         }
 
         false
     }
 
-    pub fn disconnect_client(&self, nickname: &str) {
+    fn disconnect_client(&self, nickname: &str) {
         println!("Disconnecting {} ", nickname);
 
-        if let Some(client) = self.clients.write().unwrap().get_mut(nickname) {
+        if let Some(client) = self.clients.get_mut(nickname) {
             client.disconnect();
         }
     }
 
-    pub fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<T>>> {
-        let clients_rlock = self.clients.read().unwrap();
-        let client = clients_rlock.get(nickname)?;
+    fn get_stream(&self, nickname: &str) -> Option<Arc<Mutex<T>>> {
+        let client = self.clients.get(nickname)?;
 
         client.get_stream()
     }
 
-    pub fn add_client_to_channel(&self, nickname: &str, channel_name: &str) {
+    fn add_client_to_channel(&self, nickname: &str, channel_name: &str) {
         println!("Adding {} to channel {}", nickname, channel_name);
 
-        let mut channels_lock = self.channels.write().unwrap();
-        let channel: Option<&mut Channel> = channels_lock.get_mut(&channel_name.to_string());
+        let channel: Option<&mut Channel> = self.channels.get_mut(&channel_name.to_string());
         match channel {
             Some(channel) => channel.add_client(nickname.to_string()),
             None => {
                 let new_channel = Channel::new(channel_name.to_string(), nickname.to_string());
-                channels_lock.insert(channel_name.to_string(), new_channel);
+                self.channels.insert(channel_name.to_string(), new_channel);
             }
         }
     }
 
-    pub fn remove_client_of_channel(&self, nickname: &str, channel_name: &str) {
+    fn remove_client_of_channel(&self, nickname: &str, channel_name: &str) {
         println!("Removing {} from channel {}", nickname, channel_name);
 
-        let mut channels_lock = self.channels.write().unwrap();
-        if let Some(channel) = channels_lock.get_mut(&channel_name.to_string()) {
+        if let Some(channel) = self.channels.get_mut(&channel_name.to_string()) {
             channel.remove_client(nickname.to_string());
             if channel.get_clients().is_empty() {
-                channels_lock.remove(channel_name);
+                self.channels.remove(channel_name);
             }
         }
     }
 
-    pub fn contains_client(&self, nickname: &str) -> bool {
-        let clients_lock = self.clients.read().unwrap();
-
-        clients_lock.contains_key(nickname)
+    fn contains_client(&self, nickname: &str) -> bool {
+        self.clients.contains_key(nickname)
     }
 
-    pub fn contains_channel(&self, channel: &str) -> bool {
-        let channels_lock = self.channels.read().unwrap();
-
-        channels_lock.contains_key(channel)
+    fn contains_channel(&self, channel: &str) -> bool {
+        self.channels.contains_key(channel)
     }
 
-    pub fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
+    fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
         self.get_clients(channel).contains(&nickname.to_string())
     }
 
-    pub fn get_clients(&self, channel: &str) -> Vec<String> {
-        let channels_lock = self.channels.read().unwrap();
-
-        let channel_info = channels_lock.get(channel);
+    fn get_clients(&self, channel: &str) -> Vec<String> {
+        let channel_info = self.channels.get(channel);
 
         match channel_info {
             Some(channel_info) => channel_info.get_clients(),
@@ -121,34 +125,29 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    pub fn get_all_clients(&self) -> Vec<ClientInfo> {
-        let clients_lock = self.clients.read().unwrap();
-
-        clients_lock
+    fn get_all_clients(&self) -> Vec<ClientInfo> {
+        self.clients
             .values()
             .map(|client| client.get_info())
             .collect()
     }
 
-    pub fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
+    fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
         self.filtered_clients(mask, client_matches_mask)
     }
 
-    pub fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
+    fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
         self.filtered_clients(mask, client_matches_nickmask)
     }
 
-    pub fn get_channels(&self) -> Vec<String> {
-        let channels_lock = self.channels.read().unwrap();
-
-        channels_lock.keys().cloned().collect()
+    fn get_channels(&self) -> Vec<String> {
+        self.channels.keys().cloned().collect()
     }
 
-    pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
-        let channels_lock = self.channels.read().unwrap();
+    fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
         let mut channels = vec![];
 
-        for (channel_name, channel) in channels_lock.iter() {
+        for (channel_name, channel) in self.channels.iter() {
             let clients = channel.get_clients();
             if clients.contains(&nickname.to_string()) {
                 channels.push(channel_name.clone());
@@ -157,18 +156,11 @@ impl<T: ClientTrait> Database<T> {
         channels
     }
     fn filtered_clients(&self, mask: &str, f: fn(&ClientInfo, &str) -> bool) -> Vec<ClientInfo> {
-        let clients_lock = self.clients.read().unwrap();
-        clients_lock
+        self.clients
             .values()
             .map(|client| client.get_info())
             .filter(|client| f(client, mask))
             .collect()
-    }
-}
-
-impl<T: ClientTrait> Default for Database<T> {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
