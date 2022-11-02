@@ -51,7 +51,7 @@ fn get_stream_returns_reference_to_client_stream() {
 }
 
 #[test]
-fn disconnect_client_sets_stream_to_none() {
+fn disconnecting_sets_client_not_online() {
     let mut database = dummy_database();
 
     let client = dummy_client("nickname");
@@ -87,7 +87,7 @@ fn after_adding_client_to_channel_it_contains_client() {
 }
 
 #[test]
-fn get_clients_returns_all_clients_from_channel() {
+fn can_get_all_clients_for_channel() {
     let mut database = dummy_database();
 
     let client = dummy_client("nickname1");
@@ -174,7 +174,7 @@ fn get_channels_for_client_returns_all_channels_for_client() {
 }
 
 #[test]
-fn get_clients_for_query_returns_all_matching_clients() {
+fn get_clients_for_mask_returns_all_matching_clients() {
     let mut database = dummy_database();
 
     let client = ClientBuilder::new()
@@ -200,6 +200,28 @@ fn get_clients_for_query_returns_all_matching_clients() {
     assert_eq!(database.get_clients_for_mask("*C*"), expected);
     assert_eq!(database.get_clients_for_mask("*D*"), expected);
     assert_eq!(database.get_clients_for_mask("*E*"), expected);
+}
+
+#[test]
+fn get_clients_for_nickmask_returns_all_matching_clients() {
+    let mut database = dummy_database();
+
+    let client1 = dummy_client("nick1");
+    let client2 = dummy_client("nick2");
+    let client3 = dummy_client("nick3");
+
+    let client1_info = client1.get_info();
+    let client2_info = client2.get_info();
+    let client3_info = client3.get_info();
+
+    database.add_client(client1);
+    database.add_client(client2);
+    database.add_client(client3);
+
+    let expected = vec![client1_info, client2_info, client3_info];
+
+    assert_eq!(database.get_clients_for_nickmask("nick*"), expected);
+    assert_eq!(database.get_clients_for_nickmask("*ni*"), expected);
 }
 
 #[test]
