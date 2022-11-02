@@ -17,8 +17,8 @@ fn join_fails_with_unregistered_client() {
 fn join_fails_with_empty_params() {
     let mut handler = dummy_client_handler();
     let parameters = vec![];
-    let channels: Vec<String> = vec![];
 
+    let channels: Vec<String> = vec![];
     handler.join_command(parameters).unwrap();
 
     assert_eq!(

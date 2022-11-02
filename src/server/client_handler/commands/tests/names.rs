@@ -38,16 +38,7 @@ fn names_with_no_parameters_prints_all_channels() {
 
     handler.database.add_client_to_channel("nick", "#hola");
     handler.database.add_client_to_channel("nick", "#chau");
-
-    handler.names_command(parameters.clone()).unwrap();
-
-    assert_eq!(
-        "353 #chau :nick\r\n353 #hola :nick\r\n366 :End of /NAMES list\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
-
     handler.database.add_client_to_channel("nick2", "#canal");
-    handler.stream.clear();
 
     handler.names_command(parameters).unwrap();
 
@@ -64,23 +55,11 @@ fn names_with_parameters_prints_requested_channels() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
-    let parameters = vec!["#hola".to_string()];
-
     handler.database.add_client_to_channel("nick", "#hola");
     handler.database.add_client_to_channel("nick", "#chau");
 
+    let parameters = vec!["#hola,#chau".to_string()];
     handler.names_command(parameters).unwrap();
-
-    assert_eq!(
-        "353 #hola :nick\r\n366 #hola :End of /NAMES list\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
-
-    handler.stream.clear();
-
-    let parameters2 = vec!["#hola,#chau".to_string()];
-
-    handler.names_command(parameters2).unwrap();
 
     let responses = handler.stream.get_responses();
 

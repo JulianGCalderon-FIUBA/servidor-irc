@@ -15,6 +15,9 @@ use database::Database;
 
 pub const MAX_CLIENTS: usize = 26;
 
+pub const OPER_USERNAME: &str = "admin";
+pub const OPER_PASSWORD: &str = "admin";
+
 /// Represents a Server clients can connect to.
 pub struct Server {
     database: Arc<Database<TcpStream>>,

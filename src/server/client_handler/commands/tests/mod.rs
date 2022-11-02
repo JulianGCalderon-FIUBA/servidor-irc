@@ -26,8 +26,8 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     ClientHandler::from_stream(Arc::new(database), stream).unwrap()
 }
 
-fn register_client(handler: &mut ClientHandler<MockTcpStream>, nick: &str) {
-    let parameters = vec![nick.to_string()];
+fn register_client(handler: &mut ClientHandler<MockTcpStream>, nickname: &str) {
+    let parameters = vec![nickname.to_string()];
     handler.nick_command(parameters).unwrap();
 
     let parameters = vec![

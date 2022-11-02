@@ -1,6 +1,8 @@
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_trait::ClientTrait;
+use crate::server::OPER_PASSWORD;
+use crate::server::OPER_USERNAME;
 
 use super::ClientHandler;
 
@@ -64,6 +66,10 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
+        }
+
+        if parameters[0] != OPER_USERNAME || parameters[1] != OPER_PASSWORD {
+            return Some(ErrorReply::PasswordMismatch464);
         }
 
         None

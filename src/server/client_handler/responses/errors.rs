@@ -15,7 +15,7 @@ pub enum ErrorReply {
     UserOnChannel443 { nickname: String, channel: String },
     NeedMoreParameters461 { command: String },
     AlreadyRegistered462,
-    // PasswordMismatch464,
+    PasswordMismatch464,
     // ChannelIsFull471 { channel: String },
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },
@@ -66,7 +66,7 @@ impl Display for ErrorReply {
                 format!("461 {command} :not enough parameters")
             }
             ErrorReply::AlreadyRegistered462 => "462 :you may not reregister".to_string(),
-            //ErrorReply::PasswordMismatch464 => "464 :password incorrect".to_string(),
+            ErrorReply::PasswordMismatch464 => "464 :Password incorrect".to_string(),
             ErrorReply::ClientOffline { nickname } => {
                 format!("200 {nickname} :client is offline")
             }

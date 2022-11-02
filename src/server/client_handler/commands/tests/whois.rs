@@ -64,7 +64,7 @@ fn whois_returns_nick_info_if_oper() {
 
     let parameters = vec!["nick".to_string()];
 
-    let parameters_oper = vec!["user".to_string(), "pass".to_string()];
+    let parameters_oper = vec!["admin".to_string(), "admin".to_string()];
 
     handler.oper_command(parameters_oper).unwrap();
 
@@ -106,7 +106,7 @@ fn whois_returns_complete_nick_info() {
 
     handler.database.add_client_to_channel("nick", "#hola");
 
-    let parameters_oper = vec!["user".to_string(), "pass".to_string()];
+    let parameters_oper = vec!["admin".to_string(), "admin".to_string()];
 
     handler.oper_command(parameters_oper).unwrap();
 
