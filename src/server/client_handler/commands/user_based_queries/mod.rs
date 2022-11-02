@@ -22,7 +22,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         for mask in nickmasks.split(',') {
-            let mut clients: Vec<ClientInfo> = self.get_clients_for_nickmask(mask);
+            let mut clients: Vec<ClientInfo> = self.database.get_clients_for_nickmask(mask);
 
             if clients.is_empty() {
                 self.send_response_for_error(ErrorReply::NoSuchNickname401 {
@@ -45,9 +45,9 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         let mut clients = if parameters.is_empty() {
-            self.filtered_clients_for_default_who_command(self.get_all_clients())
+            self.filtered_clients_for_default_who_command(self.database.get_all_clients())
         } else {
-            self.get_clients_for_mask(&parameters[0])
+            self.database.get_clients_for_mask(&parameters[0])
         };
 
         clients.sort();

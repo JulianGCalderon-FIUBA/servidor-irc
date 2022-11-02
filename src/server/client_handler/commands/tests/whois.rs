@@ -85,7 +85,7 @@ fn whois_returns_nick_info_with_channels() {
 
     let parameters = vec!["nick".to_string()];
 
-    handler.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#hola");
 
     handler.whois_command(parameters).unwrap();
 
@@ -102,7 +102,7 @@ fn whois_returns_complete_nick_info() {
 
     let parameters = vec!["nick".to_string()];
 
-    handler.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#hola");
 
     let parameters_oper = vec!["user".to_string(), "pass".to_string()];
 
@@ -125,8 +125,8 @@ fn whois_works_with_nickmask() {
 
     let parameters = vec!["nic*".to_string()];
 
-    handler.add_client(dummy_client("nick2"));
-    handler.add_client(dummy_client("nick3"));
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client(dummy_client("nick3"));
 
     handler.whois_command(parameters).unwrap();
 

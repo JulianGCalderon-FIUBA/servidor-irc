@@ -19,12 +19,12 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
-    handler.add_client(dummy_client("nick1"));
-    handler.add_client(dummy_client("nick2"));
-    handler.add_client(dummy_client("nick3"));
-    handler.add_client_to_channel("nick", "#channel");
-    handler.add_client_to_channel("nick3", "#channel");
-    handler.add_client_to_channel("nick1", "#channel2");
+    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client(dummy_client("nick3"));
+    handler.database.add_client_to_channel("nick", "#channel");
+    handler.database.add_client_to_channel("nick3", "#channel");
+    handler.database.add_client_to_channel("nick1", "#channel2");
 
     let parameters = vec![];
 
@@ -49,7 +49,7 @@ fn who_with_mask_returns_all_public_clients_matching_mask() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "local");
 
-    handler.add_client(dummy_client("nick1name"));
+    handler.database.add_client(dummy_client("nick1name"));
 
     let parameters = vec!["*1*".to_string()];
 

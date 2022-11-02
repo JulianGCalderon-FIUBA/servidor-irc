@@ -29,7 +29,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             let message = Message::new(&message).unwrap();
             self.send_message_to_target(&message, target)?;
 
-            // if command == PRIVMSG_COMMAND && self.contains_client(target) {
+            // if command == PRIVMSG_COMMAND && self.database.contains_client(target) {
             //     self.away_response_for_client(target);
             // }
         }
@@ -38,7 +38,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     pub fn send_message_to_target(&mut self, message: &Message, receiver: &str) -> io::Result<()> {
-        if self.contains_client(receiver) {
+        if self.database.contains_client(receiver) {
             if let Some(error) = self.send_message_to_client(receiver, message) {
                 self.send_response_for_error(error)?;
             }
@@ -52,7 +52,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     // pub fn away_response_for_client(&mut self, nickname: &str) {}
 
     pub fn send_message_to_channel(&self, channel: &str, message: &Message) {
-        let clients = self.get_clients_for_channel(channel);
+        let clients = self.database.get_clients_for_channel(channel);
 
         for client in clients {
             self.send_message_to_client(&client, message);
@@ -69,7 +69,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     fn try_send_message_to_client(&self, nickname: &str, message: &Message) -> io::Result<()> {
-        let mut stream = self.get_stream(nickname)?;
+        let mut stream = self.database.get_stream(nickname)?;
         message.send_to(&mut stream)
     }
 }

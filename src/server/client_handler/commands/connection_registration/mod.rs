@@ -57,7 +57,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.registration.set_attribute("realname", realname);
 
         let client = self.registration.build().unwrap();
-        self.add_client(client);
+        self.database.add_client(client);
 
         self.send_response_for_reply(CommandResponse::Ok)
     }
@@ -71,7 +71,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         let nickname = self.registration.nickname().unwrap();
-        self.set_server_operator(&nickname);
+        self.database.set_server_operator(&nickname);
 
         self.send_response_for_reply(CommandResponse::YouAreOper381)
     }

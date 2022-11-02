@@ -36,8 +36,8 @@ fn list_with_no_parameters_prints_all_channels() {
 
     let parameters = vec![];
 
-    handler.add_client_to_channel("nick", "#hola");
-    handler.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#chau");
 
     handler.list_command(parameters.clone()).unwrap();
 
@@ -46,7 +46,7 @@ fn list_with_no_parameters_prints_all_channels() {
         handler.stream.read_wbuf_to_string()
     );
 
-    handler.add_client_to_channel("nick2", "#canal");
+    handler.database.add_client_to_channel("nick2", "#canal");
     handler.stream.clear();
 
     handler.list_command(parameters).unwrap();
@@ -64,8 +64,8 @@ fn list_with_parameters_prints_requested_channels() {
 
     let parameters = vec!["#hola".to_string()];
 
-    handler.add_client_to_channel("nick", "#hola");
-    handler.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#chau");
 
     handler.list_command(parameters).unwrap();
 
@@ -93,8 +93,8 @@ fn list_ignores_invalid_channels() {
 
     let parameters = vec!["#hola,#invalido,#chau".to_string()];
 
-    handler.add_client_to_channel("nick", "#hola");
-    handler.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#chau");
 
     handler.list_command(parameters).unwrap();
 
