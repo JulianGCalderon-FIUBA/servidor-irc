@@ -9,7 +9,7 @@ fn names_fails_with_unregistered_client() {
     handler.names_command(parameters).unwrap();
 
     assert_eq!(
-        "200 :unregistered\r\n",
+        "200 :Unregistered\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }

@@ -90,7 +90,7 @@ impl Display for CommandResponse {
             //     format!("312 {nickname} {server} :{server_info}")
             // }
             CommandResponse::WhoisOperator313 { nickname } => {
-                format!("313 {nickname} :is an IRC operator")
+                format!("313 {nickname} :Is an IRC operator")
             }
             CommandResponse::EndOfWho315 { name } => {
                 format!(
@@ -113,7 +113,7 @@ impl Display for CommandResponse {
             }
             CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
             CommandResponse::NoTopic331 { channel } => {
-                format!("331 {channel} :no topic is set")
+                format!("331 {channel} :No topic is set")
             }
             // CommandResponse::Topic332 { channel, topic } => {
             //     format!("332 {} :{}", channel, topic)
@@ -145,7 +145,7 @@ impl Display for CommandResponse {
             CommandResponse::Quit { message } => {
                 format!("{QUIT_COMMAND} :{message}")
             }
-            CommandResponse::Ok => "200 :success".to_string(),
+            CommandResponse::Ok => "200 :Success".to_string(),
         };
         write!(f, "{string}")
     }

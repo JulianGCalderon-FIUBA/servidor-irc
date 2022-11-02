@@ -10,7 +10,7 @@ fn nick_fails_with_no_nickname_given() {
     handler.nick_command(parameters).unwrap();
 
     assert_eq!(
-        "431 :no nickname given\r\n",
+        "431 :No nickname given\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -26,7 +26,7 @@ fn changing_nick_fails_with_nickname_in_use() {
     handler.nick_command(parameters).unwrap();
 
     assert_eq!(
-        "433 nick2 :nickname is already in use\r\n",
+        "433 nick2 :Nickname is already in use\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -40,7 +40,7 @@ fn nick_fails_with_nickname_collision() {
     handler.nick_command(parameters).unwrap();
 
     assert_eq!(
-        "436 nick :nickname collision KILL\r\n",
+        "436 nick :Nickname collision KILL\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -52,7 +52,7 @@ fn can_set_nickname() {
     let parameters = vec!["nick".to_string()];
     handler.nick_command(parameters).unwrap();
 
-    assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
+    assert_eq!("200 :Success\r\n", handler.stream.read_wbuf_to_string());
 
     assert_eq!("nick", handler.registration.nickname().unwrap());
     assert_eq!(
@@ -69,7 +69,7 @@ fn can_update_nickname() {
     let parameters = vec!["nick2".to_string()];
     handler.nick_command(parameters).unwrap();
 
-    assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
+    assert_eq!("200 :Success\r\n", handler.stream.read_wbuf_to_string());
 
     assert_eq!("nick2", handler.registration.nickname().unwrap());
 

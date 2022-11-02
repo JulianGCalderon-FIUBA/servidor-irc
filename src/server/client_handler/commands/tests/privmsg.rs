@@ -9,7 +9,7 @@ fn privmsg_fails_with_unregistered_client() {
     handler.privmsg_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        "200 :unregistered\r\n",
+        "200 :Unregistered\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -24,7 +24,7 @@ fn privmsg_fails_with_no_recipient() {
     handler.privmsg_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        "411 :no recipient given (PRIVMSG)\r\n",
+        "411 :No recipient given (PRIVMSG)\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -39,7 +39,7 @@ fn privmsg_fails_with_no_text() {
     handler.privmsg_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        "412 :no text to send\r\n",
+        "412 :No text to send\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -56,7 +56,7 @@ fn privmsg_fails_with_invalid_target() {
     let responses = handler.stream.get_responses();
 
     assert_eq!("401 nick1 :No such nick/channel", responses[0]);
-    assert_eq!("200 :success", responses[1]);
+    assert_eq!("200 :Success", responses[1]);
 }
 
 #[test]
@@ -73,8 +73,8 @@ fn privmsg_fails_when_not_on_channel() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("404 #channel :cannot send to channel", responses[0]);
-    assert_eq!("200 :success", responses[1]);
+    assert_eq!("404 #channel :Cannot send to channel", responses[0]);
+    assert_eq!("200 :Success", responses[1]);
 }
 
 #[test]
@@ -88,7 +88,7 @@ fn privmsg_works_with_valid_target_client() {
     let trailing = Some("message!".to_string());
     handler.privmsg_command(parameters, trailing).unwrap();
 
-    assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
+    assert_eq!("200 :Success\r\n", handler.stream.read_wbuf_to_string());
     assert_eq!(
         ":nick PRIVMSG nick1 :message!\r\n",
         handler
@@ -120,7 +120,7 @@ fn privmsg_works_with_valid_target_channel() {
 
     assert_eq!(":nick PRIVMSG #channel :message!", responses[0]);
 
-    assert_eq!("200 :success", responses[1]);
+    assert_eq!("200 :Success", responses[1]);
 
     assert_eq!(
         ":nick PRIVMSG #channel :message!\r\n",
@@ -157,7 +157,7 @@ fn privmsg_works_with_multiple_targets() {
     let trailing = Some("message!".to_string());
     handler.privmsg_command(parameters, trailing).unwrap();
 
-    assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
+    assert_eq!("200 :Success\r\n", handler.stream.read_wbuf_to_string());
 
     assert_eq!(
         ":nick PRIVMSG nick1 :message!\r\n",

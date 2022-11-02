@@ -12,8 +12,8 @@ fn pass_fails_with_already_registered() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("200 :success", responses[0]);
-    assert_eq!("462 :you may not reregister", responses[1]);
+    assert_eq!("200 :Success", responses[0]);
+    assert_eq!("462 :You may not reregister", responses[1]);
 }
 
 #[test]
@@ -29,7 +29,7 @@ fn pass_fails_with_empty_params() {
     handler.pass_command(parameters).unwrap();
 
     assert_eq!(
-        "461 PASS :not enough parameters\r\n",
+        "461 PASS :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -46,8 +46,8 @@ fn pass_sets_connection_password() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("200 :success", responses[0]);
-    assert_eq!("200 :success", responses[1]);
+    assert_eq!("200 :Success", responses[0]);
+    assert_eq!("200 :Success", responses[1]);
 
     assert_eq!(
         "pass2",

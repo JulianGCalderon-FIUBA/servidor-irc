@@ -34,44 +34,44 @@ impl Display for ErrorReply {
                 format!("401 {nickname} :No such nick/channel")
             }
             ErrorReply::NoSuchChannel403 { channel } => {
-                format!("403 {channel} :no such channel")
+                format!("403 {channel} :No such channel")
             }
             ErrorReply::CanNotSendToChannel404 { channel } => {
-                format!("404 {channel} :cannot send to channel")
+                format!("404 {channel} :Cannot send to channel")
             }
             ErrorReply::TooManyChannels405 { channel } => {
-                format!("405 {channel} :you have joined too many channels")
+                format!("405 {channel} :You have joined too many channels")
             }
             ErrorReply::NoRecipient411 { command } => {
-                format!("411 :no recipient given ({command})")
+                format!("411 :No recipient given ({command})")
             }
-            ErrorReply::NoTextToSend412 => "412 :no text to send".to_string(),
+            ErrorReply::NoTextToSend412 => "412 :No text to send".to_string(),
             ErrorReply::UnknownCommand421 { command } => {
-                format!("421 {command} :unknown command")
+                format!("421 {command} :Unknown command")
             }
-            ErrorReply::NoNicknameGiven431 => "431 :no nickname given".to_string(),
+            ErrorReply::NoNicknameGiven431 => "431 :No nickname given".to_string(),
             ErrorReply::NicknameInUse433 { nickname } => {
-                format!("433 {nickname} :nickname is already in use")
+                format!("433 {nickname} :Nickname is already in use")
             }
             ErrorReply::NickCollision436 { nickname } => {
-                format!("436 {nickname} :nickname collision KILL")
+                format!("436 {nickname} :Nickname collision KILL")
             }
             ErrorReply::NotOnChannel442 { channel } => {
-                format!("442 {channel} :you're not on that channel")
+                format!("442 {channel} :You're not on that channel")
             }
             ErrorReply::UserOnChannel443 { nickname, channel } => {
-                format!("443 {nickname} {channel} :is already on channel")
+                format!("443 {nickname} {channel} :Is already on channel")
             }
             ErrorReply::NeedMoreParameters461 { command } => {
-                format!("461 {command} :not enough parameters")
+                format!("461 {command} :Not enough parameters")
             }
-            ErrorReply::AlreadyRegistered462 => "462 :you may not reregister".to_string(),
+            ErrorReply::AlreadyRegistered462 => "462 :You may not reregister".to_string(),
             ErrorReply::PasswordMismatch464 => "464 :Password incorrect".to_string(),
             ErrorReply::ClientOffline { nickname } => {
-                format!("200 {nickname} :client is offline")
+                format!("200 {nickname} :Client is offline")
             }
-            ErrorReply::NoNickname => "200 :no nickname registered".to_string(),
-            ErrorReply::UnregisteredClient => "200 :unregistered".to_string(),
+            ErrorReply::NoNickname => "200 :No nickname registered".to_string(),
+            ErrorReply::UnregisteredClient => "200 :Unregistered".to_string(),
         };
         write!(f, "{string}")
     }

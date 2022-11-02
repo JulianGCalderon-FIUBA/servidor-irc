@@ -38,7 +38,7 @@ fn user_fails_with_no_nickname_registered() {
     handler.user_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        "200 :no nickname registered\r\n",
+        "200 :No nickname registered\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -58,7 +58,7 @@ fn user_fails_with_empty_parameters() {
     handler.user_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        "461 USER :not enough parameters\r\n",
+        "461 USER :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -76,8 +76,8 @@ fn user_registers_client_correctly() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("200 :success", responses[0]);
-    assert_eq!("200 :success", responses[1]);
+    assert_eq!("200 :Success", responses[0]);
+    assert_eq!("200 :Success", responses[1]);
     assert_eq!(
         "user",
         handler.registration.get_attribute("username").unwrap()

@@ -8,7 +8,7 @@ fn oper_fails_with_less_than_two_parameters() {
     handler.oper_command(parameters).unwrap();
 
     assert_eq!(
-        "461 OPER :not enough parameters\r\n",
+        "461 OPER :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
@@ -21,7 +21,7 @@ fn oper_fails_with_unregistered_client() {
     handler.oper_command(parameters).unwrap();
 
     assert_eq!(
-        "200 :unregistered\r\n",
+        "200 :Unregistered\r\n",
         handler.stream.read_wbuf_to_string()
     );
 }
