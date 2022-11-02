@@ -13,13 +13,13 @@ use crate::thread_pool::ThreadPool;
 use client_handler::ClientHandler;
 use database::Database;
 
-use self::database::DatabaseRequest;
+use self::database::DatabaseMessage;
 
 pub const MAX_CLIENTS: usize = 26;
 
 /// Represents a Server clients can connect to.
 pub struct Server {
-    database: mpsc::Sender<DatabaseRequest<TcpStream>>,
+    database: mpsc::Sender<DatabaseMessage<TcpStream>>,
 }
 
 impl Server {

@@ -1,15 +1,10 @@
+use crate::server::database::utils::matches;
 use crate::server::testing_utils::{dummy_client, mock_stream::MockTcpStream};
 
 use super::*;
 
 fn dummy_database() -> Database<MockTcpStream> {
-    let (_sender, receiver) = mpsc::channel();
-
-    Database {
-        receiver,
-        clients: HashMap::new(),
-        channels: HashMap::new(),
-    }
+    Database::new().1
 }
 
 #[test]

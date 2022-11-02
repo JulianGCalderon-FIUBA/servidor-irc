@@ -1,23 +1,31 @@
-use std::{io, sync::mpsc};
-
-use crate::server::{
-    client_trait::ClientTrait,
-    database::{Client, ClientInfo, DatabaseMessage},
+use std::{
+    io,
+    sync::mpsc::{self, Sender},
 };
 
-use super::ClientHandler;
+use crate::server::client_trait::ClientTrait;
 
-impl<T: ClientTrait> ClientHandler<T> {
+use super::{Client, ClientInfo, DatabaseMessage};
+
+pub struct DatabaseHandle<T: ClientTrait> {
+    sender: Sender<DatabaseMessage<T>>,
+}
+
+impl<T: ClientTrait> DatabaseHandle<T> {
+    pub fn new(sender: Sender<DatabaseMessage<T>>) -> Self {
+        Self { sender }
+    }
+
     pub fn add_client(&self, client: Client<T>) {
         let request = DatabaseMessage::AddClient { client };
-        self.database.send(request).unwrap();
+        self.sender.send(request).unwrap();
     }
 
     pub fn set_server_operator(&self, nickname: &str) {
         let request = DatabaseMessage::SetServerOperator {
             nickname: nickname.to_string(),
         };
-        self.database.send(request).unwrap();
+        self.sender.send(request).unwrap();
     }
 
     pub fn is_server_operator(&self, nickname: &str) -> bool {
@@ -26,28 +34,16 @@ impl<T: ClientTrait> ClientHandler<T> {
             nickname: nickname.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
     pub fn disconnect_client(&self, nickname: &str) {
-        println!("Disconnecting {} ", nickname);
-
         let request = DatabaseMessage::DisconnectClient {
             nickname: nickname.to_string(),
         };
-        self.database.send(request).unwrap();
+        self.sender.send(request).unwrap();
     }
-
-    // pub fn is_online(&self, nickname: &str) -> bool {
-    //     let (sender, receiver) = mpsc::channel();
-    //     let request = DatabaseRequest::IsOnline {
-    //         nickname: nickname.to_string(),
-    //         response: sender,
-    //     };
-    //     self.database.send(request).unwrap();
-    //     receiver.recv().unwrap()
-    // }
 
     pub fn get_stream(&self, nickname: &str) -> io::Result<T> {
         let (sender, receiver) = mpsc::channel();
@@ -55,7 +51,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             nickname: nickname.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
@@ -64,8 +60,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             nickname: nickname.to_string(),
             channel: channel_name.to_string(),
         };
-
-        self.database.send(request).unwrap();
+        self.sender.send(request).unwrap();
     }
 
     pub fn remove_client_from_channel(&self, nickname: &str, channel_name: &str) {
@@ -73,8 +68,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             nickname: nickname.to_string(),
             channel: channel_name.to_string(),
         };
-
-        self.database.send(request).unwrap();
+        self.sender.send(request).unwrap();
     }
 
     pub fn contains_client(&self, nickname: &str) -> bool {
@@ -83,8 +77,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             nickname: nickname.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
-
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
@@ -94,8 +87,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             channel: channel.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
-
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
@@ -106,8 +98,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             channel: channel.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
-
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
@@ -117,15 +108,14 @@ impl<T: ClientTrait> ClientHandler<T> {
             channel: channel.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
-
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
     pub fn get_all_clients(&self) -> Vec<ClientInfo> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetAllClients { respond_to: sender };
-        self.database.send(request).unwrap();
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
@@ -135,8 +125,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             mask: mask.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
-
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
@@ -146,16 +135,14 @@ impl<T: ClientTrait> ClientHandler<T> {
             nickmask: mask.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
-
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
     pub fn get_channels(&self) -> Vec<String> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetAllChannels { respond_to: sender };
-        self.database.send(request).unwrap();
-
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 
@@ -165,8 +152,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             nickname: nickname.to_string(),
             respond_to: sender,
         };
-        self.database.send(request).unwrap();
-
+        self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
 }

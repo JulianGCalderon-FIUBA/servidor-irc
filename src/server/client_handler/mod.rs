@@ -21,13 +21,13 @@ use self::commands::user_based_queries::WHO_COMMAND;
 use self::responses::errors::ErrorReply;
 
 use super::client_trait::ClientTrait;
-use super::database::DatabaseRequest;
+use super::database::DatabaseMessage;
 use crate::message::{CreationError, ParsingError};
 use registration::Registration;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<T: ClientTrait> {
-    database: Sender<DatabaseRequest<T>>,
+    database: Sender<DatabaseMessage<T>>,
     stream: T,
     registration: Registration<T>,
 }
@@ -36,7 +36,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     /// Returns new clientHandler.
 
     pub fn from_stream(
-        database: Sender<DatabaseRequest<T>>,
+        database: Sender<DatabaseMessage<T>>,
         stream: T,
     ) -> io::Result<ClientHandler<T>> {
         let registration = Registration::with_stream(stream.try_clone()?);
