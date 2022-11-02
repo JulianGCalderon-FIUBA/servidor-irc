@@ -14,7 +14,7 @@ fn part_fails_with_unregistered_client() {
 }
 
 #[test]
-fn part_with_empty_params() {
+fn part_fails_with_empty_params() {
     let mut handler = dummy_client_handler();
     let parameters = vec![];
     let channels: Vec<String> = vec![];
