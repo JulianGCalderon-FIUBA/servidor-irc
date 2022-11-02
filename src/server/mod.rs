@@ -7,19 +7,18 @@ mod database;
 
 use std::io;
 use std::net::{TcpListener, TcpStream};
-use std::sync::mpsc;
 
 use crate::thread_pool::ThreadPool;
 use client_handler::ClientHandler;
 use database::Database;
 
-use self::database::DatabaseMessage;
+use self::database::DatabaseHandle;
 
 pub const MAX_CLIENTS: usize = 26;
 
 /// Represents a Server clients can connect to.
 pub struct Server {
-    database: mpsc::Sender<DatabaseMessage<TcpStream>>,
+    database: DatabaseHandle<TcpStream>,
 }
 
 impl Server {
@@ -45,7 +44,7 @@ impl Server {
                 }
             };
 
-            let database = mpsc::Sender::clone(&self.database);
+            let database = self.database.clone();
             let handler: ClientHandler<TcpStream> =
                 match ClientHandler::<TcpStream>::from_stream(database, client) {
                     Ok(handler) => handler,

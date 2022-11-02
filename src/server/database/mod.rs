@@ -15,7 +15,7 @@ use std::thread;
 
 pub use channel::Channel;
 pub use client::{Client, ClientBuilder, ClientInfo};
-pub use database_message::DatabaseMessage;
+pub use database_handle::DatabaseHandle;
 
 use database_message::DatabaseMessage::{
     AddClient, AddClientToChannel, ContainsChannel, ContainsClient, DisconnectClient,
@@ -23,6 +23,8 @@ use database_message::DatabaseMessage::{
     GetClientsFromChannel, GetStream, IsClientInChannel, IsServerOperator, RemoveClientFromChannel,
     SetServerOperator,
 };
+
+use self::database_message::DatabaseMessage;
 
 use super::client_trait::ClientTrait;
 pub struct Database<T: ClientTrait> {
@@ -44,12 +46,12 @@ impl<T: ClientTrait> Database<T> {
         (sender, database)
     }
 
-    pub fn start() -> Sender<DatabaseMessage<T>> {
+    pub fn start() -> DatabaseHandle<T> {
         let (sender, database) = Self::new();
 
         thread::spawn(|| database.run());
 
-        sender
+        DatabaseHandle::new(sender)
     }
 
     fn run(mut self) {

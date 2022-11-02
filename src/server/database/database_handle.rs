@@ -5,7 +5,7 @@ use std::{
 
 use crate::server::client_trait::ClientTrait;
 
-use super::{Client, ClientInfo, DatabaseMessage};
+use super::{database_message::DatabaseMessage, Client, ClientInfo};
 
 pub struct DatabaseHandle<T: ClientTrait> {
     sender: Sender<DatabaseMessage<T>>,
@@ -154,5 +154,13 @@ impl<T: ClientTrait> DatabaseHandle<T> {
         };
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
+    }
+}
+
+impl<T: ClientTrait> Clone for DatabaseHandle<T> {
+    fn clone(&self) -> Self {
+        Self {
+            sender: self.sender.clone(),
+        }
     }
 }
