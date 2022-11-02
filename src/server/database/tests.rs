@@ -3,7 +3,7 @@ use crate::server::testing_utils::{dummy_client, mock_stream::MockTcpStream};
 use super::*;
 
 #[test]
-fn after_adding_client_database_contains_client() {
+fn can_add_client() {
     let database = Database::new();
 
     assert!(!database.contains_client("nickname"));
@@ -16,7 +16,7 @@ fn after_adding_client_database_contains_client() {
 }
 
 #[test]
-fn after_setting_server_operator_client_is_server_operator() {
+fn can_set_server_operator() {
     let database = Database::new();
 
     database.add_client(dummy_client("nickname"));
@@ -27,7 +27,7 @@ fn after_setting_server_operator_client_is_server_operator() {
 }
 
 #[test]
-fn get_stream_returns_reference_to_client_stream() {
+fn can_get_client_stream() {
     let database = Database::new();
 
     let client = dummy_client("nickname");
@@ -41,7 +41,7 @@ fn get_stream_returns_reference_to_client_stream() {
 }
 
 #[test]
-fn disconnect_client_sets_stream_to_none() {
+fn can_disconnect_client() {
     let database = Database::new();
 
     let client = dummy_client("nickname");
@@ -54,30 +54,21 @@ fn disconnect_client_sets_stream_to_none() {
 }
 
 #[test]
-fn after_adding_client_to_channel_it_exists() {
-    let database = Database::new();
-
-    let client = dummy_client("nickname1");
-    database.add_client(client);
-
-    assert!(!database.contains_channel("channel"));
-    database.add_client_to_channel("nickname1", "channel");
-    assert!(database.contains_channel("channel"));
-}
-
-#[test]
-fn after_adding_client_to_channel_it_contains_client() {
+fn can_add_client_to_channel() {
     let database = Database::new();
 
     let client = dummy_client("nickname");
     database.add_client(client);
+
+    assert!(!database.contains_channel("channel"));
     database.add_client_to_channel("nickname", "channel");
+    assert!(database.contains_channel("channel"));
 
     assert!(database.is_client_in_channel("nickname", "channel"));
 }
 
 #[test]
-fn get_clients_returns_all_clients_from_channel() {
+fn can_get_all_clients_from_channel() {
     let database = Database::new();
 
     let client = dummy_client("nickname1");
@@ -97,7 +88,7 @@ fn get_clients_returns_all_clients_from_channel() {
 }
 
 #[test]
-fn after_removing_client_from_channel_it_no_longer_contains_client() {
+fn can_remove_client_from_channel() {
     let database = Database::new();
 
     let client = dummy_client("nickname1");
@@ -117,7 +108,7 @@ fn after_removing_client_from_channel_it_no_longer_contains_client() {
 }
 
 #[test]
-fn after_removing_last_client_from_channel_it_no_longer_exists() {
+fn removing_last_client_from_channel_deletes_channel() {
     let database = Database::new();
 
     let client = dummy_client("nickname1");
@@ -130,7 +121,7 @@ fn after_removing_last_client_from_channel_it_no_longer_exists() {
 }
 
 #[test]
-fn get_channels_returns_all_channels() {
+fn can_get_all_channels() {
     let database = Database::new();
 
     let client = dummy_client("nickname");
@@ -147,7 +138,7 @@ fn get_channels_returns_all_channels() {
 }
 
 #[test]
-fn get_channels_for_client_returns_all_channels_for_client() {
+fn can_get_all_channels_from_client() {
     let database = Database::new();
 
     let client = dummy_client("nickname");
@@ -164,7 +155,7 @@ fn get_channels_for_client_returns_all_channels_for_client() {
 }
 
 #[test]
-fn get_clients_for_query_returns_all_matching_clients() {
+fn can_get_all_clients_for_mask() {
     let database = Database::new();
 
     let client = ClientBuilder::new()
@@ -193,7 +184,7 @@ fn get_clients_for_query_returns_all_matching_clients() {
 }
 
 #[test]
-fn get_all_clients_returns_all_clients() {
+fn can_get_all_clients() {
     let database = Database::new();
 
     let client1 = dummy_client("nick1");
@@ -213,16 +204,20 @@ fn get_all_clients_returns_all_clients() {
 }
 
 #[test]
-fn matches_works_for_inner_wilcard() {
-    let stack = "hola_como_estas";
+fn wildcard_pattern_works() {
+    assert!(matches("hola_como_estas", "hola*estas"));
+    assert!(matches("hola_como_estas", "hola*como*estas"));
+    assert!(matches("hola_como_estas", "*ola*como*estas"));
+    assert!(matches("hola_como_estas", "hola*como*esta*"));
 
-    assert!(matches(stack, "hola*estas"));
-    assert!(matches(stack, "hola*como*estas"));
-    assert!(matches(stack, "*ola*como*estas"));
-    assert!(matches(stack, "hola*como*esta*"));
-    assert!(!matches(stack, "Xola*como*estas"));
-    assert!(!matches(stack, "hola*Xomo*estas"));
-    assert!(!matches(stack, "hola*como*Xstas"));
-    assert!(!matches(stack, "ola*como*estas"));
-    assert!(!matches(stack, "hola*como*esta"));
+    assert!(!matches("hola_como_estas", "Xola*como*estas"));
+    assert!(!matches("hola_como_estas", "hola*Xomo*estas"));
+    assert!(!matches("hola_como_estas", "hola*como*Xstas"));
+
+    assert!(!matches("hola_como_estas", "ola*como*estas"));
+    assert!(!matches("hola_como_estas", "hola*como*esta"));
+
+    assert!(matches("hola_como_estas", "hola_?omo_estas"));
+    assert!(matches("hola_como_estas", "hola_com?_estas"));
+    assert!(matches("hola_como_estas", "hola_????_estas"));
 }
