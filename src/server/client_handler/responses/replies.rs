@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
-use crate::server::{client_handler::commands::QUIT_COMMAND, database::ClientInfo};
+use crate::server::client_handler::commands::QUIT_COMMAND;
+use crate::server::database::ClientInfo;
 
 pub enum CommandResponse {
     // Away301 {

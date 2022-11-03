@@ -1,9 +1,9 @@
+mod utils;
 mod validations;
 
-use crate::{
-    message::Message,
-    server::{client_handler::responses::replies::CommandResponse, client_trait::ClientTrait},
-};
+use crate::message::Message;
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_trait::ClientTrait;
 
 use super::ClientHandler;
 use super::INVITE_COMMAND;
@@ -17,8 +17,8 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         let invited_client = &parameters[0];
-        let inviting_client = self.registration.nickname().unwrap();
         let channel = parameters[1].to_string();
+        let inviting_client = self.registration.nickname().unwrap();
 
         let prefix = self.registration.nickname().unwrap();
 
@@ -75,20 +75,6 @@ impl<T: ClientTrait> ClientHandler<T> {
             }
         }
         self.send_response_for_reply(CommandResponse::ListEnd323)
-    }
-
-    fn get_channels_for_query(&mut self, channels: Option<&String>) -> Vec<String> {
-        if channels.is_none() {
-            let mut channels = self.database.get_channels();
-            channels.sort();
-            return channels;
-        }
-
-        channels
-            .unwrap()
-            .split(',')
-            .map(|string| string.to_string())
-            .collect()
     }
 
     pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {

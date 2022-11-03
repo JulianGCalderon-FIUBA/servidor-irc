@@ -1,12 +1,9 @@
 use std::io;
 
-use crate::{
-    message::Message,
-    server::{
-        client_handler::{responses::replies::CommandResponse, ClientHandler},
-        client_trait::ClientTrait,
-    },
-};
+use crate::message::Message;
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_handler::ClientHandler;
+use crate::server::client_trait::ClientTrait;
 
 use crate::server::client_handler::responses::errors::ErrorReply;
 

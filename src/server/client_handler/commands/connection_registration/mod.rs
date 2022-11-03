@@ -1,7 +1,5 @@
-use crate::server::{
-    client_handler::{registration::RegistrationState, responses::replies::CommandResponse},
-    client_trait::ClientTrait,
-};
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_trait::ClientTrait;
 
 use super::ClientHandler;
 
@@ -26,11 +24,13 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         let nickname = parameters.remove(0);
-        self.registration.set_nickname(nickname);
 
-        if self.registration.state() == &RegistrationState::Registered {
-            // NICK CHANGE
-        }
+        // if self.registration.state() == &RegistrationState::Registered {
+        //     let prev_nickname = self.registration.nickname().unwrap();
+        //     self.database.update_nickname(&prev_nickname, &nickname)
+        // }
+
+        self.registration.set_nickname(nickname);
 
         self.send_response_for_reply(CommandResponse::Ok)
     }

@@ -1,11 +1,8 @@
-use crate::server::{
-    client_handler::{
-        commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
-        registration::RegistrationState,
-        responses::errors::ErrorReply,
-    },
-    client_trait::ClientTrait,
-};
+use crate::server::client_handler::commands::DISTRIBUTED_CHANNEL;
+use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
+use crate::server::client_handler::registration::RegistrationState;
+use crate::server::client_handler::responses::errors::ErrorReply;
+use crate::server::client_trait::ClientTrait;
 
 use super::super::{INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
 use super::ClientHandler;

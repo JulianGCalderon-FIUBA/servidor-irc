@@ -13,7 +13,7 @@ use std::net::{TcpListener, TcpStream};
 
 use self::database::DatabaseHandle;
 
-pub const MAX_CLIENTS: usize = 26;
+const MAX_CLIENTS: usize = 26;
 
 /// Represents a Server clients can connect to.
 pub struct Server {

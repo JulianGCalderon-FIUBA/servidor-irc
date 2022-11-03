@@ -2,8 +2,9 @@ use std::io;
 mod utils;
 mod validations;
 
+use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::replies::CommandResponse;
-use crate::server::client_handler::{responses::errors::ErrorReply, ClientHandler};
+use crate::server::client_handler::ClientHandler;
 use crate::server::client_trait::ClientTrait;
 use crate::server::database::ClientInfo;
 
