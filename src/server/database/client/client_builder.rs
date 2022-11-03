@@ -64,7 +64,7 @@ impl<T: ClientTrait> ClientBuilder<T> {
         let client_info = Client {
             stream: self.stream?,
             _password: self.password,
-            nickname: self.nickname?,
+            nicknames: vec![self.nickname?],
             username: self.username?,
             hostname: self.hostname?,
             servername: self.servername?,

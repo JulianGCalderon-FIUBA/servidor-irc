@@ -10,7 +10,7 @@ use crate::server::client_trait::ClientTrait;
 pub struct Client<T: ClientTrait> {
     stream: T,
     _password: Option<String>,
-    nickname: String,
+    nicknames: Vec<String>,
     username: String,
     hostname: String,
     servername: String,
@@ -34,7 +34,7 @@ impl<T: ClientTrait> Client<T> {
 
     pub fn get_info(&self) -> ClientInfo {
         ClientInfo {
-            nickname: self.nickname.clone(),
+            nickname: self.nickname(),
             username: self.username.clone(),
             hostname: self.hostname.clone(),
             servername: self.servername.clone(),
@@ -49,6 +49,14 @@ impl<T: ClientTrait> Client<T> {
 
     pub fn _is_online(&self) -> bool {
         self.online
+    }
+
+    pub fn _update_nickname(&mut self, nickname: String) {
+        self.nicknames.push(nickname)
+    }
+
+    pub fn nickname(&self) -> String {
+        self.nicknames.last().unwrap().to_string()
     }
 
     pub fn _password(&mut self) -> Option<String> {
