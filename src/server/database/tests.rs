@@ -1,4 +1,3 @@
-use crate::server::database::utils::matches;
 use crate::server::testing_utils::{dummy_client, mock_stream::MockTcpStream};
 
 use super::*;
@@ -211,19 +210,4 @@ fn get_all_clients_returns_all_clients() {
     real.sort();
 
     assert_eq!(real, expected);
-}
-
-#[test]
-fn matches_works_for_inner_wilcard() {
-    let stack = "hola_como_estas";
-
-    assert!(matches(stack, "hola*estas"));
-    assert!(matches(stack, "hola*como*estas"));
-    assert!(matches(stack, "*ola*como*estas"));
-    assert!(matches(stack, "hola*como*esta*"));
-    assert!(!matches(stack, "Xola*como*estas"));
-    assert!(!matches(stack, "hola*Xomo*estas"));
-    assert!(!matches(stack, "hola*como*Xstas"));
-    assert!(!matches(stack, "ola*como*estas"));
-    assert!(!matches(stack, "hola*como*esta"));
 }

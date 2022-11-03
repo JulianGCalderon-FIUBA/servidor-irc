@@ -1,5 +1,8 @@
 use std::{io, sync::mpsc::Sender};
 
+mod logic;
+mod utils;
+
 use crate::server::client_trait::ClientTrait;
 
 use super::{ClientInfo, Database};

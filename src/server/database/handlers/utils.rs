@@ -1,9 +1,5 @@
 use super::ClientInfo;
 
-pub fn index_of(element: String, array: &[String]) -> usize {
-    array.iter().position(|client| *client == element).unwrap()
-}
-
 pub fn client_matches_nickmask(client: &ClientInfo, mask: &str) -> bool {
     matches(&client.nickname, mask)
 }

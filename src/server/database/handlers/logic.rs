@@ -1,10 +1,13 @@
 use std::io;
 
-use crate::server::{client_trait::ClientTrait, database::Channel};
+use crate::server::{
+    client_trait::ClientTrait,
+    database::{Channel, Client},
+};
 
 use super::{
     utils::{client_matches_mask, client_matches_nickmask},
-    Client, ClientInfo, Database,
+    ClientInfo, Database,
 };
 
 impl<T: ClientTrait> Database<T> {

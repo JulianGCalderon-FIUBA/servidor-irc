@@ -3,14 +3,12 @@ mod client;
 mod database_handle;
 mod database_message;
 mod handlers;
-mod interface;
-mod utils;
 
 #[cfg(test)]
 mod tests;
 
 use std::collections::HashMap;
-use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::mpsc::{self, Receiver};
 use std::thread;
 
 pub use channel::Channel;
@@ -34,7 +32,7 @@ pub struct Database<T: ClientTrait> {
 }
 
 impl<T: ClientTrait> Database<T> {
-    fn new() -> (Sender<DatabaseMessage<T>>, Self) {
+    pub fn start() -> DatabaseHandle<T> {
         let (sender, receiver) = mpsc::channel();
 
         let database = Self {
@@ -42,12 +40,6 @@ impl<T: ClientTrait> Database<T> {
             clients: HashMap::new(),
             channels: HashMap::new(),
         };
-
-        (sender, database)
-    }
-
-    pub fn start() -> DatabaseHandle<T> {
-        let (sender, database) = Self::new();
 
         thread::spawn(|| database.run());
 
