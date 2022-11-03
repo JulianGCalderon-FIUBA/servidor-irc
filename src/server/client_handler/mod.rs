@@ -6,22 +6,18 @@ mod commands;
 mod registration;
 mod responses;
 
-use commands::channel_operations::{
-    INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, PART_COMMAND,
-};
-use commands::connection_registration::{
-    NICK_COMMAND, OPER_COMMAND, PASS_COMMAND, QUIT_COMMAND, USER_COMMAND,
-};
-use commands::sending_messages::{NOTICE_COMMAND, PRIVMSG_COMMAND};
-use commands::user_based_queries::WHOIS_COMMAND;
-
-use self::commands::user_based_queries::WHO_COMMAND;
-use self::responses::errors::ErrorReply;
+use responses::errors::ErrorReply;
 
 use super::client_trait::ClientTrait;
 use super::database::DatabaseHandle;
 use crate::message::{CreationError, ParsingError};
 use registration::Registration;
+
+use commands::{
+    INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, NOTICE_COMMAND,
+    OPER_COMMAND, PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
+    WHOIS_COMMAND, WHO_COMMAND,
+};
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<T: ClientTrait> {
@@ -49,7 +45,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         let nickname = self.registration.nickname();
 
-        if let Some(nickname) = nickname.as_ref() {
+        if let Some(nickname) = &nickname {
             self.database.disconnect_client(nickname)
         }
 
@@ -59,9 +55,8 @@ impl<T: ClientTrait> ClientHandler<T> {
                 nickname.unwrap_or_default()
             ),
             Err(error) => eprintln!(
-                "Conection with client [{}] failed with error [{}]",
+                "Conection with client [{}] failed with error [{error}]",
                 nickname.unwrap_or_default(),
-                error
             ),
         }
     }
@@ -110,7 +105,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
-        self.send_response("200 :parsing error")
+        self.send_response_for_error(ErrorReply::ParsingError)
     }
 
     fn on_unknown_command(&mut self, command: &str) -> io::Result<()> {

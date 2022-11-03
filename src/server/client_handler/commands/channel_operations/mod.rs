@@ -6,14 +6,9 @@ use crate::{
 };
 
 use super::ClientHandler;
+use super::INVITE_COMMAND;
 
 use std::io;
-
-pub const INVITE_COMMAND: &str = "INVITE";
-pub const JOIN_COMMAND: &str = "JOIN";
-pub const LIST_COMMAND: &str = "LIST";
-pub const NAMES_COMMAND: &str = "NAMES";
-pub const PART_COMMAND: &str = "PART";
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {

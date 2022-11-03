@@ -1,12 +1,9 @@
+use super::super::{OPER_COMMAND, PASS_COMMAND, USER_COMMAND};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_trait::ClientTrait;
 
 use super::ClientHandler;
-
-use super::OPER_COMMAND;
-use super::PASS_COMMAND;
-use super::USER_COMMAND;
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn assert_pass_command_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
@@ -66,6 +63,8 @@ impl<T: ClientTrait> ClientHandler<T> {
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
         }
+
+        // USER PASS VERIFICATION
 
         None
     }

@@ -23,6 +23,7 @@ pub enum ErrorReply {
     //
     NoNickname,
     UnregisteredClient,
+    ParsingError,
     ClientOffline { nickname: String },
     // NoSuchServer { server: String},
 }
@@ -66,12 +67,13 @@ impl Display for ErrorReply {
                 format!("461 {command} :not enough parameters")
             }
             ErrorReply::AlreadyRegistered462 => "462 :you may not reregister".to_string(),
-            //ErrorReply::PasswordMismatch464 => "464 :password incorrect".to_string(),
+            // ErrorReply::PasswordMismatch464 => "464 :password incorrect".to_string(),
             ErrorReply::ClientOffline { nickname } => {
                 format!("200 {nickname} :client is offline")
             }
             ErrorReply::NoNickname => "200 :no nickname registered".to_string(),
             ErrorReply::UnregisteredClient => "200 :unregistered".to_string(),
+            ErrorReply::ParsingError => "200 :parsing error".to_string(),
         };
         write!(f, "{string}")
     }

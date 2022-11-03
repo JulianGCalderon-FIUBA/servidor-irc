@@ -7,7 +7,8 @@ use crate::server::{
     client_trait::ClientTrait,
 };
 
-use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
+use super::super::{INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
+use super::ClientHandler;
 
 // use std::sync::mpsc::channel;
 
