@@ -15,7 +15,7 @@ pub enum ErrorReply {
     UserOnChannel443 { nickname: String, channel: String },
     NeedMoreParameters461 { command: String },
     AlreadyRegistered462,
-    PasswordMismatch464,
+    // PasswordMismatch464,
     // ChannelIsFull471 { channel: String },
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },
@@ -23,6 +23,7 @@ pub enum ErrorReply {
     //
     NoNickname,
     UnregisteredClient,
+    ParsingError,
     ClientOffline { nickname: String },
     // NoSuchServer { server: String},
 }
@@ -66,12 +67,13 @@ impl Display for ErrorReply {
                 format!("461 {command} :Not enough parameters")
             }
             ErrorReply::AlreadyRegistered462 => "462 :You may not reregister".to_string(),
-            ErrorReply::PasswordMismatch464 => "464 :Password incorrect".to_string(),
+            // ErrorReply::PasswordMismatch464 => "464 :password incorrect".to_string(),
             ErrorReply::ClientOffline { nickname } => {
                 format!("200 {nickname} :Client is offline")
             }
             ErrorReply::NoNickname => "200 :No nickname registered".to_string(),
             ErrorReply::UnregisteredClient => "200 :Unregistered".to_string(),
+            ErrorReply::ParsingError => "200 :Parsing error".to_string(),
         };
         write!(f, "{string}")
     }

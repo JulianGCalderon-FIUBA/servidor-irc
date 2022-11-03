@@ -1,5 +1,3 @@
-use super::utils::index_of;
-
 pub struct Channel {
     _name: String,
     //vector de nicknames
@@ -29,6 +27,7 @@ impl Channel {
     }
 
     pub fn remove_client(&mut self, client: String) {
-        self.clients.remove(index_of(client, &self.clients));
+        let index = self.clients.iter().position(|c| *c == client).unwrap();
+        self.clients.remove(index);
     }
 }

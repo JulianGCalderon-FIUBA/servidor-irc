@@ -95,8 +95,6 @@ fn privmsg_works_with_valid_target_client() {
             .database
             .get_stream("nick1")
             .unwrap()
-            .lock()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -128,8 +126,6 @@ fn privmsg_works_with_valid_target_channel() {
             .database
             .get_stream("nick1")
             .unwrap()
-            .lock()
-            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -138,8 +134,6 @@ fn privmsg_works_with_valid_target_channel() {
         handler
             .database
             .get_stream("nick2")
-            .unwrap()
-            .lock()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -165,8 +159,6 @@ fn privmsg_works_with_multiple_targets() {
             .database
             .get_stream("nick1")
             .unwrap()
-            .lock()
-            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -175,8 +167,6 @@ fn privmsg_works_with_multiple_targets() {
         handler
             .database
             .get_stream("nick2")
-            .unwrap()
-            .lock()
             .unwrap()
             .read_wbuf_to_string()
     );

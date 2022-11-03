@@ -3,12 +3,12 @@ mod client_info;
 
 pub use client_builder::ClientBuilder;
 pub use client_info::ClientInfo;
-use std::sync::{Arc, Mutex};
+use std::io;
 
 use crate::server::client_trait::ClientTrait;
 
 pub struct Client<T: ClientTrait> {
-    stream: Option<Arc<Mutex<T>>>,
+    stream: T,
     _password: Option<String>,
     nickname: String,
     username: String,
@@ -16,6 +16,7 @@ pub struct Client<T: ClientTrait> {
     servername: String,
     realname: String,
     operator: bool,
+    online: bool,
 }
 
 impl<T: ClientTrait> Client<T> {
@@ -27,10 +28,8 @@ impl<T: ClientTrait> Client<T> {
         self.operator
     }
 
-    pub fn get_stream(&self) -> Option<Arc<Mutex<T>>> {
-        let stream = self.stream.as_ref()?;
-
-        Some(Arc::clone(stream))
+    pub fn get_stream(&self) -> io::Result<T> {
+        self.stream.try_clone()
     }
 
     pub fn get_info(&self) -> ClientInfo {
@@ -45,7 +44,11 @@ impl<T: ClientTrait> Client<T> {
     }
 
     pub fn disconnect(&mut self) {
-        self.stream = None;
+        self.online = false;
+    }
+
+    pub fn _is_online(&self) -> bool {
+        self.online
     }
 
     pub fn _password(&mut self) -> Option<String> {

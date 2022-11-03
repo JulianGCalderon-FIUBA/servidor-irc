@@ -1,12 +1,9 @@
-use std::{io, ops::DerefMut};
+use std::io;
 
-use crate::{
-    message::Message,
-    server::{
-        client_handler::{responses::replies::CommandResponse, ClientHandler},
-        client_trait::ClientTrait,
-    },
-};
+use crate::message::Message;
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_handler::ClientHandler;
+use crate::server::client_trait::ClientTrait;
 
 use crate::server::client_handler::responses::errors::ErrorReply;
 
@@ -52,7 +49,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     // pub fn away_response_for_client(&mut self, nickname: &str) {}
 
     pub fn send_message_to_channel(&self, channel: &str, message: &Message) {
-        let clients = self.database.get_clients(channel);
+        let clients = self.database.get_clients_for_channel(channel);
 
         for client in clients {
             self.send_message_to_client(&client, message);
@@ -60,7 +57,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     pub fn send_message_to_client(&self, nickname: &str, message: &Message) -> Option<ErrorReply> {
-        if self.try_send_message_to_client(nickname, message).is_none() {
+        if self.try_send_message_to_client(nickname, message).is_err() {
             let nickname = nickname.to_string();
             return Some(ErrorReply::ClientOffline { nickname });
         }
@@ -68,9 +65,8 @@ impl<T: ClientTrait> ClientHandler<T> {
         None
     }
 
-    fn try_send_message_to_client(&self, nickname: &str, message: &Message) -> Option<()> {
-        let stream_ref = self.database.get_stream(nickname)?;
-        let mut stream = stream_ref.lock().unwrap();
-        message.send_to(stream.deref_mut()).ok()
+    fn try_send_message_to_client(&self, nickname: &str, message: &Message) -> io::Result<()> {
+        let mut stream = self.database.get_stream(nickname)?;
+        message.send_to(&mut stream)
     }
 }

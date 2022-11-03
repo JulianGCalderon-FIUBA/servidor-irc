@@ -1,7 +1,6 @@
 use crate::server::client_trait::ClientTrait;
 
 use super::Client;
-use std::sync::{Arc, Mutex};
 
 pub struct ClientBuilder<T: ClientTrait> {
     stream: Option<T>,
@@ -62,10 +61,8 @@ impl<T: ClientTrait> ClientBuilder<T> {
     }
 
     pub fn build(self) -> Option<Client<T>> {
-        let stream = Arc::new(Mutex::new(self.stream?));
-
         let client_info = Client {
-            stream: Some(stream),
+            stream: self.stream?,
             _password: self.password,
             nickname: self.nickname?,
             username: self.username?,
@@ -73,6 +70,7 @@ impl<T: ClientTrait> ClientBuilder<T> {
             servername: self.servername?,
             realname: self.realname?,
             operator: false,
+            online: true,
         };
 
         Some(client_info)

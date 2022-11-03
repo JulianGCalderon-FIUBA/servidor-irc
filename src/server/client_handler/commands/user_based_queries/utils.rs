@@ -1,10 +1,9 @@
 use std::io;
 
-use crate::server::{
-    client_handler::{responses::replies::CommandResponse, ClientHandler},
-    client_trait::ClientTrait,
-    database::ClientInfo,
-};
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_handler::ClientHandler;
+use crate::server::client_trait::ClientTrait;
+use crate::server::database::ClientInfo;
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn filtered_clients_for_default_who_command(

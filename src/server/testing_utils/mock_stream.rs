@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 use crate::server::client_trait::ClientTrait;
 
+#[derive(Debug)]
 pub struct MockTcpStream {
     read_buffer: Arc<Mutex<Vec<u8>>>,
     write_buffer: Arc<Mutex<Vec<u8>>>,
@@ -33,6 +34,13 @@ impl ClientTrait for MockTcpStream {
         };
 
         Ok(clone)
+    }
+}
+
+impl PartialEq for MockTcpStream {
+    fn eq(&self, other: &Self) -> bool {
+        Arc::ptr_eq(&self.read_buffer, &other.read_buffer)
+            && Arc::ptr_eq(&self.write_buffer, &other.write_buffer)
     }
 }
 

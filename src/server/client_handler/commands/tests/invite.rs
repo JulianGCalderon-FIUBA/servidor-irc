@@ -111,8 +111,6 @@ fn can_invite_one_user() {
             .database
             .get_stream("nick2")
             .unwrap()
-            .lock()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }

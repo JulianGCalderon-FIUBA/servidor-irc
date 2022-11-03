@@ -4,7 +4,7 @@ use super::*;
 
 #[test]
 fn can_add_client() {
-    let database = Database::new();
+    let database = Database::start();
 
     assert!(!database.contains_client("nickname"));
     database.add_client(dummy_client("nickname"));
@@ -17,7 +17,7 @@ fn can_add_client() {
 
 #[test]
 fn can_set_server_operator() {
-    let database = Database::new();
+    let database = Database::start();
 
     database.add_client(dummy_client("nickname"));
 
@@ -28,7 +28,7 @@ fn can_set_server_operator() {
 
 #[test]
 fn can_get_client_stream() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client = dummy_client("nickname");
 
@@ -37,30 +37,40 @@ fn can_get_client_stream() {
     database.add_client(client);
     let stream_ref_actual = database.get_stream("nickname").unwrap();
 
-    assert!(Arc::ptr_eq(&stream_ref_expected, &stream_ref_actual));
+    assert_eq!(stream_ref_expected, stream_ref_actual);
 }
 
-#[test]
-fn can_disconnect_client() {
-    let database = Database::new();
+// #[test]
+// fn disconnect_client_sets_stream_to_none() {
+//     let database = Database::start();
 
-    let client = dummy_client("nickname");
+//     let client = dummy_client("nickname");
 
-    database.add_client(client);
+//     database.add_client(client);
 
-    assert!(database.get_stream("nickname").is_some());
-    database.disconnect_client("nickname");
-    assert!(database.get_stream("nickname").is_none());
-}
+//     assert!(database.is_online("nickname"));
+//     database.disconnect_client("nickname");
+//     assert!(!database.is_online("nickname"));
+// }
 
 #[test]
 fn can_add_client_to_channel() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client = dummy_client("nickname");
     database.add_client(client);
 
     assert!(!database.contains_channel("channel"));
+    database.add_client_to_channel("nickname1", "channel");
+    assert!(database.contains_channel("channel"));
+}
+
+#[test]
+fn after_adding_client_to_channel_it_contains_client() {
+    let database = Database::start();
+
+    let client = dummy_client("nickname");
+    database.add_client(client);
     database.add_client_to_channel("nickname", "channel");
     assert!(database.contains_channel("channel"));
 
@@ -69,7 +79,7 @@ fn can_add_client_to_channel() {
 
 #[test]
 fn can_get_all_clients_from_channel() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client = dummy_client("nickname1");
     database.add_client(client);
@@ -80,7 +90,7 @@ fn can_get_all_clients_from_channel() {
     database.add_client_to_channel("nickname1", "channel");
     database.add_client_to_channel("nickname2", "channel");
 
-    let mut value = database.get_clients("channel");
+    let mut value = database.get_clients_for_channel("channel");
     let expected = vec!["nickname1".to_string(), "nickname2".to_string()];
     value.sort();
 
@@ -89,7 +99,7 @@ fn can_get_all_clients_from_channel() {
 
 #[test]
 fn can_remove_client_from_channel() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client = dummy_client("nickname1");
     database.add_client(client);
@@ -99,9 +109,9 @@ fn can_remove_client_from_channel() {
 
     database.add_client_to_channel("nickname1", "channel");
     database.add_client_to_channel("nickname2", "channel");
-    database.remove_client_of_channel("nickname1", "channel");
+    database.remove_client_from_channel("nickname1", "channel");
 
-    let value = database.get_clients("channel");
+    let value = database.get_clients_for_channel("channel");
     let expected = vec!["nickname2".to_string()];
 
     assert_eq!(value, expected);
@@ -109,20 +119,20 @@ fn can_remove_client_from_channel() {
 
 #[test]
 fn removing_last_client_from_channel_deletes_channel() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client = dummy_client("nickname1");
     database.add_client(client);
 
     database.add_client_to_channel("nickname1", "channel");
-    database.remove_client_of_channel("nickname1", "channel");
+    database.remove_client_from_channel("nickname1", "channel");
 
     assert!(!database.contains_channel("channel"));
 }
 
 #[test]
 fn can_get_all_channels() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client = dummy_client("nickname");
     database.add_client(client);
@@ -139,7 +149,7 @@ fn can_get_all_channels() {
 
 #[test]
 fn can_get_all_channels_from_client() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client = dummy_client("nickname");
     database.add_client(client);
@@ -156,7 +166,7 @@ fn can_get_all_channels_from_client() {
 
 #[test]
 fn can_get_all_clients_for_mask() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client = ClientBuilder::new()
         .nickname("nickAname".to_string())
@@ -185,7 +195,7 @@ fn can_get_all_clients_for_mask() {
 
 #[test]
 fn can_get_all_clients() {
-    let database = Database::new();
+    let database = Database::start();
 
     let client1 = dummy_client("nick1");
     let client2 = dummy_client("nick2");
@@ -201,23 +211,4 @@ fn can_get_all_clients() {
     real.sort();
 
     assert_eq!(real, expected);
-}
-
-#[test]
-fn wildcard_pattern_works() {
-    assert!(matches("hola_como_estas", "hola*estas"));
-    assert!(matches("hola_como_estas", "hola*como*estas"));
-    assert!(matches("hola_como_estas", "*ola*como*estas"));
-    assert!(matches("hola_como_estas", "hola*como*esta*"));
-
-    assert!(!matches("hola_como_estas", "Xola*como*estas"));
-    assert!(!matches("hola_como_estas", "hola*Xomo*estas"));
-    assert!(!matches("hola_como_estas", "hola*como*Xstas"));
-
-    assert!(!matches("hola_como_estas", "ola*como*estas"));
-    assert!(!matches("hola_como_estas", "hola*como*esta"));
-
-    assert!(matches("hola_como_estas", "hola_?omo_estas"));
-    assert!(matches("hola_como_estas", "hola_com?_estas"));
-    assert!(matches("hola_como_estas", "hola_????_estas"));
 }

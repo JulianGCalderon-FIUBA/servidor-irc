@@ -1,13 +1,11 @@
-use crate::server::{
-    client_handler::{
-        commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
-        registration::RegistrationState,
-        responses::errors::ErrorReply,
-    },
-    client_trait::ClientTrait,
-};
+use crate::server::client_handler::commands::DISTRIBUTED_CHANNEL;
+use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
+use crate::server::client_handler::registration::RegistrationState;
+use crate::server::client_handler::responses::errors::ErrorReply;
+use crate::server::client_trait::ClientTrait;
 
-use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
+use super::super::{INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
+use super::ClientHandler;
 
 // use std::sync::mpsc::channel;
 
@@ -47,7 +45,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             return Some(ErrorReply::NoSuchChannel403 { channel });
         }
 
-        let clients = self.database.get_clients(&channel);
+        let clients = self.database.get_clients_for_channel(&channel);
         if !clients.contains(&nickname.to_string()) {
             return Some(ErrorReply::NotOnChannel442 { channel });
         }
@@ -61,7 +59,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
     pub fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
         self.database
-            .get_clients(channel)
+            .get_clients_for_channel(channel)
             .contains(&String::from(nickname))
     }
 
