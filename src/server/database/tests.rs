@@ -40,18 +40,18 @@ fn can_get_client_stream() {
     assert_eq!(stream_ref_expected, stream_ref_actual);
 }
 
-// #[test]
-// fn disconnecting_sets_client_not_online() {
-//     let database = Database::start();
+#[test]
+fn disconnecting_sets_client_not_online() {
+    let database = Database::start();
 
-//     let client = dummy_client("nickname");
+    let client = dummy_client("nickname");
 
-//     database.add_client(client);
+    database.add_client(client);
 
-//     assert!(database.is_online("nickname"));
-//     database.disconnect_client("nickname");
-//     assert!(!database.is_online("nickname"));
-// }
+    assert!(database._is_online("nickname"));
+    database.disconnect_client("nickname");
+    assert!(!database._is_online("nickname"));
+}
 
 #[test]
 fn can_add_client_to_channel() {

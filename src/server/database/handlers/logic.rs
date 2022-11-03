@@ -41,9 +41,9 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    pub fn _is_online(&self, nickname: &str) -> bool {
+    pub fn is_online(&self, nickname: &str) -> bool {
         if let Some(client) = self.clients.get(nickname) {
-            return client._is_online();
+            return client.is_online();
         }
 
         false
