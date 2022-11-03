@@ -1,4 +1,5 @@
-use std::{io, sync::mpsc::Sender};
+use std::io;
+use std::sync::mpsc::Sender;
 
 mod logic;
 mod utils;

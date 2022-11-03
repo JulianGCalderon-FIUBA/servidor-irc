@@ -1,9 +1,7 @@
 use std::io;
 
-use crate::server::{
-    client_trait::ClientTrait,
-    database::{Channel, Client},
-};
+use crate::server::client_trait::ClientTrait;
+use crate::server::database::{Channel, Client};
 
 use super::{
     utils::{client_matches_mask, client_matches_nickmask},

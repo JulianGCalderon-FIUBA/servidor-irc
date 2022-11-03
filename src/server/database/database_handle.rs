@@ -5,7 +5,8 @@ use std::{
 
 use crate::server::client_trait::ClientTrait;
 
-use super::{database_message::DatabaseMessage, Client, ClientInfo};
+use super::database_message::DatabaseMessage;
+use super::{Client, ClientInfo};
 
 pub struct DatabaseHandle<T: ClientTrait> {
     sender: Sender<DatabaseMessage<T>>,
