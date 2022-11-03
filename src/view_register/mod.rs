@@ -1,4 +1,4 @@
-use std::sync::mpsc::Sender;
+use std::sync::mpsc::{Sender, Receiver};
 
 use gtk4 as gtk;
 use gtk::{
@@ -19,17 +19,19 @@ pub struct RegisterView {
     pub username_entry: Entry,
     pub pass_entry: Entry,
     pub login_button: Button,
-    sender: Sender<String>
+    sender: Sender<String>,
+    receiver: Receiver<String>
 }
 
 impl RegisterView {
-    pub fn new(sender: Sender<String>) -> Self {
+    pub fn new(sender: Sender<String>, receiver: Receiver<String>) -> Self {
         Self { 
             nick_entry: create_entry(), 
             username_entry: create_entry(), 
             pass_entry: create_entry(),
             login_button: create_login_button("login"),
-            sender
+            sender,
+            receiver
         }
     }
 

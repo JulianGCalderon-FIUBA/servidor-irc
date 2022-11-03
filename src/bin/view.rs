@@ -4,16 +4,18 @@ use std::thread;
 use gtk4::Application;
 use gtk4::prelude::{ApplicationExt, ApplicationExtManual};
 use internet_relay_chat::client::Client;
-use internet_relay_chat::controller_register::RegisterController;
+use internet_relay_chat::controller::RegisterController;
 use internet_relay_chat::message::{CreationError, Message};
 use internet_relay_chat::ADDRESS;
 use internet_relay_chat::view_register::RegisterView;
 
 fn main() {
     
-    let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
-    app.connect_activate(build_ui);
-    app.run();
+    // let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
+    // app.connect_activate(build_ui);
+    // app.run();
+
+
 }
 
 fn print_message(message: Result<Message, CreationError>) {

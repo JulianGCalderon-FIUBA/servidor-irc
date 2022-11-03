@@ -15,7 +15,7 @@ pub mod thread_pool;
 
 pub mod views;
 
-pub mod controller_register;
+pub mod controller;
 
 pub mod view_register;
 
