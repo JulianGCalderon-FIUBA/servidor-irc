@@ -9,7 +9,7 @@ fn invite_fails_with_unregistered_client() {
     handler.invite_command(parameters).unwrap();
 
     assert_eq!(
-        "200 :unregistered\r\n",
+        "200 :Unregistered\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -24,7 +24,7 @@ fn invite_fails_with_less_than_two_parameters() {
     handler.invite_command(parameters).unwrap();
 
     assert_eq!(
-        "461 INVITE :not enough parameters\r\n",
+        "461 INVITE :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
     handler.stream.clear();
@@ -34,7 +34,7 @@ fn invite_fails_with_less_than_two_parameters() {
     handler.invite_command(parameters2).unwrap();
 
     assert_eq!(
-        "461 INVITE :not enough parameters\r\n",
+        "461 INVITE :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -68,7 +68,7 @@ fn invite_fails_with_user_already_on_channel() {
     handler.invite_command(parameters).unwrap();
 
     assert_eq!(
-        "443 nick2 #hola :is already on channel\r\n",
+        "443 nick2 #hola :Is already on channel\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -86,7 +86,7 @@ fn invite_fails_with_sending_user_not_on_channel() {
     handler.invite_command(parameters).unwrap();
 
     assert_eq!(
-        "442 #hola :you're not on that channel\r\n",
+        "442 #hola :You're not on that channel\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }

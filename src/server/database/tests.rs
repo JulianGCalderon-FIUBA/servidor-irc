@@ -3,7 +3,7 @@ use crate::server::testing_utils::{dummy_client, mock_stream::MockTcpStream};
 use super::*;
 
 #[test]
-fn after_adding_client_database_contains_client() {
+fn can_add_client() {
     let database = Database::start();
 
     assert!(!database.contains_client("nickname"));
@@ -16,7 +16,7 @@ fn after_adding_client_database_contains_client() {
 }
 
 #[test]
-fn after_setting_server_operator_client_is_server_operator() {
+fn can_set_server_operator() {
     let database = Database::start();
 
     database.add_client(dummy_client("nickname"));
@@ -27,7 +27,7 @@ fn after_setting_server_operator_client_is_server_operator() {
 }
 
 #[test]
-fn get_stream_returns_reference_to_client_stream() {
+fn can_get_client_stream() {
     let database = Database::start();
 
     let client = dummy_client("nickname");
@@ -54,10 +54,10 @@ fn get_stream_returns_reference_to_client_stream() {
 // }
 
 #[test]
-fn after_adding_client_to_channel_it_exists() {
+fn can_add_client_to_channel() {
     let database = Database::start();
 
-    let client = dummy_client("nickname1");
+    let client = dummy_client("nickname");
     database.add_client(client);
 
     assert!(!database.contains_channel("channel"));
@@ -72,12 +72,13 @@ fn after_adding_client_to_channel_it_contains_client() {
     let client = dummy_client("nickname");
     database.add_client(client);
     database.add_client_to_channel("nickname", "channel");
+    assert!(database.contains_channel("channel"));
 
     assert!(database.is_client_in_channel("nickname", "channel"));
 }
 
 #[test]
-fn get_clients_returns_all_clients_from_channel() {
+fn can_get_all_clients_from_channel() {
     let database = Database::start();
 
     let client = dummy_client("nickname1");
@@ -97,7 +98,7 @@ fn get_clients_returns_all_clients_from_channel() {
 }
 
 #[test]
-fn after_removing_client_from_channel_it_no_longer_contains_client() {
+fn can_remove_client_from_channel() {
     let database = Database::start();
 
     let client = dummy_client("nickname1");
@@ -117,7 +118,7 @@ fn after_removing_client_from_channel_it_no_longer_contains_client() {
 }
 
 #[test]
-fn after_removing_last_client_from_channel_it_no_longer_exists() {
+fn removing_last_client_from_channel_deletes_channel() {
     let database = Database::start();
 
     let client = dummy_client("nickname1");
@@ -130,7 +131,7 @@ fn after_removing_last_client_from_channel_it_no_longer_exists() {
 }
 
 #[test]
-fn get_channels_returns_all_channels() {
+fn can_get_all_channels() {
     let database = Database::start();
 
     let client = dummy_client("nickname");
@@ -147,7 +148,7 @@ fn get_channels_returns_all_channels() {
 }
 
 #[test]
-fn get_channels_for_client_returns_all_channels_for_client() {
+fn can_get_all_channels_from_client() {
     let database = Database::start();
 
     let client = dummy_client("nickname");
@@ -164,7 +165,7 @@ fn get_channels_for_client_returns_all_channels_for_client() {
 }
 
 #[test]
-fn get_clients_for_query_returns_all_matching_clients() {
+fn can_get_all_clients_for_mask() {
     let database = Database::start();
 
     let client = ClientBuilder::new()
@@ -193,7 +194,7 @@ fn get_clients_for_query_returns_all_matching_clients() {
 }
 
 #[test]
-fn get_all_clients_returns_all_clients() {
+fn can_get_all_clients() {
     let database = Database::start();
 
     let client1 = dummy_client("nick1");

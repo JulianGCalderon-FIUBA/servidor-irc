@@ -8,13 +8,13 @@ fn part_fails_with_unregistered_client() {
     handler.part_command(parameters).unwrap();
 
     assert_eq!(
-        "200 :unregistered\r\n",
+        "200 :Unregistered\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
 
 #[test]
-fn part_with_empty_params() {
+fn part_fails_with_empty_params() {
     let mut handler = dummy_client_handler();
     let parameters = vec![];
     let channels: Vec<String> = vec![];
@@ -22,7 +22,7 @@ fn part_with_empty_params() {
     handler.part_command(parameters).unwrap();
 
     assert_eq!(
-        "461 PART :not enough parameters\r\n",
+        "461 PART :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
     assert_eq!(handler.database.get_channels(), channels);
@@ -37,10 +37,11 @@ fn part_fails_with_invalid_channel_name() {
 
     handler.part_command(parameters).unwrap();
 
-    assert_eq!(
-        "403 hola :no such channel\r\n403 #ho'la :no such channel\r\n403 #hola :no such channel\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("403 hola :No such channel", responses[0]);
+    assert_eq!("403 #ho'la :No such channel", responses[1]);
+    assert_eq!("403 #hola :No such channel", responses[2]);
 }
 
 #[test]
@@ -56,7 +57,7 @@ fn part_fails_with_user_not_on_channel() {
     handler.part_command(parameters).unwrap();
 
     assert_eq!(
-        "442 #hola :you're not on that channel\r\n",
+        "442 #hola :You're not on that channel\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -73,7 +74,7 @@ fn can_part_one_channel() {
 
     handler.part_command(parameters).unwrap();
 
-    assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
+    assert_eq!("200 :Success\r\n", handler.stream.read_wbuf_to_string());
     assert!(handler.database.get_channels().is_empty());
 }
 
@@ -92,10 +93,10 @@ fn can_part_existing_channels() {
 
     handler.part_command(parameters).unwrap();
 
-    assert_eq!(
-        "200 :success\r\n200 :success\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
-    println!("channels {:?}", handler.database.get_channels());
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("200 :Success", responses[0]);
+    assert_eq!("200 :Success", responses[1]);
+
     assert!(!handler.database.get_channels().is_empty())
 }

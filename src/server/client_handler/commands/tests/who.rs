@@ -9,7 +9,7 @@ fn who_fails_with_unregistered_client() {
     handler.who_command(parameters).unwrap();
 
     assert_eq!(
-        "200 :unregistered\r\n",
+        "200 :Unregistered\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -30,18 +30,17 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
 
     handler.who_command(parameters).unwrap();
 
-    let read = handler.stream.read_wbuf_to_string();
-    let mut responses = read.split("\r\n");
+    let responses = handler.stream.get_responses();
 
     assert_eq!(
         "352 #channel2 username hostname servername nick1 \\MODOS :HOPCOUNT realname",
-        responses.next().unwrap()
+        responses[0]
     );
     assert_eq!(
         "352 * username hostname servername nick2 \\MODOS :HOPCOUNT realname",
-        responses.next().unwrap()
+        responses[1]
     );
-    assert_eq!("315 :End of /WHO list", responses.next().unwrap());
+    assert_eq!("315 :End of /WHO list", responses[2]);
 }
 
 #[test]
@@ -55,12 +54,11 @@ fn who_with_mask_returns_all_public_clients_matching_mask() {
 
     handler.who_command(parameters).unwrap();
 
-    let read = handler.stream.read_wbuf_to_string();
-    let mut responses = read.split("\r\n");
+    let responses = handler.stream.get_responses();
 
     assert_eq!(
         "352 * username hostname servername nick1name \\MODOS :HOPCOUNT realname",
-        responses.next().unwrap()
+        responses[0]
     );
-    assert_eq!("315 *1* :End of /WHO list", responses.next().unwrap());
+    assert_eq!("315 *1* :End of /WHO list", responses[1]);
 }
