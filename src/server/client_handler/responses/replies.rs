@@ -1,7 +1,7 @@
-use crate::server::{
-    client_handler::commands::connection_registration::QUIT_COMMAND, database::ClientInfo,
-};
 use std::fmt::Display;
+
+use crate::server::client_handler::commands::QUIT_COMMAND;
+use crate::server::database::ClientInfo;
 
 pub enum CommandResponse {
     // Away301 {
@@ -90,7 +90,7 @@ impl Display for CommandResponse {
             //     format!("312 {nickname} {server} :{server_info}")
             // }
             CommandResponse::WhoisOperator313 { nickname } => {
-                format!("313 {nickname} :is an IRC operator")
+                format!("313 {nickname} :Is an IRC operator")
             }
             CommandResponse::EndOfWho315 { name } => {
                 format!(
@@ -113,7 +113,7 @@ impl Display for CommandResponse {
             }
             CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
             CommandResponse::NoTopic331 { channel } => {
-                format!("331 {channel} :no topic is set")
+                format!("331 {channel} :No topic is set")
             }
             // CommandResponse::Topic332 { channel, topic } => {
             //     format!("332 {} :{}", channel, topic)
@@ -143,9 +143,9 @@ impl Display for CommandResponse {
             }
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
             CommandResponse::Quit { message } => {
-                format!("{QUIT_COMMAND} :{message}")
+                format!("{QUIT_COMMAND} :{}", message)
             }
-            CommandResponse::Ok => "200 :success".to_string(),
+            CommandResponse::Ok => "200 :Success".to_string(),
         };
         write!(f, "{string}")
     }

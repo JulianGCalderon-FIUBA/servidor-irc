@@ -5,21 +5,22 @@ mod client_handler;
 mod client_trait;
 mod database;
 
-use std::io;
-use std::net::{TcpListener, TcpStream};
-use std::sync::mpsc;
-
 use crate::thread_pool::ThreadPool;
 use client_handler::ClientHandler;
 use database::Database;
+use std::io;
+use std::net::{TcpListener, TcpStream};
 
-use self::database::DatabaseRequest;
+use self::database::DatabaseHandle;
 
-pub const MAX_CLIENTS: usize = 26;
+const MAX_CLIENTS: usize = 26;
+
+pub const OPER_USERNAME: &str = "admin";
+pub const OPER_PASSWORD: &str = "admin";
 
 /// Represents a Server clients can connect to.
 pub struct Server {
-    database: mpsc::Sender<DatabaseRequest<TcpStream>>,
+    database: DatabaseHandle<TcpStream>,
 }
 
 impl Server {
@@ -37,29 +38,17 @@ impl Server {
         let pool = ThreadPool::create(MAX_CLIENTS);
 
         for client in listener.incoming() {
-            let client = match client {
-                Ok(client) => client,
-                Err(error) => {
-                    eprintln!("Could not establish connection with client, with error: {error:?}");
-                    continue;
-                }
-            };
-
-            let database = mpsc::Sender::clone(&self.database);
-            let handler: ClientHandler<TcpStream> =
-                match ClientHandler::<TcpStream>::from_stream(database, client) {
-                    Ok(handler) => handler,
-                    Err(error) => {
-                        eprintln!("Could not create handler for client, with error: {error:?}");
-                        continue;
-                    }
-                };
-
-            pool.execute(|| {
-                handler.handle();
-            })
+            match self.handler(client) {
+                Ok(handler) => pool.execute(|| handler.handle()),
+                Err(error) => eprintln!("Could not create handler {error:?}"),
+            }
         }
 
         Ok(())
+    }
+
+    fn handler(&self, client: io::Result<TcpStream>) -> io::Result<ClientHandler<TcpStream>> {
+        let database = self.database.clone();
+        ClientHandler::<TcpStream>::from_stream(database, client?)
     }
 }

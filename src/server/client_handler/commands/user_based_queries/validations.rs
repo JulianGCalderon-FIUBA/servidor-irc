@@ -1,9 +1,7 @@
-use crate::server::{
-    client_handler::{
-        registration::RegistrationState, responses::errors::ErrorReply, ClientHandler,
-    },
-    client_trait::ClientTrait,
-};
+use crate::server::client_handler::registration::RegistrationState;
+use crate::server::client_handler::responses::errors::ErrorReply;
+use crate::server::client_handler::ClientHandler;
+use crate::server::client_trait::ClientTrait;
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn assert_who_is_valid(&self, _parameters: &[String]) -> Option<ErrorReply> {

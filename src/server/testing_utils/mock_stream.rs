@@ -37,10 +37,6 @@ impl ClientTrait for MockTcpStream {
     }
 }
 
-impl Eq for MockTcpStream {
-    fn assert_receiver_is_total_eq(&self) {}
-}
-
 impl PartialEq for MockTcpStream {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.read_buffer, &other.read_buffer)
