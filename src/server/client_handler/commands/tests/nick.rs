@@ -18,7 +18,7 @@ fn nick_sets_connection_nickname() {
 #[test]
 fn registering_used_nick_returns_collision_error() {
     let mut handler = dummy_client_handler();
-    handler.add_client(dummy_client("nick"));
+    handler.database.add_client(dummy_client("nick"));
 
     let parameters = vec!["nick".to_string()];
     handler.nick_command(parameters).unwrap();
@@ -34,7 +34,7 @@ fn changing_nick_used_nick_returns_in_use_error() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
-    handler.add_client(dummy_client("nick2"));
+    handler.database.add_client(dummy_client("nick2"));
 
     let parameters = vec!["nick2".to_string()];
     handler.nick_command(parameters).unwrap();

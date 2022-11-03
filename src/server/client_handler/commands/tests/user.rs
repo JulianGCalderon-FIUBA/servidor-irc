@@ -34,7 +34,7 @@ fn user_adds_registers_client_correctly() {
         "real"
     );
 
-    assert!(handler.contains_client("nick"));
+    assert!(handler.database.contains_client("nick"));
 
     assert!(handler.registration.state() == &RegistrationState::Registered);
 }

@@ -1,10 +1,9 @@
 use std::io;
 
-use crate::server::{
-    client_handler::{responses::replies::CommandResponse, ClientHandler},
-    client_trait::ClientTrait,
-    database::ClientInfo,
-};
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_handler::ClientHandler;
+use crate::server::client_trait::ClientTrait;
+use crate::server::database::ClientInfo;
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn filtered_clients_for_default_who_command(
@@ -18,8 +17,10 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     fn shares_channel_with_self(&mut self, client_info: &ClientInfo) -> bool {
-        let client_channels = self.get_channels_for_client(&client_info.nickname);
-        let self_channels = self.get_channels_for_client(&self.registration.nickname().unwrap());
+        let client_channels = self.database.get_channels_for_client(&client_info.nickname);
+        let self_channels = self
+            .database
+            .get_channels_for_client(&self.registration.nickname().unwrap());
 
         !client_channels
             .iter()
@@ -31,6 +32,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         client_info: crate::server::database::ClientInfo,
     ) -> io::Result<()> {
         let channel = self
+            .database
             .get_channels_for_client(&client_info.nickname)
             .get(0)
             .map(|string| string.to_owned());
@@ -45,12 +47,12 @@ impl<T: ClientTrait> ClientHandler<T> {
         let nickname = client_info.nickname.clone();
 
         self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
-        if self.is_server_operator(&nickname) {
+        if self.database.is_server_operator(&nickname) {
             self.send_response_for_reply(CommandResponse::WhoisOperator313 {
                 nickname: nickname.to_string(),
             })?;
         }
-        let channels = self.get_channels_for_client(&nickname);
+        let channels = self.database.get_channels_for_client(&nickname);
         if !channels.is_empty() {
             self.send_response_for_reply(CommandResponse::WhoisChannels319 {
                 nickname: nickname.to_string(),

@@ -1,13 +1,11 @@
-use crate::server::{
-    client_handler::{
-        commands::{DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS},
-        registration::RegistrationState,
-        responses::errors::ErrorReply,
-    },
-    client_trait::ClientTrait,
-};
+use crate::server::client_handler::commands::DISTRIBUTED_CHANNEL;
+use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
+use crate::server::client_handler::registration::RegistrationState;
+use crate::server::client_handler::responses::errors::ErrorReply;
+use crate::server::client_trait::ClientTrait;
 
-use super::{ClientHandler, INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
+use super::super::{INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
+use super::ClientHandler;
 
 // use std::sync::mpsc::channel;
 
@@ -24,7 +22,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let nickname = nickname.to_string();
         let channel = channel.to_string();
 
-        let channels_for_nickname = self.get_channels_for_client(&nickname);
+        let channels_for_nickname = self.database.get_channels_for_client(&nickname);
         if channels_for_nickname.len() == MAX_CHANNELS {
             return Some(ErrorReply::TooManyChannels405 { channel });
         }
@@ -43,11 +41,11 @@ impl<T: ClientTrait> ClientHandler<T> {
     pub fn assert_can_part_channel(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
         let channel = channel.to_string();
 
-        if !self.contains_channel(&channel) || !self.channel_name_is_valid(&channel) {
+        if !self.database.contains_channel(&channel) || !self.channel_name_is_valid(&channel) {
             return Some(ErrorReply::NoSuchChannel403 { channel });
         }
 
-        let clients = self.get_clients_for_channel(&channel);
+        let clients = self.database.get_clients_for_channel(&channel);
         if !clients.contains(&nickname.to_string()) {
             return Some(ErrorReply::NotOnChannel442 { channel });
         }
@@ -56,11 +54,12 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     pub fn can_list_channel(&self, channel: &str) -> bool {
-        self.contains_channel(channel) && self.channel_name_is_valid(channel)
+        self.database.contains_channel(channel) && self.channel_name_is_valid(channel)
     }
 
     pub fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
-        self.get_clients_for_channel(channel)
+        self.database
+            .get_clients_for_channel(channel)
             .contains(&String::from(nickname))
     }
 
@@ -80,13 +79,13 @@ impl<T: ClientTrait> ClientHandler<T> {
         let inviting_client = self.registration.nickname().unwrap();
         let channel = parameters[1].to_string();
 
-        if !self.contains_client(&invited_client) {
+        if !self.database.contains_client(&invited_client) {
             return Some(ErrorReply::NoSuchNickname401 {
                 nickname: invited_client,
             });
         }
 
-        if self.contains_channel(&channel) {
+        if self.database.contains_channel(&channel) {
             if !self.user_is_in_channel(&channel, &inviting_client) {
                 return Some(ErrorReply::NotOnChannel442 { channel });
             }

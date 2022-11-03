@@ -5,8 +5,7 @@ use crate::server::client_trait::ClientTrait;
 use crate::server::ClientHandler;
 use std::io;
 
-pub const NOTICE_COMMAND: &str = "NOTICE";
-pub const PRIVMSG_COMMAND: &str = "PRIVMSG";
+use super::{NOTICE_COMMAND, PRIVMSG_COMMAND};
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn privmsg_command(

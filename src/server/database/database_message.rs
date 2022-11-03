@@ -1,16 +1,16 @@
-use std::{io, sync::mpsc::Sender};
-
-use crate::server::client_trait::ClientTrait;
+use std::io;
+use std::sync::mpsc::Sender;
 
 use super::{Client, ClientInfo};
+use crate::server::client_trait::ClientTrait;
 
-pub enum DatabaseRequest<T: ClientTrait> {
+pub enum DatabaseMessage<T: ClientTrait> {
     AddClient {
         client: Client<T>,
     },
     GetStream {
         nickname: String,
-        response: Sender<io::Result<T>>,
+        respond_to: Sender<io::Result<T>>,
     },
     DisconnectClient {
         nickname: String,
@@ -20,21 +20,16 @@ pub enum DatabaseRequest<T: ClientTrait> {
     },
     IsServerOperator {
         nickname: String,
-        response: Sender<bool>,
+        respond_to: Sender<bool>,
     },
-    // IsOnline {
-    //     nickname: String,
-    //     response: Sender<bool>,
-    // },
     ContainsClient {
         nickname: String,
-        response: Sender<bool>,
+        respond_to: Sender<bool>,
     },
     ContainsChannel {
         channel: String,
-        response: Sender<bool>,
+        respond_to: Sender<bool>,
     },
-
     AddClientToChannel {
         nickname: String,
         channel: String,
@@ -46,30 +41,28 @@ pub enum DatabaseRequest<T: ClientTrait> {
     IsClientInChannel {
         nickname: String,
         channel: String,
-        response: Sender<bool>,
+        respond_to: Sender<bool>,
     },
-
     GetChannelsForClient {
         nickname: String,
-        response: Sender<Vec<String>>,
+        respond_to: Sender<Vec<String>>,
     },
     GetClientsFromChannel {
         channel: String,
-        response: Sender<Vec<String>>,
+        respond_to: Sender<Vec<String>>,
     },
-
     GetAllClients {
-        response: Sender<Vec<ClientInfo>>,
+        respond_to: Sender<Vec<ClientInfo>>,
     },
     GetAllChannels {
-        response: Sender<Vec<String>>,
+        respond_to: Sender<Vec<String>>,
     },
     GetClientsForMask {
         mask: String,
-        response: Sender<Vec<ClientInfo>>,
+        respond_to: Sender<Vec<ClientInfo>>,
     },
     GetClientsForNickMask {
         nickmask: String,
-        response: Sender<Vec<ClientInfo>>,
+        respond_to: Sender<Vec<ClientInfo>>,
     },
 }

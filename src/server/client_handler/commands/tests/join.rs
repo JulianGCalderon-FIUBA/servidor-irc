@@ -25,7 +25,7 @@ fn join_fails_with_empty_params() {
         "461 JOIN :not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    assert_eq!(handler.get_channels(), channels);
+    assert_eq!(handler.database.get_channels(), channels);
 }
 
 #[test]
@@ -89,7 +89,7 @@ fn can_join_one_channel() {
 
     let parameters = vec!["#channel".to_string()];
 
-    assert!(handler.get_channels().is_empty());
+    assert!(handler.database.get_channels().is_empty());
 
     handler.join_command(parameters).unwrap();
 
@@ -99,7 +99,7 @@ fn can_join_one_channel() {
         "331 #channel :no topic is set\r\n353 #channel :nick\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    assert_eq!(handler.get_channels_for_client("nick"), channels);
+    assert_eq!(handler.database.get_channels_for_client("nick"), channels);
 }
 
 #[test]
@@ -121,7 +121,7 @@ fn can_join_multiple_channels() {
         "#channel3".to_string(),
     ];
     channels.sort();
-    let mut channels_for_client = handler.get_channels_for_client("nick");
+    let mut channels_for_client = handler.database.get_channels_for_client("nick");
     channels_for_client.sort();
     assert_eq!(channels_for_client, channels);
 }
@@ -133,7 +133,7 @@ fn can_join_existing_channel() {
 
     let parameters = vec!["#channel".to_string()];
 
-    handler.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("nick2", "#channel");
 
     let channels = vec!["#channel".to_string()];
 
@@ -143,6 +143,6 @@ fn can_join_existing_channel() {
         "331 #channel :no topic is set\r\n353 #channel :nick2 nick\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    assert_eq!(handler.get_channels_for_client("nick"), channels);
-    assert_eq!(handler.get_channels_for_client("nick2"), channels);
+    assert_eq!(handler.database.get_channels_for_client("nick"), channels);
+    assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
 }

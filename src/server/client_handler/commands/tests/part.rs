@@ -25,7 +25,7 @@ fn part_with_empty_params() {
         "461 PART :not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    assert_eq!(handler.get_channels(), channels);
+    assert_eq!(handler.database.get_channels(), channels);
 }
 
 #[test]
@@ -49,7 +49,9 @@ fn part_fails_with_user_not_on_channel() {
     register_client(&mut handler, "nick");
 
     let parameters = vec!["#hola".to_string()];
-    handler.add_client_to_channel("newnickname", "#hola");
+    handler
+        .database
+        .add_client_to_channel("newnickname", "#hola");
 
     handler.part_command(parameters).unwrap();
 
@@ -72,7 +74,7 @@ fn can_part_one_channel() {
     handler.part_command(parameters).unwrap();
 
     assert_eq!("200 :success\r\n", handler.stream.read_wbuf_to_string());
-    assert!(handler.get_channels().is_empty());
+    assert!(handler.database.get_channels().is_empty());
 }
 
 #[test]
@@ -81,8 +83,8 @@ fn can_part_existing_channels() {
     register_client(&mut handler, "nick2");
     let parameters = vec!["#hola,#chau".to_string()];
 
-    handler.add_client_to_channel("nick", "#hola");
-    handler.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nick", "#chau");
 
     handler.join_command(parameters.clone()).unwrap();
 
@@ -94,6 +96,6 @@ fn can_part_existing_channels() {
         "200 :success\r\n200 :success\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    println!("channels {:?}", handler.get_channels());
-    assert!(!handler.get_channels().is_empty())
+    println!("channels {:?}", handler.database.get_channels());
+    assert!(!handler.database.get_channels().is_empty())
 }

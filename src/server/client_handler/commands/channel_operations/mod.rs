@@ -1,19 +1,14 @@
+mod utils;
 mod validations;
 
-use crate::{
-    message::Message,
-    server::{client_handler::responses::replies::CommandResponse, client_trait::ClientTrait},
-};
+use crate::message::Message;
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_trait::ClientTrait;
 
 use super::ClientHandler;
+use super::INVITE_COMMAND;
 
 use std::io;
-
-pub const INVITE_COMMAND: &str = "INVITE";
-pub const JOIN_COMMAND: &str = "JOIN";
-pub const LIST_COMMAND: &str = "LIST";
-pub const NAMES_COMMAND: &str = "NAMES";
-pub const PART_COMMAND: &str = "PART";
 
 impl<T: ClientTrait> ClientHandler<T> {
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
@@ -22,8 +17,8 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         let invited_client = &parameters[0];
-        let inviting_client = self.registration.nickname().unwrap();
         let channel = parameters[1].to_string();
+        let inviting_client = self.registration.nickname().unwrap();
 
         let prefix = self.registration.nickname().unwrap();
 
@@ -51,14 +46,14 @@ impl<T: ClientTrait> ClientHandler<T> {
                 self.send_response_for_error(error)?;
                 continue;
             }
-            self.add_client_to_channel(&nickname, channel);
+            self.database.add_client_to_channel(&nickname, channel);
 
             self.send_response_for_reply(CommandResponse::NoTopic331 {
                 channel: channel.to_string(),
             })?;
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.to_string(),
-                clients: self.get_clients_for_channel(channel),
+                clients: self.database.get_clients_for_channel(channel),
             })?;
         }
 
@@ -82,20 +77,6 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.send_response_for_reply(CommandResponse::ListEnd323)
     }
 
-    fn get_channels_for_query(&mut self, channels: Option<&String>) -> Vec<String> {
-        if channels.is_none() {
-            let mut channels = self.get_channels();
-            channels.sort();
-            return channels;
-        }
-
-        channels
-            .unwrap()
-            .split(',')
-            .map(|string| string.to_string())
-            .collect()
-    }
-
     pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_registration_is_valid() {
             return self.send_response_for_error(error);
@@ -104,11 +85,11 @@ impl<T: ClientTrait> ClientHandler<T> {
         let channels = self.get_channels_for_query(parameters.get(0));
 
         for channel in channels {
-            if !self.contains_channel(&channel) {
+            if !self.database.contains_channel(&channel) {
                 continue;
             }
 
-            let clients = self.get_clients_for_channel(&channel);
+            let clients = self.database.get_clients_for_channel(&channel);
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.clone(),
                 clients,
@@ -141,7 +122,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 self.send_response_for_error(error)?;
                 continue;
             }
-            self.remove_client_from_channel(&nickname, channel);
+            self.database.remove_client_from_channel(&nickname, channel);
             self.send_response_for_reply(CommandResponse::Ok)?
         }
         Ok(())

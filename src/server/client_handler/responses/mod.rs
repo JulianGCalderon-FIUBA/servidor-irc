@@ -4,10 +4,9 @@ pub mod replies;
 use errors::ErrorReply;
 use std::io;
 
-use crate::{
-    message::Message,
-    server::{client_trait::ClientTrait, ClientHandler},
-};
+use crate::message::Message;
+use crate::server::client_trait::ClientTrait;
+use crate::server::ClientHandler;
 
 use self::replies::CommandResponse;
 
