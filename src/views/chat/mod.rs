@@ -11,11 +11,9 @@ glib::wrapper! {
         @implements gtk::Actionable, gtk::Buildable, gtk::Orientable;
 }
 
-
 impl Chat {
     pub fn new() -> Self {
-        Object::new(&[("orientation", &gtk::Orientation::Vertical)])
-                                .expect("Could not be created")
+        Object::new(&[("orientation", &gtk::Orientation::Vertical)]).expect("Could not be created")
     }
 }
 

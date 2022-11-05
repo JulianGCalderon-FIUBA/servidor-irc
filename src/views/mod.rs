@@ -1,40 +1,25 @@
-mod sidebar;
 mod chat;
 mod conv_info;
+mod login;
+mod sidebar;
 
-use gtk4 as gtk;
 use gtk::{
-    Align,
-    Label,
-    Button,
-    Entry,
-    Application,
-    ApplicationWindow,
-    Box,
-    CssProvider,
-    gdk::Display,
-    Orientation,
-    prelude::*,
-    Separator,
-    StyleContext,
+    gdk::Display, prelude::*, Application, ApplicationWindow, Box, Button, CssProvider,
+    Orientation, Separator, StyleContext,
 };
+use gtk4 as gtk;
 
-use sidebar::Sidebar;
 use chat::Chat;
 use conv_info::ConvInfo;
+use login::LogIn;
+use sidebar::Sidebar;
 
 pub fn run() {
     let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
     app.connect_startup(|_| load_css());
-    let x = 0;
-    if x == 0 {
-        app.connect_activate(build_ui1);
-    } else {
-        app.connect_activate(build_ui2);
-    }
-    
-    
+
+    app.connect_activate(build_login);
     app.run();
 }
 
@@ -45,84 +30,31 @@ fn load_css() {
     StyleContext::add_provider_for_display(
         &Display::default().expect("Could not connect to a display."),
         &provider,
-        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
 }
 
-fn build_ui1(app: &Application) {
-    let window = ApplicationWindow::builder().application(app).title("Lemon Pie IRC").build();
-
-    let main_box = Box::builder()
-        .orientation(Orientation::Vertical)
-        .halign(gtk::Align::Center)
+fn build_login(app: &Application) {
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("Lemon Pie IRC")
         .build();
+
+    let main_box = create_main_box(Orientation::Vertical, 300, 300);
     main_box.add_css_class("main_box");
 
-    let nickname_box = Box::builder()
-        .orientation(Orientation::Horizontal)
-        .halign(gtk::Align::Center)
-        .build();
-    let label = create_label("Nickname");
-    nickname_box.append(&label);
-    let entry = create_entry();
-    nickname_box.append(&entry);
-    nickname_box.set_margin_top(20);
-    nickname_box.set_margin_bottom(20);
-    main_box.append(&nickname_box);
+    let login_content = LogIn::new();
+    main_box.append(&login_content);
 
-    let username_box = Box::builder()
-        .orientation(Orientation::Horizontal)
-        .halign(gtk::Align::Center)
-        .build();
-    let label = create_label("Username");
-    username_box.append(&label);
-    let entry = create_entry();
-    username_box.append(&entry);
-    username_box.set_margin_top(20);
-    username_box.set_margin_bottom(20);
-    main_box.append(&username_box);
-
-    let password_box = Box::builder()
-        .orientation(Orientation::Horizontal)
-        .halign(gtk::Align::Center)
-        .build();
-    let label = create_label("Password");
-    password_box.append(&label);
-    let entry = create_entry();
-    password_box.append(&entry);
-    password_box.set_margin_top(20);
-    password_box.set_margin_bottom(20);
-    main_box.append(&password_box);
-
-    let button = create_button("login");
+    let button = create_button("login", window.clone(), app.clone());
     main_box.append(&button);
-    main_box.set_margin_top(20);
-    main_box.set_margin_bottom(20);
-    main_box.set_margin_start(20);
-    main_box.set_margin_end(20);
-    
+
     window.set_child(Some(&main_box));
 
     window.show();
 }
 
-fn create_label(label: &str) -> Label {
-    Label::builder()
-        .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .halign(Align::Center)
-        .valign(Align::Center)
-        .build()
-}
-
-fn create_entry() -> Entry {
-    Entry::builder().build()
-}
-
-fn create_button(label: &str) -> Button {
+fn create_button(label: &str, window: ApplicationWindow, app: Application) -> Button {
     let button = Button::builder()
         .label(label)
         .margin_top(12)
@@ -134,20 +66,20 @@ fn create_button(label: &str) -> Button {
         .build();
 
     button.connect_clicked(move |_| {
-        // app.connect_activate(build_ui2);
-        // app.run();
+        window.close();
+        build_main_app(&app);
     });
-    
+
     button
 }
 
-fn build_ui2(app: &Application) {
-    let window = ApplicationWindow::builder().application(app).title("Lemon Pie IRC").build();
-
-    let main_box = Box::builder()
-        .orientation(Orientation::Horizontal)
-        .halign(gtk::Align::Center)
+fn build_main_app(app: &Application) {
+    let window = ApplicationWindow::builder()
+        .application(app)
+        .title("Lemon Pie IRC")
         .build();
+
+    let main_box = create_main_box(Orientation::Horizontal, 800, 1200);
     main_box.add_css_class("main_box");
 
     let sidebar = Sidebar::new();
@@ -159,20 +91,31 @@ fn build_ui2(app: &Application) {
     main_box.append(&separator);
 
     let chat = Chat::new();
+    chat.add_css_class("chat");
     main_box.append(&chat);
 
-    let separator = create_separator();
-    main_box.append(&separator);
+    // let separator = create_separator();
+    // main_box.append(&separator);
 
     let conv_info = ConvInfo::new();
     main_box.append(&conv_info);
 
-    // main_box.set_height_request(1015);
     window.set_child(Some(&main_box));
     window.fullscreen();
     window.show();
 }
 
 fn create_separator() -> Separator {
-    Separator::builder().orientation(Orientation::Vertical).build()
+    Separator::builder()
+        .orientation(Orientation::Vertical)
+        .build()
+}
+
+fn create_main_box(orientation: Orientation, height: i32, width: i32) -> Box {
+    Box::builder()
+        .orientation(orientation)
+        .halign(gtk::Align::Center)
+        .height_request(height)
+        .width_request(width)
+        .build()
 }
