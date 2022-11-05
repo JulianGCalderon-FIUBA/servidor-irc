@@ -101,7 +101,6 @@ fn build_main_app(app: &Application) {
     main_box.append(&conv_info);
 
     window.set_child(Some(&main_box));
-    window.fullscreen();
     window.show();
 }
 
