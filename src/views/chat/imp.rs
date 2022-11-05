@@ -1,19 +1,11 @@
 use gtk4 as gtk;
 
-use gtk::{
-    Align,
-    Box,
-    Button,
-    Entry,
-    glib,
-    glib::once_cell::sync::Lazy,
-    glib::ParamSpec,
-    Label,
-    Orientation,
-    prelude::*,
-};
-use gtk::subclass::prelude::{ BoxImpl, ObjectImpl, ObjectImplExt, ObjectSubclass };
+use gtk::subclass::prelude::{BoxImpl, ObjectImpl, ObjectImplExt, ObjectSubclass};
 use gtk::subclass::widget::WidgetImpl;
+use gtk::{
+    glib, glib::once_cell::sync::Lazy, glib::ParamSpec, prelude::*, Align, Box, Button, Entry,
+    Label, Orientation, ScrolledWindow,
+};
 
 #[derive(Default)]
 pub struct Chat {
@@ -33,8 +25,10 @@ impl ObjectImpl for Chat {
 
         let message_box = Box::builder()
             .orientation(Orientation::Vertical)
-            .margin_top(20)
-            .margin_bottom(20)
+            .margin_top(10)
+            .margin_bottom(10)
+            .margin_start(10)
+            .margin_bottom(10)
             .halign(gtk::Align::Start)
             .build();
 
@@ -42,33 +36,41 @@ impl ObjectImpl for Chat {
             .orientation(Orientation::Horizontal)
             .margin_top(20)
             .margin_bottom(20)
-            .halign(gtk::Align::Start)
+            .halign(gtk::Align::Center)
+            .hexpand(true)
             .build();
 
         let info_button = create_button("info");
         info_button.connect_clicked(|_| println!("Hi"));
-        info_button.set_width_request(100);
         message_sender_box.append(&info_button);
 
         let input = create_entry("Message...");
-        // input.set_hexpand(true);
+        input.set_hexpand(true);
+        input.set_width_request(600);
         message_sender_box.append(&input);
 
-        let send_button = create_send_button(message_box.clone(), input.clone());
-        send_button.set_width_request(100);
+        let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
+            .min_content_height(800)
+            .min_content_width(600)
+            .margin_top(20)
+            .margin_bottom(20)
+            .margin_start(20)
+            .child(&message_box)
+            .build();
+
+        scrolled_window.add_css_class("message_box");
+        let send_button = create_send_button(message_box, input, scrolled_window.clone());
         message_sender_box.append(&send_button);
 
-        obj.append(&message_box);
+        obj.append(&scrolled_window);
         obj.append(&message_sender_box);
 
-        obj.set_halign(gtk::Align::Start);
         obj.set_valign(gtk::Align::End);
         obj.set_hexpand(true);
-        obj.set_width_request(600);
     }
 
     fn properties() -> &'static [glib::ParamSpec] {
-        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| { vec![] });
+        static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(Vec::new);
         PROPERTIES.as_ref()
     }
 
@@ -77,17 +79,15 @@ impl ObjectImpl for Chat {
         _obj: &Self::Type,
         _id: usize,
         _value: &glib::Value,
-        pspec: &glib::ParamSpec
+        pspec: &glib::ParamSpec,
     ) {
-        match pspec.name() {
-            _ => unimplemented!(),
-        }
+        pspec.name();
+        unimplemented!()
     }
 
     fn property(&self, _obj: &Self::Type, _id: usize, pspec: &glib::ParamSpec) -> glib::Value {
-        match pspec.name() {
-            _ => unimplemented!(),
-        }
+        pspec.name();
+        unimplemented!()
     }
 }
 
@@ -107,14 +107,8 @@ fn create_message(label: &str) -> Label {
         .build()
 }
 
-fn _create_empty_message() -> Label {
-    let message = create_message("");
-    message.add_css_class("empty_message");
-    message
-}
-
 fn create_button(label: &str) -> Button {
-    let button = Button::builder()
+    Button::builder()
         .label(label)
         .margin_top(12)
         .margin_bottom(12)
@@ -122,42 +116,35 @@ fn create_button(label: &str) -> Button {
         .margin_end(12)
         .halign(gtk::Align::Center)
         .valign(gtk::Align::Center)
-        .build();
-
-    button
+        .build()
 }
 
 fn create_entry(placeholder: &str) -> Entry {
-    Entry::builder()
-    .placeholder_text(placeholder)
-    .width_request(600)
-    .build()
+    Entry::builder().placeholder_text(placeholder).build()
 }
 
 fn entry_is_valid(entry_text: &str) -> bool {
-    entry_text != ""
+    !entry_text.is_empty()
 }
 
-fn create_send_button(message_box: Box, input: Entry) -> Button {
-    let send_button = create_button("Send!");
-    
+fn create_send_button(message_box: Box, input: Entry, scrolled_window: ScrolledWindow) -> Button {
+    let send_button = create_button("send");
+    send_button.add_css_class("send_button");
+
     send_button.connect_clicked(move |_| {
         let input_text = input.text();
-        if !entry_is_valid(&input_text) { return }
+        if !entry_is_valid(&input_text) {
+            return;
+        }
 
-        // if messages.iter().any(|message| message.text() == "") {
-        //     let new_message = messages.iter().find(|message| message.text() == "").unwrap();
-        //     new_message.add_css_class("message");
-        //     new_message.set_text(&entry_text);   
-        // } else {
-        //     for i in 0..messages.len()-1 {
-        //         messages[i].set_text(&messages[i+1].text());
-        //     }
-        //     messages[messages.len()-1].set_text(&entry_text);
-        // }
         let message = create_message(&input_text);
         message.add_css_class("message");
         message_box.append(&message);
+
+        let adj = scrolled_window.vadjustment();
+        adj.set_upper(adj.upper() + adj.page_size());
+        adj.set_value(adj.upper());
+        scrolled_window.set_vadjustment(Some(&adj));
     });
 
     send_button
