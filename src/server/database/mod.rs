@@ -107,10 +107,6 @@ impl<T: ClientTrait> Database<T> {
                 nickmask,
                 respond_to: response,
             } => self.handle_get_clients_for_nickmask(&nickmask, response),
-            DatabaseMessage::_IsOnline {
-                nickname,
-                respond_to,
-            } => self.handle_is_online(&nickname, respond_to),
         }
     }
 }

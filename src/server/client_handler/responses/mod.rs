@@ -1,4 +1,5 @@
 pub mod errors;
+pub mod notifications;
 pub mod replies;
 
 use errors::ErrorReply;

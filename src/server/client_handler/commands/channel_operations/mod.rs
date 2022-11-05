@@ -1,12 +1,12 @@
 mod utils;
 mod validations;
 
-use crate::message::Message;
+use crate::server::client_handler::responses::errors::ErrorReply;
+use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_trait::ClientTrait;
 
 use super::ClientHandler;
-use super::INVITE_COMMAND;
 
 use std::io;
 
@@ -20,11 +20,20 @@ impl<T: ClientTrait> ClientHandler<T> {
         let channel = parameters[1].to_string();
         let inviting_client = self.registration.nickname().unwrap();
 
-        let prefix = self.registration.nickname().unwrap();
+        let invitation = Notification::Invite {
+            inviting_client: inviting_client.clone(),
+            invited_client: invited_client.clone(),
+            channel: channel.clone(),
+        };
 
-        let invitation_text = format!(":{prefix} {INVITE_COMMAND} {invited_client} {channel}");
-        let message = Message::new(&invitation_text).unwrap();
-        self.send_message_to_client(invited_client, &message);
+        if self
+            .send_message_to_client(invited_client, &invitation.to_string())
+            .is_err()
+        {
+            self.send_response_for_error(ErrorReply::NoSuchNickname401 {
+                nickname: invited_client.clone(),
+            })?
+        }
 
         self.send_response_for_reply(CommandResponse::Inviting341 {
             nickname: inviting_client,

@@ -16,7 +16,6 @@ pub struct Client<T: ClientTrait> {
     servername: String,
     realname: String,
     operator: bool,
-    online: bool,
 }
 
 impl<T: ClientTrait> Client<T> {
@@ -41,14 +40,6 @@ impl<T: ClientTrait> Client<T> {
             realname: self.realname.clone(),
             operator: self.operator,
         }
-    }
-
-    pub fn disconnect(&mut self) {
-        self.online = false;
-    }
-
-    pub fn is_online(&self) -> bool {
-        self.online
     }
 
     pub fn _update_nickname(&mut self, nickname: String) {

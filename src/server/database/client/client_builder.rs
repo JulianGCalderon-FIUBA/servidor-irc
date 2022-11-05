@@ -70,7 +70,6 @@ impl<T: ClientTrait> ClientBuilder<T> {
             servername: self.servername?,
             realname: self.realname?,
             operator: false,
-            online: true,
         };
 
         Some(client_info)

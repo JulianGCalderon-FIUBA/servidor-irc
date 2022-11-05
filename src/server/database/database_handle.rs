@@ -156,16 +156,6 @@ impl<T: ClientTrait> DatabaseHandle<T> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
-
-    pub fn _is_online(&self, nickname: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::_IsOnline {
-            nickname: nickname.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
 }
 
 impl<T: ClientTrait> Clone for DatabaseHandle<T> {

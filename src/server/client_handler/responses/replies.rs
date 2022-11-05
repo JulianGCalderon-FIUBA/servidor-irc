@@ -1,6 +1,5 @@
 use std::fmt::Display;
 
-use crate::server::client_handler::commands::QUIT_COMMAND;
 use crate::server::database::ClientInfo;
 
 pub enum CommandResponse {
@@ -61,9 +60,6 @@ pub enum CommandResponse {
         channel: String,
     },
     YouAreOper381,
-    Quit {
-        message: String,
-    },
     Ok,
 }
 
@@ -142,9 +138,6 @@ impl Display for CommandResponse {
                 format!("366 {channel} :End of /NAMES list")
             }
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
-            CommandResponse::Quit { message } => {
-                format!("{QUIT_COMMAND} :{}", message)
-            }
             CommandResponse::Ok => "200 :Success".to_string(),
         };
         write!(f, "{string}")

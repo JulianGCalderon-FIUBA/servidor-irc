@@ -1,3 +1,4 @@
+use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_trait::ClientTrait;
 
@@ -15,7 +16,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let password = parameters.remove(0);
         self.registration.set_attribute("password", password);
 
-        self.send_response_for_reply(CommandResponse::Ok)
+        Ok(())
     }
 
     pub fn nick_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
@@ -32,7 +33,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         self.registration.set_nickname(nickname);
 
-        self.send_response_for_reply(CommandResponse::Ok)
+        Ok(())
     }
 
     pub fn user_command(
@@ -57,7 +58,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         let client = self.registration.build().unwrap();
         self.database.add_client(client);
 
-        self.send_response_for_reply(CommandResponse::Ok)
+        Ok(())
     }
 
     pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
@@ -72,8 +73,20 @@ impl<T: ClientTrait> ClientHandler<T> {
     }
 
     pub fn quit_command(&mut self, trailing: Option<String>) -> io::Result<()> {
-        let message = trailing.unwrap_or_else(|| self.registration.nickname().unwrap_or_default());
+        let content = trailing.unwrap_or_else(|| self.registration.nickname().unwrap_or_default());
 
-        self.send_response_for_reply(CommandResponse::Quit { message })
+        let notification = Notification::Quit { message: content };
+
+        if let Some(nickname) = self.registration.nickname() {
+            self.database.disconnect_client(&nickname);
+            let channels = self.database.get_channels_for_client(&nickname);
+            for channel in channels {
+                self.send_message_to_channel(&channel, &notification.to_string());
+            }
+        }
+
+        self.send_response(&notification.to_string())?;
+
+        Ok(())
     }
 }

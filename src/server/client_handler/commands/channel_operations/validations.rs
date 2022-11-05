@@ -110,8 +110,9 @@ impl<T: ClientTrait> ClientHandler<T> {
 
     pub fn assert_part_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
+            let command = PART_COMMAND.to_string();
             return Some(ErrorReply::NeedMoreParameters461 {
-                command: PART_COMMAND.to_string(),
+                command
             });
         }
 

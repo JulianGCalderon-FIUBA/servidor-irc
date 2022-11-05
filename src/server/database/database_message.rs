@@ -65,8 +65,4 @@ pub enum DatabaseMessage<T: ClientTrait> {
         nickmask: String,
         respond_to: Sender<Vec<ClientInfo>>,
     },
-    _IsOnline {
-        nickname: String,
-        respond_to: Sender<bool>,
-    },
 }

@@ -36,17 +36,13 @@ impl<T: ClientTrait> Database<T> {
     pub fn disconnect_client(&mut self, nickname: &str) {
         println!("Disconnecting {} ", nickname);
 
-        if let Some(client) = self.clients.get_mut(nickname) {
-            client.disconnect();
-        }
-    }
+        self.clients.remove(nickname);
 
-    pub fn is_online(&self, nickname: &str) -> bool {
-        if let Some(client) = self.clients.get(nickname) {
-            return client.is_online();
-        }
+        let channels = self.get_channels_for_client(nickname);
 
-        false
+        for channel in channels {
+            self.remove_client_from_channel(nickname, &channel)
+        }
     }
 
     pub fn get_stream(&self, nickname: &str) -> io::Result<T> {
@@ -65,7 +61,7 @@ impl<T: ClientTrait> Database<T> {
 
         let channel: Option<&mut Channel> = self.channels.get_mut(&channel_name.to_string());
         match channel {
-            Some(channel) => channel.add_client(nickname.to_string()),
+            Some(channel) => channel.add_client(nickname),
             None => {
                 let new_channel = Channel::new(channel_name.to_string(), nickname.to_string());
                 self.channels.insert(channel_name.to_string(), new_channel);
@@ -77,7 +73,7 @@ impl<T: ClientTrait> Database<T> {
         println!("Removing {} from channel {}", nickname, channel_name);
 
         if let Some(channel) = self.channels.get_mut(&channel_name.to_string()) {
-            channel.remove_client(nickname.to_string());
+            channel.remove_client(nickname);
             if channel.get_clients().is_empty() {
                 self.channels.remove(channel_name);
             }

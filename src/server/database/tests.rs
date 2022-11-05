@@ -48,9 +48,9 @@ fn disconnecting_sets_client_not_online() {
 
     database.add_client(client);
 
-    assert!(database._is_online("nickname"));
+    assert!(database.contains_client("nickname"));
     database.disconnect_client("nickname");
-    assert!(!database._is_online("nickname"));
+    assert!(!database.contains_client("nickname"));
 }
 
 #[test]

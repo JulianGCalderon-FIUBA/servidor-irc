@@ -62,9 +62,4 @@ impl<T: ClientTrait> Database<T> {
         let response = self.get_channels_for_client(nickname);
         sender.send(response).unwrap();
     }
-
-    pub fn handle_is_online(&self, nickname: &str, sender: Sender<bool>) {
-        let response = self.is_online(nickname);
-        sender.send(response).unwrap();
-    }
 }

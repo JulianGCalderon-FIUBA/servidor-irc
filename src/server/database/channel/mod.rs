@@ -22,11 +22,11 @@ impl Channel {
         self.clients.clone()
     }
 
-    pub fn add_client(&mut self, client: String) {
-        self.clients.push(client);
+    pub fn add_client(&mut self, client: &str) {
+        self.clients.push(client.to_string());
     }
 
-    pub fn remove_client(&mut self, client: String) {
+    pub fn remove_client(&mut self, client: &str) {
         let index = self.clients.iter().position(|c| *c == client).unwrap();
         self.clients.remove(index);
     }
