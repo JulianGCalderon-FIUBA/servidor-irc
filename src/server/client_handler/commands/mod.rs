@@ -4,6 +4,7 @@ pub mod channel_operations;
 pub mod connection_registration;
 pub mod sending_messages;
 pub mod user_based_queries;
+mod utils;
 
 #[cfg(test)]
 mod tests;

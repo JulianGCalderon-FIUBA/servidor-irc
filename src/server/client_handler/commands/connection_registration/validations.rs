@@ -47,8 +47,12 @@ impl<T: ClientTrait> ClientHandler<T> {
             return Some(ErrorReply::NeedMoreParameters461 { command });
         }
 
-        if self.registration.state() != &RegistrationState::NicknameSent {
+        if self.registration.state() == &RegistrationState::NotInitialized {
             return Some(ErrorReply::NoNickname);
+        }
+
+        if self.registration.state() == &RegistrationState::Registered {
+            return Some(ErrorReply::AlreadyRegistered462);
         }
 
         None

@@ -52,7 +52,7 @@ fn can_set_nickname() {
     let parameters = vec!["nick".to_string()];
     handler.nick_command(parameters).unwrap();
 
-    assert_eq!("200 :Success\r\n", handler.stream.read_wbuf_to_string());
+    assert_eq!("", handler.stream.read_wbuf_to_string());
 
     assert_eq!("nick", handler.registration.nickname().unwrap());
     assert_eq!(
@@ -69,9 +69,8 @@ fn can_update_nickname() {
     let parameters = vec!["nick2".to_string()];
     handler.nick_command(parameters).unwrap();
 
-    assert_eq!("200 :Success\r\n", handler.stream.read_wbuf_to_string());
-
     assert_eq!("nick2", handler.registration.nickname().unwrap());
 
-    // FALTA CAMBIAR BASE DE DATOS
+    assert!(!handler.database.contains_client("nick"));
+    assert!(handler.database.contains_client("nick2"));
 }

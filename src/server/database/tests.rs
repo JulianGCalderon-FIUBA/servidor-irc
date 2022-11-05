@@ -48,9 +48,9 @@ fn disconnecting_sets_client_not_online() {
 
     database.add_client(client);
 
-    assert!(database._is_online("nickname"));
+    assert!(database.contains_client("nickname"));
     database.disconnect_client("nickname");
-    assert!(!database._is_online("nickname"));
+    assert!(!database.contains_client("nickname"));
 }
 
 #[test]
@@ -61,7 +61,7 @@ fn can_add_client_to_channel() {
     database.add_client(client);
 
     assert!(!database.contains_channel("channel"));
-    database.add_client_to_channel("nickname1", "channel");
+    database.add_client_to_channel("nickname", "channel");
     assert!(database.contains_channel("channel"));
 }
 
@@ -238,4 +238,18 @@ fn can_get_all_clients() {
     real.sort();
 
     assert_eq!(real, expected);
+}
+
+#[test]
+fn can_update_nickname() {
+    let database = Database::start();
+
+    let client = dummy_client("nick");
+
+    database.add_client(client);
+
+    database.update_nickname("nick", "new_nick");
+
+    assert!(database.contains_client("new_nick"));
+    assert!(!database.contains_client("nick"));
 }

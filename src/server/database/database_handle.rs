@@ -157,14 +157,12 @@ impl<T: ClientTrait> DatabaseHandle<T> {
         receiver.recv().unwrap()
     }
 
-    pub fn _is_online(&self, nickname: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::_IsOnline {
-            nickname: nickname.to_string(),
-            respond_to: sender,
+    pub fn update_nickname(&self, old_nickname: &str, new_nickname: &str) {
+        let request = DatabaseMessage::UpdateNickname {
+            old_nickname: old_nickname.to_string(),
+            new_nickname: new_nickname.to_string(),
         };
         self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
     }
 }
 

@@ -2,32 +2,32 @@ use crate::server::client_handler::registration::RegistrationState;
 
 use super::*;
 
-// #[test]
-// fn user_fails_with_already_registered() {
-//     let mut handler = dummy_client_handler();
+#[test]
+fn user_fails_with_already_registered() {
+    let mut handler = dummy_client_handler();
 
-//     let parameters = vec!["nick".to_string()];
-//     handler.nick_command(parameters).unwrap();
+    let parameters = vec!["nick".to_string()];
+    handler.nick_command(parameters).unwrap();
 
-//     let parameters = vec!["user".to_string(), "host".to_string(), "server".to_string()];
-//     let trailing = Some("real".to_string());
-//     handler.user_command(parameters, trailing).unwrap();
+    let parameters = vec!["user".to_string(), "host".to_string(), "server".to_string()];
+    let trailing = Some("real".to_string());
+    handler.user_command(parameters, trailing).unwrap();
 
-//     handler.stream.clear();
+    handler.stream.clear();
 
-//     let parameters = vec![
-//         "user2".to_string(),
-//         "host2".to_string(),
-//         "server2".to_string(),
-//     ];
-//     let trailing = Some("real2".to_string());
-//     handler.user_command(parameters, trailing).unwrap();
+    let parameters = vec![
+        "user2".to_string(),
+        "host2".to_string(),
+        "server2".to_string(),
+    ];
+    let trailing = Some("real2".to_string());
+    handler.user_command(parameters, trailing).unwrap();
 
-//     assert_eq!(
-//         "462 :you may not reregister\r\n",
-//         handler.stream.read_wbuf_to_string()
-//     );
-// }
+    assert_eq!(
+        "462 :You may not reregister\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
 
 #[test]
 fn user_fails_with_no_nickname_registered() {
@@ -74,10 +74,6 @@ fn user_registers_client_correctly() {
     let trailing = Some("real".to_string());
     handler.user_command(parameters, trailing).unwrap();
 
-    let responses = handler.stream.get_responses();
-
-    assert_eq!("200 :Success", responses[0]);
-    assert_eq!("200 :Success", responses[1]);
     assert_eq!(
         "user",
         handler.registration.get_attribute("username").unwrap()

@@ -16,7 +16,6 @@ pub struct Client<T: ClientTrait> {
     servername: String,
     realname: String,
     operator: bool,
-    online: bool,
 }
 
 impl<T: ClientTrait> Client<T> {
@@ -43,19 +42,15 @@ impl<T: ClientTrait> Client<T> {
         }
     }
 
-    pub fn disconnect(&mut self) {
-        self.online = false;
-    }
-
-    pub fn is_online(&self) -> bool {
-        self.online
-    }
-
-    pub fn _update_nickname(&mut self, nickname: String) {
-        self.nicknames.push(nickname)
+    pub fn update_nickname(&mut self, nickname: String) {
+        self.nicknames.push(nickname);
     }
 
     pub fn nickname(&self) -> String {
         self.nicknames.last().unwrap().to_string()
+    }
+
+    pub fn had_nickname(&self, nickname: &str) -> bool {
+        self.nicknames.contains(&nickname.to_string())
     }
 }
