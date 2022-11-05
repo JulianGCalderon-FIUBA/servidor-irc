@@ -1,0 +1,43 @@
+.main_box {
+    background-color: black;
+}
+
+.sidebar {
+    background-color: #020311; 
+}
+
+button {
+    color: white;
+    border: solid 2px white;
+}
+
+.add {
+    color: white;
+    background-color: #177934;
+}
+
+.exit_channel {
+    color: white;
+    background-color: #681a1a;
+}
+
+label {
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
+.message {
+    border-radius: 5px;
+    padding: 10px;
+    background-color: #767a75;
+}
+
+.empty_message {
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.message_box {
+    border: solid 2px #b13415;
+    border-radius: 5px;
+}

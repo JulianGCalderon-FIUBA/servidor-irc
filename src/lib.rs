@@ -13,7 +13,7 @@ pub mod message;
 /// This module contains a threadPool's functionality. A threadPool creates n threads to handle n requests simultaneously.
 pub mod thread_pool;
 
-pub mod views;
+pub mod view_main;
 
 pub mod controller;
 
