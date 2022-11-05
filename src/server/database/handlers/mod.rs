@@ -66,7 +66,12 @@ impl<T: ClientTrait> Database<T> {
     pub fn handle_update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
         if let Some(client) = self.clients.get_mut(old_nickname) {
             let client = Rc::get_mut(client).unwrap();
-            client.borrow_mut().update_nickname(new_nickname.to_string());
+            client
+                .borrow_mut()
+                .update_nickname(new_nickname.to_string());
+
+            let client = self.clients.remove(old_nickname).unwrap();
+            self.clients.insert(new_nickname.to_string(), client);
         }
     }
 }

@@ -36,11 +36,17 @@ impl<T: ClientTrait> Channel<T> {
         self.clients.push(client);
     }
 
+    pub fn contains_client(&self, nickname: &str) -> bool {
+        self.clients
+            .iter()
+            .any(|c| c.borrow().nickname() == nickname)
+    }
+
     pub fn remove_client(&mut self, client: &str) {
         let index = self
             .clients
             .iter()
-            .position(|c| c.borrow_mut().nickname() == client)
+            .position(|c| c.borrow().had_nickname(client))
             .unwrap();
         self.clients.remove(index);
     }

@@ -76,7 +76,6 @@ fn can_part_one_channel() {
 
     handler.part_command(parameters).unwrap();
 
-    assert_eq!("200 :Success\r\n", handler.stream.read_wbuf_to_string());
     assert!(handler.database.get_channels().is_empty());
 }
 
@@ -96,11 +95,6 @@ fn can_part_existing_channels() {
     handler.stream.clear();
 
     handler.part_command(parameters).unwrap();
-
-    let responses = handler.stream.get_responses();
-
-    assert_eq!("200 :Success", responses[0]);
-    assert_eq!("200 :Success", responses[1]);
 
     assert!(!handler.database.get_channels().is_empty())
 }

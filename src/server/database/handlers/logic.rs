@@ -30,7 +30,7 @@ impl<T: ClientTrait> Database<T> {
     }
 
     pub fn is_server_operator(&mut self, nickname: &str) -> bool {
-        if let Some(client) = self.clients.get_mut(&nickname.to_string()) {
+        if let Some(client) = self.clients.get(nickname) {
             return client.borrow_mut().is_server_operator();
         }
 
@@ -74,8 +74,6 @@ impl<T: ClientTrait> Database<T> {
                     self.channels.insert(channel_name.to_string(), new_channel);
                 }
             }
-
-            println!("HOLA!!");
         }
     }
 
@@ -91,7 +89,7 @@ impl<T: ClientTrait> Database<T> {
     }
 
     pub fn contains_client(&self, nickname: &str) -> bool {
-        self.clients.contains_key(nickname)
+        self.clients.get(nickname).is_some()
     }
 
     pub fn contains_channel(&self, channel: &str) -> bool {
@@ -99,8 +97,11 @@ impl<T: ClientTrait> Database<T> {
     }
 
     pub fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
-        self.get_clients_for_channel(channel)
-            .contains(&nickname.to_string())
+        if let Some(channel) = self.channels.get(channel) {
+            return channel.contains_client(nickname);
+        }
+
+        false
     }
 
     pub fn get_clients_for_channel(&self, channel: &str) -> Vec<String> {

@@ -60,7 +60,6 @@ pub enum CommandResponse {
         channel: String,
     },
     YouAreOper381,
-    Ok,
 }
 
 impl Display for CommandResponse {
@@ -138,7 +137,6 @@ impl Display for CommandResponse {
                 format!("366 {channel} :End of /NAMES list")
             }
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
-            CommandResponse::Ok => "200 :Success".to_string(),
         };
         write!(f, "{string}")
     }

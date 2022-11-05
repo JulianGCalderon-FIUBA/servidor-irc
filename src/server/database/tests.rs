@@ -239,3 +239,17 @@ fn can_get_all_clients() {
 
     assert_eq!(real, expected);
 }
+
+#[test]
+fn can_update_nickname() {
+    let database = Database::start();
+
+    let client = dummy_client("nick");
+
+    database.add_client(client);
+
+    database.update_nickname("nick", "new_nick");
+
+    assert!(database.contains_client("new_nick"));
+    assert!(!database.contains_client("nick"));
+}

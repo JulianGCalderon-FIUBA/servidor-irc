@@ -43,10 +43,14 @@ impl<T: ClientTrait> Client<T> {
     }
 
     pub fn update_nickname(&mut self, nickname: String) {
-        self.nicknames.push(nickname)
+        self.nicknames.push(nickname);
     }
 
     pub fn nickname(&self) -> String {
         self.nicknames.last().unwrap().to_string()
+    }
+
+    pub fn had_nickname(&self, nickname: &str) -> bool {
+        self.nicknames.contains(&nickname.to_string())
     }
 }
