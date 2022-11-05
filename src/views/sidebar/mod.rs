@@ -13,8 +13,7 @@ glib::wrapper! {
 
 impl Sidebar {
     pub fn new() -> Self {
-        Object::new(&[("orientation", &gtk::Orientation::Vertical)])
-                                .expect("Could not be created")
+        Object::new(&[("orientation", &gtk::Orientation::Vertical)]).expect("Could not be created")
     }
 }
 
