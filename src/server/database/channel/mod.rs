@@ -1,14 +1,20 @@
-pub struct Channel {
+use std::{cell::RefCell, rc::Rc};
+
+use crate::server::client_trait::ClientTrait;
+
+use super::Client;
+
+pub struct Channel<T: ClientTrait> {
     _name: String,
     //vector de nicknames
-    clients: Vec<String>,
+    clients: Vec<Rc<RefCell<Client<T>>>>,
     //nickname del operador
     _operator: Option<String>,
 }
 
-impl Channel {
+impl<T: ClientTrait> Channel<T> {
     /// Creates a new [`_ChannelInfo`].
-    pub fn new(_name: String, creator: String) -> Self {
+    pub fn new(_name: String, creator: Rc<RefCell<Client<T>>>) -> Self {
         let clients = vec![creator];
 
         Self {
@@ -19,15 +25,23 @@ impl Channel {
     }
 
     pub fn get_clients(&self) -> Vec<String> {
-        self.clients.clone()
+        let mut names = vec![];
+        for client in self.clients.iter() {
+            names.push(client.borrow().nickname());
+        }
+        names
     }
 
-    pub fn add_client(&mut self, client: &str) {
-        self.clients.push(client.to_string());
+    pub fn add_client(&mut self, client: Rc<RefCell<Client<T>>>) {
+        self.clients.push(client);
     }
 
     pub fn remove_client(&mut self, client: &str) {
-        let index = self.clients.iter().position(|c| *c == client).unwrap();
+        let index = self
+            .clients
+            .iter()
+            .position(|c| c.borrow_mut().nickname() == client)
+            .unwrap();
         self.clients.remove(index);
     }
 }

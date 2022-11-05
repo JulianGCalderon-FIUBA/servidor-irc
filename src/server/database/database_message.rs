@@ -65,4 +65,5 @@ pub enum DatabaseMessage<T: ClientTrait> {
         nickmask: String,
         respond_to: Sender<Vec<ClientInfo>>,
     },
+    UpdateNickname { old_nickname: String, new_nickname: String}
 }

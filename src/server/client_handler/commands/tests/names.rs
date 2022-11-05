@@ -36,6 +36,8 @@ fn names_with_no_parameters_prints_all_channels() {
 
     let parameters = vec![];
 
+    handler.database.add_client(dummy_client("nick2"));
+
     handler.database.add_client_to_channel("nick", "#hola");
     handler.database.add_client_to_channel("nick", "#chau");
     handler.database.add_client_to_channel("nick2", "#canal");

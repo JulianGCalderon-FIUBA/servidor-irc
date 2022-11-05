@@ -156,6 +156,14 @@ impl<T: ClientTrait> DatabaseHandle<T> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub fn update_nickname(&self, old_nickname: &str, new_nickname: &str) {
+        let request = DatabaseMessage::UpdateNickname {
+            old_nickname: old_nickname.to_string(),
+            new_nickname: new_nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
 }
 
 impl<T: ClientTrait> Clone for DatabaseHandle<T> {

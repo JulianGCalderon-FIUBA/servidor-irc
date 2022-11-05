@@ -42,7 +42,7 @@ impl<T: ClientTrait> Client<T> {
         }
     }
 
-    pub fn _update_nickname(&mut self, nickname: String) {
+    pub fn update_nickname(&mut self, nickname: String) {
         self.nicknames.push(nickname)
     }
 

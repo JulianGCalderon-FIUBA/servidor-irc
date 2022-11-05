@@ -1,5 +1,5 @@
-use std::io;
 use std::sync::mpsc::Sender;
+use std::{io, rc::Rc};
 
 mod logic;
 mod utils;
@@ -61,5 +61,12 @@ impl<T: ClientTrait> Database<T> {
     pub fn handle_get_channels_for_client(&self, nickname: &str, sender: Sender<Vec<String>>) {
         let response = self.get_channels_for_client(nickname);
         sender.send(response).unwrap();
+    }
+
+    pub fn handle_update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
+        if let Some(client) = self.clients.get_mut(old_nickname) {
+            let client = Rc::get_mut(client).unwrap();
+            client.borrow_mut().update_nickname(new_nickname.to_string());
+        }
     }
 }

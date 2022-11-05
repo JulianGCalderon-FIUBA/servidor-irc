@@ -1,4 +1,6 @@
+use std::cell::RefCell;
 use std::io;
+use std::rc::Rc;
 
 use crate::server::client_trait::ClientTrait;
 use crate::server::database::{Channel, Client};
@@ -14,6 +16,8 @@ impl<T: ClientTrait> Database<T> {
 
         println!("Client registered: {clientinfo:?}",);
 
+        let client = Rc::new(RefCell::new(client));
+
         self.clients.insert(clientinfo.nickname, client);
     }
 
@@ -21,13 +25,13 @@ impl<T: ClientTrait> Database<T> {
         println!("Setting {} as operator", nickname);
 
         if let Some(client) = self.clients.get_mut(nickname) {
-            client.set_server_operator();
+            client.borrow_mut().set_server_operator();
         }
     }
 
     pub fn is_server_operator(&mut self, nickname: &str) -> bool {
         if let Some(client) = self.clients.get_mut(&nickname.to_string()) {
-            return client.is_server_operator();
+            return client.borrow_mut().is_server_operator();
         }
 
         false
@@ -47,7 +51,7 @@ impl<T: ClientTrait> Database<T> {
 
     pub fn get_stream(&self, nickname: &str) -> io::Result<T> {
         if let Some(client) = self.clients.get(nickname) {
-            return client.get_stream();
+            return client.borrow().get_stream();
         }
 
         Err(io::Error::new(
@@ -59,13 +63,19 @@ impl<T: ClientTrait> Database<T> {
     pub fn add_client_to_channel(&mut self, nickname: &str, channel_name: &str) {
         println!("Adding {} to channel {}", nickname, channel_name);
 
-        let channel: Option<&mut Channel> = self.channels.get_mut(&channel_name.to_string());
-        match channel {
-            Some(channel) => channel.add_client(nickname),
-            None => {
-                let new_channel = Channel::new(channel_name.to_string(), nickname.to_string());
-                self.channels.insert(channel_name.to_string(), new_channel);
+        let channel: Option<&mut Channel<T>> = self.channels.get_mut(&channel_name.to_string());
+        if let Some(client) = self.clients.get(nickname) {
+            let client_rc = client.clone();
+
+            match channel {
+                Some(channel) => channel.add_client(client_rc),
+                None => {
+                    let new_channel = Channel::new(channel_name.to_string(), client_rc);
+                    self.channels.insert(channel_name.to_string(), new_channel);
+                }
             }
+
+            println!("HOLA!!");
         }
     }
 
@@ -105,7 +115,7 @@ impl<T: ClientTrait> Database<T> {
     pub fn get_all_clients(&self) -> Vec<ClientInfo> {
         self.clients
             .values()
-            .map(|client| client.get_info())
+            .map(|client| client.borrow().get_info())
             .collect()
     }
 
@@ -140,7 +150,7 @@ impl<T: ClientTrait> Database<T> {
     ) -> Vec<ClientInfo> {
         self.clients
             .values()
-            .map(|client| client.get_info())
+            .map(|client| client.borrow().get_info())
             .filter(|client| filter(client, mask))
             .collect()
     }

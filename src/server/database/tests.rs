@@ -61,7 +61,7 @@ fn can_add_client_to_channel() {
     database.add_client(client);
 
     assert!(!database.contains_channel("channel"));
-    database.add_client_to_channel("nickname1", "channel");
+    database.add_client_to_channel("nickname", "channel");
     assert!(database.contains_channel("channel"));
 }
 

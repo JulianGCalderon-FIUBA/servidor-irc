@@ -137,6 +137,8 @@ fn can_join_existing_channel() {
 
     let parameters = vec!["#channel".to_string()];
 
+    handler.database.add_client(dummy_client("nick2"));
+
     handler.database.add_client_to_channel("nick2", "#channel");
 
     let channels = vec!["#channel".to_string()];

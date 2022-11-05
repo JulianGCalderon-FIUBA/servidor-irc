@@ -7,7 +7,9 @@ mod handlers;
 #[cfg(test)]
 mod tests;
 
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 use std::sync::mpsc::{self, Receiver};
 use std::thread;
 
@@ -19,7 +21,7 @@ use database_message::DatabaseMessage::{
     AddClient, AddClientToChannel, ContainsChannel, ContainsClient, DisconnectClient,
     GetAllChannels, GetAllClients, GetChannelsForClient, GetClientsForMask, GetClientsForNickMask,
     GetClientsFromChannel, GetStream, IsClientInChannel, IsServerOperator, RemoveClientFromChannel,
-    SetServerOperator,
+    SetServerOperator, UpdateNickname,
 };
 
 use self::database_message::DatabaseMessage;
@@ -27,21 +29,23 @@ use self::database_message::DatabaseMessage;
 use super::client_trait::ClientTrait;
 pub struct Database<T: ClientTrait> {
     receiver: Receiver<DatabaseMessage<T>>,
-    clients: HashMap<String, Client<T>>,
-    channels: HashMap<String, Channel>,
+    clients: HashMap<String, Rc<RefCell<Client<T>>>>,
+    channels: HashMap<String, Channel<T>>,
 }
 
 impl<T: ClientTrait> Database<T> {
     pub fn start() -> DatabaseHandle<T> {
         let (sender, receiver) = mpsc::channel();
 
-        let database = Self {
-            receiver,
-            clients: HashMap::new(),
-            channels: HashMap::new(),
-        };
+        thread::spawn(|| {
+            let database = Self {
+                receiver,
+                clients: HashMap::new(),
+                channels: HashMap::new(),
+            };
 
-        thread::spawn(|| database.run());
+            database.run()
+        });
 
         DatabaseHandle::new(sender)
     }
@@ -107,6 +111,10 @@ impl<T: ClientTrait> Database<T> {
                 nickmask,
                 respond_to: response,
             } => self.handle_get_clients_for_nickmask(&nickmask, response),
+            UpdateNickname {
+                old_nickname,
+                new_nickname,
+            } => self.handle_update_nickname(&old_nickname, &new_nickname),
         }
     }
 }

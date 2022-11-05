@@ -49,6 +49,8 @@ fn part_fails_with_user_not_on_channel() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
+    handler.database.add_client(dummy_client("newnickname"));
+
     let parameters = vec!["#hola".to_string()];
     handler
         .database
@@ -83,6 +85,8 @@ fn can_part_existing_channels() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick2");
     let parameters = vec!["#hola,#chau".to_string()];
+
+    handler.database.add_client(dummy_client("nick"));
 
     handler.database.add_client_to_channel("nick", "#hola");
     handler.database.add_client_to_channel("nick", "#chau");

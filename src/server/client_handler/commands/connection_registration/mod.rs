@@ -1,3 +1,4 @@
+use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_trait::ClientTrait;
@@ -26,10 +27,10 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         let nickname = parameters.remove(0);
 
-        // if self.registration.state() == &RegistrationState::Registered {
-        //     let prev_nickname = self.registration.nickname().unwrap();
-        //     self.database.update_nickname(&prev_nickname, &nickname)
-        // }
+        if self.registration.state() == &RegistrationState::Registered {
+            let prev_nickname = self.registration.nickname().unwrap();
+            self.database.update_nickname(&prev_nickname, &nickname)
+        }
 
         self.registration.set_nickname(nickname);
 
