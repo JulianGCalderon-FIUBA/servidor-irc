@@ -1,4 +1,6 @@
+/// This module contains useful functionalities when working with channels.
 mod utils;
+/// This module contains validations for channel operations.
 mod validations;
 
 use crate::server::client_handler::responses::errors::ErrorReply;
@@ -11,6 +13,7 @@ use super::ClientHandler;
 use std::io;
 
 impl<T: ClientTrait> ClientHandler<T> {
+    /// Invites client to channel.
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_invite_is_valid(&parameters) {
             return self.send_response_for_error(error);
@@ -41,6 +44,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         })
     }
 
+    /// Joins specific channel.
     pub fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_join_is_valid(&parameters) {
             return self.send_response_for_error(error);
@@ -69,6 +73,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         Ok(())
     }
 
+    /// Lists all channels and their information.
     pub fn list_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_registration_is_valid() {
             return self.send_response_for_error(error);
@@ -86,6 +91,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.send_response_for_reply(CommandResponse::ListEnd323)
     }
 
+    /// Lists all names in specific channel.
     pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_registration_is_valid() {
             return self.send_response_for_error(error);
@@ -118,6 +124,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         Ok(())
     }
 
+    /// Parts specific channel.
     pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_part_is_valid(&parameters) {
             return self.send_response_for_error(error);

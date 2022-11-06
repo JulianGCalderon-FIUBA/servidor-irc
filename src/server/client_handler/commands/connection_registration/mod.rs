@@ -6,9 +6,11 @@ use crate::server::client_trait::ClientTrait;
 use super::ClientHandler;
 
 use std::io;
+/// This module contains validations for connection registration operations.
 mod validations;
 
 impl<T: ClientTrait> ClientHandler<T> {
+    /// Saves password.
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_pass_command_is_valid(&parameters) {
             return self.send_response_for_error(error);
@@ -19,7 +21,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         Ok(())
     }
-
+    /// Saves nickname.
     pub fn nick_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_nick_command_is_valid(&parameters) {
             return self.send_response_for_error(error);
@@ -36,7 +38,8 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         Ok(())
     }
-
+    /// Saves username, hostname, servername and realname.
+    /// Finishes registration.
     pub fn user_command(
         &mut self,
         mut parameters: Vec<String>,
@@ -61,7 +64,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         Ok(())
     }
-
+    /// Sets client as server operator.
     pub fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_oper_command_is_valid(&parameters) {
             return self.send_response_for_error(error);
@@ -72,7 +75,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         self.send_response_for_reply(CommandResponse::YouAreOper381)
     }
-
+    /// Quits server and ends connection.
     pub fn quit_command(&mut self, trailing: Option<String>) -> io::Result<()> {
         let content = trailing.unwrap_or_else(|| self.registration.nickname().unwrap_or_default());
 

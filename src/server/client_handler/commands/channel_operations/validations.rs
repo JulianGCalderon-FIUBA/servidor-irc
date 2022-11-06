@@ -7,17 +7,17 @@ use crate::server::client_trait::ClientTrait;
 use super::super::{INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
 use super::ClientHandler;
 
-// use std::sync::mpsc::channel;
-
 impl<T: ClientTrait> ClientHandler<T> {
-    // GENERAL
-
     fn channel_name_is_valid(&self, channel: &str) -> bool {
         return ((channel.as_bytes()[0] == LOCAL_CHANNEL)
             || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
             && !channel.contains(INVALID_CHARACTER);
     }
-
+    /// Asserts client can join channel.
+    /// Possible errors:
+    ///     - Client is in too many channels.
+    ///     - Channel name does not exist.
+    ///     - User is already on channel.
     pub fn assert_can_join_channel(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
         let nickname = nickname.to_string();
         let channel = channel.to_string();
@@ -37,7 +37,10 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         None
     }
-
+    /// Asserts client can part channel.
+    /// Possible errors:
+    ///     - Channel name does not exist.
+    ///     - User is not on channel.
     pub fn assert_can_part_channel(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
         let channel = channel.to_string();
 
@@ -52,19 +55,24 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         None
     }
-
+    /// Asserts channel can be listed.
     pub fn can_list_channel(&self, channel: &str) -> bool {
         self.database.contains_channel(channel) && self.channel_name_is_valid(channel)
     }
 
-    pub fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
+    fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
         self.database
             .get_clients_for_channel(channel)
             .contains(&String::from(nickname))
     }
 
-    // COMMANDS
-
+    /// Asserts invite command can be executed.
+    /// Possible errors:
+    ///     - Not enough parameters.
+    ///     - Client is not registered.
+    ///     - Invited client does not exist.
+    ///     - Invited client is already on channel.
+    ///     - Inviting client is not on channel.
     pub fn assert_invite_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.len() != 2 {
             let command = INVITE_COMMAND.to_string();
@@ -98,7 +106,10 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
         None
     }
-
+    /// Asserts join command can be executed.
+    /// Possible errors:
+    ///     - Not enough parameters.
+    ///     - Client is not registered.
     pub fn assert_join_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
             let command = JOIN_COMMAND.to_string();
@@ -107,18 +118,19 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         self.assert_registration_is_valid()
     }
-
+    /// Asserts part command can be executed.
+    /// Possible errors:
+    ///     - Not enough parameters.
+    ///     - Client is not registered.
     pub fn assert_part_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
             let command = PART_COMMAND.to_string();
-            return Some(ErrorReply::NeedMoreParameters461 {
-                command
-            });
+            return Some(ErrorReply::NeedMoreParameters461 { command });
         }
 
         self.assert_registration_is_valid()
     }
-
+    /// Asserts client is registered.
     pub fn assert_registration_is_valid(&self) -> Option<ErrorReply> {
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);

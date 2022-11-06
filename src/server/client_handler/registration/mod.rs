@@ -6,7 +6,7 @@ use crate::server::client_trait::ClientTrait;
 use crate::server::database::{Client, ClientBuilder};
 pub use registration_state::RegistrationState;
 
-/// Holds a Clients' relevant information.
+/// Holds a Clients' relevant information when registering.
 pub struct Registration<T: ClientTrait> {
     stream: Option<T>,
     nickname: Option<String>,
@@ -15,6 +15,7 @@ pub struct Registration<T: ClientTrait> {
 }
 
 impl<T: ClientTrait> Registration<T> {
+    /// Creates new [`Registration`].
     pub fn with_stream(stream: T) -> Self {
         Self {
             stream: Some(stream),
@@ -23,15 +24,16 @@ impl<T: ClientTrait> Registration<T> {
             attributes: HashMap::new(),
         }
     }
-
+    /// Sets a Client's attribute.
     pub fn set_attribute(&mut self, key: &'static str, value: String) {
         self.attributes.insert(key, value);
     }
-
+    /// Gets a Client's attribute.
     pub fn get_attribute(&mut self, key: &'static str) -> Option<String> {
         self.attributes.get(key).map(|attr| attr.to_owned())
     }
 
+    /// Sets Client nickname when registering.
     pub fn set_nickname(&mut self, nickname: String) {
         self.nickname = Some(nickname);
 
@@ -40,14 +42,17 @@ impl<T: ClientTrait> Registration<T> {
         }
     }
 
+    /// Returns nickname used during registration process.
     pub fn nickname(&self) -> Option<String> {
         self.nickname.clone()
     }
 
+    /// Returns current Registration State.
     pub fn state(&self) -> &RegistrationState {
         &self.state
     }
 
+    /// Builds new [`Client`]
     pub fn build(&mut self) -> Option<Client<T>> {
         let client = ClientBuilder::new()
             .nickname(self.nickname()?)

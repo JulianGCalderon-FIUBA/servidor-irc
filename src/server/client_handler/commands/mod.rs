@@ -1,9 +1,13 @@
 use crate::server::ClientHandler;
-
+/// This module contains operations regarding channels.
 pub mod channel_operations;
+/// This module contains operations regarding the registration process.
 pub mod connection_registration;
+/// This module contains operations regarding the sending messages process.
 pub mod sending_messages;
+/// This module contains operations regarding the user based queries.
 pub mod user_based_queries;
+/// This module contains extra functionalities that can be useful when working with commands.
 mod utils;
 
 #[cfg(test)]

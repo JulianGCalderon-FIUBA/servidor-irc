@@ -3,7 +3,7 @@ use std::fmt::Display;
 use crate::server::client_handler::commands::{
     INVITE_COMMAND, NOTICE_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND,
 };
-
+/// Possible notifications that can be sent for different commands.
 pub enum Notification {
     Quit {
         message: String,

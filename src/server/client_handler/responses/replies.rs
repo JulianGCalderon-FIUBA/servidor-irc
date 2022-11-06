@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::server::database::ClientInfo;
-
+/// Possible responses the commands can generate.
 pub enum CommandResponse {
     // Away301 {
     //     nickname: String,

@@ -2,8 +2,11 @@ use std::io;
 
 use crate::message::Message;
 
+/// This module contains commands the ClientHandler knows.
 mod commands;
+/// This module contains the structure that contains current Registration.
 mod registration;
+/// This module contains the responses a ClientHandler can have for the different commands.
 mod responses;
 
 use responses::errors::ErrorReply;
@@ -27,8 +30,7 @@ pub struct ClientHandler<T: ClientTrait> {
 }
 
 impl<T: ClientTrait> ClientHandler<T> {
-    /// Returns new clientHandler.
-
+    /// Returns new [`ClientHandler`].
     pub fn from_stream(database: DatabaseHandle<T>, stream: T) -> io::Result<ClientHandler<T>> {
         let registration = Registration::with_stream(stream.try_clone()?);
 
@@ -39,7 +41,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         })
     }
 
-    /// Handles the received requests with error handling
+    /// Handles the received requests with error handling.
     pub fn handle(mut self) {
         let conection_result = self.try_handle();
 
