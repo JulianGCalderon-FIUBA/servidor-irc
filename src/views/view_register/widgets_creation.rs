@@ -1,5 +1,5 @@
 use gtk4 as gtk;
-use gtk::{ Align, Label, Button, prelude::* };
+use gtk::{ Align, Box, Button, Label, prelude::*, Orientation };
 
 use crate::views::view_main::widgets_creation::create_button;
 
@@ -20,4 +20,16 @@ pub fn create_login_button(label: &str) -> Button {
     button.set_halign(gtk::Align::Center);
     button.set_valign(gtk::Align::Center);
     button
+}
+
+pub fn create_label_box(label: &str) -> Box {
+    let label_input_box = Box::builder()
+        .orientation(Orientation::Horizontal)
+        .halign(gtk::Align::Center)
+        .margin_top(20)
+        .margin_bottom(20)
+        .build();
+    let label = create_label(label);
+    label_input_box.append(&label);
+    label_input_box
 }

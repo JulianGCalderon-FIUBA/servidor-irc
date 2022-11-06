@@ -6,15 +6,14 @@ use gtk::{
     Entry,
     Application,
     ApplicationWindow,
-    Box,
     Orientation,
     prelude::*,
     glib::Sender,
 };
 
-use self::widgets_creation::{ create_label, create_login_button };
+use self::widgets_creation::{ create_login_button, create_label_box };
 
-use super::widgets_creation::{create_entry, create_main_box};
+use super::widgets_creation::{ create_entry, create_main_box };
 
 pub struct RegisterView {
     pub realname_entry: Entry,
@@ -43,47 +42,19 @@ impl RegisterView {
         let main_box = create_main_box(Orientation::Vertical, 300, 300);
         main_box.add_css_class("main_box");
 
-        let realname_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .halign(gtk::Align::Center)
-            .margin_top(20)
-            .margin_bottom(20)
-            .build();
-        let label = create_label("Your name:");
-        realname_box.append(&label);
+        let realname_box = create_label_box("Your name:");
         realname_box.append(&self.realname_entry);
         main_box.append(&realname_box);
 
-        let nickname_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .halign(gtk::Align::Center)
-            .margin_top(20)
-            .margin_bottom(20)
-            .build();
-        let label = create_label("Nickname:");
-        nickname_box.append(&label);
+        let nickname_box = create_label_box("Nickname:");
         nickname_box.append(&self.nick_entry);
         main_box.append(&nickname_box);
 
-        let username_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .halign(gtk::Align::Center)
-            .margin_top(20)
-            .margin_bottom(20)
-            .build();
-        let label = create_label("Username:");
-        username_box.append(&label);
+        let username_box = create_label_box("Username:");
         username_box.append(&self.username_entry);
         main_box.append(&username_box);
 
-        let password_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .margin_top(20)
-            .margin_bottom(20)
-            .halign(gtk::Align::Center)
-            .build();
-        let label = create_label("Password:");
-        password_box.append(&label);
+        let password_box = create_label_box("Password:");
         password_box.append(&self.pass_entry);
         main_box.append(&password_box);
 
