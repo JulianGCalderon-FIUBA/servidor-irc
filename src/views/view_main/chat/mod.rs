@@ -74,7 +74,7 @@ impl MainView {
         scrolled_window: ScrolledWindow,
         sender: Sender<ControllerMessage>,
     ) {
-        let nickname_reveiver = self.current_conversation.clone();
+        let nickname_receiver = self.current_conversation.clone();
 
         self.send_message.connect_clicked(move |_| {
             let input_text = input.text();
@@ -83,7 +83,7 @@ impl MainView {
             }
 
             let priv_message = ControllerMessage::SendPrivMessage {
-                nickname: nickname_reveiver.clone(),
+                nickname: nickname_receiver.clone(),
                 message: input_text.clone(),
             };
             sender
