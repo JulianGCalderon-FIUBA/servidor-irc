@@ -1,25 +1,23 @@
+pub(crate) mod controller_message;
+mod controller_handler;
 use gtk4 as gtk;
 
 use crate::{
     view_register::RegisterView,
     view_main::MainView,
     client::Client,
-    ADDRESS,
-    message::{ Message, CreationError, self },
+    ADDRESS
 };
 use gtk::{
     gdk::Display,
     prelude::*,
     Application,
-    ApplicationWindow,
-    Box,
-    Button,
     CssProvider,
-    Orientation,
-    Separator,
-    StyleContext, glib::{self, Receiver, Sender},
+    StyleContext, glib,
 };
 
+use controller_message::ControllerMessage::*;
+use controller_handler::to_controller_message;
 pub struct Controller {
     app: Application,
 }
@@ -68,24 +66,39 @@ impl Controller {
         let sender_clone = sender.clone();
         client.async_read(move |message| {
             match message {
-                Ok(message) => sender_clone.send(message.to_string()).unwrap(),
+                Ok(message) => {
+                    let controller_message = to_controller_message(message);
+                    sender_clone.send(controller_message).unwrap();
+                },
                 Err(error) => (eprintln!("Failed to read message: {}", error)),
             }
         });
 
         receiver.attach(None, move |msg| {
-            match &msg[..] {
-                "change"   => {
+            match msg {
+                Register { pass, nickname, username, realname }  => {
+                    let pass_command = format!("PASS {}", pass);
+                    let nick_command = format!("NICK {}", nickname);
+                    let user_command = format!(
+                        "USER {} {} {} :{}",
+                        username,
+                        username,
+                        username,
+                        realname
+                    );
+                    client.send_raw(&pass_command).expect("ERROR");
+                    client.send_raw(&nick_command).expect("ERROR");
+                    client.send_raw(&user_command).expect("ERROR");
+                },
+                ChangeViewToMain {} => {
                     window.close();
                     let mut main_view = MainView::new(sender.clone());
-                    main_view.get_view(app_clone.clone()).show()
+                    main_view.get_view(app_clone.clone()).show();                    
                 },
-                "register" => {
-                    client.send_raw("PASS pass123").expect("ERROR");
-                    client.send_raw("NICK nick").expect("ERROR");
-                    client.send_raw("USER user user user :user").expect("ERROR");
+                RegularMessage { message } => {
+                    println!("{}", message);
                 }
-                msg => println!("{}", msg)
+                _ => println!("No command found")
             };
             // Returning false here would close the receiver
             // and have senders fail

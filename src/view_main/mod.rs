@@ -19,9 +19,7 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use chat::Chat;
-use conv_info::ConvInfo;
-use sidebar::Sidebar;
+use crate::controller::controller_message::ControllerMessage;
 
 pub struct MainView {
     pub channels: Vec<Button>,
@@ -35,10 +33,10 @@ pub struct MainView {
     pub channel_info: Button,
     pub quit_channel: Button,
     pub func_channel: Button,
-    sender: Sender<String>,
+    sender: Sender<ControllerMessage>,
 }
 impl MainView {
-    pub fn new(sender: Sender<String>) -> Self {
+    pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channels: vec![
                 create_button("#channel1"),

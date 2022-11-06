@@ -1,5 +1,3 @@
-
-
 use gtk4 as gtk;
 use gtk::{
     Align,
@@ -13,17 +11,19 @@ use gtk::{
     prelude::*, glib::Sender,
 };
 
+use crate::controller::controller_message::ControllerMessage;
+
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
     pub username_entry: Entry,
     pub pass_entry: Entry,
     pub login_button: Button,
-    sender: Sender<String>,
+    sender: Sender<ControllerMessage>,
 }
 
 impl RegisterView {
-    pub fn new(sender: Sender<String>) -> Self {
+    pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             realname_entry: create_entry(),
             nick_entry: create_entry(),
@@ -87,7 +87,6 @@ impl RegisterView {
         main_box.append(&self.login_button);
 
         self.connect_button(
-            window.clone(),
             self.realname_entry.clone(),
             self.pass_entry.clone(),
             self.nick_entry.clone(),
@@ -102,12 +101,11 @@ impl RegisterView {
 
     fn connect_button(
         &self,
-        window: ApplicationWindow,
         realname_entry: Entry,
         pass_entry: Entry,
         nick_entry: Entry,
         username_entry: Entry,
-        sender: Sender<String>
+        sender: Sender<ControllerMessage>
     ) {
         self.login_button.connect_clicked(move |_| {
             if
@@ -130,9 +128,15 @@ impl RegisterView {
                 // sender.send(user_command).expect("Error: user command");
 
                 // window.close();
-                
-                sender.send("register".to_string()).expect("Error: pass command");
-                sender.send("change".to_string()).expect("Error: pass command");
+                let register = ControllerMessage::Register { 
+                                                                pass: pass_entry.text(), 
+                                                                nickname: nick_entry.text(), 
+                                                                username: username_entry.text(), 
+                                                                realname: realname_entry.text() };
+                sender.send(register).expect("Error: pass command");
+
+                let change_view = ControllerMessage::ChangeViewToMain {};
+                sender.send(change_view).expect("Error: pass command");
             }
         });
     }
