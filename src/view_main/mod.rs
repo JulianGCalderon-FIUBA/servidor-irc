@@ -138,7 +138,7 @@ impl MainView {
             .build();
 
         scrolled_window.add_css_class("message_box");
-        self.send_message = create_send_button(message_box, self.input.clone(), scrolled_window.clone());
+        self.connect_send_button(message_box, self.input.clone(), scrolled_window.clone(), self.sender.clone());
         message_sender_box.append(&self.send_message);
 
         chat.append(&scrolled_window);
@@ -172,6 +172,30 @@ impl MainView {
 
         window
     }
+
+    fn connect_send_button(&self, message_box: Box, input: Entry, scrolled_window: ScrolledWindow, sender: Sender<ControllerMessage>) {
+        self.send_message.connect_clicked(move |_| {
+            let input_text = input.text();
+            if !entry_is_valid(&input_text) {
+                return;
+            }
+            
+            let priv_message = ControllerMessage::SendPrivMessage { 
+                nickname: "ana".to_string(), 
+                message: input_text.clone() };
+            sender.send(priv_message).expect("Error: private message command");
+    
+            let message = create_message(&input_text);
+            message.add_css_class("message");
+            message_box.append(&message);
+    
+            let adj = scrolled_window.vadjustment();
+            adj.set_upper(adj.upper() + adj.page_size());
+            adj.set_value(adj.upper());
+            scrolled_window.set_vadjustment(Some(&adj));
+        });
+    }
+
 }
 
 fn create_button(label: &str) -> Button {
@@ -205,21 +229,23 @@ fn create_send_button(message_box: Box, input: Entry, scrolled_window: ScrolledW
     let send_button = create_button("send");
     send_button.add_css_class("send_button");
     
-    send_button.connect_clicked(move |_| {
-        let input_text = input.text();
-        if !entry_is_valid(&input_text) {
-            return;
-        }
+    // send_button.connect_clicked(move |_| {
+    //     let input_text = input.text();
+    //     if !entry_is_valid(&input_text) {
+    //         return;
+    //     }
 
-        let message = create_message(&input_text);
-        message.add_css_class("message");
-        message_box.append(&message);
 
-        let adj = scrolled_window.vadjustment();
-        adj.set_upper(adj.upper() + adj.page_size());
-        adj.set_value(adj.upper());
-        scrolled_window.set_vadjustment(Some(&adj));
-    });
+
+    //     let message = create_message(&input_text);
+    //     message.add_css_class("message");
+    //     message_box.append(&message);
+
+    //     let adj = scrolled_window.vadjustment();
+    //     adj.set_upper(adj.upper() + adj.page_size());
+    //     adj.set_value(adj.upper());
+    //     scrolled_window.set_vadjustment(Some(&adj));
+    // });
 
     send_button
 }

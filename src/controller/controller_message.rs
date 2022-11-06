@@ -11,7 +11,7 @@ pub enum ControllerMessage {
     ChangeViewToMain {},
     SendPrivMessage {
         nickname: String,
-        message: String
+        message: GString
     },
     RegularMessage {
         message: String

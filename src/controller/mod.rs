@@ -95,9 +95,13 @@ impl Controller {
                     let mut main_view = MainView::new(sender.clone());
                     main_view.get_view(app_clone.clone()).show();                    
                 },
+                SendPrivMessage { nickname, message } => {
+                    let priv_message = format!("PRIVMSG {} :{}", nickname, message);
+                    client.send_raw(&priv_message).expect("ERROR");
+                }
                 RegularMessage { message } => {
                     println!("{}", message);
-                }
+                },
                 _ => println!("No command found")
             };
             // Returning false here would close the receiver
