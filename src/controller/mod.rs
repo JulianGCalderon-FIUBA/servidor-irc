@@ -96,7 +96,8 @@ impl Controller {
                     client.send_raw(&priv_message).expect("ERROR");
                 },
                 ReceivePrivMessage { nickname, message } => {
-                    println!("Mensaje privado de {}: {}", nickname, message);
+                    // println!("Mensaje privado de {}: {}", nickname, message);
+                    main_view.receive_priv_message(message);
                 }
                 RegularMessage { message } => {
                     println!("{}", message);

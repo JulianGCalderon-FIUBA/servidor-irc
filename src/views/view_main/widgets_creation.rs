@@ -1,4 +1,4 @@
-use gtk::{Button, Orientation, Separator};
+use gtk::{Button, Orientation, Separator, Box};
 use gtk4 as gtk;
 
 pub fn create_button(label: &str) -> Button {
@@ -15,4 +15,15 @@ pub fn create_separator() -> Separator {
     Separator::builder()
         .orientation(Orientation::Vertical)
         .build()
+}
+
+pub fn create_message_box() -> Box {
+    Box::builder()
+            .orientation(Orientation::Vertical)
+            .margin_top(10)
+            .margin_bottom(10)
+            .margin_start(10)
+            .margin_bottom(10)
+            .halign(gtk::Align::Start)
+            .build()
 }

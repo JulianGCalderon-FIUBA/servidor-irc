@@ -4,14 +4,14 @@ mod sidebar;
 pub mod widgets_creation;
 
 use gtk::{
-    glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Label, Orientation,
+    glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Label, Orientation, Box
 };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
 use self::chat::widgets_creation::create_message;
-use self::widgets_creation::{create_button, create_separator};
+use self::widgets_creation::{create_button, create_separator, create_message_box};
 
 use super::widgets_creation::{create_entry, create_main_box};
 
@@ -20,7 +20,7 @@ pub struct MainView {
     pub add_channel: Button,
     pub clients: Vec<Button>,
     pub add_client: Button,
-    pub messages: Vec<Label>,
+    pub message_box: Box,
     pub user_info: Button,
     pub send_message: Button,
     pub input: Entry,
@@ -43,7 +43,7 @@ impl MainView {
                 create_button("ana"),
             ],
             add_client: create_button("+"),
-            messages: vec![create_message("hola!")],
+            message_box: create_message_box(),
             user_info: create_button("info"),
             input: create_entry("Message..."),
             send_message: create_button("send"),

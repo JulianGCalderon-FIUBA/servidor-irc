@@ -1,5 +1,7 @@
 pub mod widgets_creation;
 
+use std::{rc::Rc, cell::Cell};
+
 use gtk::{glib::Sender, prelude::*, Box, Entry, Orientation, ScrolledWindow};
 use gtk4 as gtk;
 
@@ -19,14 +21,14 @@ impl MainView {
             .build();
         chat.add_css_class("chat");
 
-        let message_box = Box::builder()
-            .orientation(Orientation::Vertical)
-            .margin_top(10)
-            .margin_bottom(10)
-            .margin_start(10)
-            .margin_bottom(10)
-            .halign(gtk::Align::Start)
-            .build();
+        // let message_box = Box::builder()
+        //     .orientation(Orientation::Vertical)
+        //     .margin_top(10)
+        //     .margin_bottom(10)
+        //     .margin_start(10)
+        //     .margin_bottom(10)
+        //     .halign(gtk::Align::Start)
+        //     .build();
 
         let message_sender_box = Box::builder()
             .orientation(Orientation::Horizontal)
@@ -48,17 +50,21 @@ impl MainView {
             .min_content_width(600)
             .margin_top(20)
             .margin_bottom(20)
-            .child(&message_box)
+            .child(&self.message_box)
             .build();
 
         scrolled_window.add_css_class("message_box");
 
+        let message_box = self.message_box.clone();
+
         self.connect_send_button(
-            message_box,
+            message_box.clone(),
             self.input.clone(),
             scrolled_window.clone(),
             self.sender.clone(),
         );
+
+        self.message_box = message_box;
 
         message_sender_box.append(&self.send_message);
 
@@ -99,6 +105,12 @@ impl MainView {
             adj.set_value(adj.upper());
             scrolled_window.set_vadjustment(Some(&adj));
         });
+    }
+
+    pub fn receive_priv_message(&self, message: String) {
+        let message = create_message(&message);
+        message.add_css_class("message");
+        self.message_box.append(&message);
     }
 }
 
