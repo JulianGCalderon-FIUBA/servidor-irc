@@ -11,6 +11,7 @@ use super::{
 };
 
 impl<T: ClientTrait> Database<T> {
+    /// Adds client to Database.
     pub fn add_client(&mut self, client: Client<T>) {
         let clientinfo = client.get_info();
 
@@ -21,6 +22,7 @@ impl<T: ClientTrait> Database<T> {
         self.clients.insert(clientinfo.nickname, client);
     }
 
+    /// Sets client as server operator.
     pub fn set_server_operator(&mut self, nickname: &str) {
         println!("Setting {} as operator", nickname);
 
@@ -29,6 +31,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
+    /// Returns if client is server operator.
     pub fn is_server_operator(&mut self, nickname: &str) -> bool {
         if let Some(client) = self.clients.get(nickname) {
             return client.borrow_mut().is_server_operator();
@@ -37,6 +40,7 @@ impl<T: ClientTrait> Database<T> {
         false
     }
 
+    /// Disconnects client from server, removing it from Database.
     pub fn disconnect_client(&mut self, nickname: &str) {
         println!("Disconnecting {} ", nickname);
 
@@ -49,6 +53,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
+    /// Returns the client's stream or error if client is disconnected.
     pub fn get_stream(&self, nickname: &str) -> io::Result<T> {
         if let Some(client) = self.clients.get(nickname) {
             return client.borrow().get_stream();
@@ -60,6 +65,7 @@ impl<T: ClientTrait> Database<T> {
         ))
     }
 
+    /// Adds client to channel.
     pub fn add_client_to_channel(&mut self, nickname: &str, channel_name: &str) {
         println!("Adding {} to channel {}", nickname, channel_name);
 
@@ -77,6 +83,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
+    /// Removes client from channel.
     pub fn remove_client_from_channel(&mut self, nickname: &str, channel_name: &str) {
         println!("Removing {} from channel {}", nickname, channel_name);
 
@@ -88,14 +95,17 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
+    /// Returns if Database contains client.
     pub fn contains_client(&self, nickname: &str) -> bool {
         self.clients.get(nickname).is_some()
     }
 
+    /// Returns if Database contains channel.
     pub fn contains_channel(&self, channel: &str) -> bool {
         self.channels.contains_key(channel)
     }
 
+    /// Returns if client is in channel.
     pub fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
         if let Some(channel) = self.channels.get(channel) {
             return channel.contains_client(nickname);
@@ -104,6 +114,7 @@ impl<T: ClientTrait> Database<T> {
         false
     }
 
+    /// Returns array of clients for channel.
     pub fn get_clients_for_channel(&self, channel: &str) -> Vec<String> {
         let channel_info = self.channels.get(channel);
 
@@ -113,6 +124,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
+    /// Returns array with ClientInfo for connected clients.
     pub fn get_all_clients(&self) -> Vec<ClientInfo> {
         self.clients
             .values()
@@ -120,18 +132,22 @@ impl<T: ClientTrait> Database<T> {
             .collect()
     }
 
+    /// Returns array with ClientInfo for channels that match mask.
     pub fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
         self.filtered_clients(mask, client_matches_mask)
     }
 
+    /// Returns array with ClientInfo for channels that match nick mask.
     pub fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
         self.filtered_clients(mask, client_matches_nickmask)
     }
 
+    /// Returns array of channels in Database.
     pub fn get_channels(&self) -> Vec<String> {
         self.channels.keys().cloned().collect()
     }
 
+    /// Returns array of channels the client is connected to.
     pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
         let mut channels = vec![];
 
@@ -144,7 +160,7 @@ impl<T: ClientTrait> Database<T> {
         channels
     }
 
-    pub fn filtered_clients(
+    fn filtered_clients(
         &self,
         mask: &str,
         filter: fn(&ClientInfo, &str) -> bool,

@@ -4,6 +4,7 @@ use std::sync::mpsc::Sender;
 use super::{Client, ClientInfo};
 use crate::server::client_trait::ClientTrait;
 
+/// Possible messages or requests a Database can receive.
 pub enum DatabaseMessage<T: ClientTrait> {
     AddClient {
         client: Client<T>,
@@ -65,5 +66,8 @@ pub enum DatabaseMessage<T: ClientTrait> {
         nickmask: String,
         respond_to: Sender<Vec<ClientInfo>>,
     },
-    UpdateNickname { old_nickname: String, new_nickname: String}
+    UpdateNickname {
+        old_nickname: String,
+        new_nickname: String,
+    },
 }

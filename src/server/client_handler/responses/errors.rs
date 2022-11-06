@@ -1,5 +1,5 @@
 use std::fmt::Display;
-
+/// Possible errors the commands may have.
 pub enum ErrorReply {
     NoSuchNickname401 { nickname: String },
     NoSuchChannel403 { channel: String },

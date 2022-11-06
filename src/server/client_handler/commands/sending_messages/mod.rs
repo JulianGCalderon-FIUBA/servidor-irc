@@ -1,3 +1,4 @@
+/// This module contains validations for sending messages operations.
 mod validations;
 
 use crate::server::ClientHandler;
@@ -9,6 +10,7 @@ use std::io;
 use super::{NOTICE_COMMAND, PRIVMSG_COMMAND};
 
 impl<T: ClientTrait> ClientHandler<T> {
+    /// Sends private message to client.
     pub fn privmsg_command(
         &mut self,
         mut parameters: Vec<String>,
@@ -44,7 +46,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         Ok(())
     }
-
+    /// Sends notice to targets.
     pub fn notice_command(
         &mut self,
         mut parameters: Vec<String>,

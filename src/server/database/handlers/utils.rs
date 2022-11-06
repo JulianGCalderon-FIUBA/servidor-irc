@@ -1,9 +1,11 @@
 use super::ClientInfo;
 
+/// Returns if client matches nickmask.
 pub fn client_matches_nickmask(client: &ClientInfo, mask: &str) -> bool {
     matches(&client.nickname, mask)
 }
 
+/// Returns if client matches mask.
 pub fn client_matches_mask(client: &ClientInfo, query: &str) -> bool {
     if matches(&client.nickname, query) {
         return true;
@@ -24,6 +26,7 @@ pub fn client_matches_mask(client: &ClientInfo, query: &str) -> bool {
     false
 }
 
+/// Checks for pattern in base and returns true if it matches in some way.
 pub fn matches(base: &str, pattern: &str) -> bool {
     if pattern.is_empty() {
         return base.is_empty();

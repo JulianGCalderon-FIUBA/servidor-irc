@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use crate::server::client_trait::ClientTrait;
 
 use super::Client;
-
+/// A Channel has clients and a name.
 pub struct Channel<T: ClientTrait> {
     _name: String,
     //vector de nicknames
@@ -13,7 +13,7 @@ pub struct Channel<T: ClientTrait> {
 }
 
 impl<T: ClientTrait> Channel<T> {
-    /// Creates a new [`_ChannelInfo`].
+    /// Creates a new [`Channel`].
     pub fn new(_name: String, creator: Rc<RefCell<Client<T>>>) -> Self {
         let clients = vec![creator];
 
@@ -24,6 +24,7 @@ impl<T: ClientTrait> Channel<T> {
         }
     }
 
+    /// Returns clients in Channel.
     pub fn get_clients(&self) -> Vec<String> {
         let mut names = vec![];
         for client in self.clients.iter() {
@@ -32,16 +33,19 @@ impl<T: ClientTrait> Channel<T> {
         names
     }
 
+    /// Adds client to Channel.
     pub fn add_client(&mut self, client: Rc<RefCell<Client<T>>>) {
         self.clients.push(client);
     }
 
+    /// Returns true if the client is in Channel.
     pub fn contains_client(&self, nickname: &str) -> bool {
         self.clients
             .iter()
             .any(|c| c.borrow().nickname() == nickname)
     }
 
+    /// Removes client from Channel.
     pub fn remove_client(&mut self, client: &str) {
         let index = self
             .clients

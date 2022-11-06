@@ -1,5 +1,7 @@
 use std::io;
+/// This module contains useful functionalities when working with user based queries.
 mod utils;
+/// This module contains validations for user based queries operations.
 mod validations;
 
 use crate::server::client_handler::responses::errors::ErrorReply;
@@ -9,6 +11,7 @@ use crate::server::client_trait::ClientTrait;
 use crate::server::database::ClientInfo;
 
 impl<T: ClientTrait> ClientHandler<T> {
+    /// Sends whois command.
     pub fn whois_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_whois_is_valid(&parameters) {
             return self.send_response_for_error(error);
@@ -36,7 +39,7 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         Ok(())
     }
-
+    /// Sends who command.
     pub fn who_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_who_is_valid(&parameters) {
             return self.send_response_for_error(error);
