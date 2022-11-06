@@ -41,21 +41,21 @@ impl MainView {
     pub fn new(sender: Sender<String>) -> Self {
         Self {
             channels: vec![
-                create_sidebar_button("#channel1", 12),
-                create_sidebar_button("#channel2", 12)
+                create_button("#channel1", 12),
+                create_button("#channel2", 12)
             ],
-            add_channel: create_sidebar_button("+", 12),
+            add_channel: create_button("+", 12),
             clients: vec![
-                create_sidebar_button("juli", 12),
-                create_sidebar_button("sol", 12),
-                create_sidebar_button("santi", 12),
-                create_sidebar_button("ana", 12)
+                create_button("juli", 12),
+                create_button("sol", 12),
+                create_button("santi", 12),
+                create_button("ana", 12)
             ],
-            add_client: create_sidebar_button("+", 12),
+            add_client: create_button("+", 12),
             messages: vec![create_message("hola!")],
-            user_info: create_button_chat("info"),
+            user_info: create_button("info",12),
             input: create_entry("Message..."),
-            send_message: create_button_chat("send"),
+            send_message: create_button("send",12),
             quit_channel: create_button_conv_info("x"),
             channel_info: create_button_conv_info("info"),
             func_channel: create_button_conv_info("func"),
@@ -175,50 +175,9 @@ impl MainView {
 
         window
     }
-
-    // fn connect_button(
-    //     &self,
-    //     window: ApplicationWindow,
-    //     realname_entry: Entry,
-    //     pass_entry: Entry,
-    //     nick_entry: Entry,
-    //     username_entry: Entry,
-    //     sender: Sender<String>
-    // ) {
-    //     self.login_button.connect_clicked(move |_| {
-    //         if
-    //             realname_entry.text().len() != 0 &&
-    //             !!pass_entry.text().len() != 0 &&
-    //             !!nick_entry.text().len() != 0 &&
-    //             !!username_entry.text().len() != 0
-    //         {
-    //             // let pass_command = format!("PASS {}", pass_entry.text());
-    //             // let nick_command = format!("NICK {}", nick_entry.text());
-    //             // let user_command = format!(
-    //             //     "USER {} {} {} :{}",
-    //             //     username_entry.text(),
-    //             //     username_entry.text(),
-    //             //     username_entry.text(),
-    //             //     username_entry.text()
-    //             // );
-    //             // sender.send(pass_command).expect("Error: pass command");
-    //             // sender.send(nick_command).expect("Error: nick command");
-    //             // sender.send(user_command).expect("Error: user command");
-
-    //             // window.close();
-
-    //             sender.send("register".to_string()).expect("Error: pass command");
-    //             sender.send("change".to_string()).expect("Error: pass command");
-    //         }
-    //     });
-    // }
-
-    // pub fn get_pass(&self) -> Entry {
-    //     self.pass_entry.clone()
-    // }
 }
 
-fn create_sidebar_button(label: &str, margin: i32) -> Button {
+fn create_button(label: &str, margin: i32) -> Button {
     let button = Button::builder()
         .label(label)
         .margin_top(margin)
@@ -246,20 +205,8 @@ fn create_separator() -> Separator {
     Separator::builder().orientation(Orientation::Vertical).build()
 }
 
-fn create_button_chat(label: &str) -> Button {
-    Button::builder()
-        .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .halign(gtk::Align::Center)
-        .valign(gtk::Align::Center)
-        .build()
-}
-
 fn create_send_button(message_box: Box, input: Entry, scrolled_window: ScrolledWindow) -> Button {
-    let send_button = create_button_chat("send");
+    let send_button = create_button("send",12);
     send_button.add_css_class("send_button");
     
     send_button.connect_clicked(move |_| {
@@ -325,32 +272,3 @@ fn create_main_box(orientation: Orientation, height: i32, width: i32) -> Box {
         .width_request(width)
         .build()
 }
-
-fn build_main_app(app: &Application) {
-    let window = ApplicationWindow::builder().application(app).title("Lemon Pie IRC").build();
-
-    let main_box = create_main_box(Orientation::Horizontal, 800, 1200);
-    main_box.add_css_class("main_box");
-
-    let sidebar = Sidebar::new();
-    sidebar.add_css_class("sidebar");
-    main_box.append(&sidebar);
-
-    let separator = create_separator();
-    main_box.add_css_class("separator");
-    main_box.append(&separator);
-
-    let chat = Chat::new();
-    chat.add_css_class("chat");
-    main_box.append(&chat);
-
-    // let separator = create_separator();
-    // main_box.append(&separator);
-
-    let conv_info = ConvInfo::new();
-    main_box.append(&conv_info);
-
-    window.set_child(Some(&main_box));
-    window.show();
-}
-
