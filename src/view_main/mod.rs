@@ -142,7 +142,7 @@ impl MainView {
             .build();
 
         scrolled_window.add_css_class("message_box");
-        self.send_message = create_send_button(message_box, &self.input, scrolled_window.clone());
+        self.send_message = create_send_button(message_box, self.input.clone(), scrolled_window.clone());
         message_sender_box.append(&self.send_message);
 
         chat.append(&scrolled_window);
@@ -258,12 +258,12 @@ fn create_button_chat(label: &str) -> Button {
         .build()
 }
 
-fn create_send_button(message_box: Box, input: &Entry, scrolled_window: ScrolledWindow) -> Button {
+fn create_send_button(message_box: Box, input: Entry, scrolled_window: ScrolledWindow) -> Button {
     let send_button = create_button_chat("send");
     send_button.add_css_class("send_button");
-    let input_text = input.text();
-
+    
     send_button.connect_clicked(move |_| {
+        let input_text = input.text();
         if !entry_is_valid(&input_text) {
             return;
         }
