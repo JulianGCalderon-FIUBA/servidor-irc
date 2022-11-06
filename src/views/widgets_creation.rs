@@ -1,5 +1,5 @@
+use gtk::{Box, Entry, Orientation};
 use gtk4 as gtk;
-use gtk::{ Entry, Orientation, Box };
 
 pub fn create_entry(placeholder: &str) -> Entry {
     Entry::builder().placeholder_text(placeholder).build()

@@ -1,5 +1,5 @@
+use gtk::{Button, Orientation, Separator};
 use gtk4 as gtk;
-use gtk::{ Button, Orientation, Separator };
 
 pub fn create_button(label: &str) -> Button {
     Button::builder()
@@ -12,5 +12,7 @@ pub fn create_button(label: &str) -> Button {
 }
 
 pub fn create_separator() -> Separator {
-    Separator::builder().orientation(Orientation::Vertical).build()
+    Separator::builder()
+        .orientation(Orientation::Vertical)
+        .build()
 }

@@ -1,12 +1,12 @@
+use gtk::{prelude::*, Align, Box, Button, Entry, Label, ScrolledWindow};
 use gtk4 as gtk;
-use gtk::{ Align, Box, Button, Entry, Label, prelude::*, ScrolledWindow };
 
 use crate::views::view_main::widgets_creation::create_button;
 
 pub fn create_send_button(
     message_box: Box,
     input: Entry,
-    scrolled_window: ScrolledWindow
+    scrolled_window: ScrolledWindow,
 ) -> Button {
     let send_button = create_button("send");
     // send_button.add_css_class("send_button");

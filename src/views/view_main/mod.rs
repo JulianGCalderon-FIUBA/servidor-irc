@@ -4,19 +4,12 @@ mod sidebar;
 pub mod widgets_creation;
 
 use gtk::{
-    Application,
-    ApplicationWindow,
-    Button,
-    Entry,
-    glib::Sender,
-    Label,
-    Orientation,
-    prelude::*,
+    glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Label, Orientation,
 };
 use gtk4 as gtk;
 
-use self::widgets_creation::{ create_button, create_separator };
 use self::chat::widgets_creation::create_message;
+use self::widgets_creation::{create_button, create_separator};
 
 use super::widgets_creation::{create_entry, create_main_box};
 
@@ -44,7 +37,7 @@ impl MainView {
                 create_button("juli"),
                 create_button("sol"),
                 create_button("santi"),
-                create_button("ana")
+                create_button("ana"),
             ],
             add_client: create_button("+"),
             messages: vec![create_message("hola!")],
@@ -59,7 +52,10 @@ impl MainView {
     }
 
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
-        let window = ApplicationWindow::builder().application(&app).title("Lemon Pie IRC").build();
+        let window = ApplicationWindow::builder()
+            .application(&app)
+            .title("Lemon Pie IRC")
+            .build();
 
         let main_box = create_main_box(Orientation::Horizontal, 800, 1200);
         main_box.add_css_class("main_box");

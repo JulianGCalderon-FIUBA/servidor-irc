@@ -1,5 +1,5 @@
+use gtk::{Orientation, Separator};
 use gtk4 as gtk;
-use gtk::{ Separator, Orientation };
 
 pub fn create_separator_sidebar() -> Separator {
     Separator::builder()

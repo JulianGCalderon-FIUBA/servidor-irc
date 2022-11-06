@@ -1,18 +1,13 @@
 mod widgets_creation;
 
+use gtk::{prelude::*, Box, Orientation};
 use gtk4 as gtk;
-use gtk::{
-    Box,
-    Orientation,
-    prelude::*,
-};
 
 use self::widgets_creation::create_separator_sidebar;
 
-use super::{MainView};
+use super::MainView;
 
 impl MainView {
-    
     pub fn create_sidebar(&mut self) -> Box {
         let sidebar = Box::builder().orientation(Orientation::Vertical).build();
 

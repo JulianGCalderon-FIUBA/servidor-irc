@@ -1,19 +1,13 @@
 pub mod widgets_creation;
 
+use gtk::{prelude::*, Box, Orientation, ScrolledWindow};
 use gtk4 as gtk;
-use gtk::{
-    Box,
-    Orientation,
-    prelude::*,
-    ScrolledWindow,
-};
 
 use self::widgets_creation::create_send_button;
 
-use super::{MainView};
+use super::MainView;
 
 impl MainView {
-
     pub fn create_chat(&mut self) -> Box {
         let chat = Box::builder()
             .orientation(Orientation::Vertical)
@@ -56,11 +50,8 @@ impl MainView {
             .build();
 
         scrolled_window.add_css_class("message_box");
-        self.send_message = create_send_button(
-            message_box,
-            self.input.clone(),
-            scrolled_window.clone()
-        );
+        self.send_message =
+            create_send_button(message_box, self.input.clone(), scrolled_window.clone());
         message_sender_box.append(&self.send_message);
 
         chat.append(&scrolled_window);

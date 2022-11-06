@@ -1,5 +1,5 @@
+use gtk::{prelude::*, Align, Box, Button, Label, Orientation};
 use gtk4 as gtk;
-use gtk::{ Align, Box, Button, Label, prelude::*, Orientation };
 
 use crate::views::view_main::widgets_creation::create_button;
 

@@ -1,12 +1,7 @@
+use gtk::{prelude::*, Align, Box, Orientation};
 use gtk4 as gtk;
-use gtk::{
-    Align,
-    Box,
-    Orientation,
-    prelude::*
-};
 
-use super::{MainView};
+use super::MainView;
 
 impl MainView {
     pub fn create_conv_info(&mut self) -> Box {
