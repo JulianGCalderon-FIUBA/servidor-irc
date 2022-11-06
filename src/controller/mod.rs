@@ -60,7 +60,8 @@ impl Controller {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
         
         let mut view = RegisterView::new(sender.clone());
-        view.get_view(app.clone()).show();
+        let window = view.get_view(app.clone());
+        window.show();
 
         let app_clone = app.clone();
         
@@ -75,7 +76,7 @@ impl Controller {
         receiver.attach(None, move |msg| {
             match &msg[..] {
                 "change"   => {
-                    // view.get_view(app).close();
+                    window.close();
                     let mut main_view = MainView::new(sender.clone());
                     main_view.get_view(app_clone.clone()).show()
                 },
