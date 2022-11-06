@@ -1,14 +1,13 @@
 mod widgets_creation;
 
-use gtk::{ glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation };
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation};
 use gtk4 as gtk;
 
+use self::widgets_creation::{create_label_box, create_login_button};
+
+use super::widgets_creation::{create_entry, create_main_box};
+
 use crate::controller::controller_message::ControllerMessage;
-
-use self::widgets_creation::{ create_label_box, create_login_button };
-
-use super::widgets_creation::{ create_entry, create_main_box };
-
 
 pub struct RegisterView {
     pub realname_entry: Entry,
@@ -32,7 +31,10 @@ impl RegisterView {
     }
 
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
-        let window = ApplicationWindow::builder().application(&app).title("Lemon Pie IRC").build();
+        let window = ApplicationWindow::builder()
+            .application(&app)
+            .title("Lemon Pie IRC")
+            .build();
 
         let main_box = create_main_box(Orientation::Vertical, 300, 300);
         main_box.add_css_class("main_box");
@@ -60,7 +62,7 @@ impl RegisterView {
             self.pass_entry.clone(),
             self.nick_entry.clone(),
             self.username_entry.clone(),
-            self.sender.clone()
+            self.sender.clone(),
         );
 
         window.set_child(Some(&main_box));
