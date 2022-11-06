@@ -27,6 +27,7 @@ pub struct MainView {
     pub channel_info: Button,
     pub quit_channel: Button,
     pub func_channel: Button,
+    pub current_conversation: String, //nickname
     sender: Sender<ControllerMessage>,
 }
 
@@ -49,6 +50,7 @@ impl MainView {
             quit_channel: create_button("x"),
             channel_info: create_button("info"),
             func_channel: create_button("func"),
+            current_conversation: "juli".to_string(),
             sender,
         }
     }

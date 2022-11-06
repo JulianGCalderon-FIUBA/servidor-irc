@@ -63,6 +63,8 @@ impl MainView {
     }
 
     fn connect_send_button(&self, message_box: Box, input: Entry, scrolled_window: ScrolledWindow, sender: Sender<ControllerMessage>) {
+        let nickname_reveiver = self.current_conversation.clone();
+        
         self.send_message.connect_clicked(move |_| {
             let input_text = input.text();
             if !entry_is_valid(&input_text) {
@@ -70,7 +72,7 @@ impl MainView {
             }
             
             let priv_message = ControllerMessage::SendPrivMessage { 
-                nickname: "ana".to_string(), 
+                nickname: nickname_reveiver.clone(), 
                 message: input_text.clone() };
             sender.send(priv_message).expect("Error: private message command");
     
