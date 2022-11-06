@@ -12,9 +12,9 @@ use gtk::{
     glib::Sender,
 };
 
-use self::widgets_creation::{ create_label, create_login_button, create_main_box };
+use self::widgets_creation::{ create_label, create_login_button };
 
-use super::widgets_creation::create_entry;
+use super::widgets_creation::{create_entry, create_main_box};
 
 pub struct RegisterView {
     pub realname_entry: Entry,
@@ -90,7 +90,6 @@ impl RegisterView {
         main_box.append(&self.login_button);
 
         self.connect_button(
-            window.clone(),
             self.realname_entry.clone(),
             self.pass_entry.clone(),
             self.nick_entry.clone(),
@@ -105,7 +104,6 @@ impl RegisterView {
 
     fn connect_button(
         &self,
-        window: ApplicationWindow,
         realname_entry: Entry,
         pass_entry: Entry,
         nick_entry: Entry,

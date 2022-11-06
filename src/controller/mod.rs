@@ -1,8 +1,8 @@
 use gtk4 as gtk;
 
 use crate::{
-    view_register::RegisterView,
-    view_main::MainView,
+    views::view_register::RegisterView,
+    views::view_main::MainView,
     client::Client,
     ADDRESS,
     message::{ Message, CreationError, self },

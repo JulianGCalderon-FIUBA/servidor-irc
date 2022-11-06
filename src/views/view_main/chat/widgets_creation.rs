@@ -18,7 +18,6 @@ pub fn create_send_button(
         }
 
         let message = create_message(&input_text);
-        message.add_css_class("message");
         message_box.append(&message);
 
         let adj = scrolled_window.vadjustment();
@@ -35,12 +34,14 @@ fn entry_is_valid(entry_text: &str) -> bool {
 }
 
 pub fn create_message(label: &str) -> Label {
-    Label::builder()
+    let message = Label::builder()
         .label(label)
         .margin_top(12)
         .margin_bottom(12)
         .margin_start(12)
         .margin_end(12)
         .halign(Align::Start)
-        .build()
+        .build();
+    message.add_css_class("message");
+    message
 }

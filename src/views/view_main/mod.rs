@@ -1,7 +1,7 @@
 mod chat;
 mod conv_info;
 mod sidebar;
-mod widgets_creation;
+pub mod widgets_creation;
 
 use gtk::{
     Application,
@@ -15,10 +15,10 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use self::widgets_creation::{ create_button, create_separator, create_main_box };
+use self::widgets_creation::{ create_button, create_separator };
 use self::chat::widgets_creation::create_message;
 
-use super::widgets_creation::create_entry;
+use super::widgets_creation::{create_entry, create_main_box};
 
 pub struct MainView {
     pub channels: Vec<Button>,
