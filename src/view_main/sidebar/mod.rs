@@ -1,24 +1,37 @@
-mod imp;
+pub(crate) mod widgets_creation;
 
 use gtk4 as gtk;
+use gtk::{
+    Box,
+    Orientation,
+    prelude::*,
+};
 
-use glib::Object;
-use gtk::glib;
+use self::widgets_creation::create_separator_sidebar;
 
-glib::wrapper! {
-    pub struct Sidebar(ObjectSubclass<imp::Sidebar>)
-        @extends gtk::Box, gtk::Widget,
-        @implements gtk::Actionable, gtk::Buildable, gtk::Orientable;
-}
+use super::{MainView};
 
-impl Sidebar {
-    pub fn new() -> Self {
-        Object::new(&[("orientation", &gtk::Orientation::Vertical)]).expect("Could not be created")
-    }
-}
+impl MainView {
+    
+    pub fn create_sidebar(&mut self) -> Box {
+        let sidebar = Box::builder().orientation(Orientation::Vertical).build();
 
-impl Default for Sidebar {
-    fn default() -> Self {
-        Self::new()
+        sidebar.append(&self.channels[0]);
+        sidebar.append(&self.channels[1]);
+
+        self.add_channel.add_css_class("add");
+        sidebar.append(&self.add_channel);
+
+        let separator = create_separator_sidebar();
+        sidebar.append(&separator);
+
+        sidebar.append(&self.clients[0]);
+        sidebar.append(&self.clients[1]);
+        sidebar.append(&self.clients[2]);
+        sidebar.append(&self.clients[3]);
+
+        self.add_client.add_css_class("add");
+        sidebar.append(&self.add_client);
+        sidebar
     }
 }

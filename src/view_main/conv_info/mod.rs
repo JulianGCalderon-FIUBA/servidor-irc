@@ -1,24 +1,28 @@
-mod imp;
-
 use gtk4 as gtk;
+use gtk::{
+    Align,
+    Box,
+    Orientation,
+    prelude::*
+};
 
-use glib::Object;
-use gtk::glib;
+use super::{MainView};
 
-glib::wrapper! {
-    pub struct ConvInfo(ObjectSubclass<imp::ConvInfo>)
-        @extends gtk::Box, gtk::Widget,
-        @implements gtk::Actionable, gtk::Buildable, gtk::Orientable;
-}
+impl MainView {
+    pub fn create_conv_info(&mut self) -> Box {
+        let conv_info = Box::builder()
+            .orientation(Orientation::Vertical)
+            .margin_end(12)
+            .halign(Align::Start)
+            .build();
 
-impl ConvInfo {
-    pub fn new() -> Self {
-        Object::new(&[("orientation", &gtk::Orientation::Vertical)]).expect("Could not be created")
-    }
-}
+        self.quit_channel.add_css_class("exit_channel");
+        conv_info.append(&self.quit_channel);
 
-impl Default for ConvInfo {
-    fn default() -> Self {
-        Self::new()
+        conv_info.append(&self.channel_info);
+
+        conv_info.append(&self.func_channel);
+
+        conv_info
     }
 }
