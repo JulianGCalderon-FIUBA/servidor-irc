@@ -37,56 +37,51 @@ impl RegisterView {
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = ApplicationWindow::builder().application(&app).title("Lemon Pie IRC").build();
 
-        let main_box = Box::builder()
-            .orientation(Orientation::Vertical)
-            .width_request(300)
-            .height_request(300)
-            .halign(gtk::Align::Center)
-            .build();
+        let main_box = create_main_box(Orientation::Vertical, 300, 300);
         main_box.add_css_class("main_box");
 
         let realname_box = Box::builder()
             .orientation(Orientation::Horizontal)
             .halign(gtk::Align::Center)
+            .margin_top(20)
+            .margin_bottom(20)
             .build();
         let label = create_label("Your name:");
         realname_box.append(&label);
         realname_box.append(&self.realname_entry);
-        realname_box.set_margin_top(20);
-        realname_box.set_margin_bottom(20);
         main_box.append(&realname_box);
 
         let nickname_box = Box::builder()
             .orientation(Orientation::Horizontal)
             .halign(gtk::Align::Center)
+            .margin_top(20)
+            .margin_bottom(20)
             .build();
         let label = create_label("Nickname:");
         nickname_box.append(&label);
         nickname_box.append(&self.nick_entry);
-        nickname_box.set_margin_top(20);
-        nickname_box.set_margin_bottom(20);
         main_box.append(&nickname_box);
 
         let username_box = Box::builder()
             .orientation(Orientation::Horizontal)
             .halign(gtk::Align::Center)
+            .margin_top(20)
+            .margin_bottom(20)        
             .build();
         let label = create_label("Username:");
         username_box.append(&label);
         username_box.append(&self.username_entry);
-        username_box.set_margin_top(20);
-        username_box.set_margin_bottom(20);
         main_box.append(&username_box);
 
         let password_box = Box::builder()
             .orientation(Orientation::Horizontal)
+            .margin_top(20)
+            .margin_bottom(20)
             .halign(gtk::Align::Center)
             .build();
         let label = create_label("Password:");
         password_box.append(&label);
         password_box.append(&self.pass_entry);
-        password_box.set_margin_top(20);
-        password_box.set_margin_bottom(20);
         main_box.append(&password_box);
 
         main_box.append(&self.login_button);
@@ -138,7 +133,6 @@ impl RegisterView {
                 
                 sender.send("register".to_string()).expect("Error: pass command");
                 sender.send("change".to_string()).expect("Error: pass command");
-
             }
         });
     }
@@ -173,5 +167,14 @@ fn create_login_button(label: &str) -> Button {
         .margin_end(12)
         .halign(gtk::Align::Center)
         .valign(gtk::Align::Center)
+        .build()
+}
+
+fn create_main_box(orientation: Orientation, height: i32, width: i32) -> Box {
+    Box::builder()
+        .orientation(orientation)
+        .halign(gtk::Align::Center)
+        .height_request(height)
+        .width_request(width)
         .build()
 }

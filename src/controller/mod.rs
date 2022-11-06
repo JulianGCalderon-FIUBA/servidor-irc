@@ -2,6 +2,7 @@ use gtk4 as gtk;
 
 use crate::{
     view_register::RegisterView,
+    view_main::MainView,
     client::Client,
     ADDRESS,
     message::{ Message, CreationError, self },
@@ -58,8 +59,6 @@ impl Controller {
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
         
-        
-
         let mut view = RegisterView::new(sender.clone());
         view.get_view(app.clone()).show();
 
@@ -77,7 +76,7 @@ impl Controller {
             match &msg[..] {
                 "change"   => {
                     // view.get_view(app).close();
-                    let mut main_view = RegisterView::new(sender.clone());
+                    let mut main_view = MainView::new(sender.clone());
                     main_view.get_view(app_clone.clone()).show()
                 },
                 "register" => {
