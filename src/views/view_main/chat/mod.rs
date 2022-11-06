@@ -1,6 +1,6 @@
 pub mod widgets_creation;
 
-use gtk::{prelude::*, Box,Entry, Orientation, ScrolledWindow, glib::Sender};
+use gtk::{glib::Sender, prelude::*, Box, Entry, Orientation, ScrolledWindow};
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
@@ -52,8 +52,13 @@ impl MainView {
             .build();
 
         scrolled_window.add_css_class("message_box");
-    
-        self.connect_send_button(message_box, self.input.clone(), scrolled_window.clone(), self.sender.clone());
+
+        self.connect_send_button(
+            message_box,
+            self.input.clone(),
+            scrolled_window.clone(),
+            self.sender.clone(),
+        );
 
         message_sender_box.append(&self.send_message);
 
@@ -62,24 +67,33 @@ impl MainView {
         chat
     }
 
-    fn connect_send_button(&self, message_box: Box, input: Entry, scrolled_window: ScrolledWindow, sender: Sender<ControllerMessage>) {
+    fn connect_send_button(
+        &self,
+        message_box: Box,
+        input: Entry,
+        scrolled_window: ScrolledWindow,
+        sender: Sender<ControllerMessage>,
+    ) {
         let nickname_reveiver = self.current_conversation.clone();
-        
+
         self.send_message.connect_clicked(move |_| {
             let input_text = input.text();
             if !entry_is_valid(&input_text) {
                 return;
             }
-            
-            let priv_message = ControllerMessage::SendPrivMessage { 
-                nickname: nickname_reveiver.clone(), 
-                message: input_text.clone() };
-            sender.send(priv_message).expect("Error: private message command");
-    
+
+            let priv_message = ControllerMessage::SendPrivMessage {
+                nickname: nickname_reveiver.clone(),
+                message: input_text.clone(),
+            };
+            sender
+                .send(priv_message)
+                .expect("Error: private message command");
+
             let message = create_message(&input_text);
             message.add_css_class("message");
             message_box.append(&message);
-    
+
             let adj = scrolled_window.vadjustment();
             adj.set_upper(adj.upper() + adj.page_size());
             adj.set_value(adj.upper());

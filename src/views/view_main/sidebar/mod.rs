@@ -1,6 +1,6 @@
 mod widgets_creation;
 
-use gtk::{ prelude::*, Box, Orientation };
+use gtk::{prelude::*, Box, Orientation};
 use gtk4 as gtk;
 
 use self::widgets_creation::create_separator_sidebar;
