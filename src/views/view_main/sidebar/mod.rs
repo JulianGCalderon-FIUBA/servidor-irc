@@ -1,4 +1,4 @@
-pub(crate) mod widgets_creation;
+mod widgets_creation;
 
 use gtk4 as gtk;
 use gtk::{

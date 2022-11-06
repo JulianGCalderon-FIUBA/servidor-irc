@@ -1,17 +1,20 @@
-
+mod widgets_creation;
 
 use gtk4 as gtk;
 use gtk::{
-    Align,
-    Label,
     Button,
     Entry,
     Application,
     ApplicationWindow,
     Box,
     Orientation,
-    prelude::*, glib::Sender,
+    prelude::*,
+    glib::Sender,
 };
+
+use self::widgets_creation::{ create_label, create_login_button, create_main_box };
+
+use super::widgets_creation::create_entry;
 
 pub struct RegisterView {
     pub realname_entry: Entry,
@@ -25,10 +28,10 @@ pub struct RegisterView {
 impl RegisterView {
     pub fn new(sender: Sender<String>) -> Self {
         Self {
-            realname_entry: create_entry(),
-            nick_entry: create_entry(),
-            username_entry: create_entry(),
-            pass_entry: create_entry(),
+            realname_entry: create_entry(""),
+            nick_entry: create_entry(""),
+            username_entry: create_entry(""),
+            pass_entry: create_entry(""),
             login_button: create_login_button("login"),
             sender,
         }
@@ -66,7 +69,7 @@ impl RegisterView {
             .orientation(Orientation::Horizontal)
             .halign(gtk::Align::Center)
             .margin_top(20)
-            .margin_bottom(20)        
+            .margin_bottom(20)
             .build();
         let label = create_label("Username:");
         username_box.append(&label);
@@ -130,7 +133,7 @@ impl RegisterView {
                 // sender.send(user_command).expect("Error: user command");
 
                 // window.close();
-                
+
                 sender.send("register".to_string()).expect("Error: pass command");
                 sender.send("change".to_string()).expect("Error: pass command");
             }
@@ -140,41 +143,4 @@ impl RegisterView {
     pub fn get_pass(&self) -> Entry {
         self.pass_entry.clone()
     }
-}
-
-fn create_label(label: &str) -> Label {
-    Label::builder()
-        .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .halign(Align::Center)
-        .valign(Align::Center)
-        .build()
-}
-
-fn create_entry() -> Entry {
-    Entry::builder().build()
-}
-
-fn create_login_button(label: &str) -> Button {
-    Button::builder()
-        .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .halign(gtk::Align::Center)
-        .valign(gtk::Align::Center)
-        .build()
-}
-
-fn create_main_box(orientation: Orientation, height: i32, width: i32) -> Box {
-    Box::builder()
-        .orientation(orientation)
-        .halign(gtk::Align::Center)
-        .height_request(height)
-        .width_request(width)
-        .build()
 }

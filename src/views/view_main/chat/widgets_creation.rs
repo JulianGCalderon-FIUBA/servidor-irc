@@ -1,7 +1,7 @@
 use gtk4 as gtk;
 use gtk::{ Align, Box, Button, Entry, Label, prelude::*, ScrolledWindow };
 
-use crate::view_main::widgets_creation::create_button;
+use crate::views::view_main::widgets_creation::create_button;
 
 pub fn create_send_button(
     message_box: Box,
@@ -28,10 +28,6 @@ pub fn create_send_button(
     });
 
     send_button
-}
-
-pub fn create_entry(placeholder: &str) -> Entry {
-    Entry::builder().placeholder_text(placeholder).build()
 }
 
 fn entry_is_valid(entry_text: &str) -> bool {

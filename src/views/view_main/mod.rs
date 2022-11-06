@@ -16,7 +16,9 @@ use gtk::{
 use gtk4 as gtk;
 
 use self::widgets_creation::{ create_button, create_separator, create_main_box };
-use self::chat::widgets_creation::{ create_entry, create_message };
+use self::chat::widgets_creation::create_message;
+
+use super::widgets_creation::create_entry;
 
 pub struct MainView {
     pub channels: Vec<Button>,
