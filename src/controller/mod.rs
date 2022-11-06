@@ -1,12 +1,10 @@
-use std::{ sync::mpsc::{ Sender, Receiver }, thread };
-
 use gtk4 as gtk;
 
 use crate::{
     view_register::RegisterView,
     client::Client,
     ADDRESS,
-    message::{ Message, CreationError },
+    message::{ Message, CreationError, self },
 };
 use gtk::{
     gdk::Display,
@@ -18,7 +16,7 @@ use gtk::{
     CssProvider,
     Orientation,
     Separator,
-    StyleContext,
+    StyleContext, glib::{self, Receiver, Sender},
 };
 
 pub struct Controller {
@@ -45,34 +43,76 @@ impl Controller {
         );
     }
 
-    pub fn start(&mut self, sender: Sender<String>, receiver: Receiver<String>) {
-        let mut client = match Client::new(ADDRESS.to_string()) {
-            Ok(stream) => stream,
-            Err(error) => panic!("Error connecting to server: {:?}", error),
-        };
-
-        thread::spawn(move || {
-            client.async_read(Self::print_message);
-
-            for command in receiver {
-                println!("{}", &command);
-                client.send_raw(&command).expect("Failed sending message");
-            }
-        });
+    pub fn start(&mut self) {
         self.app.connect_startup(|_| Self::load_css());
-        self.app.connect_activate(move |app| Self::build_ui(&app, sender.clone()));
+        self.app.connect_activate(move |app| Self::build_ui(&app));
         self.app.run();
     }
 
-    fn build_ui(app: &Application, sender: Sender<String>) {
-        let mut view = RegisterView::new(sender);
-        view.get_view(app).show();
+    fn build_ui(app: &Application) {
+
+        let mut client = match Client::new(ADDRESS.to_string()) {
+            Ok(stream) => stream,
+            Err(error) => panic!("Error connecting to server: {:?}", error),
+        }; 
+
+        let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+        
+        
+
+        let mut view = RegisterView::new(sender.clone());
+        view.get_view(app.clone()).show();
+
+        let app_clone = app.clone();
+        
+        let sender_clone = sender.clone();
+        client.async_read(move |message| {
+            match message {
+                Ok(message) => sender_clone.send(message.to_string()).unwrap(),
+                Err(error) => (eprintln!("Failed to read message: {}", error)),
+            }
+        });
+
+        receiver.attach(None, move |msg| {
+            match &msg[..] {
+                "change"   => {
+                    // view.get_view(app).close();
+                    let mut main_view = RegisterView::new(sender.clone());
+                    main_view.get_view(app_clone.clone()).show()
+                },
+                "register" => {
+                    client.send_raw("PASS pass123").expect("ERROR");
+                    client.send_raw("NICK nick").expect("ERROR");
+                    client.send_raw("USER user user user :user").expect("ERROR");
+                }
+                msg => println!("{}", msg)
+            };
+            // Returning false here would close the receiver
+            // and have senders fail
+            glib::Continue(true)
+        });
+
+
+
+        
     }
 
-    fn print_message(message: Result<Message, CreationError>) {
-        match message {
-            Ok(message) => println!("{}", message),
-            Err(error) => eprintln!("Failed to read message: {}", error),
-        }
-    }
+    // fn handle_message(msg: String, view: RegisterView) {
+
+    // }
+
+    // fn print_message(message: Result<Message, CreationError>) {
+    //     match message {
+    //         Ok(message) => println!("{}", message),
+    //         Err(error) => eprintln!("Failed to read message: {}", error),
+    //     }
+    // }
 }
+
+// pub fn send_msg(message: Result<Message, CreationError>, sender: Sender<String>) {
+    
+//     match message {
+//                 Ok(message) => sender.send(message.to_string()).unwrap(),
+//                 Err(error) => (eprintln!("Failed to read message: {}", error)),
+//             }
+// }

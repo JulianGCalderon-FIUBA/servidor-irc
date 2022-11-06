@@ -1,4 +1,4 @@
-use std::sync::mpsc::Sender;
+
 
 use gtk4 as gtk;
 use gtk::{
@@ -10,7 +10,7 @@ use gtk::{
     ApplicationWindow,
     Box,
     Orientation,
-    prelude::*,
+    prelude::*, glib::Sender,
 };
 
 pub struct RegisterView {
@@ -34,8 +34,8 @@ impl RegisterView {
         }
     }
 
-    pub fn get_view(&mut self, app: &Application) -> ApplicationWindow {
-        let window = ApplicationWindow::builder().application(app).title("Lemon Pie IRC").build();
+    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
+        let window = ApplicationWindow::builder().application(&app).title("Lemon Pie IRC").build();
 
         let main_box = Box::builder()
             .orientation(Orientation::Vertical)
@@ -121,20 +121,24 @@ impl RegisterView {
                 !!nick_entry.text().len() != 0 &&
                 !!username_entry.text().len() != 0
             {
-                let pass_command = format!("PASS {}", pass_entry.text());
-                let nick_command = format!("NICK {}", nick_entry.text());
-                let user_command = format!(
-                    "USER {} {} {} :{}",
-                    username_entry.text(),
-                    username_entry.text(),
-                    username_entry.text(),
-                    username_entry.text()
-                );
-                sender.send(pass_command).expect("Error: pass command");
-                sender.send(nick_command).expect("Error: nick command");
-                sender.send(user_command).expect("Error: user command");
+                // let pass_command = format!("PASS {}", pass_entry.text());
+                // let nick_command = format!("NICK {}", nick_entry.text());
+                // let user_command = format!(
+                //     "USER {} {} {} :{}",
+                //     username_entry.text(),
+                //     username_entry.text(),
+                //     username_entry.text(),
+                //     username_entry.text()
+                // );
+                // sender.send(pass_command).expect("Error: pass command");
+                // sender.send(nick_command).expect("Error: nick command");
+                // sender.send(user_command).expect("Error: user command");
 
-                window.close();
+                // window.close();
+                
+                sender.send("register".to_string()).expect("Error: pass command");
+                sender.send("change".to_string()).expect("Error: pass command");
+
             }
         });
     }
