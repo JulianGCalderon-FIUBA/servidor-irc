@@ -1,8 +1,14 @@
 #[cfg(test)]
+/// Utils for testing different functionalities.
 mod testing_utils;
 
+/// Contains structure for client handler. It's main purpose is to handle the connection established between server and clients.
 mod client_handler;
+
+/// Definition of the trait used in the project's structures.
 mod client_trait;
+
+/// Contains structure for database. A Database stores and updates information regarding clients, channels and related.
 mod database;
 
 use crate::thread_pool::ThreadPool;
@@ -18,13 +24,13 @@ const MAX_CLIENTS: usize = 26;
 pub const OPER_USERNAME: &str = "admin";
 pub const OPER_PASSWORD: &str = "admin";
 
-/// Represents a Server clients can connect to.
+/// Represents a Server clients can connect to it contains a Database that stores relevant information.
 pub struct Server {
     database: DatabaseHandle<TcpStream>,
 }
 
 impl Server {
-    /// Starts new Server.
+    /// Starts new [`Server`].
     pub fn start() -> Self {
         let database = Database::start();
 

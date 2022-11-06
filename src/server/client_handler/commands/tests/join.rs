@@ -25,7 +25,7 @@ fn join_fails_with_empty_params() {
         "461 JOIN :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    assert_eq!(handler.database.get_channels(), channels);
+    assert_eq!(handler.database.get_all_channels(), channels);
 }
 
 #[test]
@@ -89,7 +89,7 @@ fn can_join_one_channel() {
 
     let parameters = vec!["#channel".to_string()];
 
-    assert!(handler.database.get_channels().is_empty());
+    assert!(handler.database.get_all_channels().is_empty());
 
     handler.join_command(parameters).unwrap();
 

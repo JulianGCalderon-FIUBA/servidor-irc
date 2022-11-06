@@ -139,7 +139,7 @@ fn can_get_all_channels() {
     database.add_client_to_channel("nickname", "channel1");
     database.add_client_to_channel("nickname", "channel2");
 
-    let mut channels_real = database.get_channels();
+    let mut channels_real = database.get_all_channels();
     let channels_expected = vec!["channel1".to_string(), "channel2".to_string()];
 
     channels_real.sort();

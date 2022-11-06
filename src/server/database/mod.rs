@@ -27,6 +27,7 @@ use database_message::DatabaseMessage::{
 use self::database_message::DatabaseMessage;
 
 use super::client_trait::ClientTrait;
+/// Represents a Database that implements ClientTrait.
 pub struct Database<T: ClientTrait> {
     receiver: Receiver<DatabaseMessage<T>>,
     clients: HashMap<String, Rc<RefCell<Client<T>>>>,
@@ -34,6 +35,7 @@ pub struct Database<T: ClientTrait> {
 }
 
 impl<T: ClientTrait> Database<T> {
+    /// Returns new [`DatabaseHandle`] and starts listening for requests.
     pub fn start() -> DatabaseHandle<T> {
         let (sender, receiver) = mpsc::channel();
 
@@ -102,7 +104,7 @@ impl<T: ClientTrait> Database<T> {
             } => self.handle_get_all_clients(response),
             GetAllChannels {
                 respond_to: response,
-            } => self.handle_get_channels(response),
+            } => self.handle_get_all_channels(response),
             GetClientsForMask {
                 mask,
                 respond_to: response,

@@ -3,6 +3,7 @@ pub mod mock_stream;
 use super::database::{Client, ClientBuilder};
 use mock_stream::MockTcpStream;
 
+/// Creates dummy client used for tests.
 pub fn dummy_client(nickname: &str) -> Client<MockTcpStream> {
     let builder = ClientBuilder::new()
         .nickname(nickname.to_string())
