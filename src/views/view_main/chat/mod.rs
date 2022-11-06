@@ -1,9 +1,11 @@
 pub mod widgets_creation;
 
-use gtk::{prelude::*, Box, Orientation, ScrolledWindow};
+use gtk::{prelude::*, Box,Entry, Orientation, ScrolledWindow, glib::Sender};
 use gtk4 as gtk;
 
-use self::widgets_creation::create_send_button;
+use crate::controller::controller_message::ControllerMessage;
+
+use self::widgets_creation::create_message;
 
 use super::MainView;
 
@@ -50,12 +52,40 @@ impl MainView {
             .build();
 
         scrolled_window.add_css_class("message_box");
-        self.send_message =
-            create_send_button(message_box, self.input.clone(), scrolled_window.clone());
+    
+        self.connect_send_button(message_box, self.input.clone(), scrolled_window.clone(), self.sender.clone());
+
         message_sender_box.append(&self.send_message);
 
         chat.append(&scrolled_window);
         chat.append(&message_sender_box);
         chat
     }
+
+    fn connect_send_button(&self, message_box: Box, input: Entry, scrolled_window: ScrolledWindow, sender: Sender<ControllerMessage>) {
+        self.send_message.connect_clicked(move |_| {
+            let input_text = input.text();
+            if !entry_is_valid(&input_text) {
+                return;
+            }
+            
+            let priv_message = ControllerMessage::SendPrivMessage { 
+                nickname: "ana".to_string(), 
+                message: input_text.clone() };
+            sender.send(priv_message).expect("Error: private message command");
+    
+            let message = create_message(&input_text);
+            message.add_css_class("message");
+            message_box.append(&message);
+    
+            let adj = scrolled_window.vadjustment();
+            adj.set_upper(adj.upper() + adj.page_size());
+            adj.set_value(adj.upper());
+            scrolled_window.set_vadjustment(Some(&adj));
+        });
+    }
+}
+
+fn entry_is_valid(entry_text: &str) -> bool {
+    !entry_text.is_empty()
 }

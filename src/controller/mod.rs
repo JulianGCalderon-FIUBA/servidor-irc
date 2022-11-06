@@ -1,19 +1,23 @@
+pub(crate) mod controller_message;
+mod controller_handler;
+use crate::views::view_register::RegisterView;
 use gtk4 as gtk;
 
 use crate::{
     client::Client,
-    message::{self, CreationError, Message},
-    views::view_main::MainView,
-    views::view_register::RegisterView,
-    ADDRESS,
+    ADDRESS, views::view_main::MainView
 };
 use gtk::{
     gdk::Display,
-    glib::{self, Receiver, Sender},
+    glib::{self},
     prelude::*,
-    Application, ApplicationWindow, Box, Button, CssProvider, Orientation, Separator, StyleContext,
+    Application,
+    CssProvider,
+    StyleContext,
 };
 
+use controller_message::ControllerMessage::*;
+use controller_handler::to_controller_message;
 pub struct Controller {
     app: Application,
 }
@@ -57,24 +61,45 @@ impl Controller {
         let app_clone = app.clone();
 
         let sender_clone = sender.clone();
-        client.async_read(move |message| match message {
-            Ok(message) => sender_clone.send(message.to_string()).unwrap(),
-            Err(error) => (eprintln!("Failed to read message: {}", error)),
+        client.async_read(move |message| {
+            match message {
+                Ok(message) => {
+                    let controller_message = to_controller_message(message);
+                    sender_clone.send(controller_message).unwrap();
+                },
+                Err(error) => (eprintln!("Failed to read message: {}", error)),
+            }
         });
 
         receiver.attach(None, move |msg| {
-            match &msg[..] {
-                "change" => {
+            match msg {
+                Register { pass, nickname, username, realname }  => {
+                    let pass_command = format!("PASS {}", pass);
+                    let nick_command = format!("NICK {}", nickname);
+                    let user_command = format!(
+                        "USER {} {} {} :{}",
+                        username,
+                        username,
+                        username,
+                        realname
+                    );
+                    client.send_raw(&pass_command).expect("ERROR");
+                    client.send_raw(&nick_command).expect("ERROR");
+                    client.send_raw(&user_command).expect("ERROR");
+                },
+                ChangeViewToMain {} => {
                     window.close();
                     let mut main_view = MainView::new(sender.clone());
-                    main_view.get_view(app_clone.clone()).show()
+                    main_view.get_view(app_clone.clone()).show();                    
+                },
+                SendPrivMessage { nickname, message } => {
+                    let priv_message = format!("PRIVMSG {} :{}", nickname, message);
+                    client.send_raw(&priv_message).expect("ERROR");
                 }
-                "register" => {
-                    client.send_raw("PASS pass123").expect("ERROR");
-                    client.send_raw("NICK nick").expect("ERROR");
-                    client.send_raw("USER user user user :user").expect("ERROR");
-                }
-                msg => println!("{}", msg),
+                RegularMessage { message } => {
+                    println!("{}", message);
+                },
+                _ => println!("No command found")
             };
             // Returning false here would close the receiver
             // and have senders fail

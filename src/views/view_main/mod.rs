@@ -8,6 +8,8 @@ use gtk::{
 };
 use gtk4 as gtk;
 
+use crate::controller::controller_message::ControllerMessage;
+
 use self::chat::widgets_creation::create_message;
 use self::widgets_creation::{create_button, create_separator};
 
@@ -25,11 +27,11 @@ pub struct MainView {
     pub channel_info: Button,
     pub quit_channel: Button,
     pub func_channel: Button,
-    sender: Sender<String>,
+    sender: Sender<ControllerMessage>,
 }
 
 impl MainView {
-    pub fn new(sender: Sender<String>) -> Self {
+    pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channels: vec![create_button("#channel1"), create_button("#channel2")],
             add_channel: create_button("+"),

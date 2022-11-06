@@ -1,5 +1,3 @@
-use std::sync::mpsc::channel;
-
 use internet_relay_chat::controller::Controller;
 
 fn main() {
