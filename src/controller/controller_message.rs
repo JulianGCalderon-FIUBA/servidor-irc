@@ -13,6 +13,10 @@ pub enum ControllerMessage {
         nickname: String,
         message: GString,
     },
+    ReceivePrivMessage {
+        nickname: String,
+        message: String
+    },
     RegularMessage {
         message: String,
     },

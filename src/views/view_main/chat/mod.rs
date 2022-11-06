@@ -44,7 +44,7 @@ impl MainView {
         message_sender_box.append(&self.input);
 
         let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
-            .min_content_height(800)
+            .min_content_height(600)
             .min_content_width(600)
             .margin_top(20)
             .margin_bottom(20)

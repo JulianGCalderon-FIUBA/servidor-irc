@@ -54,6 +54,9 @@ impl Controller {
         let window = view.get_view(app.clone());
         window.show();
 
+        // Solucionar esto
+        let mut main_view = MainView::new(sender.clone());
+
         let app_clone = app.clone();
 
         let sender_clone = sender.clone();
@@ -85,12 +88,15 @@ impl Controller {
                 }
                 ChangeViewToMain {} => {
                     window.close();
-                    let mut main_view = MainView::new(sender.clone());
                     main_view.get_view(app_clone.clone()).show();
                 }
                 SendPrivMessage { nickname, message } => {
+                    println!("Sending message");
                     let priv_message = format!("PRIVMSG {} :{}", nickname, message);
                     client.send_raw(&priv_message).expect("ERROR");
+                },
+                ReceivePrivMessage { nickname, message } => {
+                    println!("Mensaje privado de {}: {}", nickname, message);
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
