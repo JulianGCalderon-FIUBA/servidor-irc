@@ -41,24 +41,24 @@ impl MainView {
     pub fn new(sender: Sender<String>) -> Self {
         Self {
             channels: vec![
-                create_button("#channel1", 12),
-                create_button("#channel2", 12)
+                create_button("#channel1"),
+                create_button("#channel2")
             ],
-            add_channel: create_button("+", 12),
+            add_channel: create_button("+"),
             clients: vec![
-                create_button("juli", 12),
-                create_button("sol", 12),
-                create_button("santi", 12),
-                create_button("ana", 12)
+                create_button("juli"),
+                create_button("sol"),
+                create_button("santi"),
+                create_button("ana")
             ],
-            add_client: create_button("+", 12),
+            add_client: create_button("+"),
             messages: vec![create_message("hola!")],
-            user_info: create_button("info",12),
+            user_info: create_button("info"),
             input: create_entry("Message..."),
-            send_message: create_button("send",12),
-            quit_channel: create_button_conv_info("x"),
-            channel_info: create_button_conv_info("info"),
-            func_channel: create_button_conv_info("func"),
+            send_message: create_button("send"),
+            quit_channel: create_button("x"),
+            channel_info: create_button("info"),
+            func_channel: create_button("func"),
             sender,
         }
     }
@@ -71,7 +71,6 @@ impl MainView {
 
         let sidebar = Box::builder()
             .orientation(Orientation::Vertical)
-            .halign(gtk::Align::Center)
             .build();
 
         sidebar.append(&self.channels[0]);
@@ -137,7 +136,6 @@ impl MainView {
             .min_content_width(600)
             .margin_top(20)
             .margin_bottom(20)
-            .margin_start(20)
             .child(&message_box)
             .build();
 
@@ -158,6 +156,7 @@ impl MainView {
         .margin_bottom(12)
         .margin_top(12)
         .margin_end(12)
+        .halign(Align::Start)
         .build();
 
         self.quit_channel.add_css_class("exit_channel");
@@ -177,14 +176,13 @@ impl MainView {
     }
 }
 
-fn create_button(label: &str, margin: i32) -> Button {
+fn create_button(label: &str) -> Button {
     let button = Button::builder()
         .label(label)
-        .margin_top(margin)
-        .margin_bottom(margin)
-        .margin_start(margin)
-        .margin_end(margin)
-        .valign(gtk::Align::Center)
+        .margin_top(12)
+        .margin_bottom(12)
+        .margin_start(12)
+        .margin_end(12)
         .build();
 
     button.connect_clicked(|_| println!("Hi"));
@@ -206,7 +204,7 @@ fn create_separator() -> Separator {
 }
 
 fn create_send_button(message_box: Box, input: Entry, scrolled_window: ScrolledWindow) -> Button {
-    let send_button = create_button("send",12);
+    let send_button = create_button("send");
     send_button.add_css_class("send_button");
     
     send_button.connect_clicked(move |_| {
@@ -246,22 +244,6 @@ fn create_message(label: &str) -> Label {
         .valign(Align::Start)
         .halign(Align::Start)
         .build()
-}
-
-fn create_button_conv_info(label: &str) -> Button {
-    let button = Button::builder()
-        .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .halign(gtk::Align::Start)
-        .valign(gtk::Align::Center)
-        .build();
-
-    button.connect_clicked(|_| println!("Hi"));
-
-    button
 }
 
 fn create_main_box(orientation: Orientation, height: i32, width: i32) -> Box {
