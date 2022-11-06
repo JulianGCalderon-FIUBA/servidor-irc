@@ -6,14 +6,14 @@ pub enum ControllerMessage {
         pass: GString,
         nickname: GString,
         username: GString,
-        realname: GString
+        realname: GString,
     },
     ChangeViewToMain {},
     SendPrivMessage {
         nickname: String,
-        message: GString
+        message: GString,
     },
     RegularMessage {
-        message: String
+        message: String,
     },
 }

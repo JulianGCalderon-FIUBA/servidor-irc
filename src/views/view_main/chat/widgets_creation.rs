@@ -1,7 +1,5 @@
-use gtk::{prelude::*, Align, Box, Button, Entry, Label, ScrolledWindow};
+use gtk::{prelude::*, Align, Label};
 use gtk4 as gtk;
-
-use crate::views::view_main::widgets_creation::create_button;
 
 pub fn create_message(label: &str) -> Label {
     let message = Label::builder()
