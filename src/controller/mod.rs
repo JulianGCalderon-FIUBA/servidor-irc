@@ -17,6 +17,12 @@ pub struct Controller {
     app: Application,
 }
 
+impl Default for Controller {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Controller {
     pub fn new() -> Self {
         let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
@@ -37,7 +43,7 @@ impl Controller {
 
     pub fn start(&mut self) {
         self.app.connect_startup(|_| Self::load_css());
-        self.app.connect_activate(move |app| Self::build_ui(&app));
+        self.app.connect_activate(Self::build_ui);
         self.app.run();
     }
 
@@ -61,7 +67,7 @@ impl Controller {
                 let controller_message = to_controller_message(message);
                 sender_clone.send(controller_message).unwrap();
             }
-            Err(error) => (eprintln!("Failed to read message: {}", error)),
+            Err(error) => eprintln!("Failed to read message: {}", error),
         });
 
         receiver.attach(None, move |msg| {
@@ -92,8 +98,7 @@ impl Controller {
                 RegularMessage { message } => {
                     println!("{}", message);
                 }
-                _ => println!("No command found"),
-            };
+            }
             // Returning false here would close the receiver
             // and have senders fail
             glib::Continue(true)
