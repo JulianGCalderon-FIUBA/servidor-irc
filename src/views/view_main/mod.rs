@@ -4,13 +4,12 @@ mod sidebar;
 pub mod widgets_creation;
 
 use gtk::{
-    glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Label, Orientation, Box
+    glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation, Box
 };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::chat::widgets_creation::create_message;
 use self::widgets_creation::{create_button, create_separator, create_message_box};
 
 use super::widgets_creation::{create_entry, create_main_box};

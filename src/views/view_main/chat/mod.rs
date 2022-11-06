@@ -1,7 +1,5 @@
 pub mod widgets_creation;
 
-use std::{rc::Rc, cell::Cell};
-
 use gtk::{glib::Sender, prelude::*, Box, Entry, Orientation, ScrolledWindow};
 use gtk4 as gtk;
 
@@ -107,7 +105,7 @@ impl MainView {
         });
     }
 
-    pub fn receive_priv_message(&self, message: String) {
+    pub fn receive_priv_message(&self, message: String, _nickname: String) {
         let message = create_message(&message);
         message.add_css_class("message");
         self.message_box.append(&message);

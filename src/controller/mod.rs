@@ -97,7 +97,7 @@ impl Controller {
                 },
                 ReceivePrivMessage { nickname, message } => {
                     // println!("Mensaje privado de {}: {}", nickname, message);
-                    main_view.receive_priv_message(message);
+                    main_view.receive_priv_message(message, nickname);
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
