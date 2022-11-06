@@ -19,15 +19,6 @@ impl MainView {
             .build();
         chat.add_css_class("chat");
 
-        // let message_box = Box::builder()
-        //     .orientation(Orientation::Vertical)
-        //     .margin_top(10)
-        //     .margin_bottom(10)
-        //     .margin_start(10)
-        //     .margin_bottom(10)
-        //     .halign(gtk::Align::Start)
-        //     .build();
-
         let message_sender_box = Box::builder()
             .orientation(Orientation::Horizontal)
             .margin_top(20)

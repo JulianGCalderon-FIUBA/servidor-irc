@@ -96,7 +96,6 @@ impl Controller {
                     client.send_raw(&priv_message).expect("ERROR");
                 },
                 ReceivePrivMessage { nickname, message } => {
-                    // println!("Mensaje privado de {}: {}", nickname, message);
                     main_view.receive_priv_message(message, nickname);
                 }
                 RegularMessage { message } => {
@@ -108,23 +107,4 @@ impl Controller {
             glib::Continue(true)
         });
     }
-
-    // fn handle_message(msg: String, view: RegisterView) {
-
-    // }
-
-    // fn print_message(message: Result<Message, CreationError>) {
-    //     match message {
-    //         Ok(message) => println!("{}", message),
-    //         Err(error) => eprintln!("Failed to read message: {}", error),
-    //     }
-    // }
 }
-
-// pub fn send_msg(message: Result<Message, CreationError>, sender: Sender<String>) {
-
-//     match message {
-//                 Ok(message) => sender.send(message.to_string()).unwrap(),
-//                 Err(error) => (eprintln!("Failed to read message: {}", error)),
-//             }
-// }
