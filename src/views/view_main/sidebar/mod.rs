@@ -1,6 +1,6 @@
 mod widgets_creation;
 
-use gtk::{prelude::*, Box, Orientation};
+use gtk::{ prelude::*, Box, Orientation };
 use gtk4 as gtk;
 
 use self::widgets_creation::create_separator_sidebar;
@@ -14,10 +14,12 @@ impl MainView {
         sidebar.append(&self.channels[0]);
         sidebar.append(&self.channels[1]);
 
-        // self.channels[0].connect_clicked (move |_| {
-        //     self.current_conversation = "hola".to_string().clone();
+        // let mut current_conversation = &mut self.current_conversation;
+        // let mut channel_text = self.channels[0].label().unwrap().to_string().clone();
+        // // self.channels[0].connect_clicked( move |_| {
+        //     self.change_current_conversation(channel_text);
         // });
-        // for channel in self.channels {
+        //for channel in self.channels {
         //     let channel_text = channel.label().unwrap().to_string().clone();
         //     channel.connect_clicked(move |_| {
         //         self.current_conversation = "hola".to_string();
