@@ -80,9 +80,9 @@ impl RegisterView {
     ) {
         self.login_button.connect_clicked(move |_| {
             if realname_entry.text().len() != 0
-                && !!pass_entry.text().len() != 0
-                && !!nick_entry.text().len() != 0
-                && !!username_entry.text().len() != 0
+                && pass_entry.text().len() != 0
+                && nick_entry.text().len() != 0
+                && username_entry.text().len() != 0
             {
                 // let pass_command = format!("PASS {}", pass_entry.text());
                 // let nick_command = format!("NICK {}", nick_entry.text());
