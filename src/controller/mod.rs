@@ -1,19 +1,19 @@
 pub(crate) mod controller_message;
 mod controller_handler;
+use crate::views::view_register::RegisterView;
 use gtk4 as gtk;
 
 use crate::{
-    view_register::RegisterView,
-    view_main::MainView,
     client::Client,
-    ADDRESS
+    ADDRESS, views::view_main::MainView
 };
 use gtk::{
     gdk::Display,
+    glib::{self},
     prelude::*,
     Application,
     CssProvider,
-    StyleContext, glib,
+    StyleContext,
 };
 
 use controller_message::ControllerMessage::*;
@@ -26,9 +26,7 @@ impl Controller {
     pub fn new() -> Self {
         let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
-        Self {
-            app,
-        }
+        Self { app }
     }
 
     fn load_css() {
@@ -38,7 +36,7 @@ impl Controller {
         StyleContext::add_provider_for_display(
             &Display::default().expect("Could not connect to a display."),
             &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }
 
@@ -49,20 +47,19 @@ impl Controller {
     }
 
     fn build_ui(app: &Application) {
-
         let mut client = match Client::new(ADDRESS.to_string()) {
             Ok(stream) => stream,
             Err(error) => panic!("Error connecting to server: {:?}", error),
-        }; 
+        };
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
-        
+
         let mut view = RegisterView::new(sender.clone());
         let window = view.get_view(app.clone());
         window.show();
 
         let app_clone = app.clone();
-        
+
         let sender_clone = sender.clone();
         client.async_read(move |message| {
             match message {
@@ -108,10 +105,6 @@ impl Controller {
             // and have senders fail
             glib::Continue(true)
         });
-
-
-
-        
     }
 
     // fn handle_message(msg: String, view: RegisterView) {
@@ -127,7 +120,7 @@ impl Controller {
 }
 
 // pub fn send_msg(message: Result<Message, CreationError>, sender: Sender<String>) {
-    
+
 //     match message {
 //                 Ok(message) => sender.send(message.to_string()).unwrap(),
 //                 Err(error) => (eprintln!("Failed to read message: {}", error)),

@@ -1,15 +1,11 @@
+mod widgets_creation;
+
+use gtk::{ glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation };
 use gtk4 as gtk;
-use gtk::{
-    Align,
-    Label,
-    Button,
-    Entry,
-    Application,
-    ApplicationWindow,
-    Box,
-    Orientation,
-    prelude::*, glib::Sender,
-};
+
+use self::widgets_creation::{ create_label_box, create_login_button };
+
+use super::widgets_creation::{ create_entry, create_main_box };
 
 use crate::controller::controller_message::ControllerMessage;
 
@@ -25,10 +21,10 @@ pub struct RegisterView {
 impl RegisterView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
-            realname_entry: create_entry(),
-            nick_entry: create_entry(),
-            username_entry: create_entry(),
-            pass_entry: create_entry(),
+            realname_entry: create_entry(""),
+            nick_entry: create_entry(""),
+            username_entry: create_entry(""),
+            pass_entry: create_entry(""),
             login_button: create_login_button("login"),
             sender,
         }
@@ -40,47 +36,19 @@ impl RegisterView {
         let main_box = create_main_box(Orientation::Vertical, 300, 300);
         main_box.add_css_class("main_box");
 
-        let realname_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .halign(gtk::Align::Center)
-            .margin_top(20)
-            .margin_bottom(20)
-            .build();
-        let label = create_label("Your name:");
-        realname_box.append(&label);
+        let realname_box = create_label_box("Your name:");
         realname_box.append(&self.realname_entry);
         main_box.append(&realname_box);
 
-        let nickname_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .halign(gtk::Align::Center)
-            .margin_top(20)
-            .margin_bottom(20)
-            .build();
-        let label = create_label("Nickname:");
-        nickname_box.append(&label);
+        let nickname_box = create_label_box("Nickname:");
         nickname_box.append(&self.nick_entry);
         main_box.append(&nickname_box);
 
-        let username_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .halign(gtk::Align::Center)
-            .margin_top(20)
-            .margin_bottom(20)        
-            .build();
-        let label = create_label("Username:");
-        username_box.append(&label);
+        let username_box = create_label_box("Username:");
         username_box.append(&self.username_entry);
         main_box.append(&username_box);
 
-        let password_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .margin_top(20)
-            .margin_bottom(20)
-            .halign(gtk::Align::Center)
-            .build();
-        let label = create_label("Password:");
-        password_box.append(&label);
+        let password_box = create_label_box("Password:");
         password_box.append(&self.pass_entry);
         main_box.append(&password_box);
 
@@ -128,11 +96,13 @@ impl RegisterView {
                 // sender.send(user_command).expect("Error: user command");
 
                 // window.close();
-                let register = ControllerMessage::Register { 
-                                                                pass: pass_entry.text(), 
-                                                                nickname: nick_entry.text(), 
-                                                                username: username_entry.text(), 
-                                                                realname: realname_entry.text() };
+
+                let register = ControllerMessage::Register {
+                    pass: pass_entry.text(),
+                    nickname: nick_entry.text(),
+                    username: username_entry.text(),
+                    realname: realname_entry.text(),
+                };
                 sender.send(register).expect("Error: pass command");
 
                 let change_view = ControllerMessage::ChangeViewToMain {};
@@ -144,41 +114,4 @@ impl RegisterView {
     pub fn get_pass(&self) -> Entry {
         self.pass_entry.clone()
     }
-}
-
-fn create_label(label: &str) -> Label {
-    Label::builder()
-        .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .halign(Align::Center)
-        .valign(Align::Center)
-        .build()
-}
-
-fn create_entry() -> Entry {
-    Entry::builder().build()
-}
-
-fn create_login_button(label: &str) -> Button {
-    Button::builder()
-        .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .halign(gtk::Align::Center)
-        .valign(gtk::Align::Center)
-        .build()
-}
-
-fn create_main_box(orientation: Orientation, height: i32, width: i32) -> Box {
-    Box::builder()
-        .orientation(orientation)
-        .halign(gtk::Align::Center)
-        .height_request(height)
-        .width_request(width)
-        .build()
 }
