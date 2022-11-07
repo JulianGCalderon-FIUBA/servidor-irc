@@ -10,7 +10,7 @@ pub fn create_message(label: &str) -> Label {
         .margin_end(12)
         .halign(Align::End)
         .build();
-    message.add_css_class("message");
+    message.add_css_class("send_message");
     message
 }
 
@@ -23,6 +23,6 @@ pub fn create_received_message(label: &str) -> Label {
         .margin_end(12)
         .halign(Align::Start)
         .build();
-    message.add_css_class("message");
+    message.add_css_class("received_message");
     message
 }

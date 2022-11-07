@@ -10,7 +10,7 @@ use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::widgets_creation::{create_button, create_separator, create_message_box, create_label};
+use self::widgets_creation::{create_button, create_separator, create_message_box, create_current_chat};
 
 use super::widgets_creation::{create_entry, create_main_box};
 
@@ -42,7 +42,7 @@ impl MainView {
                 create_button("ana"),
             ],
             add_client: create_button("+"),
-            current_chat: create_label(""),
+            current_chat: create_current_chat(""),
             message_box: create_message_box(),
             user_info: create_button("info"),
             input: create_entry("Message..."),

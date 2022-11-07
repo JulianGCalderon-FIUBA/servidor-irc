@@ -38,6 +38,8 @@ impl MainView {
             .min_content_height(600)
             .max_content_width(600)
             .margin_top(20)
+            .margin_start(20)
+            .margin_end(20)
             .margin_bottom(20)
             .child(&self.message_box)
             .build();
