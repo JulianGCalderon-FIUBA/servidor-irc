@@ -8,6 +8,19 @@ pub fn create_message(label: &str) -> Label {
         .margin_bottom(12)
         .margin_start(12)
         .margin_end(12)
+        .halign(Align::End)
+        .build();
+    message.add_css_class("message");
+    message
+}
+
+pub fn create_received_message(label: &str) -> Label {
+    let message = Label::builder()
+        .label(label)
+        .margin_top(12)
+        .margin_bottom(12)
+        .margin_start(12)
+        .margin_end(12)
         .halign(Align::Start)
         .build();
     message.add_css_class("message");

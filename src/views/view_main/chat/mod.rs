@@ -5,7 +5,7 @@ use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::widgets_creation::create_message;
+use self::widgets_creation::{create_message, create_received_message};
 
 use super::MainView;
 
@@ -31,12 +31,12 @@ impl MainView {
         message_sender_box.append(&self.user_info);
 
         self.input.set_hexpand(true);
-        self.input.set_width_request(600);
+        self.input.set_width_request(550);
         message_sender_box.append(&self.input);
 
         let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
             .min_content_height(600)
-            .min_content_width(600)
+            .max_content_width(600)
             .margin_top(20)
             .margin_bottom(20)
             .child(&self.message_box)
@@ -97,7 +97,7 @@ impl MainView {
     }
 
     pub fn receive_priv_message(&self, message: String, _nickname: String) {
-        let message = create_message(&message);
+        let message = create_received_message(&message);
         message.add_css_class("message");
         self.message_box.append(&message);
     }

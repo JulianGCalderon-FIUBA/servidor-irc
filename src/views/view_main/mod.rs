@@ -27,7 +27,6 @@ pub struct MainView {
     pub channel_info: Button,
     pub quit_channel: Button,
     pub func_channel: Button,
-    pub current_conversation: String, //nickname
     sender: Sender<ControllerMessage>,
 }
 
@@ -43,7 +42,7 @@ impl MainView {
                 create_button("ana"),
             ],
             add_client: create_button("+"),
-            current_chat: create_label("juli"),
+            current_chat: create_label(""),
             message_box: create_message_box(),
             user_info: create_button("info"),
             input: create_entry("Message..."),
@@ -51,7 +50,6 @@ impl MainView {
             quit_channel: create_button("x"),
             channel_info: create_button("info"),
             func_channel: create_button("func"),
-            current_conversation: "".to_string(),
             sender,
         }
     }
@@ -65,7 +63,7 @@ impl MainView {
             .title("Lemon Pie IRC")
             .build();
 
-        let main_box = create_main_box(Orientation::Horizontal, 800, 1200);
+        let main_box = create_main_box(Orientation::Horizontal, 800, 700);
         main_box.add_css_class("main_box");
 
         let sidebar = self.create_sidebar();

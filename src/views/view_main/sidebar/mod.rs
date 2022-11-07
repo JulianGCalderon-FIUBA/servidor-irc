@@ -48,15 +48,10 @@ impl MainView {
             sidebar.append(button);
         }
 
-        let label = self.current_chat.label().to_string();
-        self.add_client.connect_clicked(move |_| {
-            println!("label says: {}", label);
-        });
-
-        // sidebar.append(&self.clients[0]);
-        // sidebar.append(&self.clients[1]);
-        // sidebar.append(&self.clients[2]);
-        // sidebar.append(&self.clients[3]);
+        // let label = self.current_chat.label().to_string();
+        // self.add_client.connect_clicked(move |_| {
+        //     println!("label says: {}", label);
+        // });
 
         self.add_client.add_css_class("add");
         sidebar.append(&self.add_client);
