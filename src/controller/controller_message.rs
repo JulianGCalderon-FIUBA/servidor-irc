@@ -16,7 +16,7 @@ pub enum ControllerMessage {
     },
     ReceivePrivMessage {
         nickname: String,
-        message: String
+        message: String,
     },
     ChangeConversation {
         nickname: String,

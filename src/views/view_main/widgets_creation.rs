@@ -1,4 +1,4 @@
-use gtk::{Button, Orientation, Separator, Box, Label, Align, traits::WidgetExt};
+use gtk::{traits::WidgetExt, Align, Box, Button, Label, Orientation, Separator};
 use gtk4 as gtk;
 
 pub fn create_button(label: &str) -> Button {
@@ -19,14 +19,14 @@ pub fn create_separator() -> Separator {
 
 pub fn create_message_box() -> Box {
     Box::builder()
-            .orientation(Orientation::Vertical)
-            .margin_top(10)
-            .margin_bottom(10)
-            .margin_start(10)
-            .margin_bottom(10)
-            .width_request(620)
-            .halign(gtk::Align::Start)
-            .build()
+        .orientation(Orientation::Vertical)
+        .margin_top(10)
+        .margin_bottom(10)
+        .margin_start(10)
+        .margin_bottom(10)
+        .width_request(620)
+        .halign(gtk::Align::Start)
+        .build()
 }
 
 pub fn create_current_chat(label: &str) -> Label {

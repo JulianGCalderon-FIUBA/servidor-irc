@@ -46,10 +46,8 @@ impl MainView {
 
         scrolled_window.add_css_class("message_box");
 
-        let message_box = self.message_box.clone();
-
         self.connect_send_button(
-            message_box.clone(),
+            self.message_box.clone(),
             self.input.clone(),
             scrolled_window.clone(),
             self.sender.clone(),
@@ -70,7 +68,7 @@ impl MainView {
         scrolled_window: ScrolledWindow,
         sender: Sender<ControllerMessage>,
     ) {
-        let nickname_receiver = self.current_chat.label().to_string().clone();
+        let nickname_receiver = self.current_chat.label().to_string();
 
         self.send_message.connect_clicked(move |_| {
             let input_text = input.text();

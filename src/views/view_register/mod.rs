@@ -93,7 +93,7 @@ impl RegisterView {
                 sender.send(register).expect("Error: pass command");
 
                 let change_view = ControllerMessage::ChangeViewToMain {
-                    nickname: nick_entry.text()
+                    nickname: nick_entry.text(),
                 };
                 sender.send(change_view).expect("Error: pass command");
             }

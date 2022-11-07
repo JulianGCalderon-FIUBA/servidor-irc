@@ -1,6 +1,6 @@
 mod widgets_creation;
 
-use gtk::{ prelude::*, Box, Orientation, Button, Label, glib::Sender};
+use gtk::{glib::Sender, prelude::*, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
@@ -18,7 +18,6 @@ impl MainView {
         for button in &self.channels {
             sidebar.append(button);
         }
-        
 
         // sidebar.append(&self.channels[0]);
         // sidebar.append(&self.channels[1]);
@@ -44,7 +43,12 @@ impl MainView {
 
         for button in &self.clients {
             let label = button.label().unwrap().to_string();
-            self.connect_conv_button(button, label.clone(), current_chat_clone.clone(), self.sender.clone());
+            self.connect_conv_button(
+                button,
+                label.clone(),
+                current_chat_clone.clone(),
+                self.sender.clone(),
+            );
             sidebar.append(button);
         }
 
@@ -58,10 +62,18 @@ impl MainView {
         sidebar
     }
 
-    fn connect_conv_button(&self, button: &Button, label: String, current_chat: Label, sender: Sender<ControllerMessage>) {
+    fn connect_conv_button(
+        &self,
+        button: &Button,
+        label: String,
+        current_chat: Label,
+        sender: Sender<ControllerMessage>,
+    ) {
         button.connect_clicked(move |_| {
             current_chat.set_label(&label);
-            let request = ControllerMessage::ChangeConversation { nickname: label.clone() };
+            let request = ControllerMessage::ChangeConversation {
+                nickname: label.clone(),
+            };
             sender.send(request).expect("ERROR: change conversation");
         });
     }

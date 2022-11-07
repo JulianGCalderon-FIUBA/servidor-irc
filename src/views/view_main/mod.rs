@@ -4,13 +4,17 @@ mod sidebar;
 pub mod widgets_creation;
 
 use gtk::{
-    glib::{Sender, GString}, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation, Box, Label
+    glib::{GString, Sender},
+    prelude::*,
+    Application, ApplicationWindow, Box, Button, Entry, Label, Orientation,
 };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::widgets_creation::{create_button, create_separator, create_message_box, create_current_chat};
+use self::widgets_creation::{
+    create_button, create_current_chat, create_message_box, create_separator,
+};
 
 use super::widgets_creation::{create_entry, create_main_box};
 
@@ -55,7 +59,6 @@ impl MainView {
     }
 
     pub fn get_view(&mut self, app: Application, nickname: GString) -> ApplicationWindow {
-
         self.user_info.set_label(&nickname);
 
         let window = ApplicationWindow::builder()
