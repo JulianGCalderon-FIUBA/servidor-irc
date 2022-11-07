@@ -26,15 +26,21 @@ pub const OPER_PASSWORD: &str = "admin";
 
 /// Represents a Server clients can connect to it contains a Database that stores relevant information.
 pub struct Server {
+    servername: String,
     database: DatabaseHandle<TcpStream>,
 }
 
 impl Server {
     /// Starts new [`Server`].
-    pub fn start() -> Self {
+    pub fn start(servername: &str) -> Self {
         let database = Database::start();
 
-        Self { database }
+        let servername = servername.to_string();
+
+        Self {
+            database,
+            servername,
+        }
     }
 
     /// Listens for incoming clients and handles each request in a new thread.
@@ -55,6 +61,6 @@ impl Server {
 
     fn handler(&self, client: io::Result<TcpStream>) -> io::Result<ClientHandler<TcpStream>> {
         let database = self.database.clone();
-        ClientHandler::<TcpStream>::from_stream(database, client?)
+        ClientHandler::<TcpStream>::from_stream(database, client?, self.servername.clone())
     }
 }

@@ -54,7 +54,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         parameters: &Vec<String>,
         trailing: &Option<String>,
     ) -> Option<ErrorReply> {
-        if parameters.len() != 3 || trailing.is_none() {
+        if parameters.is_empty() || trailing.is_none() {
             let command = USER_COMMAND.to_string();
             return Some(ErrorReply::NeedMoreParameters461 { command });
         }

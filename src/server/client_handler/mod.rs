@@ -27,17 +27,23 @@ pub struct ClientHandler<T: ClientTrait> {
     database: DatabaseHandle<T>,
     stream: T,
     registration: Registration<T>,
+    servername: String,
 }
 
 impl<T: ClientTrait> ClientHandler<T> {
     /// Returns new [`ClientHandler`].
-    pub fn from_stream(database: DatabaseHandle<T>, stream: T) -> io::Result<ClientHandler<T>> {
+    pub fn from_stream(
+        database: DatabaseHandle<T>,
+        stream: T,
+        servername: String,
+    ) -> io::Result<ClientHandler<T>> {
         let registration = Registration::with_stream(stream.try_clone()?);
 
         Ok(Self {
             database,
             stream,
             registration,
+            servername,
         })
     }
 

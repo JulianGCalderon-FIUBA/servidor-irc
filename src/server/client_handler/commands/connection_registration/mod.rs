@@ -42,7 +42,7 @@ impl<T: ClientTrait> ClientHandler<T> {
     /// Finishes registration.
     pub fn user_command(
         &mut self,
-        mut parameters: Vec<String>,
+        parameters: Vec<String>,
         trailing: Option<String>,
     ) -> io::Result<()> {
         if let Some(error) = self.assert_user_command_is_valid(&parameters, &trailing) {
@@ -50,9 +50,9 @@ impl<T: ClientTrait> ClientHandler<T> {
         }
 
         let realname = trailing.unwrap();
-        let servername = parameters.pop().unwrap();
-        let hostname = parameters.pop().unwrap();
-        let username = parameters.pop().unwrap();
+        let username = parameters[0].to_string();
+        let servername = self.servername.to_string();
+        let hostname = self.stream.peer_address()?.ip().to_string();
 
         self.registration.set_attribute("username", username);
         self.registration.set_attribute("hostname", hostname);

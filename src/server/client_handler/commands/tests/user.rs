@@ -79,11 +79,11 @@ fn user_registers_client_correctly() {
         handler.registration.get_attribute("username").unwrap()
     );
     assert_eq!(
-        "server",
+        "servername",
         handler.registration.get_attribute("servername").unwrap()
     );
     assert_eq!(
-        "host",
+        "127.0.0.1",
         handler.registration.get_attribute("hostname").unwrap()
     );
     assert_eq!(

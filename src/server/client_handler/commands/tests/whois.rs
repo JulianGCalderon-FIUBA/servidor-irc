@@ -53,7 +53,7 @@ fn whois_returns_nick_info() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("311 nick username hostname *: realname", responses[0]);
+    assert_eq!("311 nick username 127.0.0.1 *: realname", responses[0]);
     assert_eq!("318 nick :End of /WHOIS list", responses[1]);
 }
 
@@ -74,7 +74,7 @@ fn whois_returns_nick_info_if_oper() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("311 nick username hostname *: realname", responses[0]);
+    assert_eq!("311 nick username 127.0.0.1 *: realname", responses[0]);
     assert_eq!("313 nick :Is an IRC operator", responses[1]);
     assert_eq!("318 nick :End of /WHOIS list", responses[2]);
 }
@@ -92,7 +92,7 @@ fn whois_returns_nick_info_with_channels() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("311 nick username hostname *: realname", responses[0]);
+    assert_eq!("311 nick username 127.0.0.1 *: realname", responses[0]);
     assert_eq!("319 nick : #hola", responses[1]);
     assert_eq!("318 nick :End of /WHOIS list", responses[2]);
 }
@@ -116,7 +116,7 @@ fn whois_returns_complete_nick_info() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("311 nick username hostname *: realname", responses[0]);
+    assert_eq!("311 nick username 127.0.0.1 *: realname", responses[0]);
     assert_eq!("313 nick :Is an IRC operator", responses[1]);
     assert_eq!("319 nick : #hola", responses[2]);
     assert_eq!("318 nick :End of /WHOIS list", responses[3]);
@@ -136,7 +136,7 @@ fn whois_works_with_nickmask() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("311 nick username hostname *: realname", responses[0]);
+    assert_eq!("311 nick username 127.0.0.1 *: realname", responses[0]);
     assert_eq!("318 nick :End of /WHOIS list", responses[1]);
     assert_eq!("311 nick2 username hostname *: realname", responses[2]);
     assert_eq!("318 nick2 :End of /WHOIS list", responses[3]);

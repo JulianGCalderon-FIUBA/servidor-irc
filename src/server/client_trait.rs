@@ -1,6 +1,6 @@
 use std::io;
 use std::io::{Read, Write};
-use std::net::TcpStream;
+use std::net::{SocketAddr, TcpStream};
 
 /// An implementor of ClientTrait must also implent the following traits:
 ///    - Read
@@ -9,10 +9,15 @@ use std::net::TcpStream;
 ///    - Send
 pub trait ClientTrait: Read + Write + Sized + Send + 'static {
     fn try_clone(&self) -> io::Result<Self>;
+    fn peer_address(&self) -> io::Result<SocketAddr>;
 }
 
 impl ClientTrait for TcpStream {
     fn try_clone(&self) -> io::Result<Self> {
         self.try_clone()
+    }
+
+    fn peer_address(&self) -> io::Result<SocketAddr> {
+        self.peer_addr()
     }
 }

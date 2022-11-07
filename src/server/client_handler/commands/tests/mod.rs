@@ -21,7 +21,7 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let database = Database::start();
     let stream = MockTcpStream::new();
 
-    ClientHandler::from_stream(database, stream).unwrap()
+    ClientHandler::from_stream(database, stream, "servername".to_string()).unwrap()
 }
 
 fn register_client(handler: &mut ClientHandler<MockTcpStream>, nickname: &str) {
