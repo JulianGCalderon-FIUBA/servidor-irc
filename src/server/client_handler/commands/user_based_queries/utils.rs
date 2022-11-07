@@ -50,7 +50,7 @@ impl<C: Connection> ClientHandler<C> {
 
         self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
         self.send_response_for_reply(CommandResponse::WhoisServer312 {
-            nickname,
+            nickname: nickname.clone(),
             server,
             server_info: "Lemon pie server".to_string(),
         })?;
