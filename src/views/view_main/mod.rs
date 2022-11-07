@@ -4,7 +4,7 @@ mod sidebar;
 pub mod widgets_creation;
 
 use gtk::{
-    glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation, Box, Label
+    glib::{Sender, GString}, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation, Box, Label
 };
 use gtk4 as gtk;
 
@@ -51,12 +51,15 @@ impl MainView {
             quit_channel: create_button("x"),
             channel_info: create_button("info"),
             func_channel: create_button("func"),
-            current_conversation: "juli".to_string(),
+            current_conversation: "".to_string(),
             sender,
         }
     }
 
-    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application, nickname: GString) -> ApplicationWindow {
+
+        self.user_info.set_label(&nickname);
+
         let window = ApplicationWindow::builder()
             .application(&app)
             .title("Lemon Pie IRC")

@@ -87,9 +87,9 @@ impl Controller {
                     client.send_raw(&nick_command).expect("ERROR");
                     client.send_raw(&user_command).expect("ERROR");
                 }
-                ChangeViewToMain {} => {
+                ChangeViewToMain { nickname } => {
                     window.close();
-                    main_view.get_view(app_clone.clone()).show();
+                    main_view.get_view(app_clone.clone(), nickname).show();
                 }
                 SendPrivMessage { message } => {
                     let priv_message = format!("PRIVMSG {} :{}", current_conv, message);

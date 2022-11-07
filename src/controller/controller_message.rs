@@ -8,7 +8,9 @@ pub enum ControllerMessage {
         username: GString,
         realname: GString,
     },
-    ChangeViewToMain {},
+    ChangeViewToMain {
+        nickname: GString,
+    },
     SendPrivMessage {
         message: GString,
     },
