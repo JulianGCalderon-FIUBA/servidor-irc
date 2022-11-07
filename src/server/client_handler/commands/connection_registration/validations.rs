@@ -83,6 +83,12 @@ impl<T: ClientTrait> ClientHandler<T> {
             return Some(ErrorReply::UnregisteredClient);
         }
 
+        let username = &parameters[0];
+        let password = &parameters[1];
+        if !self.database.are_credentials_valid(username, password) {
+            return Some(ErrorReply::PasswordMismatch464);
+        }
+
         None
     }
 }

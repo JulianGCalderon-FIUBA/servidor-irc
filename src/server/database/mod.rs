@@ -32,6 +32,7 @@ pub struct Database<T: ClientTrait> {
     receiver: Receiver<DatabaseMessage<T>>,
     clients: HashMap<String, Rc<RefCell<Client<T>>>>,
     channels: HashMap<String, Channel<T>>,
+    credentials: HashMap<String, String>,
 }
 
 impl<T: ClientTrait> Database<T> {
@@ -39,17 +40,24 @@ impl<T: ClientTrait> Database<T> {
     pub fn start() -> DatabaseHandle<T> {
         let (sender, receiver) = mpsc::channel();
 
-        thread::spawn(|| {
-            let database = Self {
-                receiver,
-                clients: HashMap::new(),
-                channels: HashMap::new(),
-            };
-
-            database.run()
-        });
+        thread::spawn(|| Database::<T>::new(receiver).run());
 
         DatabaseHandle::new(sender)
+    }
+
+    fn new(receiver: Receiver<DatabaseMessage<T>>) -> Self {
+        let mut database = Self {
+            receiver,
+            clients: HashMap::new(),
+            channels: HashMap::new(),
+            credentials: HashMap::new(),
+        };
+
+        database
+            .credentials
+            .insert("admin".to_string(), "admin".to_string());
+
+        database
     }
 
     fn run(mut self) {
@@ -89,34 +97,34 @@ impl<T: ClientTrait> Database<T> {
             IsClientInChannel {
                 nickname,
                 channel,
-                respond_to: response,
-            } => self.handle_is_client_in_channel(&nickname, &channel, response),
+                respond_to,
+            } => self.handle_is_client_in_channel(&nickname, &channel, respond_to),
             GetChannelsForClient {
                 nickname,
-                respond_to: response,
-            } => self.handle_get_channels_for_client(&nickname, response),
+                respond_to,
+            } => self.handle_get_channels_for_client(&nickname, respond_to),
             GetClientsFromChannel {
                 channel,
-                respond_to: response,
-            } => self.handle_get_clients_for_channel(&channel, response),
-            GetAllClients {
-                respond_to: response,
-            } => self.handle_get_all_clients(response),
-            GetAllChannels {
-                respond_to: response,
-            } => self.handle_get_all_channels(response),
-            GetClientsForMask {
-                mask,
-                respond_to: response,
-            } => self.handle_get_clients_for_mask(&mask, response),
+                respond_to,
+            } => self.handle_get_clients_for_channel(&channel, respond_to),
+            GetAllClients { respond_to } => self.handle_get_all_clients(respond_to),
+            GetAllChannels { respond_to } => self.handle_get_all_channels(respond_to),
+            GetClientsForMask { mask, respond_to } => {
+                self.handle_get_clients_for_mask(&mask, respond_to)
+            }
             GetClientsForNickMask {
                 nickmask,
-                respond_to: response,
-            } => self.handle_get_clients_for_nickmask(&nickmask, response),
+                respond_to,
+            } => self.handle_get_clients_for_nickmask(&nickmask, respond_to),
             UpdateNickname {
                 old_nickname,
                 new_nickname,
             } => self.handle_update_nickname(&old_nickname, &new_nickname),
+            DatabaseMessage::AreCredentialsValid {
+                username,
+                password,
+                respond_to,
+            } => self.handle_are_credentials_valid(&username, &password, respond_to),
         }
     }
 }

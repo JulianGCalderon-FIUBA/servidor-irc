@@ -182,6 +182,17 @@ impl<T: ClientTrait> DatabaseHandle<T> {
         };
         self.sender.send(request).unwrap();
     }
+
+    pub fn are_credentials_valid(&self, username: &str, password: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::AreCredentialsValid {
+            username: username.to_string(),
+            password: password.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
 }
 
 impl<T: ClientTrait> Clone for DatabaseHandle<T> {

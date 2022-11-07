@@ -26,19 +26,19 @@ fn oper_fails_with_unregistered_client() {
     );
 }
 
-// #[test]
-// fn oper_fails_with_incorrect_credentials() {
-//     let mut handler = dummy_client_handler();
-//     register_client(&mut handler, "nick");
+#[test]
+fn oper_fails_with_incorrect_credentials() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
 
-//     let parameters = vec!["user".to_string(), "user".to_string()];
-//     handler.oper_command(parameters).unwrap();
+    let parameters = vec!["user".to_string(), "user".to_string()];
+    handler.oper_command(parameters).unwrap();
 
-//     assert_eq!(
-//         "464 :Password incorrect\r\n",
-//         handler.stream.read_wbuf_to_string()
-//     );
-// }
+    assert_eq!(
+        "464 :Password incorrect\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
 
 #[test]
 fn can_register_as_operator() {

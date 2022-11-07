@@ -88,4 +88,14 @@ impl<T: ClientTrait> Database<T> {
             self.clients.insert(new_nickname.to_string(), client);
         }
     }
+
+    pub fn handle_are_credentials_valid(
+        &self,
+        username: &str,
+        password: &str,
+        sender: Sender<bool>,
+    ) {
+        let response = self.are_credentials_valid(username, password);
+        sender.send(response).unwrap();
+    }
 }

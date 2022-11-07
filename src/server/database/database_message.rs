@@ -70,4 +70,9 @@ pub enum DatabaseMessage<T: ClientTrait> {
         old_nickname: String,
         new_nickname: String,
     },
+    AreCredentialsValid {
+        username: String,
+        password: String,
+        respond_to: Sender<bool>,
+    },
 }

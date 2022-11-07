@@ -22,6 +22,14 @@ impl<T: ClientTrait> Database<T> {
         self.clients.insert(clientinfo.nickname, client);
     }
 
+    pub fn are_credentials_valid(&self, username: &str, password: &str) -> bool {
+        if let Some(real_password) = self.credentials.get(username) {
+            return password == real_password;
+        }
+
+        false
+    }
+
     /// Sets client as server operator.
     pub fn set_server_operator(&mut self, nickname: &str) {
         println!("Setting {} as operator", nickname);
