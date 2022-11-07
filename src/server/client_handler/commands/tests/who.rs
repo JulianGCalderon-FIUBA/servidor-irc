@@ -9,7 +9,7 @@ fn who_fails_with_unregistered_client() {
     handler.who_command(parameters).unwrap();
 
     assert_eq!(
-        "200 :unregistered\r\n",
+        "200 :Unregistered\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -50,7 +50,7 @@ fn who_with_mask_returns_all_public_clients_matching_mask() {
 
     handler.database.add_client(dummy_client("nick1name"));
 
-    let parameters = vec!["*1*".to_string()];
+    let parameters = vec!["*k1*".to_string()];
 
     handler.who_command(parameters).unwrap();
 
@@ -60,5 +60,5 @@ fn who_with_mask_returns_all_public_clients_matching_mask() {
         "352 * username hostname servername nick1name \\MODOS :HOPCOUNT realname",
         responses[0]
     );
-    assert_eq!("315 *1* :End of /WHO list", responses[1]);
+    assert_eq!("315 *k1* :End of /WHO list", responses[1]);
 }

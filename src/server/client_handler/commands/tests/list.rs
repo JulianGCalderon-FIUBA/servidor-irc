@@ -9,7 +9,7 @@ fn list_fails_with_unregistered_client() {
     handler.list_command(parameters).unwrap();
 
     assert_eq!(
-        "200 :unregistered\r\n",
+        "200 :Unregistered\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -46,6 +46,7 @@ fn list_with_no_parameters_prints_all_channels() {
         handler.stream.read_wbuf_to_string()
     );
 
+    handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#canal");
     handler.stream.clear();
 

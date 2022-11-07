@@ -1,10 +1,13 @@
-use crate::server::{client_handler::registration::RegistrationState, client_trait::ClientTrait};
+use crate::server::{client_handler::registration::RegistrationState, client_trait::Connection};
 
 use crate::server::client_handler::responses::errors::ErrorReply;
 
 use super::ClientHandler;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
+    /// Asserts target for message exists.
+    /// Possible errors:
+    ///     - Target does not exist.
     pub fn assert_target_is_valid(&self, target: &str) -> Option<ErrorReply> {
         let target = target.to_string();
 
@@ -22,7 +25,10 @@ impl<T: ClientTrait> ClientHandler<T> {
 
         None
     }
-
+    /// Asserts message can be sent.
+    /// Possible errors:
+    ///     - Not enough parameters.
+    ///     - Client is not registered.
     pub fn assert_message_command_is_valid(
         &self,
         command: &str,
