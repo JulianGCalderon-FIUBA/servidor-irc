@@ -10,11 +10,11 @@ pub enum CommandResponse {
     WhoisUser311 {
         client_info: ClientInfo,
     },
-    // WhoisServer312 {
-    //     nickname: String,
-    //     server: String,
-    //     server_info: String,
-    // },
+    WhoisServer312 {
+        nickname: String,
+        server: String,
+        server_info: String,
+    },
     WhoisOperator313 {
         nickname: String,
     },
@@ -77,13 +77,13 @@ impl Display for CommandResponse {
                     client_info.realname,
                 )
             }
-            // CommandResponse::WhoisServer312 {
-            //     nickname,
-            //     server,
-            //     server_info,
-            // } => {
-            //     format!("312 {nickname} {server} :{server_info}")
-            // }
+            CommandResponse::WhoisServer312 {
+                nickname,
+                server,
+                server_info,
+            } => {
+                format!("312 {nickname} {server} :{server_info}")
+            }
             CommandResponse::WhoisOperator313 { nickname } => {
                 format!("313 {nickname} :Is an IRC operator")
             }

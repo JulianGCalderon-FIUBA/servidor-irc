@@ -46,8 +46,14 @@ impl<C: Connection> ClientHandler<C> {
     /// Sends full whois reply.
     pub fn send_whois_responses(&mut self, client_info: ClientInfo) -> Result<(), io::Error> {
         let nickname = client_info.nickname.clone();
+        let server = self.servername.to_string();
 
         self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
+        self.send_response_for_reply(CommandResponse::WhoisServer312 {
+            nickname,
+            server,
+            server_info: "Lemon pie server".to_string(),
+        })?;
         if self.database.is_server_operator(&nickname) {
             self.send_response_for_reply(CommandResponse::WhoisOperator313 {
                 nickname: nickname.to_string(),
