@@ -93,6 +93,8 @@ impl MainView {
             adj.set_upper(adj.upper() + adj.page_size());
             adj.set_value(adj.upper());
             scrolled_window.set_vadjustment(Some(&adj));
+
+            input.set_text("");
         });
     }
 
