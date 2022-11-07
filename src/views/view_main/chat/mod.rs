@@ -31,12 +31,12 @@ impl MainView {
         message_sender_box.append(&self.user_info);
 
         self.input.set_hexpand(true);
-        self.input.set_width_request(550);
+        self.input.set_width_request(500);
         message_sender_box.append(&self.input);
 
         let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
             .min_content_height(600)
-            .max_content_width(600)
+            .max_content_width(500)
             .margin_top(20)
             .margin_start(20)
             .margin_end(20)

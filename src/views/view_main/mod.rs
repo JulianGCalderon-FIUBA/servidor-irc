@@ -63,7 +63,7 @@ impl MainView {
             .title("Lemon Pie IRC")
             .build();
 
-        let main_box = create_main_box(Orientation::Horizontal, 800, 700);
+        let main_box = create_main_box(Orientation::Horizontal, 800, 600);
         main_box.add_css_class("main_box");
 
         let sidebar = self.create_sidebar();
