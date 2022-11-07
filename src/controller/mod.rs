@@ -56,6 +56,7 @@ impl Controller {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut view = RegisterView::new(sender.clone());
+        
         // Solucionar esto
         let mut main_view = MainView::new(sender.clone());
         let mut current_conv = "".to_string();
