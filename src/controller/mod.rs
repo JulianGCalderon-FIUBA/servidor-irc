@@ -3,8 +3,13 @@ pub mod controller_message;
 use crate::views::view_register::RegisterView;
 use gtk4 as gtk;
 
-use crate::{ client::Client, views::view_main::MainView, ADDRESS };
-use gtk::{ gdk::Display, glib::{ self }, prelude::*, Application, CssProvider, StyleContext };
+use crate::{client::Client, views::view_main::MainView, ADDRESS};
+use gtk::{
+    gdk::Display,
+    glib::{self},
+    prelude::*,
+    Application, CssProvider, StyleContext,
+};
 
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
@@ -57,28 +62,26 @@ impl Controller {
         let app_clone = app.clone();
 
         let sender_clone = sender.clone();
-        client.async_read(move |message| {
-            match message {
-                Ok(message) => {
-                    let controller_message = to_controller_message(message);
-                    sender_clone.send(controller_message).unwrap();
-                }
-                Err(error) => eprintln!("Failed to read message: {}", error),
+        client.async_read(move |message| match message {
+            Ok(message) => {
+                let controller_message = to_controller_message(message);
+                sender_clone.send(controller_message).unwrap();
             }
+            Err(error) => eprintln!("Failed to read message: {}", error),
         });
 
         receiver.attach(None, move |msg| {
             match msg {
-                Register { pass, nickname, username, realname } => {
+                Register {
+                    pass,
+                    nickname,
+                    username,
+                    realname,
+                } => {
                     let pass_command = format!("PASS {}", pass);
                     let nick_command = format!("NICK {}", nickname);
-                    let user_command = format!(
-                        "USER {} {} {} :{}",
-                        username,
-                        username,
-                        username,
-                        realname
-                    );
+                    let user_command =
+                        format!("USER {} {} {} :{}", username, username, username, realname);
                     client.send_raw(&pass_command).expect("ERROR");
                     client.send_raw(&nick_command).expect("ERROR");
                     client.send_raw(&user_command).expect("ERROR");
