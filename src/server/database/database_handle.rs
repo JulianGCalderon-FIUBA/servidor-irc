@@ -183,6 +183,7 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
+    /// Sends AreCredentialsValid request and returns answer.
     pub fn are_credentials_valid(&self, username: &str, password: &str) -> bool {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::AreCredentialsValid {
