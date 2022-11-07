@@ -1,35 +1,42 @@
+/// This module contains useful functionalities when working with channels.
+mod utils;
+/// This module contains validations for channel operations.
 mod validations;
 
-use crate::{
-    message::Message,
-    server::{client_handler::responses::replies::CommandResponse, client_trait::ClientTrait},
-};
+use crate::server::client_handler::responses::errors::ErrorReply;
+use crate::server::client_handler::responses::notifications::Notification;
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_trait::Connection;
 
 use super::ClientHandler;
 
 use std::io;
 
-pub const INVITE_COMMAND: &str = "INVITE";
-pub const JOIN_COMMAND: &str = "JOIN";
-pub const LIST_COMMAND: &str = "LIST";
-pub const NAMES_COMMAND: &str = "NAMES";
-pub const PART_COMMAND: &str = "PART";
-
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
+    /// Invites client to channel.
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_invite_is_valid(&parameters) {
             return self.send_response_for_error(error);
         }
 
         let invited_client = &parameters[0];
-        let inviting_client = self.registration.nickname().unwrap();
         let channel = parameters[1].to_string();
+        let inviting_client = self.registration.nickname().unwrap();
 
-        let prefix = self.registration.nickname().unwrap();
+        let invitation = Notification::Invite {
+            inviting_client: inviting_client.clone(),
+            invited_client: invited_client.clone(),
+            channel: channel.clone(),
+        };
 
-        let invitation_text = format!(":{prefix} {INVITE_COMMAND} {invited_client} {channel}");
-        let message = Message::new(&invitation_text).unwrap();
-        self.send_message_to_client(invited_client, &message);
+        if self
+            .send_message_to_client(invited_client, &invitation.to_string())
+            .is_err()
+        {
+            self.send_response_for_error(ErrorReply::NoSuchNickname401 {
+                nickname: invited_client.clone(),
+            })?
+        }
 
         self.send_response_for_reply(CommandResponse::Inviting341 {
             nickname: inviting_client,
@@ -37,6 +44,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         })
     }
 
+    /// Joins specific channel.
     pub fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_join_is_valid(&parameters) {
             return self.send_response_for_error(error);
@@ -58,13 +66,14 @@ impl<T: ClientTrait> ClientHandler<T> {
             })?;
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.to_string(),
-                clients: self.database.get_clients(channel),
+                clients: self.database.get_clients_for_channel(channel),
             })?;
         }
 
         Ok(())
     }
 
+    /// Lists all channels and their information.
     pub fn list_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_registration_is_valid() {
             return self.send_response_for_error(error);
@@ -82,20 +91,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         self.send_response_for_reply(CommandResponse::ListEnd323)
     }
 
-    fn get_channels_for_query(&mut self, channels: Option<&String>) -> Vec<String> {
-        if channels.is_none() {
-            let mut channels = self.database.get_channels();
-            channels.sort();
-            return channels;
-        }
-
-        channels
-            .unwrap()
-            .split(',')
-            .map(|string| string.to_string())
-            .collect()
-    }
-
+    /// Lists all names in specific channel.
     pub fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_registration_is_valid() {
             return self.send_response_for_error(error);
@@ -108,7 +104,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 continue;
             }
 
-            let clients = self.database.get_clients(&channel);
+            let clients = self.database.get_clients_for_channel(&channel);
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.clone(),
                 clients,
@@ -128,6 +124,7 @@ impl<T: ClientTrait> ClientHandler<T> {
         Ok(())
     }
 
+    /// Parts specific channel.
     pub fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_part_is_valid(&parameters) {
             return self.send_response_for_error(error);
@@ -141,8 +138,7 @@ impl<T: ClientTrait> ClientHandler<T> {
                 self.send_response_for_error(error)?;
                 continue;
             }
-            self.database.remove_client_of_channel(&nickname, channel);
-            self.send_response_for_reply(CommandResponse::Ok)?
+            self.database.remove_client_from_channel(&nickname, channel);
         }
         Ok(())
     }

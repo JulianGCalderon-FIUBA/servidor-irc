@@ -1,12 +1,12 @@
 use std::io;
 
-use crate::server::{
-    client_handler::{responses::replies::CommandResponse, ClientHandler},
-    client_trait::ClientTrait,
-    database::ClientInfo,
-};
+use crate::server::client_handler::responses::replies::CommandResponse;
+use crate::server::client_handler::ClientHandler;
+use crate::server::client_trait::Connection;
+use crate::server::database::ClientInfo;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
+    /// Returns filtered list of clients.
     pub fn filtered_clients_for_default_who_command(
         &mut self,
         clients: Vec<ClientInfo>,
@@ -27,7 +27,7 @@ impl<T: ClientTrait> ClientHandler<T> {
             .iter()
             .any(|channel| self_channels.contains(channel))
     }
-
+    /// Sends full who reply.
     pub fn send_whoreply_for_client(
         &mut self,
         client_info: crate::server::database::ClientInfo,
@@ -43,11 +43,17 @@ impl<T: ClientTrait> ClientHandler<T> {
             client_info,
         })
     }
-
+    /// Sends full whois reply.
     pub fn send_whois_responses(&mut self, client_info: ClientInfo) -> Result<(), io::Error> {
         let nickname = client_info.nickname.clone();
+        let server = self.servername.to_string();
 
         self.send_response_for_reply(CommandResponse::WhoisUser311 { client_info })?;
+        self.send_response_for_reply(CommandResponse::WhoisServer312 {
+            nickname: nickname.clone(),
+            server,
+            server_info: "Lemon pie server".to_string(),
+        })?;
         if self.database.is_server_operator(&nickname) {
             self.send_response_for_reply(CommandResponse::WhoisOperator313 {
                 nickname: nickname.to_string(),

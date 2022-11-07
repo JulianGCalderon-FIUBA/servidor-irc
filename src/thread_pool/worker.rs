@@ -11,7 +11,7 @@ pub struct Worker {
 }
 
 impl Worker {
-    /// Creates new Worker that executes Job received through receiver.
+    /// Creates new [`Worker`] that executes Job received through receiver.
     pub fn new(receiver: Arc<Mutex<mpsc::Receiver<Job>>>) -> Self {
         let thread = thread::spawn(move || loop {
             let message = receiver.lock().expect("Lock is poisoned").recv();
