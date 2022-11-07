@@ -46,6 +46,10 @@ impl Client {
         }
     }
 
+    pub fn async_print(&mut self) {
+        self.async_read(print_message);
+    }
+
     /// Sends message to Server.
     pub fn send_raw(&mut self, message: &str) -> io::Result<()> {
         let bytes = message.as_bytes();
@@ -62,5 +66,12 @@ impl Drop for Client {
                 eprintln!("Error: {:?}", error);
             }
         }
+    }
+}
+
+fn print_message(message: Result<Message, CreationError>) {
+    match message {
+        Ok(message) => println!("{message}"),
+        Err(error) => eprintln!("{error:?}"),
     }
 }
