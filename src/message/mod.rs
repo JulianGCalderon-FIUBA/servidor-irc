@@ -75,6 +75,10 @@ impl Message {
         (self.prefix, self.command, self.parameters, self.trailing)
     }
 
+    pub fn get_prefix(&self) -> &Option<String> {
+        &self.prefix
+    }
+
     pub fn get_command(&self) -> &String {
         &self.command
     }
