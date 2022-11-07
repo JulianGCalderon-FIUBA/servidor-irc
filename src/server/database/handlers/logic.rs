@@ -22,6 +22,7 @@ impl<C: Connection> Database<C> {
         self.clients.insert(clientinfo.nickname, client);
     }
 
+    /// Verifies if operator credentials are valid.
     pub fn are_credentials_valid(&self, username: &str, password: &str) -> bool {
         if let Some(real_password) = self.credentials.get(username) {
             return password == real_password;
