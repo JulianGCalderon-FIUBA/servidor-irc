@@ -84,21 +84,6 @@ impl RegisterView {
                 && nick_entry.text().len() != 0
                 && username_entry.text().len() != 0
             {
-                // let pass_command = format!("PASS {}", pass_entry.text());
-                // let nick_command = format!("NICK {}", nick_entry.text());
-                // let user_command = format!(
-                //     "USER {} {} {} :{}",
-                //     username_entry.text(),
-                //     username_entry.text(),
-                //     username_entry.text(),
-                //     username_entry.text()
-                // );
-                // sender.send(pass_command).expect("Error: pass command");
-                // sender.send(nick_command).expect("Error: nick command");
-                // sender.send(user_command).expect("Error: user command");
-
-                // window.close();
-
                 let register = ControllerMessage::Register {
                     pass: pass_entry.text(),
                     nickname: nick_entry.text(),

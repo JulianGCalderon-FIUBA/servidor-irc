@@ -57,6 +57,7 @@ impl MainView {
 
         message_sender_box.append(&self.send_message);
 
+        chat.append(&self.current_chat);
         chat.append(&scrolled_window);
         chat.append(&message_sender_box);
         chat
@@ -69,13 +70,15 @@ impl MainView {
         scrolled_window: ScrolledWindow,
         sender: Sender<ControllerMessage>,
     ) {
-        let nickname_receiver = self.current_conversation.clone();
+        let nickname_receiver = self.current_chat.label().to_string().clone();
 
         self.send_message.connect_clicked(move |_| {
             let input_text = input.text();
             if !entry_is_valid(&input_text) {
                 return;
             }
+
+            println!("Send message to: {}", nickname_receiver);
 
             let priv_message = ControllerMessage::SendPrivMessage {
                 nickname: nickname_receiver.clone(),
