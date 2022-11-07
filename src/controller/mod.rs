@@ -51,11 +51,12 @@ impl Controller {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut view = RegisterView::new(sender.clone());
-        let window = view.get_view(app.clone());
-        window.show();
-
         // Solucionar esto
         let mut main_view = MainView::new(sender.clone());
+        let mut current_conv = "".to_string();
+
+        let window = view.get_view(app.clone());
+        window.show();        
 
         let app_clone = app.clone();
 
@@ -90,13 +91,15 @@ impl Controller {
                     window.close();
                     main_view.get_view(app_clone.clone()).show();
                 }
-                SendPrivMessage { nickname, message } => {
-                    println!("Sending message");
-                    let priv_message = format!("PRIVMSG {} :{}", nickname, message);
+                SendPrivMessage { message } => {
+                    let priv_message = format!("PRIVMSG {} :{}", current_conv, message);
                     client.send_raw(&priv_message).expect("ERROR");
                 },
                 ReceivePrivMessage { nickname, message } => {
                     main_view.receive_priv_message(message, nickname);
+                },
+                ChangeConversation { nickname } => {
+                    current_conv = nickname;
                 }
                 RegularMessage { message } => {
                     println!("{}", message);

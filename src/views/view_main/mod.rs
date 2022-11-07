@@ -43,7 +43,7 @@ impl MainView {
                 create_button("ana"),
             ],
             add_client: create_button("+"),
-            current_chat: create_label(""),
+            current_chat: create_label("juli"),
             message_box: create_message_box(),
             user_info: create_button("info"),
             input: create_entry("Message..."),

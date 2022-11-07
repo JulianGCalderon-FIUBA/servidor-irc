@@ -10,12 +10,14 @@ pub enum ControllerMessage {
     },
     ChangeViewToMain {},
     SendPrivMessage {
-        nickname: String,
         message: GString,
     },
     ReceivePrivMessage {
         nickname: String,
         message: String
+    },
+    ChangeConversation {
+        nickname: String,
     },
     RegularMessage {
         message: String,

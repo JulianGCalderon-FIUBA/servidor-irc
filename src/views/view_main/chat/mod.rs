@@ -53,8 +53,6 @@ impl MainView {
             self.sender.clone(),
         );
 
-        self.message_box = message_box;
-
         message_sender_box.append(&self.send_message);
 
         chat.append(&self.current_chat);
@@ -81,7 +79,6 @@ impl MainView {
             println!("Send message to: {}", nickname_receiver);
 
             let priv_message = ControllerMessage::SendPrivMessage {
-                nickname: nickname_receiver.clone(),
                 message: input_text.clone(),
             };
             sender

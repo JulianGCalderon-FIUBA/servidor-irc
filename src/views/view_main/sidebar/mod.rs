@@ -1,7 +1,9 @@
 mod widgets_creation;
 
-use gtk::{ prelude::*, Box, Orientation, Button, Label};
+use gtk::{ prelude::*, Box, Orientation, Button, Label, glib::Sender};
 use gtk4 as gtk;
+
+use crate::controller::controller_message::ControllerMessage;
 
 use self::widgets_creation::create_separator_sidebar;
 
@@ -42,11 +44,9 @@ impl MainView {
 
         for button in &self.clients {
             let label = button.label().unwrap().to_string();
-            self.connect_conv_button(button, label, current_chat_clone.clone());
+            self.connect_conv_button(button, label.clone(), current_chat_clone.clone(), self.sender.clone());
             sidebar.append(button);
         }
-
-        self.current_chat.set_label(&current_chat_clone.label().to_string());
 
         let label = self.current_chat.label().to_string();
         self.add_client.connect_clicked(move |_| {
@@ -63,9 +63,11 @@ impl MainView {
         sidebar
     }
 
-    fn connect_conv_button(&self, button: &Button, label: String, current_chat: Label) {
+    fn connect_conv_button(&self, button: &Button, label: String, current_chat: Label, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
             current_chat.set_label(&label);
+            let request = ControllerMessage::ChangeConversation { nickname: label.clone() };
+            sender.send(request).expect("ERROR: change conversation");
         });
     }
 }
