@@ -4,8 +4,8 @@ use gtk4 as gtk;
 pub fn create_message(label: &str) -> Label {
     let message = Label::builder()
         .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
+        .margin_top(10)
+        .margin_bottom(10)
         .margin_start(12)
         .margin_end(12)
         .halign(Align::End)
@@ -17,8 +17,8 @@ pub fn create_message(label: &str) -> Label {
 pub fn create_received_message(label: &str) -> Label {
     let message = Label::builder()
         .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
+        .margin_top(10)
+        .margin_bottom(10)
         .margin_start(12)
         .margin_end(12)
         .halign(Align::Start)
