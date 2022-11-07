@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
 
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 use crate::server::database::{Channel, Client};
 
 use super::{
@@ -10,9 +10,9 @@ use super::{
     ClientInfo, Database,
 };
 
-impl<T: ClientTrait> Database<T> {
+impl<C: Connection> Database<C> {
     /// Adds client to Database.
-    pub fn add_client(&mut self, client: Client<T>) {
+    pub fn add_client(&mut self, client: Client<C>) {
         let clientinfo = client.get_info();
 
         println!("Client registered: {clientinfo:?}",);
@@ -62,7 +62,7 @@ impl<T: ClientTrait> Database<T> {
     }
 
     /// Returns the client's stream or error if client is disconnected.
-    pub fn get_stream(&self, nickname: &str) -> io::Result<T> {
+    pub fn get_stream(&self, nickname: &str) -> io::Result<C> {
         if let Some(client) = self.clients.get(nickname) {
             return client.borrow().get_stream();
         }
@@ -77,7 +77,7 @@ impl<T: ClientTrait> Database<T> {
     pub fn add_client_to_channel(&mut self, nickname: &str, channel_name: &str) {
         println!("Adding {} to channel {}", nickname, channel_name);
 
-        let channel: Option<&mut Channel<T>> = self.channels.get_mut(&channel_name.to_string());
+        let channel: Option<&mut Channel<C>> = self.channels.get_mut(&channel_name.to_string());
         if let Some(client) = self.clients.get(nickname) {
             let client_rc = client.clone();
 

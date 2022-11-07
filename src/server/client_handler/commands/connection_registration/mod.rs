@@ -1,7 +1,7 @@
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 use super::ClientHandler;
 
@@ -9,7 +9,7 @@ use std::io;
 /// This module contains validations for connection registration operations.
 mod validations;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Saves password.
     pub fn pass_command(&mut self, mut parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_pass_command_is_valid(&parameters) {

@@ -2,21 +2,21 @@ use std::collections::HashMap;
 
 mod registration_state;
 
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 use crate::server::database::{Client, ClientBuilder};
 pub use registration_state::RegistrationState;
 
 /// Holds a Clients' relevant information when registering.
-pub struct Registration<T: ClientTrait> {
-    stream: Option<T>,
+pub struct Registration<C: Connection> {
+    stream: Option<C>,
     nickname: Option<String>,
     state: RegistrationState,
     attributes: HashMap<&'static str, String>,
 }
 
-impl<T: ClientTrait> Registration<T> {
+impl<C: Connection> Registration<C> {
     /// Creates new [`Registration`].
-    pub fn with_stream(stream: T) -> Self {
+    pub fn with_stream(stream: C) -> Self {
         Self {
             stream: Some(stream),
             nickname: None,
@@ -53,7 +53,7 @@ impl<T: ClientTrait> Registration<T> {
     }
 
     /// Builds new [`Client`]
-    pub fn build(&mut self) -> Option<Client<T>> {
+    pub fn build(&mut self) -> Option<Client<C>> {
         let client = ClientBuilder::new()
             .nickname(self.nickname()?)
             .password(self.get_attribute("password"))

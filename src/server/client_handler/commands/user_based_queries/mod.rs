@@ -7,10 +7,10 @@ mod validations;
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_handler::ClientHandler;
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 use crate::server::database::ClientInfo;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Sends whois command.
     pub fn whois_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_whois_is_valid(&parameters) {

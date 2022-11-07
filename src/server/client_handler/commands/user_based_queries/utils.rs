@@ -2,10 +2,10 @@ use std::io;
 
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_handler::ClientHandler;
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 use crate::server::database::ClientInfo;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Returns filtered list of clients.
     pub fn filtered_clients_for_default_who_command(
         &mut self,

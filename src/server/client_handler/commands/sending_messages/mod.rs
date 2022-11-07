@@ -3,13 +3,13 @@ mod validations;
 
 use crate::server::ClientHandler;
 use crate::server::{
-    client_handler::responses::notifications::Notification, client_trait::ClientTrait,
+    client_handler::responses::notifications::Notification, client_trait::Connection,
 };
 use std::io;
 
 use super::{NOTICE_COMMAND, PRIVMSG_COMMAND};
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Sends private message to client.
     pub fn privmsg_command(
         &mut self,

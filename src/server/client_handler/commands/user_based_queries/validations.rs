@@ -1,9 +1,9 @@
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::ClientHandler;
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Asserts whois command can be executed.
     /// Possible errors:
     ///     - Client is not registered.

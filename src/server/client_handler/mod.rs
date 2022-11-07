@@ -11,7 +11,7 @@ mod responses;
 
 use responses::errors::ErrorReply;
 
-use super::client_trait::ClientTrait;
+use super::client_trait::Connection;
 use super::database::DatabaseHandle;
 use crate::message::{CreationError, ParsingError};
 use registration::Registration;
@@ -23,20 +23,20 @@ use commands::{
 };
 
 /// A ClientHandler handles the client's request.
-pub struct ClientHandler<T: ClientTrait> {
-    database: DatabaseHandle<T>,
-    stream: T,
-    registration: Registration<T>,
+pub struct ClientHandler<C: Connection> {
+    database: DatabaseHandle<C>,
+    stream: C,
+    registration: Registration<C>,
     servername: String,
 }
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Returns new [`ClientHandler`].
     pub fn from_stream(
-        database: DatabaseHandle<T>,
-        stream: T,
+        database: DatabaseHandle<C>,
+        stream: C,
         servername: String,
-    ) -> io::Result<ClientHandler<T>> {
+    ) -> io::Result<ClientHandler<C>> {
         let registration = Registration::with_stream(stream.try_clone()?);
 
         Ok(Self {

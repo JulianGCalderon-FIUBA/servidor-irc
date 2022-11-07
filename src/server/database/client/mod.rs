@@ -5,11 +5,11 @@ pub use client_builder::ClientBuilder;
 pub use client_info::ClientInfo;
 use std::io;
 
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 /// Represents a Client that is connected to the Server.
-pub struct Client<T: ClientTrait> {
-    stream: T,
+pub struct Client<C: Connection> {
+    stream: C,
     _password: Option<String>,
     nicknames: Vec<String>,
     username: String,
@@ -19,7 +19,7 @@ pub struct Client<T: ClientTrait> {
     operator: bool,
 }
 
-impl<T: ClientTrait> Client<T> {
+impl<C: Connection> Client<C> {
     /// Sets Client as server operator.
     pub fn set_server_operator(&mut self) {
         self.operator = true;
@@ -31,7 +31,7 @@ impl<T: ClientTrait> Client<T> {
     }
 
     /// Gets stream for Client. Returns error if cannot clone stream.
-    pub fn get_stream(&self) -> io::Result<T> {
+    pub fn get_stream(&self) -> io::Result<C> {
         self.stream.try_clone()
     }
 

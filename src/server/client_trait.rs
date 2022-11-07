@@ -7,12 +7,12 @@ use std::net::{SocketAddr, TcpStream};
 ///    - Write
 ///    - Sized
 ///    - Send
-pub trait ClientTrait: Read + Write + Sized + Send + 'static {
+pub trait Connection: Read + Write + Sized + Send + 'static {
     fn try_clone(&self) -> io::Result<Self>;
     fn peer_address(&self) -> io::Result<SocketAddr>;
 }
 
-impl ClientTrait for TcpStream {
+impl Connection for TcpStream {
     fn try_clone(&self) -> io::Result<Self> {
         self.try_clone()
     }

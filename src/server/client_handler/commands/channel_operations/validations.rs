@@ -2,12 +2,12 @@ use crate::server::client_handler::commands::DISTRIBUTED_CHANNEL;
 use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 use super::super::{INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
 use super::ClientHandler;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     fn channel_name_is_valid(&self, channel: &str) -> bool {
         return ((channel.as_bytes()[0] == LOCAL_CHANNEL)
             || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))

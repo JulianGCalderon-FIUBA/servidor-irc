@@ -26,26 +26,26 @@ use database_message::DatabaseMessage::{
 
 use self::database_message::DatabaseMessage;
 
-use super::client_trait::ClientTrait;
+use super::client_trait::Connection;
 /// Represents a Database that implements ClientTrait.
-pub struct Database<T: ClientTrait> {
-    receiver: Receiver<DatabaseMessage<T>>,
-    clients: HashMap<String, Rc<RefCell<Client<T>>>>,
-    channels: HashMap<String, Channel<T>>,
+pub struct Database<C: Connection> {
+    receiver: Receiver<DatabaseMessage<C>>,
+    clients: HashMap<String, Rc<RefCell<Client<C>>>>,
+    channels: HashMap<String, Channel<C>>,
     credentials: HashMap<String, String>,
 }
 
-impl<T: ClientTrait> Database<T> {
+impl<C: Connection> Database<C> {
     /// Returns new [`DatabaseHandle`] and starts listening for requests.
-    pub fn start() -> DatabaseHandle<T> {
+    pub fn start() -> DatabaseHandle<C> {
         let (sender, receiver) = mpsc::channel();
 
-        thread::spawn(|| Database::<T>::new(receiver).run());
+        thread::spawn(|| Database::<C>::new(receiver).run());
 
         DatabaseHandle::new(sender)
     }
 
-    fn new(receiver: Receiver<DatabaseMessage<T>>) -> Self {
+    fn new(receiver: Receiver<DatabaseMessage<C>>) -> Self {
         let mut database = Self {
             receiver,
             clients: HashMap::new(),
@@ -66,7 +66,7 @@ impl<T: ClientTrait> Database<T> {
         }
     }
 
-    fn handle_message(&mut self, request: DatabaseMessage<T>) {
+    fn handle_message(&mut self, request: DatabaseMessage<C>) {
         match request {
             AddClient { client } => self.add_client(client),
             GetStream {

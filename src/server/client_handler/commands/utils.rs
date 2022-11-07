@@ -2,10 +2,10 @@ use std::io;
 
 use crate::{
     message::Message,
-    server::{client_handler::ClientHandler, client_trait::ClientTrait},
+    server::{client_handler::ClientHandler, client_trait::Connection},
 };
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Sends a Message to everyone in channel.
     pub fn send_message_to_channel(&self, channel: &str, content: &str) {
         let clients = self.database.get_clients_for_channel(channel);

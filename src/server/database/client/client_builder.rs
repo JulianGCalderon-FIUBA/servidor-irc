@@ -1,10 +1,10 @@
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 use super::Client;
 
 /// A ClientBuilder is used to build a Client using a Builder pattern.
-pub struct ClientBuilder<T: ClientTrait> {
-    stream: Option<T>,
+pub struct ClientBuilder<C: Connection> {
+    stream: Option<C>,
     password: Option<String>,
     nickname: Option<String>,
     username: Option<String>,
@@ -13,7 +13,7 @@ pub struct ClientBuilder<T: ClientTrait> {
     realname: Option<String>,
 }
 
-impl<T: ClientTrait> ClientBuilder<T> {
+impl<C: Connection> ClientBuilder<C> {
     /// Creates empty [`ClientBuilder`].
     pub fn new() -> Self {
         Self {
@@ -28,7 +28,7 @@ impl<T: ClientTrait> ClientBuilder<T> {
     }
 
     /// Sets stream.
-    pub fn stream(mut self, stream: T) -> Self {
+    pub fn stream(mut self, stream: C) -> Self {
         self.stream = Some(stream);
         self
     }
@@ -70,7 +70,7 @@ impl<T: ClientTrait> ClientBuilder<T> {
     }
 
     /// Builds and returns new [`Client`] with previously received fields.
-    pub fn build(self) -> Option<Client<T>> {
+    pub fn build(self) -> Option<Client<C>> {
         let client_info = Client {
             stream: self.stream?,
             _password: self.password,

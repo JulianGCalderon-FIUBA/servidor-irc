@@ -1,20 +1,20 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 use super::Client;
 /// A Channel has clients and a name.
-pub struct Channel<T: ClientTrait> {
+pub struct Channel<C: Connection> {
     _name: String,
     //vector de nicknames
-    clients: Vec<Rc<RefCell<Client<T>>>>,
+    clients: Vec<Rc<RefCell<Client<C>>>>,
     //nickname del operador
     _operator: Option<String>,
 }
 
-impl<T: ClientTrait> Channel<T> {
+impl<C: Connection> Channel<C> {
     /// Creates a new [`Channel`].
-    pub fn new(_name: String, creator: Rc<RefCell<Client<T>>>) -> Self {
+    pub fn new(_name: String, creator: Rc<RefCell<Client<C>>>) -> Self {
         let clients = vec![creator];
 
         Self {
@@ -34,7 +34,7 @@ impl<T: ClientTrait> Channel<T> {
     }
 
     /// Adds client to Channel.
-    pub fn add_client(&mut self, client: Rc<RefCell<Client<T>>>) {
+    pub fn add_client(&mut self, client: Rc<RefCell<Client<C>>>) {
         self.clients.push(client);
     }
 

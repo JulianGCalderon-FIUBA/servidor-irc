@@ -3,23 +3,23 @@ use std::{
     sync::mpsc::{self, Sender},
 };
 
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 use super::database_message::DatabaseMessage;
 use super::{Client, ClientInfo};
 /// A DatabaseHandle handles and makes request to the main Database. Works as an intermediary so external structures cannot acces the Database directly.
-pub struct DatabaseHandle<T: ClientTrait> {
-    sender: Sender<DatabaseMessage<T>>,
+pub struct DatabaseHandle<C: Connection> {
+    sender: Sender<DatabaseMessage<C>>,
 }
 
-impl<T: ClientTrait> DatabaseHandle<T> {
+impl<C: Connection> DatabaseHandle<C> {
     /// Creates new DatabaseHandle
-    pub fn new(sender: Sender<DatabaseMessage<T>>) -> Self {
+    pub fn new(sender: Sender<DatabaseMessage<C>>) -> Self {
         Self { sender }
     }
 
     /// Sends AddClient request.
-    pub fn add_client(&self, client: Client<T>) {
+    pub fn add_client(&self, client: Client<C>) {
         let request = DatabaseMessage::AddClient { client };
         self.sender.send(request).unwrap();
     }
@@ -52,7 +52,7 @@ impl<T: ClientTrait> DatabaseHandle<T> {
     }
 
     /// Sends GetStream request and returns answer.
-    pub fn get_stream(&self, nickname: &str) -> io::Result<T> {
+    pub fn get_stream(&self, nickname: &str) -> io::Result<C> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetStream {
             nickname: nickname.to_string(),
@@ -195,7 +195,7 @@ impl<T: ClientTrait> DatabaseHandle<T> {
     }
 }
 
-impl<T: ClientTrait> Clone for DatabaseHandle<T> {
+impl<C: Connection> Clone for DatabaseHandle<C> {
     fn clone(&self) -> Self {
         Self {
             sender: self.sender.clone(),

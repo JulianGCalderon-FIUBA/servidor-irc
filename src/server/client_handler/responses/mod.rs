@@ -9,12 +9,12 @@ use errors::ErrorReply;
 use std::io;
 
 use crate::message::Message;
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 use crate::server::ClientHandler;
 
 use self::replies::CommandResponse;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Sends response as Message.
     pub fn send_response(&mut self, response: &str) -> io::Result<()> {
         let response = Message::new(response).unwrap();

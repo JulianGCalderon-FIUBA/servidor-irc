@@ -6,11 +6,11 @@ mod logic;
 /// This module contains extra functions that are useful for the database to complete it's tasks.
 mod utils;
 
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 use super::{ClientInfo, Database};
 
-impl<T: ClientTrait> Database<T> {
+impl<C: Connection> Database<C> {
     /// Returns response to IsServerOperator request.
     pub fn handle_is_server_operator(&mut self, nickname: &str, sender: Sender<bool>) {
         let response = self.is_server_operator(nickname);
@@ -18,7 +18,7 @@ impl<T: ClientTrait> Database<T> {
     }
 
     /// Returns response to GetStream request.
-    pub fn handle_get_stream_request(&self, nickname: &str, sender: Sender<io::Result<T>>) {
+    pub fn handle_get_stream_request(&self, nickname: &str, sender: Sender<io::Result<C>>) {
         let response = self.get_stream(nickname);
         sender.send(response).unwrap();
     }

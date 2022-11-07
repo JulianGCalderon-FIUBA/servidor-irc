@@ -1,11 +1,11 @@
 use super::super::{OPER_COMMAND, PASS_COMMAND, USER_COMMAND};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 use super::ClientHandler;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Asserts pass command can be executed.
     /// Possible errors:
     ///     - Not enough parameters.

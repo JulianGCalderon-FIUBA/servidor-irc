@@ -1,10 +1,10 @@
-use crate::server::{client_handler::registration::RegistrationState, client_trait::ClientTrait};
+use crate::server::{client_handler::registration::RegistrationState, client_trait::Connection};
 
 use crate::server::client_handler::responses::errors::ErrorReply;
 
 use super::ClientHandler;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Asserts target for message exists.
     /// Possible errors:
     ///     - Target does not exist.

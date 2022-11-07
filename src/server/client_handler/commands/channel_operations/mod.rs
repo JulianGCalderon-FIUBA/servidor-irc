@@ -6,13 +6,13 @@ mod validations;
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 use super::ClientHandler;
 
 use std::io;
 
-impl<T: ClientTrait> ClientHandler<T> {
+impl<C: Connection> ClientHandler<C> {
     /// Invites client to channel.
     pub fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_invite_is_valid(&parameters) {

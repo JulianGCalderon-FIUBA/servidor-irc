@@ -2,16 +2,16 @@ use std::io;
 use std::sync::mpsc::Sender;
 
 use super::{Client, ClientInfo};
-use crate::server::client_trait::ClientTrait;
+use crate::server::client_trait::Connection;
 
 /// Possible messages or requests a Database can receive.
-pub enum DatabaseMessage<T: ClientTrait> {
+pub enum DatabaseMessage<C: Connection> {
     AddClient {
-        client: Client<T>,
+        client: Client<C>,
     },
     GetStream {
         nickname: String,
-        respond_to: Sender<io::Result<T>>,
+        respond_to: Sender<io::Result<C>>,
     },
     DisconnectClient {
         nickname: String,
