@@ -17,6 +17,8 @@ mod responses;
 
 use responses::errors::ErrorReply;
 
+use self::registration::RegistrationState;
+
 use super::client_trait::Connection;
 use super::database::DatabaseHandle;
 use crate::message::{CreationError, ParsingError};
@@ -28,7 +30,7 @@ use commands::{
     WHOIS_COMMAND, WHO_COMMAND,
 };
 
-const REGISTRATION_TIMEOUT_SECONDS: u8 = 60;
+const REGISTRATION_TIMELIMIT_MS: u128 = 60 * 1000;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<C: Connection> {
@@ -160,9 +162,14 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     fn registration_timeout(&self) -> bool {
-        let time = Instant::now().duration_since(self.registration.instant());
+        if self.registration.state() == &RegistrationState::Registered {
+            return false;
+        }
 
-        time.as_millis() > (REGISTRATION_TIMEOUT_SECONDS as u128 * 1000)
+        let elapsed_time = Instant::now().duration_since(self.registration.instant());
+        let elapsed_time_ms = elapsed_time.as_millis();
+
+        elapsed_time_ms > REGISTRATION_TIMELIMIT_MS
     }
 
     fn server_shutdown(&mut self) -> bool {
