@@ -1,13 +1,10 @@
-use std::{
-    io::{self, BufReader},
-    sync::{
-        atomic::{AtomicBool, Ordering},
-        mpsc::{self, Receiver, Sender, TryRecvError},
-        Arc,
-    },
-    thread,
-    time::Instant,
-};
+use std::io;
+use std::io::BufReader;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
+use std::sync::Arc;
+use std::thread;
+use std::time::Instant;
 
 use crate::message::Message;
 
@@ -93,7 +90,7 @@ impl<C: Connection> ClientHandler<C> {
         let receiver = self.start_async_read_stream()?;
 
         loop {
-            if !self.online.load(Ordering::Relaxed) {
+            if self.server_shutdown() {
                 self.on_shutdown();
                 return Ok(());
             }
@@ -140,6 +137,10 @@ impl<C: Connection> ClientHandler<C> {
                 _ => self.on_unknown_command(&command)?,
             };
         }
+    }
+
+    fn server_shutdown(&mut self) -> bool {
+        !self.online.load(Ordering::Relaxed)
     }
 
     fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
