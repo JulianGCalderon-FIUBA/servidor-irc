@@ -6,6 +6,7 @@ use std::{
         Arc,
     },
     thread,
+    time::Instant,
 };
 
 use crate::message::Message;
@@ -29,6 +30,8 @@ use commands::{
     OPER_COMMAND, PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     WHOIS_COMMAND, WHO_COMMAND,
 };
+
+const REGISTRATION_TIMEOUT_SECONDS: u8 = 60;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<C: Connection> {
@@ -95,6 +98,11 @@ impl<C: Connection> ClientHandler<C> {
                 return Ok(());
             }
 
+            if self.registration_timeout() {
+                self.on_registration_timeout();
+                return Ok(());
+            }
+
             let message = match receiver.try_recv() {
                 Ok(message) => message,
                 Err(TryRecvError::Empty) => continue,
@@ -149,6 +157,17 @@ impl<C: Connection> ClientHandler<C> {
         self.stream.shutdown().ok();
     }
 
+    fn registration_timeout(&self) -> bool {
+        let time = Instant::now().duration_since(self.registration.instant());
+
+        time.as_millis() > (REGISTRATION_TIMEOUT_SECONDS as u128 * 1000)
+    }
+
+    fn on_registration_timeout(&mut self) {
+        self.send_response("Registration timeout").ok();
+        self.stream.shutdown().ok();
+    }
+
     fn start_async_read_stream(&self) -> io::Result<Receiver<Result<Message, CreationError>>> {
         let (sender, receiver) = mpsc::channel();
 
@@ -166,10 +185,14 @@ fn async_read_stream<C: Connection>(stream: C, sender: Sender<Result<Message, Cr
         let message = Message::read_from_buffer(&mut reader);
 
         if let Err(CreationError::IoError(_)) = message {
-            sender.send(message).unwrap();
+            if sender.send(message).is_err() {
+                return;
+            };
             break;
         }
 
-        sender.send(message).unwrap();
+        if sender.send(message).is_err() {
+            return;
+        };
     }
 }
