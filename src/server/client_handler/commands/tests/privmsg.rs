@@ -147,3 +147,23 @@ fn privmsg_works_with_multiple_targets() {
             .read_wbuf_to_string()
     );
 }
+
+#[test]
+fn privmsg_with_away_client_returns_away_message() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick1"));
+    handler
+        .database
+        .set_away_message(&Some("away message!".to_string()), "nick1");
+
+    let parameters = vec!["nick1".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.privmsg_command(parameters, trailing).unwrap();
+
+    assert_eq!(
+        "301 nick1 :away message!\r\n",
+        handler.stream.read_wbuf_to_string(),
+    );
+}

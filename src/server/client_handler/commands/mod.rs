@@ -33,3 +33,4 @@ pub const JOIN_COMMAND: &str = "JOIN";
 pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
 pub const PART_COMMAND: &str = "PART";
+pub const AWAY_COMMAND: &str = "AWAY";

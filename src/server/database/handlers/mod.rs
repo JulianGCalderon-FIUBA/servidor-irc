@@ -98,4 +98,15 @@ impl<C: Connection> Database<C> {
         let response = self.are_credentials_valid(username, password);
         sender.send(response).unwrap();
     }
+
+    pub fn handle_set_away_message(&self, message: &Option<String>, nickname: &str) {
+        if let Some(client) = self.clients.get(nickname) {
+            client.borrow_mut().set_away_message(message.to_owned());
+        }
+    }
+
+    pub fn handle_get_away_message(&self, nickname: &str, sender: Sender<Option<String>>) {
+        let response = self.get_away_message(nickname);
+        sender.send(response).unwrap();
+    }
 }

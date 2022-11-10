@@ -17,6 +17,7 @@ mod responses;
 
 use responses::errors::ErrorReply;
 
+use self::commands::AWAY_COMMAND;
 use self::registration::RegistrationState;
 
 use super::client_trait::Connection;
@@ -136,6 +137,7 @@ impl<C: Connection> ClientHandler<C> {
                 LIST_COMMAND => self.list_command(parameters)?,
                 WHO_COMMAND => self.who_command(parameters)?,
                 WHOIS_COMMAND => self.whois_command(parameters)?,
+                AWAY_COMMAND => self.away_command(trailing)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());

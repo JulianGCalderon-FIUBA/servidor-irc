@@ -194,6 +194,24 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub fn set_away_message(&self, message: &Option<String>, nickname: &str) {
+        let request = DatabaseMessage::SetAwayMessage {
+            message: message.to_owned(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn get_away_message(&self, nickname: &str) -> Option<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetAwayMessage {
+            nickname: nickname.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

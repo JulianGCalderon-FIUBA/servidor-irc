@@ -125,6 +125,13 @@ impl<C: Connection> Database<C> {
                 password,
                 respond_to,
             } => self.handle_are_credentials_valid(&username, &password, respond_to),
+            DatabaseMessage::SetAwayMessage { message, nickname } => {
+                self.handle_set_away_message(&message, &nickname)
+            }
+            DatabaseMessage::GetAwayMessage {
+                nickname,
+                respond_to,
+            } => self.handle_get_away_message(&nickname, respond_to),
         }
     }
 }
