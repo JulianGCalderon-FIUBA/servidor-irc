@@ -180,17 +180,4 @@ impl<C: Connection> Database<C> {
             .filter(|client| filter(client, mask))
             .collect()
     }
-
-    pub fn modify_channel_topic(&mut self, channel: &str, topic: &str) {
-        if let Some(channel) = self.channels.get_mut(channel) {
-            channel.set_topic(topic);
-        }
-    }
-
-    pub fn get_channel_topic(&self, channel: &str) -> Option<String> {
-        if let Some(channel) = self.channels.get(channel) {
-            return channel.get_topic();
-        }
-        None
-    }
 }

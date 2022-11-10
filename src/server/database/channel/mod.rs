@@ -10,7 +10,6 @@ pub struct Channel<C: Connection> {
     clients: Vec<Rc<RefCell<Client<C>>>>,
     //nickname del operador
     _operator: Option<String>,
-    topic: Option<String>,
 }
 
 impl<C: Connection> Channel<C> {
@@ -22,7 +21,6 @@ impl<C: Connection> Channel<C> {
             _name,
             clients,
             _operator: None,
-            topic: None,
         }
     }
 
@@ -55,13 +53,5 @@ impl<C: Connection> Channel<C> {
             .position(|c| c.borrow().had_nickname(client))
             .unwrap();
         self.clients.remove(index);
-    }
-
-    pub fn set_topic(&mut self, topic: &str) {
-        self.topic = Some(topic.to_string())
-    }
-
-    pub fn get_topic(&self) -> Option<String> {
-        self.topic.clone()
     }
 }

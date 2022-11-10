@@ -40,10 +40,10 @@ pub enum CommandResponse {
     NoTopic331 {
         channel: String,
     },
-    Topic332 {
-        channel: String,
-        topic: String,
-    },
+    // Topic332 {
+    //     channel: String,
+    //     topic: String,
+    // },
     Inviting341 {
         channel: String,
         nickname: String,
@@ -110,9 +110,9 @@ impl Display for CommandResponse {
             CommandResponse::NoTopic331 { channel } => {
                 format!("331 {channel} :No topic is set")
             }
-            CommandResponse::Topic332 { channel, topic } => {
-                format!("332 {} :{}", channel, topic)
-            }
+            // CommandResponse::Topic332 { channel, topic } => {
+            //     format!("332 {} :{}", channel, topic)
+            // }
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")
             }
