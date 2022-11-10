@@ -3,7 +3,7 @@ use std::fmt::Display;
 pub enum ErrorReply {
     NoSuchNickname401 { nickname: String },
     NoSuchChannel403 { channel: String },
-    CanNotSendToChannel404 { channel: String },
+    // CanNotSendToChannel404 { channel: String },
     TooManyChannels405 { channel: String },
     NoRecipient411 { command: String },
     NoTextToSend412,
@@ -36,9 +36,9 @@ impl Display for ErrorReply {
             ErrorReply::NoSuchChannel403 { channel } => {
                 format!("403 {channel} :No such channel")
             }
-            ErrorReply::CanNotSendToChannel404 { channel } => {
-                format!("404 {channel} :Cannot send to channel")
-            }
+            // ErrorReply::CanNotSendToChannel404 { channel } => {
+            //     format!("404 {channel} :Cannot send to channel")
+            // }
             ErrorReply::TooManyChannels405 { channel } => {
                 format!("405 {channel} :You have joined too many channels")
             }

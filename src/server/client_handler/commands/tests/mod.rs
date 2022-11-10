@@ -11,6 +11,9 @@ mod user;
 mod who;
 mod whois;
 
+use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
+
 use crate::server::database::Database;
 use crate::server::testing_utils::dummy_client;
 use crate::server::testing_utils::mock_stream::MockTcpStream;
@@ -21,7 +24,8 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let database = Database::start();
     let stream = MockTcpStream::new();
 
-    ClientHandler::from_stream(database, stream, "servername".to_string()).unwrap()
+    let online = Arc::new(AtomicBool::new(true));
+    ClientHandler::from_stream(database, stream, "servername".to_string(), online).unwrap()
 }
 
 fn register_client(handler: &mut ClientHandler<MockTcpStream>, nickname: &str) {

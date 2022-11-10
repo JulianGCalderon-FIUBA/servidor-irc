@@ -56,7 +56,7 @@ impl Controller {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut view = RegisterView::new(sender.clone());
-        
+
         // Solucionar esto
         let mut main_view = MainView::new(sender.clone());
         let mut current_conv = "".to_string();
@@ -66,7 +66,7 @@ impl Controller {
 
         let app_clone = app.clone();
 
-        client.async_read(move |message| match message {
+        client.start_async_read(move |message| match message {
             Ok(message) => {
                 let controller_message = to_controller_message(message);
                 sender.send(controller_message).unwrap();

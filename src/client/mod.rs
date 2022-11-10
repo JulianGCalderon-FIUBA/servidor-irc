@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::io::{BufReader, Write};
 use std::net::TcpStream;
 use std::thread;
 use std::{io, thread::JoinHandle};
@@ -27,27 +27,23 @@ impl Client {
         })
     }
 
-    pub fn async_read<F>(&mut self, on_message: F)
+    pub fn start_async_read<F>(&mut self, on_message: F)
     where
         F: Fn(Result<Message, CreationError>) + Send + 'static,
     {
         let on_message = Box::new(on_message);
 
-        let read_stream = self.read_stream.take();
-        if let Some(mut read_stream) = read_stream {
-            let handle = thread::spawn(move || loop {
-                let message = Message::read_from(&mut read_stream);
-                if let Err(CreationError::IoError(_)) = message {
-                    return;
-                }
-                on_message(message);
-            });
-            self.read_thread = Some(handle);
-        }
+        let read_stream = match self.read_stream.take() {
+            Some(read_stream) => read_stream,
+            None => return,
+        };
+
+        let handle = thread::spawn(|| async_read(read_stream, on_message));
+        self.read_thread = Some(handle);
     }
 
     pub fn async_print(&mut self) {
-        self.async_read(print_message);
+        self.start_async_read(print_message);
     }
 
     /// Sends message to Server.
@@ -56,6 +52,20 @@ impl Client {
 
         self.write_stream.write_all(bytes)?;
         self.write_stream.write_all(CRLF)
+    }
+}
+
+fn async_read<F>(read_stream: TcpStream, on_message: Box<F>)
+where
+    F: Fn(Result<Message, CreationError>) + Send + 'static,
+{
+    let mut reader = BufReader::new(read_stream);
+    loop {
+        let message = Message::read_from_buffer(&mut reader);
+        if let Err(CreationError::IoError(_)) = message {
+            return;
+        }
+        on_message(message);
     }
 }
 

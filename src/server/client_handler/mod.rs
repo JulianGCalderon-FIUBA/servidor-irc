@@ -1,4 +1,12 @@
-use std::io;
+use std::{
+    io::{self, BufReader},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc::{self, Receiver, Sender, TryRecvError},
+        Arc,
+    },
+    thread,
+};
 
 use crate::message::Message;
 
@@ -28,6 +36,7 @@ pub struct ClientHandler<C: Connection> {
     stream: C,
     registration: Registration<C>,
     servername: String,
+    online: Arc<AtomicBool>,
 }
 
 impl<C: Connection> ClientHandler<C> {
@@ -36,6 +45,7 @@ impl<C: Connection> ClientHandler<C> {
         database: DatabaseHandle<C>,
         stream: C,
         servername: String,
+        online: Arc<AtomicBool>,
     ) -> io::Result<ClientHandler<C>> {
         let registration = Registration::with_stream(stream.try_clone()?);
 
@@ -44,6 +54,7 @@ impl<C: Connection> ClientHandler<C> {
             stream,
             registration,
             servername,
+            online,
         })
     }
 
@@ -76,8 +87,19 @@ impl<C: Connection> ClientHandler<C> {
     /// `try_handle` fails if there is an IOError when reading the Message the client sent.
     ///
     fn try_handle(&mut self) -> io::Result<()> {
+        let receiver = self.start_async_read_stream()?;
+
         loop {
-            let message = Message::read_from(&mut self.stream);
+            if !self.online.load(Ordering::Relaxed) {
+                self.on_shutdown();
+                return Ok(());
+            }
+
+            let message = match receiver.try_recv() {
+                Ok(message) => message,
+                Err(TryRecvError::Empty) => continue,
+                Err(TryRecvError::Disconnected) => panic!(),
+            };
 
             let message = match message {
                 Ok(message) => message,
@@ -120,5 +142,34 @@ impl<C: Connection> ClientHandler<C> {
         self.send_response_for_error(ErrorReply::UnknownCommand421 {
             command: command.to_string(),
         })
+    }
+
+    fn on_shutdown(&mut self) {
+        self.send_response("Server has shutdown").ok();
+        self.stream.shutdown().ok();
+    }
+
+    fn start_async_read_stream(&self) -> io::Result<Receiver<Result<Message, CreationError>>> {
+        let (sender, receiver) = mpsc::channel();
+
+        let stream = self.stream.try_clone()?;
+        thread::spawn(|| async_read_stream(stream, sender));
+
+        Ok(receiver)
+    }
+}
+
+fn async_read_stream<C: Connection>(stream: C, sender: Sender<Result<Message, CreationError>>) {
+    let mut reader = BufReader::new(stream);
+
+    loop {
+        let message = Message::read_from_buffer(&mut reader);
+
+        if let Err(CreationError::IoError(_)) = message {
+            sender.send(message).unwrap();
+            break;
+        }
+
+        sender.send(message).unwrap();
     }
 }
