@@ -59,23 +59,6 @@ fn privmsg_fails_with_invalid_target() {
 }
 
 #[test]
-fn privmsg_fails_when_not_on_channel() {
-    let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
-
-    handler.database.add_client(dummy_client("nick1"));
-    handler.database.add_client_to_channel("nick1", "#channel");
-
-    let parameters = vec!["#channel".to_string()];
-    let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
-
-    let responses = handler.stream.get_responses();
-
-    assert_eq!("404 #channel :Cannot send to channel", responses[0]);
-}
-
-#[test]
 fn privmsg_works_with_valid_target_client() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");

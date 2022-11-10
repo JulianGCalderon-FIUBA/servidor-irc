@@ -18,11 +18,6 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchNickname401 { nickname: target });
         }
 
-        let nickname = self.registration.nickname().unwrap();
-        if is_channel && !self.database.is_client_in_channel(&nickname, &target) {
-            return Some(ErrorReply::CanNotSendToChannel404 { channel: target });
-        }
-
         None
     }
     /// Asserts message can be sent.
