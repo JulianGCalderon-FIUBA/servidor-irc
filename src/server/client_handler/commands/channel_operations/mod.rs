@@ -155,6 +155,7 @@ impl<C: Connection> ClientHandler<C> {
             .split(',')
             .map(|string| string.to_string())
             .collect();
+
         if parameters.len() > 1 {
             topics = parameters[1]
                 .split(',')
@@ -166,6 +167,7 @@ impl<C: Connection> ClientHandler<C> {
 
         while i < topics.len() {
             if !self.database.contains_channel(&channels[i]) {
+                i += 1;
                 continue;
             }
             if let Some(error) = self.assert_can_modify_topic(&channels[i], &nickname) {
@@ -177,6 +179,7 @@ impl<C: Connection> ClientHandler<C> {
 
         while i < channels.len() {
             if !self.database.contains_channel(&channels[i]) {
+                i += 1;
                 continue;
             }
             match self.database.get_topic_for_channel(&channels[i]) {
