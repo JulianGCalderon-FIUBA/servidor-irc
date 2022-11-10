@@ -1,4 +1,4 @@
-use crate::server::client_handler::commands::DISTRIBUTED_CHANNEL;
+use crate::server::client_handler::commands::{DISTRIBUTED_CHANNEL, TOPIC_COMMAND};
 use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
@@ -150,7 +150,7 @@ impl<C: Connection> ClientHandler<C> {
 
     pub fn assert_topic_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
         if parameters.is_empty() {
-            let command = PART_COMMAND.to_string();
+            let command = TOPIC_COMMAND.to_string();
             return Some(ErrorReply::NeedMoreParameters461 { command });
         }
 
