@@ -61,15 +61,8 @@ impl<C: Connection> ClientHandler<C> {
             }
             self.database.add_client_to_channel(&nickname, channel);
 
-            match self.database.get_topic_for_channel(channel) {
-                Some(topic) => self.send_response_for_reply(CommandResponse::Topic332 {
-                    channel: channel.to_string(),
-                    topic,
-                })?,
-                None => self.send_response_for_reply(CommandResponse::NoTopic331 {
-                    channel: channel.to_string(),
-                })?,
-            }
+            self.send_topic_reply(channel.to_string())?;
+
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.to_string(),
                 clients: self.database.get_clients_for_channel(channel),
@@ -188,18 +181,20 @@ impl<C: Connection> ClientHandler<C> {
                 i += 1;
                 continue;
             }
-            match self.database.get_topic_for_channel(&channels[i]) {
-                Some(topic) => self.send_response_for_reply(CommandResponse::Topic332 {
-                    channel: channels[i].clone(),
-                    topic,
-                })?,
-                None => self.send_response_for_reply(CommandResponse::NoTopic331 {
-                    channel: channels[i].clone(),
-                })?,
-            }
+            self.send_topic_reply(channels[i].clone())?;
             i += 1;
         }
 
+        Ok(())
+    }
+
+    fn send_topic_reply(&mut self, channel: String) -> Result<(), io::Error> {
+        match self.database.get_topic_for_channel(&channel) {
+            Some(topic) => {
+                self.send_response_for_reply(CommandResponse::Topic332 { channel, topic })?
+            }
+            None => self.send_response_for_reply(CommandResponse::NoTopic331 { channel })?,
+        };
         Ok(())
     }
 }
