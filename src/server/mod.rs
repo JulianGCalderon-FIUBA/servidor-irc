@@ -14,8 +14,11 @@ mod database;
 use crate::thread_pool::ThreadPool;
 use client_handler::ClientHandler;
 use database::Database;
-use std::io;
+use std::io::{self, stdin, BufRead, BufReader};
 use std::net::{TcpListener, TcpStream};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
+use std::thread;
 
 use self::database::DatabaseHandle;
 
@@ -28,6 +31,7 @@ pub const OPER_PASSWORD: &str = "admin";
 pub struct Server {
     servername: String,
     database: DatabaseHandle<TcpStream>,
+    online: Arc<AtomicBool>,
 }
 
 impl Server {
@@ -37,19 +41,36 @@ impl Server {
 
         let servername = servername.to_string();
 
+        let online = Arc::new(AtomicBool::new(true));
+
         Self {
             database,
             servername,
+            online,
         }
+    }
+
+    fn start_debug(&self) {
+        let online_ref = Arc::clone(&self.online);
+        thread::spawn(|| xxx(online_ref));
     }
 
     /// Listens for incoming clients and handles each request in a new thread.
     pub fn listen_to(self, address: String) -> io::Result<()> {
+        self.start_debug();
+
         let listener = TcpListener::bind(address)?;
 
         let pool = ThreadPool::create(MAX_CLIENTS);
 
-        for client in listener.incoming() {
+        listener.set_nonblocking(true).ok();
+
+        while self.online.load(Ordering::Relaxed) {
+            let client = match listener.accept() {
+                Ok((client, _)) => client,
+                Err(_) => continue,
+            };
+
             match self.handler(client) {
                 Ok(handler) => pool.execute(|| handler.handle()),
                 Err(error) => eprintln!("Could not create handler {error:?}"),
@@ -59,8 +80,28 @@ impl Server {
         Ok(())
     }
 
-    fn handler(&self, client: io::Result<TcpStream>) -> io::Result<ClientHandler<TcpStream>> {
+    fn handler(&self, client: TcpStream) -> io::Result<ClientHandler<TcpStream>> {
         let database = self.database.clone();
-        ClientHandler::<TcpStream>::from_stream(database, client?, self.servername.clone())
+        let online_ref = Arc::clone(&self.online);
+        ClientHandler::<TcpStream>::from_stream(
+            database,
+            client,
+            self.servername.clone(),
+            online_ref,
+        )
+    }
+}
+
+fn xxx(online: Arc<AtomicBool>) {
+    let reader = BufReader::new(stdin());
+    for line in reader.lines() {
+        let line = match line {
+            Ok(line) => line,
+            Err(error) => return eprint!("Error reading from stdin: {}", error),
+        };
+
+        if let "QUIT" = &line[..] {
+            online.store(false, Ordering::Relaxed)
+        }
     }
 }
