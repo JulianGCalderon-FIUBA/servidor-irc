@@ -61,9 +61,15 @@ impl<C: Connection> ClientHandler<C> {
             }
             self.database.add_client_to_channel(&nickname, channel);
 
-            self.send_response_for_reply(CommandResponse::NoTopic331 {
-                channel: channel.to_string(),
-            })?;
+            match self.database.get_topic_for_channel(channel) {
+                Some(topic) => self.send_response_for_reply(CommandResponse::Topic332 {
+                    channel: channel.to_string(),
+                    topic,
+                })?,
+                None => self.send_response_for_reply(CommandResponse::NoTopic331 {
+                    channel: channel.to_string(),
+                })?,
+            }
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.to_string(),
                 clients: self.database.get_clients_for_channel(channel),
