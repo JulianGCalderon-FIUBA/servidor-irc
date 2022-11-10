@@ -139,10 +139,6 @@ impl<C: Connection> ClientHandler<C> {
         }
     }
 
-    fn server_shutdown(&mut self) -> bool {
-        !self.online.load(Ordering::Relaxed)
-    }
-
     fn on_parsing_error(&mut self, _error: &ParsingError) -> io::Result<()> {
         self.send_response_for_error(ErrorReply::ParsingError)
     }
@@ -158,15 +154,19 @@ impl<C: Connection> ClientHandler<C> {
         self.stream.shutdown().ok();
     }
 
+    fn on_registration_timeout(&mut self) {
+        self.send_response("Registration timeout").ok();
+        self.stream.shutdown().ok();
+    }
+
     fn registration_timeout(&self) -> bool {
         let time = Instant::now().duration_since(self.registration.instant());
 
         time.as_millis() > (REGISTRATION_TIMEOUT_SECONDS as u128 * 1000)
     }
 
-    fn on_registration_timeout(&mut self) {
-        self.send_response("Registration timeout").ok();
-        self.stream.shutdown().ok();
+    fn server_shutdown(&mut self) -> bool {
+        !self.online.load(Ordering::Relaxed)
     }
 
     fn start_async_read_stream(&self) -> io::Result<Receiver<Result<Message, CreationError>>> {
