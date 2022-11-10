@@ -1,10 +1,10 @@
 use std::io;
 use std::io::BufReader;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::sync::Arc;
 use std::thread;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use crate::message::Message;
 
@@ -31,6 +31,7 @@ use commands::{
 };
 
 const REGISTRATION_TIMELIMIT_MS: u128 = 60 * 1000;
+const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<C: Connection> {
@@ -80,6 +81,8 @@ impl<C: Connection> ClientHandler<C> {
                 nickname.unwrap_or_default(),
             ),
         }
+
+        self.stream.shutdown().ok();
     }
 
     /// Tries to handle the received request.
@@ -102,10 +105,11 @@ impl<C: Connection> ClientHandler<C> {
                 return Ok(());
             }
 
-            let message = match receiver.try_recv() {
+            let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
+            let message = match receiver.recv_timeout(timeout) {
                 Ok(message) => message,
-                Err(TryRecvError::Empty) => continue,
-                Err(TryRecvError::Disconnected) => panic!(),
+                Err(RecvTimeoutError::Timeout) => continue,
+                Err(RecvTimeoutError::Disconnected) => panic!(),
             };
 
             let message = match message {
@@ -153,12 +157,10 @@ impl<C: Connection> ClientHandler<C> {
 
     fn on_shutdown(&mut self) {
         self.send_response("Server has shutdown").ok();
-        self.stream.shutdown().ok();
     }
 
     fn on_registration_timeout(&mut self) {
         self.send_response("Registration timeout").ok();
-        self.stream.shutdown().ok();
     }
 
     fn registration_timeout(&self) -> bool {
