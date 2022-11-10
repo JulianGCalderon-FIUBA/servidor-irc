@@ -105,7 +105,7 @@ impl<C: Connection> DatabaseHandle<C> {
     /// Sends IsClientInChannel request and returns answer.
     pub fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
         let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::_IsClientInChannel {
+        let request = DatabaseMessage::IsClientInChannel {
             nickname: nickname.to_string(),
             channel: channel.to_string(),
             respond_to: sender,
