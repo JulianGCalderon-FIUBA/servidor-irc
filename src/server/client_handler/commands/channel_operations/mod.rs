@@ -142,4 +142,55 @@ impl<C: Connection> ClientHandler<C> {
         }
         Ok(())
     }
+
+    pub fn topic_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        if let Some(error) = self.assert_topic_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+
+        let mut topics = vec![];
+        let nickname = self.registration.nickname().unwrap();
+
+        let channels: Vec<String> = parameters[0]
+            .split(',')
+            .map(|string| string.to_string())
+            .collect();
+        if parameters.len() > 1 {
+            topics = parameters[1]
+                .split(',')
+                .map(|string| string.to_string())
+                .collect();
+        }
+
+        let mut i = 0;
+
+        while i < topics.len() {
+            if !self.database.contains_channel(&channels[i]) {
+                continue;
+            }
+            if let Some(error) = self.assert_can_modify_topic(&channels[i], &nickname) {
+                return self.send_response_for_error(error);
+            }
+            self.database.modify_topic(&channels[i], &topics[i]);
+            i += 1;
+        }
+
+        while i < channels.len() {
+            if !self.database.contains_channel(&channels[i]) {
+                continue;
+            }
+            match self.database.get_topic_for_channel(&channels[i]) {
+                Some(topic) => self.send_response_for_reply(CommandResponse::Topic332 {
+                    channel: channels[i].clone(),
+                    topic,
+                })?,
+                None => self.send_response_for_reply(CommandResponse::NoTopic331 {
+                    channel: channels[i].clone(),
+                })?,
+            }
+            i += 1;
+        }
+
+        Ok(())
+    }
 }
