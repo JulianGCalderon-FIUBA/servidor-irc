@@ -193,4 +193,11 @@ impl<C: Connection> Database<C> {
         }
         None
     }
+
+    pub fn is_channel_operator(&self, channel: &str, nickname: &str) -> bool {
+        if let Some(channel) = self.channels.get(channel) {
+            return channel.operator() == nickname;
+        }
+        false
+    }
 }

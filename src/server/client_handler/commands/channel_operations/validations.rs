@@ -169,4 +169,29 @@ impl<C: Connection> ClientHandler<C> {
 
         None
     }
+
+    pub fn assert_can_kick_from_channel(&self, channel: &str) -> Option<ErrorReply> {
+        if !self.database.contains_channel(channel) {
+            let channel = channel.to_string();
+            return Some(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        if !self
+            .database
+            .is_client_in_channel(&self.registration.nickname().unwrap(), channel)
+        {
+            let channel = channel.to_string();
+            return Some(ErrorReply::NotOnChannel442 { channel });
+        }
+
+        if !self
+            .database
+            .is_channel_operator(channel, &self.registration.nickname().unwrap())
+        {
+            let channel = channel.to_string();
+            return Some(ErrorReply::ChanopPrivilegesNeeded482 { channel });
+        }
+
+        None
+    }
 }

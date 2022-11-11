@@ -25,6 +25,8 @@ impl<C: Connection> ClientHandler<C> {
         };
         Ok(())
     }
+
+   
 }
 
 pub fn collect_parameters(parameters: &str) -> Vec<String> {
