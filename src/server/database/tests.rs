@@ -74,7 +74,7 @@ fn after_adding_client_to_channel_it_contains_client() {
     database.add_client_to_channel("nickname", "channel");
     assert!(database.contains_channel("channel"));
 
-    assert!(database._is_client_in_channel("nickname", "channel"));
+    assert!(database.is_client_in_channel("nickname", "channel"));
 }
 
 #[test]

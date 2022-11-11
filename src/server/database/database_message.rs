@@ -39,7 +39,7 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         channel: String,
     },
-    _IsClientInChannel {
+    IsClientInChannel {
         nickname: String,
         channel: String,
         respond_to: Sender<bool>,
@@ -74,5 +74,13 @@ pub enum DatabaseMessage<C: Connection> {
         username: String,
         password: String,
         respond_to: Sender<bool>,
+    },
+    ModifyChannelTopic {
+        channel: String,
+        topic: String,
+    },
+    GetChannelTopic {
+        channel: String,
+        respond_to: Sender<Option<String>>,
     },
 }

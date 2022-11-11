@@ -20,8 +20,8 @@ pub use database_handle::DatabaseHandle;
 use database_message::DatabaseMessage::{
     AddClient, AddClientToChannel, ContainsChannel, ContainsClient, DisconnectClient,
     GetAllChannels, GetAllClients, GetChannelsForClient, GetClientsForMask, GetClientsForNickMask,
-    GetClientsFromChannel, GetStream, IsServerOperator, RemoveClientFromChannel, SetServerOperator,
-    UpdateNickname, _IsClientInChannel,
+    GetClientsFromChannel, GetStream, IsClientInChannel, IsServerOperator, RemoveClientFromChannel,
+    SetServerOperator, UpdateNickname,
 };
 
 use self::database_message::DatabaseMessage;
@@ -94,7 +94,7 @@ impl<C: Connection> Database<C> {
             RemoveClientFromChannel { nickname, channel } => {
                 self.remove_client_from_channel(&nickname, &channel)
             }
-            _IsClientInChannel {
+            IsClientInChannel {
                 nickname,
                 channel,
                 respond_to,
@@ -125,6 +125,13 @@ impl<C: Connection> Database<C> {
                 password,
                 respond_to,
             } => self.handle_are_credentials_valid(&username, &password, respond_to),
+            DatabaseMessage::ModifyChannelTopic { channel, topic } => {
+                self.modify_channel_topic(&channel, &topic)
+            }
+            DatabaseMessage::GetChannelTopic {
+                channel,
+                respond_to,
+            } => self.handle_get_channel_topic(&channel, respond_to),
         }
     }
 }
