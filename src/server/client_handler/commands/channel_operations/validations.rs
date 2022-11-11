@@ -156,4 +156,12 @@ impl<C: Connection> ClientHandler<C> {
         }
         None
     }
+
+    pub fn assert_kick_is_valid(&self, _parameters: &[String]) -> Option<ErrorReply> {
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient);
+        }
+
+        None
+    }
 }

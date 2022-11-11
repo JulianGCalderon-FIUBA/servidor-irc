@@ -162,4 +162,16 @@ impl<C: Connection> ClientHandler<C> {
 
         Ok(())
     }
+
+    pub fn kick_command(
+        &mut self,
+        parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) -> io::Result<()> {
+        if let Some(error) = self.assert_kick_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+
+        Ok(())
+    }
 }

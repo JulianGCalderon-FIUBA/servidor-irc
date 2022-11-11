@@ -40,3 +40,5 @@ pub const NAMES_COMMAND: &str = "NAMES";
 
 pub const WHOIS_COMMAND: &str = "WHOIS";
 pub const WHO_COMMAND: &str = "WHO";
+
+pub const KICK_COMMAND: &str = "KICK";
