@@ -75,7 +75,7 @@ pub enum DatabaseMessage<C: Connection> {
         password: String,
         respond_to: Sender<bool>,
     },
-    ModifyChannelTopic {
+    SetChannelTopic {
         channel: String,
         topic: String,
     },

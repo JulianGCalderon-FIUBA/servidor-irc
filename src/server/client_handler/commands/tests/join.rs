@@ -166,7 +166,7 @@ fn can_join_channel_with_topic() {
     handler.database.add_client_to_channel("nick2", "#channel");
     handler
         .database
-        .modify_topic("#channel", "topic for channel");
+        .set_channel_topic("#channel", "topic for channel");
 
     let channels = vec!["#channel".to_string()];
 

@@ -195,8 +195,8 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn modify_topic(&self, channel: &str, topic: &str) {
-        let request = DatabaseMessage::ModifyChannelTopic {
+    pub fn set_channel_topic(&self, channel: &str, topic: &str) {
+        let request = DatabaseMessage::SetChannelTopic {
             channel: channel.to_string(),
             topic: topic.to_string(),
         };

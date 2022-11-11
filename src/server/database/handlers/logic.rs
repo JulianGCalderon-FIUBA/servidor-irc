@@ -181,7 +181,7 @@ impl<C: Connection> Database<C> {
             .collect()
     }
 
-    pub fn modify_channel_topic(&mut self, channel: &str, topic: &str) {
+    pub fn set_channel_topic(&mut self, channel: &str, topic: &str) {
         if let Some(channel) = self.channels.get_mut(channel) {
             channel.set_topic(topic);
         }

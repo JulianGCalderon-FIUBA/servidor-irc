@@ -37,7 +37,9 @@ fn list_with_no_parameters_prints_all_channels() {
     let parameters = vec![];
 
     handler.database.add_client_to_channel("nick", "#hola");
-    handler.database.modify_topic("#hola", "topic for #hola");
+    handler
+        .database
+        .set_channel_topic("#hola", "topic for #hola");
     handler.database.add_client_to_channel("nick", "#chau");
 
     handler.list_command(parameters.clone()).unwrap();

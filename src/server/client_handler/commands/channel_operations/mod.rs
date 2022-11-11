@@ -155,7 +155,7 @@ impl<C: Connection> ClientHandler<C> {
 
         if parameters.len() > 1 {
             let topic = &parameters[1];
-            self.database.modify_topic(channel, topic);
+            self.database.set_channel_topic(channel, topic);
         } else {
             self.send_topic_reply(channel.to_string())?;
         }

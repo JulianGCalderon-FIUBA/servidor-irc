@@ -125,8 +125,8 @@ impl<C: Connection> Database<C> {
                 password,
                 respond_to,
             } => self.handle_are_credentials_valid(&username, &password, respond_to),
-            DatabaseMessage::ModifyChannelTopic { channel, topic } => {
-                self.modify_channel_topic(&channel, &topic)
+            DatabaseMessage::SetChannelTopic { channel, topic } => {
+                self.set_channel_topic(&channel, &topic)
             }
             DatabaseMessage::GetChannelTopic {
                 channel,
