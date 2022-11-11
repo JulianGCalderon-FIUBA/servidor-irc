@@ -1,4 +1,4 @@
-use crate::server::client_handler::commands::{DISTRIBUTED_CHANNEL, TOPIC_COMMAND};
+use crate::server::client_handler::commands::{DISTRIBUTED_CHANNEL, KICK_COMMAND, TOPIC_COMMAND};
 use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
@@ -157,7 +157,12 @@ impl<C: Connection> ClientHandler<C> {
         None
     }
 
-    pub fn assert_kick_is_valid(&self, _parameters: &[String]) -> Option<ErrorReply> {
+    pub fn assert_kick_is_valid(&self, parameters: &[String]) -> Option<ErrorReply> {
+        if parameters.len() < 2 {
+            let command = KICK_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
+        }
+
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
         }

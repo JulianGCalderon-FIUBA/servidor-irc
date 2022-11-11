@@ -13,18 +13,18 @@ fn kick_fails_with_unregistered_client() {
     )
 }
 
-// #[test]
-// fn join_fails_with_empty_params() {
-//     let mut handler = dummy_client_handler();
-//     let parameters = vec![];
-//     register_client(&mut handler, "nick");
+#[test]
+fn join_fails_with_empty_params() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
 
-//     let channels: Vec<String> = vec![];
-//     handler.join_command(parameters).unwrap();
+    handler.kick_command(vec![], None).unwrap();
 
-//     assert_eq!(
-//         "461 JOIN :Not enough parameters\r\n",
-//         handler.stream.read_wbuf_to_string()
-//     );
-//     assert_eq!(handler.database.get_all_channels(), channels);
-// }
+    assert_eq!(
+        "461 KICK :Not enough parameters\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let channels: Vec<String> = vec![];
+    assert_eq!(handler.database.get_all_channels(), channels);
+}
