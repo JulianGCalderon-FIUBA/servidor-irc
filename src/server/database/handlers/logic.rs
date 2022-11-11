@@ -169,6 +169,14 @@ impl<C: Connection> Database<C> {
         channels
     }
 
+    pub fn get_away_message(&self, nickname: &str) -> Option<String> {
+        if let Some(client) = self.clients.get(nickname) {
+            return client.borrow().away_message();
+        }
+
+        None
+    }
+
     fn filtered_clients(
         &self,
         mask: &str,

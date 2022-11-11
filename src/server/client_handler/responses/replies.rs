@@ -61,6 +61,12 @@ pub enum CommandResponse {
         channel: String,
     },
     YouAreOper381,
+    UnAway,
+    NowAway,
+    Away {
+        nickname: String,
+        message: String,
+    },
 }
 
 impl Display for CommandResponse {
@@ -138,6 +144,11 @@ impl Display for CommandResponse {
                 format!("366 {channel} :End of /NAMES list")
             }
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
+            CommandResponse::UnAway => "305 :You are no longer marked as being away".to_string(),
+            CommandResponse::NowAway => "306 :You have been marked as being away".to_string(),
+            CommandResponse::Away { nickname, message } => {
+                format!("301 {nickname} :{message}")
+            }
         };
         write!(f, "{string}")
     }

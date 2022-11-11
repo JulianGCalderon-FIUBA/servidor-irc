@@ -45,4 +45,12 @@ impl<C: Connection> ClientHandler<C> {
 
         None
     }
+
+    pub fn assert_away_command_is_valid(&self) -> Option<ErrorReply> {
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient {});
+        }
+
+        None
+    }
 }
