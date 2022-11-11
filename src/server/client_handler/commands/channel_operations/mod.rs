@@ -166,30 +166,21 @@ impl<C: Connection> ClientHandler<C> {
     pub fn kick_command(
         &mut self,
         parameters: Vec<String>,
-        _trailing: Option<String>,
+        trailing: Option<String>,
     ) -> io::Result<()> {
         if let Some(error) = self.assert_kick_is_valid(&parameters) {
             return self.send_response_for_error(error);
         }
 
-        let channel = parameters[0].to_string();
-        let nickname = parameters[1].to_string();
+        let channel = parameters[0].split(',');
+        let nickname = parameters[1].split(',');
 
-        if let Some(error) = self.assert_can_kick_from_channel(&channel) {
-            self.send_response_for_error(error)?;
-        } else {
-            self.database
-                .remove_client_from_channel(&nickname, &channel);
-
-            let notification = Notification::Kick {
-                kicker: self.registration.nickname().unwrap(),
-                channel,
-                nickname: nickname.clone(),
-                comment: None,
-            };
-
-            self.send_message_to_client(&nickname, &notification.to_string())
-                .ok();
+        for (channel, nickname) in channel.zip(nickname) {
+            if let Some(error) = self.assert_can_kick_from_channel(channel) {
+                self.send_response_for_error(error)?;
+            } else {
+                self.kick_client_from_channel(nickname, channel, &trailing);
+            }
         }
 
         Ok(())

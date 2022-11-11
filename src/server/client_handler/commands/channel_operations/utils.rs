@@ -1,7 +1,10 @@
 use std::io;
 
 use crate::server::{
-    client_handler::{responses::replies::CommandResponse, ClientHandler},
+    client_handler::{
+        responses::{notifications::Notification, replies::CommandResponse},
+        ClientHandler,
+    },
     client_trait::Connection,
 };
 
@@ -26,7 +29,23 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-   
+    pub fn kick_client_from_channel(
+        &mut self,
+        nickname: &str,
+        channel: &str,
+        comment: &Option<String>,
+    ) {
+        self.database.remove_client_from_channel(nickname, channel);
+        let notification = Notification::Kick {
+            kicker: self.registration.nickname().unwrap(),
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+            comment: comment.clone(),
+        };
+
+        self.send_message_to_client(nickname, &notification.to_string())
+            .ok();
+    }
 }
 
 pub fn collect_parameters(parameters: &str) -> Vec<String> {
