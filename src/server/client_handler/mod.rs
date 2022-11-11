@@ -17,7 +17,6 @@ mod responses;
 
 use responses::errors::ErrorReply;
 
-use self::commands::TOPIC_COMMAND;
 use self::registration::RegistrationState;
 
 use super::client_trait::Connection;
