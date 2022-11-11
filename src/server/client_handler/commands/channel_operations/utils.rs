@@ -9,10 +9,13 @@ impl<C: Connection> ClientHandler<C> {
             return channels;
         }
 
-        channels
-            .unwrap()
-            .split(',')
-            .map(|string| string.to_string())
-            .collect()
+        collect_parameters(channels.unwrap())
     }
+}
+
+pub fn collect_parameters(parameters: &str) -> Vec<String> {
+    parameters
+        .split(',')
+        .map(|string| string.to_string())
+        .collect()
 }

@@ -8,6 +8,8 @@ use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_trait::Connection;
 
+use self::utils::collect_parameters;
+
 use super::ClientHandler;
 
 use std::io;
@@ -154,16 +156,10 @@ impl<C: Connection> ClientHandler<C> {
         let mut topics = vec![];
         let nickname = self.registration.nickname().unwrap();
 
-        let channels: Vec<String> = parameters[0]
-            .split(',')
-            .map(|string| string.to_string())
-            .collect();
+        let channels = collect_parameters(&parameters[0]);
 
         if parameters.len() > 1 {
-            topics = parameters[1]
-                .split(',')
-                .map(|string| string.to_string())
-                .collect();
+            topics = collect_parameters(&parameters[1]);
         }
 
         let mut i = 0;

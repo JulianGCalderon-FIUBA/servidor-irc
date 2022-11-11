@@ -31,7 +31,7 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchChannel403 { channel });
         }
 
-        if self.user_is_in_channel(&channel, &nickname) {
+        if self.database.is_client_in_channel(&nickname, &channel) {
             return Some(ErrorReply::UserOnChannel443 { nickname, channel });
         }
 
@@ -48,8 +48,7 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchChannel403 { channel });
         }
 
-        let clients = self.database.get_clients_for_channel(&channel);
-        if !clients.contains(&nickname.to_string()) {
+        if !self.database.is_client_in_channel(nickname, &channel) {
             return Some(ErrorReply::NotOnChannel442 { channel });
         }
 
@@ -58,12 +57,6 @@ impl<C: Connection> ClientHandler<C> {
     /// Asserts channel can be listed.
     pub fn can_list_channel(&self, channel: &str) -> bool {
         self.database.contains_channel(channel) && self.channel_name_is_valid(channel)
-    }
-
-    fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
-        self.database
-            .get_clients_for_channel(channel)
-            .contains(&String::from(nickname))
     }
 
     pub fn assert_can_modify_topic(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
@@ -104,10 +97,16 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         if self.database.contains_channel(&channel) {
-            if !self.user_is_in_channel(&channel, &inviting_client) {
+            if !self
+                .database
+                .is_client_in_channel(&inviting_client, &channel)
+            {
                 return Some(ErrorReply::NotOnChannel442 { channel });
             }
-            if self.user_is_in_channel(&channel, &invited_client) {
+            if self
+                .database
+                .is_client_in_channel(&invited_client, &channel)
+            {
                 return Some(ErrorReply::UserOnChannel443 {
                     nickname: invited_client,
                     channel,
