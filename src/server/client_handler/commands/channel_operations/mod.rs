@@ -163,7 +163,10 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    pub fn mode_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+    pub fn mode_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        if let Some(error) = self.assert_mode_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
         Ok(())
     }
 }
