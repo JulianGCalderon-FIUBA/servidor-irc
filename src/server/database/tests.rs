@@ -253,3 +253,28 @@ fn can_update_nickname() {
     assert!(database.contains_client("new_nick"));
     assert!(!database.contains_client("nick"));
 }
+
+#[test]
+fn can_set_and_get_channel_topic() {
+    let database = Database::start();
+
+    let client = dummy_client("nick");
+    database.add_client(client);
+    database.add_client_to_channel("nick", "#channel");
+
+    assert_eq!(database.get_topic_for_channel("#channel"), None);
+
+    database.set_channel_topic("#channel", "topic");
+
+    assert_eq!(
+        database.get_topic_for_channel("#channel"),
+        Some("topic".to_string())
+    );
+
+    database.set_channel_topic("#channel", "new topic");
+
+    assert_eq!(
+        database.get_topic_for_channel("#channel"),
+        Some("new topic".to_string())
+    );
+}
