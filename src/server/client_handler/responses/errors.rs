@@ -24,6 +24,7 @@ pub enum ErrorReply {
     NoNickname,
     UnregisteredClient,
     ParsingError,
+    ChanopPrivilegesNeeded482 { channel: String },
     // NoSuchServer { server: String},
 }
 
@@ -70,6 +71,9 @@ impl Display for ErrorReply {
             ErrorReply::NoNickname => "200 :No nickname registered".to_string(),
             ErrorReply::UnregisteredClient => "200 :Unregistered".to_string(),
             ErrorReply::ParsingError => "200 :Parsing error".to_string(),
+            ErrorReply::ChanopPrivilegesNeeded482 { channel } => {
+                format!("482 {channel} :You're not channel operator")
+            }
         };
         write!(f, "{string}")
     }

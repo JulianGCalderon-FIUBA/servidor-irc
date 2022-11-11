@@ -229,6 +229,17 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub fn is_channel_operator(&self, channel: &str, nick: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::IsChannelOperator {
+            channel: channel.to_string(),
+            nickname: nick.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

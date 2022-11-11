@@ -41,3 +41,5 @@ pub const AWAY_COMMAND: &str = "AWAY";
 
 pub const WHOIS_COMMAND: &str = "WHOIS";
 pub const WHO_COMMAND: &str = "WHO";
+
+pub const KICK_COMMAND: &str = "KICK";

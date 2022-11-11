@@ -280,6 +280,19 @@ fn can_set_and_get_channel_topic() {
 }
 
 #[test]
+fn can_verify_channel_operator() {
+    let database = Database::start();
+
+    database.add_client(dummy_client("nickname1"));
+    database.add_client(dummy_client("nickname2"));
+    database.add_client_to_channel("nickname1", "#channel");
+    database.add_client_to_channel("nickname2", "#channel");
+
+    assert!(database.is_channel_operator("#channel", "nickname1"));
+    assert!(!database.is_channel_operator("#channel", "nickname2"));
+}
+
+#[test]
 fn can_set_away_message_for_client() {
     let database = Database::start();
 

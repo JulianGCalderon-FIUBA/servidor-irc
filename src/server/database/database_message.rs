@@ -91,4 +91,9 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         respond_to: Sender<Option<String>>,
     },
+    IsChannelOperator {
+        channel: String,
+        nickname: String,
+        respond_to: Sender<bool>,
+    },
 }

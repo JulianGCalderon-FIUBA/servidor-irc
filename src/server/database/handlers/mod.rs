@@ -113,4 +113,9 @@ impl<C: Connection> Database<C> {
         let response = self.get_channel_topic(channel);
         sender.send(response).unwrap();
     }
+
+    pub fn handle_is_channel_operator(&self, channel: &str, nickname: &str, sender: Sender<bool>) {
+        let response = self.is_channel_operator(channel, nickname);
+        sender.send(response).unwrap();
+    }
 }

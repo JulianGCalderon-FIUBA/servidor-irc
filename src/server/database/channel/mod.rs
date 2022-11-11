@@ -9,19 +9,20 @@ pub struct Channel<C: Connection> {
     //vector de nicknames
     clients: Vec<Rc<RefCell<Client<C>>>>,
     //nickname del operador
-    _operator: Option<String>,
+    operator: String,
     topic: Option<String>,
 }
 
 impl<C: Connection> Channel<C> {
     /// Creates a new [`Channel`].
     pub fn new(_name: String, creator: Rc<RefCell<Client<C>>>) -> Self {
+        let operator = creator.borrow().nickname();
         let clients = vec![creator];
 
         Self {
             _name,
             clients,
-            _operator: None,
+            operator,
             topic: None,
         }
     }
@@ -63,5 +64,9 @@ impl<C: Connection> Channel<C> {
 
     pub fn get_topic(&self) -> Option<String> {
         self.topic.clone()
+    }
+
+    pub fn operator(&self) -> String {
+        self.operator.clone()
     }
 }

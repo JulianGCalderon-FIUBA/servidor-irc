@@ -139,6 +139,11 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_channel_topic(&channel, respond_to),
+            DatabaseMessage::IsChannelOperator {
+                channel,
+                nickname,
+                respond_to,
+            } => self.handle_is_channel_operator(&channel, &nickname, respond_to),
         }
     }
 }

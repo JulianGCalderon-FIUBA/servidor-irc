@@ -1,6 +1,7 @@
 mod away;
 mod invite;
 mod join;
+mod kick;
 mod list;
 mod names;
 mod nick;
