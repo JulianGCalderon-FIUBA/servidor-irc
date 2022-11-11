@@ -167,6 +167,13 @@ impl<C: Connection> ClientHandler<C> {
         if let Some(error) = self.assert_mode_is_valid(&parameters) {
             return self.send_response_for_error(error);
         }
+        let _channel = &parameters[0];
+        let modes: Vec<char> = parameters[1].chars().collect();
+
+        if !self.assert_modes_starts_correctly(modes) {
+            return Ok(());
+        }
+
         Ok(())
     }
 }

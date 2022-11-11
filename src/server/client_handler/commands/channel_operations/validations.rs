@@ -6,6 +6,9 @@ use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_trait::Connection;
 
+pub const ADD_MODE: char = '+';
+pub const REMOVE_MODE: char = '-';
+
 use super::ClientHandler;
 
 impl<C: Connection> ClientHandler<C> {
@@ -14,6 +17,10 @@ impl<C: Connection> ClientHandler<C> {
             || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
             && !channel.contains(INVALID_CHARACTER);
     }
+    pub fn assert_modes_starts_correctly(&mut self, modes: Vec<char>) -> bool {
+        modes[0] == ADD_MODE || modes[0] == REMOVE_MODE
+    }
+
     /// Asserts client can join channel.
     /// Possible errors:
     ///     - Client is in too many channels.
@@ -166,6 +173,22 @@ impl<C: Connection> ClientHandler<C> {
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
         }
+
+        let channel = &parameters[0];
+        let nickname = self.registration.nickname().unwrap();
+
+        if !self.database.contains_channel(channel) {
+            return Some(ErrorReply::NoSuchChannel403 {
+                channel: channel.to_string(),
+            });
+        }
+
+        if !self.database.is_client_in_channel(&nickname, channel) {
+            return Some(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
+        }
+
         None
     }
 }
