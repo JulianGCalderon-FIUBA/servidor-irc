@@ -35,15 +35,16 @@ pub enum CommandResponse {
     ListStart321,
     List322 {
         channel: String,
+        topic: String,
     },
     ListEnd323,
     NoTopic331 {
         channel: String,
     },
-    // Topic332 {
-    //     channel: String,
-    //     topic: String,
-    // },
+    Topic332 {
+        channel: String,
+        topic: String,
+    },
     Inviting341 {
         channel: String,
         nickname: String,
@@ -103,16 +104,16 @@ impl Display for CommandResponse {
                 format!("319 {nickname} : {}", channels.join(" "))
             }
             CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
-            CommandResponse::List322 { channel } => {
-                format!("322 : {channel}")
+            CommandResponse::List322 { channel, topic } => {
+                format!("322 {channel} :{topic}")
             }
             CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
             CommandResponse::NoTopic331 { channel } => {
                 format!("331 {channel} :No topic is set")
             }
-            // CommandResponse::Topic332 { channel, topic } => {
-            //     format!("332 {} :{}", channel, topic)
-            // }
+            CommandResponse::Topic332 { channel, topic } => {
+                format!("332 {} :{}", channel, topic)
+            }
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")
             }

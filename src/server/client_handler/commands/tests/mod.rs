@@ -7,6 +7,7 @@ mod oper;
 mod part;
 mod pass;
 mod privmsg;
+mod topic;
 mod user;
 mod who;
 mod whois;

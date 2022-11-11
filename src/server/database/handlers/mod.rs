@@ -98,4 +98,9 @@ impl<C: Connection> Database<C> {
         let response = self.are_credentials_valid(username, password);
         sender.send(response).unwrap();
     }
+
+    pub fn handle_get_channel_topic(&self, channel: &str, sender: Sender<Option<String>>) {
+        let response = self.get_channel_topic(channel);
+        sender.send(response).unwrap();
+    }
 }

@@ -37,14 +37,17 @@ fn list_with_no_parameters_prints_all_channels() {
     let parameters = vec![];
 
     handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.modify_topic("#hola", "topic for #hola");
     handler.database.add_client_to_channel("nick", "#chau");
 
     handler.list_command(parameters.clone()).unwrap();
 
-    assert_eq!(
-        "321 :Channel :Users Name\r\n322 : #chau\r\n322 : #hola\r\n323 :End of /LIST\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("321 :Channel :Users Name", responses[0]);
+    assert_eq!("322 #chau :No topic set", responses[1]);
+    assert_eq!("322 #hola :topic for #hola", responses[2]);
+    assert_eq!("323 :End of /LIST", responses[3]);
 
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#canal");
@@ -55,9 +58,9 @@ fn list_with_no_parameters_prints_all_channels() {
     let responses = handler.stream.get_responses();
 
     assert_eq!("321 :Channel :Users Name", responses[0]);
-    assert_eq!("322 : #canal", responses[1]);
-    assert_eq!("322 : #chau", responses[2]);
-    assert_eq!("322 : #hola", responses[3]);
+    assert_eq!("322 #canal :No topic set", responses[1]);
+    assert_eq!("322 #chau :No topic set", responses[2]);
+    assert_eq!("322 #hola :topic for #hola", responses[3]);
     assert_eq!("323 :End of /LIST", responses[4]);
 }
 
@@ -73,10 +76,11 @@ fn list_with_parameters_prints_requested_channels() {
 
     handler.list_command(parameters).unwrap();
 
-    assert_eq!(
-        "321 :Channel :Users Name\r\n322 : #hola\r\n323 :End of /LIST\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("321 :Channel :Users Name", responses[0]);
+    assert_eq!("322 #hola :No topic set", responses[1]);
+    assert_eq!("323 :End of /LIST", responses[2]);
 
     handler.stream.clear();
 
@@ -87,8 +91,8 @@ fn list_with_parameters_prints_requested_channels() {
     let responses = handler.stream.get_responses();
 
     assert_eq!("321 :Channel :Users Name", responses[0]);
-    assert_eq!("322 : #hola", responses[1]);
-    assert_eq!("322 : #chau", responses[2]);
+    assert_eq!("322 #hola :No topic set", responses[1]);
+    assert_eq!("322 #chau :No topic set", responses[2]);
     assert_eq!("323 :End of /LIST", responses[3]);
 }
 
@@ -107,7 +111,7 @@ fn list_ignores_invalid_channels() {
     let responses = handler.stream.get_responses();
 
     assert_eq!("321 :Channel :Users Name", responses[0]);
-    assert_eq!("322 : #hola", responses[1]);
-    assert_eq!("322 : #chau", responses[2]);
+    assert_eq!("322 #hola :No topic set", responses[1]);
+    assert_eq!("322 #chau :No topic set", responses[2]);
     assert_eq!("323 :End of /LIST", responses[3]);
 }

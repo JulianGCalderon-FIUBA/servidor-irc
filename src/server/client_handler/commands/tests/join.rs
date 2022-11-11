@@ -17,6 +17,7 @@ fn join_fails_with_unregistered_client() {
 fn join_fails_with_empty_params() {
     let mut handler = dummy_client_handler();
     let parameters = vec![];
+    register_client(&mut handler, "nick");
 
     let channels: Vec<String> = vec![];
     handler.join_command(parameters).unwrap();
@@ -148,6 +149,32 @@ fn can_join_existing_channel() {
     let responses = handler.stream.get_responses();
 
     assert_eq!("331 #channel :No topic is set", responses[0]);
+    assert_eq!("353 #channel :nick2 nick", responses[1]);
+
+    assert_eq!(handler.database.get_channels_for_client("nick"), channels);
+    assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
+}
+
+#[test]
+fn can_join_channel_with_topic() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    let parameters = vec!["#channel".to_string()];
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+    handler
+        .database
+        .modify_topic("#channel", "topic for channel");
+
+    let channels = vec!["#channel".to_string()];
+
+    handler.join_command(parameters).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("332 #channel :topic for channel", responses[0]);
     assert_eq!("353 #channel :nick2 nick", responses[1]);
 
     assert_eq!(handler.database.get_channels_for_client("nick"), channels);
