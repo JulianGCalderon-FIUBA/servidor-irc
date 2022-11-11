@@ -84,7 +84,11 @@ impl<C: Connection> ClientHandler<C> {
 
         for channel in channels {
             if self.can_list_channel(&channel) {
-                self.send_response_for_reply(CommandResponse::List322 { channel })?;
+                let topic = match self.database.get_topic_for_channel(&channel) {
+                    Some(topic) => topic,
+                    None => "No topic set".to_string(),
+                };
+                self.send_response_for_reply(CommandResponse::List322 { channel, topic })?;
             }
         }
         self.send_response_for_reply(CommandResponse::ListEnd323)
