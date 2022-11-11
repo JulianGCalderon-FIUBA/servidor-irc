@@ -50,11 +50,14 @@ fn topic_ignores_nonexistent_channels() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
-    let parameters = vec!["#canal1,#canal2".to_string(), "topic1".to_string()];
+    let parameters = vec!["#canal1".to_string(), "topic1".to_string()];
 
     handler.topic_command(parameters).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string())
+    assert_eq!(
+        "442 #canal1 :You're not on that channel\r\n",
+        handler.stream.read_wbuf_to_string()
+    )
 }
 
 #[test]
@@ -79,33 +82,4 @@ fn topic_sets_and_gets_channel_topic() {
 
     assert_eq!("331 #canal :No topic is set", responses[0]);
     assert_eq!("332 #canal :topic", responses[1]);
-}
-
-#[test]
-fn can_set_topic_and_get_topic_for_different_channels() {
-    let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
-
-    handler.database.add_client(dummy_client("dummy"));
-    handler.database.add_client_to_channel("dummy", "#canal1");
-    handler.database.add_client_to_channel("nick", "#canal1");
-    handler.database.add_client_to_channel("nick", "#canal2");
-    handler.database.add_client_to_channel("nick", "#canal3");
-
-    let mut parameters = vec![
-        "#canal1,#canal2,#canal3".to_string(),
-        "topic1,topic2".to_string(),
-    ];
-
-    handler.topic_command(parameters).unwrap();
-
-    parameters = vec!["#canal1,#canal2".to_string()];
-
-    handler.topic_command(parameters).unwrap();
-
-    let responses = handler.stream.get_responses();
-
-    assert_eq!("331 #canal3 :No topic is set", responses[0]);
-    assert_eq!("332 #canal1 :topic1", responses[1]);
-    assert_eq!("332 #canal2 :topic2", responses[2]);
 }

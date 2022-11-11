@@ -59,16 +59,6 @@ impl<C: Connection> ClientHandler<C> {
         self.database.contains_channel(channel) && self.channel_name_is_valid(channel)
     }
 
-    pub fn assert_can_modify_topic(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
-        if !self.database.is_client_in_channel(nickname, channel) {
-            return Some(ErrorReply::NotOnChannel442 {
-                channel: channel.to_string(),
-            });
-        }
-        // despues revisar si es operador
-        None
-    }
-
     /// Asserts invite command can be executed.
     /// Possible errors:
     ///     - Not enough parameters.
@@ -152,7 +142,18 @@ impl<C: Connection> ClientHandler<C> {
             let command = TOPIC_COMMAND.to_string();
             return Some(ErrorReply::NeedMoreParameters461 { command });
         }
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient);
+        }
 
-        self.assert_registration_is_valid()
+        let nickname = self.registration.nickname().unwrap();
+        let channel = &parameters[0];
+
+        if !self.database.is_client_in_channel(&nickname, channel) {
+            return Some(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
+        }
+        None
     }
 }

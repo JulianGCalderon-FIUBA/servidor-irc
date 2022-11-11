@@ -8,8 +8,6 @@ use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_trait::Connection;
 
-use self::utils::collect_parameters;
-
 use super::ClientHandler;
 
 use std::io;
@@ -153,36 +151,13 @@ impl<C: Connection> ClientHandler<C> {
             return self.send_response_for_error(error);
         }
 
-        let mut topics = vec![];
-        let nickname = self.registration.nickname().unwrap();
-
-        let channels = collect_parameters(&parameters[0]);
+        let channel = &parameters[0];
 
         if parameters.len() > 1 {
-            topics = collect_parameters(&parameters[1]);
-        }
-
-        let mut i = 0;
-
-        while i < topics.len() {
-            if !self.database.contains_channel(&channels[i]) {
-                i += 1;
-                continue;
-            }
-            if let Some(error) = self.assert_can_modify_topic(&channels[i], &nickname) {
-                return self.send_response_for_error(error);
-            }
-            self.database.modify_topic(&channels[i], &topics[i]);
-            i += 1;
-        }
-
-        while i < channels.len() {
-            if !self.database.contains_channel(&channels[i]) {
-                i += 1;
-                continue;
-            }
-            self.send_topic_reply(channels[i].clone())?;
-            i += 1;
+            let topic = &parameters[1];
+            self.database.modify_topic(channel, topic);
+        } else {
+            self.send_topic_reply(channel.to_string())?;
         }
 
         Ok(())
