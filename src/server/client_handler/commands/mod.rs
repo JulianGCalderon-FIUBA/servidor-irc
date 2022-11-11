@@ -37,6 +37,7 @@ pub const TOPIC_COMMAND: &str = "TOPIC";
 
 pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
+pub const AWAY_COMMAND: &str = "AWAY";
 
 pub const WHOIS_COMMAND: &str = "WHOIS";
 pub const WHO_COMMAND: &str = "WHO";

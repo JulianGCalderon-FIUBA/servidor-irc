@@ -1,8 +1,10 @@
+mod away;
 mod invite;
 mod join;
 mod list;
 mod names;
 mod nick;
+mod notice;
 mod oper;
 mod part;
 mod pass;

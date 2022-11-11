@@ -195,12 +195,29 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
+    pub fn set_away_message(&self, message: &Option<String>, nickname: &str) {
+        let request = DatabaseMessage::SetAwayMessage {
+            message: message.to_owned(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
     pub fn set_channel_topic(&self, channel: &str, topic: &str) {
         let request = DatabaseMessage::SetChannelTopic {
             channel: channel.to_string(),
             topic: topic.to_string(),
         };
         self.sender.send(request).unwrap();
+    }
+
+    pub fn get_away_message(&self, nickname: &str) -> Option<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetAwayMessage {
+            nickname: nickname.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
     }
 
     pub fn get_topic_for_channel(&self, channel: &str) -> Option<String> {
