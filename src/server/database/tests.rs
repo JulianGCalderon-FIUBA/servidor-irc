@@ -253,3 +253,14 @@ fn can_update_nickname() {
     assert!(database.contains_client("new_nick"));
     assert!(!database.contains_client("nick"));
 }
+
+#[test]
+fn can_set_away_message_for_client() {
+    let database = Database::start();
+
+    let client = dummy_client("nick");
+    database.add_client(client);
+
+    database.set_away_message(&Some("away".to_string()), "nick");
+    assert_eq!(Some("away".to_string()), database.get_away_message("nick"));
+}
