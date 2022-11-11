@@ -162,4 +162,8 @@ impl<C: Connection> ClientHandler<C> {
 
         Ok(())
     }
+
+    pub fn mode_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
 }
