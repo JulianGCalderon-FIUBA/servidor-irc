@@ -1,4 +1,4 @@
-use crate::server::client_handler::commands::DISTRIBUTED_CHANNEL;
+use crate::server::client_handler::commands::{DISTRIBUTED_CHANNEL, TOPIC_COMMAND};
 use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
@@ -31,7 +31,7 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchChannel403 { channel });
         }
 
-        if self.user_is_in_channel(&channel, &nickname) {
+        if self.database.is_client_in_channel(&nickname, &channel) {
             return Some(ErrorReply::UserOnChannel443 { nickname, channel });
         }
 
@@ -48,8 +48,7 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchChannel403 { channel });
         }
 
-        let clients = self.database.get_clients_for_channel(&channel);
-        if !clients.contains(&nickname.to_string()) {
+        if !self.database.is_client_in_channel(nickname, &channel) {
             return Some(ErrorReply::NotOnChannel442 { channel });
         }
 
@@ -58,12 +57,6 @@ impl<C: Connection> ClientHandler<C> {
     /// Asserts channel can be listed.
     pub fn can_list_channel(&self, channel: &str) -> bool {
         self.database.contains_channel(channel) && self.channel_name_is_valid(channel)
-    }
-
-    fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
-        self.database
-            .get_clients_for_channel(channel)
-            .contains(&String::from(nickname))
     }
 
     /// Asserts invite command can be executed.
@@ -94,10 +87,16 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         if self.database.contains_channel(&channel) {
-            if !self.user_is_in_channel(&channel, &inviting_client) {
+            if !self
+                .database
+                .is_client_in_channel(&inviting_client, &channel)
+            {
                 return Some(ErrorReply::NotOnChannel442 { channel });
             }
-            if self.user_is_in_channel(&channel, &invited_client) {
+            if self
+                .database
+                .is_client_in_channel(&invited_client, &channel)
+            {
                 return Some(ErrorReply::UserOnChannel443 {
                     nickname: invited_client,
                     channel,
@@ -134,6 +133,26 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_registration_is_valid(&self) -> Option<ErrorReply> {
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
+        }
+        None
+    }
+
+    pub fn assert_topic_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
+        if parameters.is_empty() {
+            let command = TOPIC_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
+        }
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient);
+        }
+
+        let nickname = self.registration.nickname().unwrap();
+        let channel = &parameters[0];
+
+        if !self.database.is_client_in_channel(&nickname, channel) {
+            return Some(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
         }
         None
     }

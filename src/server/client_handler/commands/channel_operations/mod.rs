@@ -61,9 +61,8 @@ impl<C: Connection> ClientHandler<C> {
             }
             self.database.add_client_to_channel(&nickname, channel);
 
-            self.send_response_for_reply(CommandResponse::NoTopic331 {
-                channel: channel.to_string(),
-            })?;
+            self.send_topic_reply(channel.to_string())?;
+
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.to_string(),
                 clients: self.database.get_clients_for_channel(channel),
@@ -85,7 +84,11 @@ impl<C: Connection> ClientHandler<C> {
 
         for channel in channels {
             if self.can_list_channel(&channel) {
-                self.send_response_for_reply(CommandResponse::List322 { channel })?;
+                let topic = match self.database.get_topic_for_channel(&channel) {
+                    Some(topic) => topic,
+                    None => "No topic set".to_string(),
+                };
+                self.send_response_for_reply(CommandResponse::List322 { channel, topic })?;
             }
         }
         self.send_response_for_reply(CommandResponse::ListEnd323)
@@ -140,6 +143,23 @@ impl<C: Connection> ClientHandler<C> {
             }
             self.database.remove_client_from_channel(&nickname, channel);
         }
+        Ok(())
+    }
+
+    pub fn topic_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        if let Some(error) = self.assert_topic_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+
+        let channel = &parameters[0];
+
+        if parameters.len() > 1 {
+            let topic = &parameters[1];
+            self.database.set_channel_topic(channel, topic);
+        } else {
+            self.send_topic_reply(channel.to_string())?;
+        }
+
         Ok(())
     }
 }

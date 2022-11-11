@@ -103,9 +103,9 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     /// Sends IsClientInChannel request and returns answer.
-    pub fn _is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
+    pub fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
         let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::_IsClientInChannel {
+        let request = DatabaseMessage::IsClientInChannel {
             nickname: nickname.to_string(),
             channel: channel.to_string(),
             respond_to: sender,
@@ -202,11 +202,28 @@ impl<C: Connection> DatabaseHandle<C> {
         };
         self.sender.send(request).unwrap();
     }
+    pub fn set_channel_topic(&self, channel: &str, topic: &str) {
+        let request = DatabaseMessage::SetChannelTopic {
+            channel: channel.to_string(),
+            topic: topic.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
 
     pub fn get_away_message(&self, nickname: &str) -> Option<String> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetAwayMessage {
             nickname: nickname.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn get_topic_for_channel(&self, channel: &str) -> Option<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetChannelTopic {
+            channel: channel.to_string(),
             respond_to: sender,
         };
         self.sender.send(request).unwrap();

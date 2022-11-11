@@ -27,8 +27,8 @@ use registration::Registration;
 
 use commands::{
     INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, NOTICE_COMMAND,
-    OPER_COMMAND, PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
-    WHOIS_COMMAND, WHO_COMMAND,
+    OPER_COMMAND, PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, TOPIC_COMMAND,
+    USER_COMMAND, WHOIS_COMMAND, WHO_COMMAND,
 };
 
 const REGISTRATION_TIMELIMIT_MS: u128 = 60 * 1000;
@@ -138,6 +138,7 @@ impl<C: Connection> ClientHandler<C> {
                 WHO_COMMAND => self.who_command(parameters)?,
                 WHOIS_COMMAND => self.whois_command(parameters)?,
                 AWAY_COMMAND => self.away_command(trailing)?,
+                TOPIC_COMMAND => self.topic_command(parameters)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
