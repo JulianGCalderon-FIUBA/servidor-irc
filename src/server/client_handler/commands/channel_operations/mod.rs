@@ -187,14 +187,4 @@ impl<C: Connection> ClientHandler<C> {
 
         Ok(())
     }
-
-    fn send_topic_reply(&mut self, channel: String) -> Result<(), io::Error> {
-        match self.database.get_topic_for_channel(&channel) {
-            Some(topic) => {
-                self.send_response_for_reply(CommandResponse::Topic332 { channel, topic })?
-            }
-            None => self.send_response_for_reply(CommandResponse::NoTopic331 { channel })?,
-        };
-        Ok(())
-    }
 }
