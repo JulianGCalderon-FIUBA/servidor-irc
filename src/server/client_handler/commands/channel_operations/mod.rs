@@ -59,6 +59,13 @@ impl<C: Connection> ClientHandler<C> {
                 self.send_response_for_error(error)?;
                 continue;
             }
+
+            let notification = Notification::Join {
+                nickname: self.registration.nickname().unwrap(),
+                channel: channel.to_string(),
+            };
+            self.send_message_to_channel(channel, &notification.to_string());
+
             self.database.add_client_to_channel(&nickname, channel);
 
             self.send_topic_reply(channel.to_string())?;
@@ -141,6 +148,11 @@ impl<C: Connection> ClientHandler<C> {
                 self.send_response_for_error(error)?;
                 continue;
             }
+            let notification = Notification::Part {
+                nickname: self.registration.nickname().unwrap(),
+                channel: channel.to_string(),
+            };
+            self.send_message_to_channel(channel, &notification.to_string());
             self.database.remove_client_from_channel(&nickname, channel);
         }
         Ok(())

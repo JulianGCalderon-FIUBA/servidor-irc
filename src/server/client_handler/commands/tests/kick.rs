@@ -147,21 +147,29 @@ fn can_kick_multiple_user() {
 
     assert!(!handler.database.is_client_in_channel("nick2", "#channel"));
     assert!(!handler.database.is_client_in_channel("nick3", "#channel"));
+}
 
-    assert_eq!(
-        ":nick1 KICK #channel nick2 :no lollygagging\r\n",
-        handler
-            .database
-            .get_stream("nick2")
-            .unwrap()
-            .read_wbuf_to_string()
-    );
-    assert_eq!(
-        ":nick1 KICK #channel nick3 :no lollygagging\r\n",
-        handler
-            .database
-            .get_stream("nick3")
-            .unwrap()
-            .read_wbuf_to_string()
-    );
+#[test]
+fn kick_notifies_users_in_channel() {
+    let mut handler = dummy_client_handler();
+
+    register_client(&mut handler, "nick1");
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client(dummy_client("nick3"));
+    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("nick3", "#channel");
+
+    let parameters = vec!["#channel".to_string(), "nick2".to_string()];
+    handler
+        .kick_command(parameters, Some("no lollygagging".to_string()))
+        .unwrap();
+
+    let responses = handler
+        .database
+        .get_stream("nick3")
+        .unwrap()
+        .get_responses();
+
+    assert_eq!(":nick1 KICK #channel nick2 :no lollygagging", responses[0]);
 }

@@ -180,3 +180,24 @@ fn can_join_channel_with_topic() {
     assert_eq!(handler.database.get_channels_for_client("nick"), channels);
     assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
 }
+
+#[test]
+fn join_notifies_users_in_channel() {
+    let mut handler = dummy_client_handler();
+
+    register_client(&mut handler, "nick1");
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    let parameters = vec!["#channel".to_string()];
+    handler.join_command(parameters).unwrap();
+
+    assert_eq!(
+        ":nick1 JOIN #channel\r\n",
+        handler
+            .database
+            .get_stream("nick2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}

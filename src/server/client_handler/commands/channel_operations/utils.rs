@@ -35,7 +35,6 @@ impl<C: Connection> ClientHandler<C> {
         channel: &str,
         comment: &Option<String>,
     ) {
-        self.database.remove_client_from_channel(nickname, channel);
         let notification = Notification::Kick {
             kicker: self.registration.nickname().unwrap(),
             channel: channel.to_string(),
@@ -43,8 +42,9 @@ impl<C: Connection> ClientHandler<C> {
             comment: comment.clone(),
         };
 
-        self.send_message_to_client(nickname, &notification.to_string())
-            .ok();
+        self.send_message_to_channel(channel, &notification.to_string());
+
+        self.database.remove_client_from_channel(nickname, channel);
     }
 }
 
