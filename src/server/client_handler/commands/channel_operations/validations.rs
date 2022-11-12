@@ -17,8 +17,8 @@ impl<C: Connection> ClientHandler<C> {
             || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
             && !channel.contains(INVALID_CHARACTER);
     }
-    pub fn assert_modes_starts_correctly(&mut self, modes: Vec<char>) -> bool {
-        modes[0] == ADD_MODE || modes[0] == REMOVE_MODE
+    pub fn assert_modes_starts_correctly(&mut self, modes: String) -> bool {
+        modes.as_bytes()[0] == (ADD_MODE as u8) || modes.as_bytes()[0] == (REMOVE_MODE as u8)
     }
 
     /// Asserts client can join channel.

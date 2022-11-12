@@ -8,6 +8,8 @@ use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_trait::Connection;
 
+use self::validations::{ADD_MODE, REMOVE_MODE};
+
 use super::ClientHandler;
 
 use std::io;
@@ -167,12 +169,13 @@ impl<C: Connection> ClientHandler<C> {
         if let Some(error) = self.assert_mode_is_valid(&parameters) {
             return self.send_response_for_error(error);
         }
-        let _channel = &parameters[0];
-        let modes: Vec<char> = parameters[1].chars().collect();
-
-        if !self.assert_modes_starts_correctly(modes) {
+        if !self.assert_modes_starts_correctly(parameters[1].clone()) {
             return Ok(());
         }
+        let _channel = &parameters[0];
+        let _modes: Vec<&str> = parameters[1]
+            .split_inclusive(&[ADD_MODE, REMOVE_MODE])
+            .collect();
 
         Ok(())
     }
