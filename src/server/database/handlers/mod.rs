@@ -103,4 +103,61 @@ impl<C: Connection> Database<C> {
         let response = self.get_channel_topic(channel);
         sender.send(response).unwrap();
     }
+
+    pub fn handle_set_channel_key(&self, channel: String, key: Option<String>) {
+        todo!()
+    }
+
+    pub fn handle_get_channel_key(&self, channel: String, key: Sender<Option<String>>) {
+        todo!()
+    }
+
+    pub fn handle_set_mode(&self, channel: String, mode: char) {
+        todo!()
+    }
+
+    pub fn handle_unset_mode(&self, channel: String, mode: char) {
+        todo!()
+    }
+
+    pub fn handle_channel_has_mode(&self, channel: String, mode: char, respond_to: Sender<bool>) {
+        todo!()
+    }
+
+    pub fn handle_set_channel_limit(&self, channel: String, limit: Option<isize>) {
+        todo!()
+    }
+
+    pub fn handle_get_channel_limit(&self, channel: String, respond_to: Sender<Option<isize>>) {
+        todo!()
+    }
+
+    pub fn handle_add_channop(&self, channel: String, nickname: String) {
+        todo!()
+    }
+
+    pub fn handle_add_speaker(&self, channel: String, nickname: String) {
+        todo!()
+    }
+
+    pub fn handle_remove_speaker(&self, channel: String, nickname: String) {
+        todo!()
+    }
+
+    pub fn handle_is_channel_speaker(
+        &self,
+        channel: String,
+        nickname: String,
+        respond_to: Sender<bool>,
+    ) {
+        todo!()
+    }
+
+    pub fn handle_set_channel_ban_mask(&self, channel: String, mask: String) {
+        todo!()
+    }
+
+    pub fn handle_get_channel_banmask(&self, channel: String, respond_to: Sender<String>) {
+        todo!()
+    }
 }

@@ -3,6 +3,8 @@ mod utils;
 /// This module contains validations for channel operations.
 mod validations;
 
+use std::io;
+
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
@@ -10,9 +12,15 @@ use crate::server::client_trait::Connection;
 
 use self::validations::{ADD_MODE, REMOVE_MODE};
 
-use super::ClientHandler;
+pub const OPER_CONFIG: char = 'o';
+pub const LIMIT_CONFIG: char = 'l';
+pub const BAN_CONFIG: char = 'b';
+pub const SPEAKING_ABILITY_CONFIG: char = 'v';
+pub const KEY_CONFIG: char = 'k';
 
-use std::io;
+const VALID_MODES: [char; 5] = ['s', 'i', 't', 'n', 'm'];
+
+use super::ClientHandler;
 
 impl<C: Connection> ClientHandler<C> {
     /// Invites client to channel.
@@ -172,11 +180,60 @@ impl<C: Connection> ClientHandler<C> {
         if !self.assert_modes_starts_correctly(parameters[1].clone()) {
             return Ok(());
         }
-        let _channel = &parameters[0];
-        let _modes: Vec<&str> = parameters[1]
-            .split_inclusive(&[ADD_MODE, REMOVE_MODE])
-            .collect();
+        let channel = &parameters[0];
+        let modes: Vec<char> = parameters[1].chars().collect();
+
+        let (add, remove) = parse_modes(modes);
+
+        for mode in add {
+            match mode {
+                OPER_CONFIG => {}
+                LIMIT_CONFIG => {}
+                BAN_CONFIG => {}
+                SPEAKING_ABILITY_CONFIG => {}
+                KEY_CONFIG => {}
+                mode if VALID_MODES.contains(&mode) => {} //self.database.set_mode(channel, mode),
+                mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
+            }
+        }
+        for mode in remove {
+            match mode {
+                OPER_CONFIG => {}
+                LIMIT_CONFIG => {}
+                BAN_CONFIG => {}
+                SPEAKING_ABILITY_CONFIG => {}
+                KEY_CONFIG => {}
+                mode if VALID_MODES.contains(&mode) => {} //self.database.remove_mode(channel, mode),
+                mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
+            }
+        }
 
         Ok(())
     }
+}
+
+fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
+    let mut add_modes: Vec<char> = vec![];
+    let mut remove_modes: Vec<char> = vec![];
+    let mut add: bool = false;
+    for char in modes {
+        match char {
+            ADD_MODE => {
+                add = true;
+                continue;
+            }
+            REMOVE_MODE => {
+                add = false;
+                continue;
+            }
+            char => {
+                if add {
+                    add_modes.push(char);
+                } else {
+                    remove_modes.push(char);
+                }
+            }
+        }
+    }
+    (add_modes, remove_modes)
 }

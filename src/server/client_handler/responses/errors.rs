@@ -25,6 +25,7 @@ pub enum ErrorReply {
     UnregisteredClient,
     ParsingError,
     // NoSuchServer { server: String},
+    UnknownMode472 { mode: char },
 }
 
 impl Display for ErrorReply {
@@ -70,6 +71,9 @@ impl Display for ErrorReply {
             ErrorReply::NoNickname => "200 :No nickname registered".to_string(),
             ErrorReply::UnregisteredClient => "200 :Unregistered".to_string(),
             ErrorReply::ParsingError => "200 :Parsing error".to_string(),
+            ErrorReply::UnknownMode472 { mode } => {
+                format!("472 {mode} :Is unknown mode char to me")
+            }
         };
         write!(f, "{string}")
     }
