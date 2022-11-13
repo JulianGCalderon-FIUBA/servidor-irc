@@ -11,6 +11,12 @@ pub fn create_button(label: &str) -> Button {
         .build()
 }
 
+pub fn create_add_button(label: &str) -> Button {
+    let add_button = create_button(label);
+    add_button.add_css_class("add");
+    add_button
+}
+
 pub fn create_separator() -> Separator {
     Separator::builder()
         .orientation(Orientation::Vertical)

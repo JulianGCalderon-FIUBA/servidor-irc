@@ -2,27 +2,38 @@ mod chat;
 mod conv_info;
 mod sidebar;
 pub mod widgets_creation;
+pub mod utils;
 
 use gtk::{
-    glib::{GString, Sender},
+    glib::{ GString, Sender },
     prelude::*,
-    Application, ApplicationWindow, Box, Button, Entry, Label, Orientation,
+    Application,
+    ApplicationWindow,
+    Box,
+    Button,
+    Entry,
+    Label,
+    Orientation,
 };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
 use self::widgets_creation::{
-    create_button, create_current_chat, create_message_box, create_separator, create_channels_box, create_clients_box,
+    create_button,
+    create_current_chat,
+    create_message_box,
+    create_separator,
+    create_channels_box,
+    create_clients_box, create_add_button,
 };
 
-use super::widgets_creation::{create_entry, create_main_box};
+use super::widgets_creation::{ create_entry, create_main_box };
 
 pub struct MainView {
     pub channels_box: Box,
     pub add_channel: Button,
     pub clients_box: Box,
-    pub clients: Vec<Button>,
     pub add_client: Button,
     pub current_chat: Label,
     pub message_box: Box,
@@ -38,16 +49,10 @@ pub struct MainView {
 impl MainView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
-            add_channel: create_button("+"),
             channels_box: create_channels_box(),
+            add_channel: create_add_button("+"),
             clients_box: create_clients_box(),
-            clients: vec![
-                create_button("juli"),
-                create_button("sol"),
-                create_button("santi"),
-                create_button("ana"),
-            ],
-            add_client: create_button("+"),
+            add_client: create_add_button("+"),
             current_chat: create_current_chat(""),
             message_box: create_message_box(),
             user_info: create_button("info"),
@@ -63,10 +68,7 @@ impl MainView {
     pub fn get_view(&mut self, app: Application, nickname: GString) -> ApplicationWindow {
         self.user_info.set_label(&nickname);
 
-        let window = ApplicationWindow::builder()
-            .application(&app)
-            .title("Lemon Pie IRC")
-            .build();
+        let window = ApplicationWindow::builder().application(&app).title("Lemon Pie IRC").build();
 
         let main_box = create_main_box(Orientation::Horizontal, 800, 600);
         main_box.add_css_class("main_box");

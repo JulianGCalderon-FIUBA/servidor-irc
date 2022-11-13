@@ -1,61 +1,53 @@
 mod widgets_creation;
 
-use gtk::{ glib::Sender, prelude::*, Box, Button, Label, Orientation, Entry, ScrolledWindow };
+use gtk::{ Box, Entry, glib::Sender, Label, Orientation, prelude::*, ScrolledWindow };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::widgets_creation::create_separator_sidebar;
+use self::widgets_creation::{ create_scrollwindow_sidebar, create_separator_sidebar };
 
-use super::{MainView, widgets_creation::create_button};
+use super::{
+    MainView,
+    utils::{ adjust_scrollbar, entry_is_valid },
+    widgets_creation::create_button,
+};
 
 impl MainView {
     pub fn create_sidebar(&mut self) -> Box {
         let sidebar = Box::builder().width_request(200).orientation(Orientation::Vertical).build();
 
-        let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
-        .min_content_height(320)
-        .child(&self.channels_box)
-        .build();
-        sidebar.append(&scrolled_window);
+        //Channels box
+        let scrolled_window_channels: ScrolledWindow = create_scrollwindow_sidebar(&self.channels_box);
 
-        self.add_channel.add_css_class("add");
-        sidebar.append(&self.add_channel);
-        self.connect_add_button(
+        self.connect_add_channel_button(
             self.channels_box.clone(),
             self.input.clone(),
-            scrolled_window.clone(),
+            scrolled_window_channels.clone(),
+            self.sender.clone()
+        );
+        
+        //Clients box
+        let scrolled_window_clients: ScrolledWindow = create_scrollwindow_sidebar(&self.clients_box);
+        
+        self.connect_add_client_button(
+            self.clients_box.clone(),
+            self.input.clone(),
+            scrolled_window_clients.clone(),
+            self.current_chat.clone(),
             self.sender.clone()
         );
 
-        let separator = create_separator_sidebar();
-        sidebar.append(&separator);
-
-        let current_chat_clone = self.current_chat.clone();
-        for button in &self.clients {
-            let label = button.label().unwrap().to_string();
-            self.connect_conv_button(
-                button,
-                label.clone(),
-                current_chat_clone.clone(),
-                self.sender.clone()
-            );
-            self.clients_box.append(button);
-        }
-        
-        let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
-        .min_content_height(320)
-        .child(&self.clients_box)
-        .build();
-        sidebar.append(&scrolled_window);
-
-        self.add_client.add_css_class("add");
+        sidebar.append(&scrolled_window_channels);
+        sidebar.append(&self.add_channel);
+        sidebar.append(&create_separator_sidebar());
+        sidebar.append(&scrolled_window_clients);
         sidebar.append(&self.add_client);
 
         sidebar
     }
 
-    fn connect_add_button(
+    fn connect_add_channel_button(
         &self,
         channels_box: Box,
         input: Entry,
@@ -71,40 +63,42 @@ impl MainView {
             let join_channel_message = ControllerMessage::JoinChannel {
                 channel: input_text.clone(),
             };
-            sender
-                .send(join_channel_message)
-                .expect("Error: join channel command");
-
+            sender.send(join_channel_message).expect("Error: join channel command");
 
             let channel = create_button(&input_text);
             channels_box.append(&channel);
 
-            let adj = scrolled_window.vadjustment();
-            adj.set_upper(adj.upper() + adj.page_size());
-            adj.set_value(adj.upper());
-            scrolled_window.set_vadjustment(Some(&adj));
+            adjust_scrollbar(scrolled_window.clone());
 
             input.set_text("");
         });
     }
 
-    fn connect_conv_button(
+    fn connect_add_client_button(
         &self,
-        button: &Button,
-        label: String,
+        clients_box: Box,
+        input: Entry,
+        scrolled_window: ScrolledWindow,
         current_chat: Label,
         sender: Sender<ControllerMessage>
     ) {
-        button.connect_clicked(move |_| {
-            current_chat.set_label(&label);
+        self.add_client.connect_clicked(move |_| {
+            let input_text = input.text();
+            if !entry_is_valid(&input_text) {
+                return;
+            }
+
+            let client = create_button(&input_text);
+            current_chat.set_label(&input_text);
             let request = ControllerMessage::ChangeConversation {
-                nickname: label.clone(),
+                nickname: input_text.to_string(),
             };
             sender.send(request).expect("ERROR: change conversation");
+            clients_box.append(&client);
+
+            adjust_scrollbar(scrolled_window.clone());
+
+            input.set_text("");
         });
     }
-}
-
-fn entry_is_valid(entry_text: &str) -> bool {
-    !entry_text.is_empty()
 }
