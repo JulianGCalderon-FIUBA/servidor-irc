@@ -213,10 +213,10 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn set_channel_key(&self, channel: &str, key: &str) {
+    pub fn set_channel_key(&self, channel: &str, key: Option<String>) {
         let request = DatabaseMessage::SetChannelKey {
             channel: channel.to_string(),
-            key: Some(key.to_string()),
+            key,
         };
         self.sender.send(request).unwrap();
     }
@@ -258,10 +258,10 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn set_channel_limit(&self, channel: &str, limit: isize) {
+    pub fn set_channel_limit(&self, channel: &str, limit: Option<isize>) {
         let request = DatabaseMessage::SetLimit {
             channel: channel.to_string(),
-            limit: Some(limit),
+            limit,
         };
         self.sender.send(request).unwrap();
     }
@@ -327,7 +327,7 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
-    pub fn get_channel_banmask(&self, channel: &str) -> String {
+    pub fn get_channel_banmask(&self, channel: &str) -> Vec<String> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelBanMask {
             channel: channel.to_string(),

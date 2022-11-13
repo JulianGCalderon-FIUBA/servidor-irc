@@ -161,7 +161,7 @@ impl<C: Connection> Database<C> {
                 self.handle_add_channop(channel, nickname)
             }
             DatabaseMessage::RemoveChanop { channel, nickname } => {
-                self.handle_add_channop(channel, nickname)
+                self.handle_remove_channop(channel, nickname)
             }
             DatabaseMessage::AddSpeaker { channel, nickname } => {
                 self.handle_add_speaker(channel, nickname)

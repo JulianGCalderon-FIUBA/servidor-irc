@@ -104,7 +104,7 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
-    pub fn handle_set_channel_key(&self, channel: String, key: Option<String>) {
+    pub fn handle_set_channel_key(&mut self, channel: String, key: Option<String>) {
         self.set_channel_key(channel, key);
     }
 
@@ -113,11 +113,11 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
-    pub fn handle_set_mode(&self, channel: String, mode: char) {
+    pub fn handle_set_mode(&mut self, channel: String, mode: char) {
         self.set_mode(channel, mode);
     }
 
-    pub fn handle_unset_mode(&self, channel: String, mode: char) {
+    pub fn handle_unset_mode(&mut self, channel: String, mode: char) {
         self.unset_mode(channel, mode);
     }
 
@@ -126,7 +126,7 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
-    pub fn handle_set_channel_limit(&self, channel: String, limit: Option<isize>) {
+    pub fn handle_set_channel_limit(&mut self, channel: String, limit: Option<isize>) {
         self.set_channel_limit(channel, limit);
     }
 
@@ -135,15 +135,19 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
-    pub fn handle_add_channop(&self, channel: String, nickname: String) {
+    pub fn handle_add_channop(&mut self, channel: String, nickname: String) {
         self.add_channop(channel, nickname);
     }
 
-    pub fn handle_add_speaker(&self, channel: String, nickname: String) {
+    pub fn handle_remove_channop(&mut self, channel: String, nickname: String) {
+        self.remove_channop(channel, nickname);
+    }
+
+    pub fn handle_add_speaker(&mut self, channel: String, nickname: String) {
         self.add_speaker(channel, nickname);
     }
 
-    pub fn handle_remove_speaker(&self, channel: String, nickname: String) {
+    pub fn handle_remove_speaker(&mut self, channel: String, nickname: String) {
         self.remove_speaker(channel, nickname);
     }
 
@@ -157,11 +161,11 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
-    pub fn handle_set_channel_banmask(&self, channel: String, mask: String) {
+    pub fn handle_set_channel_banmask(&mut self, channel: String, mask: String) {
         self.set_channel_banmask(channel, mask);
     }
 
-    pub fn handle_get_channel_banmask(&self, channel: String, sender: Sender<String>) {
+    pub fn handle_get_channel_banmask(&self, channel: String, sender: Sender<Vec<String>>) {
         let response = self.get_channel_banmask(channel);
         sender.send(response).unwrap();
     }

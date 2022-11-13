@@ -139,6 +139,6 @@ pub enum DatabaseMessage<C: Connection> {
     },
     GetChannelBanMask {
         channel: String,
-        respond_to: Sender<String>,
+        respond_to: Sender<Vec<String>>,
     },
 }

@@ -203,7 +203,7 @@ impl<C: Connection> ClientHandler<C> {
                     }
 
                     if let Ok(limit) = parameters[2].parse::<isize>() {
-                        self.database.set_channel_limit(channel, limit);
+                        self.database.set_channel_limit(channel, Some(limit));
                     }
                 }
                 BAN_CONFIG => {
@@ -234,7 +234,8 @@ impl<C: Connection> ClientHandler<C> {
                         continue;
                     }
                     let key = &parameters[2];
-                    self.database.set_channel_key(channel, key)
+                    self.database
+                        .set_channel_key(channel, Some(key.to_string()));
                 }
                 mode if VALID_MODES.contains(&mode) => {
                     self.database.set_channel_mode(channel, mode)
@@ -253,7 +254,7 @@ impl<C: Connection> ClientHandler<C> {
                         self.database.remove_channop(channel, nickname);
                     }
                 }
-                LIMIT_CONFIG => {}
+                LIMIT_CONFIG => self.database.set_channel_limit(channel, None),
                 BAN_CONFIG => {}
                 SPEAKING_ABILITY_CONFIG => {
                     if let Some(error) = self.assert_enough_parameters(&parameters) {
@@ -264,7 +265,7 @@ impl<C: Connection> ClientHandler<C> {
                         self.database.remove_speaker(channel, nickname);
                     }
                 }
-                KEY_CONFIG => {}
+                KEY_CONFIG => self.database.set_channel_key(channel, None),
                 mode if VALID_MODES.contains(&mode) => {
                     self.database.unset_channel_mode(channel, mode)
                 }
