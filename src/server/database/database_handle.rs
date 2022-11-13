@@ -336,6 +336,14 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub fn unset_channel_banmask(&self, channel: &str, banmask: &str) {
+        let request = DatabaseMessage::UnsetChannelBanMask {
+            channel: channel.to_string(),
+            mask: banmask.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

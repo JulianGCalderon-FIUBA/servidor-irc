@@ -255,7 +255,15 @@ impl<C: Connection> ClientHandler<C> {
                     }
                 }
                 LIMIT_CONFIG => self.database.set_channel_limit(channel, None),
-                BAN_CONFIG => {}
+                BAN_CONFIG => {
+                    if let Some(error) = self.assert_enough_parameters(&parameters) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+                    for banmask in parameters[2].split(',') {
+                        self.database.unset_channel_banmask(channel, banmask)
+                    }
+                }
                 SPEAKING_ABILITY_CONFIG => {
                     if let Some(error) = self.assert_enough_parameters(&parameters) {
                         self.send_response_for_error(error)?;

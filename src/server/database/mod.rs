@@ -181,6 +181,9 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_channel_banmask(channel, respond_to),
+            DatabaseMessage::UnsetChannelBanMask { channel, mask } => {
+                self.handle_unset_channel_banmask(channel, mask)
+            }
         }
     }
 }

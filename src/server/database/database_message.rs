@@ -141,4 +141,8 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         respond_to: Sender<Vec<String>>,
     },
+    UnsetChannelBanMask {
+        channel: String,
+        mask: String,
+    },
 }

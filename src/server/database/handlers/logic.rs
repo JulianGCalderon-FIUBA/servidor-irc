@@ -281,4 +281,10 @@ impl<C: Connection> Database<C> {
         }
         vec![]
     }
+
+    pub fn unset_channel_banmask(&mut self, channel: String, mask: String) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.unset_banmask(mask);
+        }
+    }
 }

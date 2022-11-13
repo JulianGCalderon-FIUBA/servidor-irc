@@ -169,4 +169,8 @@ impl<C: Connection> Database<C> {
         let response = self.get_channel_banmask(channel);
         sender.send(response).unwrap();
     }
+
+    pub fn handle_unset_channel_banmask(&mut self, channel: String, mask: String) {
+        self.unset_channel_banmask(channel, mask);
+    }
 }

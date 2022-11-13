@@ -140,6 +140,13 @@ impl<C: Connection> Channel<C> {
     pub fn get_banmasks(&self) -> Vec<String> {
         self.banmasks.clone()
     }
+
+    pub fn unset_banmask(&mut self, mask: String) {
+        self.banmasks
+            .iter()
+            .position(|m| m == &mask)
+            .map(|index| self.speakers.remove(index));
+    }
 }
 
 fn initialize_modes() -> HashMap<char, bool> {
