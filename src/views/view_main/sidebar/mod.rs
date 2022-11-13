@@ -1,6 +1,6 @@
 mod widgets_creation;
 
-use gtk::{ glib::Sender, prelude::*, Box, Button, Label, Orientation, Entry };
+use gtk::{ glib::Sender, prelude::*, Box, Button, Label, Orientation, Entry, ScrolledWindow };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
@@ -11,18 +11,20 @@ use super::{MainView, widgets_creation::create_button};
 
 impl MainView {
     pub fn create_sidebar(&mut self) -> Box {
-        let sidebar = Box::builder().orientation(Orientation::Vertical).build();
+        let sidebar = Box::builder().width_request(200).orientation(Orientation::Vertical).build();
 
-        for button in &self.channels {
-            self.channels_box.append(button);
-        }
-        sidebar.append(&self.channels_box);
+        let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
+        .min_content_height(320)
+        .child(&self.channels_box)
+        .build();
+        sidebar.append(&scrolled_window);
 
         self.add_channel.add_css_class("add");
         sidebar.append(&self.add_channel);
         self.connect_add_button(
             self.channels_box.clone(),
             self.input.clone(),
+            scrolled_window.clone(),
             self.sender.clone()
         );
 
@@ -38,8 +40,15 @@ impl MainView {
                 current_chat_clone.clone(),
                 self.sender.clone()
             );
-            sidebar.append(button);
+            self.clients_box.append(button);
         }
+        
+        let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
+        .min_content_height(320)
+        .child(&self.clients_box)
+        .build();
+        sidebar.append(&scrolled_window);
+
         self.add_client.add_css_class("add");
         sidebar.append(&self.add_client);
 
@@ -50,6 +59,7 @@ impl MainView {
         &self,
         channels_box: Box,
         input: Entry,
+        scrolled_window: ScrolledWindow,
         sender: Sender<ControllerMessage>
     ) {
         self.add_channel.connect_clicked(move |_| {
@@ -68,6 +78,11 @@ impl MainView {
 
             let channel = create_button(&input_text);
             channels_box.append(&channel);
+
+            let adj = scrolled_window.vadjustment();
+            adj.set_upper(adj.upper() + adj.page_size());
+            adj.set_value(adj.upper());
+            scrolled_window.set_vadjustment(Some(&adj));
 
             input.set_text("");
         });
