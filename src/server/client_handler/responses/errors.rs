@@ -26,6 +26,7 @@ pub enum ErrorReply {
     ParsingError,
     // NoSuchServer { server: String},
     UnknownMode472 { mode: char },
+    KeySet467 { channel: String },
 }
 
 impl Display for ErrorReply {
@@ -74,6 +75,7 @@ impl Display for ErrorReply {
             ErrorReply::UnknownMode472 { mode } => {
                 format!("472 {mode} :Is unknown mode char to me")
             }
+            ErrorReply::KeySet467 { channel } => format!("467 {channel} :Channel key already set"),
         };
         write!(f, "{string}")
     }

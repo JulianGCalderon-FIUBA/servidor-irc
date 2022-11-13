@@ -212,6 +212,130 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub fn set_channel_key(&self, channel: &str, key: &str) {
+        let request = DatabaseMessage::SetChannelKey {
+            channel: channel.to_string(),
+            key: Some(key.to_string()),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn get_channel_key(&self, channel: &str) -> Option<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetChannelKey {
+            channel: channel.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn set_channel_mode(&self, channel: &str, mode: char) {
+        let request = DatabaseMessage::SetChannelMode {
+            channel: channel.to_string(),
+            mode,
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn unset_channel_mode(&self, channel: &str, mode: char) {
+        let request = DatabaseMessage::UnsetChannelMode {
+            channel: channel.to_string(),
+            mode,
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn channel_has_mode(&self, channel: &str, mode: char) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::ChannelHasMode {
+            channel: channel.to_string(),
+            mode,
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn set_channel_limit(&self, channel: &str, limit: isize) {
+        let request = DatabaseMessage::SetLimit {
+            channel: channel.to_string(),
+            limit: Some(limit),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn get_channel_limit(&self, channel: &str) -> Option<isize> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetLimit {
+            channel: channel.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn add_channop(&self, channel: &str, nickname: &str) {
+        let request = DatabaseMessage::AddChanop {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn remove_channop(&self, channel: &str, nickname: &str) {
+        let request = DatabaseMessage::RemoveChanop {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn add_speaker(&self, channel: &str, nickname: &str) {
+        let request = DatabaseMessage::AddSpeaker {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn remove_speaker(&self, channel: &str, nickname: &str) {
+        let request = DatabaseMessage::RemoveSpeaker {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn is_channel_speaker(&self, channel: &str, nickname: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::IsChannelSpeaker {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn set_channel_banmask(&self, channel: &str, banmask: &str) {
+        let request = DatabaseMessage::SetChannelBanMask {
+            channel: channel.to_string(),
+            mask: banmask.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn get_channel_banmask(&self, channel: &str) -> String {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetChannelBanMask {
+            channel: channel.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

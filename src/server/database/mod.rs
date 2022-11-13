@@ -175,7 +175,7 @@ impl<C: Connection> Database<C> {
                 respond_to,
             } => self.handle_is_channel_speaker(channel, nickname, respond_to),
             DatabaseMessage::SetChannelBanMask { channel, mask } => {
-                self.handle_set_channel_ban_mask(channel, mask)
+                self.handle_set_channel_banmask(channel, mask)
             }
             DatabaseMessage::GetChannelBanMask {
                 channel,

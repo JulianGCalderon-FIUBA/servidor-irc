@@ -187,23 +187,87 @@ impl<C: Connection> ClientHandler<C> {
 
         for mode in add {
             match mode {
-                OPER_CONFIG => {}
-                LIMIT_CONFIG => {}
-                BAN_CONFIG => {}
-                SPEAKING_ABILITY_CONFIG => {}
-                KEY_CONFIG => {}
-                mode if VALID_MODES.contains(&mode) => {} //self.database.set_mode(channel, mode),
+                OPER_CONFIG => {
+                    if let Some(error) = self.assert_enough_parameters(&parameters) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+                    for nickname in parameters[2].split(',') {
+                        self.database.add_channop(channel, nickname);
+                    }
+                }
+                LIMIT_CONFIG => {
+                    if let Some(error) = self.assert_enough_parameters(&parameters) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+
+                    if let Ok(limit) = parameters[2].parse::<isize>() {
+                        self.database.set_channel_limit(channel, limit);
+                    }
+                }
+                BAN_CONFIG => {
+                    if let Some(error) = self.assert_enough_parameters(&parameters) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+                    for banmask in parameters[2].split(',') {
+                        self.database.set_channel_banmask(channel, banmask)
+                    }
+                }
+                SPEAKING_ABILITY_CONFIG => {
+                    if let Some(error) = self.assert_enough_parameters(&parameters) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+                    for nickname in parameters[2].split(',') {
+                        self.database.add_speaker(channel, nickname);
+                    }
+                }
+                KEY_CONFIG => {
+                    if let Some(error) = self.assert_enough_parameters(&parameters) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+                    if let Some(error) = self.assert_can_set_key(channel) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+                    let key = &parameters[2];
+                    self.database.set_channel_key(channel, key)
+                }
+                mode if VALID_MODES.contains(&mode) => {
+                    self.database.set_channel_mode(channel, mode)
+                }
                 mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
             }
         }
         for mode in remove {
             match mode {
-                OPER_CONFIG => {}
+                OPER_CONFIG => {
+                    if let Some(error) = self.assert_enough_parameters(&parameters) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+                    for nickname in parameters[2].split(',') {
+                        self.database.remove_channop(channel, nickname);
+                    }
+                }
                 LIMIT_CONFIG => {}
                 BAN_CONFIG => {}
-                SPEAKING_ABILITY_CONFIG => {}
+                SPEAKING_ABILITY_CONFIG => {
+                    if let Some(error) = self.assert_enough_parameters(&parameters) {
+                        self.send_response_for_error(error)?;
+                        continue;
+                    }
+                    for nickname in parameters[2].split(',') {
+                        self.database.remove_speaker(channel, nickname);
+                    }
+                }
                 KEY_CONFIG => {}
-                mode if VALID_MODES.contains(&mode) => {} //self.database.remove_mode(channel, mode),
+                mode if VALID_MODES.contains(&mode) => {
+                    self.database.unset_channel_mode(channel, mode)
+                }
                 mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
             }
         }

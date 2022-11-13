@@ -105,59 +105,64 @@ impl<C: Connection> Database<C> {
     }
 
     pub fn handle_set_channel_key(&self, channel: String, key: Option<String>) {
-        todo!()
+        self.set_channel_key(channel, key);
     }
 
-    pub fn handle_get_channel_key(&self, channel: String, key: Sender<Option<String>>) {
-        todo!()
+    pub fn handle_get_channel_key(&self, channel: String, sender: Sender<Option<String>>) {
+        let response = self.get_channel_key(channel);
+        sender.send(response).unwrap();
     }
 
     pub fn handle_set_mode(&self, channel: String, mode: char) {
-        todo!()
+        self.set_mode(channel, mode);
     }
 
     pub fn handle_unset_mode(&self, channel: String, mode: char) {
-        todo!()
+        self.unset_mode(channel, mode);
     }
 
-    pub fn handle_channel_has_mode(&self, channel: String, mode: char, respond_to: Sender<bool>) {
-        todo!()
+    pub fn handle_channel_has_mode(&self, channel: String, mode: char, sender: Sender<bool>) {
+        let response = self.channel_has_mode(channel, mode);
+        sender.send(response).unwrap();
     }
 
     pub fn handle_set_channel_limit(&self, channel: String, limit: Option<isize>) {
-        todo!()
+        self.set_channel_limit(channel, limit);
     }
 
-    pub fn handle_get_channel_limit(&self, channel: String, respond_to: Sender<Option<isize>>) {
-        todo!()
+    pub fn handle_get_channel_limit(&self, channel: String, sender: Sender<Option<isize>>) {
+        let response = self.get_channel_limit(channel);
+        sender.send(response).unwrap();
     }
 
     pub fn handle_add_channop(&self, channel: String, nickname: String) {
-        todo!()
+        self.add_channop(channel, nickname);
     }
 
     pub fn handle_add_speaker(&self, channel: String, nickname: String) {
-        todo!()
+        self.add_speaker(channel, nickname);
     }
 
     pub fn handle_remove_speaker(&self, channel: String, nickname: String) {
-        todo!()
+        self.remove_speaker(channel, nickname);
     }
 
     pub fn handle_is_channel_speaker(
         &self,
         channel: String,
         nickname: String,
-        respond_to: Sender<bool>,
+        sender: Sender<bool>,
     ) {
-        todo!()
+        let response = self.is_channel_speaker(channel, nickname);
+        sender.send(response).unwrap();
     }
 
-    pub fn handle_set_channel_ban_mask(&self, channel: String, mask: String) {
-        todo!()
+    pub fn handle_set_channel_banmask(&self, channel: String, mask: String) {
+        self.set_channel_banmask(channel, mask);
     }
 
-    pub fn handle_get_channel_banmask(&self, channel: String, respond_to: Sender<String>) {
-        todo!()
+    pub fn handle_get_channel_banmask(&self, channel: String, sender: Sender<String>) {
+        let response = self.get_channel_banmask(channel);
+        sender.send(response).unwrap();
     }
 }

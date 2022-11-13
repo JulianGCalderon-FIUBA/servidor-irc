@@ -193,4 +193,56 @@ impl<C: Connection> Database<C> {
         }
         None
     }
+
+    pub fn set_channel_key(&self, channel: String, key: Option<String>) {
+        todo!()
+    }
+
+    pub fn get_channel_key(&self, channel: String) -> Option<String> {
+        todo!()
+    }
+
+    pub fn set_mode(&self, channel: String, mode: char) {
+        todo!()
+    }
+
+    pub fn channel_has_mode(&self, channel: String, mode: char) -> bool {
+        todo!()
+    }
+
+    pub fn get_channel_limit(&self, channel: String) -> Option<isize> {
+        todo!()
+    }
+
+    pub fn set_channel_limit(&self, channel: String, limit: Option<isize>) {
+        todo!()
+    }
+
+    pub fn unset_mode(&self, channel: String, mode: char) {
+        todo!()
+    }
+
+    pub fn add_channop(&self, channel: String, nickname: String) {
+        todo!()
+    }
+
+    pub fn add_speaker(&self, channel: String, nickname: String) {
+        todo!()
+    }
+
+    pub fn remove_speaker(&self, channel: String, nickname: String) {
+        todo!()
+    }
+
+    pub fn is_channel_speaker(&self, channel: String, nickname: String) -> bool {
+        todo!()
+    }
+
+    pub fn set_channel_banmask(&self, channel: String, mask: String) {
+        todo!()
+    }
+
+    pub fn get_channel_banmask(&self, channel: String) -> String {
+        todo!()
+    }
 }
