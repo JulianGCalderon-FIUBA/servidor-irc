@@ -18,10 +18,14 @@ pub enum ControllerMessage {
         nickname: String,
         message: String,
     },
+    JoinChannel {
+        channel: GString,
+    },
     ChangeConversation {
         nickname: String,
     },
     RegularMessage {
         message: String,
     },
+    
 }

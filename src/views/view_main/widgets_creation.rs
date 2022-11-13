@@ -29,6 +29,13 @@ pub fn create_message_box() -> Box {
         .build()
 }
 
+pub fn create_channels_box()-> Box {
+    Box::builder()
+        .orientation(Orientation::Vertical)
+        .height_request(300)
+        .build()
+}
+
 pub fn create_current_chat(label: &str) -> Label {
     let message = Label::builder()
         .label(label)

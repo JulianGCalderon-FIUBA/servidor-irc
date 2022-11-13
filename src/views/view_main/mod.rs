@@ -13,12 +13,13 @@ use gtk4 as gtk;
 use crate::controller::controller_message::ControllerMessage;
 
 use self::widgets_creation::{
-    create_button, create_current_chat, create_message_box, create_separator,
+    create_button, create_current_chat, create_message_box, create_separator, create_channels_box,
 };
 
 use super::widgets_creation::{create_entry, create_main_box};
 
 pub struct MainView {
+    pub channels_box: Box,
     pub channels: Vec<Button>,
     pub add_channel: Button,
     pub clients: Vec<Button>,
@@ -39,6 +40,7 @@ impl MainView {
         Self {
             channels: vec![create_button("#channel1"), create_button("#channel2")],
             add_channel: create_button("+"),
+            channels_box: create_channels_box(),
             clients: vec![
                 create_button("juli"),
                 create_button("sol"),
