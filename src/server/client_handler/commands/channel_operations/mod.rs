@@ -3,14 +3,14 @@ mod utils;
 /// This module contains validations for channel operations.
 mod validations;
 
+mod mode_utils;
+
 use std::io;
 
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_trait::Connection;
-
-use self::validations::{ADD_MODE, REMOVE_MODE};
 
 pub const OPER_CONFIG: char = 'o';
 pub const LIMIT_CONFIG: char = 'l';
@@ -19,6 +19,8 @@ pub const SPEAKING_ABILITY_CONFIG: char = 'v';
 pub const KEY_CONFIG: char = 'k';
 
 const VALID_MODES: [char; 5] = ['s', 'i', 't', 'n', 'm'];
+
+use self::mode_utils::parse_modes;
 
 use super::ClientHandler;
 
@@ -180,133 +182,14 @@ impl<C: Connection> ClientHandler<C> {
         if !self.assert_modes_starts_correctly(parameters[1].clone()) {
             return Ok(());
         }
-        let channel = &parameters[0];
+
         let modes: Vec<char> = parameters[1].chars().collect();
 
         let (add, remove) = parse_modes(modes);
 
-        for mode in add {
-            match mode {
-                OPER_CONFIG => {
-                    if let Some(error) = self.assert_enough_parameters(&parameters) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-                    for nickname in parameters[2].split(',') {
-                        self.database.add_channop(channel, nickname);
-                    }
-                }
-                LIMIT_CONFIG => {
-                    if let Some(error) = self.assert_enough_parameters(&parameters) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-
-                    if let Ok(limit) = parameters[2].parse::<isize>() {
-                        self.database.set_channel_limit(channel, Some(limit));
-                    }
-                }
-                BAN_CONFIG => {
-                    if let Some(error) = self.assert_enough_parameters(&parameters) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-                    for banmask in parameters[2].split(',') {
-                        self.database.set_channel_banmask(channel, banmask)
-                    }
-                }
-                SPEAKING_ABILITY_CONFIG => {
-                    if let Some(error) = self.assert_enough_parameters(&parameters) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-                    for nickname in parameters[2].split(',') {
-                        self.database.add_speaker(channel, nickname);
-                    }
-                }
-                KEY_CONFIG => {
-                    if let Some(error) = self.assert_enough_parameters(&parameters) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-                    if let Some(error) = self.assert_can_set_key(channel) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-                    let key = &parameters[2];
-                    self.database
-                        .set_channel_key(channel, Some(key.to_string()));
-                }
-                mode if VALID_MODES.contains(&mode) => {
-                    self.database.set_channel_mode(channel, mode)
-                }
-                mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
-            }
-        }
-        for mode in remove {
-            match mode {
-                OPER_CONFIG => {
-                    if let Some(error) = self.assert_enough_parameters(&parameters) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-                    for nickname in parameters[2].split(',') {
-                        self.database.remove_channop(channel, nickname);
-                    }
-                }
-                LIMIT_CONFIG => self.database.set_channel_limit(channel, None),
-                BAN_CONFIG => {
-                    if let Some(error) = self.assert_enough_parameters(&parameters) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-                    for banmask in parameters[2].split(',') {
-                        self.database.unset_channel_banmask(channel, banmask)
-                    }
-                }
-                SPEAKING_ABILITY_CONFIG => {
-                    if let Some(error) = self.assert_enough_parameters(&parameters) {
-                        self.send_response_for_error(error)?;
-                        continue;
-                    }
-                    for nickname in parameters[2].split(',') {
-                        self.database.remove_speaker(channel, nickname);
-                    }
-                }
-                KEY_CONFIG => self.database.set_channel_key(channel, None),
-                mode if VALID_MODES.contains(&mode) => {
-                    self.database.unset_channel_mode(channel, mode)
-                }
-                mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
-            }
-        }
+        self.add_modes(add, parameters.clone())?;
+        self.remove_modes(remove, parameters)?;
 
         Ok(())
     }
-}
-
-fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
-    let mut add_modes: Vec<char> = vec![];
-    let mut remove_modes: Vec<char> = vec![];
-    let mut add: bool = false;
-    for char in modes {
-        match char {
-            ADD_MODE => {
-                add = true;
-                continue;
-            }
-            REMOVE_MODE => {
-                add = false;
-                continue;
-            }
-            char => {
-                if add {
-                    add_modes.push(char);
-                } else {
-                    remove_modes.push(char);
-                }
-            }
-        }
-    }
-    (add_modes, remove_modes)
 }

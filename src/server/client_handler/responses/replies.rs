@@ -61,6 +61,13 @@ pub enum CommandResponse {
         channel: String,
     },
     YouAreOper381,
+    BanList367 {
+        channel: String,
+        banmask: String,
+    },
+    EndOfBanList368 {
+        channel: String,
+    },
 }
 
 impl Display for CommandResponse {
@@ -138,6 +145,12 @@ impl Display for CommandResponse {
                 format!("366 {channel} :End of /NAMES list")
             }
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
+            CommandResponse::BanList367 { channel, banmask } => {
+                format!("367 {channel} {banmask}")
+            }
+            CommandResponse::EndOfBanList368 { channel } => {
+                format!("368 {channel} :End of channel ban list")
+            }
         };
         write!(f, "{string}")
     }
