@@ -1,34 +1,24 @@
 mod chat;
 mod conv_info;
 mod sidebar;
-pub mod widgets_creation;
 pub mod utils;
+pub mod widgets_creation;
 
 use gtk::{
-    glib::{ GString, Sender },
+    glib::{GString, Sender},
     prelude::*,
-    Application,
-    ApplicationWindow,
-    Box,
-    Button,
-    Entry,
-    Label,
-    Orientation,
+    Application, ApplicationWindow, Box, Button, Entry, Label, Orientation,
 };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
 use self::widgets_creation::{
-    create_button,
-    create_current_chat,
-    create_message_box,
-    create_separator,
-    create_channels_box,
-    create_clients_box, create_add_button,
+    create_add_button, create_button, create_channels_box, create_clients_box, create_current_chat,
+    create_message_box, create_separator,
 };
 
-use super::widgets_creation::{ create_entry, create_main_box };
+use super::widgets_creation::{create_entry, create_main_box};
 
 pub struct MainView {
     pub channels_box: Box,
@@ -68,7 +58,10 @@ impl MainView {
     pub fn get_view(&mut self, app: Application, nickname: GString) -> ApplicationWindow {
         self.user_info.set_label(&nickname);
 
-        let window = ApplicationWindow::builder().application(&app).title("Lemon Pie IRC").build();
+        let window = ApplicationWindow::builder()
+            .application(&app)
+            .title("Lemon Pie IRC")
+            .build();
 
         let main_box = create_main_box(Orientation::Horizontal, 800, 600);
         main_box.add_css_class("main_box");

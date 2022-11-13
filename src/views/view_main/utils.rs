@@ -1,4 +1,4 @@
-use gtk4::{ScrolledWindow, prelude::*};
+use gtk4::{prelude::*, ScrolledWindow};
 
 pub fn adjust_scrollbar(scrolled_window: ScrolledWindow) {
     let adj = scrolled_window.vadjustment();

@@ -1,17 +1,18 @@
 pub mod widgets_creation;
 
-use gtk::{ glib::Sender, prelude::*, Box, Entry, Orientation, ScrolledWindow };
+use gtk::{glib::Sender, prelude::*, Box, Entry, Orientation, ScrolledWindow};
 use gtk4 as gtk;
 
 use crate::{
-    controller::controller_message::ControllerMessage,
-    views::view_main::utils::entry_is_valid,
+    controller::controller_message::ControllerMessage, views::view_main::utils::entry_is_valid,
 };
 
-use self::widgets_creation::{ create_message, create_received_message, create_chat_box, create_message_sender_box, create_scrollwindow_chat };
+use self::widgets_creation::{
+    create_chat_box, create_message, create_message_sender_box, create_received_message,
+    create_scrollwindow_chat,
+};
 
 use super::MainView;
-
 
 impl MainView {
     pub fn create_chat(&mut self) -> Box {
@@ -31,7 +32,7 @@ impl MainView {
             self.message_box.clone(),
             self.input.clone(),
             scrolled_window.clone(),
-            self.sender.clone()
+            self.sender.clone(),
         );
         message_sender_box.append(&self.send_message);
 
@@ -46,7 +47,7 @@ impl MainView {
         message_box: Box,
         input: Entry,
         scrolled_window: ScrolledWindow,
-        sender: Sender<ControllerMessage>
+        sender: Sender<ControllerMessage>,
     ) {
         let nickname_receiver = self.current_chat.label().to_string();
 
@@ -61,7 +62,9 @@ impl MainView {
             let priv_message = ControllerMessage::SendPrivMessage {
                 message: input_text.clone(),
             };
-            sender.send(priv_message).expect("Error: private message command");
+            sender
+                .send(priv_message)
+                .expect("Error: private message command");
 
             let message = create_message(&input_text);
             message.add_css_class("message");

@@ -27,5 +27,4 @@ pub enum ControllerMessage {
     RegularMessage {
         message: String,
     },
-    
 }

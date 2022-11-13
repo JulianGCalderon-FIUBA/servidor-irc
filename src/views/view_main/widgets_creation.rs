@@ -35,7 +35,7 @@ pub fn create_message_box() -> Box {
         .build()
 }
 
-pub fn create_channels_box()-> Box {
+pub fn create_channels_box() -> Box {
     Box::builder()
         .orientation(Orientation::Vertical)
         .height_request(300)
@@ -43,7 +43,7 @@ pub fn create_channels_box()-> Box {
         .build()
 }
 
-pub fn create_clients_box()-> Box {
+pub fn create_clients_box() -> Box {
     Box::builder()
         .orientation(Orientation::Vertical)
         .height_request(300)

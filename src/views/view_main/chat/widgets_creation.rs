@@ -1,4 +1,4 @@
-use gtk::{ prelude::*, Align, Label, Orientation, Box, ScrolledWindow };
+use gtk::{prelude::*, Align, Box, Label, Orientation, ScrolledWindow};
 use gtk4 as gtk;
 
 pub fn create_message(label: &str) -> Label {
