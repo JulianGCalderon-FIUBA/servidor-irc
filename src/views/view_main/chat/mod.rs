@@ -1,6 +1,6 @@
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry, Orientation, ScrolledWindow};
+use gtk::{glib::Sender, prelude::*, Box, Entry, ScrolledWindow};
 use gtk4 as gtk;
 
 use crate::{
