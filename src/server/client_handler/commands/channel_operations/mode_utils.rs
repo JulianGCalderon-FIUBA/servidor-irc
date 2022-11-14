@@ -153,7 +153,7 @@ impl<C: Connection> ClientHandler<C> {
             }
         };
 
-        if let Ok(limit) = limit.parse::<isize>() {
+        if let Ok(limit) = limit.parse::<usize>() {
             self.database.set_channel_limit(channel, Some(limit));
         }
         Ok(())

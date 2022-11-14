@@ -5,10 +5,7 @@ use std::rc::Rc;
 use crate::server::client_trait::Connection;
 use crate::server::database::{Channel, Client};
 
-use super::{
-    utils::{client_matches_mask, client_matches_nickmask},
-    ClientInfo, Database,
-};
+use super::{ClientInfo, Database};
 
 impl<C: Connection> Database<C> {
     /// Adds client to Database.
@@ -143,12 +140,12 @@ impl<C: Connection> Database<C> {
 
     /// Returns array with ClientInfo for channels that match mask.
     pub fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
-        self.filtered_clients(mask, client_matches_mask)
+        self.filtered_clients(mask, Client::matches_mask)
     }
 
     /// Returns array with ClientInfo for channels that match nick mask.
     pub fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
-        self.filtered_clients(mask, client_matches_nickmask)
+        self.filtered_clients(mask, Client::matches_nickmask)
     }
 
     /// Returns array of channels in Database.
@@ -180,12 +177,12 @@ impl<C: Connection> Database<C> {
     fn filtered_clients(
         &self,
         mask: &str,
-        filter: fn(&ClientInfo, &str) -> bool,
+        filter: fn(&Client<C>, &str) -> bool,
     ) -> Vec<ClientInfo> {
         self.clients
             .values()
+            .filter(|client| filter(&client.borrow(), mask))
             .map(|client| client.borrow().get_info())
-            .filter(|client| filter(client, mask))
             .collect()
     }
 
@@ -233,14 +230,14 @@ impl<C: Connection> Database<C> {
         false
     }
 
-    pub fn get_channel_limit(&self, channel: String) -> Option<isize> {
+    pub fn get_channel_limit(&self, channel: String) -> Option<usize> {
         if let Some(channel) = self.channels.get(&channel) {
             return channel.get_limit();
         }
         None
     }
 
-    pub fn set_channel_limit(&mut self, channel: String, limit: Option<isize>) {
+    pub fn set_channel_limit(&mut self, channel: String, limit: Option<usize>) {
         if let Some(channel) = self.channels.get_mut(&channel) {
             channel.set_limit(limit)
         }
@@ -306,6 +303,14 @@ impl<C: Connection> Database<C> {
         if let Some(channel) = self.channels.get(channel) {
             return channel.operator() == nickname;
         }
+        false
+    }
+
+    pub fn client_matches_banmask(&self, nickname: &str, banmask: &str) -> bool {
+        if let Some(client) = self.clients.get(nickname) {
+            return client.borrow().matches_banmask(banmask);
+        }
+
         false
     }
 }

@@ -13,7 +13,7 @@ pub struct Channel<C: Connection> {
     topic: Option<String>,
     key: Option<String>,
     modes: HashMap<char, bool>,
-    limit: Option<isize>,
+    limit: Option<usize>,
     operators: Vec<String>,
     speakers: Vec<String>,
     banmasks: Vec<String>,
@@ -104,11 +104,11 @@ impl<C: Connection> Channel<C> {
         *value
     }
 
-    pub fn get_limit(&self) -> Option<isize> {
+    pub fn get_limit(&self) -> Option<usize> {
         self.limit
     }
 
-    pub fn set_limit(&mut self, limit: Option<isize>) {
+    pub fn set_limit(&mut self, limit: Option<usize>) {
         self.limit = limit
     }
 

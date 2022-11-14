@@ -119,11 +119,11 @@ pub enum DatabaseMessage<C: Connection> {
     },
     SetLimit {
         channel: String,
-        limit: Option<isize>,
+        limit: Option<usize>,
     },
     GetLimit {
         channel: String,
-        respond_to: Sender<Option<isize>>,
+        respond_to: Sender<Option<usize>>,
     },
     AddChanop {
         channel: String,
@@ -157,6 +157,11 @@ pub enum DatabaseMessage<C: Connection> {
     UnsetChannelBanMask {
         channel: String,
         mask: String,
+    },
+    ClientMatchesBanmask {
+        nickname: String,
+        mask: String,
+        respond_to: Sender<bool>,
     },
     // GetAllChannelModes {
     //     channel: String,

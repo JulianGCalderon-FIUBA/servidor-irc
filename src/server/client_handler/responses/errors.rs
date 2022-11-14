@@ -16,7 +16,6 @@ pub enum ErrorReply {
     NeedMoreParameters461 { command: String },
     AlreadyRegistered462,
     PasswordMismatch464,
-    // ChannelIsFull471 { channel: String },
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },
     BadChannelKey475 { channel: String },
@@ -30,6 +29,8 @@ pub enum ErrorReply {
     KeySet467 { channel: String },
     ChanOPrivIsNeeded482 { channel: String },
     CannotSendToChannel404 { channel: String },
+    ChannelIsFull471 { channel: String },
+    BannedFromChannel474 { channel: String },
 }
 
 impl Display for ErrorReply {
@@ -41,9 +42,6 @@ impl Display for ErrorReply {
             ErrorReply::NoSuchChannel403 { channel } => {
                 format!("403 {channel} :No such channel")
             }
-            // ErrorReply::CanNotSendToChannel404 { channel } => {
-            //     format!("404 {channel} :Cannot send to channel")
-            // }
             ErrorReply::TooManyChannels405 { channel } => {
                 format!("405 {channel} :You have joined too many channels")
             }
@@ -92,6 +90,12 @@ impl Display for ErrorReply {
             }
             ErrorReply::BadChannelKey475 { channel } => {
                 format!("475 {channel} :Cannot join channel (+k)")
+            }
+            ErrorReply::ChannelIsFull471 { channel } => {
+                format!("471 {channel} :Cannot join channel (+l)")
+            }
+            ErrorReply::BannedFromChannel474 { channel } => {
+                format!("474 {channel} :Cannot join channel (+b)")
             }
         };
         write!(f, "{string}")

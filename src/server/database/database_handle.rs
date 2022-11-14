@@ -286,7 +286,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn set_channel_limit(&self, channel: &str, limit: Option<isize>) {
+    pub fn set_channel_limit(&self, channel: &str, limit: Option<usize>) {
         let request = DatabaseMessage::SetLimit {
             channel: channel.to_string(),
             limit,
@@ -294,7 +294,7 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
-    pub fn get_channel_limit(&self, channel: &str) -> Option<isize> {
+    pub fn get_channel_limit(&self, channel: &str) -> Option<usize> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetLimit {
             channel: channel.to_string(),
@@ -371,6 +371,17 @@ impl<C: Connection> DatabaseHandle<C> {
             mask: banmask.to_string(),
         };
         self.sender.send(request).unwrap();
+    }
+
+    pub fn client_matches_banmask(&self, nickname: &str, mask: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::ClientMatchesBanmask {
+            nickname: nickname.to_string(),
+            mask: mask.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
     }
 
     // pub fn get_channel_modes(&self, channel: &str) -> Vec<char> {

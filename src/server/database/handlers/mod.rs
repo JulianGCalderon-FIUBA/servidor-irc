@@ -3,8 +3,6 @@ use std::{io, rc::Rc};
 
 /// This module contains the functions with the logic regarding the database's functionalities.
 mod logic;
-/// This module contains extra functions that are useful for the database to complete it's tasks.
-mod utils;
 
 use crate::server::client_trait::Connection;
 
@@ -136,11 +134,11 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
-    pub fn handle_set_channel_limit(&mut self, channel: String, limit: Option<isize>) {
+    pub fn handle_set_channel_limit(&mut self, channel: String, limit: Option<usize>) {
         self.set_channel_limit(channel, limit);
     }
 
-    pub fn handle_get_channel_limit(&self, channel: String, sender: Sender<Option<isize>>) {
+    pub fn handle_get_channel_limit(&self, channel: String, sender: Sender<Option<usize>>) {
         let response = self.get_channel_limit(channel);
         sender.send(response).unwrap();
     }
@@ -190,6 +188,16 @@ impl<C: Connection> Database<C> {
     // }
     pub fn handle_is_channel_operator(&self, channel: &str, nickname: &str, sender: Sender<bool>) {
         let response = self.is_channel_operator(channel, nickname);
+        sender.send(response).unwrap();
+    }
+
+    pub fn handle_clients_matches_banmask(
+        &self,
+        nickname: &str,
+        banmask: &str,
+        sender: Sender<bool>,
+    ) {
+        let response = self.client_matches_banmask(nickname, banmask);
         sender.send(response).unwrap();
     }
 }

@@ -200,6 +200,11 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to,
             } => self.handle_is_channel_operator(&channel, &nickname, respond_to),
+            DatabaseMessage::ClientMatchesBanmask {
+                nickname,
+                mask,
+                respond_to,
+            } => self.handle_clients_matches_banmask(&nickname, &mask, respond_to),
         }
     }
 }

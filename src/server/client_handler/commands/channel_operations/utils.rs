@@ -54,3 +54,10 @@ pub fn collect_parameters(parameters: &str) -> Vec<String> {
         .map(|string| string.to_string())
         .collect()
 }
+
+pub fn get_keys_split(keys: Option<&String>) -> Vec<String> {
+    match keys {
+        Some(keys) => keys.split(',').map(|s| s.to_string()).collect(),
+        None => vec![],
+    }
+}

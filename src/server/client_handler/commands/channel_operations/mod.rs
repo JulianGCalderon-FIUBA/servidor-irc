@@ -21,6 +21,7 @@ pub const KEY_CONFIG: char = 'k';
 const VALID_MODES: [char; 5] = ['s', 'i', 't', 'n', 'm'];
 
 use self::mode_utils::parse_modes;
+use self::utils::get_keys_split;
 
 use super::ClientHandler;
 
@@ -64,21 +65,40 @@ impl<C: Connection> ClientHandler<C> {
         let nickname = self.registration.nickname().unwrap();
 
         let channels = parameters[0].split(',');
-        let mut keys = parameters[1].split(',');
+
+        let mut keys = get_keys_split(parameters.get(1)).into_iter();
 
         for channel in channels {
-            let key = keys.next().map(|s| s.to_string());
+            let key = keys.next();
 
             if let Some(error) = self.assert_can_join_channel(channel, &nickname) {
                 self.send_response_for_error(error)?;
                 continue;
             }
 
-            if self.database.get_channel_key(channel) == key {
+            if self.database.get_channel_key(channel) != key {
                 self.send_response_for_error(ErrorReply::BadChannelKey475 {
                     channel: channel.to_string(),
                 })?;
                 continue;
+            }
+
+            if let Some(limit) = self.database.get_channel_limit(channel) {
+                if self.database.get_clients_for_channel(channel).len() >= limit {
+                    self.send_response_for_error(ErrorReply::ChannelIsFull471 {
+                        channel: channel.to_string(),
+                    })?;
+                    continue;
+                }
+            }
+
+            for mask in self.database.get_channel_banmask(channel) {
+                if self.database.client_matches_banmask(&nickname, &mask) {
+                    self.send_response_for_error(ErrorReply::BannedFromChannel474 {
+                        channel: channel.to_string(),
+                    })?;
+                    continue;
+                }
             }
 
             let notification = Notification::Join {
