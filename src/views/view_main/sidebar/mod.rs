@@ -1,80 +1,134 @@
 mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Button, Label, Orientation};
+use gtk::{
+    glib::{GString, Sender},
+    prelude::*,
+    Box, Button, Label, Orientation,
+};
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{
+    controller::controller_message::ControllerMessage,
+    views::views_add::widget_creations::create_title,
+};
 
 use self::widgets_creation::create_separator_sidebar;
 
-use super::MainView;
+use super::{utils::adjust_scrollbar, widgets_creation::create_button, MainView};
 
 impl MainView {
     pub fn create_sidebar(&mut self) -> Box {
-        let sidebar = Box::builder().orientation(Orientation::Vertical).build();
+        let sidebar = Box::builder()
+            .width_request(200)
+            .orientation(Orientation::Vertical)
+            .build();
 
-        // self.connect_conv_buttons();
+        //Channels box
+        let channels_title = create_title("channels");
 
-        for button in &self.channels {
-            sidebar.append(button);
-        }
+        self.scrollwindow_channels
+            .set_child(Some(&self.channels_box));
 
-        // sidebar.append(&self.channels[0]);
-        // sidebar.append(&self.channels[1]);
+        self.connect_add_button(self.add_channel.clone(), false, self.sender.clone());
 
-        // let mut current_conversation = &mut self.current_conversation;
-        // let mut channel_text = self.channels[0].label().unwrap().to_string().clone();
-        // // self.channels[0].connect_clicked( move |_| {
-        //     self.change_current_conversation(channel_text);
-        // });
-        //for channel in self.channels {
-        //     let channel_text = channel.label().unwrap().to_string().clone();
-        //     channel.connect_clicked(move |_| {
-        //         self.current_conversation = "hola".to_string();
-        //     });
-        // }
-        self.add_channel.add_css_class("add");
+        //Clients box
+        let clients_title = create_title("clients");
+
+        self.scrollwindow_clients.set_child(Some(&self.clients_box));
+
+        self.connect_add_button(self.add_client.clone(), true, self.sender.clone());
+
+        sidebar.append(&channels_title);
+        sidebar.append(&self.scrollwindow_channels);
         sidebar.append(&self.add_channel);
-
-        let separator = create_separator_sidebar();
-        sidebar.append(&separator);
-
-        let current_chat_clone = self.current_chat.clone();
-
-        for button in &self.clients {
-            let label = button.label().unwrap().to_string();
-            self.connect_conv_button(
-                button,
-                label.clone(),
-                current_chat_clone.clone(),
-                self.sender.clone(),
-            );
-            sidebar.append(button);
-        }
-
-        // let label = self.current_chat.label().to_string();
-        // self.add_client.connect_clicked(move |_| {
-        //     println!("label says: {}", label);
-        // });
-
-        self.add_client.add_css_class("add");
+        sidebar.append(&create_separator_sidebar());
+        sidebar.append(&clients_title);
+        sidebar.append(&self.scrollwindow_clients);
         sidebar.append(&self.add_client);
+
         sidebar
     }
 
-    fn connect_conv_button(
+    fn connect_add_button(
         &self,
-        button: &Button,
-        label: String,
+        button: Button,
+        is_add_client: bool,
+        sender: Sender<ControllerMessage>,
+    ) {
+        button.connect_clicked(move |_| {
+            let add_view = if is_add_client {
+                ControllerMessage::AddViewToAddClient {}
+            } else {
+                ControllerMessage::AddViewToAddChannel {}
+            };
+            sender.send(add_view).expect("ERROR");
+        });
+    }
+
+    pub fn add_channel(&mut self, channel: GString) {
+        let join_channel_message = ControllerMessage::JoinChannel {
+            channel: channel.clone(),
+        };
+        self.sender
+            .send(join_channel_message)
+            .expect("Error: join channel command");
+        Self::change_channel_conversation(channel.clone(), self.current_chat.clone());
+        let channel_button = create_button(&channel);
+        self.connect_channel_button(channel_button.clone(), channel, self.current_chat.clone());
+        self.channels_box.append(&channel_button);
+
+        adjust_scrollbar(self.scrollwindow_channels.clone());
+    }
+
+    pub fn connect_channel_button(&self, button: Button, channel: GString, current_chat: Label) {
+        button.connect_clicked(move |_| {
+            Self::change_channel_conversation(channel.clone(), current_chat.clone());
+        });
+    }
+
+    pub fn change_channel_conversation(channel: GString, current_chat: Label) {
+        current_chat.set_label(&channel);
+    }
+
+    pub fn add_client(&mut self, client: GString) {
+        Self::change_client_conversation(
+            client.clone(),
+            self.current_chat.clone(),
+            self.sender.clone(),
+        );
+        let client_button = create_button(&client);
+        self.connect_client_button(
+            client_button.clone(),
+            client,
+            self.current_chat.clone(),
+            self.sender.clone(),
+        );
+        self.clients_box.append(&client_button);
+
+        adjust_scrollbar(self.scrollwindow_clients.clone());
+    }
+
+    pub fn connect_client_button(
+        &self,
+        button: Button,
+        client: GString,
         current_chat: Label,
         sender: Sender<ControllerMessage>,
     ) {
         button.connect_clicked(move |_| {
-            current_chat.set_label(&label);
-            let request = ControllerMessage::ChangeConversation {
-                nickname: label.clone(),
-            };
-            sender.send(request).expect("ERROR: change conversation");
+            Self::change_client_conversation(client.clone(), current_chat.clone(), sender.clone());
         });
+    }
+
+    pub fn change_client_conversation(
+        client: GString,
+        current_chat: Label,
+        sender: Sender<ControllerMessage>,
+    ) {
+        let request = ControllerMessage::ChangeConversation {
+            nickname: client.to_string(),
+        };
+        sender.send(request).expect("ERROR: change conversation");
+        current_chat.set_label(&client);
     }
 }

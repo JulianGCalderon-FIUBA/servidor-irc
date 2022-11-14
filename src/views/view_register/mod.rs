@@ -99,8 +99,4 @@ impl RegisterView {
             }
         });
     }
-
-    pub fn get_pass(&self) -> Entry {
-        self.pass_entry.clone()
-    }
 }
