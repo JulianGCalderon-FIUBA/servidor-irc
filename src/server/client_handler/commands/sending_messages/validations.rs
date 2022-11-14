@@ -18,6 +18,22 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchNickname401 { nickname: target });
         }
 
+        if self.database.channel_has_mode(&target, 'n')
+            && !self
+                .database
+                .is_client_in_channel(&self.registration.nickname().unwrap(), &target)
+        {
+            return Some(ErrorReply::CannotSendToChannel404 { channel: target });
+        }
+
+        if self.database.channel_has_mode(&target, 'm')
+            && !self
+                .database
+                .is_channel_speaker(&target, &self.registration.nickname().unwrap())
+        {
+            return Some(ErrorReply::CannotSendToChannel404 { channel: target });
+        }
+
         None
     }
     /// Asserts message can be sent.

@@ -121,8 +121,18 @@ impl<C: Connection> ClientHandler<C> {
                 });
             }
         }
+
+        if self.database.channel_has_mode(&channel, 'i')
+            && !self
+                .database
+                .is_channel_operator(&channel, &inviting_client)
+        {
+            return Some(ErrorReply::ChanOPrivIsNeeded482 { channel });
+        }
+
         None
     }
+
     /// Asserts join command can be executed.
     /// Possible errors:
     ///     - Not enough parameters.
@@ -165,13 +175,20 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         let nickname = self.registration.nickname().unwrap();
-        let channel = &parameters[0];
+        let channel = parameters[0].to_string();
 
-        if !self.database.is_client_in_channel(&nickname, channel) {
-            return Some(ErrorReply::NotOnChannel442 {
-                channel: channel.to_string(),
-            });
+        if !self.database.is_client_in_channel(&nickname, &channel) {
+            return Some(ErrorReply::NotOnChannel442 { channel });
         }
+
+        if self.database.channel_has_mode(&channel, 't')
+            && !self
+                .database
+                .is_channel_operator(&channel, &self.registration.nickname().unwrap())
+        {
+            return Some(ErrorReply::ChanOPrivIsNeeded482 { channel });
+        }
+
         None
     }
 

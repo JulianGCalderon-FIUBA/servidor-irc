@@ -82,6 +82,7 @@ impl<C: Connection> ClientHandler<C> {
 
             self.send_message_to_target(&notification.to_string(), target)?;
         }
+
         Ok(())
     }
 
