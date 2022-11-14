@@ -36,6 +36,9 @@ impl<C: Connection> ClientHandler<C> {
         let channel = &parameters[0];
 
         for mode in remove {
+            if !self.database.channel_has_mode(channel, mode) {
+                continue;
+            }
             match mode {
                 OPER_CONFIG => {
                     if let Some(error) = self.remove_channop(parameters.clone()) {
