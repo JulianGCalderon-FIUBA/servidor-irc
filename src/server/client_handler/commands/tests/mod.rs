@@ -3,6 +3,7 @@ mod invite;
 mod join;
 mod kick;
 mod list;
+mod mode;
 mod names;
 mod nick;
 mod notice;

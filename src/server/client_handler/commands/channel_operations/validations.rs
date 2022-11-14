@@ -277,11 +277,11 @@ impl<C: Connection> ClientHandler<C> {
             });
         }
 
-        // if !self.database.is_channel_operator(channel, &nickname) && parameters.len() > 1{
-        //     return Some(ErrorReply::ChanOPrivIsNeeded482 {
-        //         channel: channel.to_string(),
-        //     });
-        // }
+        if !self.database.is_channel_operator(channel, &nickname) && parameters.len() > 1 {
+            return Some(ErrorReply::ChanOPrivIsNeeded482 {
+                channel: channel.to_string(),
+            });
+        }
 
         None
     }
