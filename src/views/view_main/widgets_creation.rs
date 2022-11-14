@@ -1,4 +1,4 @@
-use gtk::{traits::WidgetExt, Align, Box, Button, Label, Orientation, Separator};
+use gtk::{traits::WidgetExt, Align, Box, Button, Label, Orientation, ScrolledWindow, Separator};
 use gtk4 as gtk;
 
 pub fn create_button(label: &str) -> Button {
@@ -61,4 +61,8 @@ pub fn create_current_chat(label: &str) -> Label {
         .build();
     message.add_css_class("current_chat");
     message
+}
+
+pub fn create_scrollwindow_sidebar(/*child: &Box*/) -> ScrolledWindow {
+    ScrolledWindow::builder().min_content_height(280).build()
 }

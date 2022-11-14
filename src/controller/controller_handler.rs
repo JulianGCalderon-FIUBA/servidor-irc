@@ -11,9 +11,6 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
             nickname: message.get_prefix().clone().unwrap(),
             message: message.get_trailing().clone().unwrap(),
         },
-        // JOIN_COMMAND=> ControllerMessage::AddNewChannel {
-        //     channel: message.get_prefix().clone().unwrap()
-        // },
         _ => ControllerMessage::RegularMessage {
             message: message.to_string(),
         },

@@ -1,11 +1,11 @@
-mod widget_creations;
-
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation};
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry};
 use gtk4 as gtk;
 
-use self::widget_creations::{create_add_channel_buton, create_label_box};
-
-use super::{widgets_creation::{create_entry, create_main_box}, view_main::utils::entry_is_valid};
+use super::widget_creations::create_main_box_add_view;
+use super::{
+    super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
+    widget_creations::{create_add_channel_buton, create_label_box, create_title},
+};
 
 use crate::controller::controller_message::ControllerMessage;
 
@@ -30,8 +30,10 @@ impl AddChannelView {
             .title("Lemon Pie IRC")
             .build();
 
-        let main_box = create_main_box(Orientation::Vertical, 300, 300);
-        main_box.add_css_class("main_box");
+        let main_box = create_main_box_add_view();
+
+        let title = create_title("Add channel");
+        main_box.append(&title);
 
         let channel_box = create_label_box("Channel:");
         channel_box.append(&self.channel_entry);
@@ -39,26 +41,18 @@ impl AddChannelView {
 
         main_box.append(&self.add_channel_button);
 
-        self.connect_add_channel_button(
-            self.channel_entry.clone(),
-            self.sender.clone(),
-        );
+        self.connect_add_channel_button(self.channel_entry.clone(), self.sender.clone());
 
         window.set_child(Some(&main_box));
-
         window
     }
 
-    fn connect_add_channel_button(
-        &self,
-        input: Entry,
-        sender: Sender<ControllerMessage>,
-    ) {
+    fn connect_add_channel_button(&self, input: Entry, sender: Sender<ControllerMessage>) {
         self.add_channel_button.connect_clicked(move |_| {
             if !entry_is_valid(&input.text()) {
                 return;
             }
-            
+
             let add_channel = ControllerMessage::AddNewChannel {
                 channel: input.text(),
             };

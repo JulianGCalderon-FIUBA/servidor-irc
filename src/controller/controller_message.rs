@@ -21,10 +21,13 @@ pub enum ControllerMessage {
     JoinChannel {
         channel: GString,
     },
-    AddViewToAddChannel {
-    },
+    AddViewToAddChannel {},
+    AddViewToAddClient {},
     AddNewChannel {
         channel: GString,
+    },
+    AddNewClient {
+        client: GString,
     },
     ChangeConversation {
         nickname: String,
