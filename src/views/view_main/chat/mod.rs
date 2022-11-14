@@ -12,7 +12,7 @@ use self::widgets_creation::{
     create_scrollwindow_chat,
 };
 
-use super::MainView;
+use super::{MainView, utils::adjust_scrollbar};
 
 impl MainView {
     pub fn create_chat(&mut self) -> Box {
@@ -26,38 +26,30 @@ impl MainView {
         self.input.set_width_request(500);
         message_sender_box.append(&self.input);
 
-        let scrolled_window: ScrolledWindow = create_scrollwindow_chat(&self.message_box);
+        self.scrollwindow_chat.set_child(Some(&self.message_box));
 
         self.connect_send_button(
-            self.message_box.clone(),
             self.input.clone(),
-            scrolled_window.clone(),
             self.sender.clone(),
         );
         message_sender_box.append(&self.send_message);
 
         chat.append(&self.current_chat);
-        chat.append(&scrolled_window);
+        chat.append(&self.scrollwindow_chat);
         chat.append(&message_sender_box);
         chat
     }
 
     fn connect_send_button(
         &self,
-        message_box: Box,
         input: Entry,
-        scrolled_window: ScrolledWindow,
         sender: Sender<ControllerMessage>,
     ) {
-        let nickname_receiver = self.current_chat.label().to_string();
-
         self.send_message.connect_clicked(move |_| {
             let input_text = input.text();
             if !entry_is_valid(&input_text) {
                 return;
             }
-
-            println!("Send message to: {}", nickname_receiver);
 
             let priv_message = ControllerMessage::SendPrivMessage {
                 message: input_text.clone(),
@@ -66,22 +58,21 @@ impl MainView {
                 .send(priv_message)
                 .expect("Error: private message command");
 
-            let message = create_message(&input_text);
-            message.add_css_class("message");
-            message_box.append(&message);
-
-            let adj = scrolled_window.vadjustment();
-            adj.set_upper(adj.upper() + adj.page_size());
-            adj.set_value(adj.upper());
-            scrolled_window.set_vadjustment(Some(&adj));
-
             input.set_text("");
         });
     }
 
-    pub fn receive_priv_message(&self, message: String, _nickname: String) {
+    pub fn receive_priv_message(&mut self, message: String, _nickname: String) {
         let message = create_received_message(&message);
-        message.add_css_class("message");
         self.message_box.append(&message);
+        adjust_scrollbar(self.scrollwindow_chat.clone());
+        self.messages.push(message);
+    }
+
+    pub fn send_message(&mut self, message: String){
+        let message = create_message(&message);
+        self.message_box.append(&message);
+        adjust_scrollbar(self.scrollwindow_chat.clone());
+        self.messages.push(message);
     }
 }

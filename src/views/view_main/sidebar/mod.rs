@@ -62,58 +62,23 @@ impl MainView {
             channel: channel.clone(),
         };
         self.sender.send(join_channel_message).expect("Error: join channel command");
-        Self::change_channel_conversation(
-            channel.clone(),
-            self.current_chat.clone(),
-            self.sender.clone()
-        );
+        Self::change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button(&channel);
-        self.connect_channel_button(
-            channel_button.clone(),
-            channel,
-            self.current_chat.clone(),
-            self.sender.clone()
-        );
+        self.connect_channel_client_button(channel_button.clone(), channel, self.sender.clone());
         self.channels_box.append(&channel_button);
 
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
-    pub fn connect_channel_button(
-        &self,
-        button: Button,
-        channel: GString,
-        current_chat: Label,
-        sender: Sender<ControllerMessage>
-    ) {
-        button.connect_clicked(move |_| {
-            Self::change_channel_conversation(channel.clone(), current_chat.clone(), sender.clone());
-        });
-    }
-
-    pub fn change_channel_conversation(
-        channel: GString,
-        current_chat: Label,
-        sender: Sender<ControllerMessage>
-    ) {
-        let request = ControllerMessage::ChangeConversation {
-            nickname: channel.to_string(),
-        };
-        sender.send(request).expect("ERROR: change conversation");
-        current_chat.set_label(&channel);
-    }
-
     pub fn add_client(&mut self, client: GString) {
-        Self::change_client_conversation(
+        Self::change_conversation_request(
             client.clone(),
-            self.current_chat.clone(),
             self.sender.clone()
         );
         let client_button = create_button(&client);
-        self.connect_client_button(
+        self.connect_channel_client_button(
             client_button.clone(),
             client,
-            self.current_chat.clone(),
             self.sender.clone()
         );
         self.clients_box.append(&client_button);
@@ -121,27 +86,32 @@ impl MainView {
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
 
-    pub fn connect_client_button(
+    pub fn connect_channel_client_button(
         &self,
         button: Button,
-        client: GString,
-        current_chat: Label,
+        channel_or_client: GString,
         sender: Sender<ControllerMessage>
     ) {
         button.connect_clicked(move |_| {
-            Self::change_client_conversation(client.clone(), current_chat.clone(), sender.clone());
+            Self::change_conversation_request(channel_or_client.clone(), sender.clone());
         });
     }
 
-    pub fn change_client_conversation(
-        client: GString,
-        current_chat: Label,
+    pub fn change_conversation_request(
+        conversation: GString,
         sender: Sender<ControllerMessage>
     ) {
         let request = ControllerMessage::ChangeConversation {
-            nickname: client.to_string(),
+            nickname: conversation.to_string(),
         };
         sender.send(request).expect("ERROR: change conversation");
-        current_chat.set_label(&client);
+    }
+
+    pub fn change_conversation(&mut self, conversation_label: String) {
+        self.current_chat.set_label(&conversation_label);
+        for message in &self.messages {
+            self.message_box.remove(message);
+        }
     }
 }
+

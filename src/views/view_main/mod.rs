@@ -13,10 +13,10 @@ use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::widgets_creation::{
+use self::{widgets_creation::{
     create_add_button, create_button, create_channels_box, create_clients_box, create_current_chat,
     create_message_box, create_scrollwindow_sidebar, create_separator,
-};
+}, chat::widgets_creation::create_scrollwindow_chat};
 
 use super::widgets_creation::{create_entry, create_main_box};
 
@@ -28,7 +28,9 @@ pub struct MainView {
     pub scrollwindow_clients: ScrolledWindow,
     pub add_client: Button,
     pub current_chat: Label,
+    scrollwindow_chat: ScrolledWindow,
     pub message_box: Box,
+    pub messages: Vec<Label>,
     pub user_info: Button,
     pub send_message: Button,
     pub input: Entry,
@@ -48,7 +50,9 @@ impl MainView {
             scrollwindow_clients: create_scrollwindow_sidebar(),
             add_client: create_add_button("+"),
             current_chat: create_current_chat(""),
+            scrollwindow_chat: create_scrollwindow_chat(),
             message_box: create_message_box(),
+            messages: vec![],
             user_info: create_button("info"),
             input: create_entry("Message..."),
             send_message: create_button("send"),
