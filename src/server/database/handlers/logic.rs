@@ -277,7 +277,7 @@ impl<C: Connection> Database<C> {
 
     pub fn get_channel_banmask(&self, channel: String) -> Vec<String> {
         if let Some(channel) = self.channels.get(&channel) {
-            channel.get_banmasks();
+            return channel.get_banmasks();
         }
         vec![]
     }

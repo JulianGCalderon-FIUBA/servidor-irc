@@ -145,7 +145,7 @@ impl<C: Connection> Channel<C> {
         self.banmasks
             .iter()
             .position(|m| m == &mask)
-            .map(|index| self.speakers.remove(index));
+            .map(|index| self.banmasks.remove(index));
     }
 }
 
