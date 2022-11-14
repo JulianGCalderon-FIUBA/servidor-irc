@@ -29,8 +29,17 @@ pub enum ControllerMessage {
     AddNewClient {
         client: GString,
     },
+    QuitChannel {},
     ChangeConversation {
         nickname: String,
+    },
+    AddInviteView {},
+    SendInviteMessage {
+        channel: GString,
+    },
+    RecieveInvite {
+        nickname: String,
+        channel: String,
     },
     RegularMessage {
         message: String,
