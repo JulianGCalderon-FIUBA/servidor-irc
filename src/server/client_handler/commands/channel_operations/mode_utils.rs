@@ -124,7 +124,11 @@ impl<C: Connection> ClientHandler<C> {
             return Some(error);
         }
         let channel = &parameters[0];
-        for nickname in parameters[2].split(',') {
+        let operators = parameters[2].split(',');
+        for (i, nickname) in operators.enumerate() {
+            if i == 3 {
+                break;
+            }
             self.database.add_channop(channel, nickname);
         }
         None
@@ -156,7 +160,11 @@ impl<C: Connection> ClientHandler<C> {
 
     pub fn set_banmask(&mut self, parameters: Vec<String>) {
         let channel = &parameters[0];
-        for banmask in parameters[2].split(',') {
+        let masks = parameters[2].split(',');
+        for (i, banmask) in masks.enumerate() {
+            if i == 3 {
+                break;
+            }
             self.database.set_channel_banmask(channel, banmask)
         }
     }
