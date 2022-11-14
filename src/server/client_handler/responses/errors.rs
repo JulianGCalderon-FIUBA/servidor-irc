@@ -19,7 +19,7 @@ pub enum ErrorReply {
     // ChannelIsFull471 { channel: String },
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },
-    // BadChannelKey475 { channel: String },
+    BadChannelKey475 { channel: String },
     //
     NoNickname,
     UnregisteredClient,
@@ -89,6 +89,9 @@ impl Display for ErrorReply {
             }
             ErrorReply::CannotSendToChannel404 { channel } => {
                 format!("404 {channel} :Cannot send to channel")
+            }
+            ErrorReply::BadChannelKey475 { channel } => {
+                format!("475 {channel} :Cannot join channel (+k)")
             }
         };
         write!(f, "{string}")

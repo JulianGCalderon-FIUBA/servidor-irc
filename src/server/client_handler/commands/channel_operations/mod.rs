@@ -63,12 +63,21 @@ impl<C: Connection> ClientHandler<C> {
         }
         let nickname = self.registration.nickname().unwrap();
 
-        let channels = &parameters[0];
-        //let keys = &parameters[1];
+        let channels = parameters[0].split(',');
+        let mut keys = parameters[1].split(',');
 
-        for channel in channels.split(',') {
+        for channel in channels {
+            let key = keys.next().map(|s| s.to_string());
+
             if let Some(error) = self.assert_can_join_channel(channel, &nickname) {
                 self.send_response_for_error(error)?;
+                continue;
+            }
+
+            if self.database.get_channel_key(channel) == key {
+                self.send_response_for_error(ErrorReply::BadChannelKey475 {
+                    channel: channel.to_string(),
+                })?;
                 continue;
             }
 
