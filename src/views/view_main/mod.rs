@@ -22,6 +22,7 @@ use super::widgets_creation::{create_entry, create_main_box};
 
 pub struct MainView {
     pub channels_box: Box,
+    pub channels_button: Vec<Button>,
     pub scrollwindow_channels: ScrolledWindow,
     pub add_channel: Button,
     pub clients_box: Box,
@@ -42,6 +43,7 @@ impl MainView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channels_box: create_channels_box(),
+            channels_button: vec![],
             scrollwindow_channels: create_scrollwindow_sidebar(),
             add_channel: create_add_button("+"),
             clients_box: create_clients_box(),

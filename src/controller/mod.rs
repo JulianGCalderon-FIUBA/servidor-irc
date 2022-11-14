@@ -135,6 +135,13 @@ impl Controller {
                 }
                 ChangeConversation { nickname } => {
                     current_conv = nickname;
+                    main_view.change_conversation_label(current_conv.clone());
+                }
+                QuitChannel {} => {
+                    let part_message = format!("PART {}", current_conv);
+                    client.send_raw(&part_message).expect("ERROR: Part message");
+                    main_view.remove_channel(current_conv.clone());
+                    current_conv = "".to_string();
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
