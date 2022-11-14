@@ -1,7 +1,7 @@
 mod controller_handler;
 pub mod controller_message;
 use crate::views::{
-    view_register::RegisterView, views_add::view_add_channel::AddChannelView,
+    view_register::RegisterView, views_add::{view_add_channel::AddChannelView, view_invite::InviteView},
     views_add::view_add_client::AddClientView,
 };
 use gtk4 as gtk;
@@ -67,6 +67,8 @@ impl Controller {
 
         let mut add_client_view = AddClientView::new(sender.clone());
         let mut add_client_window = add_client_view.get_view(app.clone());
+
+        let mut invite_view = InviteView::new(sender.clone());
 
         let mut current_conv = "".to_string();
 
@@ -141,6 +143,10 @@ impl Controller {
                     let part_message = format!("PART {}", current_conv);
                     client.send_raw(&part_message).expect("ERROR: Part message");
                     main_view.remove_channel(current_conv.clone());
+                }
+                AddInviteView {} => {
+                    invite_view = InviteView::new(sender_clone.clone());
+                    invite_view.get_view(app_clone.clone()).show()
                 }
                 RegularMessage { message } => {
                     println!("{}", message);

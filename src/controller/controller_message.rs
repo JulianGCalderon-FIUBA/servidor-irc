@@ -33,6 +33,7 @@ pub enum ControllerMessage {
     ChangeConversation {
         nickname: String,
     },
+    AddInviteView {},
     RegularMessage {
         message: String,
     },

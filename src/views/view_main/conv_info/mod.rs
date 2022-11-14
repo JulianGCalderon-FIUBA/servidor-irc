@@ -19,6 +19,7 @@ impl MainView {
 
         conv_info.append(&self.channel_info);
 
+        self.connect_func_channel(self.sender.clone());
         conv_info.append(&self.func_channel);
 
         conv_info
@@ -30,6 +31,13 @@ impl MainView {
             sender.send(quit_channel).expect("ERROR");
             let change_conv = ControllerMessage::ChangeConversation { nickname: "".to_string() };
             sender.send(change_conv).expect("ERROR");
+        });
+    }
+
+    fn connect_func_channel(&mut self, sender: Sender<ControllerMessage>) {
+        self.func_channel.connect_clicked(move |_| {
+            let add_invite_view = ControllerMessage::AddInviteView {};
+            sender.send(add_invite_view).expect("ERROR");
         });
     }
 
