@@ -98,3 +98,34 @@ fn can_part_existing_channels() {
 
     assert!(!handler.database.get_all_channels().is_empty())
 }
+
+#[test]
+fn part_notifies_users_in_channel() {
+    let mut handler = dummy_client_handler();
+
+    register_client(&mut handler, "nick1");
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    let parameters = vec!["#channel".to_string()];
+    handler.part_command(parameters).unwrap();
+
+    assert_eq!(
+        ":nick1 PART #channel\r\n",
+        handler
+            .database
+            .get_stream("nick2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+
+    assert_eq!(
+        ":nick1 PART #channel\r\n",
+        handler
+            .database
+            .get_stream("nick1")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}

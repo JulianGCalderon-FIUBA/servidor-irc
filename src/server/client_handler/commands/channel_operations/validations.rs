@@ -1,5 +1,6 @@
 use crate::server::client_handler::commands::{
-    DISTRIBUTED_CHANNEL, INVITE_COMMAND, JOIN_COMMAND, MODE_COMMAND, PART_COMMAND, TOPIC_COMMAND,
+    DISTRIBUTED_CHANNEL, INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, MODE_COMMAND, PART_COMMAND,
+    TOPIC_COMMAND,
 };
 use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 use crate::server::client_handler::registration::RegistrationState;
@@ -171,6 +172,44 @@ impl<C: Connection> ClientHandler<C> {
                 channel: channel.to_string(),
             });
         }
+        None
+    }
+
+    pub fn assert_kick_is_valid(&self, parameters: &[String]) -> Option<ErrorReply> {
+        if parameters.len() < 2 {
+            let command = KICK_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
+        }
+
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient);
+        }
+
+        None
+    }
+
+    pub fn assert_can_kick_from_channel(&self, channel: &str) -> Option<ErrorReply> {
+        if !self.database.contains_channel(channel) {
+            let channel = channel.to_string();
+            return Some(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        if !self
+            .database
+            .is_client_in_channel(&self.registration.nickname().unwrap(), channel)
+        {
+            let channel = channel.to_string();
+            return Some(ErrorReply::NotOnChannel442 { channel });
+        }
+
+        if !self
+            .database
+            .is_channel_operator(channel, &self.registration.nickname().unwrap())
+        {
+            let channel = channel.to_string();
+            return Some(ErrorReply::ChanopPrivilegesNeeded482 { channel });
+        }
+
         None
     }
 

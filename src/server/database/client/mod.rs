@@ -17,6 +17,7 @@ pub struct Client<C: Connection> {
     servername: String,
     realname: String,
     operator: bool,
+    away_message: Option<String>,
 }
 
 impl<C: Connection> Client<C> {
@@ -60,5 +61,13 @@ impl<C: Connection> Client<C> {
     /// Returns true if Client has or had received nickname.
     pub fn had_nickname(&self, nickname: &str) -> bool {
         self.nicknames.contains(&nickname.to_string())
+    }
+
+    pub fn set_away_message(&mut self, message: Option<String>) {
+        self.away_message = message;
+    }
+
+    pub fn away_message(&self) -> Option<String> {
+        self.away_message.clone()
     }
 }

@@ -99,6 +99,16 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
+    pub fn handle_set_away_message(&self, message: &Option<String>, nickname: &str) {
+        if let Some(client) = self.clients.get(nickname) {
+            client.borrow_mut().set_away_message(message.to_owned());
+        }
+    }
+
+    pub fn handle_get_away_message(&self, nickname: &str, sender: Sender<Option<String>>) {
+        let response = self.get_away_message(nickname);
+        sender.send(response).unwrap();
+    }
     pub fn handle_get_channel_topic(&self, channel: &str, sender: Sender<Option<String>>) {
         let response = self.get_channel_topic(channel);
         sender.send(response).unwrap();
@@ -178,4 +188,8 @@ impl<C: Connection> Database<C> {
     //     let response = self.get_all_channel_modes(channel);
     //     sender.send(response).unwrap();
     // }
+    pub fn handle_is_channel_operator(&self, channel: &str, nickname: &str, sender: Sender<bool>) {
+        let response = self.is_channel_operator(channel, nickname);
+        sender.send(response).unwrap();
+    }
 }

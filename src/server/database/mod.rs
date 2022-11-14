@@ -125,6 +125,13 @@ impl<C: Connection> Database<C> {
                 password,
                 respond_to,
             } => self.handle_are_credentials_valid(&username, &password, respond_to),
+            DatabaseMessage::SetAwayMessage { message, nickname } => {
+                self.handle_set_away_message(&message, &nickname)
+            }
+            DatabaseMessage::GetAwayMessage {
+                nickname,
+                respond_to,
+            } => self.handle_get_away_message(&nickname, respond_to),
             DatabaseMessage::SetChannelTopic { channel, topic } => {
                 self.set_channel_topic(&channel, &topic)
             }
@@ -188,6 +195,11 @@ impl<C: Connection> Database<C> {
             //     channel,
             //     respond_to,
             // } => self.handle_get_all_channel_modes(channel, respond_to),
+            DatabaseMessage::IsChannelOperator {
+                channel,
+                nickname,
+                respond_to,
+            } => self.handle_is_channel_operator(&channel, &nickname, respond_to),
         }
     }
 }

@@ -71,6 +71,13 @@ impl<C: Connection> ClientHandler<C> {
                 self.send_response_for_error(error)?;
                 continue;
             }
+
+            let notification = Notification::Join {
+                nickname: self.registration.nickname().unwrap(),
+                channel: channel.to_string(),
+            };
+            self.send_message_to_channel(channel, &notification.to_string());
+
             self.database.add_client_to_channel(&nickname, channel);
 
             self.send_topic_reply(channel.to_string())?;
@@ -153,6 +160,11 @@ impl<C: Connection> ClientHandler<C> {
                 self.send_response_for_error(error)?;
                 continue;
             }
+            let notification = Notification::Part {
+                nickname: self.registration.nickname().unwrap(),
+                channel: channel.to_string(),
+            };
+            self.send_message_to_channel(channel, &notification.to_string());
             self.database.remove_client_from_channel(&nickname, channel);
         }
         Ok(())
@@ -170,6 +182,29 @@ impl<C: Connection> ClientHandler<C> {
             self.database.set_channel_topic(channel, topic);
         } else {
             self.send_topic_reply(channel.to_string())?;
+        }
+
+        Ok(())
+    }
+
+    pub fn kick_command(
+        &mut self,
+        parameters: Vec<String>,
+        trailing: Option<String>,
+    ) -> io::Result<()> {
+        if let Some(error) = self.assert_kick_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+
+        let channel = parameters[0].split(',');
+        let nickname = parameters[1].split(',');
+
+        for (channel, nickname) in channel.zip(nickname) {
+            if let Some(error) = self.assert_can_kick_from_channel(channel) {
+                self.send_response_for_error(error)?;
+            } else {
+                self.kick_client_from_channel(nickname, channel, &trailing);
+            }
         }
 
         Ok(())

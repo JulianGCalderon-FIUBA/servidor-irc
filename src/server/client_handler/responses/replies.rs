@@ -73,6 +73,12 @@ pub enum CommandResponse {
     //     mode: char,
     //     mode_params: Option<Vec<String>>,
     // },
+    UnAway,
+    NowAway,
+    Away {
+        nickname: String,
+        message: String,
+    },
 }
 
 impl Display for CommandResponse {
@@ -164,6 +170,11 @@ impl Display for CommandResponse {
             //     "324 {channel} {mode} {:?}",
             //     mode_params.as_ref().unwrap_or(&vec!["".to_string()])
             // ),
+            CommandResponse::UnAway => "305 :You are no longer marked as being away".to_string(),
+            CommandResponse::NowAway => "306 :You have been marked as being away".to_string(),
+            CommandResponse::Away { nickname, message } => {
+                format!("301 {nickname} :{message}")
+            }
         };
         write!(f, "{string}")
     }

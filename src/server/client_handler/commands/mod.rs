@@ -38,6 +38,9 @@ pub const MODE_COMMAND: &str = "MODE";
 
 pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
+pub const AWAY_COMMAND: &str = "AWAY";
 
 pub const WHOIS_COMMAND: &str = "WHOIS";
 pub const WHO_COMMAND: &str = "WHO";
+
+pub const KICK_COMMAND: &str = "KICK";
