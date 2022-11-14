@@ -12,7 +12,7 @@ use self::widgets_creation::{
     create_scrollwindow_chat,
 };
 
-use super::{MainView, utils::adjust_scrollbar};
+use super::{utils::adjust_scrollbar, MainView};
 
 impl MainView {
     pub fn create_chat(&mut self) -> Box {
@@ -28,10 +28,7 @@ impl MainView {
 
         self.scrollwindow_chat.set_child(Some(&self.message_box));
 
-        self.connect_send_button(
-            self.input.clone(),
-            self.sender.clone(),
-        );
+        self.connect_send_button(self.input.clone(), self.sender.clone());
         message_sender_box.append(&self.send_message);
 
         chat.append(&self.current_chat);
@@ -40,11 +37,7 @@ impl MainView {
         chat
     }
 
-    fn connect_send_button(
-        &self,
-        input: Entry,
-        sender: Sender<ControllerMessage>,
-    ) {
+    fn connect_send_button(&self, input: Entry, sender: Sender<ControllerMessage>) {
         self.send_message.connect_clicked(move |_| {
             let input_text = input.text();
             if !entry_is_valid(&input_text) {
@@ -69,7 +62,7 @@ impl MainView {
         self.messages.push(message);
     }
 
-    pub fn send_message(&mut self, message: String){
+    pub fn send_message(&mut self, message: String) {
         let message = create_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());

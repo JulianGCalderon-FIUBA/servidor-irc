@@ -13,10 +13,13 @@ use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::{widgets_creation::{
-    create_add_button, create_button, create_channels_box, create_clients_box, create_current_chat,
-    create_message_box, create_scrollwindow_sidebar, create_separator,
-}, chat::widgets_creation::create_scrollwindow_chat};
+use self::{
+    chat::widgets_creation::create_scrollwindow_chat,
+    widgets_creation::{
+        create_add_button, create_button, create_channels_box, create_clients_box,
+        create_current_chat, create_message_box, create_scrollwindow_sidebar, create_separator,
+    },
+};
 
 use super::widgets_creation::{create_entry, create_main_box};
 
