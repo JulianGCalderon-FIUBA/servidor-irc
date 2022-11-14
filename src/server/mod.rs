@@ -50,14 +50,14 @@ impl Server {
         }
     }
 
-    fn start_debug(&self) {
+    fn start_input_read(&self) {
         let online_ref = Arc::clone(&self.online);
-        thread::spawn(|| xxx(online_ref));
+        thread::spawn(|| input_read(online_ref));
     }
 
     /// Listens for incoming clients and handles each request in a new thread.
     pub fn listen_to(self, address: String) -> io::Result<()> {
-        self.start_debug();
+        self.start_input_read();
 
         let listener = TcpListener::bind(address)?;
 
@@ -92,7 +92,7 @@ impl Server {
     }
 }
 
-fn xxx(online: Arc<AtomicBool>) {
+fn input_read(online: Arc<AtomicBool>) {
     let reader = BufReader::new(stdin());
     for line in reader.lines() {
         let line = match line {
@@ -101,7 +101,8 @@ fn xxx(online: Arc<AtomicBool>) {
         };
 
         if let "QUIT" = &line[..] {
-            online.store(false, Ordering::Relaxed)
+            online.store(false, Ordering::Relaxed);
+            return;
         }
     }
 }

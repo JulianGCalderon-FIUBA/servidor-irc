@@ -53,6 +53,10 @@ impl Client {
         self.write_stream.write_all(bytes)?;
         self.write_stream.write_all(CRLF)
     }
+
+    pub fn is_connected(&self) -> bool {
+        self.write_stream.peek(&mut []).is_err()
+    }
 }
 
 fn async_read<F>(read_stream: TcpStream, on_message: Box<F>)
