@@ -72,13 +72,16 @@ impl MainView {
         self.sender
             .send(join_channel_message)
             .expect("Error: join channel command");
+
         Self::change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button(&channel);
         self.connect_channel_client_button(channel_button.clone(), channel, self.sender.clone());
         self.channels_box.append(&channel_button);
+        self.channels_button.push(channel_button);
 
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
+
 
     pub fn add_client(&mut self, client: GString) {
         Self::change_conversation_request(client.clone(), self.sender.clone());
@@ -106,6 +109,7 @@ impl MainView {
         };
         sender.send(request).expect("ERROR: change conversation");
     }
+
 
     pub fn change_conversation(&mut self, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
