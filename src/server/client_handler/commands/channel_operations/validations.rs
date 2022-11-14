@@ -89,6 +89,17 @@ impl<C: Connection> ClientHandler<C> {
         false
     }
 
+    pub fn can_name_channel(&mut self, channel: &str) -> bool {
+        let is_priv_or_secret = self.database.channel_has_mode(channel, 's')
+            || self.database.channel_has_mode(channel, 'p');
+
+        let is_client_in_channel = self
+            .database
+            .is_client_in_channel(&self.registration.nickname().unwrap(), channel);
+
+        !is_priv_or_secret || is_client_in_channel
+    }
+
     /// Asserts invite command can be executed.
     /// Possible errors:
     ///     - Not enough parameters.

@@ -136,12 +136,7 @@ impl<C: Connection> ClientHandler<C> {
                 continue;
             }
 
-            if (self.database.channel_has_mode(&channel, 's')
-                || self.database.channel_has_mode(&channel, 'p'))
-                && !self
-                    .database
-                    .is_client_in_channel(&self.registration.nickname().unwrap(), &channel)
-            {
+            if !self.can_name_channel(&channel) {
                 continue;
             }
 
