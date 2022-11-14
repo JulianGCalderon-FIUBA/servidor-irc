@@ -28,6 +28,8 @@ impl MainView {
         self.quit_channel.connect_clicked(move |_| {
             let quit_channel = ControllerMessage::QuitChannel {};
             sender.send(quit_channel).expect("ERROR");
+            let change_conv = ControllerMessage::ChangeConversation { nickname: "".to_string() };
+            sender.send(change_conv).expect("ERROR");
         });
     }
 
