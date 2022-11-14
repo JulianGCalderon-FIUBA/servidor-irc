@@ -9,11 +9,9 @@ pub fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
         match char {
             ADD_MODE => {
                 add = true;
-                continue;
             }
             REMOVE_MODE => {
                 add = false;
-                continue;
             }
             char => {
                 if add {
@@ -43,20 +41,17 @@ impl<C: Connection> ClientHandler<C> {
                 OPER_CONFIG => {
                     if let Some(error) = self.remove_channop(parameters.clone()) {
                         self.send_response_for_error(error)?;
-                        continue;
                     }
                 }
                 LIMIT_CONFIG => self.database.set_channel_limit(channel, None),
                 BAN_CONFIG => {
                     if let Some(error) = self.remove_banmask(parameters.clone()) {
                         self.send_response_for_error(error)?;
-                        continue;
                     }
                 }
                 SPEAKING_ABILITY_CONFIG => {
                     if let Some(error) = self.remove_speaker(parameters.clone()) {
                         self.send_response_for_error(error)?;
-                        continue;
                     }
                 }
                 KEY_CONFIG => self.database.set_channel_key(channel, None),
@@ -77,42 +72,28 @@ impl<C: Connection> ClientHandler<C> {
                 OPER_CONFIG => {
                     if let Some(error) = self.add_channop(parameters.clone()) {
                         self.send_response_for_error(error)?;
-                        continue;
                     }
                 }
                 LIMIT_CONFIG => {
                     if let Some(error) = self.set_limit(parameters.clone()) {
                         self.send_response_for_error(error)?;
-                        continue;
                     }
                 }
                 BAN_CONFIG => {
                     if parameters.len() >= 3 {
                         self.set_banmask(parameters.clone())
                     } else {
-                        let bans = self.database.get_channel_banmask(channel);
-
-                        for b in bans {
-                            self.send_response_for_reply(CommandResponse::BanList367 {
-                                channel: channel.to_string(),
-                                banmask: b,
-                            })?;
-                        }
-                        self.send_response_for_reply(CommandResponse::EndOfBanList368 {
-                            channel: channel.to_string(),
-                        })?;
+                        self.send_ban_reply(channel)?;
                     }
                 }
                 SPEAKING_ABILITY_CONFIG => {
                     if let Some(error) = self.add_speaker(parameters.clone()) {
                         self.send_response_for_error(error)?;
-                        continue;
                     }
                 }
                 KEY_CONFIG => {
                     if let Some(error) = self.set_key(parameters.clone()) {
                         self.send_response_for_error(error)?;
-                        continue;
                     }
                 }
                 mode if VALID_MODES.contains(&mode) => {
@@ -121,6 +102,20 @@ impl<C: Connection> ClientHandler<C> {
                 mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
             }
         }
+        Ok(())
+    }
+
+    fn send_ban_reply(&mut self, channel: &String) -> Result<(), io::Error> {
+        let bans = self.database.get_channel_banmask(channel);
+        for b in bans {
+            self.send_response_for_reply(CommandResponse::BanList367 {
+                channel: channel.to_string(),
+                banmask: b,
+            })?;
+        }
+        self.send_response_for_reply(CommandResponse::EndOfBanList368 {
+            channel: channel.to_string(),
+        })?;
         Ok(())
     }
 
