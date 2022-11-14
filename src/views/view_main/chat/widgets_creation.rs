@@ -48,7 +48,7 @@ pub fn create_message_sender_box() -> Box {
         .build()
 }
 
-pub fn create_scrollwindow_chat(child: &Box) -> ScrolledWindow {
+pub fn create_scrollwindow_chat() -> ScrolledWindow {
     let scrolled_window = ScrolledWindow::builder()
         .min_content_height(600)
         .max_content_width(500)
@@ -56,7 +56,6 @@ pub fn create_scrollwindow_chat(child: &Box) -> ScrolledWindow {
         .margin_start(20)
         .margin_end(20)
         .margin_bottom(20)
-        .child(child)
         .build();
     scrolled_window.add_css_class("message_box");
     scrolled_window

@@ -110,6 +110,7 @@ impl Controller {
                 SendPrivMessage { message } => {
                     let priv_message = format!("PRIVMSG {} :{}", current_conv, message);
                     client.send_raw(&priv_message).expect("ERROR");
+                    main_view.send_message(message.to_string());
                 }
                 AddViewToAddChannel {} => {
                     add_channel_window =
@@ -138,7 +139,7 @@ impl Controller {
                 }
                 ChangeConversation { nickname } => {
                     current_conv = nickname;
-                    main_view.change_conversation_label(current_conv.clone());
+                    main_view.change_conversation(current_conv.clone());
                 }
                 QuitChannel {} => {
                     let part_message = format!("PART {}", current_conv);
