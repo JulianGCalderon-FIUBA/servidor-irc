@@ -135,7 +135,7 @@ impl Controller {
                     client.send_raw(&join_message).expect("ERROR");
                 }
                 ReceivePrivMessage { nickname, message } => {
-                    main_view.receive_message(message, nickname);
+                    main_view.receive_priv_message(message, nickname);
                 }
                 ChangeConversation { nickname } => {
                     current_conv = nickname;
@@ -157,7 +157,7 @@ impl Controller {
                 }
                 RecieveInvite { nickname, channel } => {
                     let message = format!("{} has invited you to join {}", nickname, channel);
-                    main_view.receive_message(message, channel);
+                    main_view.receive_priv_message(message, channel);
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
