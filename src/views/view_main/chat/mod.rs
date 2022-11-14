@@ -1,6 +1,6 @@
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry, ScrolledWindow};
+use gtk::{glib::Sender, prelude::*, Box, Entry};
 use gtk4 as gtk;
 
 use crate::{
@@ -9,7 +9,6 @@ use crate::{
 
 use self::widgets_creation::{
     create_chat_box, create_message, create_message_sender_box, create_received_message,
-    create_scrollwindow_chat,
 };
 
 use super::{utils::adjust_scrollbar, MainView};
@@ -45,7 +44,7 @@ impl MainView {
             }
 
             let priv_message = ControllerMessage::SendPrivMessage {
-                message: input_text.clone(),
+                message: input_text,
             };
             sender
                 .send(priv_message)

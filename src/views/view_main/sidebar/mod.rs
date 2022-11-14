@@ -3,7 +3,7 @@ mod widgets_creation;
 use gtk::{
     glib::{GString, Sender},
     prelude::*,
-    Box, Button, Label, Orientation,
+    Box, Button, Orientation,
 };
 use gtk4 as gtk;
 
