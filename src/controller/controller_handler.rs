@@ -3,6 +3,7 @@ use crate::message::Message;
 use super::controller_message::ControllerMessage;
 
 pub const PRIVMSG_COMMAND: &str = "PRIVMSG";
+// pub const JOIN_COMMAND: &str = "JOIN";
 
 pub fn to_controller_message(message: Message) -> ControllerMessage {
     match &message.get_command()[..] {

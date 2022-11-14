@@ -1,31 +1,23 @@
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry, Orientation, ScrolledWindow};
+use gtk::{glib::Sender, prelude::*, Box, Entry, ScrolledWindow};
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{
+    controller::controller_message::ControllerMessage, views::view_main::utils::entry_is_valid,
+};
 
-use self::widgets_creation::{create_message, create_received_message};
+use self::widgets_creation::{
+    create_chat_box, create_message, create_message_sender_box, create_received_message,
+    create_scrollwindow_chat,
+};
 
 use super::MainView;
 
 impl MainView {
     pub fn create_chat(&mut self) -> Box {
-        let chat = Box::builder()
-            .orientation(Orientation::Vertical)
-            .halign(gtk::Align::Center)
-            .valign(gtk::Align::End)
-            .hexpand(true)
-            .build();
-        chat.add_css_class("chat");
-
-        let message_sender_box = Box::builder()
-            .orientation(Orientation::Horizontal)
-            .margin_top(20)
-            .margin_bottom(20)
-            .halign(gtk::Align::Center)
-            .hexpand(true)
-            .build();
+        let chat = create_chat_box();
+        let message_sender_box = create_message_sender_box();
 
         self.user_info.connect_clicked(|_| println!("Hi"));
         message_sender_box.append(&self.user_info);
@@ -34,17 +26,7 @@ impl MainView {
         self.input.set_width_request(500);
         message_sender_box.append(&self.input);
 
-        let scrolled_window: ScrolledWindow = ScrolledWindow::builder()
-            .min_content_height(600)
-            .max_content_width(500)
-            .margin_top(20)
-            .margin_start(20)
-            .margin_end(20)
-            .margin_bottom(20)
-            .child(&self.message_box)
-            .build();
-
-        scrolled_window.add_css_class("message_box");
+        let scrolled_window: ScrolledWindow = create_scrollwindow_chat(&self.message_box);
 
         self.connect_send_button(
             self.message_box.clone(),
@@ -52,7 +34,6 @@ impl MainView {
             scrolled_window.clone(),
             self.sender.clone(),
         );
-
         message_sender_box.append(&self.send_message);
 
         chat.append(&self.current_chat);
@@ -103,8 +84,4 @@ impl MainView {
         message.add_css_class("message");
         self.message_box.append(&message);
     }
-}
-
-fn entry_is_valid(entry_text: &str) -> bool {
-    !entry_text.is_empty()
 }
