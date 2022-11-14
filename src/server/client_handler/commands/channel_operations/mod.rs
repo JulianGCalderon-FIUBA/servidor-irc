@@ -107,7 +107,17 @@ impl<C: Connection> ClientHandler<C> {
                     Some(topic) => topic,
                     None => "No topic set".to_string(),
                 };
-                self.send_response_for_reply(CommandResponse::List322 { channel, topic })?;
+
+                let prv = self.database.channel_has_mode(&channel, 'p')
+                    && !self
+                        .database
+                        .is_client_in_channel(&self.registration.nickname().unwrap(), &channel);
+
+                self.send_response_for_reply(CommandResponse::List322 {
+                    channel,
+                    prv,
+                    topic,
+                })?;
             }
         }
         self.send_response_for_reply(CommandResponse::ListEnd323)
@@ -123,6 +133,15 @@ impl<C: Connection> ClientHandler<C> {
 
         for channel in channels {
             if !self.database.contains_channel(&channel) {
+                continue;
+            }
+
+            if (self.database.channel_has_mode(&channel, 's')
+                || self.database.channel_has_mode(&channel, 'p'))
+                && !self
+                    .database
+                    .is_client_in_channel(&self.registration.nickname().unwrap(), &channel)
+            {
                 continue;
             }
 

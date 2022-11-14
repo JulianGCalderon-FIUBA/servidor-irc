@@ -74,7 +74,19 @@ impl<C: Connection> ClientHandler<C> {
     }
     /// Asserts channel can be listed.
     pub fn can_list_channel(&self, channel: &str) -> bool {
-        self.database.contains_channel(channel) && self.channel_name_is_valid(channel)
+        if self.database.channel_has_mode(channel, 's')
+            && !self
+                .database
+                .is_client_in_channel(&self.registration.nickname().unwrap(), channel)
+        {
+            return false;
+        }
+
+        if self.database.contains_channel(channel) {
+            return true;
+        }
+
+        false
     }
 
     /// Asserts invite command can be executed.

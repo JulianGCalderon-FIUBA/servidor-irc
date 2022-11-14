@@ -35,6 +35,7 @@ pub enum CommandResponse {
     ListStart321,
     List322 {
         channel: String,
+        prv: bool,
         topic: String,
     },
     ListEnd323,
@@ -122,8 +123,16 @@ impl Display for CommandResponse {
                 format!("319 {nickname} : {}", channels.join(" "))
             }
             CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
-            CommandResponse::List322 { channel, topic } => {
-                format!("322 {channel} :{topic}")
+            CommandResponse::List322 {
+                channel,
+                topic,
+                prv,
+            } => {
+                if *prv {
+                    format!("322 {channel} Prv")
+                } else {
+                    format!("322 {channel} :{topic}")
+                }
             }
             CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
             CommandResponse::NoTopic331 { channel } => {
