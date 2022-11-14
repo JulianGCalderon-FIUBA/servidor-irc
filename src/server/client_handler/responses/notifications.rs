@@ -1,7 +1,8 @@
 use std::fmt::Display;
 
 use crate::server::client_handler::commands::{
-    INVITE_COMMAND, KICK_COMMAND, NOTICE_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND,
+    INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, NOTICE_COMMAND, PART_COMMAND, PRIVMSG_COMMAND,
+    QUIT_COMMAND,
 };
 /// Possible notifications that can be sent for different commands.
 pub enum Notification {
@@ -28,6 +29,14 @@ pub enum Notification {
         channel: String,
         nickname: String,
         comment: Option<String>,
+    },
+    Part {
+        nickname: String,
+        channel: String,
+    },
+    Join {
+        nickname: String,
+        channel: String,
     },
 }
 
@@ -69,6 +78,12 @@ impl Display for Notification {
                 }
                 None => format!(":{kicker} {KICK_COMMAND} {channel} {nickname}"),
             },
+            Notification::Part { nickname, channel } => {
+                format!(":{nickname} {PART_COMMAND} {channel}")
+            }
+            Notification::Join { nickname, channel } => {
+                format!(":{nickname} {JOIN_COMMAND} {channel}")
+            }
         };
 
         write!(f, "{string}")
