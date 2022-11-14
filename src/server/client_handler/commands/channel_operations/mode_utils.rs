@@ -37,9 +37,6 @@ impl<C: Connection> ClientHandler<C> {
         let argument = parameters.get(2);
 
         for mode in remove {
-            if !self.database.channel_has_mode(channel, mode) {
-                continue;
-            }
             match mode {
                 OPER_CONFIG => {
                     self.remove_channop(channel, argument)?;
@@ -53,7 +50,9 @@ impl<C: Connection> ClientHandler<C> {
                 }
                 KEY_CONFIG => self.database.set_channel_key(channel, None),
                 mode if VALID_MODES.contains(&mode) => {
-                    self.database.unset_channel_mode(channel, mode)
+                    if self.database.channel_has_mode(channel, mode) {
+                        self.database.unset_channel_mode(channel, mode)
+                    }
                 }
                 mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
             }

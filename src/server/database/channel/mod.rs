@@ -62,12 +62,13 @@ impl<C: Connection> Channel<C> {
 
     /// Removes client from Channel.
     pub fn remove_client(&mut self, client: &str) {
-        let index = self
+        if let Some(index) = self
             .clients
             .iter()
             .position(|c| c.borrow().had_nickname(client))
-            .unwrap();
-        self.clients.remove(index);
+        {
+            self.clients.remove(index);
+        }
     }
 
     pub fn set_topic(&mut self, topic: &str) {
@@ -99,9 +100,7 @@ impl<C: Connection> Channel<C> {
     }
 
     pub fn has_mode(&self, mode: char) -> bool {
-        let (_key, value) = self.modes.get_key_value(&mode).unwrap();
-
-        *value
+        self.modes.get(&mode).copied().unwrap_or_default()
     }
 
     pub fn get_limit(&self) -> Option<usize> {
