@@ -59,6 +59,8 @@ impl Controller {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut register_view = RegisterView::new(sender.clone());
+        let register_window = register_view.get_view(app.clone());
+        register_window.show();
 
         let mut main_view = MainView::new(sender.clone());
 
@@ -68,12 +70,11 @@ impl Controller {
         let mut add_client_view = AddClientView::new(sender.clone());
         let mut add_client_window = add_client_view.get_view(app.clone());
 
-        let mut invite_view = InviteView::new(sender.clone());
+        let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone());
 
         let mut current_conv = "".to_string();
 
-        let register_window = register_view.get_view(app.clone());
-        register_window.show();
+        
 
         let app_clone = app.clone();
         let sender_clone = sender.clone();
@@ -133,7 +134,7 @@ impl Controller {
                     client.send_raw(&join_message).expect("ERROR");
                 }
                 ReceivePrivMessage { nickname, message } => {
-                    main_view.receive_priv_message(message, nickname);
+                    main_view.receive_message(message, nickname);
                 }
                 ChangeConversation { nickname } => {
                     current_conv = nickname;
@@ -145,8 +146,17 @@ impl Controller {
                     main_view.remove_channel(current_conv.clone());
                 }
                 AddInviteView {} => {
-                    invite_view = InviteView::new(sender_clone.clone());
-                    invite_view.get_view(app_clone.clone()).show()
+                    invite_window = InviteView::new(sender_clone.clone()).get_view(app_clone.clone());
+                    invite_window.show()
+                }
+                SendInviteMessage { channel } => {
+                    invite_window.close();
+                    let invite = format!("INVITE {} {}", current_conv, channel);
+                    client.send_raw(&invite).expect("ERROR");
+                }
+                RecieveInvite { nickname, channel } => {
+                    let message = format!("{} has invited you to join {}", nickname, channel);
+                    main_view.receive_message(message, channel);
                 }
                 RegularMessage { message } => {
                     println!("{}", message);

@@ -11,7 +11,7 @@ use crate::controller::controller_message::ControllerMessage;
 
 pub struct InviteView {
     pub channel_entry: Entry,
-    pub add_channel_button: Button,
+    pub invite_button: Button,
     sender: Sender<ControllerMessage>,
 }
 
@@ -19,7 +19,7 @@ impl InviteView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channel_entry: create_entry(""),
-            add_channel_button: create_add_channel_buton("add channel"),
+            invite_button: create_add_channel_buton("Send invite"),
             sender,
         }
     }
@@ -32,31 +32,31 @@ impl InviteView {
 
         let main_box = create_main_box_add_view();
 
-        let title = create_title("Add channel");
+        let title = create_title("Send Invite");
         main_box.append(&title);
 
         let channel_box = create_label_box("Channel:");
         channel_box.append(&self.channel_entry);
         main_box.append(&channel_box);
 
-        main_box.append(&self.add_channel_button);
+        main_box.append(&self.invite_button);
 
-        self.connect_add_channel_button(self.channel_entry.clone(), self.sender.clone());
+        self.connect_invite_button(self.channel_entry.clone(), self.sender.clone());
 
         window.set_child(Some(&main_box));
         window
     }
 
-    fn connect_add_channel_button(&self, input: Entry, sender: Sender<ControllerMessage>) {
-        self.add_channel_button.connect_clicked(move |_| {
+    fn connect_invite_button(&self, input: Entry, sender: Sender<ControllerMessage>) {
+        self.invite_button.connect_clicked(move |_| {
             if !entry_is_valid(&input.text()) {
                 return;
             }
 
-            let add_channel = ControllerMessage::AddNewChannel {
+            let invite = ControllerMessage::SendInviteMessage {
                 channel: input.text(),
             };
-            sender.send(add_channel).expect("ERROR");
+            sender.send(invite).expect("ERROR");
         });
     }
 }

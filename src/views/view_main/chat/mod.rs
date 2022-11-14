@@ -79,7 +79,7 @@ impl MainView {
         });
     }
 
-    pub fn receive_priv_message(&self, message: String, _nickname: String) {
+    pub fn receive_message(&self, message: String, _nickname: String) {
         let message = create_received_message(&message);
         message.add_css_class("message");
         self.message_box.append(&message);
