@@ -3,14 +3,26 @@ mod utils;
 /// This module contains validations for channel operations.
 mod validations;
 
+mod mode_utils;
+
+use std::io;
+
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_trait::Connection;
 
-use super::ClientHandler;
+pub const OPER_CONFIG: char = 'o';
+pub const LIMIT_CONFIG: char = 'l';
+pub const BAN_CONFIG: char = 'b';
+pub const SPEAKING_ABILITY_CONFIG: char = 'v';
+pub const KEY_CONFIG: char = 'k';
 
-use std::io;
+const VALID_MODES: [char; 5] = ['s', 'i', 't', 'n', 'm'];
+
+use self::mode_utils::parse_modes;
+
+use super::ClientHandler;
 
 impl<C: Connection> ClientHandler<C> {
     /// Invites client to channel.
@@ -194,6 +206,44 @@ impl<C: Connection> ClientHandler<C> {
                 self.kick_client_from_channel(nickname, channel, &trailing);
             }
         }
+
+        Ok(())
+    }
+
+    pub fn mode_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        if let Some(error) = self.assert_mode_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+        if !self.assert_modes_starts_correctly(&parameters[1]) {
+            return Ok(());
+        }
+
+        // let channel = &parameters[0];
+
+        // if parameters.len() == 1 {
+        //     let modes = self.database.get_channel_modes(channel);
+        //     for mode in modes {
+        //         let params: Option<Vec<String>> = match mode {
+        //             OPER_CONFIG => self.database.get_channel_operators(channel),
+        //             LIMIT_CONFIG => self.database.get_channel_limit(channel),
+        //             BAN_CONFIG => Some(self.database.get_channel_banmask(channel)),
+        //             SPEAKING_ABILITY_CONFIG => self.get_channel_speakers(channel),
+        //             _ => None,
+        //         };
+        //         self.send_response_for_reply(CommandResponse::ChannelModeIs324 {
+        //             channel: channel.to_string(),
+        //             mode,
+        //             mode_params: params,
+        //         })?;
+        //     }
+        // }
+
+        let modes: Vec<char> = parameters[1].chars().collect();
+
+        let (add, remove) = parse_modes(modes);
+
+        self.add_modes(add, parameters.clone())?;
+        self.remove_modes(remove, parameters)?;
 
         Ok(())
     }

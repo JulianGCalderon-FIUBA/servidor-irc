@@ -114,6 +114,80 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
+    pub fn handle_set_channel_key(&mut self, channel: String, key: Option<String>) {
+        self.set_channel_key(channel, key);
+    }
+
+    pub fn handle_get_channel_key(&self, channel: String, sender: Sender<Option<String>>) {
+        let response = self.get_channel_key(channel);
+        sender.send(response).unwrap();
+    }
+
+    pub fn handle_set_mode(&mut self, channel: String, mode: char) {
+        self.set_mode(channel, mode);
+    }
+
+    pub fn handle_unset_mode(&mut self, channel: String, mode: char) {
+        self.unset_mode(channel, mode);
+    }
+
+    pub fn handle_channel_has_mode(&self, channel: String, mode: char, sender: Sender<bool>) {
+        let response = self.channel_has_mode(channel, mode);
+        sender.send(response).unwrap();
+    }
+
+    pub fn handle_set_channel_limit(&mut self, channel: String, limit: Option<isize>) {
+        self.set_channel_limit(channel, limit);
+    }
+
+    pub fn handle_get_channel_limit(&self, channel: String, sender: Sender<Option<isize>>) {
+        let response = self.get_channel_limit(channel);
+        sender.send(response).unwrap();
+    }
+
+    pub fn handle_add_channop(&mut self, channel: String, nickname: String) {
+        self.add_channop(channel, nickname);
+    }
+
+    pub fn handle_remove_channop(&mut self, channel: String, nickname: String) {
+        self.remove_channop(channel, nickname);
+    }
+
+    pub fn handle_add_speaker(&mut self, channel: String, nickname: String) {
+        self.add_speaker(channel, nickname);
+    }
+
+    pub fn handle_remove_speaker(&mut self, channel: String, nickname: String) {
+        self.remove_speaker(channel, nickname);
+    }
+
+    pub fn handle_is_channel_speaker(
+        &self,
+        channel: String,
+        nickname: String,
+        sender: Sender<bool>,
+    ) {
+        let response = self.is_channel_speaker(channel, nickname);
+        sender.send(response).unwrap();
+    }
+
+    pub fn handle_set_channel_banmask(&mut self, channel: String, mask: String) {
+        self.set_channel_banmask(channel, mask);
+    }
+
+    pub fn handle_get_channel_banmask(&self, channel: String, sender: Sender<Vec<String>>) {
+        let response = self.get_channel_banmask(channel);
+        sender.send(response).unwrap();
+    }
+
+    pub fn handle_unset_channel_banmask(&mut self, channel: String, mask: String) {
+        self.unset_channel_banmask(channel, mask);
+    }
+
+    // pub fn handle_get_all_channel_modes(&self, channel: String, sender: Sender<Vec<char>>) {
+    //     let response = self.get_all_channel_modes(channel);
+    //     sender.send(response).unwrap();
+    // }
     pub fn handle_is_channel_operator(&self, channel: &str, nickname: &str, sender: Sender<bool>) {
         let response = self.is_channel_operator(channel, nickname);
         sender.send(response).unwrap();

@@ -34,6 +34,7 @@ pub const NOTICE_COMMAND: &str = "NOTICE";
 pub const JOIN_COMMAND: &str = "JOIN";
 pub const PART_COMMAND: &str = "PART";
 pub const TOPIC_COMMAND: &str = "TOPIC";
+pub const MODE_COMMAND: &str = "MODE";
 
 pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";

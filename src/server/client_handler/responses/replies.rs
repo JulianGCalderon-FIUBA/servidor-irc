@@ -61,6 +61,18 @@ pub enum CommandResponse {
         channel: String,
     },
     YouAreOper381,
+    BanList367 {
+        channel: String,
+        banmask: String,
+    },
+    EndOfBanList368 {
+        channel: String,
+    },
+    // ChannelModeIs324 {
+    //     channel: String,
+    //     mode: char,
+    //     mode_params: Option<Vec<String>>,
+    // },
     UnAway,
     NowAway,
     Away {
@@ -144,6 +156,20 @@ impl Display for CommandResponse {
                 format!("366 {channel} :End of /NAMES list")
             }
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
+            CommandResponse::BanList367 { channel, banmask } => {
+                format!("367 {channel} {banmask}")
+            }
+            CommandResponse::EndOfBanList368 { channel } => {
+                format!("368 {channel} :End of channel ban list")
+            }
+            // CommandResponse::ChannelModeIs324 {
+            //     channel,
+            //     mode,
+            //     mode_params,
+            // } => format!(
+            //     "324 {channel} {mode} {:?}",
+            //     mode_params.as_ref().unwrap_or(&vec!["".to_string()])
+            // ),
             CommandResponse::UnAway => "305 :You are no longer marked as being away".to_string(),
             CommandResponse::NowAway => "306 :You have been marked as being away".to_string(),
             CommandResponse::Away { nickname, message } => {

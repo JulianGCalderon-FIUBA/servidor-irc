@@ -202,6 +202,106 @@ impl<C: Connection> Database<C> {
         None
     }
 
+    pub fn set_channel_key(&mut self, channel: String, key: Option<String>) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.set_key(key);
+        }
+    }
+
+    pub fn get_channel_key(&self, channel: String) -> Option<String> {
+        if let Some(channel) = self.channels.get(&channel) {
+            return channel.get_key();
+        }
+        None
+    }
+
+    pub fn set_mode(&mut self, channel: String, mode: char) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.set_mode(mode);
+        }
+    }
+
+    pub fn unset_mode(&mut self, channel: String, mode: char) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.unset_mode(mode);
+        }
+    }
+    pub fn channel_has_mode(&self, channel: String, mode: char) -> bool {
+        if let Some(channel) = self.channels.get(&channel) {
+            return channel.has_mode(mode);
+        }
+        false
+    }
+
+    pub fn get_channel_limit(&self, channel: String) -> Option<isize> {
+        if let Some(channel) = self.channels.get(&channel) {
+            return channel.get_limit();
+        }
+        None
+    }
+
+    pub fn set_channel_limit(&mut self, channel: String, limit: Option<isize>) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.set_limit(limit)
+        }
+    }
+
+    pub fn add_channop(&mut self, channel: String, nickname: String) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.add_operator(nickname);
+        }
+    }
+
+    pub fn remove_channop(&mut self, channel: String, nickname: String) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.remove_operator(nickname);
+        }
+    }
+
+    pub fn add_speaker(&mut self, channel: String, nickname: String) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.add_speaker(nickname);
+        }
+    }
+
+    pub fn remove_speaker(&mut self, channel: String, nickname: String) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.remove_speaker(nickname);
+        }
+    }
+
+    pub fn is_channel_speaker(&self, channel: String, nickname: String) -> bool {
+        if let Some(channel) = self.channels.get(&channel) {
+            return channel.is_speaker(nickname);
+        }
+        false
+    }
+
+    pub fn set_channel_banmask(&mut self, channel: String, mask: String) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.set_banmask(mask);
+        }
+    }
+
+    pub fn get_channel_banmask(&self, channel: String) -> Vec<String> {
+        if let Some(channel) = self.channels.get(&channel) {
+            return channel.get_banmasks();
+        }
+        vec![]
+    }
+
+    pub fn unset_channel_banmask(&mut self, channel: String, mask: String) {
+        if let Some(channel) = self.channels.get_mut(&channel) {
+            channel.unset_banmask(mask);
+        }
+    }
+
+    // pub fn get_all_channel_modes(&self, channel: String) -> Vec<char> {
+    //     if let Some(channel) = self.channels.get(&channel) {
+    //         return channel.get_modes();
+    //     }
+    //     vec![]
+    // }
     pub fn is_channel_operator(&self, channel: &str, nickname: &str) -> bool {
         if let Some(channel) = self.channels.get(channel) {
             return channel.operator() == nickname;

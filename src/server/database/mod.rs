@@ -139,6 +139,62 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_channel_topic(&channel, respond_to),
+            DatabaseMessage::SetChannelKey { channel, key } => {
+                self.handle_set_channel_key(channel, key)
+            }
+            DatabaseMessage::GetChannelKey {
+                channel,
+                respond_to,
+            } => self.handle_get_channel_key(channel, respond_to),
+            DatabaseMessage::SetChannelMode { channel, mode } => {
+                self.handle_set_mode(channel, mode)
+            }
+            DatabaseMessage::UnsetChannelMode { channel, mode } => {
+                self.handle_unset_mode(channel, mode)
+            }
+            DatabaseMessage::ChannelHasMode {
+                channel,
+                mode,
+                respond_to,
+            } => self.handle_channel_has_mode(channel, mode, respond_to),
+            DatabaseMessage::SetLimit { channel, limit } => {
+                self.handle_set_channel_limit(channel, limit)
+            }
+            DatabaseMessage::GetLimit {
+                channel,
+                respond_to,
+            } => self.handle_get_channel_limit(channel, respond_to),
+            DatabaseMessage::AddChanop { channel, nickname } => {
+                self.handle_add_channop(channel, nickname)
+            }
+            DatabaseMessage::RemoveChanop { channel, nickname } => {
+                self.handle_remove_channop(channel, nickname)
+            }
+            DatabaseMessage::AddSpeaker { channel, nickname } => {
+                self.handle_add_speaker(channel, nickname)
+            }
+            DatabaseMessage::RemoveSpeaker { channel, nickname } => {
+                self.handle_remove_speaker(channel, nickname)
+            }
+            DatabaseMessage::IsChannelSpeaker {
+                channel,
+                nickname,
+                respond_to,
+            } => self.handle_is_channel_speaker(channel, nickname, respond_to),
+            DatabaseMessage::SetChannelBanMask { channel, mask } => {
+                self.handle_set_channel_banmask(channel, mask)
+            }
+            DatabaseMessage::GetChannelBanMask {
+                channel,
+                respond_to,
+            } => self.handle_get_channel_banmask(channel, respond_to),
+            DatabaseMessage::UnsetChannelBanMask { channel, mask } => {
+                self.handle_unset_channel_banmask(channel, mask)
+            }
+            // DatabaseMessage::GetAllChannelModes {
+            //     channel,
+            //     respond_to,
+            // } => self.handle_get_all_channel_modes(channel, respond_to),
             DatabaseMessage::IsChannelOperator {
                 channel,
                 nickname,

@@ -26,9 +26,9 @@ use crate::message::{CreationError, ParsingError};
 use registration::Registration;
 
 use commands::{
-    INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND,
-    NOTICE_COMMAND, OPER_COMMAND, PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND,
-    TOPIC_COMMAND, USER_COMMAND, WHOIS_COMMAND, WHO_COMMAND,
+    INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, MODE_COMMAND, NAMES_COMMAND,
+    NICK_COMMAND, NOTICE_COMMAND, OPER_COMMAND, PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND,
+    QUIT_COMMAND, TOPIC_COMMAND, USER_COMMAND, WHOIS_COMMAND, WHO_COMMAND,
 };
 
 const REGISTRATION_TIMELIMIT_MS: u128 = 60 * 1000;
@@ -140,6 +140,7 @@ impl<C: Connection> ClientHandler<C> {
                 AWAY_COMMAND => self.away_command(trailing)?,
                 TOPIC_COMMAND => self.topic_command(parameters)?,
                 KICK_COMMAND => self.kick_command(parameters, trailing)?,
+                MODE_COMMAND => self.mode_command(parameters)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());

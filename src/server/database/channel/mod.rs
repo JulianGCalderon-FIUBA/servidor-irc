@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::server::client_trait::Connection;
 
@@ -11,6 +11,12 @@ pub struct Channel<C: Connection> {
     //nickname del operador
     operator: String,
     topic: Option<String>,
+    key: Option<String>,
+    modes: HashMap<char, bool>,
+    limit: Option<isize>,
+    operators: Vec<String>,
+    speakers: Vec<String>,
+    banmasks: Vec<String>,
 }
 
 impl<C: Connection> Channel<C> {
@@ -24,6 +30,12 @@ impl<C: Connection> Channel<C> {
             clients,
             operator,
             topic: None,
+            key: None,
+            modes: initialize_modes(),
+            limit: None,
+            operators: vec![],
+            speakers: vec![],
+            banmasks: vec![],
         }
     }
 
@@ -69,4 +81,91 @@ impl<C: Connection> Channel<C> {
     pub fn operator(&self) -> String {
         self.operator.clone()
     }
+
+    pub fn set_key(&mut self, key: Option<String>) {
+        self.key = key
+    }
+
+    pub fn get_key(&self) -> Option<String> {
+        self.key.clone()
+    }
+
+    pub fn set_mode(&mut self, mode: char) {
+        self.modes.entry(mode).and_modify(|value| *value = true);
+    }
+
+    pub fn unset_mode(&mut self, mode: char) {
+        self.modes.entry(mode).and_modify(|value| *value = false);
+    }
+
+    pub fn has_mode(&self, mode: char) -> bool {
+        let (_key, value) = self.modes.get_key_value(&mode).unwrap();
+
+        *value
+    }
+
+    pub fn get_limit(&self) -> Option<isize> {
+        self.limit
+    }
+
+    pub fn set_limit(&mut self, limit: Option<isize>) {
+        self.limit = limit
+    }
+
+    pub fn add_operator(&mut self, nickname: String) {
+        self.operators.push(nickname)
+    }
+
+    pub fn remove_operator(&mut self, nickname: String) {
+        self.operators
+            .iter()
+            .position(|nick| nick == &nickname)
+            .map(|index| self.operators.remove(index));
+    }
+
+    pub fn add_speaker(&mut self, nickname: String) {
+        self.speakers.push(nickname)
+    }
+
+    pub fn remove_speaker(&mut self, nickname: String) {
+        self.speakers
+            .iter()
+            .position(|nick| nick == &nickname)
+            .map(|index| self.speakers.remove(index));
+    }
+
+    pub fn is_speaker(&self, nickname: String) -> bool {
+        self.speakers.contains(&nickname)
+    }
+
+    pub fn set_banmask(&mut self, mask: String) {
+        self.banmasks.push(mask)
+    }
+
+    pub fn get_banmasks(&self) -> Vec<String> {
+        self.banmasks.clone()
+    }
+
+    pub fn unset_banmask(&mut self, mask: String) {
+        self.banmasks
+            .iter()
+            .position(|m| m == &mask)
+            .map(|index| self.banmasks.remove(index));
+    }
+
+    // pub fn get_modes(&self) -> Vec<char> {
+    //     todo!()
+    // }
+}
+
+fn initialize_modes() -> HashMap<char, bool> {
+    let mut modes = HashMap::new();
+    modes.insert('p', false);
+    modes.insert('s', false);
+    modes.insert('i', false);
+    modes.insert('t', false);
+    modes.insert('n', false);
+    modes.insert('m', false);
+
+    modes
 }
