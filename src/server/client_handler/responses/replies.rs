@@ -68,11 +68,11 @@ pub enum CommandResponse {
     EndOfBanList368 {
         channel: String,
     },
-    ChannelModeIs324 {
-        channel: String,
-        mode: char,
-        mode_params: Option<Vec<String>>,
-    },
+    // ChannelModeIs324 {
+    //     channel: String,
+    //     mode: char,
+    //     mode_params: Option<Vec<String>>,
+    // },
 }
 
 impl Display for CommandResponse {
@@ -156,14 +156,14 @@ impl Display for CommandResponse {
             CommandResponse::EndOfBanList368 { channel } => {
                 format!("368 {channel} :End of channel ban list")
             }
-            CommandResponse::ChannelModeIs324 {
-                channel,
-                mode,
-                mode_params,
-            } => format!(
-                "324 {channel} {mode} {:?}",
-                mode_params.as_ref().unwrap_or(&vec!["".to_string()])
-            ),
+            // CommandResponse::ChannelModeIs324 {
+            //     channel,
+            //     mode,
+            //     mode_params,
+            // } => format!(
+            //     "324 {channel} {mode} {:?}",
+            //     mode_params.as_ref().unwrap_or(&vec!["".to_string()])
+            // ),
         };
         write!(f, "{string}")
     }

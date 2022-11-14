@@ -145,8 +145,8 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         mask: String,
     },
-    GetAllChannelModes {
-        channel: String,
-        respond_to: Sender<Vec<char>>,
-    },
+    // GetAllChannelModes {
+    //     channel: String,
+    //     respond_to: Sender<Vec<char>>,
+    // },
 }

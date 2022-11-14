@@ -288,10 +288,10 @@ impl<C: Connection> Database<C> {
         }
     }
 
-    pub fn get_all_channel_modes(&self, channel: String) -> Vec<char> {
-        if let Some(channel) = self.channels.get(&channel) {
-            return channel.get_modes();
-        }
-        vec![]
-    }
+    // pub fn get_all_channel_modes(&self, channel: String) -> Vec<char> {
+    //     if let Some(channel) = self.channels.get(&channel) {
+    //         return channel.get_modes();
+    //     }
+    //     vec![]
+    // }
 }

@@ -21,15 +21,6 @@ impl<C: Connection> ClientHandler<C> {
         modes.as_bytes()[0] == (ADD_MODE as u8) || modes.as_bytes()[0] == (REMOVE_MODE as u8)
     }
 
-    pub fn assert_enough_parameters(&mut self, parameters: &Vec<String>) -> Option<ErrorReply> {
-        if parameters.len() < 3 {
-            return Some(ErrorReply::NeedMoreParameters461 {
-                command: MODE_COMMAND.to_string(),
-            });
-        }
-        None
-    }
-
     pub fn assert_can_set_key(&mut self, channel: &str) -> Option<ErrorReply> {
         if self.database.get_channel_key(channel).is_some() {
             return Some(ErrorReply::KeySet467 {

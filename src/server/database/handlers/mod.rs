@@ -174,8 +174,8 @@ impl<C: Connection> Database<C> {
         self.unset_channel_banmask(channel, mask);
     }
 
-    pub fn handle_get_all_channel_modes(&self, channel: String, sender: Sender<Vec<char>>) {
-        let response = self.get_all_channel_modes(channel);
-        sender.send(response).unwrap();
-    }
+    // pub fn handle_get_all_channel_modes(&self, channel: String, sender: Sender<Vec<char>>) {
+    //     let response = self.get_all_channel_modes(channel);
+    //     sender.send(response).unwrap();
+    // }
 }

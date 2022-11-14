@@ -193,7 +193,6 @@ impl<C: Connection> ClientHandler<C> {
         //             LIMIT_CONFIG => self.database.get_channel_limit(channel),
         //             BAN_CONFIG => Some(self.database.get_channel_banmask(channel)),
         //             SPEAKING_ABILITY_CONFIG => self.get_channel_speakers(channel),
-        //             get_channels_for_query if VALID_MODES.contains(&mode) => None,
         //             _ => None,
         //         };
         //         self.send_response_for_reply(CommandResponse::ChannelModeIs324 {

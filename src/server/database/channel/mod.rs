@@ -148,9 +148,9 @@ impl<C: Connection> Channel<C> {
             .map(|index| self.banmasks.remove(index));
     }
 
-    pub fn get_modes(&self) -> Vec<char> {
-        todo!()
-    }
+    // pub fn get_modes(&self) -> Vec<char> {
+    //     todo!()
+    // }
 }
 
 fn initialize_modes() -> HashMap<char, bool> {
