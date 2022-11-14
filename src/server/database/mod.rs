@@ -188,11 +188,6 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_all_channel_modes(channel, respond_to),
-            DatabaseMessage::GetModeParameters {
-                channel,
-                mode,
-                respond_to,
-            } => self.handle_get_mode_parameters(channel, mode, respond_to),
         }
     }
 }

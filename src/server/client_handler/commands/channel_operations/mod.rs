@@ -179,22 +179,30 @@ impl<C: Connection> ClientHandler<C> {
         if let Some(error) = self.assert_mode_is_valid(&parameters) {
             return self.send_response_for_error(error);
         }
-        if !self.assert_modes_starts_correctly(parameters[1].clone()) {
+        if !self.assert_modes_starts_correctly(&parameters[1]) {
             return Ok(());
         }
 
-        let channel = &parameters[0];
+        // let channel = &parameters[0];
 
-        if parameters.len() == 1 {
-            let modes = self.database.get_channel_modes(channel);
-            for mode in modes {
-                self.send_response_for_reply(CommandResponse::ChannelModeIs324 {
-                    channel: channel.to_string(),
-                    mode,
-                    mode_params: self.database.get_mode_params(channel, mode),
-                })?;
-            }
-        }
+        // if parameters.len() == 1 {
+        //     let modes = self.database.get_channel_modes(channel);
+        //     for mode in modes {
+        //         let params: Option<Vec<String>> = match mode {
+        //             OPER_CONFIG => self.database.get_channel_operators(channel),
+        //             LIMIT_CONFIG => self.database.get_channel_limit(channel),
+        //             BAN_CONFIG => Some(self.database.get_channel_banmask(channel)),
+        //             SPEAKING_ABILITY_CONFIG => self.get_channel_speakers(channel),
+        //             get_channels_for_query if VALID_MODES.contains(&mode) => None,
+        //             _ => None,
+        //         };
+        //         self.send_response_for_reply(CommandResponse::ChannelModeIs324 {
+        //             channel: channel.to_string(),
+        //             mode,
+        //             mode_params: params,
+        //         })?;
+        //     }
+        // }
 
         let modes: Vec<char> = parameters[1].chars().collect();
 

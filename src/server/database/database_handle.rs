@@ -354,17 +354,6 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
-
-    pub fn get_mode_params(&self, channel: &str, mode: char) -> Option<String> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetModeParameters {
-            channel: channel.to_string(),
-            mode,
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

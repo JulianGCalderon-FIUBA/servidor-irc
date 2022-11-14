@@ -71,7 +71,7 @@ pub enum CommandResponse {
     ChannelModeIs324 {
         channel: String,
         mode: char,
-        mode_params: Option<String>,
+        mode_params: Option<Vec<String>>,
     },
 }
 
@@ -161,8 +161,8 @@ impl Display for CommandResponse {
                 mode,
                 mode_params,
             } => format!(
-                "324 {channel} {mode} {}",
-                mode_params.as_ref().unwrap_or(&"".to_string())
+                "324 {channel} {mode} {:?}",
+                mode_params.as_ref().unwrap_or(&vec!["".to_string()])
             ),
         };
         write!(f, "{string}")

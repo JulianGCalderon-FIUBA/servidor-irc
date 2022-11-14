@@ -178,14 +178,4 @@ impl<C: Connection> Database<C> {
         let response = self.get_all_channel_modes(channel);
         sender.send(response).unwrap();
     }
-
-    pub fn handle_get_mode_parameters(
-        &self,
-        channel: String,
-        mode: char,
-        sender: Sender<Option<String>>,
-    ) {
-        let response = self.get_mode_parameters(channel, mode);
-        sender.send(response).unwrap();
-    }
 }

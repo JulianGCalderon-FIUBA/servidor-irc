@@ -27,7 +27,7 @@ pub enum ErrorReply {
     // NoSuchServer { server: String},
     UnknownMode472 { mode: char },
     KeySet467 { channel: String },
-    ChanOPrivIsNeeded482 { channel: String },
+    //ChanOPrivIsNeeded482 { channel: String },
 }
 
 impl Display for ErrorReply {
@@ -77,9 +77,9 @@ impl Display for ErrorReply {
                 format!("472 {mode} :Is unknown mode char to me")
             }
             ErrorReply::KeySet467 { channel } => format!("467 {channel} :Channel key already set"),
-            ErrorReply::ChanOPrivIsNeeded482 { channel } => {
-                format!("482 {channel} :You're not channel operator")
-            }
+            // ErrorReply::ChanOPrivIsNeeded482 { channel } => {
+            //     format!("482 {channel} :You're not channel operator")
+            // }
         };
         write!(f, "{string}")
     }

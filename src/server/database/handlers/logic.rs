@@ -294,11 +294,4 @@ impl<C: Connection> Database<C> {
         }
         vec![]
     }
-
-    pub fn get_mode_parameters(&self, channel: String, mode: char) -> Option<String> {
-        if let Some(channel) = self.channels.get(&channel) {
-            return channel.get_mode_parameters(mode);
-        }
-        None
-    }
 }

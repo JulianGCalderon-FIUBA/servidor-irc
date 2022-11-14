@@ -151,10 +151,6 @@ impl<C: Connection> Channel<C> {
     pub fn get_modes(&self) -> Vec<char> {
         todo!()
     }
-
-    pub fn get_mode_parameters(&self, mode: char) -> Option<String> {
-        todo!()
-    }
 }
 
 fn initialize_modes() -> HashMap<char, bool> {
