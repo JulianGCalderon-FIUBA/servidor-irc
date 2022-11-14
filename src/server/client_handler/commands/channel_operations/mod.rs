@@ -183,6 +183,19 @@ impl<C: Connection> ClientHandler<C> {
             return Ok(());
         }
 
+        let channel = &parameters[0];
+
+        if parameters.len() == 1 {
+            let modes = self.database.get_channel_modes(channel);
+            for mode in modes {
+                self.send_response_for_reply(CommandResponse::ChannelModeIs324 {
+                    channel: channel.to_string(),
+                    mode,
+                    mode_params: self.database.get_mode_params(channel, mode),
+                })?;
+            }
+        }
+
         let modes: Vec<char> = parameters[1].chars().collect();
 
         let (add, remove) = parse_modes(modes);

@@ -184,6 +184,15 @@ impl<C: Connection> Database<C> {
             DatabaseMessage::UnsetChannelBanMask { channel, mask } => {
                 self.handle_unset_channel_banmask(channel, mask)
             }
+            DatabaseMessage::GetAllChannelModes {
+                channel,
+                respond_to,
+            } => self.handle_get_all_channel_modes(channel, respond_to),
+            DatabaseMessage::GetModeParameters {
+                channel,
+                mode,
+                respond_to,
+            } => self.handle_get_mode_parameters(channel, mode, respond_to),
         }
     }
 }

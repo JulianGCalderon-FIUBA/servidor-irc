@@ -184,7 +184,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_mode_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
-        if parameters.len() < 2 {
+        if parameters.is_empty() {
             let command = MODE_COMMAND.to_string();
             return Some(ErrorReply::NeedMoreParameters461 { command });
         }
@@ -206,6 +206,12 @@ impl<C: Connection> ClientHandler<C> {
                 channel: channel.to_string(),
             });
         }
+
+        // if !self.database.is_channel_operator(channel, &nickname) && parameters.len() > 1{
+        //     return Some(ErrorReply::ChanOPrivIsNeeded482 {
+        //         channel: channel.to_string(),
+        //     });
+        // }
 
         None
     }

@@ -173,4 +173,19 @@ impl<C: Connection> Database<C> {
     pub fn handle_unset_channel_banmask(&mut self, channel: String, mask: String) {
         self.unset_channel_banmask(channel, mask);
     }
+
+    pub fn handle_get_all_channel_modes(&self, channel: String, sender: Sender<Vec<char>>) {
+        let response = self.get_all_channel_modes(channel);
+        sender.send(response).unwrap();
+    }
+
+    pub fn handle_get_mode_parameters(
+        &self,
+        channel: String,
+        mode: char,
+        sender: Sender<Option<String>>,
+    ) {
+        let response = self.get_mode_parameters(channel, mode);
+        sender.send(response).unwrap();
+    }
 }
