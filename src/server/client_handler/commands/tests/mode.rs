@@ -166,3 +166,61 @@ fn mode_fails_with_no_oper_parameter() {
     );
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
 }
+
+#[test]
+fn mode_sets_limit_to_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(handler.database.get_channel_limit("#channel").is_none());
+
+    let parameters = vec!["#channel".to_string(), "+l".to_string(), "5".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(handler.database.get_channel_limit("#channel"), Some(5));
+}
+
+#[test]
+fn mode_unsets_channel_limit() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+    handler.database.set_channel_limit("#channel", Some(5));
+
+    assert_eq!(handler.database.get_channel_limit("#channel"), Some(5));
+
+    let parameters = vec!["#channel".to_string(), "-l".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.get_channel_limit("#channel").is_none());
+}
+
+#[test]
+fn mode_fails_with_no_limit_parameter() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(handler.database.get_channel_limit("#channel").is_none());
+
+    let parameters = vec!["#channel".to_string(), "+l".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "461 MODE :Not enough parameters\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(handler.database.get_channel_limit("#channel").is_none());
+}
