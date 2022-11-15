@@ -978,3 +978,92 @@ fn mode_fails_when_unsetting_unknown_mode() {
     );
     assert!(!handler.database.channel_has_mode("#channel", 'w'));
 }
+
+#[test]
+fn mode_sets_multiple_flags() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 's'));
+    assert!(!handler.database.channel_has_mode("#channel", 'i'));
+    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+ois".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.channel_has_mode("#channel", 's'));
+    assert!(handler.database.channel_has_mode("#channel", 'i'));
+    assert!(handler.database.is_channel_operator("#channel", "nick2"));
+}
+
+#[test]
+fn mode_unsets_multiple_flags() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    handler.database.set_channel_mode("#channel", 's');
+    handler.database.set_channel_mode("#channel", 'i');
+    handler.database.add_channop("#channel", "nick2");
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-ois".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.channel_has_mode("#channel", 's'));
+    assert!(!handler.database.channel_has_mode("#channel", 'i'));
+    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+}
+
+#[test]
+fn mode_sets_and_unsets_multiple_flags() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    handler.database.set_channel_mode("#channel", 's');
+    handler.database.set_channel_mode("#channel", 'm');
+    handler.database.add_channop("#channel", "nick2");
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-os+p-m+i".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.channel_has_mode("#channel", 's'));
+    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+    assert!(handler.database.channel_has_mode("#channel", 'p'));
+    assert!(!handler.database.channel_has_mode("#channel", 'm'));
+    assert!(handler.database.channel_has_mode("#channel", 'i'));
+}
