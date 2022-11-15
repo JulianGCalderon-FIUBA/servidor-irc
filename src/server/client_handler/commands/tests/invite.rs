@@ -114,3 +114,59 @@ fn can_invite_one_user() {
             .read_wbuf_to_string()
     );
 }
+
+#[test]
+fn invite_fails_with_not_channope_on_moderated_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick", "#hola");
+
+    handler.database.set_channel_mode("#hola", 'i');
+    handler.database.remove_channop("#hola", "nick");
+
+    let parameters = vec!["nick2".to_string(), "#hola".to_string()];
+
+    handler.invite_command(parameters).unwrap();
+
+    assert_eq!(
+        "482 #hola :You're not channel operator\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_stream("nick2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn can_invite_user_in_moderated_channel_if_channop() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick", "#hola");
+
+    handler.database.set_channel_mode("#hola", 'i');
+
+    let parameters = vec!["nick2".to_string(), "#hola".to_string()];
+
+    handler.invite_command(parameters).unwrap();
+
+    assert_eq!("341 #hola nick\r\n", handler.stream.read_wbuf_to_string());
+
+    assert_eq!(
+        ":nick INVITE nick2 #hola\r\n",
+        handler
+            .database
+            .get_stream("nick2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
