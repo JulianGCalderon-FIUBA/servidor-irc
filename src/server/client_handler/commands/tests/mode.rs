@@ -118,6 +118,40 @@ fn mode_adds_channop() {
 }
 
 #[test]
+fn mode_adds_multiple_channops() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client(dummy_client("nick3"));
+    handler.database.add_client_to_channel("nick3", "#channel");
+    handler.database.add_client(dummy_client("nick4"));
+    handler.database.add_client_to_channel("nick4", "#channel");
+
+    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+    assert!(!handler.database.is_channel_operator("#channel", "nick3"));
+    assert!(!handler.database.is_channel_operator("#channel", "nick4"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+o".to_string(),
+        "nick2,nick3".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.is_channel_operator("#channel", "nickname"));
+    assert!(handler.database.is_channel_operator("#channel", "nick2"));
+    assert!(handler.database.is_channel_operator("#channel", "nick3"));
+    assert!(!handler.database.is_channel_operator("#channel", "nick4"));
+}
+
+#[test]
 fn mode_removes_channop() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nickname");
@@ -140,7 +174,38 @@ fn mode_removes_channop() {
     handler.mode_command(parameters).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.is_channel_operator("#channel", "nickname"));
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+}
+
+#[test]
+fn mode_removes_multiple_channops() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client(dummy_client("nick3"));
+    handler.database.add_client_to_channel("nick3", "#channel");
+
+    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+    assert!(!handler.database.is_channel_operator("#channel", "nick3"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-o".to_string(),
+        "nick2,nick3".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.is_channel_operator("#channel", "nickname"));
+    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+    assert!(!handler.database.is_channel_operator("#channel", "nick3"));
 }
 
 #[test]
