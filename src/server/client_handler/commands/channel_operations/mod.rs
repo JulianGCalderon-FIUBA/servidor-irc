@@ -135,6 +135,13 @@ impl<C: Connection> ClientHandler<C> {
                     None => "No topic set".to_string(),
                 };
 
+                if self.database.channel_has_mode(&channel, 's')
+                    && !self
+                        .database
+                        .is_client_in_channel(&self.registration.nickname().unwrap(), &channel)
+                {
+                    continue;
+                }
                 let prv = self.database.channel_has_mode(&channel, 'p')
                     && !self
                         .database
