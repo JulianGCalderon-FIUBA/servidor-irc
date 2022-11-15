@@ -5,13 +5,13 @@ use std::{
 
 use crate::server::{connection::Connection, database::DatabaseHandle};
 
-use super::connection_handler_trait::ConnectionHandler;
+use super::connection_handler_trait::{
+    ConnectionHandler, ConnectionHandlerGetters, ConnectionHandlerStructure,
+};
 
 mod asserts;
-mod commands;
-mod getters;
+mod default;
 mod logic;
-mod structure;
 mod utils;
 
 pub struct RegistrationHandler<C: Connection> {
@@ -40,5 +40,28 @@ impl<C: Connection> ConnectionHandler<C> for RegistrationHandler<C> {
             online,
             attributes: HashMap::new(),
         })
+    }
+}
+
+impl<C: Connection> ConnectionHandlerGetters<C> for RegistrationHandler<C> {
+    fn online(&self) -> &Arc<AtomicBool> {
+        &self.online
+    }
+
+    fn connection(&mut self) -> &mut C {
+        &mut self.stream
+    }
+
+    fn database(&self) -> &DatabaseHandle<C> {
+        &self.database
+    }
+}
+
+impl<C: Connection> ConnectionHandlerStructure<C> for RegistrationHandler<C> {
+    fn on_try_handle_error(&mut self) {
+        eprintln!("Connection with unregistered client ended unexpectedly")
+    }
+    fn on_try_handle_success(&mut self) {
+        eprintln!("Closing conection with unregistered client")
     }
 }
