@@ -936,3 +936,45 @@ fn mode_sets_and_unsets_moderated_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 'm'));
 }
+
+#[test]
+fn mode_fails_when_setting_unknown_mode() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 'w'));
+
+    let parameters = vec!["#channel".to_string(), "+w".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "472 w :Is unknown mode char to me\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(!handler.database.channel_has_mode("#channel", 'w'));
+}
+
+#[test]
+fn mode_fails_when_unsetting_unknown_mode() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 'w'));
+
+    let parameters = vec!["#channel".to_string(), "-w".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "472 w :Is unknown mode char to me\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(!handler.database.channel_has_mode("#channel", 'w'));
+}
