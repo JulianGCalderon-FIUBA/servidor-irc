@@ -18,8 +18,28 @@ pub enum ControllerMessage {
         nickname: String,
         message: String,
     },
+    JoinChannel {
+        channel: GString,
+    },
+    AddViewToAddChannel {},
+    AddViewToAddClient {},
+    AddNewChannel {
+        channel: GString,
+    },
+    AddNewClient {
+        client: GString,
+    },
+    QuitChannel {},
     ChangeConversation {
         nickname: String,
+    },
+    AddInviteView {},
+    SendInviteMessage {
+        channel: GString,
+    },
+    RecieveInvite {
+        nickname: String,
+        channel: String,
     },
     RegularMessage {
         message: String,
