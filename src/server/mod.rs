@@ -13,6 +13,7 @@ mod database;
 
 /// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address
 mod listener;
+mod connection_handler;
 
 use client_handler::ClientHandler;
 use database::Database;
