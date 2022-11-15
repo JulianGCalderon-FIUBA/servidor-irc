@@ -6,7 +6,7 @@ use internet_relay_chat::ADDRESS;
 fn main() {
     let mut server = Server::start("lemon pie");
 
-    if let Err(error) = server.spawn_listener(ADDRESS.to_string()) {
+    if let Err(error) = server.listen_to(ADDRESS.to_string()) {
         return eprintln!("Error: Binding to address: {:?}", error);
     }
 

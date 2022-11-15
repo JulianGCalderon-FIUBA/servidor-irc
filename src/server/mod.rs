@@ -10,6 +10,8 @@ mod client_trait;
 
 /// Contains structure for database. A Database stores and updates information regarding clients, channels and related.
 mod database;
+
+/// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address
 mod listener;
 
 use client_handler::ClientHandler;
@@ -60,7 +62,7 @@ impl Server {
     }
 
     /// Listens for incoming clients and handles each request in a new thread.
-    pub fn spawn_listener(&mut self, address: String) -> io::Result<()> {
+    pub fn listen_to(&mut self, address: String) -> io::Result<()> {
         let database = match &self.database {
             Some(database) => database.clone(),
             None => {

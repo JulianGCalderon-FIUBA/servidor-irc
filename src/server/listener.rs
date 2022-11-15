@@ -1,5 +1,5 @@
 use std::{
-    io,
+    io::{self},
     net::{TcpListener, TcpStream},
     sync::{
         atomic::{AtomicBool, Ordering},
@@ -44,7 +44,10 @@ impl ConnectionListener {
         while self.online.load(Ordering::Relaxed) {
             let client = match self.listener.accept() {
                 Ok((client, _)) => client,
-                Err(_) => continue,
+                Err(error) => match error.kind() {
+                    io::ErrorKind::WouldBlock => continue,
+                    _ => return eprintln!("Could not listen from address {error:?}"),
+                },
             };
 
             match self.handler(client) {
@@ -56,12 +59,8 @@ impl ConnectionListener {
 
     fn handler(&self, client: TcpStream) -> io::Result<ClientHandler<TcpStream>> {
         let database = self.database.clone();
-        let online_ref = Arc::clone(&self.online);
-        ClientHandler::<TcpStream>::from_stream(
-            database,
-            client,
-            self.servername.clone(),
-            online_ref,
-        )
+        let online = Arc::clone(&self.online);
+        let servername = self.servername.clone();
+        ClientHandler::<TcpStream>::from_stream(database, client, servername, online)
     }
 }
