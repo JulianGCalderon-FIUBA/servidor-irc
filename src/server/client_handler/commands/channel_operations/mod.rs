@@ -18,7 +18,7 @@ pub const BAN_CONFIG: char = 'b';
 pub const SPEAKING_ABILITY_CONFIG: char = 'v';
 pub const KEY_CONFIG: char = 'k';
 
-const VALID_MODES: [char; 5] = ['s', 'i', 't', 'n', 'm'];
+const VALID_MODES: [char; 6] = ['p', 's', 'i', 't', 'n', 'm'];
 
 use self::mode_utils::parse_modes;
 use self::utils::get_keys_split;

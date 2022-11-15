@@ -787,3 +787,152 @@ fn mode_fails_with_key_already_set() {
         Some("key".to_string())
     );
 }
+
+#[test]
+fn mode_sets_and_unsets_private_flag() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 'p'));
+
+    let mut parameters = vec!["#channel".to_string(), "+p".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.channel_has_mode("#channel", 'p'));
+
+    parameters = vec!["#channel".to_string(), "-p".to_string()];
+
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.channel_has_mode("#channel", 'p'));
+}
+
+#[test]
+fn mode_sets_and_unsets_secret_flag() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 's'));
+
+    let mut parameters = vec!["#channel".to_string(), "+s".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.channel_has_mode("#channel", 's'));
+
+    parameters = vec!["#channel".to_string(), "-s".to_string()];
+
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.channel_has_mode("#channel", 's'));
+}
+
+#[test]
+fn mode_sets_and_unsets_invite_only_flag() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 'i'));
+
+    let mut parameters = vec!["#channel".to_string(), "+i".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.channel_has_mode("#channel", 'i'));
+
+    parameters = vec!["#channel".to_string(), "-i".to_string()];
+
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.channel_has_mode("#channel", 'i'));
+}
+
+#[test]
+fn mode_sets_and_unsets_topic_flag() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 't'));
+
+    let mut parameters = vec!["#channel".to_string(), "+t".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.channel_has_mode("#channel", 't'));
+
+    parameters = vec!["#channel".to_string(), "-t".to_string()];
+
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.channel_has_mode("#channel", 't'));
+}
+#[test]
+fn mode_sets_and_unsets_no_outside_messages_flag() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 'n'));
+
+    let mut parameters = vec!["#channel".to_string(), "+n".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.channel_has_mode("#channel", 'n'));
+
+    parameters = vec!["#channel".to_string(), "-n".to_string()];
+
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.channel_has_mode("#channel", 'n'));
+}
+
+#[test]
+fn mode_sets_and_unsets_moderated_flag() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(!handler.database.channel_has_mode("#channel", 'm'));
+
+    let mut parameters = vec!["#channel".to_string(), "+m".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.channel_has_mode("#channel", 'm'));
+
+    parameters = vec!["#channel".to_string(), "-m".to_string()];
+
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.channel_has_mode("#channel", 'm'));
+}
