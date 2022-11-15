@@ -38,6 +38,8 @@ const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
 pub struct ClientHandler<C: Connection> {
     database: DatabaseHandle<C>,
     stream: C,
+    receiver: MessageReceiver,
+    receiver_thread: Option<JoinHandle<()>>,
     registration: Registration<C>,
     servername: String,
     online: Arc<AtomicBool>,
@@ -54,6 +56,7 @@ impl<C: Connection> ClientHandler<C> {
         online: Arc<AtomicBool>,
     ) -> io::Result<ClientHandler<C>> {
         let registration = Registration::with_stream(stream.try_clone()?);
+        let (receiver, thread) = start_async_read_stream(stream.try_clone()?);
 
         Ok(Self {
             database,
@@ -61,6 +64,8 @@ impl<C: Connection> ClientHandler<C> {
             registration,
             servername,
             online,
+            receiver,
+            receiver_thread: Some(thread),
         })
     }
 
@@ -84,8 +89,6 @@ impl<C: Connection> ClientHandler<C> {
                 nickname.unwrap_or_default(),
             ),
         }
-
-        self.stream.shutdown().ok();
     }
 
     /// Tries to handle the received request.
@@ -95,8 +98,6 @@ impl<C: Connection> ClientHandler<C> {
     /// `try_handle` fails if there is an IOError when reading the Message the client sent.
     ///
     fn try_handle(&mut self) -> io::Result<()> {
-        let (receiver, _) = self.start_async_read_stream()?;
-
         loop {
             if self.server_shutdown() {
                 self.on_shutdown();
@@ -109,7 +110,7 @@ impl<C: Connection> ClientHandler<C> {
             }
 
             let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
-            let message = match receiver.recv_timeout(timeout) {
+            let message = match self.receiver.recv_timeout(timeout) {
                 Ok(message) => message,
                 Err(RecvTimeoutError::Timeout) => continue,
                 Err(RecvTimeoutError::Disconnected) => panic!(),
@@ -186,15 +187,21 @@ impl<C: Connection> ClientHandler<C> {
     fn server_shutdown(&mut self) -> bool {
         !self.online.load(Ordering::Relaxed)
     }
+}
 
-    fn start_async_read_stream(&self) -> io::Result<(MessageReceiver, JoinHandle<()>)> {
-        let (sender, receiver) = mpsc::channel();
-
-        let stream = self.stream.try_clone()?;
-        let handle = thread::spawn(|| async_read_stream(stream, sender));
-
-        Ok((receiver, handle))
+impl<C: Connection> Drop for ClientHandler<C> {
+    fn drop(&mut self) {
+        self.stream.shutdown().ok();
+        self.receiver_thread.take().unwrap().join().ok();
     }
+}
+
+fn start_async_read_stream<C: Connection>(stream: C) -> (MessageReceiver, JoinHandle<()>) {
+    let (sender, receiver) = mpsc::channel();
+
+    let handle = thread::spawn(|| async_read_stream(stream, sender));
+
+    (receiver, handle)
 }
 
 fn async_read_stream<C: Connection>(stream: C, sender: Sender<Result<Message, CreationError>>) {
