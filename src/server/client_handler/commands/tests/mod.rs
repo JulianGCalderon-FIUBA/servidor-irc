@@ -1,15 +1,23 @@
+mod away;
 mod invite;
 mod join;
+mod kick;
 mod list;
+mod mode;
 mod names;
 mod nick;
+mod notice;
 mod oper;
 mod part;
 mod pass;
 mod privmsg;
+mod topic;
 mod user;
 mod who;
 mod whois;
+
+use std::sync::atomic::AtomicBool;
+use std::sync::Arc;
 
 use crate::server::database::Database;
 use crate::server::testing_utils::dummy_client;
@@ -18,10 +26,11 @@ use crate::server::testing_utils::mock_stream::MockTcpStream;
 use super::*;
 
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
-    let database = Database::start();
+    let (database, _) = Database::start();
     let stream = MockTcpStream::new();
 
-    ClientHandler::from_stream(database, stream, "servername".to_string()).unwrap()
+    let online = Arc::new(AtomicBool::new(true));
+    ClientHandler::from_stream(database, stream, "servername".to_string(), online).unwrap()
 }
 
 fn register_client(handler: &mut ClientHandler<MockTcpStream>, nickname: &str) {

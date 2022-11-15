@@ -62,6 +62,7 @@ impl Controller {
         let register_window = register_view.get_view(app.clone());
         register_window.show();
 
+
         let mut main_view = MainView::new(sender.clone());
 
         let mut add_channel_view = AddChannelView::new(sender.clone());
@@ -79,7 +80,7 @@ impl Controller {
         let app_clone = app.clone();
         let sender_clone = sender.clone();
 
-        client.async_read(move |message| match message {
+        client.start_async_read(move |message| match message {
             Ok(message) => {
                 let controller_message = to_controller_message(message);
                 sender.send(controller_message).unwrap();

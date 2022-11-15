@@ -1,7 +1,7 @@
 use super::super::{OPER_COMMAND, PASS_COMMAND, USER_COMMAND};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 use super::ClientHandler;
 

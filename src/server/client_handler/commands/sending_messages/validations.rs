@@ -1,4 +1,4 @@
-use crate::server::{client_handler::registration::RegistrationState, client_trait::Connection};
+use crate::server::{client_handler::registration::RegistrationState, connection::Connection};
 
 use crate::server::client_handler::responses::errors::ErrorReply;
 
@@ -18,9 +18,20 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchNickname401 { nickname: target });
         }
 
-        let nickname = self.registration.nickname().unwrap();
-        if is_channel && !self.database.is_client_in_channel(&nickname, &target) {
-            return Some(ErrorReply::CanNotSendToChannel404 { channel: target });
+        if self.database.channel_has_mode(&target, 'n')
+            && !self
+                .database
+                .is_client_in_channel(&self.registration.nickname().unwrap(), &target)
+        {
+            return Some(ErrorReply::CannotSendToChannel404 { channel: target });
+        }
+
+        if self.database.channel_has_mode(&target, 'm')
+            && !self
+                .database
+                .is_channel_speaker(&target, &self.registration.nickname().unwrap())
+        {
+            return Some(ErrorReply::CannotSendToChannel404 { channel: target });
         }
 
         None
@@ -44,6 +55,14 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoTextToSend412 {});
         }
 
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient {});
+        }
+
+        None
+    }
+
+    pub fn assert_away_command_is_valid(&self) -> Option<ErrorReply> {
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient {});
         }

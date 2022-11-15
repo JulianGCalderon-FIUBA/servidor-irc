@@ -3,7 +3,7 @@ use std::io::{Read, Write};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::{Arc, Mutex, MutexGuard};
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 #[derive(Debug)]
 /// Used for testing. It allows the programmer to create a connection and use both ends of the stream.
@@ -41,6 +41,10 @@ impl Connection for MockTcpStream {
     fn peer_address(&self) -> io::Result<std::net::SocketAddr> {
         let addr = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080);
         Ok(addr)
+    }
+
+    fn shutdown(&self) -> io::Result<()> {
+        Ok(())
     }
 }
 

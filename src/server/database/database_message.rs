@@ -2,7 +2,7 @@ use std::io;
 use std::sync::mpsc::Sender;
 
 use super::{Client, ClientInfo};
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 /// Possible messages or requests a Database can receive.
 pub enum DatabaseMessage<C: Connection> {
@@ -75,4 +75,96 @@ pub enum DatabaseMessage<C: Connection> {
         password: String,
         respond_to: Sender<bool>,
     },
+    SetAwayMessage {
+        message: Option<String>,
+        nickname: String,
+    },
+    GetAwayMessage {
+        nickname: String,
+        respond_to: Sender<Option<String>>,
+    },
+    SetChannelTopic {
+        channel: String,
+        topic: String,
+    },
+    GetChannelTopic {
+        channel: String,
+        respond_to: Sender<Option<String>>,
+    },
+    IsChannelOperator {
+        channel: String,
+        nickname: String,
+        respond_to: Sender<bool>,
+    },
+    SetChannelKey {
+        channel: String,
+        key: Option<String>,
+    },
+    GetChannelKey {
+        channel: String,
+        respond_to: Sender<Option<String>>,
+    },
+    SetChannelMode {
+        channel: String,
+        mode: char,
+    },
+    UnsetChannelMode {
+        channel: String,
+        mode: char,
+    },
+    ChannelHasMode {
+        channel: String,
+        mode: char,
+        respond_to: Sender<bool>,
+    },
+    SetLimit {
+        channel: String,
+        limit: Option<usize>,
+    },
+    GetLimit {
+        channel: String,
+        respond_to: Sender<Option<usize>>,
+    },
+    AddChanop {
+        channel: String,
+        nickname: String,
+    },
+    RemoveChanop {
+        channel: String,
+        nickname: String,
+    },
+    AddSpeaker {
+        channel: String,
+        nickname: String,
+    },
+    RemoveSpeaker {
+        channel: String,
+        nickname: String,
+    },
+    IsChannelSpeaker {
+        channel: String,
+        nickname: String,
+        respond_to: Sender<bool>,
+    },
+    SetChannelBanMask {
+        channel: String,
+        mask: String,
+    },
+    GetChannelBanMask {
+        channel: String,
+        respond_to: Sender<Vec<String>>,
+    },
+    UnsetChannelBanMask {
+        channel: String,
+        mask: String,
+    },
+    ClientMatchesBanmask {
+        nickname: String,
+        mask: String,
+        respond_to: Sender<bool>,
+    },
+    // GetAllChannelModes {
+    //     channel: String,
+    //     respond_to: Sender<Vec<char>>,
+    // },
 }

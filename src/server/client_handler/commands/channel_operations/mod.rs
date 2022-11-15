@@ -3,14 +3,27 @@ mod utils;
 /// This module contains validations for channel operations.
 mod validations;
 
+mod mode_utils;
+
+use std::io;
+
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
+
+pub const OPER_CONFIG: char = 'o';
+pub const LIMIT_CONFIG: char = 'l';
+pub const BAN_CONFIG: char = 'b';
+pub const SPEAKING_ABILITY_CONFIG: char = 'v';
+pub const KEY_CONFIG: char = 'k';
+
+const VALID_MODES: [char; 6] = ['p', 's', 'i', 't', 'n', 'm'];
+
+use self::mode_utils::parse_modes;
+use self::utils::get_keys_split;
 
 use super::ClientHandler;
-
-use std::io;
 
 impl<C: Connection> ClientHandler<C> {
     /// Invites client to channel.
@@ -51,19 +64,51 @@ impl<C: Connection> ClientHandler<C> {
         }
         let nickname = self.registration.nickname().unwrap();
 
-        let channels = &parameters[0];
-        //let keys = &parameters[1];
+        let channels = parameters[0].split(',');
 
-        for channel in channels.split(',') {
+        let mut keys = get_keys_split(parameters.get(1)).into_iter();
+
+        for channel in channels {
+            let key = keys.next();
+
             if let Some(error) = self.assert_can_join_channel(channel, &nickname) {
                 self.send_response_for_error(error)?;
                 continue;
             }
+
+            if self.database.get_channel_key(channel) != key {
+                self.send_response_for_error(ErrorReply::BadChannelKey475 {
+                    channel: channel.to_string(),
+                })?;
+                continue;
+            }
+
+            if let Some(limit) = self.database.get_channel_limit(channel) {
+                if self.database.get_clients_for_channel(channel).len() >= limit {
+                    self.send_response_for_error(ErrorReply::ChannelIsFull471 {
+                        channel: channel.to_string(),
+                    })?;
+                    continue;
+                }
+            }
+
+            if self.client_matches_banmask(channel, &nickname) {
+                self.send_response_for_error(ErrorReply::BannedFromChannel474 {
+                    channel: channel.to_string(),
+                })?;
+                continue;
+            }
+
+            let notification = Notification::Join {
+                nickname: self.registration.nickname().unwrap(),
+                channel: channel.to_string(),
+            };
+            self.send_message_to_channel(channel, &notification.to_string());
+
             self.database.add_client_to_channel(&nickname, channel);
 
-            self.send_response_for_reply(CommandResponse::NoTopic331 {
-                channel: channel.to_string(),
-            })?;
+            self.send_topic_reply(channel.to_string())?;
+
             self.send_response_for_reply(CommandResponse::NameReply353 {
                 channel: channel.to_string(),
                 clients: self.database.get_clients_for_channel(channel),
@@ -85,7 +130,28 @@ impl<C: Connection> ClientHandler<C> {
 
         for channel in channels {
             if self.can_list_channel(&channel) {
-                self.send_response_for_reply(CommandResponse::List322 { channel })?;
+                let topic = match self.database.get_topic_for_channel(&channel) {
+                    Some(topic) => topic,
+                    None => "No topic set".to_string(),
+                };
+
+                if self.database.channel_has_mode(&channel, 's')
+                    && !self
+                        .database
+                        .is_client_in_channel(&self.registration.nickname().unwrap(), &channel)
+                {
+                    continue;
+                }
+                let prv = self.database.channel_has_mode(&channel, 'p')
+                    && !self
+                        .database
+                        .is_client_in_channel(&self.registration.nickname().unwrap(), &channel);
+
+                self.send_response_for_reply(CommandResponse::List322 {
+                    channel,
+                    prv,
+                    topic,
+                })?;
             }
         }
         self.send_response_for_reply(CommandResponse::ListEnd323)
@@ -101,6 +167,10 @@ impl<C: Connection> ClientHandler<C> {
 
         for channel in channels {
             if !self.database.contains_channel(&channel) {
+                continue;
+            }
+
+            if !self.can_name_channel(&channel) {
                 continue;
             }
 
@@ -138,8 +208,91 @@ impl<C: Connection> ClientHandler<C> {
                 self.send_response_for_error(error)?;
                 continue;
             }
+            let notification = Notification::Part {
+                nickname: self.registration.nickname().unwrap(),
+                channel: channel.to_string(),
+            };
+            self.send_message_to_channel(channel, &notification.to_string());
             self.database.remove_client_from_channel(&nickname, channel);
         }
+        Ok(())
+    }
+
+    pub fn topic_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        if let Some(error) = self.assert_topic_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+
+        let channel = &parameters[0];
+
+        if parameters.len() > 1 {
+            let topic = &parameters[1];
+            self.database.set_channel_topic(channel, topic);
+        } else {
+            self.send_topic_reply(channel.to_string())?;
+        }
+
+        Ok(())
+    }
+
+    pub fn kick_command(
+        &mut self,
+        parameters: Vec<String>,
+        trailing: Option<String>,
+    ) -> io::Result<()> {
+        if let Some(error) = self.assert_kick_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+
+        let channel = parameters[0].split(',');
+        let nickname = parameters[1].split(',');
+
+        for (channel, nickname) in channel.zip(nickname) {
+            if let Some(error) = self.assert_can_kick_from_channel(channel) {
+                self.send_response_for_error(error)?;
+            } else {
+                self.kick_client_from_channel(nickname, channel, &trailing);
+            }
+        }
+
+        Ok(())
+    }
+
+    pub fn mode_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
+        if let Some(error) = self.assert_mode_is_valid(&parameters) {
+            return self.send_response_for_error(error);
+        }
+        if !self.assert_modes_starts_correctly(&parameters[1]) {
+            return Ok(());
+        }
+
+        // let channel = &parameters[0];
+
+        // if parameters.len() == 1 {
+        //     let modes = self.database.get_channel_modes(channel);
+        //     for mode in modes {
+        //         let params: Option<Vec<String>> = match mode {
+        //             OPER_CONFIG => self.database.get_channel_operators(channel),
+        //             LIMIT_CONFIG => self.database.get_channel_limit(channel),
+        //             BAN_CONFIG => Some(self.database.get_channel_banmask(channel)),
+        //             SPEAKING_ABILITY_CONFIG => self.get_channel_speakers(channel),
+        //             _ => None,
+        //         };
+        //         self.send_response_for_reply(CommandResponse::ChannelModeIs324 {
+        //             channel: channel.to_string(),
+        //             mode,
+        //             mode_params: params,
+        //         })?;
+        //     }
+        // }
+
+        let modes: Vec<char> = parameters[1].chars().collect();
+
+        let (add, remove) = parse_modes(modes);
+
+        self.add_modes(add, parameters.clone())?;
+        self.remove_modes(remove, parameters)?;
+
         Ok(())
     }
 }

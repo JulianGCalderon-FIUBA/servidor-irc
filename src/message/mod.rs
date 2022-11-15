@@ -5,7 +5,7 @@ mod parsing_error;
 pub use creation_error::CreationError;
 pub use parsing_error::ParsingError;
 
-use std::io::{self, Read, Write};
+use std::io::{self, BufRead, BufReader, Error, ErrorKind, Read, Write};
 pub struct Message {
     prefix: Option<String>,
     command: String,
@@ -58,6 +58,25 @@ impl Message {
         Ok(message)
     }
 
+    pub fn read_from_buffer<R: Read>(buffer: &mut BufReader<R>) -> Result<Self, CreationError> {
+        let mut content = String::new();
+        let read = buffer.read_line(&mut content)?;
+        if read == 0 {
+            Err(unexpected_eof_error())?;
+        }
+
+        if content.as_bytes().ends_with(CRLF) {
+            content.pop();
+            content.pop();
+        } else {
+            return Err(CreationError::ParsingError(ParsingError::NoTrailingCRLF));
+        }
+
+        let message = Self::new(&content)?;
+
+        Ok(message)
+    }
+
     fn read_line(stream: &mut dyn Read, buffer: &mut String) -> io::Result<()> {
         let mut content = String::new();
         while !content.as_bytes().ends_with(LF) {
@@ -90,6 +109,10 @@ impl Message {
     pub fn get_trailing(&self) -> &Option<String> {
         &self.trailing
     }
+}
+
+fn unexpected_eof_error() -> Error {
+    Error::new(ErrorKind::UnexpectedEof, "")
 }
 
 impl std::fmt::Display for Message {

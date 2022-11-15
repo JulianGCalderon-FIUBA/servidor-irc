@@ -1,4 +1,4 @@
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 use super::Client;
 
@@ -80,6 +80,7 @@ impl<C: Connection> ClientBuilder<C> {
             servername: self.servername?,
             realname: self.realname?,
             operator: false,
+            away_message: None,
         };
 
         Some(client_info)

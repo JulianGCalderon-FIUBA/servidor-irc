@@ -1,10 +1,15 @@
-use crate::server::client_handler::commands::DISTRIBUTED_CHANNEL;
+use crate::server::client_handler::commands::{
+    DISTRIBUTED_CHANNEL, INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, MODE_COMMAND, PART_COMMAND,
+    TOPIC_COMMAND,
+};
 use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
-use super::super::{INVITE_COMMAND, JOIN_COMMAND, PART_COMMAND};
+pub const ADD_MODE: char = '+';
+pub const REMOVE_MODE: char = '-';
+
 use super::ClientHandler;
 
 impl<C: Connection> ClientHandler<C> {
@@ -13,6 +18,45 @@ impl<C: Connection> ClientHandler<C> {
             || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
             && !channel.contains(INVALID_CHARACTER);
     }
+    pub fn assert_modes_starts_correctly(&mut self, modes: &String) -> bool {
+        modes.as_bytes()[0] == (ADD_MODE as u8) || modes.as_bytes()[0] == (REMOVE_MODE as u8)
+    }
+    pub fn client_matches_banmask(&mut self, channel: &str, nickname: &str) -> bool {
+        for mask in self.database.get_channel_banmask(channel) {
+            if self.database.client_matches_banmask(nickname, &mask) {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn assert_can_modify_client_status_in_channel(
+        &self,
+        channel: &str,
+        nickname: &str,
+    ) -> Option<ErrorReply> {
+        if !self.database.contains_client(nickname) {
+            return Some(ErrorReply::NoSuchNickname401 {
+                nickname: nickname.to_string(),
+            });
+        }
+        if !self.database.is_client_in_channel(nickname, channel) {
+            return Some(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
+        }
+        None
+    }
+
+    pub fn assert_can_set_key(&mut self, channel: &str) -> Option<ErrorReply> {
+        if self.database.get_channel_key(channel).is_some() {
+            return Some(ErrorReply::KeySet467 {
+                channel: channel.to_string(),
+            });
+        }
+        None
+    }
+
     /// Asserts client can join channel.
     /// Possible errors:
     ///     - Client is in too many channels.
@@ -31,7 +75,7 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchChannel403 { channel });
         }
 
-        if self.user_is_in_channel(&channel, &nickname) {
+        if self.database.is_client_in_channel(&nickname, &channel) {
             return Some(ErrorReply::UserOnChannel443 { nickname, channel });
         }
 
@@ -48,8 +92,7 @@ impl<C: Connection> ClientHandler<C> {
             return Some(ErrorReply::NoSuchChannel403 { channel });
         }
 
-        let clients = self.database.get_clients_for_channel(&channel);
-        if !clients.contains(&nickname.to_string()) {
+        if !self.database.is_client_in_channel(nickname, &channel) {
             return Some(ErrorReply::NotOnChannel442 { channel });
         }
 
@@ -57,13 +100,30 @@ impl<C: Connection> ClientHandler<C> {
     }
     /// Asserts channel can be listed.
     pub fn can_list_channel(&self, channel: &str) -> bool {
-        self.database.contains_channel(channel) && self.channel_name_is_valid(channel)
+        if self.database.channel_has_mode(channel, 's')
+            && !self
+                .database
+                .is_client_in_channel(&self.registration.nickname().unwrap(), channel)
+        {
+            return false;
+        }
+
+        if self.database.contains_channel(channel) {
+            return true;
+        }
+
+        false
     }
 
-    fn user_is_in_channel(&self, channel: &str, nickname: &str) -> bool {
-        self.database
-            .get_clients_for_channel(channel)
-            .contains(&String::from(nickname))
+    pub fn can_name_channel(&mut self, channel: &str) -> bool {
+        let is_priv_or_secret = self.database.channel_has_mode(channel, 's')
+            || self.database.channel_has_mode(channel, 'p');
+
+        let is_client_in_channel = self
+            .database
+            .is_client_in_channel(&self.registration.nickname().unwrap(), channel);
+
+        !is_priv_or_secret || is_client_in_channel
     }
 
     /// Asserts invite command can be executed.
@@ -94,18 +154,34 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         if self.database.contains_channel(&channel) {
-            if !self.user_is_in_channel(&channel, &inviting_client) {
+            if !self
+                .database
+                .is_client_in_channel(&inviting_client, &channel)
+            {
                 return Some(ErrorReply::NotOnChannel442 { channel });
             }
-            if self.user_is_in_channel(&channel, &invited_client) {
+            if self
+                .database
+                .is_client_in_channel(&invited_client, &channel)
+            {
                 return Some(ErrorReply::UserOnChannel443 {
                     nickname: invited_client,
                     channel,
                 });
             }
         }
+
+        if self.database.channel_has_mode(&channel, 'i')
+            && !self
+                .database
+                .is_channel_operator(&channel, &inviting_client)
+        {
+            return Some(ErrorReply::ChanOPrivIsNeeded482 { channel });
+        }
+
         None
     }
+
     /// Asserts join command can be executed.
     /// Possible errors:
     ///     - Not enough parameters.
@@ -135,6 +211,104 @@ impl<C: Connection> ClientHandler<C> {
         if self.registration.state() != &RegistrationState::Registered {
             return Some(ErrorReply::UnregisteredClient);
         }
+        None
+    }
+
+    pub fn assert_topic_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
+        if parameters.is_empty() {
+            let command = TOPIC_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
+        }
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient);
+        }
+
+        let nickname = self.registration.nickname().unwrap();
+        let channel = parameters[0].to_string();
+
+        if !self.database.is_client_in_channel(&nickname, &channel) {
+            return Some(ErrorReply::NotOnChannel442 { channel });
+        }
+
+        if self.database.channel_has_mode(&channel, 't')
+            && !self
+                .database
+                .is_channel_operator(&channel, &self.registration.nickname().unwrap())
+        {
+            return Some(ErrorReply::ChanOPrivIsNeeded482 { channel });
+        }
+
+        None
+    }
+
+    pub fn assert_kick_is_valid(&self, parameters: &[String]) -> Option<ErrorReply> {
+        if parameters.len() < 2 {
+            let command = KICK_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
+        }
+
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient);
+        }
+
+        None
+    }
+
+    pub fn assert_can_kick_from_channel(&self, channel: &str) -> Option<ErrorReply> {
+        if !self.database.contains_channel(channel) {
+            let channel = channel.to_string();
+            return Some(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        if !self
+            .database
+            .is_client_in_channel(&self.registration.nickname().unwrap(), channel)
+        {
+            let channel = channel.to_string();
+            return Some(ErrorReply::NotOnChannel442 { channel });
+        }
+
+        if !self
+            .database
+            .is_channel_operator(channel, &self.registration.nickname().unwrap())
+        {
+            let channel = channel.to_string();
+            return Some(ErrorReply::ChanopPrivilegesNeeded482 { channel });
+        }
+
+        None
+    }
+
+    pub fn assert_mode_is_valid(&self, parameters: &Vec<String>) -> Option<ErrorReply> {
+        if parameters.is_empty() {
+            let command = MODE_COMMAND.to_string();
+            return Some(ErrorReply::NeedMoreParameters461 { command });
+        }
+        if self.registration.state() != &RegistrationState::Registered {
+            return Some(ErrorReply::UnregisteredClient);
+        }
+
+        let channel = &parameters[0];
+        let nickname = self.registration.nickname().unwrap();
+
+        if !self.database.contains_channel(channel) {
+            return Some(ErrorReply::NoSuchChannel403 {
+                channel: channel.to_string(),
+            });
+        }
+
+        if !self.database.is_client_in_channel(&nickname, channel) {
+            return Some(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
+        }
+
+        if !self.database.is_channel_operator(channel, &nickname) && parameters.len() > 1 {
+            return Some(ErrorReply::ChanOPrivIsNeeded482 {
+                channel: channel.to_string(),
+            });
+        }
+
         None
     }
 }

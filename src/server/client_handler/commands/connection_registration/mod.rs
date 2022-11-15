@@ -1,7 +1,7 @@
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 use super::ClientHandler;
 

@@ -9,7 +9,7 @@ use errors::ErrorReply;
 use std::io;
 
 use crate::message::Message;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 use crate::server::ClientHandler;
 
 use self::replies::CommandResponse;
