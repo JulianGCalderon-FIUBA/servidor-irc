@@ -687,3 +687,103 @@ fn mode_speaker_fails_with_nick_not_on_channel() {
     );
     assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
 }
+
+#[test]
+fn mode_sets_channel_key() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(handler.database.get_channel_key("#channel").is_none());
+
+    let parameters = vec!["#channel".to_string(), "+k".to_string(), "key".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        handler.database.get_channel_key("#channel"),
+        Some("key".to_string())
+    );
+}
+
+#[test]
+fn mode_unsets_channel_key() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .set_channel_key("#channel", Some("key".to_string()));
+
+    assert_eq!(
+        handler.database.get_channel_key("#channel"),
+        Some("key".to_string())
+    );
+
+    let parameters = vec!["#channel".to_string(), "-k".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.get_channel_key("#channel").is_none());
+}
+
+#[test]
+fn mode_fails_with_no_key_parameter() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(handler.database.get_channel_key("#channel").is_none());
+
+    let parameters = vec!["#channel".to_string(), "+k".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "461 MODE :Not enough parameters\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(handler.database.get_channel_key("#channel").is_none());
+}
+
+#[test]
+fn mode_fails_with_key_already_set() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .set_channel_key("#channel", Some("key".to_string()));
+
+    assert_eq!(
+        handler.database.get_channel_key("#channel"),
+        Some("key".to_string())
+    );
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+k".to_string(),
+        "new_key".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "467 #channel :Channel key already set\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert_eq!(
+        handler.database.get_channel_key("#channel"),
+        Some("key".to_string())
+    );
+}
