@@ -116,7 +116,7 @@ fn can_invite_one_user() {
 }
 
 #[test]
-fn invite_fails_with_not_channope_on_moderated_channel() {
+fn invite_fails_with_not_channop_on_moderated_channel() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nick");
 
