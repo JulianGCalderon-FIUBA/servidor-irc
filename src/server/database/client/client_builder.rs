@@ -1,4 +1,4 @@
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 use super::Client;
 

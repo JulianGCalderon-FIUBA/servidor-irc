@@ -2,7 +2,7 @@ use std::io;
 
 use crate::{
     message::Message,
-    server::{client_handler::ClientHandler, client_trait::Connection},
+    server::{client_handler::ClientHandler, connection::Connection},
 };
 
 impl<C: Connection> ClientHandler<C> {

@@ -3,7 +3,7 @@ use std::time::Instant;
 
 mod registration_state;
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 use crate::server::database::{Client, ClientBuilder};
 pub use registration_state::RegistrationState;
 

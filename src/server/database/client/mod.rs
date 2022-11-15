@@ -5,7 +5,7 @@ pub use client_builder::ClientBuilder;
 pub use client_info::ClientInfo;
 use std::io;
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 /// Represents a Client that is connected to the Server.
 pub struct Client<C: Connection> {

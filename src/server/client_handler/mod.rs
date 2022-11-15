@@ -20,7 +20,7 @@ use responses::errors::ErrorReply;
 use self::commands::AWAY_COMMAND;
 use self::registration::RegistrationState;
 
-use super::client_trait::Connection;
+use super::connection::Connection;
 use super::database::DatabaseHandle;
 use crate::message::{CreationError, ParsingError};
 use registration::Registration;

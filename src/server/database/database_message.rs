@@ -2,7 +2,7 @@ use std::io;
 use std::sync::mpsc::Sender;
 
 use super::{Client, ClientInfo};
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 /// Possible messages or requests a Database can receive.
 pub enum DatabaseMessage<C: Connection> {

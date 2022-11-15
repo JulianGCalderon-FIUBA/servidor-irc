@@ -5,7 +5,7 @@ use crate::server::{
         responses::{notifications::Notification, replies::CommandResponse},
         ClientHandler,
     },
-    client_trait::Connection,
+    connection::Connection,
 };
 
 impl<C: Connection> ClientHandler<C> {

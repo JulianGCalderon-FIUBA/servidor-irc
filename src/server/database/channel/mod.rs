@@ -1,6 +1,6 @@
 use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 use super::Client;
 /// A Channel has clients and a name.

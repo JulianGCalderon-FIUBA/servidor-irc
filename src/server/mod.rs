@@ -6,7 +6,7 @@ mod testing_utils;
 mod client_handler;
 
 /// Definition of the trait used in the project's structures.
-mod client_trait;
+mod connection;
 
 /// Contains structure for database. A Database stores and updates information regarding clients, channels and related.
 mod database;

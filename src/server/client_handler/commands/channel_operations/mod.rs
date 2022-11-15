@@ -10,7 +10,7 @@ use std::io;
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::notifications::Notification;
 use crate::server::client_handler::responses::replies::CommandResponse;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 pub const OPER_CONFIG: char = 'o';
 pub const LIMIT_CONFIG: char = 'l';

@@ -26,7 +26,7 @@ use database_message::DatabaseMessage::{
 
 use self::database_message::DatabaseMessage;
 
-use super::client_trait::Connection;
+use super::connection::Connection;
 /// Represents a Database that implements ClientTrait.
 pub struct Database<C: Connection> {
     receiver: Receiver<DatabaseMessage<C>>,

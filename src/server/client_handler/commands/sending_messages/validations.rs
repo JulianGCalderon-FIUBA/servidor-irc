@@ -1,4 +1,4 @@
-use crate::server::{client_handler::registration::RegistrationState, client_trait::Connection};
+use crate::server::{client_handler::registration::RegistrationState, connection::Connection};
 
 use crate::server::client_handler::responses::errors::ErrorReply;
 

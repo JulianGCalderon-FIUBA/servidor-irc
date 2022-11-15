@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::io;
 use std::rc::Rc;
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 use crate::server::database::{Channel, Client};
 
 use super::{ClientInfo, Database};

@@ -5,7 +5,7 @@ use crate::server::client_handler::commands::{
 use crate::server::client_handler::commands::{INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 use crate::server::client_handler::registration::RegistrationState;
 use crate::server::client_handler::responses::errors::ErrorReply;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 pub const ADD_MODE: char = '+';
 pub const REMOVE_MODE: char = '-';

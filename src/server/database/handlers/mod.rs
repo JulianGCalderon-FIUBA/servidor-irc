@@ -4,7 +4,7 @@ use std::{io, rc::Rc};
 /// This module contains the functions with the logic regarding the database's functionalities.
 mod logic;
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 use super::{ClientInfo, Database};
 

@@ -3,7 +3,7 @@ use std::{
     sync::mpsc::{self, Sender},
 };
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 use super::database_message::DatabaseMessage;
 use super::{Client, ClientInfo};

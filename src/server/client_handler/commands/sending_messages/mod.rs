@@ -4,7 +4,7 @@ mod validations;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::ClientHandler;
 use crate::server::{
-    client_handler::responses::notifications::Notification, client_trait::Connection,
+    client_handler::responses::notifications::Notification, connection::Connection,
 };
 use std::io;
 
