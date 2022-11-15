@@ -167,3 +167,141 @@ fn privmsg_with_away_client_returns_away_message() {
         handler.stream.read_wbuf_to_string(),
     );
 }
+
+#[test]
+fn privmsg_fails_with_not_on_channel_with_flag_n() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    handler.database.set_channel_mode("#channel", 'n');
+
+    let parameters = vec!["#channel".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.privmsg_command(parameters, trailing).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("404 #channel :Cannot send to channel", responses[0]);
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_stream("nick1")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_stream("nick2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("nick", "#channel");
+
+    handler.database.set_channel_mode("#channel", 'm');
+
+    let parameters = vec!["#channel".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.privmsg_command(parameters, trailing).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("404 #channel :Cannot send to channel", responses[0]);
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_stream("nick1")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn privmsg_works_on_channel_with_flag_n() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick", "#channel");
+    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    handler.database.set_channel_mode("#channel", 'n');
+
+    let parameters = vec!["#channel".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.privmsg_command(parameters, trailing).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!(":nick PRIVMSG #channel :message!", responses[0]);
+
+    assert_eq!(
+        ":nick PRIVMSG #channel :message!\r\n",
+        handler
+            .database
+            .get_stream("nick1")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+
+    assert_eq!(
+        ":nick PRIVMSG #channel :message!\r\n",
+        handler
+            .database
+            .get_stream("nick2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn privmsg_works_on_channel_with_flag_m() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("nick", "#channel");
+
+    handler.database.set_channel_mode("#channel", 'm');
+    handler.database.add_speaker("#channel", "nick");
+
+    let parameters = vec!["#channel".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.privmsg_command(parameters, trailing).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!(":nick PRIVMSG #channel :message!", responses[0]);
+
+    assert_eq!(
+        ":nick PRIVMSG #channel :message!\r\n",
+        handler
+            .database
+            .get_stream("nick1")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
