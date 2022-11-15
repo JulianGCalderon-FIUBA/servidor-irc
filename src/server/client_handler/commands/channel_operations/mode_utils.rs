@@ -101,6 +101,11 @@ impl<C: Connection> ClientHandler<C> {
             if i == 3 {
                 break;
             }
+            if let Some(error) = self.assert_can_modify_client_status_in_channel(channel, nickname)
+            {
+                self.send_response_for_error(error)?;
+                continue;
+            }
             self.database.add_channop(channel, nickname);
         }
         Ok(())
@@ -118,6 +123,14 @@ impl<C: Connection> ClientHandler<C> {
         for (i, nickname) in operators.split(',').enumerate() {
             if i == 3 {
                 break;
+            }
+            if let Some(error) = self.assert_can_modify_client_status_in_channel(channel, nickname)
+            {
+                self.send_response_for_error(error)?;
+                continue;
+            }
+            if !self.database.is_channel_operator(channel, nickname) {
+                continue;
             }
             self.database.remove_channop(channel, nickname);
         }
@@ -194,6 +207,11 @@ impl<C: Connection> ClientHandler<C> {
         };
 
         for nickname in speakers.split(',') {
+            if let Some(error) = self.assert_can_modify_client_status_in_channel(channel, nickname)
+            {
+                self.send_response_for_error(error)?;
+                continue;
+            }
             self.database.add_speaker(channel, nickname);
         }
         Ok(())
@@ -209,6 +227,14 @@ impl<C: Connection> ClientHandler<C> {
             }
         };
         for nickname in speakers.split(',') {
+            if let Some(error) = self.assert_can_modify_client_status_in_channel(channel, nickname)
+            {
+                self.send_response_for_error(error)?;
+                continue;
+            }
+            if !self.database.is_channel_speaker(channel, nickname) {
+                continue;
+            }
             self.database.remove_speaker(channel, nickname);
         }
         Ok(())

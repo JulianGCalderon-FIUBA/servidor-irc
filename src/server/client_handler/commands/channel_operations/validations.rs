@@ -22,6 +22,24 @@ impl<C: Connection> ClientHandler<C> {
         modes.as_bytes()[0] == (ADD_MODE as u8) || modes.as_bytes()[0] == (REMOVE_MODE as u8)
     }
 
+    pub fn assert_can_modify_client_status_in_channel(
+        &self,
+        channel: &str,
+        nickname: &str,
+    ) -> Option<ErrorReply> {
+        if !self.database.contains_client(nickname) {
+            return Some(ErrorReply::NoSuchNickname401 {
+                nickname: nickname.to_string(),
+            });
+        }
+        if !self.database.is_client_in_channel(nickname, channel) {
+            return Some(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
+        }
+        None
+    }
+
     pub fn assert_can_set_key(&mut self, channel: &str) -> Option<ErrorReply> {
         if self.database.get_channel_key(channel).is_some() {
             return Some(ErrorReply::KeySet467 {

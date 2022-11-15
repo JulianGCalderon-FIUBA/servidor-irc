@@ -132,15 +132,18 @@ fn mode_adds_multiple_channops() {
     handler.database.add_client_to_channel("nick3", "#channel");
     handler.database.add_client(dummy_client("nick4"));
     handler.database.add_client_to_channel("nick4", "#channel");
+    handler.database.add_client(dummy_client("nick5"));
+    handler.database.add_client_to_channel("nick5", "#channel");
 
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
     assert!(!handler.database.is_channel_operator("#channel", "nick3"));
     assert!(!handler.database.is_channel_operator("#channel", "nick4"));
+    assert!(!handler.database.is_channel_operator("#channel", "nick5"));
 
     let parameters = vec![
         "#channel".to_string(),
         "+o".to_string(),
-        "nick2,nick3".to_string(),
+        "nick2,nick3,nick4,nick5".to_string(),
     ];
     handler.mode_command(parameters).unwrap();
 
@@ -148,7 +151,8 @@ fn mode_adds_multiple_channops() {
     assert!(handler.database.is_channel_operator("#channel", "nickname"));
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
     assert!(handler.database.is_channel_operator("#channel", "nick3"));
-    assert!(!handler.database.is_channel_operator("#channel", "nick4"));
+    assert!(handler.database.is_channel_operator("#channel", "nick4"));
+    assert!(!handler.database.is_channel_operator("#channel", "nick5"));
 }
 
 #[test]
