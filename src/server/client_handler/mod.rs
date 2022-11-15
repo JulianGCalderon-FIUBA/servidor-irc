@@ -3,7 +3,7 @@ use std::io::BufReader;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
 use std::sync::Arc;
-use std::thread;
+use std::thread::{self, JoinHandle};
 use std::time::{Duration, Instant};
 
 use crate::message::Message;
@@ -42,6 +42,8 @@ pub struct ClientHandler<C: Connection> {
     servername: String,
     online: Arc<AtomicBool>,
 }
+
+type MessageReceiver = Receiver<Result<Message, CreationError>>;
 
 impl<C: Connection> ClientHandler<C> {
     /// Returns new [`ClientHandler`].
@@ -93,7 +95,7 @@ impl<C: Connection> ClientHandler<C> {
     /// `try_handle` fails if there is an IOError when reading the Message the client sent.
     ///
     fn try_handle(&mut self) -> io::Result<()> {
-        let receiver = self.start_async_read_stream()?;
+        let (receiver, _) = self.start_async_read_stream()?;
 
         loop {
             if self.server_shutdown() {
@@ -115,7 +117,9 @@ impl<C: Connection> ClientHandler<C> {
 
             let message = match message {
                 Ok(message) => message,
-                Err(CreationError::IoError(error)) => return Err(error),
+                Err(CreationError::IoError(error)) => {
+                    return Err(error);
+                }
                 Err(CreationError::ParsingError(error)) => {
                     self.on_parsing_error(&error)?;
                     continue;
@@ -183,13 +187,13 @@ impl<C: Connection> ClientHandler<C> {
         !self.online.load(Ordering::Relaxed)
     }
 
-    fn start_async_read_stream(&self) -> io::Result<Receiver<Result<Message, CreationError>>> {
+    fn start_async_read_stream(&self) -> io::Result<(MessageReceiver, JoinHandle<()>)> {
         let (sender, receiver) = mpsc::channel();
 
         let stream = self.stream.try_clone()?;
-        thread::spawn(|| async_read_stream(stream, sender));
+        let handle = thread::spawn(|| async_read_stream(stream, sender));
 
-        Ok(receiver)
+        Ok((receiver, handle))
     }
 }
 

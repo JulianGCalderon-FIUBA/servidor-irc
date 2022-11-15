@@ -54,8 +54,12 @@ impl Client {
         self.write_stream.write_all(CRLF)
     }
 
-    pub fn is_connected(&self) -> bool {
-        self.write_stream.peek(&mut []).is_err()
+    pub fn finished_asnyc_read(&self) -> bool {
+        if let Some(join_handle) = &self.read_thread {
+            return join_handle.is_finished();
+        }
+
+        true
     }
 }
 

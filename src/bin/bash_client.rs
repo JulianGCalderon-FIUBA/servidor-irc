@@ -1,6 +1,6 @@
-use std::io::{self};
+use std::io;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
-use std::thread;
+use std::thread::{self, JoinHandle};
 use std::time::Duration;
 
 use internet_relay_chat::client::Client;
@@ -14,10 +14,11 @@ fn main() {
 
     client.async_print();
 
-    let stdin = spawn_stdin_channel();
+    let (stdin, handle) = spawn_stdin_channel();
 
     loop {
-        if !client.is_connected() {
+        if client.finished_asnyc_read() {
+            println!("Connection with server was closed, press enter to continue.");
             break;
         }
 
@@ -32,16 +33,25 @@ fn main() {
             break;
         }
     }
+
+    drop(stdin);
+    handle.join().ok();
 }
 
-fn spawn_stdin_channel() -> Receiver<String> {
+fn spawn_stdin_channel() -> (Receiver<String>, JoinHandle<()>) {
     let (tx, rx) = mpsc::channel::<String>();
 
-    thread::spawn(move || loop {
+    let handle = thread::spawn(move || loop {
         let mut buffer = String::new();
-        io::stdin().read_line(&mut buffer).unwrap();
-        tx.send(buffer).unwrap();
+        if io::stdin().read_line(&mut buffer).is_err() {
+            return;
+        }
+
+        buffer.pop();
+        if tx.send(buffer).is_err() {
+            return;
+        }
     });
 
-    rx
+    (rx, handle)
 }

@@ -4,7 +4,7 @@ use super::*;
 
 #[test]
 fn can_add_client() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     assert!(!database.contains_client("nickname"));
     database.add_client(dummy_client("nickname"));
@@ -17,7 +17,7 @@ fn can_add_client() {
 
 #[test]
 fn can_set_server_operator() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     database.add_client(dummy_client("nickname"));
 
@@ -28,7 +28,7 @@ fn can_set_server_operator() {
 
 #[test]
 fn can_get_client_stream() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname");
 
@@ -42,7 +42,7 @@ fn can_get_client_stream() {
 
 #[test]
 fn disconnecting_sets_client_not_online() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname");
 
@@ -55,7 +55,7 @@ fn disconnecting_sets_client_not_online() {
 
 #[test]
 fn can_add_client_to_channel() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname");
     database.add_client(client);
@@ -67,7 +67,7 @@ fn can_add_client_to_channel() {
 
 #[test]
 fn after_adding_client_to_channel_it_contains_client() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname");
     database.add_client(client);
@@ -79,7 +79,7 @@ fn after_adding_client_to_channel_it_contains_client() {
 
 #[test]
 fn can_get_all_clients_from_channel() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname1");
     database.add_client(client);
@@ -99,7 +99,7 @@ fn can_get_all_clients_from_channel() {
 
 #[test]
 fn can_remove_client_from_channel() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname1");
     database.add_client(client);
@@ -119,7 +119,7 @@ fn can_remove_client_from_channel() {
 
 #[test]
 fn removing_last_client_from_channel_deletes_channel() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname1");
     database.add_client(client);
@@ -132,7 +132,7 @@ fn removing_last_client_from_channel_deletes_channel() {
 
 #[test]
 fn can_get_all_channels() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname");
     database.add_client(client);
@@ -149,7 +149,7 @@ fn can_get_all_channels() {
 
 #[test]
 fn can_get_all_channels_from_client() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nickname");
     database.add_client(client);
@@ -166,7 +166,7 @@ fn can_get_all_channels_from_client() {
 
 #[test]
 fn can_get_all_clients_matching_mask() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = ClientBuilder::new()
         .nickname("nickAname".to_string())
@@ -195,7 +195,7 @@ fn can_get_all_clients_matching_mask() {
 
 #[test]
 fn can_get_all_clients_matching_nickmask() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client1 = dummy_client("nick1");
     let client2 = dummy_client("nick2");
@@ -222,7 +222,7 @@ fn can_get_all_clients_matching_nickmask() {
 
 #[test]
 fn can_get_all_clients() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client1 = dummy_client("nick1");
     let client2 = dummy_client("nick2");
@@ -242,7 +242,7 @@ fn can_get_all_clients() {
 
 #[test]
 fn can_update_nickname() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nick");
 
@@ -256,7 +256,7 @@ fn can_update_nickname() {
 
 #[test]
 fn can_set_and_get_channel_topic() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nick");
     database.add_client(client);
@@ -281,7 +281,7 @@ fn can_set_and_get_channel_topic() {
 
 #[test]
 fn can_verify_channel_operator() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     database.add_client(dummy_client("nickname1"));
     database.add_client(dummy_client("nickname2"));
@@ -294,7 +294,7 @@ fn can_verify_channel_operator() {
 
 #[test]
 fn can_set_away_message_for_client() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nick");
     database.add_client(client);
@@ -305,7 +305,7 @@ fn can_set_away_message_for_client() {
 
 #[test]
 fn can_set_and_get_channel_key() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nick");
     database.add_client(client);
@@ -327,7 +327,7 @@ fn can_set_and_get_channel_key() {
 
 #[test]
 fn can_set_and_unset_channel_mode() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nick");
     database.add_client(client);
@@ -346,7 +346,7 @@ fn can_set_and_unset_channel_mode() {
 
 #[test]
 fn can_set_and_get_channel_limit() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nick");
     database.add_client(client);
@@ -365,7 +365,7 @@ fn can_set_and_get_channel_limit() {
 
 // #[test]
 // fn can_add_and_remove_channel_operator() {
-//     let database = Database::start();
+//     let (database, _) = Database::start();
 
 //     let client = dummy_client("nick");
 //     database.add_client(client);
@@ -384,7 +384,7 @@ fn can_set_and_get_channel_limit() {
 
 #[test]
 fn can_add_and_remove_channel_speaker() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nick");
     database.add_client(client);
@@ -403,7 +403,7 @@ fn can_add_and_remove_channel_speaker() {
 
 #[test]
 fn can_set_and_unset_channel_banmask() {
-    let database = Database::start();
+    let (database, _) = Database::start();
 
     let client = dummy_client("nick");
     database.add_client(client);

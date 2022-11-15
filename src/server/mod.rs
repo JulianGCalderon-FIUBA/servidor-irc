@@ -18,7 +18,7 @@ use std::io::{self, stdin, BufRead, BufReader};
 use std::net::{TcpListener, TcpStream};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
-use std::thread;
+use std::thread::{self, JoinHandle};
 
 use self::database::DatabaseHandle;
 
@@ -31,33 +31,34 @@ pub const OPER_PASSWORD: &str = "admin";
 pub struct Server {
     servername: String,
     database: DatabaseHandle<TcpStream>,
+    database_thread: JoinHandle<()>,
     online: Arc<AtomicBool>,
 }
 
 impl Server {
     /// Starts new [`Server`].
     pub fn start(servername: &str) -> Self {
-        let database = Database::start();
-
         let servername = servername.to_string();
-
         let online = Arc::new(AtomicBool::new(true));
 
+        let (database, database_thread) = Database::start();
+
         Self {
-            database,
             servername,
             online,
+            database,
+            database_thread,
         }
     }
 
-    fn start_input_read(&self) {
+    fn start_input_read(&self) -> JoinHandle<()> {
         let online_ref = Arc::clone(&self.online);
-        thread::spawn(|| input_read(online_ref));
+        thread::spawn(|| input_read(online_ref))
     }
 
     /// Listens for incoming clients and handles each request in a new thread.
     pub fn listen_to(self, address: String) -> io::Result<()> {
-        self.start_input_read();
+        let handle = self.start_input_read();
 
         let listener = TcpListener::bind(address)?;
 
@@ -76,6 +77,11 @@ impl Server {
                 Err(error) => eprintln!("Could not create handler {error:?}"),
             }
         }
+
+        handle.join().ok();
+
+        drop(self.database);
+        self.database_thread.join().ok();
 
         Ok(())
     }

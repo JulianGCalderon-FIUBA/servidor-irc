@@ -25,7 +25,7 @@ use crate::server::testing_utils::mock_stream::MockTcpStream;
 use super::*;
 
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
-    let database = Database::start();
+    let (database, _) = Database::start();
     let stream = MockTcpStream::new();
 
     let online = Arc::new(AtomicBool::new(true));

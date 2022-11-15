@@ -11,7 +11,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::mpsc::{self, Receiver};
-use std::thread;
+use std::thread::{self, JoinHandle};
 
 pub use channel::Channel;
 pub use client::{Client, ClientBuilder, ClientInfo};
@@ -37,12 +37,13 @@ pub struct Database<C: Connection> {
 
 impl<C: Connection> Database<C> {
     /// Returns new [`DatabaseHandle`] and starts listening for requests.
-    pub fn start() -> DatabaseHandle<C> {
+    pub fn start() -> (DatabaseHandle<C>, JoinHandle<()>) {
         let (sender, receiver) = mpsc::channel();
 
-        thread::spawn(|| Database::<C>::new(receiver).run());
+        let join_handle = thread::spawn(|| Database::<C>::new(receiver).run());
+        let database_handle = DatabaseHandle::new(sender);
 
-        DatabaseHandle::new(sender)
+        (database_handle, join_handle)
     }
 
     fn new(receiver: Receiver<DatabaseMessage<C>>) -> Self {
