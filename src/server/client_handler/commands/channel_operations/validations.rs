@@ -21,6 +21,14 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_modes_starts_correctly(&mut self, modes: &String) -> bool {
         modes.as_bytes()[0] == (ADD_MODE as u8) || modes.as_bytes()[0] == (REMOVE_MODE as u8)
     }
+    pub fn client_matches_banmask(&mut self, channel: &str, nickname: &str) -> bool {
+        for mask in self.database.get_channel_banmask(channel) {
+            if self.database.client_matches_banmask(nickname, &mask) {
+                return true;
+            }
+        }
+        false
+    }
 
     pub fn assert_can_modify_client_status_in_channel(
         &self,

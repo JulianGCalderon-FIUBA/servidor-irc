@@ -118,15 +118,6 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    fn client_matches_banmask(&mut self, channel: &str, nickname: &str) -> bool {
-        for mask in self.database.get_channel_banmask(channel) {
-            if self.database.client_matches_banmask(nickname, &mask) {
-                return true;
-            }
-        }
-        false
-    }
-
     /// Lists all channels and their information.
     pub fn list_command(&mut self, parameters: Vec<String>) -> io::Result<()> {
         if let Some(error) = self.assert_registration_is_valid() {
