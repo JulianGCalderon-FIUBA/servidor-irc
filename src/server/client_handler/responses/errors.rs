@@ -3,7 +3,7 @@ use std::fmt::Display;
 pub enum ErrorReply {
     NoSuchNickname401 { nickname: String },
     NoSuchChannel403 { channel: String },
-    CanNotSendToChannel404 { channel: String },
+    // CanNotSendToChannel404 { channel: String },
     TooManyChannels405 { channel: String },
     NoRecipient411 { command: String },
     NoTextToSend412,
@@ -16,15 +16,21 @@ pub enum ErrorReply {
     NeedMoreParameters461 { command: String },
     AlreadyRegistered462,
     PasswordMismatch464,
-    // ChannelIsFull471 { channel: String },
     // InviteOnlyChannel473 { channel: String },
     // BannedFromChannel474 { channel: String },
-    // BadChannelKey475 { channel: String },
+    BadChannelKey475 { channel: String },
     //
     NoNickname,
     UnregisteredClient,
     ParsingError,
+    ChanopPrivilegesNeeded482 { channel: String },
     // NoSuchServer { server: String},
+    UnknownMode472 { mode: char },
+    KeySet467 { channel: String },
+    ChanOPrivIsNeeded482 { channel: String },
+    CannotSendToChannel404 { channel: String },
+    ChannelIsFull471 { channel: String },
+    BannedFromChannel474 { channel: String },
 }
 
 impl Display for ErrorReply {
@@ -35,9 +41,6 @@ impl Display for ErrorReply {
             }
             ErrorReply::NoSuchChannel403 { channel } => {
                 format!("403 {channel} :No such channel")
-            }
-            ErrorReply::CanNotSendToChannel404 { channel } => {
-                format!("404 {channel} :Cannot send to channel")
             }
             ErrorReply::TooManyChannels405 { channel } => {
                 format!("405 {channel} :You have joined too many channels")
@@ -70,6 +73,30 @@ impl Display for ErrorReply {
             ErrorReply::NoNickname => "200 :No nickname registered".to_string(),
             ErrorReply::UnregisteredClient => "200 :Unregistered".to_string(),
             ErrorReply::ParsingError => "200 :Parsing error".to_string(),
+            ErrorReply::ChanopPrivilegesNeeded482 { channel } => {
+                format!("482 {channel} :You're not channel operator")
+            }
+            ErrorReply::UnknownMode472 { mode } => {
+                format!("472 {mode} :Is unknown mode char to me")
+            }
+            ErrorReply::KeySet467 { channel } => {
+                format!("467 {channel} :Channel key already set")
+            }
+            ErrorReply::ChanOPrivIsNeeded482 { channel } => {
+                format!("482 {channel} :You're not channel operator")
+            }
+            ErrorReply::CannotSendToChannel404 { channel } => {
+                format!("404 {channel} :Cannot send to channel")
+            }
+            ErrorReply::BadChannelKey475 { channel } => {
+                format!("475 {channel} :Cannot join channel (+k)")
+            }
+            ErrorReply::ChannelIsFull471 { channel } => {
+                format!("471 {channel} :Cannot join channel (+l)")
+            }
+            ErrorReply::BannedFromChannel474 { channel } => {
+                format!("474 {channel} :Cannot join channel (+b)")
+            }
         };
         write!(f, "{string}")
     }

@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use crate::server::database::ClientInfo;
+
 /// Possible responses the commands can generate.
 pub enum CommandResponse {
     // Away301 {
@@ -35,15 +36,17 @@ pub enum CommandResponse {
     ListStart321,
     List322 {
         channel: String,
+        prv: bool,
+        topic: String,
     },
     ListEnd323,
     NoTopic331 {
         channel: String,
     },
-    // Topic332 {
-    //     channel: String,
-    //     topic: String,
-    // },
+    Topic332 {
+        channel: String,
+        topic: String,
+    },
     Inviting341 {
         channel: String,
         nickname: String,
@@ -60,6 +63,24 @@ pub enum CommandResponse {
         channel: String,
     },
     YouAreOper381,
+    BanList367 {
+        channel: String,
+        banmask: String,
+    },
+    EndOfBanList368 {
+        channel: String,
+    },
+    // ChannelModeIs324 {
+    //     channel: String,
+    //     mode: char,
+    //     mode_params: Option<Vec<String>>,
+    // },
+    UnAway,
+    NowAway,
+    Away {
+        nickname: String,
+        message: String,
+    },
 }
 
 impl Display for CommandResponse {
@@ -103,16 +124,24 @@ impl Display for CommandResponse {
                 format!("319 {nickname} : {}", channels.join(" "))
             }
             CommandResponse::ListStart321 => "321 :Channel :Users Name".to_string(),
-            CommandResponse::List322 { channel } => {
-                format!("322 : {channel}")
+            CommandResponse::List322 {
+                channel,
+                topic,
+                prv,
+            } => {
+                if *prv {
+                    format!("322 {channel} Prv")
+                } else {
+                    format!("322 {channel} :{topic}")
+                }
             }
             CommandResponse::ListEnd323 => "323 :End of /LIST".to_string(),
             CommandResponse::NoTopic331 { channel } => {
                 format!("331 {channel} :No topic is set")
             }
-            // CommandResponse::Topic332 { channel, topic } => {
-            //     format!("332 {} :{}", channel, topic)
-            // }
+            CommandResponse::Topic332 { channel, topic } => {
+                format!("332 {} :{}", channel, topic)
+            }
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")
             }
@@ -137,6 +166,25 @@ impl Display for CommandResponse {
                 format!("366 {channel} :End of /NAMES list")
             }
             CommandResponse::YouAreOper381 => "381 :You are now an IRC operator".to_string(),
+            CommandResponse::BanList367 { channel, banmask } => {
+                format!("367 {channel} {banmask}")
+            }
+            CommandResponse::EndOfBanList368 { channel } => {
+                format!("368 {channel} :End of channel ban list")
+            }
+            // CommandResponse::ChannelModeIs324 {
+            //     channel,
+            //     mode,
+            //     mode_params,
+            // } => format!(
+            //     "324 {channel} {mode} {:?}",
+            //     mode_params.as_ref().unwrap_or(&vec!["".to_string()])
+            // ),
+            CommandResponse::UnAway => "305 :You are no longer marked as being away".to_string(),
+            CommandResponse::NowAway => "306 :You have been marked as being away".to_string(),
+            CommandResponse::Away { nickname, message } => {
+                format!("301 {nickname} :{message}")
+            }
         };
         write!(f, "{string}")
     }

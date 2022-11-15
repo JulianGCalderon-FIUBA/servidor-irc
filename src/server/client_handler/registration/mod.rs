@@ -1,8 +1,9 @@
 use std::collections::HashMap;
+use std::time::Instant;
 
 mod registration_state;
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 use crate::server::database::{Client, ClientBuilder};
 pub use registration_state::RegistrationState;
 
@@ -12,6 +13,7 @@ pub struct Registration<C: Connection> {
     nickname: Option<String>,
     state: RegistrationState,
     attributes: HashMap<&'static str, String>,
+    timestamp: Instant,
 }
 
 impl<C: Connection> Registration<C> {
@@ -22,6 +24,7 @@ impl<C: Connection> Registration<C> {
             nickname: None,
             state: RegistrationState::NotInitialized,
             attributes: HashMap::new(),
+            timestamp: Instant::now(),
         }
     }
     /// Sets a Client's attribute.
@@ -50,6 +53,10 @@ impl<C: Connection> Registration<C> {
     /// Returns current Registration State.
     pub fn state(&self) -> &RegistrationState {
         &self.state
+    }
+
+    pub fn instant(&self) -> Instant {
+        self.timestamp
     }
 
     /// Builds new [`Client`]

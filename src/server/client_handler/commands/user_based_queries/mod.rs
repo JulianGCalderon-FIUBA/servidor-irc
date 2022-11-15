@@ -7,7 +7,7 @@ mod validations;
 use crate::server::client_handler::responses::errors::ErrorReply;
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_handler::ClientHandler;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 use crate::server::database::ClientInfo;
 
 impl<C: Connection> ClientHandler<C> {

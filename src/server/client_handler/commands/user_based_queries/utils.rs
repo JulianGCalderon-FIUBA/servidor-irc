@@ -2,8 +2,11 @@ use std::io;
 
 use crate::server::client_handler::responses::replies::CommandResponse;
 use crate::server::client_handler::ClientHandler;
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 use crate::server::database::ClientInfo;
+
+pub const OPERATOR_SYMBOL: char = '@';
+pub const SPEAKER_SYMBOL: char = '+';
 
 impl<C: Connection> ClientHandler<C> {
     /// Returns filtered list of clients.
@@ -59,8 +62,18 @@ impl<C: Connection> ClientHandler<C> {
                 nickname: nickname.to_string(),
             })?;
         }
-        let channels = self.database.get_channels_for_client(&nickname);
+        let mut channels = self.database.get_channels_for_client(&nickname);
         if !channels.is_empty() {
+            for channel in &mut channels {
+                if self.database.is_channel_operator(channel, &nickname) {
+                    channel.insert(0, OPERATOR_SYMBOL);
+                }
+                if self.database.channel_has_mode(channel, 'm')
+                    && self.database.is_channel_speaker(channel, &nickname)
+                {
+                    channel.insert(0, SPEAKER_SYMBOL);
+                }
+            }
             self.send_response_for_reply(CommandResponse::WhoisChannels319 {
                 nickname: nickname.to_string(),
                 channels,

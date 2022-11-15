@@ -1,4 +1,10 @@
 use std::io;
+use std::io::BufReader;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError, Sender};
+use std::sync::Arc;
+use std::thread::{self, JoinHandle};
+use std::time::{Duration, Instant};
 
 use crate::message::Message;
 
@@ -11,24 +17,35 @@ mod responses;
 
 use responses::errors::ErrorReply;
 
-use super::client_trait::Connection;
+use self::commands::AWAY_COMMAND;
+use self::registration::RegistrationState;
+
+use super::connection::Connection;
 use super::database::DatabaseHandle;
 use crate::message::{CreationError, ParsingError};
 use registration::Registration;
 
 use commands::{
-    INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, NOTICE_COMMAND,
-    OPER_COMMAND, PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
-    WHOIS_COMMAND, WHO_COMMAND,
+    INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, MODE_COMMAND, NAMES_COMMAND,
+    NICK_COMMAND, NOTICE_COMMAND, OPER_COMMAND, PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND,
+    QUIT_COMMAND, TOPIC_COMMAND, USER_COMMAND, WHOIS_COMMAND, WHO_COMMAND,
 };
+
+const REGISTRATION_TIMELIMIT_MS: u128 = 60 * 1000;
+const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
 
 /// A ClientHandler handles the client's request.
 pub struct ClientHandler<C: Connection> {
     database: DatabaseHandle<C>,
     stream: C,
+    receiver: MessageReceiver,
+    receiver_thread: Option<JoinHandle<()>>,
     registration: Registration<C>,
     servername: String,
+    online: Arc<AtomicBool>,
 }
+
+type MessageReceiver = Receiver<Result<Message, CreationError>>;
 
 impl<C: Connection> ClientHandler<C> {
     /// Returns new [`ClientHandler`].
@@ -36,14 +53,19 @@ impl<C: Connection> ClientHandler<C> {
         database: DatabaseHandle<C>,
         stream: C,
         servername: String,
+        online: Arc<AtomicBool>,
     ) -> io::Result<ClientHandler<C>> {
         let registration = Registration::with_stream(stream.try_clone()?);
+        let (receiver, thread) = start_async_read_stream(stream.try_clone()?);
 
         Ok(Self {
             database,
             stream,
             registration,
             servername,
+            online,
+            receiver,
+            receiver_thread: Some(thread),
         })
     }
 
@@ -77,11 +99,28 @@ impl<C: Connection> ClientHandler<C> {
     ///
     fn try_handle(&mut self) -> io::Result<()> {
         loop {
-            let message = Message::read_from(&mut self.stream);
+            if self.server_shutdown() {
+                self.on_shutdown();
+                return Ok(());
+            }
+
+            if self.registration_timeout() {
+                self.on_registration_timeout();
+                return Ok(());
+            }
+
+            let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
+            let message = match self.receiver.recv_timeout(timeout) {
+                Ok(message) => message,
+                Err(RecvTimeoutError::Timeout) => continue,
+                Err(RecvTimeoutError::Disconnected) => panic!(),
+            };
 
             let message = match message {
                 Ok(message) => message,
-                Err(CreationError::IoError(error)) => return Err(error),
+                Err(CreationError::IoError(error)) => {
+                    return Err(error);
+                }
                 Err(CreationError::ParsingError(error)) => {
                     self.on_parsing_error(&error)?;
                     continue;
@@ -103,6 +142,10 @@ impl<C: Connection> ClientHandler<C> {
                 LIST_COMMAND => self.list_command(parameters)?,
                 WHO_COMMAND => self.who_command(parameters)?,
                 WHOIS_COMMAND => self.whois_command(parameters)?,
+                AWAY_COMMAND => self.away_command(trailing)?,
+                TOPIC_COMMAND => self.topic_command(parameters)?,
+                KICK_COMMAND => self.kick_command(parameters, trailing)?,
+                MODE_COMMAND => self.mode_command(parameters)?,
                 QUIT_COMMAND => {
                     self.quit_command(trailing)?;
                     return Ok(());
@@ -120,5 +163,62 @@ impl<C: Connection> ClientHandler<C> {
         self.send_response_for_error(ErrorReply::UnknownCommand421 {
             command: command.to_string(),
         })
+    }
+
+    fn on_shutdown(&mut self) {
+        self.send_response("Server has shutdown").ok();
+    }
+
+    fn on_registration_timeout(&mut self) {
+        self.send_response("Registration timeout").ok();
+    }
+
+    fn registration_timeout(&self) -> bool {
+        if self.registration.state() == &RegistrationState::Registered {
+            return false;
+        }
+
+        let elapsed_time = Instant::now().duration_since(self.registration.instant());
+        let elapsed_time_ms = elapsed_time.as_millis();
+
+        elapsed_time_ms > REGISTRATION_TIMELIMIT_MS
+    }
+
+    fn server_shutdown(&mut self) -> bool {
+        !self.online.load(Ordering::Relaxed)
+    }
+}
+
+impl<C: Connection> Drop for ClientHandler<C> {
+    fn drop(&mut self) {
+        self.stream.shutdown().ok();
+        self.receiver_thread.take().unwrap().join().ok();
+    }
+}
+
+fn start_async_read_stream<C: Connection>(stream: C) -> (MessageReceiver, JoinHandle<()>) {
+    let (sender, receiver) = mpsc::channel();
+
+    let handle = thread::spawn(|| async_read_stream(stream, sender));
+
+    (receiver, handle)
+}
+
+fn async_read_stream<C: Connection>(stream: C, sender: Sender<Result<Message, CreationError>>) {
+    let mut reader = BufReader::new(stream);
+
+    loop {
+        let message = Message::read_from_buffer(&mut reader);
+
+        if let Err(CreationError::IoError(_)) = message {
+            if sender.send(message).is_err() {
+                return;
+            };
+            break;
+        }
+
+        if sender.send(message).is_err() {
+            return;
+        };
     }
 }

@@ -1,5 +1,7 @@
-use std::io::stdin;
-use std::io::{BufRead, BufReader};
+use std::io;
+use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
+use std::thread::{self, JoinHandle};
+use std::time::Duration;
 
 use internet_relay_chat::client::Client;
 use internet_relay_chat::ADDRESS;
@@ -12,15 +14,44 @@ fn main() {
 
     client.async_print();
 
-    let reader = BufReader::new(stdin());
-    for line in reader.lines() {
-        let line = match line {
+    let (stdin, handle) = spawn_stdin_channel();
+
+    loop {
+        if client.finished_asnyc_read() {
+            println!("Connection with server was closed, press enter to continue.");
+            break;
+        }
+
+        let line = match stdin.recv_timeout(Duration::from_millis(100)) {
             Ok(line) => line,
-            Err(error) => return eprint!("Error reading from stdin: {}", error),
+            Err(RecvTimeoutError::Timeout) => continue,
+            Err(RecvTimeoutError::Disconnected) => break,
         };
 
         if let Err(error) = client.send_raw(&line) {
-            return eprintln!("Error sending message to server: {}", error);
+            eprintln!("Error sending message to server: {}", error);
+            break;
         }
     }
+
+    drop(stdin);
+    handle.join().ok();
+}
+
+fn spawn_stdin_channel() -> (Receiver<String>, JoinHandle<()>) {
+    let (tx, rx) = mpsc::channel::<String>();
+
+    let handle = thread::spawn(move || loop {
+        let mut buffer = String::new();
+        if io::stdin().read_line(&mut buffer).is_err() {
+            return;
+        }
+
+        buffer.pop();
+        if tx.send(buffer).is_err() {
+            return;
+        }
+    });
+
+    (rx, handle)
 }

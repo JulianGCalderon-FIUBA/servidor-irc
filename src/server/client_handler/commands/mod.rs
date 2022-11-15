@@ -19,17 +19,28 @@ pub const MAX_CHANNELS: usize = 10;
 pub const DISTRIBUTED_CHANNEL: u8 = b'#';
 pub const LOCAL_CHANNEL: u8 = b'&';
 
-pub const WHOIS_COMMAND: &str = "WHOIS";
-pub const WHO_COMMAND: &str = "WHO";
-pub const NOTICE_COMMAND: &str = "NOTICE";
-pub const PRIVMSG_COMMAND: &str = "PRIVMSG";
-pub const NICK_COMMAND: &str = "NICK";
-pub const OPER_COMMAND: &str = "OPER";
 pub const PASS_COMMAND: &str = "PASS";
-pub const QUIT_COMMAND: &str = "QUIT";
+pub const NICK_COMMAND: &str = "NICK";
 pub const USER_COMMAND: &str = "USER";
+pub const QUIT_COMMAND: &str = "QUIT";
+
+pub const OPER_COMMAND: &str = "OPER";
+
 pub const INVITE_COMMAND: &str = "INVITE";
+
+pub const PRIVMSG_COMMAND: &str = "PRIVMSG";
+pub const NOTICE_COMMAND: &str = "NOTICE";
+
 pub const JOIN_COMMAND: &str = "JOIN";
+pub const PART_COMMAND: &str = "PART";
+pub const TOPIC_COMMAND: &str = "TOPIC";
+pub const MODE_COMMAND: &str = "MODE";
+
 pub const LIST_COMMAND: &str = "LIST";
 pub const NAMES_COMMAND: &str = "NAMES";
-pub const PART_COMMAND: &str = "PART";
+pub const AWAY_COMMAND: &str = "AWAY";
+
+pub const WHOIS_COMMAND: &str = "WHOIS";
+pub const WHO_COMMAND: &str = "WHO";
+
+pub const KICK_COMMAND: &str = "KICK";

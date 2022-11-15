@@ -3,7 +3,7 @@ use std::{
     sync::mpsc::{self, Sender},
 };
 
-use crate::server::client_trait::Connection;
+use crate::server::connection::Connection;
 
 use super::database_message::DatabaseMessage;
 use super::{Client, ClientInfo};
@@ -194,6 +194,205 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub fn set_away_message(&self, message: &Option<String>, nickname: &str) {
+        let request = DatabaseMessage::SetAwayMessage {
+            message: message.to_owned(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+    pub fn set_channel_topic(&self, channel: &str, topic: &str) {
+        let request = DatabaseMessage::SetChannelTopic {
+            channel: channel.to_string(),
+            topic: topic.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn get_away_message(&self, nickname: &str) -> Option<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetAwayMessage {
+            nickname: nickname.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn get_topic_for_channel(&self, channel: &str) -> Option<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetChannelTopic {
+            channel: channel.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn is_channel_operator(&self, channel: &str, nick: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::IsChannelOperator {
+            channel: channel.to_string(),
+            nickname: nick.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn set_channel_key(&self, channel: &str, key: Option<String>) {
+        let request = DatabaseMessage::SetChannelKey {
+            channel: channel.to_string(),
+            key,
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn get_channel_key(&self, channel: &str) -> Option<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetChannelKey {
+            channel: channel.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn set_channel_mode(&self, channel: &str, mode: char) {
+        let request = DatabaseMessage::SetChannelMode {
+            channel: channel.to_string(),
+            mode,
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn unset_channel_mode(&self, channel: &str, mode: char) {
+        let request = DatabaseMessage::UnsetChannelMode {
+            channel: channel.to_string(),
+            mode,
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn channel_has_mode(&self, channel: &str, mode: char) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::ChannelHasMode {
+            channel: channel.to_string(),
+            mode,
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn set_channel_limit(&self, channel: &str, limit: Option<usize>) {
+        let request = DatabaseMessage::SetLimit {
+            channel: channel.to_string(),
+            limit,
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn get_channel_limit(&self, channel: &str) -> Option<usize> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetLimit {
+            channel: channel.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn add_channop(&self, channel: &str, nickname: &str) {
+        let request = DatabaseMessage::AddChanop {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn remove_channop(&self, channel: &str, nickname: &str) {
+        let request = DatabaseMessage::RemoveChanop {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn add_speaker(&self, channel: &str, nickname: &str) {
+        let request = DatabaseMessage::AddSpeaker {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn remove_speaker(&self, channel: &str, nickname: &str) {
+        let request = DatabaseMessage::RemoveSpeaker {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn is_channel_speaker(&self, channel: &str, nickname: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::IsChannelSpeaker {
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn set_channel_banmask(&self, channel: &str, banmask: &str) {
+        let request = DatabaseMessage::SetChannelBanMask {
+            channel: channel.to_string(),
+            mask: banmask.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn get_channel_banmask(&self, channel: &str) -> Vec<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetChannelBanMask {
+            channel: channel.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn unset_channel_banmask(&self, channel: &str, banmask: &str) {
+        let request = DatabaseMessage::UnsetChannelBanMask {
+            channel: channel.to_string(),
+            mask: banmask.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn client_matches_banmask(&self, nickname: &str, mask: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::ClientMatchesBanmask {
+            nickname: nickname.to_string(),
+            mask: mask.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    // pub fn get_channel_modes(&self, channel: &str) -> Vec<char> {
+    //     let (sender, receiver) = mpsc::channel();
+    //     let request = DatabaseMessage::GetAllChannelModes {
+    //         channel: channel.to_string(),
+    //         respond_to: sender,
+    //     };
+    //     self.sender.send(request).unwrap();
+    //     receiver.recv().unwrap()
+    // }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {
