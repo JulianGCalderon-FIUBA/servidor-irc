@@ -92,13 +92,11 @@ impl<C: Connection> ClientHandler<C> {
                 }
             }
 
-            for mask in self.database.get_channel_banmask(channel) {
-                if self.database.client_matches_banmask(&nickname, &mask) {
-                    self.send_response_for_error(ErrorReply::BannedFromChannel474 {
-                        channel: channel.to_string(),
-                    })?;
-                    continue;
-                }
+            if self.client_matches_banmask(channel, &nickname) {
+                self.send_response_for_error(ErrorReply::BannedFromChannel474 {
+                    channel: channel.to_string(),
+                })?;
+                continue;
             }
 
             let notification = Notification::Join {
@@ -118,6 +116,15 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         Ok(())
+    }
+
+    fn client_matches_banmask(&mut self, channel: &str, nickname: &str) -> bool {
+        for mask in self.database.get_channel_banmask(channel) {
+            if self.database.client_matches_banmask(nickname, &mask) {
+                return true;
+            }
+        }
+        false
     }
 
     /// Lists all channels and their information.
