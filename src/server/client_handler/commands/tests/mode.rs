@@ -341,3 +341,164 @@ fn mode_fails_with_no_limit_parameter() {
     );
     assert!(handler.database.get_channel_limit("#channel").is_none());
 }
+
+#[test]
+fn mode_sets_banmask() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(handler.database.get_channel_banmask("#channel").is_empty());
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+b".to_string(),
+        "banmask".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+
+    let masks = vec!["banmask".to_string()];
+
+    assert_eq!(masks, handler.database.get_channel_banmask("#channel"))
+}
+
+#[test]
+fn mode_sets_multiple_banmasks() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(handler.database.get_channel_banmask("#channel").is_empty());
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+b".to_string(),
+        "banmask1,banmask2,banmask3,banmask4".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+
+    let masks = vec![
+        "banmask1".to_string(),
+        "banmask2".to_string(),
+        "banmask3".to_string(),
+    ];
+
+    assert_eq!(masks, handler.database.get_channel_banmask("#channel"))
+}
+
+#[test]
+fn mode_unsets_banmask() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.set_channel_banmask("#channel", "banmask");
+    handler.database.set_channel_banmask("#channel", "banmask2");
+    assert!(!handler.database.get_channel_banmask("#channel").is_empty());
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-b".to_string(),
+        "banmask".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+
+    let masks = vec!["banmask2".to_string()];
+
+    assert_eq!(masks, handler.database.get_channel_banmask("#channel"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-b".to_string(),
+        "banmask2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert!(handler.database.get_channel_banmask("#channel").is_empty())
+}
+
+#[test]
+fn mode_returns_ban_list_with_no_parameters() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    assert!(handler.database.get_channel_banmask("#channel").is_empty());
+
+    let mut parameters = vec![
+        "#channel".to_string(),
+        "+b".to_string(),
+        "banmask1,banmask2,banmask3,banmask4".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+    handler.stream.clear();
+
+    parameters = vec!["#channel".to_string(), "+b".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("367 #channel banmask1", responses[0]);
+    assert_eq!("367 #channel banmask2", responses[1]);
+    assert_eq!("367 #channel banmask3", responses[2]);
+    assert_eq!("368 #channel :End of channel ban list", responses[3]);
+}
+
+#[test]
+fn mode_fails_with_no_banmask_parameter() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.set_channel_banmask("#channel", "banmask");
+    assert!(!handler.database.get_channel_banmask("#channel").is_empty());
+
+    let parameters = vec!["#channel".to_string(), "-b".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "461 MODE :Not enough parameters\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn mode_ignores_unknown_banmask_when_unsetting() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-b".to_string(),
+        "banmask".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.get_channel_banmask("#channel").is_empty());
+}
