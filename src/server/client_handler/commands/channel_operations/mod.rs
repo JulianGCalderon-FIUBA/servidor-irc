@@ -18,7 +18,7 @@ pub const BAN_CONFIG: char = 'b';
 pub const SPEAKING_ABILITY_CONFIG: char = 'v';
 pub const KEY_CONFIG: char = 'k';
 
-const VALID_MODES: [char; 5] = ['s', 'i', 't', 'n', 'm'];
+const VALID_MODES: [char; 6] = ['p', 's', 'i', 't', 'n', 'm'];
 
 use self::mode_utils::parse_modes;
 use self::utils::get_keys_split;
@@ -92,13 +92,11 @@ impl<C: Connection> ClientHandler<C> {
                 }
             }
 
-            for mask in self.database.get_channel_banmask(channel) {
-                if self.database.client_matches_banmask(&nickname, &mask) {
-                    self.send_response_for_error(ErrorReply::BannedFromChannel474 {
-                        channel: channel.to_string(),
-                    })?;
-                    continue;
-                }
+            if self.client_matches_banmask(channel, &nickname) {
+                self.send_response_for_error(ErrorReply::BannedFromChannel474 {
+                    channel: channel.to_string(),
+                })?;
+                continue;
             }
 
             let notification = Notification::Join {
@@ -137,6 +135,13 @@ impl<C: Connection> ClientHandler<C> {
                     None => "No topic set".to_string(),
                 };
 
+                if self.database.channel_has_mode(&channel, 's')
+                    && !self
+                        .database
+                        .is_client_in_channel(&self.registration.nickname().unwrap(), &channel)
+                {
+                    continue;
+                }
                 let prv = self.database.channel_has_mode(&channel, 'p')
                     && !self
                         .database

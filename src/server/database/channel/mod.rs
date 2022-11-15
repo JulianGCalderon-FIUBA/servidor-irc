@@ -8,8 +8,6 @@ pub struct Channel<C: Connection> {
     _name: String,
     //vector de nicknames
     clients: Vec<Rc<RefCell<Client<C>>>>,
-    //nickname del operador
-    operator: String,
     topic: Option<String>,
     key: Option<String>,
     modes: HashMap<char, bool>,
@@ -28,12 +26,11 @@ impl<C: Connection> Channel<C> {
         Self {
             _name,
             clients,
-            operator,
             topic: None,
             key: None,
             modes: initialize_modes(),
             limit: None,
-            operators: vec![],
+            operators: vec![operator],
             speakers: vec![],
             banmasks: vec![],
         }
@@ -77,10 +74,6 @@ impl<C: Connection> Channel<C> {
 
     pub fn get_topic(&self) -> Option<String> {
         self.topic.clone()
-    }
-
-    pub fn operator(&self) -> String {
-        self.operator.clone()
     }
 
     pub fn set_key(&mut self, key: Option<String>) {
@@ -150,6 +143,10 @@ impl<C: Connection> Channel<C> {
             .iter()
             .position(|m| m == &mask)
             .map(|index| self.banmasks.remove(index));
+    }
+
+    pub fn is_operator(&self, nickname: &str) -> bool {
+        self.operators.contains(&nickname.to_string())
     }
 
     // pub fn get_modes(&self) -> Vec<char> {

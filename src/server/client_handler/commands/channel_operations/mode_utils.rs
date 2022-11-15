@@ -28,6 +28,34 @@ pub fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
 }
 
 impl<C: Connection> ClientHandler<C> {
+    pub fn add_modes(&mut self, add: Vec<char>, parameters: Vec<String>) -> Result<(), io::Error> {
+        let channel = &parameters[0];
+        let argument = parameters.get(2);
+
+        for mode in add {
+            match mode {
+                OPER_CONFIG => self.add_channop(channel, argument)?,
+                LIMIT_CONFIG => {
+                    self.set_limit(channel, argument)?;
+                }
+                BAN_CONFIG => {
+                    self.set_banmask(channel, argument)?;
+                }
+                SPEAKING_ABILITY_CONFIG => {
+                    self.add_speaker(channel, argument)?;
+                }
+                KEY_CONFIG => {
+                    self.set_key(channel, argument)?;
+                }
+                mode if VALID_MODES.contains(&mode) => {
+                    self.database.set_channel_mode(channel, mode)
+                }
+                mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
+            }
+        }
+        Ok(())
+    }
+
     pub fn remove_modes(
         &mut self,
         remove: Vec<char>,
@@ -60,52 +88,6 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    pub fn add_modes(&mut self, add: Vec<char>, parameters: Vec<String>) -> Result<(), io::Error> {
-        let channel = &parameters[0];
-        let argument = parameters.get(2);
-
-        for mode in add {
-            match mode {
-                OPER_CONFIG => self.add_channop(channel, argument)?,
-                LIMIT_CONFIG => {
-                    self.set_limit(channel, argument)?;
-                }
-                BAN_CONFIG => {
-                    if parameters.len() >= 3 {
-                        self.set_banmask(channel, argument)
-                    } else {
-                        self.send_ban_reply(channel)?;
-                    }
-                }
-                SPEAKING_ABILITY_CONFIG => {
-                    self.add_speaker(channel, argument)?;
-                }
-                KEY_CONFIG => {
-                    self.set_key(channel, argument)?;
-                }
-                mode if VALID_MODES.contains(&mode) => {
-                    self.database.set_channel_mode(channel, mode)
-                }
-                mode => self.send_response_for_error(ErrorReply::UnknownMode472 { mode })?,
-            }
-        }
-        Ok(())
-    }
-
-    fn send_ban_reply(&mut self, channel: &String) -> io::Result<()> {
-        let bans = self.database.get_channel_banmask(channel);
-        for b in bans {
-            self.send_response_for_reply(CommandResponse::BanList367 {
-                channel: channel.to_string(),
-                banmask: b,
-            })?;
-        }
-        self.send_response_for_reply(CommandResponse::EndOfBanList368 {
-            channel: channel.to_string(),
-        })?;
-        Ok(())
-    }
-
     pub fn add_channop(&mut self, channel: &str, operators: Option<&String>) -> io::Result<()> {
         let operators = match operators {
             Some(operators) => operators,
@@ -118,6 +100,11 @@ impl<C: Connection> ClientHandler<C> {
         for (i, nickname) in operators.split(',').enumerate() {
             if i == 3 {
                 break;
+            }
+            if let Some(error) = self.assert_can_modify_client_status_in_channel(channel, nickname)
+            {
+                self.send_response_for_error(error)?;
+                continue;
             }
             self.database.add_channop(channel, nickname);
         }
@@ -136,6 +123,14 @@ impl<C: Connection> ClientHandler<C> {
         for (i, nickname) in operators.split(',').enumerate() {
             if i == 3 {
                 break;
+            }
+            if let Some(error) = self.assert_can_modify_client_status_in_channel(channel, nickname)
+            {
+                self.send_response_for_error(error)?;
+                continue;
+            }
+            if !self.database.is_channel_operator(channel, nickname) {
+                continue;
             }
             self.database.remove_channop(channel, nickname);
         }
@@ -158,7 +153,10 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    pub fn set_banmask(&mut self, channel: &str, banmasks: Option<&String>) {
+    pub fn set_banmask(&mut self, channel: &str, banmasks: Option<&String>) -> io::Result<()> {
+        if banmasks.is_none() {
+            return self.send_ban_reply(channel);
+        }
         let masks = banmasks.unwrap().split(',');
         for (i, banmask) in masks.enumerate() {
             if i == 3 {
@@ -166,6 +164,21 @@ impl<C: Connection> ClientHandler<C> {
             }
             self.database.set_channel_banmask(channel, banmask)
         }
+        Ok(())
+    }
+
+    fn send_ban_reply(&mut self, channel: &str) -> io::Result<()> {
+        let bans = self.database.get_channel_banmask(channel);
+        for b in bans {
+            self.send_response_for_reply(CommandResponse::BanList367 {
+                channel: channel.to_string(),
+                banmask: b,
+            })?;
+        }
+        self.send_response_for_reply(CommandResponse::EndOfBanList368 {
+            channel: channel.to_string(),
+        })?;
+        Ok(())
     }
 
     pub fn remove_banmask(&mut self, channel: &str, banmasks: Option<&String>) -> io::Result<()> {
@@ -194,6 +207,11 @@ impl<C: Connection> ClientHandler<C> {
         };
 
         for nickname in speakers.split(',') {
+            if let Some(error) = self.assert_can_modify_client_status_in_channel(channel, nickname)
+            {
+                self.send_response_for_error(error)?;
+                continue;
+            }
             self.database.add_speaker(channel, nickname);
         }
         Ok(())
@@ -209,6 +227,14 @@ impl<C: Connection> ClientHandler<C> {
             }
         };
         for nickname in speakers.split(',') {
+            if let Some(error) = self.assert_can_modify_client_status_in_channel(channel, nickname)
+            {
+                self.send_response_for_error(error)?;
+                continue;
+            }
+            if !self.database.is_channel_speaker(channel, nickname) {
+                continue;
+            }
             self.database.remove_speaker(channel, nickname);
         }
         Ok(())
