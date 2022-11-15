@@ -10,6 +10,7 @@ use super::connection_handler_trait::ConnectionHandler;
 mod asserts;
 mod commands;
 mod getters;
+mod logic;
 mod structure;
 mod utils;
 

@@ -46,4 +46,76 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
 
         Ok(())
     }
+
+    fn assert_oper_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_privmsg_command_is_valid(
+        &self,
+        _params: &[String],
+        _trail: &Option<String>,
+    ) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_notice_command_is_valid(
+        &self,
+        _params: &[String],
+        _trail: &Option<String>,
+    ) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_join_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_part_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_invite_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_names_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_list_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_who_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_whois_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_away_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_topic_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_kick_command_is_valid(
+        &self,
+        _params: &[String],
+        _trail: &Option<String>,
+    ) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_mode_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
+
+    fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+        Err(ErrorReply::UnregisteredClient)
+    }
 }
