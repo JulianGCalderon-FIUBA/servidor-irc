@@ -1067,3 +1067,32 @@ fn mode_sets_and_unsets_multiple_flags() {
     assert!(!handler.database.channel_has_mode("#channel", 'm'));
     assert!(handler.database.channel_has_mode("#channel", 'i'));
 }
+
+#[test]
+fn mode_sets_and_unsets_multiple_valid_flags() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.set_channel_mode("#channel", 's');
+    handler.database.set_channel_mode("#channel", 'm');
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-os+p-m+i".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "401 nick2 :No such nick/channel\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(!handler.database.channel_has_mode("#channel", 's'));
+    assert!(handler.database.channel_has_mode("#channel", 'p'));
+    assert!(!handler.database.channel_has_mode("#channel", 'm'));
+    assert!(handler.database.channel_has_mode("#channel", 'i'));
+}
