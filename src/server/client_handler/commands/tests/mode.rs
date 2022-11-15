@@ -237,6 +237,54 @@ fn mode_fails_with_no_oper_parameter() {
 }
 
 #[test]
+fn mode_fails_with_nonexistent_oper() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+o".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "401 nick2 :No such nick/channel\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+}
+
+#[test]
+fn mode_fails_with_nick_not_on_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+o".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "442 #channel :You're not on that channel\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
+}
+
+#[test]
 fn mode_sets_limit_to_channel() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nickname");
