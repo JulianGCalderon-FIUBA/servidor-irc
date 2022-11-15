@@ -260,7 +260,7 @@ fn mode_fails_with_nonexistent_oper() {
 }
 
 #[test]
-fn mode_fails_with_nick_not_on_channel() {
+fn mode_oper_fails_with_nick_not_on_channel() {
     let mut handler = dummy_client_handler();
     register_client(&mut handler, "nickname");
 
@@ -501,4 +501,189 @@ fn mode_ignores_unknown_banmask_when_unsetting() {
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.get_channel_banmask("#channel").is_empty());
+}
+
+#[test]
+fn mode_adds_speaker_to_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+v".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.is_channel_speaker("#channel", "nick2"));
+}
+
+#[test]
+fn mode_adds_multiple_speakers_to_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client(dummy_client("nick3"));
+    handler.database.add_client_to_channel("nick3", "#channel");
+    handler.database.add_client(dummy_client("nick4"));
+    handler.database.add_client_to_channel("nick4", "#channel");
+
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
+    assert!(!handler.database.is_channel_speaker("#channel", "nick3"));
+    assert!(!handler.database.is_channel_speaker("#channel", "nick4"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+v".to_string(),
+        "nick2,nick3,nick4".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(handler.database.is_channel_speaker("#channel", "nick2"));
+    assert!(handler.database.is_channel_speaker("#channel", "nick3"));
+    assert!(handler.database.is_channel_speaker("#channel", "nick4"));
+}
+
+#[test]
+fn mode_removes_speakers_from_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_speaker("#channel", "nick2");
+
+    assert!(handler.database.is_channel_speaker("#channel", "nick2"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-v".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
+}
+
+#[test]
+fn mode_removes_multiple_speakers_from_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client(dummy_client("nick3"));
+    handler.database.add_client_to_channel("nick3", "#channel");
+
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
+    assert!(!handler.database.is_channel_speaker("#channel", "nick3"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-v".to_string(),
+        "nick2,nick3".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
+    assert!(!handler.database.is_channel_speaker("#channel", "nick3"));
+}
+
+#[test]
+fn mode_fails_with_no_speaker_parameter() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
+
+    let parameters = vec!["#channel".to_string(), "+v".to_string()];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "461 MODE :Not enough parameters\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
+}
+
+#[test]
+fn mode_fails_with_nonexistent_speaker() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+v".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "401 nick2 :No such nick/channel\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
+}
+
+#[test]
+fn mode_speaker_fails_with_nick_not_on_channel() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nickname");
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_client(dummy_client("nick2"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+v".to_string(),
+        "nick2".to_string(),
+    ];
+    handler.mode_command(parameters).unwrap();
+
+    assert_eq!(
+        "442 #channel :You're not on that channel\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
 }
