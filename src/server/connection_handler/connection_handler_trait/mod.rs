@@ -1,16 +1,19 @@
 use std::io::{self, BufReader};
 use std::sync::mpsc::{self, Receiver, Sender};
+use std::sync::{atomic::AtomicBool, Arc};
 use std::thread::{self, JoinHandle};
 
 use crate::message::{CreationError, Message};
 use crate::server::connection::Connection;
 use crate::server::database::DatabaseHandle;
 
+mod asserts;
 mod commands;
 mod getters;
 mod structure;
 mod utils;
 
+pub use asserts::ConnectionHandlerAsserts;
 pub use commands::ConnectionHandlerCommands;
 pub use getters::ConnectionHandlerGetters;
 pub use structure::ConnectionHandlerStructure;
@@ -23,6 +26,7 @@ pub trait ConnectionHandler<C: Connection>:
         connection: C,
         servername: String,
         database: DatabaseHandle<C>,
+        online: Arc<AtomicBool>,
     ) -> io::Result<Self>;
 
     fn handle(mut self) {

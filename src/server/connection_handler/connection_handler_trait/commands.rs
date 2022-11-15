@@ -2,34 +2,78 @@ use crate::server::connection::Connection;
 use std::io;
 
 pub trait ConnectionHandlerCommands<C: Connection> {
-    fn pass_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn nick_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn user_command(&mut self, parameters: Vec<String>, trailing: Option<String>)
-        -> io::Result<()>;
-    fn oper_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
+    fn pass_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn nick_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn user_command(
+        &mut self,
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) -> io::Result<()> {
+        Ok(())
+    }
+    fn oper_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
     fn privmsg_command(
         &mut self,
-        parameters: Vec<String>,
-        trailing: Option<String>,
-    ) -> io::Result<()>;
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) -> io::Result<()> {
+        Ok(())
+    }
     fn notice_command(
         &mut self,
-        parameters: Vec<String>,
-        trailing: Option<String>,
-    ) -> io::Result<()>;
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) -> io::Result<()> {
+        Ok(())
+    }
 
-    fn join_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn part_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn invite_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn names_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn list_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn who_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn whois_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn away_command(&mut self, trailing: Option<String>) -> io::Result<()>;
-    fn topic_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn kick_command(&mut self, parameters: Vec<String>, trailing: Option<String>)
-        -> io::Result<()>;
-    fn mode_command(&mut self, parameters: Vec<String>) -> io::Result<()>;
-    fn quit_command(&mut self, trailing: Option<String>) -> io::Result<()>;
-    fn on_unknown_command(&mut self, command: String) -> io::Result<()>;
+    fn join_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn part_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn invite_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn names_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn list_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn who_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn whois_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn away_command(&mut self, _trailing: Option<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn topic_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn kick_command(
+        &mut self,
+        _parameters: Vec<String>,
+        _trailing: Option<String>,
+    ) -> io::Result<()> {
+        Ok(())
+    }
+    fn mode_command(&mut self, _parameters: Vec<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn quit_command(&mut self, _trailing: Option<String>) -> io::Result<()> {
+        Ok(())
+    }
+    fn on_unknown_command(&mut self, _command: String) -> io::Result<()> {
+        Ok(())
+    }
 }

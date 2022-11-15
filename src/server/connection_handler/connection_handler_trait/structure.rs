@@ -82,7 +82,10 @@ pub trait ConnectionHandlerStructure<C: Connection>:
         !self.online().load(Ordering::Relaxed)
     }
 
-    fn on_server_shutdown(&mut self) -> io::Result<()>;
+    fn on_server_shutdown(&mut self) -> io::Result<()> {
+        self.send_response(&"Server has shutdown")
+    }
+
     fn on_parsing_error(&mut self) -> io::Result<()> {
         self.send_response(&ErrorReply::ParsingError)
     }
