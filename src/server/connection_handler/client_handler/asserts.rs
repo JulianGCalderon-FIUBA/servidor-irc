@@ -241,7 +241,7 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_exists_channel(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
-        if self.database.contains_channel(&channel) {
+        if !self.database.contains_channel(&channel) {
             return Err(ErrorReply::NoSuchChannel403 { channel });
         }
 
@@ -355,6 +355,7 @@ impl<C: Connection> ClientHandler<C> {
 
     pub fn assert_can_part_channel(&self, channel: &str) -> Result<(), ErrorReply> {
         self.assert_channel_name_is_valid(channel)?;
+        self.assert_exists_channel(channel)?;
 
         self.assert_is_in_channel(channel)
     }
