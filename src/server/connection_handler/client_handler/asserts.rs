@@ -4,7 +4,7 @@ use crate::server::connection_handler::connection_handler_trait::ConnectionHandl
 use crate::server::connection_handler::modes::{MODERATED, NO_OUTSIDE_MESSAGES, TOPIC_SETTABLE};
 use crate::server::connection_handler::responses::ErrorReply;
 
-use super::ClientHandler;
+use super::{ClientHandler, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     fn assert_pass_command_is_valid(
@@ -250,6 +250,18 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
+    pub fn assert_channel_name_is_valid(&self, channel: &str) -> Result<(), ErrorReply> {
+        let channel = channel.to_string();
+
+        if !(channel.as_bytes()[0] == LOCAL_CHANNEL || channel.as_bytes()[0] == DISTRIBUTED_CHANNEL)
+            || channel.contains(INVALID_CHARACTER)
+        {
+            return Err(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        Ok(())
+    }
+
     pub fn assert_nickname_in_use(&self, nickname: &str) -> Result<(), ErrorReply> {
         let nickname = nickname.to_string();
 
@@ -282,7 +294,7 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_target_exists(&self, target: &str) -> Result<(), ErrorReply> {
+    pub fn assert_target_exists(&self, target: &str) -> Result<(), ErrorReply> {
         let is_client = self.database.contains_client(target);
         let is_channel = self.database.contains_channel(target);
         let nickname = target.to_string();
@@ -294,7 +306,7 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_can_send_to_channel(&self, channel: &str) -> Result<(), ErrorReply> {
+    pub fn assert_can_send_to_channel(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
         if self
@@ -309,6 +321,69 @@ impl<C: Connection> ClientHandler<C> {
             && !self.database.is_channel_speaker(&channel, &self.nickname)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
+        }
+
+        Ok(())
+    }
+
+    pub fn assert_can_join_channel(&self, channel: &str, nickname: &str) -> Result<(), ErrorReply> {
+        let nickname = nickname.to_string();
+        let channel = channel.to_string();
+
+        let channels_for_client = self.database.get_channels_for_client(&nickname);
+        if channels_for_client.len() == MAX_CHANNELS {
+            return Err(ErrorReply::TooManyChannels405 { channel });
+        }
+
+        self.assert_channel_name_is_valid(&channel)?;
+        self.assert_is_in_channel(&channel)?;
+
+        Ok(())
+    }
+
+    pub fn assert_can_kick_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
+        self.assert_exists_channel(channel)?;
+
+        self.assert_is_in_channel(channel)?;
+
+        self.assert_is_channel_operator(channel)
+    }
+
+    pub fn assert_can_part_channel(&self, channel: &str) -> Result<(), ErrorReply> {
+        self.assert_channel_name_is_valid(channel)?;
+
+        self.assert_is_in_channel(channel)
+    }
+
+    pub fn assert_can_modify_client_status_in_channel(
+        &self,
+        channel: &str,
+        client: &str,
+    ) -> Result<(), ErrorReply> {
+        self.assert_exists_client(client)?;
+
+        self.assert_is_client_in_channel(channel, client)
+    }
+
+    pub fn assert_is_client_in_channel(
+        &self,
+        channel: &str,
+        client: &str,
+    ) -> Result<(), ErrorReply> {
+        let channel = channel.to_string();
+
+        if !self.database.is_client_in_channel(client, &channel) {
+            return Err(ErrorReply::NotOnChannel442 { channel });
+        }
+
+        Ok(())
+    }
+
+    pub fn assert_can_set_key(&mut self, channel: &str) -> Result<(), ErrorReply> {
+        if self.database.get_channel_key(channel).is_some() {
+            return Err(ErrorReply::KeySet467 {
+                channel: channel.to_string(),
+            });
         }
 
         Ok(())

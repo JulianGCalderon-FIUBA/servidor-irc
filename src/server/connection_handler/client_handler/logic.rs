@@ -9,10 +9,7 @@ use crate::server::connection_handler::modes::*;
 use crate::server::connection_handler::responses::{CommandResponse, ErrorReply, Notification};
 use crate::server::database::ClientInfo;
 
-use super::{
-    ClientHandler, ADD_MODE, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS,
-    REMOVE_MODE,
-};
+use super::{ClientHandler, ADD_MODE, REMOVE_MODE};
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn nick_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
@@ -75,7 +72,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         for channel in channels {
             let key = keys.next();
 
-            if let Some(error) = self.assert_can_join_channel(channel, &self.nickname) {
+            if let Err(error) = self.assert_can_join_channel(channel, &self.nickname) {
                 self.send_response(&error)?;
                 continue;
             }
@@ -128,7 +125,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let nickname = self.nickname.clone();
 
         for channel in channels.split(',') {
-            if let Err(error) = self.assert_can_part_channel(channel, &nickname) {
+            if let Err(error) = self.assert_can_part_channel(channel) {
                 self.send_response(&error)?;
                 continue;
             }
@@ -450,26 +447,6 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_can_join_channel(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
-        let nickname = nickname.to_string();
-        let channel = channel.to_string();
-
-        let channels_for_nickname = self.database.get_channels_for_client(&nickname);
-        if channels_for_nickname.len() == MAX_CHANNELS {
-            return Some(ErrorReply::TooManyChannels405 { channel });
-        }
-
-        if !channel_name_is_valid(&channel) {
-            return Some(ErrorReply::NoSuchChannel403 { channel });
-        }
-
-        if self.database.is_client_in_channel(&nickname, &channel) {
-            return Some(ErrorReply::UserOnChannel443 { nickname, channel });
-        }
-
-        None
-    }
-
     fn client_matches_banmask(&self, channel: &str, nickname: &str) -> bool {
         for mask in self.database.get_channel_banmask(channel) {
             if self.database.client_matches_banmask(nickname, &mask) {
@@ -504,25 +481,6 @@ impl<C: Connection> ClientHandler<C> {
         self.database.remove_client_from_channel(nickname, channel);
     }
 
-    fn assert_can_kick_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
-        if !self.database.contains_channel(channel) {
-            let channel = channel.to_string();
-            return Err(ErrorReply::NoSuchChannel403 { channel });
-        }
-
-        if !self.database.is_client_in_channel(&self.nickname, channel) {
-            let channel = channel.to_string();
-            return Err(ErrorReply::NotOnChannel442 { channel });
-        }
-
-        if !self.database.is_channel_operator(channel, &self.nickname) {
-            let channel = channel.to_string();
-            return Err(ErrorReply::ChanopPrivilegesNeeded482 { channel });
-        }
-
-        Ok(())
-    }
-
     fn get_channels_for_query(&mut self, channels: Option<&String>) -> Vec<String> {
         if channels.is_none() {
             let mut channels = self.database.get_all_channels();
@@ -554,20 +512,6 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         false
-    }
-
-    fn assert_can_part_channel(&self, channel: &str, nickname: &str) -> Result<(), ErrorReply> {
-        let channel = channel.to_string();
-
-        if !self.database.contains_channel(&channel) || !channel_name_is_valid(&channel) {
-            return Err(ErrorReply::NoSuchChannel403 { channel });
-        }
-
-        if !self.database.is_client_in_channel(nickname, &channel) {
-            return Err(ErrorReply::NotOnChannel442 { channel });
-        }
-
-        Ok(())
     }
 
     fn add_modes(&mut self, add: Vec<char>, parameters: Vec<String>) -> Result<(), io::Error> {
@@ -798,35 +742,6 @@ impl<C: Connection> ClientHandler<C> {
 
         Ok(())
     }
-
-    fn assert_can_modify_client_status_in_channel(
-        &self,
-        channel: &str,
-        nickname: &str,
-    ) -> Result<(), ErrorReply> {
-        if !self.database.contains_client(nickname) {
-            return Err(ErrorReply::NoSuchNickname401 {
-                nickname: nickname.to_string(),
-            });
-        }
-        if !self.database.is_client_in_channel(nickname, channel) {
-            return Err(ErrorReply::NotOnChannel442 {
-                channel: channel.to_string(),
-            });
-        }
-
-        Ok(())
-    }
-
-    fn assert_can_set_key(&mut self, channel: &str) -> Result<(), ErrorReply> {
-        if self.database.get_channel_key(channel).is_some() {
-            return Err(ErrorReply::KeySet467 {
-                channel: channel.to_string(),
-            });
-        }
-
-        Ok(())
-    }
 }
 
 fn get_keys_split(keys: Option<&String>) -> Vec<String> {
@@ -834,12 +749,6 @@ fn get_keys_split(keys: Option<&String>) -> Vec<String> {
         Some(keys) => keys.split(',').map(|s| s.to_string()).collect(),
         None => vec![],
     }
-}
-
-fn channel_name_is_valid(channel: &str) -> bool {
-    return ((channel.as_bytes()[0] == LOCAL_CHANNEL)
-        || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
-        && !channel.contains(INVALID_CHARACTER);
 }
 
 fn collect_parameters(parameters: &str) -> Vec<String> {
