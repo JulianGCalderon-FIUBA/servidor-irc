@@ -1,6 +1,7 @@
 use std::io;
 
 use crate::server::connection::Connection;
+use crate::server::connection_handler::commands::MODE_COMMAND;
 use crate::server::connection_handler::connection_handler_trait::{
     ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
@@ -317,7 +318,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn mode_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
         if !assert_modes_starts_correctly(&_params[1]) {
-            return Ok(());
+            return Ok(true);
         }
 
         let modes: Vec<char> = _params[1].chars().collect();
@@ -395,13 +396,15 @@ impl<C: Connection> ClientHandler<C> {
             return Err(ErrorReply::NoSuchNickname401 { nickname: target });
         }
 
-        if self.database.channel_has_mode(&target, NO_OUTSIDE_MESSAGES)
+        if self
+            .database
+            .channel_has_mode(&target, NO_OUTSIDE_MESSAGES as char)
             && !self.database.is_client_in_channel(&self.nickname, &target)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel: target });
         }
 
-        if self.database.channel_has_mode(&target, MODERATED)
+        if self.database.channel_has_mode(&target, MODERATED as char)
             && !self.database.is_channel_speaker(&target, &self.nickname)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel: target });
@@ -588,6 +591,264 @@ impl<C: Connection> ClientHandler<C> {
 
         Ok(())
     }
+
+    fn add_modes(&mut self, add: Vec<char>, parameters: Vec<String>) -> Result<(), io::Error> {
+        let channel = &parameters[0];
+        let argument = parameters.get(2);
+
+        for mode in add {
+            match mode as u8 {
+                SET_OPERATOR => self.add_channop(channel, argument)?,
+                SET_USER_LIMIT => {
+                    self.set_limit(channel, argument)?;
+                }
+                SET_BANMASK => {
+                    self.set_banmask(channel, argument)?;
+                }
+                SET_SPEAKER => {
+                    self.add_speaker(channel, argument)?;
+                }
+                SET_KEY => {
+                    self.set_key(channel, argument)?;
+                }
+                mode if VALID_MODES.contains(&mode) => {
+                    self.database.set_channel_mode(channel, mode as char)
+                }
+                mode => self.send_response(&ErrorReply::UnknownMode472 { mode: mode as char })?,
+            }
+        }
+
+        Ok(())
+    }
+
+    fn remove_modes(
+        &mut self,
+        remove: Vec<char>,
+        parameters: Vec<String>,
+    ) -> Result<(), io::Error> {
+        let channel = &parameters[0];
+        let argument = parameters.get(2);
+
+        for mode in remove {
+            match mode as u8 {
+                SET_OPERATOR => {
+                    self.remove_channop(channel, argument)?;
+                }
+                SET_USER_LIMIT => self.database.set_channel_limit(channel, None),
+                SET_BANMASK => {
+                    self.remove_banmask(channel, argument)?;
+                }
+                SET_SPEAKER => {
+                    self.remove_speaker(channel, argument)?;
+                }
+                SET_KEY => self.database.set_channel_key(channel, None),
+                mode if VALID_MODES.contains(&mode) => {
+                    if self.database.channel_has_mode(channel, mode as char) {
+                        self.database.unset_channel_mode(channel, mode as char)
+                    }
+                }
+                mode => self.send_response(&ErrorReply::UnknownMode472 { mode: mode as char })?,
+            }
+        }
+
+        Ok(())
+    }
+
+    fn add_channop(&mut self, channel: &str, operators: Option<&String>) -> io::Result<()> {
+        let operators = match operators {
+            Some(operators) => operators,
+            None => {
+                return self.send_response(&ErrorReply::NeedMoreParameters461 {
+                    command: MODE_COMMAND.to_string(),
+                })
+            }
+        };
+        for (i, nickname) in operators.split(',').enumerate() {
+            if i == 3 {
+                break;
+            }
+            if let Err(error) = self.assert_can_modify_client_status_in_channel(channel, nickname) {
+                self.send_response(&error)?;
+                continue;
+            }
+            self.database.add_channop(channel, nickname);
+        }
+        Ok(())
+    }
+
+    fn remove_channop(&mut self, channel: &str, operators: Option<&String>) -> io::Result<()> {
+        let operators = match operators {
+            Some(operators) => operators,
+            None => {
+                return self.send_response(&ErrorReply::NeedMoreParameters461 {
+                    command: MODE_COMMAND.to_string(),
+                })
+            }
+        };
+        for (i, nickname) in operators.split(',').enumerate() {
+            if i == 3 {
+                break;
+            }
+            if let Err(error) = self.assert_can_modify_client_status_in_channel(channel, nickname) {
+                self.send_response(&error)?;
+                continue;
+            }
+            if !self.database.is_channel_operator(channel, nickname) {
+                continue;
+            }
+            self.database.remove_channop(channel, nickname);
+        }
+        Ok(())
+    }
+
+    fn set_limit(&mut self, channel: &str, limit: Option<&String>) -> io::Result<()> {
+        let limit = match limit {
+            Some(limit) => limit,
+            None => {
+                return self.send_response(&ErrorReply::NeedMoreParameters461 {
+                    command: MODE_COMMAND.to_string(),
+                })
+            }
+        };
+
+        if let Ok(limit) = limit.parse::<usize>() {
+            self.database.set_channel_limit(channel, Some(limit));
+        }
+        Ok(())
+    }
+
+    fn set_banmask(&mut self, channel: &str, banmasks: Option<&String>) -> io::Result<()> {
+        if banmasks.is_none() {
+            return self.send_ban_reply(channel);
+        }
+        let masks = banmasks.unwrap().split(',');
+        for (i, banmask) in masks.enumerate() {
+            if i == 3 {
+                break;
+            }
+            self.database.set_channel_banmask(channel, banmask)
+        }
+        Ok(())
+    }
+
+    fn send_ban_reply(&mut self, channel: &str) -> io::Result<()> {
+        let bans = self.database.get_channel_banmask(channel);
+        for b in bans {
+            self.send_response(&CommandResponse::BanList367 {
+                channel: channel.to_string(),
+                banmask: b,
+            })?;
+        }
+        self.send_response(&CommandResponse::EndOfBanList368 {
+            channel: channel.to_string(),
+        })?;
+        Ok(())
+    }
+
+    fn remove_banmask(&mut self, channel: &str, banmasks: Option<&String>) -> io::Result<()> {
+        let banmasks = match banmasks {
+            Some(banmasks) => banmasks,
+            None => {
+                return self.send_response(&ErrorReply::NeedMoreParameters461 {
+                    command: MODE_COMMAND.to_string(),
+                })
+            }
+        };
+        for banmask in banmasks.split(',') {
+            self.database.unset_channel_banmask(channel, banmask)
+        }
+        Ok(())
+    }
+
+    fn add_speaker(&mut self, channel: &str, speakers: Option<&String>) -> io::Result<()> {
+        let speakers = match speakers {
+            Some(speakers) => speakers,
+            None => {
+                return self.send_response(&ErrorReply::NeedMoreParameters461 {
+                    command: MODE_COMMAND.to_string(),
+                })
+            }
+        };
+
+        for nickname in speakers.split(',') {
+            if let Err(error) = self.assert_can_modify_client_status_in_channel(channel, nickname) {
+                self.send_response(&error)?;
+                continue;
+            }
+            self.database.add_speaker(channel, nickname);
+        }
+        Ok(())
+    }
+
+    fn remove_speaker(&mut self, channel: &str, speakers: Option<&String>) -> io::Result<()> {
+        let speakers = match speakers {
+            Some(speakers) => speakers,
+            None => {
+                return self.send_response(&ErrorReply::NeedMoreParameters461 {
+                    command: MODE_COMMAND.to_string(),
+                });
+            }
+        };
+        for nickname in speakers.split(',') {
+            if let Err(error) = self.assert_can_modify_client_status_in_channel(channel, nickname) {
+                self.send_response(&error)?;
+                continue;
+            }
+            if !self.database.is_channel_speaker(channel, nickname) {
+                continue;
+            }
+            self.database.remove_speaker(channel, nickname);
+        }
+        Ok(())
+    }
+
+    fn set_key(&mut self, channel: &str, key: Option<&String>) -> io::Result<()> {
+        let key = match key {
+            Some(key) => key,
+            None => {
+                return self.send_response(&ErrorReply::NeedMoreParameters461 {
+                    command: MODE_COMMAND.to_string(),
+                });
+            }
+        };
+
+        if let Err(error) = self.assert_can_set_key(channel) {
+            return self.send_response(&error);
+        }
+        self.database
+            .set_channel_key(channel, Some(key.to_string()));
+
+        Ok(())
+    }
+
+    fn assert_can_modify_client_status_in_channel(
+        &self,
+        channel: &str,
+        nickname: &str,
+    ) -> Result<(), ErrorReply> {
+        if !self.database.contains_client(nickname) {
+            return Err(ErrorReply::NoSuchNickname401 {
+                nickname: nickname.to_string(),
+            });
+        }
+        if !self.database.is_client_in_channel(nickname, channel) {
+            return Err(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
+        }
+
+        Ok(())
+    }
+
+    fn assert_can_set_key(&mut self, channel: &str) -> Result<(), ErrorReply> {
+        if self.database.get_channel_key(channel).is_some() {
+            return Err(ErrorReply::KeySet467 {
+                channel: channel.to_string(),
+            });
+        }
+
+        Ok(())
+    }
 }
 
 fn get_keys_split(keys: Option<&String>) -> Vec<String> {
@@ -619,7 +880,7 @@ fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
     let mut remove_modes: Vec<char> = vec![];
     let mut add: bool = false;
     for char in modes {
-        match char {
+        match char as u8 {
             ADD_MODE => {
                 add = true;
             }
@@ -628,9 +889,9 @@ fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
             }
             char => {
                 if add {
-                    add_modes.push(char);
+                    add_modes.push(char as char);
                 } else {
-                    remove_modes.push(char);
+                    remove_modes.push(char as char);
                 }
             }
         }
