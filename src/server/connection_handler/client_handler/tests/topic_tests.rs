@@ -1,20 +1,6 @@
 use super::*;
 
 #[test]
-fn topic_fails_with_unregistered_client() {
-    let mut handler = dummy_client_handler();
-
-    let parameters = vec!["nick".to_string(), "#hola".to_string()];
-
-    handler.topic_command(parameters).unwrap();
-
-    assert_eq!(
-        "200 :Unregistered\r\n",
-        handler.stream.read_wbuf_to_string()
-    )
-}
-
-#[test]
 fn topic_fails_with_empty_params() {
     let mut handler = dummy_client_handler();
     let parameters = vec![];
@@ -30,7 +16,6 @@ fn topic_fails_with_empty_params() {
 #[test]
 fn cannot_modify_topic_if_not_in_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("dummy"));
     handler.database.add_client_to_channel("dummy", "#canal");
@@ -48,7 +33,6 @@ fn cannot_modify_topic_if_not_in_channel() {
 #[test]
 fn topic_ignores_nonexistent_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec!["#canal1".to_string(), "topic1".to_string()];
 
@@ -63,11 +47,10 @@ fn topic_ignores_nonexistent_channels() {
 #[test]
 fn topic_sets_and_gets_channel_topic() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("dummy"));
     handler.database.add_client_to_channel("dummy", "#canal");
-    handler.database.add_client_to_channel("nick", "#canal");
+    handler.database.add_client_to_channel("nickname", "#canal");
 
     let parameters1 = vec!["#canal".to_string()];
 
@@ -86,13 +69,12 @@ fn topic_sets_and_gets_channel_topic() {
 #[test]
 fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nickname", "#hola");
 
     handler.database.set_channel_mode("#hola", 't');
-    handler.database.remove_channop("#hola", "nick");
+    handler.database.remove_channop("#hola", "nickname");
 
     let parameters = vec!["#hola".to_string(), "topic".to_string()];
 
@@ -107,10 +89,9 @@ fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
 #[test]
 fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nickname", "#hola");
 
     handler.database.set_channel_mode("#hola", 't');
 

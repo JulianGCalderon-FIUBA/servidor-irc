@@ -10,6 +10,9 @@ pub const SET_BANMASK: char = 'b';
 pub const SET_SPEAKER: char = 'v';
 pub const SET_KEY: char = 'k';
 
+pub const OPERATOR_SYMBOL: char = '@';
+pub const SPEAKER_SYMBOL: char = '+';
+
 pub const VALID_MODES: [char; 11] = [
     SET_OPERATOR,
     PRIVATE,

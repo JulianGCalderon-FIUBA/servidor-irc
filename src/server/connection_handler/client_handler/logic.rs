@@ -400,8 +400,9 @@ impl<C: Connection> ClientHandler<C> {
             })?;
         }
 
-        let channels = self.database.get_channels_for_client(&nickname);
+        let mut channels = self.database.get_channels_for_client(&nickname);
         if !channels.is_empty() {
+            self.append_channel_role(&mut channels, &nickname);
             self.send_response(&CommandResponse::WhoisChannels319 {
                 nickname: nickname.clone(),
                 channels,
@@ -410,6 +411,19 @@ impl<C: Connection> ClientHandler<C> {
         self.send_response(&CommandResponse::EndOfWhois318 { nickname })?;
 
         Ok(())
+    }
+
+    fn append_channel_role(&mut self, channels: &mut Vec<String>, nickname: &str) {
+        for channel in channels {
+            if self.database.is_channel_operator(channel, nickname) {
+                channel.insert(0, OPERATOR_SYMBOL);
+            }
+            if self.database.channel_has_mode(channel, 'm')
+                && self.database.is_channel_speaker(channel, nickname)
+            {
+                channel.insert(0, SPEAKER_SYMBOL);
+            }
+        }
     }
 
     fn send_topic_reply(&mut self, channel: String) -> Result<(), io::Error> {
