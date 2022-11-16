@@ -10,10 +10,7 @@ use super::{
 };
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
-    fn assert_pass_command_is_valid(
-        &self,
-        _params: &[String],
-    ) -> Result<(), crate::server::connection_handler::responses::ErrorReply> {
+    fn assert_pass_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
@@ -185,7 +182,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_exists_channel(channel)?;
         self.assert_is_in_channel(channel)?;
 
-        if params.len() != 1 {
+        if params.len() > 1 {
             self.assert_is_channel_operator(channel)?;
             self.assert_modes_starts_correctly(&params[1])?;
         }
