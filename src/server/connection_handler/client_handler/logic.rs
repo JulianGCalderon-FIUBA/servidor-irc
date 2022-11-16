@@ -391,32 +391,6 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_target_is_valid(&self, target: &str) -> Result<(), ErrorReply> {
-        let target = target.to_string();
-        let is_client = self.database.contains_client(&target);
-        let is_channel = self.database.contains_channel(&target);
-
-        if !(is_client || is_channel) {
-            return Err(ErrorReply::NoSuchNickname401 { nickname: target });
-        }
-
-        if self
-            .database
-            .channel_has_mode(&target, NO_OUTSIDE_MESSAGES as char)
-            && !self.database.is_client_in_channel(&self.nickname, &target)
-        {
-            return Err(ErrorReply::CannotSendToChannel404 { channel: target });
-        }
-
-        if self.database.channel_has_mode(&target, MODERATED as char)
-            && !self.database.is_channel_speaker(&target, &self.nickname)
-        {
-            return Err(ErrorReply::CannotSendToChannel404 { channel: target });
-        }
-
-        Ok(())
-    }
-
     fn filtered_clients_for_default_who_command(&self) -> Vec<ClientInfo> {
         self.database
             .get_all_clients()

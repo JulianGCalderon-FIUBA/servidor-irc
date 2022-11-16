@@ -24,13 +24,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
             return Err(ErrorReply::NoNicknameGiven431);
         }
 
-        let nickname = params[0].to_string();
+        let nickname = &params[0];
 
-        if self.database.contains_client(&nickname) {
-            return Err(ErrorReply::NickCollision436 { nickname });
-        }
-
-        Ok(())
+        self.assert_nickname_collision(nickname)
     }
 
     fn assert_user_command_is_valid(
@@ -119,6 +115,18 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
     }
 
     fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+        Ok(())
+    }
+}
+
+impl<C: Connection> RegistrationHandler<C> {
+    pub fn assert_nickname_collision(&self, nickname: &str) -> Result<(), ErrorReply> {
+        let nickname = nickname.to_string();
+
+        if self.database.contains_client(&nickname) {
+            return Err(ErrorReply::NickCollision436 { nickname });
+        }
+
         Ok(())
     }
 }

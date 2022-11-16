@@ -1,7 +1,7 @@
 use crate::server::connection::Connection;
 use crate::server::connection_handler::commands::*;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
-use crate::server::connection_handler::modes::TOPIC_SETTABLE;
+use crate::server::connection_handler::modes::{MODERATED, NO_OUTSIDE_MESSAGES, TOPIC_SETTABLE};
 use crate::server::connection_handler::responses::ErrorReply;
 
 use super::ClientHandler;
@@ -267,6 +267,48 @@ impl<C: Connection> ClientHandler<C> {
     ) -> Result<(), ErrorReply> {
         if !self.database.are_credentials_valid(username, password) {
             return Err(ErrorReply::PasswordMismatch464);
+        }
+
+        Ok(())
+    }
+
+    pub fn assert_target_is_valid(&self, target: &str) -> Result<(), ErrorReply> {
+        self.assert_target_exists(target)?;
+
+        if self.database.contains_channel(target) {
+            self.assert_can_send_to_channel(target)
+        }
+
+        Ok(())
+    }
+
+    fn assert_target_exists(&self, target: &str) -> Result<(), ErrorReply> {
+        let is_client = self.database.contains_client(target);
+        let is_channel = self.database.contains_channel(target);
+        let nickname = target.to_string();
+
+        if !(is_client || is_channel) {
+            return Err(ErrorReply::NoSuchNickname401 { nickname });
+        }
+
+        Ok(())
+    }
+
+    fn assert_can_send_to_channel(&self, channel: &str) -> Result<(), ErrorReply> {
+        let channel = channel.to_string();
+
+        if self
+            .database
+            .channel_has_mode(&channel, NO_OUTSIDE_MESSAGES)
+            && !self.database.is_client_in_channel(&self.nickname, &channel)
+        {
+            return Err(ErrorReply::CannotSendToChannel404 { channel });
+        }
+
+        if self.database.channel_has_mode(&channel, MODERATED)
+            && !self.database.is_channel_speaker(&channel, &self.nickname)
+        {
+            return Err(ErrorReply::CannotSendToChannel404 { channel });
         }
 
         Ok(())
