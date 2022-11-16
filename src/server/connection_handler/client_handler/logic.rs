@@ -1,9 +1,12 @@
+use std::io;
+
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 use crate::server::connection_handler::modes::*;
 use crate::server::connection_handler::responses::{CommandResponse, ErrorReply, Notification};
+use crate::server::database::ClientInfo;
 
 use super::ClientHandler;
 
@@ -74,11 +77,46 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn who_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
-        Ok(())
+    fn who_logic(&mut self, mut params: Vec<String>) -> std::io::Result<()> {
+        let mask = params.pop();
+
+        let mut clients = match &mask {
+            Some(mask) => self.database.get_clients_for_mask(mask),
+            None => self.filtered_clients_for_default_who_command(),
+        };
+
+        clients.sort();
+
+        for client_info in clients {
+            self.send_whoreply_for_client(client_info)?;
+        }
+
+        self.send_response(&CommandResponse::EndOfWho315 { name: mask })
     }
 
-    fn whois_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
+    fn whois_logic(&mut self, mut params: Vec<String>) -> std::io::Result<()> {
+        let (_server, nickmasks) = if params.len() == 2 {
+            (params.get(0).map(|s| s.to_string()), params.remove(1))
+        } else {
+            (None, params.remove(1))
+        };
+
+        for nickmask in nickmasks.split(',') {
+            let mut clients: Vec<ClientInfo> = self.database.get_clients_for_nickmask(nickmask);
+
+            if clients.is_empty() {
+                let nickname = nickmask.to_string();
+                self.send_response(&ErrorReply::NoSuchNickname401 { nickname })?;
+                continue;
+            }
+
+            clients.sort();
+
+            for client in clients {
+                self.send_whois_responses(client)?;
+            }
+        }
+
         Ok(())
     }
 
@@ -179,6 +217,65 @@ impl<C: Connection> ClientHandler<C> {
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel: target });
         }
+
+        Ok(())
+    }
+
+    fn filtered_clients_for_default_who_command(&self) -> Vec<ClientInfo> {
+        self.database
+            .get_all_clients()
+            .into_iter()
+            .filter(|client_info| self.shares_channel_with_self(client_info))
+            .collect()
+    }
+
+    fn shares_channel_with_self(&self, client_info: &ClientInfo) -> bool {
+        let client_channels = self.database.get_channels_for_client(&client_info.nickname);
+        let self_channels = self.database.get_channels_for_client(&self.nickname);
+
+        !client_channels
+            .iter()
+            .any(|channel| self_channels.contains(channel))
+    }
+
+    fn send_whoreply_for_client(&mut self, client_info: ClientInfo) -> io::Result<()> {
+        let channel = self
+            .database
+            .get_channels_for_client(&client_info.nickname)
+            .get(0)
+            .map(|string| string.to_owned());
+
+        self.send_response(&CommandResponse::WhoReply352 {
+            channel,
+            client_info,
+        })
+    }
+
+    fn send_whois_responses(&mut self, client_info: ClientInfo) -> Result<(), io::Error> {
+        let nickname = client_info.nickname.clone();
+        let server = self.servername.to_string();
+
+        self.send_response(&CommandResponse::WhoisUser311 { client_info })?;
+        self.send_response(&CommandResponse::WhoisServer312 {
+            nickname: nickname.clone(),
+            server,
+            server_info: "Lemon pie server".to_string(),
+        })?;
+
+        if self.database.is_server_operator(&nickname) {
+            self.send_response(&CommandResponse::WhoisOperator313 {
+                nickname: nickname.clone(),
+            })?;
+        }
+
+        let channels = self.database.get_channels_for_client(&nickname);
+        if !channels.is_empty() {
+            self.send_response(&CommandResponse::WhoisChannels319 {
+                nickname: nickname.clone(),
+                channels,
+            })?;
+        }
+        self.send_response(&CommandResponse::EndOfWhois318 { nickname })?;
 
         Ok(())
     }
