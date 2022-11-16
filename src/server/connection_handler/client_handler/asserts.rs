@@ -231,7 +231,7 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_exists_client(&self, client: &str) -> Result<(), ErrorReply> {
         let nickname = client.to_string();
 
-        if self.database.contains_client(&nickname) {
+        if !self.database.contains_client(&nickname) {
             return Err(ErrorReply::NoSuchNickname401 { nickname });
         }
 
@@ -395,7 +395,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_modes_starts_correctly(&self, modes: &str) -> Result<(), ErrorReply> {
-        if modes.starts_with([ADD_MODE, REMOVE_MODE]) {
+        if !modes.starts_with([ADD_MODE, REMOVE_MODE]) {
             return Err(ErrorReply::NoReply);
         }
 
