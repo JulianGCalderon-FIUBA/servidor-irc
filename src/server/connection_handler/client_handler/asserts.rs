@@ -336,7 +336,7 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         self.assert_channel_name_is_valid(channel)?;
-        self.assert_is_in_channel(channel)?;
+        self.assert_client_not_on_channel(&self.nickname, channel)?;
 
         self.assert_is_valid_key(channel, key)?;
 
