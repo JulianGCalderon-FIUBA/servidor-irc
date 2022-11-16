@@ -6,11 +6,8 @@ use crate::server::connection_handler::responses::ErrorReply;
 use super::RegistrationHandler;
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
-    fn assert_pass_command_is_valid(
-        &self,
-        parameters: &[String],
-    ) -> Result<(), crate::server::connection_handler::responses::ErrorReply> {
-        if parameters.is_empty() {
+    fn assert_pass_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+        if params.is_empty() {
             let command = PASS_COMMAND.to_string();
             return Err(ErrorReply::NeedMoreParameters461 { command });
         }
@@ -22,9 +19,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         Ok(())
     }
 
-    fn assert_nick_command_is_valid(&self, parameters: &[String]) -> Result<(), ErrorReply> {
-        if parameters.is_empty() {
+    fn assert_nick_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+        if params.is_empty() {
             return Err(ErrorReply::NoNicknameGiven431);
+        }
+
+        let nickname = params[0].to_string();
+
+        if self.database.contains_client(&nickname) {
+            return Err(ErrorReply::NickCollision436 { nickname });
         }
 
         Ok(())
@@ -32,10 +35,10 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
 
     fn assert_user_command_is_valid(
         &self,
-        parameters: &[String],
-        trailing: &Option<String>,
+        params: &[String],
+        trail: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        if parameters.is_empty() || trailing.is_none() {
+        if params.is_empty() || trail.is_none() {
             let command = USER_COMMAND.to_string();
             return Err(ErrorReply::NeedMoreParameters461 { command });
         }

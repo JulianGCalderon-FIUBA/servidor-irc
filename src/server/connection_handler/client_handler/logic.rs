@@ -15,6 +15,10 @@ use super::{
 };
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
+    fn nick_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
+    }
+
     fn oper_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
         self.database.set_server_operator(&self.nickname);
 
@@ -29,7 +33,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         trail: Option<String>,
     ) -> std::io::Result<bool> {
         let content = trail.unwrap();
-        let targets = params.pop().unwrap();
+        let targets = params.remove(0);
 
         for target in targets.split(',') {
             if let Err(error) = self.assert_target_is_valid(target) {
@@ -356,7 +360,7 @@ impl<C: Connection> ClientHandler<C> {
     ) -> Result<(), std::io::Error> {
         let nickname = self.nickname.clone();
         let notification = Notification::Privmsg {
-            prefix: nickname,
+            sender: nickname,
             target: target.to_string(),
             message: content.to_owned(),
         };
@@ -377,7 +381,7 @@ impl<C: Connection> ClientHandler<C> {
     fn send_notice_to_target(&mut self, target: &str, content: &str) -> Result<(), std::io::Error> {
         let nickname = self.nickname.clone();
         let notification = Notification::Notice {
-            prefix: nickname,
+            sender: nickname,
             target: target.to_string(),
             message: content.to_owned(),
         };
@@ -518,7 +522,7 @@ impl<C: Connection> ClientHandler<C> {
         let notification = Notification::Kick {
             kicker: self.nickname.clone(),
             channel: channel.to_string(),
-            nickname: nickname.to_string(),
+            kicked: nickname.to_string(),
             comment: comment.clone(),
         };
 
@@ -597,7 +601,7 @@ impl<C: Connection> ClientHandler<C> {
         let argument = parameters.get(2);
 
         for mode in add {
-            match mode as u8 {
+            match mode {
                 SET_OPERATOR => self.add_channop(channel, argument)?,
                 SET_USER_LIMIT => {
                     self.set_limit(channel, argument)?;
@@ -614,7 +618,7 @@ impl<C: Connection> ClientHandler<C> {
                 mode if VALID_MODES.contains(&mode) => {
                     self.database.set_channel_mode(channel, mode as char)
                 }
-                mode => self.send_response(&ErrorReply::UnknownMode472 { mode: mode as char })?,
+                mode => self.send_response(&ErrorReply::UnknownMode472 { mode })?,
             }
         }
 
@@ -630,7 +634,7 @@ impl<C: Connection> ClientHandler<C> {
         let argument = parameters.get(2);
 
         for mode in remove {
-            match mode as u8 {
+            match mode {
                 SET_OPERATOR => {
                     self.remove_channop(channel, argument)?;
                 }
@@ -647,7 +651,7 @@ impl<C: Connection> ClientHandler<C> {
                         self.database.unset_channel_mode(channel, mode as char)
                     }
                 }
-                mode => self.send_response(&ErrorReply::UnknownMode472 { mode: mode as char })?,
+                mode => self.send_response(&ErrorReply::UnknownMode472 { mode })?,
             }
         }
 

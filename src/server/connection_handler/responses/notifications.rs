@@ -13,19 +13,19 @@ pub enum Notification {
         channel: String,
     },
     Privmsg {
-        prefix: String,
+        sender: String,
         target: String,
         message: String,
     },
     Notice {
-        prefix: String,
+        sender: String,
         target: String,
         message: String,
     },
     Kick {
         kicker: String,
         channel: String,
-        nickname: String,
+        kicked: String,
         comment: Option<String>,
     },
     Part {
@@ -52,14 +52,14 @@ impl Display for Notification {
                 format!(":{inviting_client} {INVITE_COMMAND} {invited_client} {channel}")
             }
             Notification::Privmsg {
-                prefix,
+                sender: prefix,
                 target,
                 message,
             } => {
                 format!(":{prefix} {PRIVMSG_COMMAND} {target} :{message}")
             }
             Notification::Notice {
-                prefix,
+                sender: prefix,
                 target,
                 message,
             } => {
@@ -68,13 +68,13 @@ impl Display for Notification {
             Notification::Kick {
                 kicker,
                 channel,
-                nickname,
+                kicked,
                 comment,
             } => match comment {
                 Some(comment) => {
-                    format!(":{kicker} {KICK_COMMAND} {channel} {nickname} :{comment}")
+                    format!(":{kicker} {KICK_COMMAND} {channel} {kicked} :{comment}")
                 }
-                None => format!(":{kicker} {KICK_COMMAND} {channel} {nickname}"),
+                None => format!(":{kicker} {KICK_COMMAND} {channel} {kicked}"),
             },
             Notification::Part { nickname, channel } => {
                 format!(":{nickname} {PART_COMMAND} {channel}")

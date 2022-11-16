@@ -3,7 +3,6 @@ use std::fmt::Display;
 pub enum ErrorReply {
     NoSuchNickname401 { nickname: String },
     NoSuchChannel403 { channel: String },
-    // CanNotSendToChannel404 { channel: String },
     TooManyChannels405 { channel: String },
     NoRecipient411 { command: String },
     NoTextToSend412,
@@ -17,9 +16,7 @@ pub enum ErrorReply {
     AlreadyRegistered462,
     PasswordMismatch464,
     // InviteOnlyChannel473 { channel: String },
-    // BannedFromChannel474 { channel: String },
     BadChannelKey475 { channel: String },
-    //
     NoNickname,
     UnregisteredClient,
     ParsingError,
@@ -48,7 +45,7 @@ impl Display for ErrorReply {
             ErrorReply::NoRecipient411 { command } => {
                 format!("411 :No recipient given ({command})")
             }
-            ErrorReply::NoTextToSend412 => "412 :No text to send".to_string(),
+            ErrorReply::NoTextToSend412 => String::from("412 :No text to send"),
             ErrorReply::UnknownCommand421 { command } => {
                 format!("421 {command} :Unknown command")
             }
