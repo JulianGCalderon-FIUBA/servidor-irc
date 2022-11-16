@@ -12,7 +12,7 @@ mod kick_tests;
 mod list_tests;
 mod mode_tests;
 mod names_tests;
-// mod nick_tests;
+mod nick_tests;
 mod notice_tests;
 mod oper_tests;
 mod part_tests;
