@@ -12,6 +12,10 @@ mod logic;
 mod utils;
 
 const REGISTRATION_TIMELIMIT_SECS: u64 = 60;
+const INVALID_CHARACTER: char = '\'';
+const MAX_CHANNELS: usize = 10;
+const DISTRIBUTED_CHANNEL: u8 = b'#';
+const LOCAL_CHANNEL: u8 = b'&';
 
 pub struct ClientHandler<C: Connection> {
     connection: C,

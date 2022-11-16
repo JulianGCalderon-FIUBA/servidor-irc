@@ -8,7 +8,7 @@ use crate::server::connection_handler::modes::*;
 use crate::server::connection_handler::responses::{CommandResponse, ErrorReply, Notification};
 use crate::server::database::ClientInfo;
 
-use super::ClientHandler;
+use super::{ClientHandler, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn oper_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
@@ -57,7 +57,59 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn join_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
+    fn join_logic(&mut self, params: Vec<String>) -> std::io::Result<()> {
+        let channels = params[0].split(',');
+
+        let mut keys = get_keys_split(params.get(1)).into_iter();
+
+        for channel in channels {
+            let key = keys.next();
+
+            if let Some(error) = self.assert_can_join_channel(channel, &self.nickname) {
+                self.send_response(&error)?;
+                continue;
+            }
+
+            if self.database.get_channel_key(channel) != key {
+                self.send_response(&ErrorReply::BadChannelKey475 {
+                    channel: channel.to_string(),
+                })?;
+                continue;
+            }
+
+            if let Some(limit) = self.database.get_channel_limit(channel) {
+                if self.database.get_clients_for_channel(channel).len() >= limit {
+                    self.send_response(&ErrorReply::ChannelIsFull471 {
+                        channel: channel.to_string(),
+                    })?;
+                    continue;
+                }
+            }
+
+            if self.client_matches_banmask(channel, &self.nickname) {
+                self.send_response(&ErrorReply::BannedFromChannel474 {
+                    channel: channel.to_string(),
+                })?;
+                continue;
+            }
+
+            let notification = Notification::Join {
+                nickname: self.nickname.clone(),
+                channel: channel.to_string(),
+            };
+
+            self.send_message_to_channel(&notification, channel);
+
+            self.database.add_client_to_channel(&self.nickname, channel);
+
+            self.send_topic_reply(channel.to_string())?;
+
+            self.send_response(&CommandResponse::NameReply353 {
+                channel: channel.to_string(),
+                clients: self.database.get_clients_for_channel(channel),
+            })?;
+        }
+
         Ok(())
     }
 
@@ -279,4 +331,54 @@ impl<C: Connection> ClientHandler<C> {
 
         Ok(())
     }
+
+    fn assert_can_join_channel(&self, channel: &str, nickname: &str) -> Option<ErrorReply> {
+        let nickname = nickname.to_string();
+        let channel = channel.to_string();
+
+        let channels_for_nickname = self.database.get_channels_for_client(&nickname);
+        if channels_for_nickname.len() == MAX_CHANNELS {
+            return Some(ErrorReply::TooManyChannels405 { channel });
+        }
+
+        if !channel_name_is_valid(&channel) {
+            return Some(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        if self.database.is_client_in_channel(&nickname, &channel) {
+            return Some(ErrorReply::UserOnChannel443 { nickname, channel });
+        }
+
+        None
+    }
+
+    fn client_matches_banmask(&self, channel: &str, nickname: &str) -> bool {
+        for mask in self.database.get_channel_banmask(channel) {
+            if self.database.client_matches_banmask(nickname, &mask) {
+                return true;
+            }
+        }
+        false
+    }
+
+    fn send_topic_reply(&mut self, channel: String) -> Result<(), io::Error> {
+        match self.database.get_topic_for_channel(&channel) {
+            Some(topic) => self.send_response(&CommandResponse::Topic332 { channel, topic })?,
+            None => self.send_response(&CommandResponse::NoTopic331 { channel })?,
+        };
+        Ok(())
+    }
+}
+
+fn get_keys_split(keys: Option<&String>) -> Vec<String> {
+    match keys {
+        Some(keys) => keys.split(',').map(|s| s.to_string()).collect(),
+        None => vec![],
+    }
+}
+
+fn channel_name_is_valid(channel: &str) -> bool {
+    return ((channel.as_bytes()[0] == LOCAL_CHANNEL)
+        || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
+        && !channel.contains(INVALID_CHARACTER);
 }
