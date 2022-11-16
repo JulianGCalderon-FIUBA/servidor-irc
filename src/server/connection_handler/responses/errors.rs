@@ -28,6 +28,7 @@ pub enum ErrorReply {
     CannotSendToChannel404 { channel: String },
     ChannelIsFull471 { channel: String },
     BannedFromChannel474 { channel: String },
+    NoReply,
 }
 
 impl Display for ErrorReply {
@@ -94,6 +95,7 @@ impl Display for ErrorReply {
             ErrorReply::BannedFromChannel474 { channel } => {
                 format!("474 {channel} :Cannot join channel (+b)")
             }
+            ErrorReply::NoReply => "".to_string(),
         };
         write!(f, "{string}")
     }

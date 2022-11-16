@@ -318,10 +318,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn mode_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
-        if !assert_modes_starts_correctly(&_params[1]) {
-            return Ok(true);
-        }
-
         let modes: Vec<char> = _params[1].chars().collect();
 
         let (add, remove) = parse_modes(modes);
@@ -758,16 +754,12 @@ fn collect_parameters(parameters: &str) -> Vec<String> {
         .collect()
 }
 
-fn assert_modes_starts_correctly(modes: &String) -> bool {
-    modes.as_bytes()[0] == (ADD_MODE as u8) || modes.as_bytes()[0] == (REMOVE_MODE as u8)
-}
-
 fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
     let mut add_modes: Vec<char> = vec![];
     let mut remove_modes: Vec<char> = vec![];
     let mut add: bool = false;
     for char in modes {
-        match char as u8 {
+        match char {
             ADD_MODE => {
                 add = true;
             }
@@ -776,9 +768,9 @@ fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
             }
             char => {
                 if add {
-                    add_modes.push(char as char);
+                    add_modes.push(char);
                 } else {
-                    remove_modes.push(char as char);
+                    remove_modes.push(char);
                 }
             }
         }

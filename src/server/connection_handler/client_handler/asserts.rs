@@ -4,7 +4,10 @@ use crate::server::connection_handler::connection_handler_trait::ConnectionHandl
 use crate::server::connection_handler::modes::{MODERATED, NO_OUTSIDE_MESSAGES, TOPIC_SETTABLE};
 use crate::server::connection_handler::responses::ErrorReply;
 
-use super::{ClientHandler, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
+use super::{
+    ClientHandler, ADD_MODE, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS,
+    REMOVE_MODE,
+};
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     fn assert_pass_command_is_valid(
@@ -184,6 +187,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 
         if params.len() != 1 {
             self.assert_is_channel_operator(channel)?;
+            self.assert_modes_starts_correctly(&params[1])?;
         }
 
         Ok(())
@@ -384,6 +388,14 @@ impl<C: Connection> ClientHandler<C> {
             return Err(ErrorReply::KeySet467 {
                 channel: channel.to_string(),
             });
+        }
+
+        Ok(())
+    }
+
+    pub fn assert_modes_starts_correctly(&self, modes: &str) -> Result<(), ErrorReply> {
+        if modes.starts_with([ADD_MODE, REMOVE_MODE]) {
+            return Err(ErrorReply::NoReply);
         }
 
         Ok(())
