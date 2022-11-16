@@ -13,7 +13,6 @@ fn pass_fails_with_already_registered() {
     let responses = handler.stream.get_responses();
 
     assert_eq!("462 :You may not reregister", responses[0]);
-
 }
 
 #[test]

@@ -21,6 +21,32 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_modes_starts_correctly(&mut self, modes: &String) -> bool {
         modes.as_bytes()[0] == (ADD_MODE as u8) || modes.as_bytes()[0] == (REMOVE_MODE as u8)
     }
+    pub fn client_matches_banmask(&mut self, channel: &str, nickname: &str) -> bool {
+        for mask in self.database.get_channel_banmask(channel) {
+            if self.database.client_matches_banmask(nickname, &mask) {
+                return true;
+            }
+        }
+        false
+    }
+
+    pub fn assert_can_modify_client_status_in_channel(
+        &self,
+        channel: &str,
+        nickname: &str,
+    ) -> Option<ErrorReply> {
+        if !self.database.contains_client(nickname) {
+            return Some(ErrorReply::NoSuchNickname401 {
+                nickname: nickname.to_string(),
+            });
+        }
+        if !self.database.is_client_in_channel(nickname, channel) {
+            return Some(ErrorReply::NotOnChannel442 {
+                channel: channel.to_string(),
+            });
+        }
+        None
+    }
 
     pub fn assert_can_set_key(&mut self, channel: &str) -> Option<ErrorReply> {
         if self.database.get_channel_key(channel).is_some() {
@@ -277,11 +303,11 @@ impl<C: Connection> ClientHandler<C> {
             });
         }
 
-        // if !self.database.is_channel_operator(channel, &nickname) && parameters.len() > 1{
-        //     return Some(ErrorReply::ChanOPrivIsNeeded482 {
-        //         channel: channel.to_string(),
-        //     });
-        // }
+        if !self.database.is_channel_operator(channel, &nickname) && parameters.len() > 1 {
+            return Some(ErrorReply::ChanOPrivIsNeeded482 {
+                channel: channel.to_string(),
+            });
+        }
 
         None
     }

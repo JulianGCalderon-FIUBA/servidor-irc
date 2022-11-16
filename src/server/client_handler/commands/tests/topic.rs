@@ -83,3 +83,46 @@ fn topic_sets_and_gets_channel_topic() {
     assert_eq!("331 #canal :No topic is set", responses[0]);
     assert_eq!("332 #canal :topic", responses[1]);
 }
+#[test]
+fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick", "#hola");
+
+    handler.database.set_channel_mode("#hola", 't');
+    handler.database.remove_channop("#hola", "nick");
+
+    let parameters = vec!["#hola".to_string(), "topic".to_string()];
+
+    handler.topic_command(parameters).unwrap();
+
+    assert_eq!(
+        "482 #hola :You're not channel operator\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
+    let mut handler = dummy_client_handler();
+    register_client(&mut handler, "nick");
+
+    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick", "#hola");
+
+    handler.database.set_channel_mode("#hola", 't');
+
+    let mut parameters = vec!["#hola".to_string(), "topic".to_string()];
+
+    handler.topic_command(parameters).unwrap();
+
+    assert_eq!("", handler.stream.read_wbuf_to_string());
+
+    parameters = vec!["#hola".to_string()];
+
+    handler.topic_command(parameters).unwrap();
+
+    assert_eq!("332 #hola :topic\r\n", handler.stream.read_wbuf_to_string());
+}
