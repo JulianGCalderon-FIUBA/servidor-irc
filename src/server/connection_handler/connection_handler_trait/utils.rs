@@ -17,4 +17,22 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         let mut stream = self.database().get_stream(nickname)?;
         message.send_to(&mut stream)
     }
+
+    fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
+        let clients = self.database().get_clients_for_channel(channel);
+
+        for client in clients {
+            self.send_message_to_client(message, &client).ok();
+        }
+    }
+
+    fn send_message_to_target(&mut self, message: &dyn Display, target: &str) -> io::Result<()> {
+        if self.database().contains_client(target) {
+            self.send_message_to_client(message, target)?
+        } else {
+            self.send_message_to_channel(message, target);
+        }
+
+        Ok(())
+    }
 }
