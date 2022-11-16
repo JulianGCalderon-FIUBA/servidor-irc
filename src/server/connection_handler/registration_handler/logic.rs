@@ -1,31 +1,34 @@
+use std::io;
+
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 use crate::server::connection_handler::responses::Notification;
 
+use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
-    fn pass_logic(&mut self, mut params: Vec<String>) -> std::io::Result<()> {
+    fn pass_logic(&mut self, mut params: Vec<String>) -> io::Result<bool> {
         let password = params.pop().unwrap();
         self.attributes.insert("password", password);
 
-        Ok(())
+        Ok(true)
     }
 
-    fn nick_logic(&mut self, mut params: Vec<String>) -> std::io::Result<()> {
+    fn nick_logic(&mut self, mut params: Vec<String>) -> io::Result<bool> {
         let nickname = params.pop().unwrap();
         self.attributes.insert("nickname", nickname);
 
-        Ok(())
+        Ok(true)
     }
 
     fn user_logic(
         &mut self,
         mut params: Vec<String>,
         trail: Option<String>,
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<bool> {
         let realname = trail.unwrap();
         let username = params.pop().unwrap();
         let servername = self.servername.to_string();
@@ -40,15 +43,19 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
 
         self.database.add_client(client.unwrap());
 
-        Ok(())
+        self.connection_type = ConnectionType::Client;
+
+        Ok(false)
     }
 
-    fn quit_logic(&mut self, trail: Option<String>) -> std::io::Result<()> {
+    fn quit_logic(&mut self, trail: Option<String>) -> io::Result<bool> {
         let message =
             trail.unwrap_or_else(|| self.attributes.remove("nickname").unwrap_or_default());
 
         let notification = Notification::Quit { message };
 
-        self.send_response(&notification.to_string())
+        self.send_response(&notification.to_string())?;
+
+        Ok(false)
     }
 }

@@ -2,58 +2,58 @@ use crate::server::connection::Connection;
 use std::io;
 
 pub trait ConnectionHandlerLogic<C: Connection> {
-    fn pass_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn pass_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn nick_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn nick_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn user_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<()> {
-        Ok(())
+    fn user_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn oper_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn oper_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn privmsg_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<()> {
-        Ok(())
+    fn privmsg_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn notice_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<()> {
-        Ok(())
+    fn notice_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn join_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn join_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn part_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn part_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn invite_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn invite_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn names_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn names_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn list_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn list_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn who_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn who_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn whois_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn whois_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn away_logic(&mut self, _trail: Option<String>) -> io::Result<()> {
-        Ok(())
+    fn away_logic(&mut self, _trail: Option<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn topic_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn topic_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn kick_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<()> {
-        Ok(())
+    fn kick_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn mode_logic(&mut self, _params: Vec<String>) -> io::Result<()> {
-        Ok(())
+    fn mode_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+        Ok(true)
     }
-    fn quit_logic(&mut self, _trail: Option<String>) -> io::Result<()> {
-        Ok(())
+    fn quit_logic(&mut self, _trail: Option<String>) -> io::Result<bool> {
+        Ok(true)
     }
 }

@@ -9,7 +9,7 @@ impl<C: Connection> ConnectionHandlerUtils<C> for RegistrationHandler<C> {}
 impl<C: Connection> RegistrationHandler<C> {
     pub fn build_client(&mut self) -> Option<Client<C>> {
         ClientBuilder::new()
-            .nickname(self.attributes.remove("nickname")?)
+            .nickname(self.attributes.get("nickname")?.clone())
             .password(self.attributes.remove("password"))
             .username(self.attributes.remove("username")?)
             .hostname(self.attributes.remove("hostname")?)

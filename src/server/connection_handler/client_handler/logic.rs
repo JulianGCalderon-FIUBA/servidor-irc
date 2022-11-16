@@ -11,17 +11,19 @@ use crate::server::database::ClientInfo;
 use super::{ClientHandler, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
-    fn oper_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
+    fn oper_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
         self.database.set_server_operator(&self.nickname);
 
-        self.send_response(&CommandResponse::YouAreOper381)
+        self.send_response(&CommandResponse::YouAreOper381)?;
+
+        Ok(true)
     }
 
     fn privmsg_logic(
         &mut self,
         mut params: Vec<String>,
         trail: Option<String>,
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<bool> {
         let content = trail.unwrap();
         let targets = params.pop().unwrap();
 
@@ -34,14 +36,14 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_privmsg_to_target(target, &content)?;
         }
 
-        Ok(())
+        Ok(true)
     }
 
     fn notice_logic(
         &mut self,
         mut params: Vec<String>,
         trail: Option<String>,
-    ) -> std::io::Result<()> {
+    ) -> std::io::Result<bool> {
         let content = trail.unwrap();
         let targets = params.pop().unwrap();
 
@@ -54,10 +56,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_notice_to_target(target, &content)?;
         }
 
-        Ok(())
+        Ok(true)
     }
 
-    fn join_logic(&mut self, params: Vec<String>) -> std::io::Result<()> {
+    fn join_logic(&mut self, params: Vec<String>) -> std::io::Result<bool> {
         let channels = params[0].split(',');
 
         let mut keys = get_keys_split(params.get(1)).into_iter();
@@ -110,26 +112,26 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             })?;
         }
 
-        Ok(())
+        Ok(true)
     }
 
-    fn part_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
-        Ok(())
+    fn part_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+        Ok(true)
     }
 
-    fn invite_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
-        Ok(())
+    fn invite_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+        Ok(true)
     }
 
-    fn names_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
-        Ok(())
+    fn names_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+        Ok(true)
     }
 
-    fn list_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
-        Ok(())
+    fn list_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+        Ok(true)
     }
 
-    fn who_logic(&mut self, mut params: Vec<String>) -> std::io::Result<()> {
+    fn who_logic(&mut self, mut params: Vec<String>) -> std::io::Result<bool> {
         let mask = params.pop();
 
         let mut clients = match &mask {
@@ -143,10 +145,12 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_whoreply_for_client(client_info)?;
         }
 
-        self.send_response(&CommandResponse::EndOfWho315 { name: mask })
+        self.send_response(&CommandResponse::EndOfWho315 { name: mask })?;
+
+        Ok(true)
     }
 
-    fn whois_logic(&mut self, mut params: Vec<String>) -> std::io::Result<()> {
+    fn whois_logic(&mut self, mut params: Vec<String>) -> std::io::Result<bool> {
         let (_server, nickmasks) = if params.len() == 2 {
             (params.get(0).map(|s| s.to_string()), params.remove(1))
         } else {
@@ -169,10 +173,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             }
         }
 
-        Ok(())
+        Ok(true)
     }
 
-    fn away_logic(&mut self, trail: Option<String>) -> std::io::Result<()> {
+    fn away_logic(&mut self, trail: Option<String>) -> std::io::Result<bool> {
         self.database.set_away_message(&trail, &self.nickname);
 
         let reply = match trail {
@@ -180,22 +184,28 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             None => CommandResponse::UnAway,
         };
 
-        self.send_response(&reply)
+        self.send_response(&reply)?;
+
+        Ok(true)
     }
 
-    fn topic_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
-        Ok(())
+    fn topic_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+        Ok(true)
     }
 
-    fn kick_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> std::io::Result<()> {
-        Ok(())
+    fn kick_logic(
+        &mut self,
+        _params: Vec<String>,
+        _trail: Option<String>,
+    ) -> std::io::Result<bool> {
+        Ok(true)
     }
 
-    fn mode_logic(&mut self, _params: Vec<String>) -> std::io::Result<()> {
-        Ok(())
+    fn mode_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+        Ok(true)
     }
 
-    fn quit_logic(&mut self, trail: Option<String>) -> std::io::Result<()> {
+    fn quit_logic(&mut self, trail: Option<String>) -> std::io::Result<bool> {
         let message = trail.unwrap_or_else(|| self.nickname.clone());
 
         let notification = Notification::Quit { message };
@@ -206,7 +216,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_message_to_channel(&channel, &notification.to_string());
         }
 
-        self.send_response(&notification.to_string())
+        self.send_response(&notification.to_string())?;
+
+        Ok(false)
     }
 }
 

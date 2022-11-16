@@ -27,7 +27,7 @@ pub struct ClientHandler<C: Connection> {
 impl<C: Connection> ConnectionHandler<C> for ClientHandler<C> {}
 
 impl<C: Connection> ClientHandler<C> {
-    fn from_connection(
+    pub fn from_connection(
         connection: C,
         servername: String,
         nickname: String,

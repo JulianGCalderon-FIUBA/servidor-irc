@@ -7,12 +7,18 @@ use std::{
 
 use crate::server::{connection::Connection, database::DatabaseHandle};
 
-use super::connection_handler_trait::{
-    ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
-    ConnectionHandlerStructure, ConnectionHandlerUtils,
+use self::connection_type::ConnectionType;
+
+use super::{
+    client_handler::ClientHandler,
+    connection_handler_trait::{
+        ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
+        ConnectionHandlerStructure, ConnectionHandlerUtils,
+    },
 };
 
 mod asserts;
+mod connection_type;
 mod logic;
 mod utils;
 
@@ -26,6 +32,7 @@ pub struct RegistrationHandler<C: Connection> {
     online: Arc<AtomicBool>,
     attributes: HashMap<&'static str, String>,
     timestamp: Instant,
+    connection_type: ConnectionType,
 }
 
 impl<C: Connection> ConnectionHandler<C> for RegistrationHandler<C> {}
@@ -47,7 +54,27 @@ impl<C: Connection> RegistrationHandler<C> {
             online,
             attributes: HashMap::new(),
             timestamp: Instant::now(),
+            connection_type: ConnectionType::Undefined,
         })
+    }
+
+    fn spawn_client_handler(&mut self) {
+        let client_handler = match self.build_client_handler() {
+            Ok(client_handler) => client_handler,
+            Err(error) => return eprintln!("Could not initiate client handler, {error:?}"),
+        };
+
+        client_handler.handle();
+    }
+
+    fn build_client_handler(&mut self) -> io::Result<ClientHandler<C>> {
+        ClientHandler::from_connection(
+            self.connection().try_clone()?,
+            self.servername.clone(),
+            self.attributes.remove("nickname").unwrap(),
+            self.database().clone(),
+            Arc::clone(self.online()),
+        )
     }
 }
 
@@ -67,10 +94,14 @@ impl<C: Connection> ConnectionHandlerGetters<C> for RegistrationHandler<C> {
 
 impl<C: Connection> ConnectionHandlerStructure<C> for RegistrationHandler<C> {
     fn on_try_handle_error(&mut self) {
-        eprintln!("Connection with unregistered client ended unexpectedly")
+        println!("Connection with unregistered client ended unexpectedly")
     }
     fn on_try_handle_success(&mut self) {
-        eprintln!("Closing conection with unregistered client")
+        match self.connection_type {
+            ConnectionType::Undefined => println!("Closing connection with unregistered client"),
+            ConnectionType::Server => todo!(),
+            ConnectionType::Client => self.spawn_client_handler(),
+        }
     }
 
     fn timeout(&mut self) -> bool {
