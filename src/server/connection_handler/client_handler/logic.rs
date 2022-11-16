@@ -119,15 +119,95 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         Ok(true)
     }
 
-    fn invite_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+    fn invite_logic(&mut self, mut params: Vec<String>) -> std::io::Result<bool> {
+        let channel = params.pop().unwrap();
+        let invited_client = params.pop().unwrap();
+        let inviting_client = self.nickname.clone();
+
+        let invitation = Notification::Invite {
+            inviting_client: inviting_client.clone(),
+            invited_client: invited_client.clone(),
+            channel: channel.clone(),
+        };
+
+        if self
+            .send_message_to_client(&invitation, &invited_client)
+            .is_err()
+        {
+            self.send_response(&ErrorReply::NoSuchNickname401 {
+                nickname: invited_client.clone(),
+            })?
+        }
+
+        self.send_response(&CommandResponse::Inviting341 {
+            nickname: inviting_client,
+            channel,
+        })?;
+
         Ok(true)
     }
 
-    fn names_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+    fn names_logic(&mut self, params: Vec<String>) -> std::io::Result<bool> {
+        let channels = self.get_channels_for_query(params.get(0));
+
+        for channel in channels {
+            if !self.database.contains_channel(&channel) {
+                continue;
+            }
+
+            if !self.can_name_channel(&channel) {
+                continue;
+            }
+
+            let clients = self.database.get_clients_for_channel(&channel);
+            self.send_response(&CommandResponse::NameReply353 {
+                channel: channel.clone(),
+                clients,
+            })?;
+
+            if !params.is_empty() {
+                self.send_response(&CommandResponse::EndOfNames366 { channel })?
+            }
+        }
+
+        if params.is_empty() {
+            self.send_response(&CommandResponse::EndOfNames366 {
+                channel: "".to_string(),
+            })?;
+        }
+
         Ok(true)
     }
 
     fn list_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+        let channels = self.get_channels_for_query(_params.get(0));
+
+        self.send_response(&CommandResponse::ListStart321)?;
+
+        for channel in channels {
+            if self.can_list_channel(&channel) {
+                let topic = match self.database.get_topic_for_channel(&channel) {
+                    Some(topic) => topic,
+                    None => "No topic set".to_string(),
+                };
+
+                if self.database.channel_has_mode(&channel, 's')
+                    && !self.database.is_client_in_channel(&self.nickname, &channel)
+                {
+                    continue;
+                }
+                let prv = self.database.channel_has_mode(&channel, 'p')
+                    && !self.database.is_client_in_channel(&self.nickname, &channel);
+
+                self.send_response(&CommandResponse::List322 {
+                    channel,
+                    prv,
+                    topic,
+                })?;
+            }
+        }
+        self.send_response(&CommandResponse::ListEnd323);
+
         Ok(true)
     }
 
@@ -189,15 +269,30 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         Ok(true)
     }
 
-    fn topic_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+    fn topic_logic(&mut self, mut params: Vec<String>) -> std::io::Result<bool> {
+        let channel = params.remove(0);
+
+        if let Some(topic) = params.pop() {
+            self.database.set_channel_topic(&channel, &topic);
+        } else {
+            self.send_topic_reply(channel)?;
+        }
+
         Ok(true)
     }
 
-    fn kick_logic(
-        &mut self,
-        _params: Vec<String>,
-        _trail: Option<String>,
-    ) -> std::io::Result<bool> {
+    fn kick_logic(&mut self, params: Vec<String>, trail: Option<String>) -> std::io::Result<bool> {
+        let channel = params[0].split(',');
+        let nickname = params[1].split(',');
+
+        for (channel, nickname) in channel.zip(nickname) {
+            if let Err(error) = self.assert_can_kick_from_channel(channel) {
+                self.send_response(&error)?;
+            } else {
+                self.kick_client_from_channel(nickname, channel, &trail);
+            }
+        }
+
         Ok(true)
     }
 
@@ -380,6 +475,75 @@ impl<C: Connection> ClientHandler<C> {
         };
         Ok(())
     }
+
+    fn kick_client_from_channel(
+        &mut self,
+        nickname: &str,
+        channel: &str,
+        comment: &Option<String>,
+    ) {
+        let notification = Notification::Kick {
+            kicker: self.nickname.clone(),
+            channel: channel.to_string(),
+            nickname: nickname.to_string(),
+            comment: comment.clone(),
+        };
+
+        self.send_message_to_channel(&notification, channel);
+        self.database.remove_client_from_channel(nickname, channel);
+    }
+
+    fn assert_can_kick_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
+        if !self.database.contains_channel(channel) {
+            let channel = channel.to_string();
+            return Err(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        if !self.database.is_client_in_channel(&self.nickname, channel) {
+            let channel = channel.to_string();
+            return Err(ErrorReply::NotOnChannel442 { channel });
+        }
+
+        if !self.database.is_channel_operator(channel, &self.nickname) {
+            let channel = channel.to_string();
+            return Err(ErrorReply::ChanopPrivilegesNeeded482 { channel });
+        }
+
+        Ok(())
+    }
+
+    fn get_channels_for_query(&mut self, channels: Option<&String>) -> Vec<String> {
+        if channels.is_none() {
+            let mut channels = self.database.get_all_channels();
+            channels.sort();
+            return channels;
+        }
+
+        collect_parameters(channels.unwrap())
+    }
+
+    fn can_name_channel(&mut self, channel: &str) -> bool {
+        let is_priv_or_secret = self.database.channel_has_mode(channel, 's')
+            || self.database.channel_has_mode(channel, 'p');
+
+        let is_client_in_channel = self.database.is_client_in_channel(&self.nickname, channel);
+
+        !is_priv_or_secret || is_client_in_channel
+    }
+
+    fn can_list_channel(&self, channel: &str) -> bool {
+        if self.database.channel_has_mode(channel, 's')
+            && !self.database.is_client_in_channel(&self.nickname, channel)
+        {
+            return false;
+        }
+
+        if self.database.contains_channel(channel) {
+            return true;
+        }
+
+        false
+    }
 }
 
 fn get_keys_split(keys: Option<&String>) -> Vec<String> {
@@ -393,4 +557,11 @@ fn channel_name_is_valid(channel: &str) -> bool {
     return ((channel.as_bytes()[0] == LOCAL_CHANNEL)
         || (channel.as_bytes()[0] == DISTRIBUTED_CHANNEL))
         && !channel.contains(INVALID_CHARACTER);
+}
+
+fn collect_parameters(parameters: &str) -> Vec<String> {
+    parameters
+        .split(',')
+        .map(|string| string.to_string())
+        .collect()
 }
