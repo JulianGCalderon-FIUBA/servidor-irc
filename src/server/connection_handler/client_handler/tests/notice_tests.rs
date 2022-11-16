@@ -80,7 +80,9 @@ fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
 
     handler.database.set_channel_mode("#channel", 'm');
 
@@ -108,7 +110,9 @@ fn notice_works_on_channel_with_flag_n() {
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
@@ -120,10 +124,10 @@ fn notice_works_on_channel_with_flag_n() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!(":nick NOTICE #channel :message!", responses[0]);
+    assert_eq!(":nickname NOTICE #channel :message!", responses[0]);
 
     assert_eq!(
-        ":nick NOTICE #channel :message!\r\n",
+        ":nickname NOTICE #channel :message!\r\n",
         handler
             .database
             .get_stream("nick1")
@@ -132,7 +136,7 @@ fn notice_works_on_channel_with_flag_n() {
     );
 
     assert_eq!(
-        ":nick NOTICE #channel :message!\r\n",
+        ":nickname NOTICE #channel :message!\r\n",
         handler
             .database
             .get_stream("nick2")
@@ -147,7 +151,9 @@ fn notice_works_on_channel_with_flag_m() {
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
 
     handler.database.set_channel_mode("#channel", 'm');
     handler.database.add_speaker("#channel", "nickname");

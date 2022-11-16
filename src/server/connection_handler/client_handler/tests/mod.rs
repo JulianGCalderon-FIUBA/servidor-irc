@@ -22,13 +22,13 @@ mod privmsg_tests;
 // mod whois_tests;
 
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
-    let connection = MockTcpStream::new();
     let database = Database::start().0;
     let nickname = "nickname".to_string();
     let servername = "servername".to_string();
     let online = Arc::new(AtomicBool::new(true));
 
     let client = dummy_client(&nickname);
+    let connection = client.get_stream().unwrap();
 
     database.add_client(client);
 
