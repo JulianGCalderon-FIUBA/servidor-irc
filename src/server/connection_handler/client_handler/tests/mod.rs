@@ -19,7 +19,7 @@ mod part_tests;
 mod privmsg_tests;
 mod topic_tests;
 mod who_tests;
-// mod whois_tests;
+mod whois_tests;
 
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let database = Database::start().0;

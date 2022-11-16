@@ -20,11 +20,11 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
     let responses = handler.stream.get_responses();
 
     assert_eq!(
-        "352 #channel2 username hostname servername nick1 \\MODOS :HOPCOUNT realname",
+        "352 #channel2 username 127.0.0.1 servername nick1 \\MODOS :HOPCOUNT realname",
         responses[0]
     );
     assert_eq!(
-        "352 * username hostname servername nick2 \\MODOS :HOPCOUNT realname",
+        "352 * username 127.0.0.1 servername nick2 \\MODOS :HOPCOUNT realname",
         responses[1]
     );
     assert_eq!("315 :End of /WHO list", responses[2]);
@@ -43,7 +43,7 @@ fn who_with_mask_returns_all_public_clients_matching_mask() {
     let responses = handler.stream.get_responses();
 
     assert_eq!(
-        "352 * username hostname servername nick1name \\MODOS :HOPCOUNT realname",
+        "352 * username 127.0.0.1 servername nick1name \\MODOS :HOPCOUNT realname",
         responses[0]
     );
     assert_eq!("315 *k1* :End of /WHO list", responses[1]);
