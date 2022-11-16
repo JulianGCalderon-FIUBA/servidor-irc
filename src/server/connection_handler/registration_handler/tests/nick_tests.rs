@@ -1,4 +1,4 @@
-use crate::server::testing_utils::dummy_client;
+use crate::server::testing::dummy_client;
 
 use super::*;
 

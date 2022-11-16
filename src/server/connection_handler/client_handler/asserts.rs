@@ -1,8 +1,8 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::channel_const::*;
-use crate::server::connection_handler::command_const::*;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
-use crate::server::connection_handler::mode_const::*;
+use crate::server::connection_handler::consts::channel::*;
+use crate::server::connection_handler::consts::commands::*;
+use crate::server::connection_handler::consts::modes::*;
 use crate::server::connection_handler::responses::ErrorReply;
 
 use super::ClientHandler;

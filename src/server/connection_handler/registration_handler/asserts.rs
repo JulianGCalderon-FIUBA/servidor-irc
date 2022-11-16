@@ -1,6 +1,6 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::command_const::{PASS_COMMAND, USER_COMMAND};
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
+use crate::server::connection_handler::consts::commands::{PASS_COMMAND, USER_COMMAND};
 use crate::server::connection_handler::responses::ErrorReply;
 
 use super::RegistrationHandler;

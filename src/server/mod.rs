@@ -1,6 +1,6 @@
 #[cfg(test)]
 /// Utils for testing different functionalities.
-mod testing_utils;
+mod testing;
 
 /// Definition of the trait used in the project's structures.
 mod connection;
