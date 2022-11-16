@@ -1,23 +1,8 @@
 use super::*;
 
 #[test]
-fn privmsg_fails_with_unregistered_client() {
-    let mut handler = dummy_client_handler();
-
-    let parameters = vec!["nick1".to_string()];
-    let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
-
-    assert_eq!(
-        "200 :Unregistered\r\n",
-        handler.stream.read_wbuf_to_string()
-    )
-}
-
-#[test]
 fn privmsg_fails_with_no_recipient() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec![];
     let trailing = Some("message!".to_string());
@@ -32,7 +17,6 @@ fn privmsg_fails_with_no_recipient() {
 #[test]
 fn privmsg_fails_with_no_text() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec!["nick1".to_string()];
     let trailing = None;
@@ -47,7 +31,6 @@ fn privmsg_fails_with_no_text() {
 #[test]
 fn privmsg_fails_with_invalid_target() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
@@ -61,7 +44,6 @@ fn privmsg_fails_with_invalid_target() {
 #[test]
 fn privmsg_works_with_valid_target_client() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
 
@@ -70,7 +52,7 @@ fn privmsg_works_with_valid_target_client() {
     handler.privmsg_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        ":nick PRIVMSG nick1 :message!\r\n",
+        ":nickname PRIVMSG nick1 :message!\r\n",
         handler
             .database
             .get_stream("nick1")
@@ -82,11 +64,10 @@ fn privmsg_works_with_valid_target_client() {
 #[test]
 fn privmsg_works_with_valid_target_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick", "#channel");
+    handler.database.add_client_to_channel("nickname", "#channel");
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
@@ -96,10 +77,10 @@ fn privmsg_works_with_valid_target_channel() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!(":nick PRIVMSG #channel :message!", responses[0]);
+    assert_eq!(":nickname PRIVMSG #channel :message!", responses[0]);
 
     assert_eq!(
-        ":nick PRIVMSG #channel :message!\r\n",
+        ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
             .get_stream("nick1")
@@ -108,7 +89,7 @@ fn privmsg_works_with_valid_target_channel() {
     );
 
     assert_eq!(
-        ":nick PRIVMSG #channel :message!\r\n",
+        ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
             .get_stream("nick2")
@@ -120,7 +101,6 @@ fn privmsg_works_with_valid_target_channel() {
 #[test]
 fn privmsg_works_with_multiple_targets() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
@@ -130,7 +110,7 @@ fn privmsg_works_with_multiple_targets() {
     handler.privmsg_command(parameters, trailing).unwrap();
 
     assert_eq!(
-        ":nick PRIVMSG nick1 :message!\r\n",
+        ":nickname PRIVMSG nick1 :message!\r\n",
         handler
             .database
             .get_stream("nick1")
@@ -139,7 +119,7 @@ fn privmsg_works_with_multiple_targets() {
     );
 
     assert_eq!(
-        ":nick PRIVMSG nick2 :message!\r\n",
+        ":nickname PRIVMSG nick2 :message!\r\n",
         handler
             .database
             .get_stream("nick2")
@@ -151,7 +131,6 @@ fn privmsg_works_with_multiple_targets() {
 #[test]
 fn privmsg_with_away_client_returns_away_message() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler
@@ -171,7 +150,6 @@ fn privmsg_with_away_client_returns_away_message() {
 #[test]
 fn privmsg_fails_with_not_on_channel_with_flag_n() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
@@ -210,11 +188,10 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
 #[test]
 fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick", "#channel");
+    handler.database.add_client_to_channel("nickname", "#channel");
 
     handler.database.set_channel_mode("#channel", 'm');
 
@@ -239,11 +216,10 @@ fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
 #[test]
 fn privmsg_works_on_channel_with_flag_n() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick", "#channel");
+    handler.database.add_client_to_channel("nickname", "#channel");
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
@@ -255,10 +231,10 @@ fn privmsg_works_on_channel_with_flag_n() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!(":nick PRIVMSG #channel :message!", responses[0]);
+    assert_eq!(":nickname PRIVMSG #channel :message!", responses[0]);
 
     assert_eq!(
-        ":nick PRIVMSG #channel :message!\r\n",
+        ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
             .get_stream("nick1")
@@ -267,7 +243,7 @@ fn privmsg_works_on_channel_with_flag_n() {
     );
 
     assert_eq!(
-        ":nick PRIVMSG #channel :message!\r\n",
+        ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
             .get_stream("nick2")
@@ -279,14 +255,13 @@ fn privmsg_works_on_channel_with_flag_n() {
 #[test]
 fn privmsg_works_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick", "#channel");
+    handler.database.add_client_to_channel("nickname", "#channel");
 
     handler.database.set_channel_mode("#channel", 'm');
-    handler.database.add_speaker("#channel", "nick");
+    handler.database.add_speaker("#channel", "nickname");
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -294,10 +269,10 @@ fn privmsg_works_on_channel_with_flag_m() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!(":nick PRIVMSG #channel :message!", responses[0]);
+    assert_eq!(":nickname PRIVMSG #channel :message!", responses[0]);
 
     assert_eq!(
-        ":nick PRIVMSG #channel :message!\r\n",
+        ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
             .get_stream("nick1")

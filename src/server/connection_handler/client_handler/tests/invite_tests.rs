@@ -1,23 +1,8 @@
 use super::*;
 
 #[test]
-fn invite_fails_with_unregistered_client() {
-    let mut handler = dummy_client_handler();
-
-    let parameters = vec!["nick".to_string(), "#hola".to_string()];
-
-    handler.invite_command(parameters).unwrap();
-
-    assert_eq!(
-        "200 :Unregistered\r\n",
-        handler.stream.read_wbuf_to_string()
-    )
-}
-
-#[test]
 fn invite_fails_with_less_than_two_parameters() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec![];
 
@@ -42,7 +27,6 @@ fn invite_fails_with_less_than_two_parameters() {
 #[test]
 fn invite_fails_with_invalid_nickname() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -57,7 +41,6 @@ fn invite_fails_with_invalid_nickname() {
 #[test]
 fn invite_fails_with_user_already_on_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#hola");
@@ -76,7 +59,6 @@ fn invite_fails_with_user_already_on_channel() {
 #[test]
 fn invite_fails_with_sending_user_not_on_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#hola");
@@ -94,7 +76,6 @@ fn invite_fails_with_sending_user_not_on_channel() {
 #[test]
 fn can_invite_one_user() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick", "#hola");
@@ -103,7 +84,7 @@ fn can_invite_one_user() {
 
     handler.invite_command(parameters).unwrap();
 
-    assert_eq!("341 #hola nick\r\n", handler.stream.read_wbuf_to_string());
+    assert_eq!("341 #hola nickname\r\n", handler.stream.read_wbuf_to_string());
 
     assert_eq!(
         ":nick INVITE nick2 #hola\r\n",
@@ -118,7 +99,6 @@ fn can_invite_one_user() {
 #[test]
 fn invite_fails_with_not_channop_on_moderated_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick", "#hola");
@@ -148,7 +128,6 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
 #[test]
 fn can_invite_user_in_moderated_channel_if_channop() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick", "#hola");
@@ -159,7 +138,7 @@ fn can_invite_user_in_moderated_channel_if_channop() {
 
     handler.invite_command(parameters).unwrap();
 
-    assert_eq!("341 #hola nick\r\n", handler.stream.read_wbuf_to_string());
+    assert_eq!("341 #hola nickname\r\n", handler.stream.read_wbuf_to_string());
 
     assert_eq!(
         ":nick INVITE nick2 #hola\r\n",

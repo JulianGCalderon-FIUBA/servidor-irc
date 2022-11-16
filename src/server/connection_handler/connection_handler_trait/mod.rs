@@ -24,14 +24,14 @@ pub trait ConnectionHandler<C: Connection>:
 {
     fn handle(mut self) {
         let (message_receiver, message_receiver_thread) =
-            start_async_read_stream(self.connection().try_clone().unwrap());
+            start_async_read_stream(self.stream().try_clone().unwrap());
 
         match self.try_handle(message_receiver) {
             Ok(()) => self.on_try_handle_success(),
             Err(_) => self.on_try_handle_error(),
         }
 
-        self.connection().shutdown().unwrap();
+        self.stream().shutdown().unwrap();
         message_receiver_thread.join().unwrap();
     }
 }

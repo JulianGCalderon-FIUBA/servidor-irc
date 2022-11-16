@@ -1,19 +1,6 @@
 use super::*;
 
 #[test]
-fn mode_fails_with_unregistered_client() {
-    let mut handler = dummy_client_handler();
-
-    let parameters = vec!["#channel".to_string()];
-    handler.mode_command(parameters).unwrap();
-
-    assert_eq!(
-        "200 :Unregistered\r\n",
-        handler.stream.read_wbuf_to_string()
-    )
-}
-
-#[test]
 fn mode_fails_with_not_enough_parameters() {
     let mut handler = dummy_client_handler();
 
@@ -29,7 +16,6 @@ fn mode_fails_with_not_enough_parameters() {
 #[test]
 fn mode_fails_with_nonexistent_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     let parameters = vec!["#channel".to_string()];
     handler.mode_command(parameters).unwrap();
@@ -43,7 +29,6 @@ fn mode_fails_with_nonexistent_channel() {
 #[test]
 fn mode_fails_with_user_not_on_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler.database.add_client(dummy_client("dummy"));
     handler.database.add_client_to_channel("dummy", "#channel");
@@ -60,7 +45,6 @@ fn mode_fails_with_user_not_on_channel() {
 #[test]
 fn mode_fails_with_user_not_operator() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler.database.add_client(dummy_client("dummy"));
     handler.database.add_client_to_channel("dummy", "#channel");
@@ -80,7 +64,6 @@ fn mode_fails_with_user_not_operator() {
 #[test]
 fn mode_ignores_wrong_parameters() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -95,7 +78,6 @@ fn mode_ignores_wrong_parameters() {
 #[test]
 fn mode_adds_channop() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -120,7 +102,6 @@ fn mode_adds_channop() {
 #[test]
 fn mode_adds_multiple_channops() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -158,7 +139,6 @@ fn mode_adds_multiple_channops() {
 #[test]
 fn mode_removes_channop() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -185,7 +165,6 @@ fn mode_removes_channop() {
 #[test]
 fn mode_removes_multiple_channops() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -215,7 +194,6 @@ fn mode_removes_multiple_channops() {
 #[test]
 fn mode_fails_with_no_oper_parameter() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -239,7 +217,6 @@ fn mode_fails_with_no_oper_parameter() {
 #[test]
 fn mode_fails_with_nonexistent_oper() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -262,7 +239,6 @@ fn mode_fails_with_nonexistent_oper() {
 #[test]
 fn mode_oper_fails_with_nick_not_on_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -287,7 +263,6 @@ fn mode_oper_fails_with_nick_not_on_channel() {
 #[test]
 fn mode_sets_limit_to_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -305,7 +280,6 @@ fn mode_sets_limit_to_channel() {
 #[test]
 fn mode_unsets_channel_limit() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -324,7 +298,6 @@ fn mode_unsets_channel_limit() {
 #[test]
 fn mode_fails_with_no_limit_parameter() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -345,7 +318,6 @@ fn mode_fails_with_no_limit_parameter() {
 #[test]
 fn mode_sets_banmask() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -370,7 +342,6 @@ fn mode_sets_banmask() {
 #[test]
 fn mode_sets_multiple_banmasks() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -399,7 +370,6 @@ fn mode_sets_multiple_banmasks() {
 #[test]
 fn mode_unsets_banmask() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -435,7 +405,6 @@ fn mode_unsets_banmask() {
 #[test]
 fn mode_returns_ban_list_with_no_parameters() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -465,7 +434,6 @@ fn mode_returns_ban_list_with_no_parameters() {
 #[test]
 fn mode_fails_with_no_banmask_parameter() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -486,7 +454,6 @@ fn mode_fails_with_no_banmask_parameter() {
 #[test]
 fn mode_ignores_unknown_banmask_when_unsetting() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -506,7 +473,6 @@ fn mode_ignores_unknown_banmask_when_unsetting() {
 #[test]
 fn mode_adds_speaker_to_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -531,7 +497,6 @@ fn mode_adds_speaker_to_channel() {
 #[test]
 fn mode_adds_multiple_speakers_to_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -564,7 +529,6 @@ fn mode_adds_multiple_speakers_to_channel() {
 #[test]
 fn mode_removes_speakers_from_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -590,7 +554,6 @@ fn mode_removes_speakers_from_channel() {
 #[test]
 fn mode_removes_multiple_speakers_from_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -619,7 +582,6 @@ fn mode_removes_multiple_speakers_from_channel() {
 #[test]
 fn mode_fails_with_no_speaker_parameter() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -643,7 +605,6 @@ fn mode_fails_with_no_speaker_parameter() {
 #[test]
 fn mode_fails_with_nonexistent_speaker() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -666,7 +627,6 @@ fn mode_fails_with_nonexistent_speaker() {
 #[test]
 fn mode_speaker_fails_with_nick_not_on_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -691,7 +651,6 @@ fn mode_speaker_fails_with_nick_not_on_channel() {
 #[test]
 fn mode_sets_channel_key() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -712,7 +671,6 @@ fn mode_sets_channel_key() {
 #[test]
 fn mode_unsets_channel_key() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -736,7 +694,6 @@ fn mode_unsets_channel_key() {
 #[test]
 fn mode_fails_with_no_key_parameter() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -757,7 +714,6 @@ fn mode_fails_with_no_key_parameter() {
 #[test]
 fn mode_fails_with_key_already_set() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -791,7 +747,6 @@ fn mode_fails_with_key_already_set() {
 #[test]
 fn mode_sets_and_unsets_private_flag() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -816,7 +771,6 @@ fn mode_sets_and_unsets_private_flag() {
 #[test]
 fn mode_sets_and_unsets_secret_flag() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -841,7 +795,6 @@ fn mode_sets_and_unsets_secret_flag() {
 #[test]
 fn mode_sets_and_unsets_invite_only_flag() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -866,7 +819,6 @@ fn mode_sets_and_unsets_invite_only_flag() {
 #[test]
 fn mode_sets_and_unsets_topic_flag() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -890,7 +842,6 @@ fn mode_sets_and_unsets_topic_flag() {
 #[test]
 fn mode_sets_and_unsets_no_outside_messages_flag() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -915,7 +866,6 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
 #[test]
 fn mode_sets_and_unsets_moderated_flag() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -940,7 +890,6 @@ fn mode_sets_and_unsets_moderated_flag() {
 #[test]
 fn mode_fails_when_setting_unknown_mode() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -961,7 +910,6 @@ fn mode_fails_when_setting_unknown_mode() {
 #[test]
 fn mode_fails_when_unsetting_unknown_mode() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -982,7 +930,6 @@ fn mode_fails_when_unsetting_unknown_mode() {
 #[test]
 fn mode_sets_multiple_flags() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -1011,7 +958,6 @@ fn mode_sets_multiple_flags() {
 #[test]
 fn mode_unsets_multiple_flags() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -1040,7 +986,6 @@ fn mode_unsets_multiple_flags() {
 #[test]
 fn mode_sets_and_unsets_multiple_flags() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database
@@ -1071,7 +1016,6 @@ fn mode_sets_and_unsets_multiple_flags() {
 #[test]
 fn mode_sets_and_unsets_multiple_valid_flags() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nickname");
 
     handler
         .database

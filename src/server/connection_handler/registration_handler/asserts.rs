@@ -47,7 +47,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
     }
 
     fn assert_oper_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_privmsg_command_is_valid(
@@ -55,7 +55,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         _params: &[String],
         _trail: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_notice_command_is_valid(
@@ -63,43 +63,43 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         _params: &[String],
         _trail: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_join_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_part_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_invite_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_names_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_list_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_who_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_whois_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_away_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_topic_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_kick_command_is_valid(
@@ -107,11 +107,11 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         _params: &[String],
         _trail: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_mode_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Err(ErrorReply::NotRegistered451)
     }
 
     fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {

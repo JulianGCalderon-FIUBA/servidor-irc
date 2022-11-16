@@ -1,19 +1,6 @@
 use super::*;
 
 #[test]
-fn part_fails_with_unregistered_client() {
-    let mut handler = dummy_client_handler();
-
-    let parameters = vec!["sol".to_string()];
-    handler.part_command(parameters).unwrap();
-
-    assert_eq!(
-        "200 :Unregistered\r\n",
-        handler.stream.read_wbuf_to_string()
-    )
-}
-
-#[test]
 fn part_fails_with_empty_params() {
     let mut handler = dummy_client_handler();
     let parameters = vec![];
@@ -31,7 +18,6 @@ fn part_fails_with_empty_params() {
 #[test]
 fn part_fails_with_invalid_channel_name() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec!["hola,#ho'la,#hola".to_string()];
 
@@ -47,7 +33,6 @@ fn part_fails_with_invalid_channel_name() {
 #[test]
 fn part_fails_with_user_not_on_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     handler.database.add_client(dummy_client("newnickname"));
 
@@ -67,7 +52,6 @@ fn part_fails_with_user_not_on_channel() {
 #[test]
 fn can_part_one_channel() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec!["#hola".to_string()];
     handler.join_command(parameters.clone()).unwrap();
@@ -82,7 +66,7 @@ fn can_part_one_channel() {
 #[test]
 fn can_part_existing_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick2");
+
     let parameters = vec!["#hola,#chau".to_string()];
 
     handler.database.add_client(dummy_client("nick"));
@@ -103,16 +87,15 @@ fn can_part_existing_channels() {
 fn part_notifies_users_in_channel() {
     let mut handler = dummy_client_handler();
 
-    register_client(&mut handler, "nick1");
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("nickname", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
     let parameters = vec!["#channel".to_string()];
     handler.part_command(parameters).unwrap();
 
     assert_eq!(
-        ":nick1 PART #channel\r\n",
+        ":nickname PART #channel\r\n",
         handler
             .database
             .get_stream("nick2")
@@ -121,10 +104,10 @@ fn part_notifies_users_in_channel() {
     );
 
     assert_eq!(
-        ":nick1 PART #channel\r\n",
+        ":nickname PART #channel\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_stream("nickname")
             .unwrap()
             .read_wbuf_to_string()
     );

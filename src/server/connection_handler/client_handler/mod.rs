@@ -9,6 +9,8 @@ use super::connection_handler_trait::{
 
 mod asserts;
 mod logic;
+#[cfg(test)]
+mod tests;
 mod utils;
 
 const INVALID_CHARACTER: char = '\'';
@@ -17,7 +19,7 @@ const DISTRIBUTED_CHANNEL: u8 = b'#';
 const LOCAL_CHANNEL: u8 = b'&';
 
 pub struct ClientHandler<C: Connection> {
-    connection: C,
+    stream: C,
     database: DatabaseHandle<C>,
     nickname: String,
     servername: String,
@@ -27,14 +29,14 @@ impl<C: Connection> ConnectionHandler<C> for ClientHandler<C> {}
 
 impl<C: Connection> ClientHandler<C> {
     pub fn from_connection(
-        connection: C,
+        stream: C,
         servername: String,
         nickname: String,
         database: DatabaseHandle<C>,
         online: Arc<AtomicBool>,
     ) -> std::io::Result<Self> {
         Ok(Self {
-            connection,
+            stream,
             database,
             servername,
             online,
@@ -48,8 +50,8 @@ impl<C: Connection> ConnectionHandlerGetters<C> for ClientHandler<C> {
         &self.online
     }
 
-    fn connection(&mut self) -> &mut C {
-        &mut self.connection
+    fn stream(&mut self) -> &mut C {
+        &mut self.stream
     }
 
     fn database(&self) -> &DatabaseHandle<C> {

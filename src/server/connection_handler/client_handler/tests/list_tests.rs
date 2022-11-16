@@ -1,23 +1,8 @@
 use super::*;
 
 #[test]
-fn list_fails_with_unregistered_client() {
-    let mut handler = dummy_client_handler();
-
-    let parameters = vec![];
-
-    handler.list_command(parameters).unwrap();
-
-    assert_eq!(
-        "200 :Unregistered\r\n",
-        handler.stream.read_wbuf_to_string()
-    )
-}
-
-#[test]
 fn list_with_no_channels_prints_start_and_end() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec![];
 
@@ -32,15 +17,14 @@ fn list_with_no_channels_prints_start_and_end() {
 #[test]
 fn list_with_no_parameters_prints_all_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec![];
 
-    handler.database.add_client_to_channel("nick", "#hola");
+    handler.database.add_client_to_channel("nickname", "#hola");
     handler
         .database
         .set_channel_topic("#hola", "topic for #hola");
-    handler.database.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nickname", "#chau");
 
     handler.list_command(parameters.clone()).unwrap();
 
@@ -69,12 +53,11 @@ fn list_with_no_parameters_prints_all_channels() {
 #[test]
 fn list_with_parameters_prints_requested_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec!["#hola".to_string()];
 
-    handler.database.add_client_to_channel("nick", "#hola");
-    handler.database.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("nickname", "#chau");
 
     handler.list_command(parameters).unwrap();
 
@@ -101,12 +84,11 @@ fn list_with_parameters_prints_requested_channels() {
 #[test]
 fn list_ignores_invalid_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
     let parameters = vec!["#hola,#invalido,#chau".to_string()];
 
-    handler.database.add_client_to_channel("nick", "#hola");
-    handler.database.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("nickname", "#chau");
 
     handler.list_command(parameters).unwrap();
 
@@ -121,10 +103,9 @@ fn list_ignores_invalid_channels() {
 #[test]
 fn list_ignores_secret_channels() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
-    handler.database.add_client_to_channel("nick", "#hola");
-    handler.database.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("nickname", "#chau");
 
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#secreto");
@@ -145,10 +126,9 @@ fn list_ignores_secret_channels() {
 #[test]
 fn list_prints_priv_channels_as_priv() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
-    handler.database.add_client_to_channel("nick", "#hola");
-    handler.database.add_client_to_channel("nick", "#chau");
+    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("nickname", "#chau");
 
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#privado");
@@ -170,11 +150,10 @@ fn list_prints_priv_channels_as_priv() {
 #[test]
 fn list_prints_secret_channel_if_client_is_in_it() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
-    handler.database.add_client_to_channel("nick", "#hola");
-    handler.database.add_client_to_channel("nick", "#chau");
-    handler.database.add_client_to_channel("nick", "#secreto");
+    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("nickname", "#secreto");
 
     handler.database.set_channel_mode("#secreto", 's');
 
@@ -193,11 +172,10 @@ fn list_prints_secret_channel_if_client_is_in_it() {
 #[test]
 fn list_prints_private_channel_if_client_is_in_it() {
     let mut handler = dummy_client_handler();
-    register_client(&mut handler, "nick");
 
-    handler.database.add_client_to_channel("nick", "#hola");
-    handler.database.add_client_to_channel("nick", "#chau");
-    handler.database.add_client_to_channel("nick", "#privado");
+    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("nickname", "#privado");
 
     handler.database.set_channel_mode("#privado", 'p');
 

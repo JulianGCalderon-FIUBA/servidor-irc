@@ -20,6 +20,9 @@ use super::{
 mod asserts;
 mod connection_type;
 mod logic;
+
+#[cfg(test)]
+mod tests;
 mod utils;
 
 const REGISTRATION_TIMELIMIT_SECS: u64 = 60;
@@ -69,7 +72,7 @@ impl<C: Connection> RegistrationHandler<C> {
 
     fn build_client_handler(&mut self) -> io::Result<ClientHandler<C>> {
         ClientHandler::from_connection(
-            self.connection().try_clone()?,
+            self.stream().try_clone()?,
             self.servername.clone(),
             self.attributes.remove("nickname").unwrap(),
             self.database().clone(),
@@ -83,7 +86,7 @@ impl<C: Connection> ConnectionHandlerGetters<C> for RegistrationHandler<C> {
         &self.online
     }
 
-    fn connection(&mut self) -> &mut C {
+    fn stream(&mut self) -> &mut C {
         &mut self.stream
     }
 

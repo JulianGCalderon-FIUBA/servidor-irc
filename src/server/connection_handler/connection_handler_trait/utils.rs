@@ -9,7 +9,7 @@ use super::ConnectionHandlerGetters;
 pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     fn send_response(&mut self, response: &dyn Display) -> io::Result<()> {
         let response = Message::new(&response.to_string()).unwrap();
-        response.send_to(self.connection())
+        response.send_to(self.stream())
     }
 
     fn send_message_to_client(&mut self, message: &dyn Display, nickname: &str) -> io::Result<()> {

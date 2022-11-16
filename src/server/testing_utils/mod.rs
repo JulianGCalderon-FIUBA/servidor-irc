@@ -1,7 +1,7 @@
-pub mod mock_stream;
+mod mock_stream;
 
 use super::database::{Client, ClientBuilder};
-use mock_stream::MockTcpStream;
+pub use mock_stream::MockTcpStream;
 
 /// Creates dummy client used for tests.
 pub fn dummy_client(nickname: &str) -> Client<MockTcpStream> {
