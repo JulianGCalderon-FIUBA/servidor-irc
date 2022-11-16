@@ -99,7 +99,7 @@ impl<C: Connection> ConnectionHandlerStructure<C> for RegistrationHandler<C> {
     fn on_try_handle_success(&mut self) {
         match self.connection_type {
             ConnectionType::Undefined => println!("Closing connection with unregistered client"),
-            ConnectionType::Server => todo!(),
+            ConnectionType::_Server => todo!(),
             ConnectionType::Client => self.spawn_client_handler(),
         }
     }

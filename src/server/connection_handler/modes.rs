@@ -24,5 +24,8 @@ pub const VALID_MODES: [char; 11] = [
     SET_KEY,
 ];
 
+pub const ADD_MODE: char = '+';
+pub const REMOVE_MODE: char = '-';
+
 pub const INVISIBLE: char = 'i';
-pub const OPERATOR: char = 'o';
+// pub const OPERATOR: char = 'o';

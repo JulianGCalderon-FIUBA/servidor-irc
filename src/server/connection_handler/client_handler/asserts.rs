@@ -1,13 +1,10 @@
 use crate::server::connection::Connection;
 use crate::server::connection_handler::commands::*;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
-use crate::server::connection_handler::modes::{MODERATED, NO_OUTSIDE_MESSAGES, TOPIC_SETTABLE};
+use crate::server::connection_handler::modes::*;
 use crate::server::connection_handler::responses::ErrorReply;
 
-use super::{
-    ClientHandler, ADD_MODE, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS,
-    REMOVE_MODE,
-};
+use super::{ClientHandler, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     fn assert_pass_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
@@ -110,7 +107,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
             self.assert_client_not_on_channel(invited_client, channel)?;
         }
 
-        if self.database.channel_has_mode(channel, 'i') {
+        if self.database.channel_has_mode(channel, INVISIBLE) {
             self.assert_is_channel_operator(channel)?;
         }
 

@@ -9,7 +9,7 @@ use crate::server::connection_handler::modes::*;
 use crate::server::connection_handler::responses::{CommandResponse, ErrorReply, Notification};
 use crate::server::database::ClientInfo;
 
-use super::{ClientHandler, ADD_MODE, REMOVE_MODE};
+use super::ClientHandler;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn nick_logic(&mut self, params: Vec<String>) -> io::Result<bool> {
@@ -450,8 +450,8 @@ impl<C: Connection> ClientHandler<C> {
     fn can_name_channel(&mut self, channel: &str) -> bool {
         let exists_channel = !self.database.contains_channel(channel);
 
-        let is_priv_or_secret = self.database.channel_has_mode(channel, 's')
-            || self.database.channel_has_mode(channel, 'p');
+        let is_priv_or_secret = self.database.channel_has_mode(channel, SECRET)
+            || self.database.channel_has_mode(channel, PRIVATE);
 
         let is_client_in_channel = self.database.is_client_in_channel(&self.nickname, channel);
 
