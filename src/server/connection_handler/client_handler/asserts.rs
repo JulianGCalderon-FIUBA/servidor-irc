@@ -23,7 +23,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         }
 
         let nickname = &params[0];
-        self.assert_nickname_in_use(nickname)
+        self.assert_nickname_not_in_use(nickname)
     }
 
     fn assert_user_command_is_valid(
@@ -266,7 +266,7 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    pub fn assert_nickname_in_use(&self, nickname: &str) -> Result<(), ErrorReply> {
+    pub fn assert_nickname_not_in_use(&self, nickname: &str) -> Result<(), ErrorReply> {
         let nickname = nickname.to_string();
 
         if self.database.contains_client(&nickname) {
@@ -330,19 +330,25 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    pub fn assert_can_join_channel(&self, channel: &str, nickname: &str) -> Result<(), ErrorReply> {
-        let nickname = nickname.to_string();
-        let channel = channel.to_string();
-
-        let channels_for_client = self.database.get_channels_for_client(&nickname);
+    pub fn assert_can_join_channel(
+        &self,
+        channel: &str,
+        key: &Option<String>,
+    ) -> Result<(), ErrorReply> {
+        let channels_for_client = self.database.get_channels_for_client(&self.nickname);
         if channels_for_client.len() == MAX_CHANNELS {
+            let channel = channel.to_string();
             return Err(ErrorReply::TooManyChannels405 { channel });
         }
 
-        self.assert_channel_name_is_valid(&channel)?;
-        self.assert_is_in_channel(&channel)?;
+        self.assert_channel_name_is_valid(channel)?;
+        self.assert_is_in_channel(channel)?;
 
-        Ok(())
+        self.assert_is_valid_key(channel, key)?;
+
+        self.assert_channel_is_not_full(channel)?;
+
+        self.assert_is_not_banned_from_channel(channel)
     }
 
     pub fn assert_can_kick_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
@@ -396,6 +402,42 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_modes_starts_correctly(&self, modes: &str) -> Result<(), ErrorReply> {
         if modes.starts_with([ADD_MODE, REMOVE_MODE]) {
             return Err(ErrorReply::NoReply);
+        }
+
+        Ok(())
+    }
+
+    pub fn assert_is_valid_key(
+        &self,
+        channel: &str,
+        key: &Option<String>,
+    ) -> Result<(), ErrorReply> {
+        let channel = channel.to_string();
+
+        if self.database.get_channel_key(&channel) != *key {
+            return Err(ErrorReply::BadChannelKey475 { channel });
+        }
+
+        Ok(())
+    }
+
+    pub fn assert_channel_is_not_full(&self, channel: &str) -> Result<(), ErrorReply> {
+        let channel = channel.to_string();
+
+        if let Some(limit) = self.database.get_channel_limit(&channel) {
+            if self.database.get_clients_for_channel(&channel).len() >= limit {
+                return Err(ErrorReply::ChannelIsFull471 { channel });
+            }
+        }
+        Ok(())
+    }
+
+    pub fn assert_is_not_banned_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
+        for mask in self.database.get_channel_banmask(channel) {
+            if self.database.client_matches_banmask(&self.nickname, &mask) {
+                let channel = channel.to_string();
+                return Err(ErrorReply::BannedFromChannel474 { channel });
+            }
         }
 
         Ok(())

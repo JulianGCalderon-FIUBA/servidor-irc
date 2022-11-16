@@ -12,7 +12,11 @@ use crate::server::database::ClientInfo;
 use super::{ClientHandler, ADD_MODE, REMOVE_MODE};
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
-    fn nick_logic(&mut self, _params: Vec<String>) -> io::Result<bool> {
+    fn nick_logic(&mut self, params: Vec<String>) -> io::Result<bool> {
+        let new_nickname = params[0].clone();
+        self.database.update_nickname(&self.nickname, &new_nickname);
+        self.nickname = new_nickname;
+
         Ok(true)
     }
 
@@ -72,31 +76,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         for channel in channels {
             let key = keys.next();
 
-            if let Err(error) = self.assert_can_join_channel(channel, &self.nickname) {
+            if let Err(error) = self.assert_can_join_channel(channel, &key) {
                 self.send_response(&error)?;
-                continue;
-            }
-
-            if self.database.get_channel_key(channel) != key {
-                self.send_response(&ErrorReply::BadChannelKey475 {
-                    channel: channel.to_string(),
-                })?;
-                continue;
-            }
-
-            if let Some(limit) = self.database.get_channel_limit(channel) {
-                if self.database.get_clients_for_channel(channel).len() >= limit {
-                    self.send_response(&ErrorReply::ChannelIsFull471 {
-                        channel: channel.to_string(),
-                    })?;
-                    continue;
-                }
-            }
-
-            if self.client_matches_banmask(channel, &self.nickname) {
-                self.send_response(&ErrorReply::BannedFromChannel474 {
-                    channel: channel.to_string(),
-                })?;
                 continue;
             }
 
@@ -104,17 +85,11 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 nickname: self.nickname.clone(),
                 channel: channel.to_string(),
             };
-
             self.send_message_to_channel(&notification, channel);
 
             self.database.add_client_to_channel(&self.nickname, channel);
 
-            self.send_topic_reply(channel.to_string())?;
-
-            self.send_response(&CommandResponse::NameReply353 {
-                channel: channel.to_string(),
-                clients: self.database.get_clients_for_channel(channel),
-            })?;
+            self.send_join_reply(channel)?;
         }
 
         Ok(true)
@@ -122,19 +97,21 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn part_logic(&mut self, mut _params: Vec<String>) -> std::io::Result<bool> {
         let channels = _params.pop().unwrap();
-        let nickname = self.nickname.clone();
 
         for channel in channels.split(',') {
             if let Err(error) = self.assert_can_part_channel(channel) {
                 self.send_response(&error)?;
                 continue;
             }
+
             let notification = Notification::Part {
                 nickname: self.nickname.clone(),
                 channel: channel.to_string(),
             };
             self.send_message_to_channel(&notification, channel);
-            self.database.remove_client_from_channel(&nickname, channel);
+
+            self.database
+                .remove_client_from_channel(&self.nickname, channel);
         }
 
         Ok(true)
@@ -153,17 +130,19 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         if self
             .send_message_to_client(&invitation, &invited_client)
-            .is_err()
+            .is_ok()
         {
-            self.send_response(&ErrorReply::NoSuchNickname401 {
+            let invite_response = CommandResponse::Inviting341 {
+                nickname: inviting_client,
+                channel,
+            };
+            self.send_response(&invite_response)?;
+        } else {
+            let no_such_nick_reply = ErrorReply::NoSuchNickname401 {
                 nickname: invited_client.clone(),
-            })?
+            };
+            self.send_response(&no_such_nick_reply)?;
         }
-
-        self.send_response(&CommandResponse::Inviting341 {
-            nickname: inviting_client,
-            channel,
-        })?;
 
         Ok(true)
     }
@@ -172,29 +151,28 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let channels = self.get_channels_for_query(params.get(0));
 
         for channel in channels {
-            if !self.database.contains_channel(&channel) {
-                continue;
-            }
-
             if !self.can_name_channel(&channel) {
                 continue;
             }
 
             let clients = self.database.get_clients_for_channel(&channel);
-            self.send_response(&CommandResponse::NameReply353 {
+            let name_reply = CommandResponse::NameReply353 {
                 channel: channel.clone(),
                 clients,
-            })?;
+            };
+            self.send_response(&name_reply)?;
 
             if !params.is_empty() {
-                self.send_response(&CommandResponse::EndOfNames366 { channel })?
+                let end_of_names = CommandResponse::EndOfNames366 { channel };
+                self.send_response(&end_of_names)?
             }
         }
 
         if params.is_empty() {
-            self.send_response(&CommandResponse::EndOfNames366 {
+            let end_of_names = CommandResponse::EndOfNames366 {
                 channel: "".to_string(),
-            })?;
+            };
+            self.send_response(&end_of_names)?;
         }
 
         Ok(true)
@@ -212,12 +190,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                     None => "No topic set".to_string(),
                 };
 
-                if self.database.channel_has_mode(&channel, 's')
-                    && !self.database.is_client_in_channel(&self.nickname, &channel)
-                {
-                    continue;
-                }
-                let prv = self.database.channel_has_mode(&channel, 'p')
+                let prv = self.database.channel_has_mode(&channel, SECRET)
                     && !self.database.is_client_in_channel(&self.nickname, &channel);
 
                 self.send_response(&CommandResponse::List322 {
@@ -252,25 +225,21 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn whois_logic(&mut self, mut params: Vec<String>) -> std::io::Result<bool> {
-        let (_server, nickmasks) = if params.len() == 2 {
-            (params.get(0).map(|s| s.to_string()), params.remove(1))
-        } else {
-            (None, params.remove(1))
-        };
+        let nickmasks = params.pop().unwrap();
+        let _server = params.get(0);
 
         for nickmask in nickmasks.split(',') {
             let mut clients: Vec<ClientInfo> = self.database.get_clients_for_nickmask(nickmask);
 
+            clients.sort();
+
             if clients.is_empty() {
                 let nickname = nickmask.to_string();
                 self.send_response(&ErrorReply::NoSuchNickname401 { nickname })?;
-                continue;
-            }
-
-            clients.sort();
-
-            for client in clients {
-                self.send_whois_responses(client)?;
+            } else {
+                for client in clients {
+                    self.send_whois_responses(client)?;
+                }
             }
         }
 
@@ -317,13 +286,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         Ok(true)
     }
 
-    fn mode_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
-        let modes: Vec<char> = _params[1].chars().collect();
+    fn mode_logic(&mut self, params: Vec<String>) -> std::io::Result<bool> {
+        let modes: Vec<char> = params[1].chars().collect();
 
         let (add, remove) = parse_modes(modes);
 
-        self.add_modes(add, _params.clone())?;
-        self.remove_modes(remove, _params)?;
+        self.add_modes(add, params.clone())?;
+        self.remove_modes(remove, params)?;
 
         Ok(true)
     }
@@ -358,7 +327,7 @@ impl<C: Connection> ClientHandler<C> {
             message: content.to_owned(),
         };
 
-        self.send_message_to_target(&notification.to_string(), target)?;
+        self.send_message_to_target(&notification, target)?;
 
         if self.database.contains_client(target) {
             if let Some(message) = self.database.get_away_message(target) {
@@ -379,7 +348,7 @@ impl<C: Connection> ClientHandler<C> {
             message: content.to_owned(),
         };
 
-        self.send_message_to_target(&notification.to_string(), target)?;
+        self.send_message_to_target(&notification, target)?;
 
         Ok(())
     }
@@ -443,15 +412,6 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    fn client_matches_banmask(&self, channel: &str, nickname: &str) -> bool {
-        for mask in self.database.get_channel_banmask(channel) {
-            if self.database.client_matches_banmask(nickname, &mask) {
-                return true;
-            }
-        }
-        false
-    }
-
     fn send_topic_reply(&mut self, channel: String) -> Result<(), io::Error> {
         match self.database.get_topic_for_channel(&channel) {
             Some(topic) => self.send_response(&CommandResponse::Topic332 { channel, topic })?,
@@ -488,26 +448,24 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     fn can_name_channel(&mut self, channel: &str) -> bool {
+        let exists_channel = !self.database.contains_channel(channel);
+
         let is_priv_or_secret = self.database.channel_has_mode(channel, 's')
             || self.database.channel_has_mode(channel, 'p');
 
         let is_client_in_channel = self.database.is_client_in_channel(&self.nickname, channel);
 
-        !is_priv_or_secret || is_client_in_channel
+        !exists_channel || !is_priv_or_secret || is_client_in_channel
     }
 
     fn can_list_channel(&self, channel: &str) -> bool {
-        if self.database.channel_has_mode(channel, 's')
+        if self.database.channel_has_mode(channel, SECRET)
             && !self.database.is_client_in_channel(&self.nickname, channel)
         {
             return false;
         }
 
-        if self.database.contains_channel(channel) {
-            return true;
-        }
-
-        false
+        self.database.contains_channel(channel)
     }
 
     fn add_modes(&mut self, add: Vec<char>, parameters: Vec<String>) -> Result<(), io::Error> {
@@ -737,6 +695,17 @@ impl<C: Connection> ClientHandler<C> {
             .set_channel_key(channel, Some(key.to_string()));
 
         Ok(())
+    }
+
+    fn send_join_reply(&mut self, channel: &str) -> io::Result<()> {
+        self.send_topic_reply(channel.to_string())?;
+
+        let name_reply = &&CommandResponse::NameReply353 {
+            channel: channel.to_string(),
+            clients: self.database.get_clients_for_channel(channel),
+        };
+
+        self.send_response(name_reply)
     }
 }
 
