@@ -37,5 +37,5 @@ fn pass_fails_after_nick() {
     handler.pass_command(parameters).unwrap();
 
     let responses = handler.stream.get_responses();
-    assert_eq!("462 :You may not reregister\r\n", responses[0]);
+    assert_eq!("462 :You may not reregister", responses[0]);
 }
