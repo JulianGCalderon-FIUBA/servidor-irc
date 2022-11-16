@@ -1,10 +1,11 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::commands::*;
+use crate::server::connection_handler::channel_const::*;
+use crate::server::connection_handler::command_const::*;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
-use crate::server::connection_handler::modes::*;
+use crate::server::connection_handler::mode_const::*;
 use crate::server::connection_handler::responses::ErrorReply;
 
-use super::{ClientHandler, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
+use super::ClientHandler;
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     fn assert_pass_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
@@ -251,7 +252,8 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_channel_name_is_valid(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
-        if !(channel.as_bytes()[0] == LOCAL_CHANNEL || channel.as_bytes()[0] == DISTRIBUTED_CHANNEL)
+        if !(channel.as_bytes()[0] as char == LOCAL_CHANNEL
+            || channel.as_bytes()[0] as char == DISTRIBUTED_CHANNEL)
             || channel.contains(INVALID_CHARACTER)
         {
             return Err(ErrorReply::NoSuchChannel403 { channel });

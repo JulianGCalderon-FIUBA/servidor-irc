@@ -9,14 +9,10 @@ use super::connection_handler_trait::{
 
 mod asserts;
 mod logic;
-#[cfg(test)]
-mod tests;
 mod utils;
 
-const INVALID_CHARACTER: char = '\'';
-const MAX_CHANNELS: usize = 10;
-const DISTRIBUTED_CHANNEL: u8 = b'#';
-const LOCAL_CHANNEL: u8 = b'&';
+#[cfg(test)]
+mod tests;
 
 pub struct ClientHandler<C: Connection> {
     stream: C,

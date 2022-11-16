@@ -1,11 +1,11 @@
 use std::io;
 
 use crate::server::connection::Connection;
-use crate::server::connection_handler::commands::MODE_COMMAND;
+use crate::server::connection_handler::command_const::MODE_COMMAND;
 use crate::server::connection_handler::connection_handler_trait::{
     ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
-use crate::server::connection_handler::modes::*;
+use crate::server::connection_handler::mode_const::*;
 use crate::server::connection_handler::responses::{CommandResponse, ErrorReply, Notification};
 use crate::server::database::ClientInfo;
 

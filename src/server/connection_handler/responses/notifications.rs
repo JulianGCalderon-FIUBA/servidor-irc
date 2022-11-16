@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::server::connection_handler::commands::*;
+use crate::server::connection_handler::command_const::*;
 
 /// Possible notifications that can be sent for different commands.
 pub enum Notification {
