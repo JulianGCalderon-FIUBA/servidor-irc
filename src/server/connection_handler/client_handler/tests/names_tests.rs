@@ -50,7 +50,7 @@ fn names_with_parameters_prints_requested_channels() {
 
     assert_eq!("353 #hola :nickname", responses[0]);
     assert_eq!("366 #hola :End of /NAMES list", responses[1]);
-    assert_eq!("353 #chau :nick", responses[2]);
+    assert_eq!("353 #chau :nickname", responses[2]);
     assert_eq!("366 #chau :End of /NAMES list", responses[3]);
 }
 
@@ -125,7 +125,9 @@ fn name_prints_secret_channel_if_client_is_in_it() {
 
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
-    handler.database.add_client_to_channel("nickname", "#secreto");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#secreto");
 
     handler.database.set_channel_mode("#secreto", 's');
 
@@ -148,7 +150,9 @@ fn name_prints_private_channel_if_client_is_in_it() {
 
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
-    handler.database.add_client_to_channel("nickname", "#privado");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#privado");
 
     handler.database.set_channel_mode("#privado", 'p');
 
