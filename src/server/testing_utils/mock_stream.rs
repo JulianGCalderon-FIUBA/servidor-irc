@@ -65,8 +65,8 @@ impl MockTcpStream {
     }
     /// Clears buffers.
     pub fn clear(&mut self) {
-        self.read_lock().drain(..);
-        self.write_lock().drain(..);
+        self.read_lock().clear();
+        self.write_lock().clear();
     }
 
     fn read_lock(&self) -> MutexGuard<Vec<u8>> {

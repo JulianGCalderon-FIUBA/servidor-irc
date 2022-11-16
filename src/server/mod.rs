@@ -2,20 +2,16 @@
 /// Utils for testing different functionalities.
 mod testing_utils;
 
-/// Contains structure for client handler. It's main purpose is to handle the connection established between server and clients.
-mod client_handler;
-
 /// Definition of the trait used in the project's structures.
 mod connection;
 
 /// Contains structure for database. A Database stores and updates information regarding clients, channels and related.
 mod database;
 
+mod connection_handler;
 /// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address
 mod listener;
-mod connection_handler;
 
-use client_handler::ClientHandler;
 use database::Database;
 use std::io;
 use std::net::TcpStream;
