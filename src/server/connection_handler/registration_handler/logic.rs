@@ -1,5 +1,8 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerLogic;
+use crate::server::connection_handler::connection_handler_trait::{
+    ConnectionHandlerLogic, ConnectionHandlerUtils,
+};
+use crate::server::connection_handler::responses::Notification;
 
 use super::RegistrationHandler;
 
@@ -38,5 +41,14 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         self.database.add_client(client.unwrap());
 
         Ok(())
+    }
+
+    fn quit_logic(&mut self, trail: Option<String>) -> std::io::Result<()> {
+        let message =
+            trail.unwrap_or_else(|| self.attributes.remove("nickname").unwrap_or_default());
+
+        let notification = Notification::Quit { message };
+
+        self.send_response(&notification.to_string())
     }
 }

@@ -116,6 +116,6 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
     }
 
     fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
-        Err(ErrorReply::UnregisteredClient)
+        Ok(())
     }
 }

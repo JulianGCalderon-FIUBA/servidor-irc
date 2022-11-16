@@ -1,18 +1,22 @@
 use std::{
     collections::HashMap,
+    io,
     sync::{atomic::AtomicBool, Arc},
+    time::Instant,
 };
 
 use crate::server::{connection::Connection, database::DatabaseHandle};
 
 use super::connection_handler_trait::{
-    ConnectionHandler, ConnectionHandlerGetters, ConnectionHandlerStructure,
+    ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
+    ConnectionHandlerStructure, ConnectionHandlerUtils,
 };
 
 mod asserts;
-mod default;
 mod logic;
 mod utils;
+
+const REGISTRATION_TIMELIMIT_SECS: u64 = 60;
 
 pub struct RegistrationHandler<C: Connection> {
     stream: C,
@@ -21,6 +25,7 @@ pub struct RegistrationHandler<C: Connection> {
     servername: String,
     online: Arc<AtomicBool>,
     attributes: HashMap<&'static str, String>,
+    timestamp: Instant,
 }
 
 impl<C: Connection> ConnectionHandler<C> for RegistrationHandler<C> {
@@ -39,6 +44,7 @@ impl<C: Connection> ConnectionHandler<C> for RegistrationHandler<C> {
             servername,
             online,
             attributes: HashMap::new(),
+            timestamp: Instant::now(),
         })
     }
 }
@@ -64,4 +70,17 @@ impl<C: Connection> ConnectionHandlerStructure<C> for RegistrationHandler<C> {
     fn on_try_handle_success(&mut self) {
         eprintln!("Closing conection with unregistered client")
     }
+
+    fn timeout(&mut self) -> bool {
+        let elapsed_time = Instant::now().duration_since(self.timestamp);
+        let elapsed_time_secs = elapsed_time.as_secs();
+
+        elapsed_time_secs > REGISTRATION_TIMELIMIT_SECS
+    }
+
+    fn on_timeout(&mut self) -> io::Result<()> {
+        self.send_response(&"Registration timeout")
+    }
 }
+
+impl<C: Connection> ConnectionHandlerCommands<C> for RegistrationHandler<C> {}

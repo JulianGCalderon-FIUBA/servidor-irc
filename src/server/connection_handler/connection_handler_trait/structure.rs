@@ -21,6 +21,10 @@ pub trait ConnectionHandlerStructure<C: Connection>:
                 return self.on_server_shutdown();
             }
 
+            if self.timeout() {
+                return self.on_timeout();
+            }
+
             let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
             let message = match receiver.recv_timeout(timeout) {
                 Ok(message) => message,
@@ -82,8 +86,16 @@ pub trait ConnectionHandlerStructure<C: Connection>:
         !self.online().load(Ordering::Relaxed)
     }
 
+    fn timeout(&mut self) -> bool {
+        false
+    }
+
     fn on_server_shutdown(&mut self) -> io::Result<()> {
         self.send_response(&"Server has shutdown")
+    }
+
+    fn on_timeout(&mut self) -> io::Result<()> {
+        Ok(())
     }
 
     fn on_parsing_error(&mut self) -> io::Result<()> {
