@@ -2,6 +2,7 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
+use crate::server::connection_handler::modes::*;
 use crate::server::connection_handler::responses::{CommandResponse, ErrorReply, Notification};
 
 use super::ClientHandler;
@@ -167,13 +168,13 @@ impl<C: Connection> ClientHandler<C> {
             return Err(ErrorReply::NoSuchNickname401 { nickname: target });
         }
 
-        if self.database.channel_has_mode(&target, 'n')
+        if self.database.channel_has_mode(&target, NO_OUTSIDE_MESSAGES)
             && !self.database.is_client_in_channel(&self.nickname, &target)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel: target });
         }
 
-        if self.database.channel_has_mode(&target, 'm')
+        if self.database.channel_has_mode(&target, MODERATED)
             && !self.database.is_channel_speaker(&target, &self.nickname)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel: target });
