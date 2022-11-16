@@ -206,7 +206,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 })?;
             }
         }
-        self.send_response(&CommandResponse::ListEnd323);
+        self.send_response(&CommandResponse::ListEnd323)?;
 
         Ok(true)
     }
