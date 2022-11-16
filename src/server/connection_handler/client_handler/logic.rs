@@ -190,7 +190,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                     None => "No topic set".to_string(),
                 };
 
-                let prv = self.database.channel_has_mode(&channel, SECRET)
+                let prv = self.database.channel_has_mode(&channel, PRIVATE)
                     && !self.database.is_client_in_channel(&self.nickname, &channel);
 
                 self.send_response(&CommandResponse::List322 {
