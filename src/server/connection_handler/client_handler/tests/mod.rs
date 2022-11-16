@@ -1,4 +1,7 @@
-use crate::server::{database::Database, testing_utils::{MockTcpStream, dummy_client}};
+use crate::server::{
+    database::Database,
+    testing_utils::{dummy_client, MockTcpStream},
+};
 
 use super::*;
 
