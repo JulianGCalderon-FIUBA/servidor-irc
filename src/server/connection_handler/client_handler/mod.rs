@@ -17,6 +17,9 @@ const MAX_CHANNELS: usize = 10;
 const DISTRIBUTED_CHANNEL: u8 = b'#';
 const LOCAL_CHANNEL: u8 = b'&';
 
+const ADD_MODE: u8 = b'+';
+const REMOVE_MODE: u8 = b'-';
+
 pub struct ClientHandler<C: Connection> {
     connection: C,
     database: DatabaseHandle<C>,

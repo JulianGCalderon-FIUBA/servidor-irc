@@ -8,7 +8,10 @@ use crate::server::connection_handler::modes::*;
 use crate::server::connection_handler::responses::{CommandResponse, ErrorReply, Notification};
 use crate::server::database::ClientInfo;
 
-use super::{ClientHandler, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS};
+use super::{
+    ClientHandler, ADD_MODE, DISTRIBUTED_CHANNEL, INVALID_CHARACTER, LOCAL_CHANNEL, MAX_CHANNELS,
+    REMOVE_MODE,
+};
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn oper_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
@@ -313,6 +316,17 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn mode_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+        if !assert_modes_starts_correctly(&_params[1]) {
+            return Ok(());
+        }
+
+        let modes: Vec<char> = _params[1].chars().collect();
+
+        let (add, remove) = parse_modes(modes);
+
+        self.add_modes(add, _params.clone())?;
+        self.remove_modes(remove, _params)?;
+
         Ok(true)
     }
 
@@ -594,4 +608,32 @@ fn collect_parameters(parameters: &str) -> Vec<String> {
         .split(',')
         .map(|string| string.to_string())
         .collect()
+}
+
+fn assert_modes_starts_correctly(modes: &String) -> bool {
+    modes.as_bytes()[0] == (ADD_MODE as u8) || modes.as_bytes()[0] == (REMOVE_MODE as u8)
+}
+
+fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
+    let mut add_modes: Vec<char> = vec![];
+    let mut remove_modes: Vec<char> = vec![];
+    let mut add: bool = false;
+    for char in modes {
+        match char {
+            ADD_MODE => {
+                add = true;
+            }
+            REMOVE_MODE => {
+                add = false;
+            }
+            char => {
+                if add {
+                    add_modes.push(char);
+                } else {
+                    remove_modes.push(char);
+                }
+            }
+        }
+    }
+    (add_modes, remove_modes)
 }
