@@ -67,9 +67,11 @@ fn privmsg_works_with_valid_target_channel() {
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#channel");
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -191,7 +193,9 @@ fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
 
     handler.database.set_channel_mode("#channel", 'm');
 
@@ -219,7 +223,9 @@ fn privmsg_works_on_channel_with_flag_n() {
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
@@ -258,7 +264,9 @@ fn privmsg_works_on_channel_with_flag_m() {
 
     handler.database.add_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
 
     handler.database.set_channel_mode("#channel", 'm');
     handler.database.add_speaker("#channel", "nickname");

@@ -62,20 +62,6 @@ fn mode_fails_with_user_not_operator() {
 }
 
 #[test]
-fn mode_ignores_wrong_parameters() {
-    let mut handler = dummy_client_handler();
-
-    handler
-        .database
-        .add_client_to_channel("nickname", "#channel");
-
-    let parameters = vec!["#channel".to_string(), "i".to_string()];
-    handler.mode_command(parameters).unwrap();
-
-    assert_eq!("", handler.stream.read_wbuf_to_string())
-}
-
-#[test]
 fn mode_adds_channop() {
     let mut handler = dummy_client_handler();
 

@@ -190,7 +190,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                     None => "No topic set".to_string(),
                 };
 
-                let prv = self.database.channel_has_mode(&channel, SECRET)
+                let prv = self.database.channel_has_mode(&channel, PRIVATE)
                     && !self.database.is_client_in_channel(&self.nickname, &channel);
 
                 self.send_response(&CommandResponse::List322 {
@@ -448,14 +448,14 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     fn can_name_channel(&mut self, channel: &str) -> bool {
-        let exists_channel = !self.database.contains_channel(channel);
+        let exists_channel = self.database.contains_channel(channel);
 
         let is_priv_or_secret = self.database.channel_has_mode(channel, SECRET)
             || self.database.channel_has_mode(channel, PRIVATE);
 
         let is_client_in_channel = self.database.is_client_in_channel(&self.nickname, channel);
 
-        !exists_channel || !is_priv_or_secret || is_client_in_channel
+        exists_channel && (!is_priv_or_secret || is_client_in_channel)
     }
 
     fn can_list_channel(&self, channel: &str) -> bool {

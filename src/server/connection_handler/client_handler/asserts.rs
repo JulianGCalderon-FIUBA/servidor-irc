@@ -231,7 +231,7 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_exists_client(&self, client: &str) -> Result<(), ErrorReply> {
         let nickname = client.to_string();
 
-        if self.database.contains_client(&nickname) {
+        if !self.database.contains_client(&nickname) {
             return Err(ErrorReply::NoSuchNickname401 { nickname });
         }
 
@@ -241,7 +241,7 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_exists_channel(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
-        if self.database.contains_channel(&channel) {
+        if !self.database.contains_channel(&channel) {
             return Err(ErrorReply::NoSuchChannel403 { channel });
         }
 
@@ -336,7 +336,7 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         self.assert_channel_name_is_valid(channel)?;
-        self.assert_is_in_channel(channel)?;
+        self.assert_client_not_on_channel(&self.nickname, channel)?;
 
         self.assert_is_valid_key(channel, key)?;
 
@@ -355,6 +355,7 @@ impl<C: Connection> ClientHandler<C> {
 
     pub fn assert_can_part_channel(&self, channel: &str) -> Result<(), ErrorReply> {
         self.assert_channel_name_is_valid(channel)?;
+        self.assert_exists_channel(channel)?;
 
         self.assert_is_in_channel(channel)
     }
@@ -394,7 +395,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_modes_starts_correctly(&self, modes: &str) -> Result<(), ErrorReply> {
-        if modes.starts_with([ADD_MODE, REMOVE_MODE]) {
+        if !modes.starts_with([ADD_MODE, REMOVE_MODE]) {
             return Err(ErrorReply::NoReply);
         }
 
