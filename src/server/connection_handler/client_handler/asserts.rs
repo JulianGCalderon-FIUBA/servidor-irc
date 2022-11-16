@@ -276,7 +276,7 @@ impl<C: Connection> ClientHandler<C> {
         self.assert_target_exists(target)?;
 
         if self.database.contains_channel(target) {
-            self.assert_can_send_to_channel(target)
+            self.assert_can_send_to_channel(target)?;
         }
 
         Ok(())
