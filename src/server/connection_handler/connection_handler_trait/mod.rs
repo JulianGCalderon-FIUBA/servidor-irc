@@ -1,11 +1,9 @@
-use std::io::{self, BufReader};
+use std::io::BufReader;
 use std::sync::mpsc::{self, Receiver, Sender};
-use std::sync::{atomic::AtomicBool, Arc};
 use std::thread::{self, JoinHandle};
 
 use crate::message::{CreationError, Message};
 use crate::server::connection::Connection;
-use crate::server::database::DatabaseHandle;
 
 mod asserts;
 mod commands;
@@ -24,13 +22,6 @@ pub use utils::ConnectionHandlerUtils;
 pub trait ConnectionHandler<C: Connection>:
     Sized + ConnectionHandlerStructure<C> + ConnectionHandlerGetters<C> + ConnectionHandlerCommands<C>
 {
-    fn from_connection(
-        connection: C,
-        servername: String,
-        database: DatabaseHandle<C>,
-        online: Arc<AtomicBool>,
-    ) -> io::Result<Self>;
-
     fn handle(mut self) {
         let (message_receiver, message_receiver_thread) =
             start_async_read_stream(self.connection().try_clone().unwrap());

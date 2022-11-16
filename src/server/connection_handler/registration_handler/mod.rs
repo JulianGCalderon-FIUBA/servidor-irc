@@ -28,8 +28,10 @@ pub struct RegistrationHandler<C: Connection> {
     timestamp: Instant,
 }
 
-impl<C: Connection> ConnectionHandler<C> for RegistrationHandler<C> {
-    fn from_connection(
+impl<C: Connection> ConnectionHandler<C> for RegistrationHandler<C> {}
+
+impl<C: Connection> RegistrationHandler<C> {
+    pub fn from_connection(
         stream: C,
         servername: String,
         database: DatabaseHandle<C>,
