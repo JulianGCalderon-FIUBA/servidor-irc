@@ -115,7 +115,23 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         Ok(true)
     }
 
-    fn part_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
+    fn part_logic(&mut self, mut _params: Vec<String>) -> std::io::Result<bool> {
+        let channels = _params.pop().unwrap();
+        let nickname = self.nickname.clone();
+
+        for channel in channels.split(',') {
+            if let Err(error) = self.assert_can_part_channel(channel, &nickname) {
+                self.send_response(&error)?;
+                continue;
+            }
+            let notification = Notification::Part {
+                nickname: self.nickname.clone(),
+                channel: channel.to_string(),
+            };
+            self.send_message_to_channel(&notification, channel);
+            self.database.remove_client_from_channel(&nickname, channel);
+        }
+
         Ok(true)
     }
 
@@ -543,6 +559,20 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         false
+    }
+
+    fn assert_can_part_channel(&self, channel: &str, nickname: &str) -> Result<(), ErrorReply> {
+        let channel = channel.to_string();
+
+        if !self.database.contains_channel(&channel) || !channel_name_is_valid(&channel) {
+            return Err(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        if !self.database.is_client_in_channel(nickname, &channel) {
+            return Err(ErrorReply::NotOnChannel442 { channel });
+        }
+
+        Ok(())
     }
 }
 
