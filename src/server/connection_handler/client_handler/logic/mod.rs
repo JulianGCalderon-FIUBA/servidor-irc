@@ -5,8 +5,7 @@ use crate::server::connection_handler::connection_handler_trait::{
     ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
-use crate::server::connection_handler::consts::modes::*;
-use crate::server::connection_handler::responses::{CommandResponse, ErrorReply, Notification};
+use crate::server::connection_handler::responses::CommandResponse;
 use crate::server::database::ClientInfo;
 
 use self::utils::{collect_list, parse_modes};
@@ -30,7 +29,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn oper_logic(&mut self, _params: Vec<String>) -> std::io::Result<bool> {
         self.database.set_server_operator(&self.nickname);
-
         self.send_response(&CommandResponse::YouAreOper381)?;
 
         Ok(true)
@@ -89,11 +87,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 continue;
             }
 
-            let notification = Notification::Join {
-                nickname: self.nickname.clone(),
-                channel: channel.to_string(),
-            };
-            self.send_message_to_channel(&notification, channel);
+            self.send_join_notification(channel);
 
             self.database.add_client_to_channel(&self.nickname, channel);
 
@@ -112,11 +106,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 continue;
             }
 
-            let notification = Notification::Part {
-                nickname: self.nickname.clone(),
-                channel: channel.to_string(),
-            };
-            self.send_message_to_channel(&notification, channel);
+            self.send_part_notification(channel);
 
             self.database
                 .remove_client_from_channel(&self.nickname, channel);
@@ -130,26 +120,11 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let invited_client = params.pop().unwrap();
         let inviting_client = self.nickname.clone();
 
-        let invitation = Notification::Invite {
-            inviting_client: inviting_client.clone(),
-            invited_client: invited_client.clone(),
-            channel: channel.clone(),
-        };
-
         if self
-            .send_message_to_client(&invitation, &invited_client)
+            .send_invite_notification(invited_client, &channel)
             .is_ok()
         {
-            let invite_response = CommandResponse::Inviting341 {
-                nickname: inviting_client,
-                channel,
-            };
-            self.send_response(&invite_response)?;
-        } else {
-            let no_such_nick_reply = ErrorReply::NoSuchNickname401 {
-                nickname: invited_client.clone(),
-            };
-            self.send_response(&no_such_nick_reply)?;
+            self.send_invite_response(inviting_client, channel)?;
         }
 
         Ok(true)
@@ -163,24 +138,15 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 continue;
             }
 
-            let clients = self.database.get_clients_for_channel(&channel);
-            let name_reply = CommandResponse::NameReply353 {
-                channel: channel.clone(),
-                clients,
-            };
-            self.send_response(&name_reply)?;
+            self.send_names_response(&channel)?;
 
             if !params.is_empty() {
-                let end_of_names = CommandResponse::EndOfNames366 { channel };
-                self.send_response(&end_of_names)?
+                self.send_end_of_names_response(&channel)?;
             }
         }
 
         if params.is_empty() {
-            let end_of_names = CommandResponse::EndOfNames366 {
-                channel: "".to_string(),
-            };
-            self.send_response(&end_of_names)?;
+            self.send_end_of_names_response("")?;
         }
 
         Ok(true)
@@ -192,21 +158,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.send_response(&CommandResponse::ListStart321)?;
 
         for channel in channels {
-            if self.can_list_channel(&channel) {
-                let topic = match self.database.get_topic_for_channel(&channel) {
-                    Some(topic) => topic,
-                    None => "No topic set".to_string(),
-                };
-
-                let prv = self.database.channel_has_mode(&channel, PRIVATE)
-                    && !self.database.is_client_in_channel(&self.nickname, &channel);
-
-                self.send_response(&CommandResponse::List322 {
-                    channel,
-                    prv,
-                    topic,
-                })?;
+            if !self.can_list_channel(&channel) {
+                continue;
             }
+            self.send_list_response(channel)?;
         }
         self.send_response(&CommandResponse::ListEnd323)?;
 
@@ -241,13 +196,12 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
             clients.sort();
 
-            if clients.is_empty() {
-                let nickname = nickmask.to_string();
-                self.send_response(&ErrorReply::NoSuchNickname401 { nickname })?;
-            } else {
-                for client in clients {
-                    self.send_whois_response(client)?;
-                }
+            if let Err(error) = self.assert_can_send_whois_response(&clients, nickmask) {
+                self.send_response(&error)?;
+                continue;
+            }
+            for client in clients {
+                self.send_whois_response(client)?;
             }
         }
 
@@ -308,15 +262,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn quit_logic(&mut self, trail: Option<String>) -> std::io::Result<bool> {
         let message = trail.unwrap_or_else(|| self.nickname.clone());
 
-        let notification = Notification::Quit { message };
-
         self.database.disconnect_client(&self.nickname);
-        let channels = self.database.get_channels_for_client(&self.nickname);
-        for channel in channels {
-            self.send_message_to_channel(&channel, &notification.to_string());
-        }
 
-        self.send_response(&notification.to_string())?;
+        self.send_quit_notification(&message);
+        self.send_quit_response(&message)?;
 
         Ok(false)
     }

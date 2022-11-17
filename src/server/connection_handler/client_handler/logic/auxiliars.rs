@@ -13,11 +13,7 @@ use crate::server::{
 };
 
 impl<C: Connection> ClientHandler<C> {
-    pub(super) fn send_privmsg_to_target(
-        &mut self,
-        target: &str,
-        content: &str,
-    ) -> Result<(), std::io::Error> {
+    pub(super) fn send_privmsg_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
         let nickname = self.nickname.clone();
         let notification = Notification::Privmsg {
             sender: nickname,
@@ -38,11 +34,7 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    pub(super) fn send_notice_to_target(
-        &mut self,
-        target: &str,
-        content: &str,
-    ) -> Result<(), std::io::Error> {
+    pub(super) fn send_notice_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
         let nickname = self.nickname.clone();
         let notification = Notification::Notice {
             sender: nickname,

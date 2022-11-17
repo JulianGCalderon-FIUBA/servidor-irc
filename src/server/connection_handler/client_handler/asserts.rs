@@ -4,6 +4,7 @@ use crate::server::connection_handler::consts::channel::*;
 use crate::server::connection_handler::consts::commands::*;
 use crate::server::connection_handler::consts::modes::*;
 use crate::server::connection_handler::responses::ErrorReply;
+use crate::server::database::ClientInfo;
 
 use super::ClientHandler;
 
@@ -437,6 +438,18 @@ impl<C: Connection> ClientHandler<C> {
             }
         }
 
+        Ok(())
+    }
+
+    pub fn assert_can_send_whois_response(
+        &mut self,
+        clients: &Vec<ClientInfo>,
+        nickmask: &str,
+    ) -> Result<(), ErrorReply> {
+        if clients.is_empty() {
+            let nickname = nickmask.to_string();
+            return Err(ErrorReply::NoSuchNickname401 { nickname });
+        }
         Ok(())
     }
 }
