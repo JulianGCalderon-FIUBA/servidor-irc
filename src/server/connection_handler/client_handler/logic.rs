@@ -418,7 +418,7 @@ impl<C: Connection> ClientHandler<C> {
             if self.database.is_channel_operator(channel, nickname) {
                 channel.insert(0, OPERATOR_SYMBOL);
             }
-            if self.database.channel_has_mode(channel, 'm')
+            if self.database.channel_has_mode(channel, MODERATED)
                 && self.database.is_channel_speaker(channel, nickname)
             {
                 channel.insert(0, SPEAKER_SYMBOL);
