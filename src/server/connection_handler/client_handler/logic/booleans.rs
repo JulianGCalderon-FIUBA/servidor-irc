@@ -31,10 +31,10 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn shares_channel_with(&self, client_info: &ClientInfo) -> bool {
         let client_channels = self.database.get_channels_for_client(&client_info.nickname);
-        let self_channels = self.database.get_channels_for_client(&self.nickname);
+        let own_channels = self.database.get_channels_for_client(&self.nickname);
 
         !client_channels
             .iter()
-            .any(|channel| self_channels.contains(channel))
+            .any(|channel| own_channels.contains(channel))
     }
 }
