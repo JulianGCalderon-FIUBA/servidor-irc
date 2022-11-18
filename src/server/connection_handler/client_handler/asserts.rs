@@ -194,7 +194,7 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_is_in_channel(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
-        if !self.database.is_client_in_channel(&self.nickname, &channel) {
+        if !self.is_in_channel(&channel) {
             return Err(ErrorReply::NotOnChannel442 { channel });
         }
 
@@ -299,7 +299,7 @@ impl<C: Connection> ClientHandler<C> {
         if self
             .database
             .channel_has_mode(&channel, NO_OUTSIDE_MESSAGES)
-            && !self.database.is_client_in_channel(&self.nickname, &channel)
+            && !self.is_in_channel(&channel)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
         }

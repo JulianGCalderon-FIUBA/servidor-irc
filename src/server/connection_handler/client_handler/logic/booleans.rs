@@ -14,15 +14,13 @@ impl<C: Connection> ClientHandler<C> {
         let is_priv_or_secret = self.database.channel_has_mode(channel, SECRET)
             || self.database.channel_has_mode(channel, PRIVATE);
 
-        let is_client_in_channel = self.database.is_client_in_channel(&self.nickname, channel);
+        let is_client_in_channel = self.is_in_channel(channel);
 
         exists_channel && (!is_priv_or_secret || is_client_in_channel)
     }
 
     pub(super) fn can_list_channel(&self, channel: &str) -> bool {
-        if self.database.channel_has_mode(channel, SECRET)
-            && !self.database.is_client_in_channel(&self.nickname, channel)
-        {
+        if self.database.channel_has_mode(channel, SECRET) && !self.is_in_channel(channel) {
             return false;
         }
 
@@ -36,5 +34,9 @@ impl<C: Connection> ClientHandler<C> {
         !client_channels
             .iter()
             .any(|channel| own_channels.contains(channel))
+    }
+
+    pub fn is_in_channel(&self, channel: &str) -> bool {
+        self.database.is_client_in_channel(&self.nickname, channel)
     }
 }

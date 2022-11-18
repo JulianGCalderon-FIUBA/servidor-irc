@@ -28,51 +28,65 @@ impl<C: Connection> ClientHandler<C> {
         let server = self.servername.to_string();
 
         self.send_response(&CommandResponse::WhoisUser311 { client_info })?;
-        self.send_response(&CommandResponse::WhoisServer312 {
-            nickname: nickname.clone(),
-            server,
-            server_info: "Lemon pie server".to_string(),
-        })?;
-
-        if self.database.is_server_operator(&nickname) {
-            self.send_response(&CommandResponse::WhoisOperator313 {
-                nickname: nickname.clone(),
-            })?;
-        }
-
-        let mut channels = self.database.get_channels_for_client(&nickname);
-        if !channels.is_empty() {
-            self.append_channel_role(&mut channels, &nickname);
-            self.send_response(&CommandResponse::WhoisChannels319 {
-                nickname: nickname.clone(),
-                channels,
-            })?;
-        }
+        self.send_whois_server_response(&nickname, server)?;
+        self.send_whois_operator_response(&nickname)?;
+        self.send_whois_channels_response(&nickname)?;
         self.send_response(&CommandResponse::EndOfWhois318 { nickname })?;
 
         Ok(())
     }
 
+    fn send_whois_channels_response(&mut self, nickname: &str) -> Result<(), io::Error> {
+        let mut channels = self.database.get_channels_for_client(nickname);
+        if !channels.is_empty() {
+            self.append_channel_role(&mut channels, nickname);
+            self.send_response(&CommandResponse::WhoisChannels319 {
+                nickname: nickname.to_string(),
+                channels,
+            })?;
+        };
+        Ok(())
+    }
+
+    fn send_whois_operator_response(&mut self, nickname: &str) -> Result<(), io::Error> {
+        if self.database.is_server_operator(nickname) {
+            self.send_response(&CommandResponse::WhoisOperator313 {
+                nickname: nickname.to_string(),
+            })?;
+        };
+        Ok(())
+    }
+
+    fn send_whois_server_response(
+        &mut self,
+        nickname: &str,
+        server: String,
+    ) -> Result<(), io::Error> {
+        self.send_response(&CommandResponse::WhoisServer312 {
+            nickname: nickname.to_string(),
+            server,
+            server_info: "Lemon pie server".to_string(),
+        })
+    }
+
     pub(super) fn send_banlist_response(&mut self, channel: &str) -> io::Result<()> {
-        let bans = self.database.get_channel_banmask(channel);
-        for b in bans {
+        let banmasks = self.database.get_channel_banmask(channel);
+        for banmask in banmasks {
             self.send_response(&CommandResponse::BanList367 {
                 channel: channel.to_string(),
-                banmask: b,
+                banmask,
             })?;
         }
         self.send_response(&CommandResponse::EndOfBanList368 {
             channel: channel.to_string(),
-        })?;
-        Ok(())
+        })
     }
 
     pub(super) fn send_topic_response(&mut self, channel: String) -> io::Result<()> {
         match self.database.get_topic_for_channel(&channel) {
-            Some(topic) => self.send_response(&CommandResponse::Topic332 { channel, topic })?,
-            None => self.send_response(&CommandResponse::NoTopic331 { channel })?,
-        };
-        Ok(())
+            Some(topic) => self.send_response(&CommandResponse::Topic332 { channel, topic }),
+            None => self.send_response(&CommandResponse::NoTopic331 { channel }),
+        }
     }
 
     pub(super) fn send_whoreply_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
@@ -93,15 +107,17 @@ impl<C: Connection> ClientHandler<C> {
             Some(topic) => topic,
             None => "No topic set".to_string(),
         };
-        let prv = self.database.channel_has_mode(&channel, PRIVATE)
-            && !self.database.is_client_in_channel(&self.nickname, &channel);
+
+        let prv =
+            self.database.channel_has_mode(&channel, PRIVATE) && !self.is_in_channel(&channel);
+
         self.send_response(&CommandResponse::List322 {
             channel,
             prv,
             topic,
-        })?;
-        Ok(())
+        })
     }
+
     pub(super) fn send_invite_response(
         &mut self,
         inviting_client: String,
@@ -111,8 +127,7 @@ impl<C: Connection> ClientHandler<C> {
             nickname: inviting_client,
             channel,
         };
-        self.send_response(&invite_response)?;
-        Ok(())
+        self.send_response(&invite_response)
     }
 
     pub(super) fn send_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
@@ -121,8 +136,7 @@ impl<C: Connection> ClientHandler<C> {
             channel: channel.to_string(),
             clients,
         };
-        self.send_response(&name_reply)?;
-        Ok(())
+        self.send_response(&name_reply)
     }
 
     pub(super) fn send_end_of_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
@@ -213,8 +227,7 @@ impl<C: Connection> ClientHandler<C> {
             target: target.to_string(),
             message: content.to_owned(),
         };
-        self.send_message_to_target(&notification, target)?;
-        Ok(())
+        self.send_message_to_target(&notification, target)
     }
 
     pub(super) fn send_notice_notification(
@@ -228,7 +241,6 @@ impl<C: Connection> ClientHandler<C> {
             target: target.to_string(),
             message: content.to_owned(),
         };
-        self.send_message_to_target(&notification, target)?;
-        Ok(())
+        self.send_message_to_target(&notification, target)
     }
 }
