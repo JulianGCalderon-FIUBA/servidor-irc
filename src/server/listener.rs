@@ -9,7 +9,11 @@ use std::{
 
 use crate::thread_pool::ThreadPool;
 
-use super::{client_handler::ClientHandler, database::DatabaseHandle, MAX_CLIENTS};
+use super::{
+    connection_handler::{ConnectionHandler, RegistrationHandler},
+    database::DatabaseHandle,
+    MAX_CLIENTS,
+};
 
 pub struct ConnectionListener {
     servername: String,
@@ -57,10 +61,10 @@ impl ConnectionListener {
         }
     }
 
-    fn handler(&self, client: TcpStream) -> io::Result<ClientHandler<TcpStream>> {
+    fn handler(&self, client: TcpStream) -> io::Result<RegistrationHandler<TcpStream>> {
         let database = self.database.clone();
         let online = Arc::clone(&self.online);
         let servername = self.servername.clone();
-        ClientHandler::<TcpStream>::from_stream(database, client, servername, online)
+        RegistrationHandler::<TcpStream>::from_connection(client, servername, database, online)
     }
 }

@@ -1,4 +1,4 @@
-use crate::server::testing_utils::{dummy_client, mock_stream::MockTcpStream};
+use crate::server::testing::{dummy_client, MockTcpStream};
 
 use super::*;
 
