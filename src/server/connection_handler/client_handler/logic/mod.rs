@@ -171,12 +171,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn who_logic(&mut self, mut params: Vec<String>) -> std::io::Result<bool> {
         let mask = params.pop();
 
-        let mut clients = match &mask {
+        let clients = match &mask {
             Some(mask) => self.database.get_clients_for_mask(mask),
             None => self.clients_for_default_who(),
         };
-
-        clients.sort();
 
         for client_info in clients {
             self.send_whoreply_response(client_info)?;
@@ -192,9 +190,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let _server = params.get(0);
 
         for nickmask in nickmasks.split(',') {
-            let mut clients: Vec<ClientInfo> = self.database.get_clients_for_nickmask(nickmask);
-
-            clients.sort();
+            let clients: Vec<ClientInfo> = self.database.get_clients_for_nickmask(nickmask);
 
             if let Err(error) = self.assert_can_send_whois_response(&clients, nickmask) {
                 self.send_response(&error)?;

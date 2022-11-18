@@ -17,17 +17,21 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
 
     handler.who_command(parameters).unwrap();
 
-    let responses = handler.stream.get_responses();
+    let mut responses = handler.stream.get_responses();
+
+    let mut channels: Vec<String> = responses.drain(0..=1).collect();
+
+    channels.sort();
 
     assert_eq!(
         "352 #channel2 username 127.0.0.1 servername nick1 \\MODOS :HOPCOUNT realname",
-        responses[0]
+        channels[0]
     );
     assert_eq!(
         "352 * username 127.0.0.1 servername nick2 \\MODOS :HOPCOUNT realname",
-        responses[1]
+        channels[1]
     );
-    assert_eq!("315 :End of /WHO list", responses[2]);
+    assert_eq!("315 :End of /WHO list", responses[0]);
 }
 
 #[test]

@@ -28,12 +28,16 @@ fn names_with_no_parameters_prints_all_channels() {
 
     handler.names_command(parameters).unwrap();
 
-    let responses = handler.stream.get_responses();
+    let mut responses = handler.stream.get_responses();
 
-    assert_eq!("353 #canal :nick2", responses[0]);
-    assert_eq!("353 #chau :nickname", responses[1]);
-    assert_eq!("353 #hola :nickname", responses[2]);
-    assert_eq!("366 :End of /NAMES list", responses[3]);
+    let mut channels: Vec<String> = responses.drain(0..=2).collect();
+
+    channels.sort();
+
+    assert_eq!("353 #canal :nick2", channels[0]);
+    assert_eq!("353 #chau :nickname", channels[1]);
+    assert_eq!("353 #hola :nickname", channels[2]);
+    assert_eq!("366 :End of /NAMES list", responses[0]);
 }
 
 #[test]

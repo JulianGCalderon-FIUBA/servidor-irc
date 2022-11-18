@@ -7,9 +7,7 @@ use crate::server::{
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn channels_to_list(&mut self, channels: Option<&String>) -> Vec<String> {
         if channels.is_none() {
-            let mut channels = self.database.get_all_channels();
-            channels.sort();
-            return channels;
+            return self.database.get_all_channels();
         }
 
         collect_list(channels)
@@ -27,8 +25,7 @@ impl<C: Connection> ClientHandler<C> {
         for channel in channels {
             if self.database.is_channel_operator(channel, nickname) {
                 channel.insert(0, OPERATOR_SYMBOL);
-            }
-            if self.database.channel_has_mode(channel, MODERATED)
+            } else if self.database.channel_has_mode(channel, MODERATED)
                 && self.database.is_channel_speaker(channel, nickname)
             {
                 channel.insert(0, SPEAKER_SYMBOL);
@@ -60,6 +57,6 @@ pub fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
 pub fn collect_list(parameters: Option<&String>) -> Vec<String> {
     match parameters {
         Some(parameters) => parameters.split(',').map(|s| s.to_string()).collect(),
-        None => Vec::new(),
+        None => vec![],
     }
 }

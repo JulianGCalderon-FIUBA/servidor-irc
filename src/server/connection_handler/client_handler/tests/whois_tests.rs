@@ -118,15 +118,43 @@ fn whois_works_with_nickmask() {
 
     handler.whois_command(parameters).unwrap();
 
-    let responses = handler.stream.get_responses();
+    let mut responses = handler.stream.get_responses();
 
-    assert_eq!("311 nickname username 127.0.0.1 *: realname", responses[0]);
-    assert_eq!("312 nickname servername :Lemon pie server", responses[1]);
-    assert_eq!("318 nickname :End of /WHOIS list", responses[2]);
-    assert_eq!("311 nickname2 username 127.0.0.1 *: realname", responses[3]);
-    assert_eq!("312 nickname2 servername :Lemon pie server", responses[4]);
-    assert_eq!("318 nickname2 :End of /WHOIS list", responses[5]);
-    assert_eq!("311 nickname3 username 127.0.0.1 *: realname", responses[6]);
-    assert_eq!("312 nickname3 servername :Lemon pie server", responses[7]);
-    assert_eq!("318 nickname3 :End of /WHOIS list", responses[8]);
+    let mut sorted_responses: Vec<Vec<String>> = vec![];
+
+    for _ in 0..3 {
+        sorted_responses.push(responses.drain(0..=2).collect())
+    }
+
+    sorted_responses.sort();
+
+    assert_eq!(
+        "311 nickname username 127.0.0.1 *: realname",
+        sorted_responses[0][0]
+    );
+    assert_eq!(
+        "312 nickname servername :Lemon pie server",
+        sorted_responses[0][1]
+    );
+    assert_eq!("318 nickname :End of /WHOIS list", sorted_responses[0][2]);
+
+    assert_eq!(
+        "311 nickname2 username 127.0.0.1 *: realname",
+        sorted_responses[1][0]
+    );
+    assert_eq!(
+        "312 nickname2 servername :Lemon pie server",
+        sorted_responses[1][1]
+    );
+    assert_eq!("318 nickname2 :End of /WHOIS list", sorted_responses[1][2]);
+
+    assert_eq!(
+        "311 nickname3 username 127.0.0.1 *: realname",
+        sorted_responses[2][0]
+    );
+    assert_eq!(
+        "312 nickname3 servername :Lemon pie server",
+        sorted_responses[2][1]
+    );
+    assert_eq!("318 nickname3 :End of /WHOIS list", sorted_responses[2][2]);
 }
