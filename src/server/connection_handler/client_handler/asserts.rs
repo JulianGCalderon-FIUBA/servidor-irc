@@ -31,10 +31,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     }
 
     fn assert_oper_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        if params.len() != 2 {
-            let command = OPER_COMMAND.to_string();
-            return Err(ErrorReply::NeedMoreParameters461 { command });
-        }
+        self.assert_has_enough_params(params.get(1), OPER_COMMAND)?;
 
         let username = &params[0];
         let password = &params[1];
@@ -76,28 +73,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     }
 
     fn assert_join_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        if params.is_empty() {
-            let command = JOIN_COMMAND.to_string();
-            return Err(ErrorReply::NeedMoreParameters461 { command });
-        }
-
-        Ok(())
+        self.assert_has_enough_params(params.get(0), JOIN_COMMAND)
     }
 
     fn assert_part_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        if params.is_empty() {
-            let command = PART_COMMAND.to_string();
-            return Err(ErrorReply::NeedMoreParameters461 { command });
-        }
-
-        Ok(())
+        self.assert_has_enough_params(params.get(0), PART_COMMAND)
     }
 
     fn assert_invite_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        if params.len() != 2 {
-            let command = INVITE_COMMAND.to_string();
-            return Err(ErrorReply::NeedMoreParameters461 { command });
-        }
+        self.assert_has_enough_params(params.get(1), INVITE_COMMAND)?;
 
         let invited_client = &params[0];
         let channel = &params[1];
@@ -141,10 +125,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     }
 
     fn assert_topic_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        if params.is_empty() {
-            let command = TOPIC_COMMAND.to_string();
-            return Err(ErrorReply::NeedMoreParameters461 { command });
-        }
+        self.assert_has_enough_params(params.get(0), TOPIC_COMMAND)?;
 
         let channel = &params[0];
 
@@ -162,19 +143,13 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         params: &[String],
         _trail: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        if params.len() < 2 {
-            let command = KICK_COMMAND.to_string();
-            return Err(ErrorReply::NeedMoreParameters461 { command });
-        }
+        self.assert_has_enough_params(params.get(1), KICK_COMMAND)?;
 
         Ok(())
     }
 
     fn assert_mode_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        if params.is_empty() {
-            let command = MODE_COMMAND.to_string();
-            return Err(ErrorReply::NeedMoreParameters461 { command });
-        }
+        self.assert_has_enough_params(params.get(0), MODE_COMMAND)?;
 
         let channel = &params[0];
 
@@ -195,6 +170,19 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 }
 
 impl<C: Connection> ClientHandler<C> {
+    pub fn assert_has_enough_params<T>(
+        &self,
+        param: Option<T>,
+        command: &str,
+    ) -> Result<(), ErrorReply> {
+        if param.is_none() {
+            return Err(ErrorReply::NeedMoreParameters461 {
+                command: command.to_string(),
+            });
+        }
+        Ok(())
+    }
+
     pub fn assert_is_channel_operator(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
