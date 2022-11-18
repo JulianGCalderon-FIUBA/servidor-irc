@@ -31,7 +31,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     }
 
     fn assert_oper_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        self.assert_has_enough_params(params.get(1), OPER_COMMAND)?;
+        self.assert_has_enough_params(&params.get(1), OPER_COMMAND)?;
 
         let username = &params[0];
         let password = &params[1];
@@ -73,15 +73,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     }
 
     fn assert_join_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        self.assert_has_enough_params(params.get(0), JOIN_COMMAND)
+        self.assert_has_enough_params(&params.get(0), JOIN_COMMAND)
     }
 
     fn assert_part_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        self.assert_has_enough_params(params.get(0), PART_COMMAND)
+        self.assert_has_enough_params(&params.get(0), PART_COMMAND)
     }
 
     fn assert_invite_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        self.assert_has_enough_params(params.get(1), INVITE_COMMAND)?;
+        self.assert_has_enough_params(&params.get(1), INVITE_COMMAND)?;
 
         let invited_client = &params[0];
         let channel = &params[1];
@@ -125,7 +125,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
     }
 
     fn assert_topic_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        self.assert_has_enough_params(params.get(0), TOPIC_COMMAND)?;
+        self.assert_has_enough_params(&params.get(0), TOPIC_COMMAND)?;
 
         let channel = &params[0];
 
@@ -143,23 +143,21 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         params: &[String],
         _trail: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        self.assert_has_enough_params(params.get(1), KICK_COMMAND)?;
+        self.assert_has_enough_params(&params.get(1), KICK_COMMAND)?;
 
         Ok(())
     }
 
     fn assert_mode_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
-        self.assert_has_enough_params(params.get(0), MODE_COMMAND)?;
+        self.assert_has_enough_params(&params.get(0), MODE_COMMAND)?;
 
         let channel = &params[0];
 
         self.assert_exists_channel(channel)?;
         self.assert_is_in_channel(channel)?;
 
-        if params.len() > 1 {
-            self.assert_is_channel_operator(channel)?;
-            self.assert_modes_starts_correctly(&params[1])?;
-        }
+        self.assert_is_channel_operator(channel)?;
+        self.assert_modes_starts_correctly(&params[1])?;
 
         Ok(())
     }
@@ -172,7 +170,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 impl<C: Connection> ClientHandler<C> {
     pub fn assert_has_enough_params<T>(
         &self,
-        param: Option<T>,
+        param: &Option<T>,
         command: &str,
     ) -> Result<(), ErrorReply> {
         if param.is_none() {
