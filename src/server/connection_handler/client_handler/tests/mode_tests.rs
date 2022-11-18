@@ -86,43 +86,6 @@ fn mode_adds_channop() {
 }
 
 #[test]
-fn mode_adds_multiple_channops() {
-    let mut handler = dummy_client_handler();
-
-    handler
-        .database
-        .add_client_to_channel("nickname", "#channel");
-
-    handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_client(dummy_client("nick3"));
-    handler.database.add_client_to_channel("nick3", "#channel");
-    handler.database.add_client(dummy_client("nick4"));
-    handler.database.add_client_to_channel("nick4", "#channel");
-    handler.database.add_client(dummy_client("nick5"));
-    handler.database.add_client_to_channel("nick5", "#channel");
-
-    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
-    assert!(!handler.database.is_channel_operator("#channel", "nick3"));
-    assert!(!handler.database.is_channel_operator("#channel", "nick4"));
-    assert!(!handler.database.is_channel_operator("#channel", "nick5"));
-
-    let parameters = vec![
-        "#channel".to_string(),
-        "+o".to_string(),
-        "nick2,nick3,nick4,nick5".to_string(),
-    ];
-    handler.mode_command(parameters).unwrap();
-
-    assert_eq!("", handler.stream.read_wbuf_to_string());
-    assert!(handler.database.is_channel_operator("#channel", "nickname"));
-    assert!(handler.database.is_channel_operator("#channel", "nick2"));
-    assert!(handler.database.is_channel_operator("#channel", "nick3"));
-    assert!(handler.database.is_channel_operator("#channel", "nick4"));
-    assert!(!handler.database.is_channel_operator("#channel", "nick5"));
-}
-
-#[test]
 fn mode_removes_channop() {
     let mut handler = dummy_client_handler();
 
@@ -146,35 +109,6 @@ fn mode_removes_channop() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.is_channel_operator("#channel", "nickname"));
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
-}
-
-#[test]
-fn mode_removes_multiple_channops() {
-    let mut handler = dummy_client_handler();
-
-    handler
-        .database
-        .add_client_to_channel("nickname", "#channel");
-
-    handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_client(dummy_client("nick3"));
-    handler.database.add_client_to_channel("nick3", "#channel");
-
-    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
-    assert!(!handler.database.is_channel_operator("#channel", "nick3"));
-
-    let parameters = vec![
-        "#channel".to_string(),
-        "-o".to_string(),
-        "nick2,nick3".to_string(),
-    ];
-    handler.mode_command(parameters).unwrap();
-
-    assert_eq!("", handler.stream.read_wbuf_to_string());
-    assert!(handler.database.is_channel_operator("#channel", "nickname"));
-    assert!(!handler.database.is_channel_operator("#channel", "nick2"));
-    assert!(!handler.database.is_channel_operator("#channel", "nick3"));
 }
 
 #[test]
@@ -326,34 +260,6 @@ fn mode_sets_banmask() {
 }
 
 #[test]
-fn mode_sets_multiple_banmasks() {
-    let mut handler = dummy_client_handler();
-
-    handler
-        .database
-        .add_client_to_channel("nickname", "#channel");
-
-    assert!(handler.database.get_channel_banmask("#channel").is_empty());
-
-    let parameters = vec![
-        "#channel".to_string(),
-        "+b".to_string(),
-        "banmask1,banmask2,banmask3,banmask4".to_string(),
-    ];
-    handler.mode_command(parameters).unwrap();
-
-    assert_eq!("", handler.stream.read_wbuf_to_string());
-
-    let masks = vec![
-        "banmask1".to_string(),
-        "banmask2".to_string(),
-        "banmask3".to_string(),
-    ];
-
-    assert_eq!(masks, handler.database.get_channel_banmask("#channel"))
-}
-
-#[test]
 fn mode_unsets_banmask() {
     let mut handler = dummy_client_handler();
 
@@ -398,15 +304,11 @@ fn mode_returns_ban_list_with_no_parameters() {
 
     assert!(handler.database.get_channel_banmask("#channel").is_empty());
 
-    let mut parameters = vec![
-        "#channel".to_string(),
-        "+b".to_string(),
-        "banmask1,banmask2,banmask3,banmask4".to_string(),
-    ];
-    handler.mode_command(parameters).unwrap();
-    handler.stream.clear();
+    handler.database.set_channel_banmask("#channel", "banmask1");
+    handler.database.set_channel_banmask("#channel", "banmask2");
+    handler.database.set_channel_banmask("#channel", "banmask3");
 
-    parameters = vec!["#channel".to_string(), "+b".to_string()];
+    let parameters = vec!["#channel".to_string(), "+b".to_string()];
     handler.mode_command(parameters).unwrap();
 
     let responses = handler.stream.get_responses();
@@ -481,38 +383,6 @@ fn mode_adds_speaker_to_channel() {
 }
 
 #[test]
-fn mode_adds_multiple_speakers_to_channel() {
-    let mut handler = dummy_client_handler();
-
-    handler
-        .database
-        .add_client_to_channel("nickname", "#channel");
-
-    handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_client(dummy_client("nick3"));
-    handler.database.add_client_to_channel("nick3", "#channel");
-    handler.database.add_client(dummy_client("nick4"));
-    handler.database.add_client_to_channel("nick4", "#channel");
-
-    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
-    assert!(!handler.database.is_channel_speaker("#channel", "nick3"));
-    assert!(!handler.database.is_channel_speaker("#channel", "nick4"));
-
-    let parameters = vec![
-        "#channel".to_string(),
-        "+v".to_string(),
-        "nick2,nick3,nick4".to_string(),
-    ];
-    handler.mode_command(parameters).unwrap();
-
-    assert_eq!("", handler.stream.read_wbuf_to_string());
-    assert!(handler.database.is_channel_speaker("#channel", "nick2"));
-    assert!(handler.database.is_channel_speaker("#channel", "nick3"));
-    assert!(handler.database.is_channel_speaker("#channel", "nick4"));
-}
-
-#[test]
 fn mode_removes_speakers_from_channel() {
     let mut handler = dummy_client_handler();
 
@@ -535,34 +405,6 @@ fn mode_removes_speakers_from_channel() {
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
-}
-
-#[test]
-fn mode_removes_multiple_speakers_from_channel() {
-    let mut handler = dummy_client_handler();
-
-    handler
-        .database
-        .add_client_to_channel("nickname", "#channel");
-
-    handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_client(dummy_client("nick3"));
-    handler.database.add_client_to_channel("nick3", "#channel");
-
-    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
-    assert!(!handler.database.is_channel_speaker("#channel", "nick3"));
-
-    let parameters = vec![
-        "#channel".to_string(),
-        "-v".to_string(),
-        "nick2,nick3".to_string(),
-    ];
-    handler.mode_command(parameters).unwrap();
-
-    assert_eq!("", handler.stream.read_wbuf_to_string());
-    assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
-    assert!(!handler.database.is_channel_speaker("#channel", "nick3"));
 }
 
 #[test]

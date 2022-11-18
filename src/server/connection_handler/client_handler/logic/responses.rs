@@ -176,4 +176,59 @@ impl<C: Connection> ClientHandler<C> {
             self.send_message_to_channel(&channel, &notification.to_string());
         }
     }
+
+    pub(super) fn send_away_response(
+        &mut self,
+        client: &str,
+        message: String,
+    ) -> Result<(), io::Error> {
+        let nickname = client.to_string();
+        let reply = CommandResponse::Away { nickname, message };
+        self.send_response(&reply)
+    }
+
+    pub(super) fn send_kick_notification(
+        &mut self,
+        channel: &str,
+        nickname: &str,
+        comment: &Option<String>,
+    ) {
+        let notification = Notification::Kick {
+            kicker: self.nickname.clone(),
+            channel: channel.to_string(),
+            kicked: nickname.to_string(),
+            comment: comment.clone(),
+        };
+        self.send_message_to_channel(&notification, channel);
+    }
+
+    pub(super) fn send_privmsg_notification(
+        &mut self,
+        target: &str,
+        content: &str,
+    ) -> Result<(), io::Error> {
+        let nickname = self.nickname.clone();
+        let notification = Notification::Privmsg {
+            sender: nickname,
+            target: target.to_string(),
+            message: content.to_owned(),
+        };
+        self.send_message_to_target(&notification, target)?;
+        Ok(())
+    }
+
+    pub(super) fn send_notice_notification(
+        &mut self,
+        target: &str,
+        content: &str,
+    ) -> Result<(), io::Error> {
+        let nickname = self.nickname.clone();
+        let notification = Notification::Notice {
+            sender: nickname,
+            target: target.to_string(),
+            message: content.to_owned(),
+        };
+        self.send_message_to_target(&notification, target)?;
+        Ok(())
+    }
 }
