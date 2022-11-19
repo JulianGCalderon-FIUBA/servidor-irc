@@ -57,3 +57,28 @@ label {
     font-size: 20px;
     font-family: monospace;
 }
+
+.active_select_button{
+    border: solid 1px white;
+    border-radius: 0px;
+    color: white;
+    background-color: rgb(222, 117, 52);
+}
+
+.inactive_select_button{
+    border-color: transparent;
+    border-radius: 0px;
+    color: rgb(22, 21, 21);
+    background-color: rgb(72, 68, 68);
+}
+
+.disable_select_button{
+    border-color: transparent;
+    border-radius: 0px;
+    color: rgb(0, 0, 0);
+    background-color: rgb(43, 40, 40);
+}
+
+.add_channel_entry{
+    border: solid 2px white; 
+}
