@@ -1,8 +1,7 @@
+use gtk::{prelude::*, Box, Button, Orientation};
 use gtk4 as gtk;
-use gtk::{Button, Box, Orientation, prelude::* };
 
-
-pub fn create_box(orientation: Orientation) -> Box{
+pub fn create_box(orientation: Orientation) -> Box {
     Box::builder()
         .orientation(orientation)
         .margin_top(20)
@@ -11,13 +10,13 @@ pub fn create_box(orientation: Orientation) -> Box{
         .build()
 }
 
-pub fn create_active_button(label: &str)-> Button{
+pub fn create_active_button(label: &str) -> Button {
     let join_channel_button = Button::builder().label(label).build();
     join_channel_button.add_css_class("active_select_button");
     join_channel_button
 }
 
-pub fn create_disable_button(label: &str)-> Button{
+pub fn create_disable_button(label: &str) -> Button {
     let join_channel_button = Button::builder().label(label).build();
     join_channel_button.add_css_class("inactive_select_button");
     join_channel_button

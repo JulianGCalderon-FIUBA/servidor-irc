@@ -1,4 +1,4 @@
-use gtk::{prelude::*, Align, Box, Orientation, glib::Sender};
+use gtk::{glib::Sender, prelude::*, Align, Box, Orientation};
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
@@ -29,7 +29,9 @@ impl MainView {
         self.quit_channel.connect_clicked(move |_| {
             let quit_channel = ControllerMessage::QuitChannel {};
             sender.send(quit_channel).expect("ERROR");
-            let change_conv = ControllerMessage::ChangeConversation { nickname: "".to_string() };
+            let change_conv = ControllerMessage::ChangeConversation {
+                nickname: "".to_string(),
+            };
             sender.send(change_conv).expect("ERROR");
         });
     }
@@ -50,7 +52,7 @@ impl MainView {
             }
             counter += 1;
         }
-        if self.channels_button.len() > 0 {
+        if !self.channels_button.is_empty() {
             self.channels_button.remove(counter);
         }
         println!("Hola amigos");
