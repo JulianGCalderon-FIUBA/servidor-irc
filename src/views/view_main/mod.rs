@@ -21,7 +21,10 @@ use self::{
     },
 };
 
-use super::widgets_creation::{create_entry, create_main_box};
+use super::{
+    widgets_creation::{create_entry, create_main_box},
+    APP_TITLE,
+};
 
 pub struct MainView {
     pub channels_box: Box,
@@ -73,7 +76,7 @@ impl MainView {
 
         let window = ApplicationWindow::builder()
             .application(&app)
-            .title("Lemon Pie IRC")
+            .title(APP_TITLE)
             .build();
 
         let main_box = create_main_box(Orientation::Horizontal, 800, 600);

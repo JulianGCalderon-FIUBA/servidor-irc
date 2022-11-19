@@ -1,4 +1,4 @@
-use gtk::{prelude::*, Box, Button, Orientation};
+use gtk::{prelude::*, Box, Button, ComboBoxText, Orientation};
 use gtk4 as gtk;
 
 pub fn create_box(orientation: Orientation) -> Box {
@@ -16,8 +16,12 @@ pub fn create_active_button(label: &str) -> Button {
     join_channel_button
 }
 
-pub fn create_disable_button(label: &str) -> Button {
+pub fn create_inactive_button(label: &str) -> Button {
     let join_channel_button = Button::builder().label(label).build();
     join_channel_button.add_css_class("inactive_select_button");
     join_channel_button
+}
+
+pub fn create_combobox() -> ComboBoxText {
+    ComboBoxText::builder().width_request(172).build()
 }

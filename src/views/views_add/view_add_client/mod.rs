@@ -8,7 +8,7 @@ use super::{
     },
 };
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{controller::controller_message::ControllerMessage, views::APP_TITLE};
 
 pub struct AddClientView {
     pub client_entry: Entry,
@@ -28,7 +28,7 @@ impl AddClientView {
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = ApplicationWindow::builder()
             .application(&app)
-            .title("Lemon Pie IRC")
+            .title(APP_TITLE)
             .build();
 
         let main_box = create_main_box_add_view();

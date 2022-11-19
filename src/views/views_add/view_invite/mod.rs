@@ -8,6 +8,7 @@ use super::{
 };
 
 use crate::controller::controller_message::ControllerMessage;
+use crate::views::APP_TITLE;
 
 pub struct InviteView {
     pub channel_entry: Entry,
@@ -27,7 +28,7 @@ impl InviteView {
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = ApplicationWindow::builder()
             .application(&app)
-            .title("Lemon Pie IRC")
+            .title(APP_TITLE)
             .build();
 
         let main_box = create_main_box_add_view();

@@ -5,7 +5,10 @@ use gtk4 as gtk;
 
 use self::widgets_creation::{create_label_box, create_login_button};
 
-use super::widgets_creation::{create_entry, create_main_box};
+use super::{
+    widgets_creation::{create_entry, create_main_box},
+    APP_TITLE,
+};
 
 use crate::controller::controller_message::ControllerMessage;
 
@@ -33,7 +36,7 @@ impl RegisterView {
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = ApplicationWindow::builder()
             .application(&app)
-            .title("Lemon Pie IRC")
+            .title(APP_TITLE)
             .build();
 
         let main_box = create_main_box(Orientation::Vertical, 300, 300);
