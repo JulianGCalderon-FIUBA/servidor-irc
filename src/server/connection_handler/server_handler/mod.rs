@@ -12,16 +12,17 @@ mod logic;
 mod utils;
 
 pub struct ServerHandler<C: Connection> {
-    stream: C,
-    database: DatabaseHandle<C>,
-    _servername: String,
-    online: Arc<AtomicBool>,
+    stream: C,                   // stream del servidor propio
+    _servername: String,         // server al que está conectado (original)
+    database: DatabaseHandle<C>, // handler para el servidor original
+    online: Arc<AtomicBool>,     // sobre el server original
+                                 // falta info del server propio
 }
 
 impl<C: Connection> ConnectionHandler<C> for ServerHandler<C> {}
 
 impl<C: Connection> ServerHandler<C> {
-    pub fn _from_connection(
+    pub fn from_connection(
         stream: C,
         servername: String,
         database: DatabaseHandle<C>,
@@ -29,8 +30,8 @@ impl<C: Connection> ServerHandler<C> {
     ) -> std::io::Result<Self> {
         Ok(Self {
             stream,
-            database,
             _servername: servername,
+            database,
             online,
         })
     }
