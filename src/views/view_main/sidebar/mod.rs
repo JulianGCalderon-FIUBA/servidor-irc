@@ -1,10 +1,6 @@
 mod widgets_creation;
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Box, Button, Orientation,
-};
+use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Button, Orientation };
 use gtk4 as gtk;
 
 use crate::{
@@ -14,29 +10,25 @@ use crate::{
 
 use self::widgets_creation::create_separator_sidebar;
 
-use super::{utils::adjust_scrollbar, widgets_creation::create_button, MainView};
+use super::{ utils::adjust_scrollbar, widgets_creation::create_button, MainView };
 
 impl MainView {
     pub fn create_sidebar(&mut self) -> Box {
-        let sidebar = Box::builder()
-            .width_request(200)
-            .orientation(Orientation::Vertical)
-            .build();
+        let sidebar = Box::builder().width_request(200).orientation(Orientation::Vertical).build();
 
         //Channels box
         let channels_title = create_title("channels");
 
-        self.scrollwindow_channels
-            .set_child(Some(&self.channels_box));
+        self.scrollwindow_channels.set_child(Some(&self.channels_box));
 
-        self.connect_add_button(self.add_channel.clone(), false, self.sender.clone());
+        self.connect_add_channel_button(self.add_channel.clone(), self.sender.clone());
 
         //Clients box
         let clients_title = create_title("clients");
 
         self.scrollwindow_clients.set_child(Some(&self.clients_box));
 
-        self.connect_add_button(self.add_client.clone(), true, self.sender.clone());
+        self.connect_add_client_button(self.add_client.clone(), self.sender.clone());
 
         sidebar.append(&channels_title);
         sidebar.append(&self.scrollwindow_channels);
@@ -49,19 +41,15 @@ impl MainView {
         sidebar
     }
 
-    fn connect_add_button(
-        &self,
-        button: Button,
-        is_add_client: bool,
-        sender: Sender<ControllerMessage>,
-    ) {
+    fn connect_add_client_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
-            let add_view = if is_add_client {
-                ControllerMessage::AddViewToAddClient {}
-            } else {
-                ControllerMessage::AddViewToAddChannel {}
-            };
-            sender.send(add_view).expect("ERROR");
+            sender.send(ControllerMessage::AddViewToAddClient {}).expect("ERROR");
+        });
+    }
+
+    pub fn connect_add_channel_button(&self, button: Button, sender: Sender<ControllerMessage>) {
+        button.connect_clicked(move |_| {
+            sender.send(ControllerMessage::SendListMessage {}).expect("ERROR");
         });
     }
 
@@ -69,9 +57,7 @@ impl MainView {
         let join_channel_message = ControllerMessage::JoinChannel {
             channel: channel.clone(),
         };
-        self.sender
-            .send(join_channel_message)
-            .expect("Error: join channel command");
+        self.sender.send(join_channel_message).expect("Error: join channel command");
 
         Self::change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button(&channel);
@@ -81,7 +67,6 @@ impl MainView {
 
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
-
 
     pub fn add_client(&mut self, client: GString) {
         Self::change_conversation_request(client.clone(), self.sender.clone());
@@ -96,7 +81,7 @@ impl MainView {
         &self,
         button: Button,
         channel_or_client: GString,
-        sender: Sender<ControllerMessage>,
+        sender: Sender<ControllerMessage>
     ) {
         button.connect_clicked(move |_| {
             Self::change_conversation_request(channel_or_client.clone(), sender.clone());
@@ -109,7 +94,6 @@ impl MainView {
         };
         sender.send(request).expect("ERROR: change conversation");
     }
-
 
     pub fn change_conversation(&mut self, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);

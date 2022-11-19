@@ -6,6 +6,7 @@ use crate::views::view_main::widgets_creation::create_button;
 pub fn create_main_box_add_view() -> Box {
     let main_box = Box::builder()
         .orientation(Orientation::Vertical)
+        .width_request(400)
         .halign(gtk::Align::Center)
         .build();
     main_box.add_css_class("main_box");

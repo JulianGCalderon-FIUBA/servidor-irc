@@ -21,7 +21,6 @@ pub enum ControllerMessage {
     JoinChannel {
         channel: GString,
     },
-    AddViewToAddChannel {},
     AddViewToAddClient {},
     AddNewChannel {
         channel: GString,
@@ -40,6 +39,10 @@ pub enum ControllerMessage {
     RecieveInvite {
         nickname: String,
         channel: String,
+    },
+    SendListMessage {},
+    ReceiveListChannels {
+        channels: Vec<String>,
     },
     RegularMessage {
         message: String,
