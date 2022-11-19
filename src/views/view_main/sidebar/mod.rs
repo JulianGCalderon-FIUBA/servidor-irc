@@ -9,7 +9,7 @@ use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage,
-    views::views_add::widget_creations::create_title,
+    views::{views_add::widget_creations::create_title, ERROR_TEXT},
 };
 
 use self::widgets_creation::create_separator_sidebar;
@@ -53,7 +53,7 @@ impl MainView {
         button.connect_clicked(move |_| {
             sender
                 .send(ControllerMessage::AddViewToAddClient {})
-                .expect("ERROR");
+                .expect(ERROR_TEXT);
         });
     }
 
@@ -61,18 +61,11 @@ impl MainView {
         button.connect_clicked(move |_| {
             sender
                 .send(ControllerMessage::SendListMessage {})
-                .expect("ERROR");
+                .expect(ERROR_TEXT);
         });
     }
 
     pub fn add_channel(&mut self, channel: GString) {
-        let join_channel_message = ControllerMessage::JoinChannel {
-            channel: channel.clone(),
-        };
-        self.sender
-            .send(join_channel_message)
-            .expect("Error: join channel command");
-
         Self::change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button(&channel);
         self.connect_channel_client_button(channel_button.clone(), channel, self.sender.clone());

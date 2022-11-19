@@ -8,7 +8,7 @@ use super::{
 };
 
 use crate::controller::controller_message::ControllerMessage;
-use crate::views::APP_TITLE;
+use crate::views::{APP_TITLE, ERROR_TEXT};
 
 pub struct InviteView {
     pub channel_entry: Entry,
@@ -57,7 +57,7 @@ impl InviteView {
             let invite = ControllerMessage::SendInviteMessage {
                 channel: input.text(),
             };
-            sender.send(invite).expect("ERROR");
+            sender.send(invite).expect(ERROR_TEXT);
         });
     }
 }

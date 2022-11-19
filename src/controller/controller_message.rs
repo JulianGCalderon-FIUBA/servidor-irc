@@ -22,9 +22,6 @@ pub enum ControllerMessage {
         channel: GString,
     },
     AddViewToAddClient {},
-    AddNewChannel {
-        channel: GString,
-    },
     AddNewClient {
         client: GString,
     },

@@ -23,7 +23,7 @@ use self::{
 
 use super::{
     widgets_creation::{create_entry, create_main_box},
-    APP_TITLE,
+    APP_TITLE, MAIN_BOX_CSS,
 };
 
 pub struct MainView {
@@ -80,7 +80,7 @@ impl MainView {
             .build();
 
         let main_box = create_main_box(Orientation::Horizontal, 800, 600);
-        main_box.add_css_class("main_box");
+        main_box.add_css_class(MAIN_BOX_CSS);
 
         let sidebar = self.create_sidebar();
         main_box.append(&sidebar);

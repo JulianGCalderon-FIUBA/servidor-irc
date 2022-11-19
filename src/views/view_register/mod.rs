@@ -7,7 +7,7 @@ use self::widgets_creation::{create_label_box, create_login_button};
 
 use super::{
     widgets_creation::{create_entry, create_main_box},
-    APP_TITLE,
+    APP_TITLE, MAIN_BOX_CSS,
 };
 
 use crate::controller::controller_message::ControllerMessage;
@@ -40,7 +40,7 @@ impl RegisterView {
             .build();
 
         let main_box = create_main_box(Orientation::Vertical, 300, 300);
-        main_box.add_css_class("main_box");
+        main_box.add_css_class(MAIN_BOX_CSS);
 
         let realname_box = create_label_box("Your name:");
         realname_box.append(&self.realname_entry);

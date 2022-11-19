@@ -1,7 +1,9 @@
 use gtk::{prelude::*, Align, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
-use crate::views::view_main::widgets_creation::create_button;
+use crate::views::{view_main::widgets_creation::create_button, MAIN_BOX_CSS};
+
+use super::ADD_VIEW_TITLE_CSS;
 
 pub fn create_main_box_add_view() -> Box {
     let main_box = Box::builder()
@@ -9,7 +11,7 @@ pub fn create_main_box_add_view() -> Box {
         .width_request(400)
         .halign(gtk::Align::Center)
         .build();
-    main_box.add_css_class("main_box");
+    main_box.add_css_class(MAIN_BOX_CSS);
     main_box
 }
 
@@ -46,6 +48,6 @@ pub fn create_label_box(label: &str) -> Box {
 
 pub fn create_title(title_text: &str) -> Label {
     let title = create_label(title_text);
-    title.add_css_class("add_view_title");
+    title.add_css_class(ADD_VIEW_TITLE_CSS);
     title
 }

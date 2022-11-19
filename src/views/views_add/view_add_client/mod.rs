@@ -8,7 +8,14 @@ use super::{
     },
 };
 
-use crate::{controller::controller_message::ControllerMessage, views::APP_TITLE};
+use crate::{
+    controller::controller_message::ControllerMessage,
+    views::{APP_TITLE, ERROR_TEXT},
+};
+
+const TITLE: &str = "Add client";
+const ADD_CLIENT_BUTTON_TEXT: &str = "Add client";
+const CLIENT_LABEL_TEXT: &str = "Client:";
 
 pub struct AddClientView {
     pub client_entry: Entry,
@@ -20,7 +27,7 @@ impl AddClientView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             client_entry: create_entry(""),
-            add_client_button: create_add_channel_buton("add client"),
+            add_client_button: create_add_channel_buton(ADD_CLIENT_BUTTON_TEXT),
             sender,
         }
     }
@@ -32,12 +39,10 @@ impl AddClientView {
             .build();
 
         let main_box = create_main_box_add_view();
-        main_box.add_css_class("main_box");
 
-        let title = create_title("Add client");
-        main_box.append(&title);
+        main_box.append(&create_title(TITLE));
 
-        let client_box = create_label_box("Client:");
+        let client_box = create_label_box(CLIENT_LABEL_TEXT);
         client_box.append(&self.client_entry);
         main_box.append(&client_box);
 
@@ -59,7 +64,7 @@ impl AddClientView {
             let add_client = ControllerMessage::AddNewClient {
                 client: input.text(),
             };
-            sender.send(add_client).expect("ERROR");
+            sender.send(add_client).expect(ERROR_TEXT);
         });
     }
 }

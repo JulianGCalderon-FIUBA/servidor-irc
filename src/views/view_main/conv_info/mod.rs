@@ -1,7 +1,7 @@
 use gtk::{glib::Sender, prelude::*, Align, Box, Orientation};
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
 
 use super::MainView;
 
@@ -28,18 +28,18 @@ impl MainView {
     fn connect_quit_channel(&mut self, sender: Sender<ControllerMessage>) {
         self.quit_channel.connect_clicked(move |_| {
             let quit_channel = ControllerMessage::QuitChannel {};
-            sender.send(quit_channel).expect("ERROR");
+            sender.send(quit_channel).expect(ERROR_TEXT);
             let change_conv = ControllerMessage::ChangeConversation {
                 nickname: "".to_string(),
             };
-            sender.send(change_conv).expect("ERROR");
+            sender.send(change_conv).expect(ERROR_TEXT);
         });
     }
 
     fn connect_func_channel(&mut self, sender: Sender<ControllerMessage>) {
         self.func_channel.connect_clicked(move |_| {
             let add_invite_view = ControllerMessage::AddInviteView {};
-            sender.send(add_invite_view).expect("ERROR");
+            sender.send(add_invite_view).expect(ERROR_TEXT);
         });
     }
 

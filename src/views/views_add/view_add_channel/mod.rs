@@ -5,6 +5,7 @@ use gtk::{
     Orientation::Horizontal, Orientation::Vertical,
 };
 use gtk4 as gtk;
+use gtk4::glib::GString;
 
 use self::widget_creations::{
     create_active_button, create_box, create_combobox, create_inactive_button,
@@ -17,7 +18,7 @@ use super::{
 };
 
 use crate::controller::controller_message::ControllerMessage;
-use crate::views::APP_TITLE;
+use crate::views::{APP_TITLE, ERROR_TEXT};
 
 const TITLE: &str = "Add channel";
 const JOIN_CHANNEL_BUTTON_TEXT: &str = "Join existing channel";
@@ -28,7 +29,6 @@ const ACTIVE_SELECT_BUTTON_CSS: &str = "active_select_button";
 const INACTIVE_SELECT_BUTTON_CSS: &str = "inactive_select_button";
 const DISABLE_SELECT_BUTTON_CSS: &str = "disable_select_button";
 const ADD_CHANNEL_ENTRY_CSS: &str = "add_channel_entry";
-const ERROR_TEXT: &str = "ERROR";
 
 pub struct AddChannelView {
     pub join_channel_button: Button,
@@ -107,6 +107,7 @@ impl AddChannelView {
     fn append_join_channel_box(&mut self, channels: Vec<String>, main_box: Box) {
         let entry_box = create_label_box(CHANNEL_LABEL_TEXT);
         self.refill_combobox(channels);
+        self.channel_combobox.add_css_class("combobox");
         entry_box.append(&self.channel_combobox);
         self.join_channel_box.append(&entry_box);
         self.join_channel_box
@@ -165,10 +166,7 @@ impl AddChannelView {
                 return;
             }
 
-            let add_channel = ControllerMessage::AddNewChannel {
-                channel: combobox.active_text().unwrap(),
-            };
-            sender.send(add_channel).expect(ERROR_TEXT);
+            Self::join_channel_request(combobox.active_text().unwrap(), sender.clone());
         });
     }
 
@@ -178,11 +176,14 @@ impl AddChannelView {
                 return;
             }
 
-            let add_channel = ControllerMessage::AddNewChannel {
-                channel: input.text(),
-            };
-            sender.send(add_channel).expect(ERROR_TEXT);
+            Self::join_channel_request(input.text(), sender.clone());
         });
+    }
+
+    pub fn join_channel_request(input: GString, sender: Sender<ControllerMessage>) {
+        sender
+            .send(ControllerMessage::JoinChannel { channel: input })
+            .expect(ERROR_TEXT);
     }
 
     fn active_button(button: Button) {

@@ -116,17 +116,15 @@ impl Controller {
                         AddClientView::new(sender_clone.clone()).get_view(app_clone.clone());
                     add_client_window.show();
                 }
-                AddNewChannel { channel } => {
+                JoinChannel { channel } => {
                     add_channel_window.close();
+                    let join_message = format!("JOIN {}", channel);
+                    client.send_raw(&join_message).expect("ERROR");
                     main_view.add_channel(channel);
                 }
                 AddNewClient { client } => {
                     add_client_window.close();
                     main_view.add_client(client);
-                }
-                JoinChannel { channel } => {
-                    let join_message = format!("JOIN {}", channel);
-                    client.send_raw(&join_message).expect("ERROR");
                 }
                 ReceivePrivMessage { nickname, message } => {
                     main_view.receive_priv_message(message, nickname);
