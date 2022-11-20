@@ -1,16 +1,14 @@
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry};
+use gtk::{ glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry };
 use gtk4 as gtk;
 
 use super::{
-    super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
-    widget_creations::{
-        create_add_channel_buton, create_label_box, create_main_box_add_view, create_title,
-    },
+    super::{ view_main::utils::entry_is_valid, widgets_creation::create_entry },
+    widget_creations::{ create_main_box_add_view, create_title },
 };
 
 use crate::{
     controller::controller_message::ControllerMessage,
-    views::{APP_TITLE, ERROR_TEXT},
+    views::{ APP_TITLE, ERROR_TEXT, widgets_creation::{create_label_input_box, create_center_button} },
 };
 
 const TITLE: &str = "Add client";
@@ -27,22 +25,19 @@ impl AddClientView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             client_entry: create_entry(""),
-            add_client_button: create_add_channel_buton(ADD_CLIENT_BUTTON_TEXT),
+            add_client_button: create_center_button(ADD_CLIENT_BUTTON_TEXT),
             sender,
         }
     }
 
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
-        let window = ApplicationWindow::builder()
-            .application(&app)
-            .title(APP_TITLE)
-            .build();
+        let window = ApplicationWindow::builder().application(&app).title(APP_TITLE).build();
 
         let main_box = create_main_box_add_view();
 
         main_box.append(&create_title(TITLE));
 
-        let client_box = create_label_box(CLIENT_LABEL_TEXT);
+        let client_box = create_label_input_box(CLIENT_LABEL_TEXT);
         client_box.append(&self.client_entry);
         main_box.append(&client_box);
 

@@ -1,22 +1,32 @@
 mod controller_handler;
 pub mod controller_message;
-use crate::views::{
-    view_register::RegisterView,
-    views_add::view_add_client::AddClientView,
-    views_add::{view_add_channel::AddChannelView, view_invite::InviteView},
+use crate::{
+    views::{
+        view_register::RegisterView,
+        views_add::view_add_client::AddClientView,
+        views_add::{ view_add_channel::AddChannelView, view_invite::InviteView },
+    },
+    server::client_handler::commands::{
+        INVITE_COMMAND,
+        JOIN_COMMAND,
+        LIST_COMMAND,
+        NICK_COMMAND,
+        PART_COMMAND,
+        PASS_COMMAND,
+        PRIVMSG_COMMAND,
+        USER_COMMAND,
+    },
 };
 use gtk4 as gtk;
 
-use crate::{client::Client, views::view_main::MainView, ADDRESS};
-use gtk::{
-    gdk::Display,
-    glib::{self},
-    prelude::*,
-    Application, CssProvider, StyleContext,
-};
+use crate::{ client::Client, views::view_main::MainView, ADDRESS };
+use gtk::{ gdk::Display, glib::{ self }, prelude::*, Application, CssProvider, StyleContext };
 
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
+
+const ERROR_TEXT: &str = "ERROR";
+
 pub struct Controller {
     app: Application,
 }
@@ -41,7 +51,7 @@ impl Controller {
         StyleContext::add_provider_for_display(
             &Display::default().expect("Could not connect to a display."),
             &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
         );
     }
 
@@ -78,48 +88,52 @@ impl Controller {
         let app_clone = app.clone();
         let sender_clone = sender.clone();
 
-        client.async_read(move |message| match message {
-            Ok(message) => {
-                let controller_message = to_controller_message(message);
-                sender.send(controller_message).unwrap();
+        client.async_read(move |message| {
+            match message {
+                Ok(message) => {
+                    let controller_message = to_controller_message(message);
+                    sender.send(controller_message).unwrap();
+                }
+                Err(error) => eprintln!("Failed to read message: {}", error),
             }
-            Err(error) => eprintln!("Failed to read message: {}", error),
         });
 
         receiver.attach(None, move |msg| {
             match msg {
-                Register {
-                    pass,
-                    nickname,
-                    username,
-                    realname,
-                } => {
-                    let pass_command = format!("PASS {}", pass);
-                    let nick_command = format!("NICK {}", nickname);
-                    let user_command =
-                        format!("USER {} {} {} :{}", username, username, username, realname);
-                    client.send_raw(&pass_command).expect("ERROR");
-                    client.send_raw(&nick_command).expect("ERROR");
-                    client.send_raw(&user_command).expect("ERROR");
+                Register { pass, nickname, username, realname } => {
+                    let pass_command = format!("{} {}", PASS_COMMAND, pass);
+                    let nick_command = format!("{} {}", NICK_COMMAND, nickname);
+                    let user_command = format!(
+                        "{} {} {} {} :{}",
+                        USER_COMMAND,
+                        username,
+                        username,
+                        username,
+                        realname
+                    );
+                    client.send_raw(&pass_command).expect(ERROR_TEXT);
+                    client.send_raw(&nick_command).expect(ERROR_TEXT);
+                    client.send_raw(&user_command).expect(ERROR_TEXT);
                 }
                 ChangeViewToMain { nickname } => {
                     register_window.close();
                     main_view.get_view(app_clone.clone(), nickname).show();
                 }
                 SendPrivMessage { message } => {
-                    let priv_message = format!("PRIVMSG {} :{}", current_conv, message);
-                    client.send_raw(&priv_message).expect("ERROR");
+                    let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
+                    client.send_raw(&priv_message).expect(ERROR_TEXT);
                     main_view.send_message(message.to_string());
                 }
                 AddViewToAddClient {} => {
-                    add_client_window =
-                        AddClientView::new(sender_clone.clone()).get_view(app_clone.clone());
+                    add_client_window = AddClientView::new(sender_clone.clone()).get_view(
+                        app_clone.clone()
+                    );
                     add_client_window.show();
                 }
                 JoinChannel { channel } => {
                     add_channel_window.close();
-                    let join_message = format!("JOIN {}", channel);
-                    client.send_raw(&join_message).expect("ERROR");
+                    let join_message = format!("{} {}", JOIN_COMMAND, channel);
+                    client.send_raw(&join_message).expect(ERROR_TEXT);
                     main_view.add_channel(channel);
                 }
                 AddNewClient { client } => {
@@ -134,30 +148,33 @@ impl Controller {
                     main_view.change_conversation(current_conv.clone());
                 }
                 QuitChannel {} => {
-                    let part_message = format!("PART {}", current_conv);
+                    let part_message = format!("{} {}", PART_COMMAND, current_conv);
                     client.send_raw(&part_message).expect("ERROR: Part message");
                     main_view.remove_channel(current_conv.clone());
                 }
                 AddInviteView {} => {
-                    invite_window =
-                        InviteView::new(sender_clone.clone()).get_view(app_clone.clone());
+                    invite_window = InviteView::new(sender_clone.clone()).get_view(
+                        app_clone.clone()
+                    );
                     invite_window.show();
                 }
                 SendInviteMessage { channel } => {
                     invite_window.close();
-                    let invite = format!("INVITE {} {}", current_conv, channel);
-                    client.send_raw(&invite).expect("ERROR");
+                    let invite = format!("{} {} {}", INVITE_COMMAND, current_conv, channel);
+                    client.send_raw(&invite).expect(ERROR_TEXT);
                 }
                 RecieveInvite { nickname, channel } => {
                     let message = format!("{} has invited you to join {}", nickname, channel);
                     main_view.receive_priv_message(message, channel);
                 }
                 SendListMessage {} => {
-                    client.send_raw("LIST").expect("ERROR");
+                    client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
                 }
                 ReceiveListChannels { channels } => {
-                    add_channel_window = AddChannelView::new(sender_clone.clone())
-                        .get_view(app_clone.clone(), channels);
+                    add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
+                        app_clone.clone(),
+                        channels
+                    );
                     add_channel_window.show();
                 }
                 RegularMessage { message } => {

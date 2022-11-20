@@ -1,4 +1,6 @@
 pub mod widget_creations;
+pub mod utils;
+pub mod requests;
 
 use gtk::{
     glib::Sender, prelude::*, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
@@ -7,6 +9,7 @@ use gtk::{
 use gtk4 as gtk;
 use gtk4::glib::GString;
 
+use self::utils::{active_button, disable_button, switch_visibility, disactive_button};
 use self::widget_creations::{
     create_active_button, create_box, create_combobox, create_inactive_button,
 };
@@ -14,10 +17,11 @@ use self::widget_creations::{
 use super::widget_creations::create_main_box_add_view;
 use super::{
     super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
-    widget_creations::{create_add_channel_buton, create_label_box, create_title},
+    widget_creations::{ create_title},
 };
 
 use crate::controller::controller_message::ControllerMessage;
+use crate::views::widgets_creation::{create_label_input_box, create_center_button};
 use crate::views::{APP_TITLE, ERROR_TEXT};
 
 const TITLE: &str = "Add channel";
@@ -51,8 +55,8 @@ impl AddChannelView {
             create_channel_box: create_box(Vertical),
             channel_entry: create_entry(""),
             channel_combobox: create_combobox(),
-            add_new_channel_button: create_add_channel_buton(ADD_CHANNEL_BUTTON_TEXT),
-            add_existing_channel_button: create_add_channel_buton(ADD_CHANNEL_BUTTON_TEXT),
+            add_new_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
+            add_existing_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
             sender,
         }
     }
@@ -105,9 +109,8 @@ impl AddChannelView {
     }
 
     fn append_join_channel_box(&mut self, channels: Vec<String>, main_box: Box) {
-        let entry_box = create_label_box(CHANNEL_LABEL_TEXT);
+        let entry_box = create_label_input_box(CHANNEL_LABEL_TEXT);
         self.refill_combobox(channels);
-        self.channel_combobox.add_css_class("combobox");
         entry_box.append(&self.channel_combobox);
         self.join_channel_box.append(&entry_box);
         self.join_channel_box
@@ -116,7 +119,7 @@ impl AddChannelView {
     }
 
     fn append_create_channel_box(&mut self, main_box: Box) {
-        let entry_box = create_label_box(CHANNEL_LABEL_TEXT);
+        let entry_box = create_label_input_box(CHANNEL_LABEL_TEXT);
         self.channel_entry.add_css_class(ADD_CHANNEL_ENTRY_CSS);
         entry_box.append(&self.channel_entry);
         self.create_channel_box.append(&entry_box);
@@ -133,9 +136,9 @@ impl AddChannelView {
 
     fn disable_join_channel_option(&mut self) {
         self.join_channel_button.set_sensitive(false);
-        Self::active_button(self.create_channel_button.clone());
-        Self::disable_button(self.join_channel_button.clone());
-        Self::switch_visibility(
+        active_button(self.create_channel_button.clone());
+        disable_button(self.join_channel_button.clone());
+        switch_visibility(
             self.create_channel_box.clone(),
             self.join_channel_box.clone(),
         );
@@ -143,16 +146,16 @@ impl AddChannelView {
 
     fn connect_select_button(
         &self,
-        active_button: Button,
-        disactive_button: Button,
+        _active_button: Button,
+        _disactive_button: Button,
         visible_box: Box,
         no_visible_box: Box,
     ) {
-        let create_channel_button_clone = active_button.clone();
-        active_button.connect_clicked(move |_| {
-            Self::active_button(create_channel_button_clone.clone());
-            Self::disactive_button(disactive_button.clone());
-            Self::switch_visibility(visible_box.clone(), no_visible_box.clone());
+        let create_channel_button_clone = _active_button.clone();
+        _active_button.connect_clicked(move |_| {
+            active_button(create_channel_button_clone.clone());
+            disactive_button(_disactive_button.clone());
+            switch_visibility(visible_box.clone(), no_visible_box.clone());
         });
     }
 
@@ -186,23 +189,5 @@ impl AddChannelView {
             .expect(ERROR_TEXT);
     }
 
-    fn active_button(button: Button) {
-        button.remove_css_class(INACTIVE_SELECT_BUTTON_CSS);
-        button.add_css_class(ACTIVE_SELECT_BUTTON_CSS);
-    }
 
-    fn disactive_button(button: Button) {
-        button.remove_css_class(ACTIVE_SELECT_BUTTON_CSS);
-        button.add_css_class(INACTIVE_SELECT_BUTTON_CSS);
-    }
-
-    fn disable_button(button: Button) {
-        button.remove_css_class(ACTIVE_SELECT_BUTTON_CSS);
-        button.add_css_class(DISABLE_SELECT_BUTTON_CSS);
-    }
-
-    fn switch_visibility(visible_box: Box, no_visible_box: Box) {
-        visible_box.set_visible(true);
-        no_visible_box.set_visible(false);
-    }
 }

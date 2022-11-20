@@ -3,7 +3,7 @@ use std::io;
 use crate::message::Message;
 
 /// This module contains commands the ClientHandler knows.
-mod commands;
+pub mod commands;
 /// This module contains the structure that contains current Registration.
 mod registration;
 /// This module contains the responses a ClientHandler can have for the different commands.

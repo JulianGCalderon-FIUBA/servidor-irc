@@ -3,7 +3,7 @@
 mod testing_utils;
 
 /// Contains structure for client handler. It's main purpose is to handle the connection established between server and clients.
-mod client_handler;
+pub mod client_handler;
 
 /// Definition of the trait used in the project's structures.
 mod client_trait;

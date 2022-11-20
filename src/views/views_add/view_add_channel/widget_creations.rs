@@ -1,7 +1,9 @@
-use gtk::{prelude::*, Box, Button, ComboBoxText, Orientation};
+use gtk::{ prelude::*, Box, Button, ComboBoxText, Orientation };
 use gtk4 as gtk;
 
-use super::{ACTIVE_SELECT_BUTTON_CSS, INACTIVE_SELECT_BUTTON_CSS};
+use crate::views::widgets_creation::create_button;
+
+use super::{ ACTIVE_SELECT_BUTTON_CSS, INACTIVE_SELECT_BUTTON_CSS };
 
 pub fn create_box(orientation: Orientation) -> Box {
     Box::builder()
@@ -13,13 +15,13 @@ pub fn create_box(orientation: Orientation) -> Box {
 }
 
 pub fn create_active_button(label: &str) -> Button {
-    let join_channel_button = Button::builder().label(label).build();
+    let join_channel_button = create_button(label);
     join_channel_button.add_css_class(ACTIVE_SELECT_BUTTON_CSS);
     join_channel_button
 }
 
 pub fn create_inactive_button(label: &str) -> Button {
-    let join_channel_button = Button::builder().label(label).build();
+    let join_channel_button = create_button(label);
     join_channel_button.add_css_class(INACTIVE_SELECT_BUTTON_CSS);
     join_channel_button
 }

@@ -1,17 +1,15 @@
-use crate::message::Message;
+use crate::{message::Message, server::client_handler::commands::{PRIVMSG_COMMAND, INVITE_COMMAND}};
 
 use super::controller_message::ControllerMessage;
 
-pub const PRIVMSG_COMMAND: &str = "PRIVMSG";
-pub const INVITE_COMMAND: &str = "INVITE";
-pub const LIST_COMMAND: &str = "353";
-pub const END_LIST_COMMAND: &str = "323";
+pub const LIST_RPL_COMMAND: &str = "353";
+pub const END_LIST_RPL_COMMAND: &str = "323";
 
 static mut CHANNELS: Vec<String> = vec![];
 
 pub fn to_controller_message(message: Message) -> ControllerMessage {
     // commands with no ControllerMessage
-    if &message.get_command()[..] == LIST_COMMAND {
+    if &message.get_command()[..] == LIST_RPL_COMMAND {
         unsafe {
             CHANNELS.push(message.get_parameters()[0].clone());
         }
@@ -27,7 +25,7 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
             nickname: message.get_prefix().clone().unwrap(),
             channel: message.get_parameters()[1].clone(),
         },
-        END_LIST_COMMAND => unsafe {
+        END_LIST_RPL_COMMAND => unsafe {
             ControllerMessage::ReceiveListChannels {
                 channels: CHANNELS.clone(),
             }

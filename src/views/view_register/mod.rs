@@ -1,17 +1,15 @@
-mod widgets_creation;
-
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation};
+use gtk::{ glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation };
 use gtk4 as gtk;
 
-use self::widgets_creation::{create_label_box, create_login_button};
-
-use super::{
-    widgets_creation::{create_entry, create_main_box},
-    APP_TITLE, MAIN_BOX_CSS,
-};
+use super::{ widgets_creation::{ create_entry, create_main_box, create_label_input_box, create_center_button }, APP_TITLE, MAIN_BOX_CSS };
 
 use crate::controller::controller_message::ControllerMessage;
 
+const LOGIN_BUTTON_TEXT: &str = "login";
+const REALNAME_LABEL_TEXT: &str = "Your name:";
+const NICKNAME_LABEL_TEXT: &str = "Nickname:";
+const USERNAME_LABEL_TEXT: &str = "Username:";
+const PASSWORD_LABEL_TEXT: &str = "Password:";
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
@@ -28,33 +26,30 @@ impl RegisterView {
             nick_entry: create_entry(""),
             username_entry: create_entry(""),
             pass_entry: create_entry(""),
-            login_button: create_login_button("login"),
+            login_button: create_center_button(LOGIN_BUTTON_TEXT),
             sender,
         }
     }
 
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
-        let window = ApplicationWindow::builder()
-            .application(&app)
-            .title(APP_TITLE)
-            .build();
+        let window = ApplicationWindow::builder().application(&app).title(APP_TITLE).build();
 
         let main_box = create_main_box(Orientation::Vertical, 300, 300);
         main_box.add_css_class(MAIN_BOX_CSS);
 
-        let realname_box = create_label_box("Your name:");
+        let realname_box = create_label_input_box(REALNAME_LABEL_TEXT);
         realname_box.append(&self.realname_entry);
         main_box.append(&realname_box);
 
-        let nickname_box = create_label_box("Nickname:");
+        let nickname_box = create_label_input_box(NICKNAME_LABEL_TEXT);
         nickname_box.append(&self.nick_entry);
         main_box.append(&nickname_box);
 
-        let username_box = create_label_box("Username:");
+        let username_box = create_label_input_box(USERNAME_LABEL_TEXT);
         username_box.append(&self.username_entry);
         main_box.append(&username_box);
 
-        let password_box = create_label_box("Password:");
+        let password_box = create_label_input_box(PASSWORD_LABEL_TEXT);
         password_box.append(&self.pass_entry);
         main_box.append(&password_box);
 
@@ -65,7 +60,7 @@ impl RegisterView {
             self.pass_entry.clone(),
             self.nick_entry.clone(),
             self.username_entry.clone(),
-            self.sender.clone(),
+            self.sender.clone()
         );
 
         window.set_child(Some(&main_box));
@@ -79,13 +74,14 @@ impl RegisterView {
         pass_entry: Entry,
         nick_entry: Entry,
         username_entry: Entry,
-        sender: Sender<ControllerMessage>,
+        sender: Sender<ControllerMessage>
     ) {
         self.login_button.connect_clicked(move |_| {
-            if realname_entry.text().len() != 0
-                && pass_entry.text().len() != 0
-                && nick_entry.text().len() != 0
-                && username_entry.text().len() != 0
+            if
+                realname_entry.text().len() != 0 &&
+                pass_entry.text().len() != 0 &&
+                nick_entry.text().len() != 0 &&
+                username_entry.text().len() != 0
             {
                 let register = ControllerMessage::Register {
                     pass: pass_entry.text(),
