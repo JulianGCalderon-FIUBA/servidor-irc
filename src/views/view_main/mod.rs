@@ -5,15 +5,10 @@ pub mod utils;
 pub mod widgets_creation;
 
 use gtk::{
-    glib::{ GString, Sender },
+    glib::{GString, Sender},
     prelude::*,
-    Application,
-    ApplicationWindow,
-    Box,
-    Button,
-    Entry,
-    Label,
-    Orientation::{ Vertical, Horizontal },
+    Application, ApplicationWindow, Box, Button, Entry, Label,
+    Orientation::{Horizontal, Vertical},
     ScrolledWindow,
 };
 use gtk4 as gtk;
@@ -23,23 +18,16 @@ use crate::controller::controller_message::ControllerMessage;
 use self::{
     chat::widgets_creation::create_scrollwindow_chat,
     widgets_creation::{
-        create_add_button,
-        create_channels_box,
-        create_clients_box,
-        create_current_chat,
-        create_message_box,
+        create_add_button, create_channels_and_client_box, create_current_chat, create_message_box,
         create_scrollwindow_sidebar,
     },
 };
 
 use super::{
     widgets_creation::{
-        create_entry,
-        create_main_box,
-        create_button_with_margin,
+        build_application_window, create_button_with_margin, create_entry, create_main_box,
         create_separator,
     },
-    APP_TITLE,
     MAIN_BOX_CSS,
 };
 
@@ -76,11 +64,11 @@ const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
 impl MainView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
-            channels_box: create_channels_box(),
+            channels_box: create_channels_and_client_box(),
             channels_button: vec![],
             scrollwindow_channels: create_scrollwindow_sidebar(),
             add_channel: create_add_button(ADD_BUTTON_TEXT),
-            clients_box: create_clients_box(),
+            clients_box: create_channels_and_client_box(),
             scrollwindow_clients: create_scrollwindow_sidebar(),
             add_client: create_add_button(ADD_BUTTON_TEXT),
             current_chat: create_current_chat(""),
@@ -100,7 +88,8 @@ impl MainView {
     pub fn get_view(&mut self, app: Application, nickname: GString) -> ApplicationWindow {
         self.user_info.set_label(&nickname);
 
-        let window = ApplicationWindow::builder().application(&app).title(APP_TITLE).build();
+        let window = build_application_window();
+        window.set_application(Some(&app));
 
         let main_box = create_main_box(Horizontal, 800, 600);
         main_box.add_css_class(MAIN_BOX_CSS);

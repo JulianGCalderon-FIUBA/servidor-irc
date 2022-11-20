@@ -1,9 +1,9 @@
-use gtk::{ prelude::*, Box, Button, ComboBoxText, Orientation };
+use gtk::{prelude::*, Box, Button, ComboBoxText, Orientation};
 use gtk4 as gtk;
 
 use crate::views::widgets_creation::create_button;
 
-use super::{ ACTIVE_SELECT_BUTTON_CSS, INACTIVE_SELECT_BUTTON_CSS };
+use super::{ACTIVE_SELECT_BUTTON_CSS, INACTIVE_SELECT_BUTTON_CSS};
 
 pub fn create_box(orientation: Orientation) -> Box {
     Box::builder()

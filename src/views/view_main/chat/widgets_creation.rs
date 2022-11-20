@@ -1,14 +1,13 @@
 use gtk::{
     prelude::*,
-    Align::{ End, Center },
-    Box,
-    Label,
-    Orientation::{ Vertical, Horizontal },
+    Align::{Center, End, Start},
+    Box, Label,
+    Orientation::{Horizontal, Vertical},
     ScrolledWindow,
 };
 use gtk4 as gtk;
 
-use super::{ RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS, CHAT_CSS, MESSAGE_BOX_CSS };
+use super::{CHAT_CSS, MESSAGE_BOX_CSS, RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS};
 
 pub fn create_message(label: &str) -> Label {
     Label::builder()
@@ -17,18 +16,19 @@ pub fn create_message(label: &str) -> Label {
         .margin_bottom(10)
         .margin_start(12)
         .margin_end(12)
-        .halign(End)
         .build()
 }
 
 pub fn create_send_message(label: &str) -> Label {
     let message = create_message(label);
+    message.set_halign(End);
     message.add_css_class(SEND_MESSAGE_CSS);
     message
 }
 
 pub fn create_received_message(label: &str) -> Label {
     let message = create_message(label);
+    message.set_halign(Start);
     message.add_css_class(RECEIVED_MESSAGE_CSS);
     message
 }

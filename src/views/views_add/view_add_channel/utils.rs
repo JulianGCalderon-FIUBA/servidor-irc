@@ -1,7 +1,7 @@
-use gtk::{ prelude::*, Box, Button };
+use gtk::{prelude::*, Box, Button};
 use gtk4 as gtk;
 
-use super::{ INACTIVE_SELECT_BUTTON_CSS, ACTIVE_SELECT_BUTTON_CSS, DISABLE_SELECT_BUTTON_CSS };
+use super::{ACTIVE_SELECT_BUTTON_CSS, DISABLE_SELECT_BUTTON_CSS, INACTIVE_SELECT_BUTTON_CSS};
 
 pub fn active_button(button: Button) {
     button.remove_css_class(INACTIVE_SELECT_BUTTON_CSS);

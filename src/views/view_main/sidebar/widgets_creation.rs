@@ -1,4 +1,4 @@
-use gtk::{ Orientation::Horizontal, Separator, prelude::* };
+use gtk::{prelude::*, Orientation::Horizontal, Separator};
 use gtk4 as gtk;
 
 use crate::views::widgets_creation::create_separator;

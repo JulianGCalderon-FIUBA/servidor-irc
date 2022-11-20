@@ -1,4 +1,7 @@
-use crate::{message::Message, server::client_handler::commands::{PRIVMSG_COMMAND, INVITE_COMMAND}};
+use crate::{
+    message::Message,
+    server::client_handler::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
+};
 
 use super::controller_message::ControllerMessage;
 
@@ -26,8 +29,10 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
             channel: message.get_parameters()[1].clone(),
         },
         END_LIST_RPL_COMMAND => unsafe {
+            let channels_clone = CHANNELS.clone();
+            CHANNELS = vec![];
             ControllerMessage::ReceiveListChannels {
-                channels: CHANNELS.clone(),
+                channels: channels_clone,
             }
         },
         _ => ControllerMessage::RegularMessage {

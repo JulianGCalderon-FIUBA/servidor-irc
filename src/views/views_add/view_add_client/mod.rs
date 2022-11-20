@@ -1,14 +1,20 @@
-use gtk::{ glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry };
+pub mod requests;
+
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry};
 use gtk4 as gtk;
 
+use self::requests::add_client_button_request;
+
 use super::{
-    super::{ view_main::utils::entry_is_valid, widgets_creation::create_entry },
-    widget_creations::{ create_main_box_add_view, create_title },
+    super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
+    widget_creations::{create_main_box_add_view, create_title},
 };
 
 use crate::{
     controller::controller_message::ControllerMessage,
-    views::{ APP_TITLE, ERROR_TEXT, widgets_creation::{create_label_input_box, create_center_button} },
+    views::widgets_creation::{
+        build_application_window, create_center_button, create_label_input_box,
+    },
 };
 
 const TITLE: &str = "Add client";
@@ -31,7 +37,8 @@ impl AddClientView {
     }
 
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
-        let window = ApplicationWindow::builder().application(&app).title(APP_TITLE).build();
+        let window = build_application_window();
+        window.set_application(Some(&app));
 
         let main_box = create_main_box_add_view();
 
@@ -56,10 +63,7 @@ impl AddClientView {
                 return;
             }
 
-            let add_client = ControllerMessage::AddNewClient {
-                client: input.text(),
-            };
-            sender.send(add_client).expect(ERROR_TEXT);
+            add_client_button_request(input.text(), sender.clone());
         });
     }
 }

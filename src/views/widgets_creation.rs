@@ -1,5 +1,10 @@
-use gtk::{Box, Entry, Orientation, Label, prelude::*, Align::Center, Orientation::Horizontal, Button, Separator};
+use gtk::{
+    prelude::*, Align::Center, ApplicationWindow, Box, Button, Entry, Label, Orientation,
+    Orientation::Horizontal, Separator,
+};
 use gtk4 as gtk;
+
+use super::APP_TITLE;
 
 pub fn create_entry(placeholder: &str) -> Entry {
     Entry::builder().placeholder_text(placeholder).build()
@@ -60,4 +65,8 @@ pub fn create_center_button(label: &str) -> Button {
 
 pub fn create_separator(orientation: Orientation) -> Separator {
     Separator::builder().orientation(orientation).build()
+}
+
+pub fn build_application_window() -> ApplicationWindow {
+    ApplicationWindow::builder().title(APP_TITLE).build()
 }

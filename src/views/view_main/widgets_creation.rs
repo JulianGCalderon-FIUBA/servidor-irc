@@ -1,4 +1,10 @@
-use gtk::{ traits::WidgetExt, Align::{Start, Center}, Box, Button, Label, Orientation::Vertical, ScrolledWindow };
+use gtk::{
+    traits::WidgetExt,
+    Align::{Center, Start},
+    Box, Button, Label,
+    Orientation::Vertical,
+    ScrolledWindow,
+};
 use gtk4 as gtk;
 
 use crate::views::widgets_creation::create_button_with_margin;
@@ -23,18 +29,9 @@ pub fn create_message_box() -> Box {
         .build()
 }
 
-pub fn create_channels_box() -> Box {
+pub fn create_channels_and_client_box() -> Box {
     Box::builder()
         .orientation(Vertical)
-        .height_request(300)
-        .height_request(200)
-        .build()
-}
-
-pub fn create_clients_box() -> Box {
-    Box::builder()
-        .orientation(Vertical)
-        .height_request(300)
         .height_request(200)
         .build()
 }

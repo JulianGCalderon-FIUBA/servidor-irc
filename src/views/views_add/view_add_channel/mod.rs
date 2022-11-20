@@ -1,15 +1,15 @@
-pub mod widget_creations;
-pub mod utils;
 pub mod requests;
+pub mod utils;
+pub mod widget_creations;
 
 use gtk::{
     glib::Sender, prelude::*, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
     Orientation::Horizontal, Orientation::Vertical,
 };
 use gtk4 as gtk;
-use gtk4::glib::GString;
 
-use self::utils::{active_button, disable_button, switch_visibility, disactive_button};
+use self::requests::join_channel_request;
+use self::utils::{active_button, disable_button, disactive_button, switch_visibility};
 use self::widget_creations::{
     create_active_button, create_box, create_combobox, create_inactive_button,
 };
@@ -17,12 +17,13 @@ use self::widget_creations::{
 use super::widget_creations::create_main_box_add_view;
 use super::{
     super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
-    widget_creations::{ create_title},
+    widget_creations::create_title,
 };
 
 use crate::controller::controller_message::ControllerMessage;
-use crate::views::widgets_creation::{create_label_input_box, create_center_button};
-use crate::views::{APP_TITLE, ERROR_TEXT};
+use crate::views::widgets_creation::{
+    build_application_window, create_center_button, create_label_input_box,
+};
 
 const TITLE: &str = "Add channel";
 const JOIN_CHANNEL_BUTTON_TEXT: &str = "Join existing channel";
@@ -62,10 +63,8 @@ impl AddChannelView {
     }
 
     pub fn get_view(&mut self, app: Application, channels: Vec<String>) -> ApplicationWindow {
-        let window = ApplicationWindow::builder()
-            .application(&app)
-            .title(APP_TITLE)
-            .build();
+        let window = build_application_window();
+        window.set_application(Some(&app));
 
         let main_box = create_main_box_add_view();
 
@@ -169,7 +168,7 @@ impl AddChannelView {
                 return;
             }
 
-            Self::join_channel_request(combobox.active_text().unwrap(), sender.clone());
+            join_channel_request(combobox.active_text().unwrap(), sender.clone());
         });
     }
 
@@ -179,15 +178,7 @@ impl AddChannelView {
                 return;
             }
 
-            Self::join_channel_request(input.text(), sender.clone());
+            join_channel_request(input.text(), sender.clone());
         });
     }
-
-    pub fn join_channel_request(input: GString, sender: Sender<ControllerMessage>) {
-        sender
-            .send(ControllerMessage::JoinChannel { channel: input })
-            .expect(ERROR_TEXT);
-    }
-
-
 }
