@@ -1,21 +1,25 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry};
+use gtk::{ glib::Sender, prelude::*, Box, Entry };
 use gtk4 as gtk;
 
 use crate::{
-    controller::controller_message::ControllerMessage, views::view_main::utils::entry_is_valid,
+    controller::controller_message::ControllerMessage,
+    views::view_main::utils::entry_is_valid,
 };
 
 use self::{
     requests::priv_message_request,
     widgets_creation::{
-        create_chat_box, create_message_sender_box, create_received_message, create_send_message,
+        create_chat_box,
+        create_message_sender_box,
+        create_received_message,
+        create_send_message,
     },
 };
 
-use super::{utils::adjust_scrollbar, MainView};
+use super::{ utils::adjust_scrollbar, MainView };
 
 const RECEIVED_MESSAGE_CSS: &str = "received_message";
 const SEND_MESSAGE_CSS: &str = "send_message";
@@ -58,7 +62,10 @@ impl MainView {
         });
     }
 
-    pub fn receive_priv_message(&mut self, message: String, _nickname: String) {
+    pub fn receive_priv_message(&mut self, message: String, nickname: String) {
+        if nickname == self.user_info.label().unwrap() {
+            return;
+        }
         let message = create_received_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
