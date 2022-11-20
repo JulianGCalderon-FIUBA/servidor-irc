@@ -58,7 +58,10 @@ impl MainView {
         });
     }
 
-    pub fn receive_priv_message(&mut self, message: String, _nickname: String) {
+    pub fn receive_priv_message(&mut self, message: String,nickname: String) {
+        if nickname == self.user_info.label().unwrap() {
+            return;
+        }
         let message = create_received_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());

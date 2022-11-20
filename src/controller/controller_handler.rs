@@ -2,7 +2,7 @@ use crate::{ message::Message, server::connection_handler::consts::commands::{PR
 
 use super::controller_message::ControllerMessage;
 
-pub const LIST_RPL_COMMAND: &str = "353";
+pub const LIST_RPL_COMMAND: &str = "322";
 pub const END_LIST_RPL_COMMAND: &str = "323";
 
 static mut CHANNELS: Vec<String> = vec![];
