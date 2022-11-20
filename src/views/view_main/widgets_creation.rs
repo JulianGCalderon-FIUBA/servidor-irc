@@ -1,52 +1,37 @@
-use gtk::{traits::WidgetExt, Align, Box, Button, Label, Orientation, ScrolledWindow, Separator};
+use gtk::{
+    traits::WidgetExt,
+    Align::{Center, Start},
+    Box, Button, Label,
+    Orientation::Vertical,
+    ScrolledWindow,
+};
 use gtk4 as gtk;
 
-pub fn create_button(label: &str) -> Button {
-    Button::builder()
-        .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
-        .margin_start(12)
-        .margin_end(12)
-        .build()
-}
+use crate::views::widgets_creation::create_button_with_margin;
+
+use super::{ADD_BUTTON_CSS, CURRENT_CHAT_TITLE_CSS};
 
 pub fn create_add_button(label: &str) -> Button {
-    let add_button = create_button(label);
-    add_button.add_css_class("add");
+    let add_button = create_button_with_margin(label);
+    add_button.add_css_class(ADD_BUTTON_CSS);
     add_button
-}
-
-pub fn create_separator() -> Separator {
-    Separator::builder()
-        .orientation(Orientation::Vertical)
-        .build()
 }
 
 pub fn create_message_box() -> Box {
     Box::builder()
-        .orientation(Orientation::Vertical)
+        .orientation(Vertical)
         .margin_top(10)
         .margin_bottom(10)
         .margin_start(10)
         .margin_bottom(10)
         .width_request(620)
-        .halign(gtk::Align::Start)
+        .halign(Start)
         .build()
 }
 
-pub fn create_channels_box() -> Box {
+pub fn create_channels_and_client_box() -> Box {
     Box::builder()
-        .orientation(Orientation::Vertical)
-        .height_request(300)
-        .height_request(200)
-        .build()
-}
-
-pub fn create_clients_box() -> Box {
-    Box::builder()
-        .orientation(Orientation::Vertical)
-        .height_request(300)
+        .orientation(Vertical)
         .height_request(200)
         .build()
 }
@@ -57,9 +42,9 @@ pub fn create_current_chat(label: &str) -> Label {
         .margin_top(20)
         .margin_start(20)
         .margin_end(12)
-        .halign(Align::Center)
+        .halign(Center)
         .build();
-    message.add_css_class("current_chat");
+    message.add_css_class(CURRENT_CHAT_TITLE_CSS);
     message
 }
 
