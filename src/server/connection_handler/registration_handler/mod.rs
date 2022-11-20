@@ -2,7 +2,7 @@ use std::{
     collections::HashMap,
     io,
     sync::{atomic::AtomicBool, Arc},
-    time::{Duration, Instant},
+    time::Instant,
 };
 
 use crate::server::{connection::Connection, database::DatabaseHandle};
@@ -26,7 +26,6 @@ mod tests;
 mod utils;
 
 const REGISTRATION_TIMELIMIT_SECS: u64 = 60;
-const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
 
 pub struct RegistrationHandler<C: Connection> {
     stream: C,
@@ -49,9 +48,6 @@ impl<C: Connection> RegistrationHandler<C> {
         online: Arc<AtomicBool>,
     ) -> std::io::Result<Self> {
         let stream_for_database = Some(stream.try_clone()?);
-
-        let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
-        stream.set_read_timeout(Some(timeout)).unwrap();
 
         Ok(Self {
             stream,

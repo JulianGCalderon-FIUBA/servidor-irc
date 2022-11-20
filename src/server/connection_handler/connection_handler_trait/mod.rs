@@ -14,6 +14,8 @@ pub use logic::ConnectionHandlerLogic;
 pub use structure::ConnectionHandlerStructure;
 pub use utils::ConnectionHandlerUtils;
 
+const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
+
 pub trait ConnectionHandler<C: Connection>:
     Sized + ConnectionHandlerStructure<C> + ConnectionHandlerGetters<C> + ConnectionHandlerCommands<C>
 {

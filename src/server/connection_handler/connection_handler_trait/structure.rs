@@ -1,12 +1,16 @@
 use std::io;
 use std::sync::atomic::Ordering;
+use std::time::Duration;
 
 use crate::message::{CreationError, Message};
 use crate::server::connection::Connection;
 use crate::server::connection_handler::consts::commands::*;
 use crate::server::connection_handler::responses::ErrorReply;
 
-use super::{ConnectionHandlerCommands, ConnectionHandlerGetters, ConnectionHandlerUtils};
+use super::{
+    ConnectionHandlerCommands, ConnectionHandlerGetters, ConnectionHandlerUtils,
+    READ_FROM_STREAM_TIMEOUT_MS,
+};
 
 // const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
 
@@ -14,6 +18,9 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     ConnectionHandlerCommands<C> + ConnectionHandlerGetters<C> + ConnectionHandlerUtils<C>
 {
     fn try_handle(&mut self) -> io::Result<()> {
+        let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
+        self.stream().set_read_timeout(Some(timeout)).unwrap();
+
         loop {
             if self.server_shutdown() {
                 return self.on_server_shutdown();
