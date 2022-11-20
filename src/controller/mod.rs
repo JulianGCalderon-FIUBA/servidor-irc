@@ -1,11 +1,15 @@
 mod controller_handler;
 pub mod controller_message;
 use crate::{
+    server::connection_handler::consts::commands::{
+        INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND, PASS_COMMAND,
+        PRIVMSG_COMMAND, USER_COMMAND,
+    },
     views::{
         view_register::RegisterView,
         views_add::view_add_client::AddClientView,
         views_add::{view_add_channel::AddChannelView, view_invite::InviteView},
-    }, server::connection_handler::consts::commands::{PASS_COMMAND, NICK_COMMAND, USER_COMMAND, PRIVMSG_COMMAND, JOIN_COMMAND, PART_COMMAND, INVITE_COMMAND, LIST_COMMAND},
+    },
 };
 use gtk4 as gtk;
 
@@ -68,7 +72,6 @@ impl Controller {
         let register_window = register_view.get_view(app.clone());
         register_window.show();
 
-
         let mut main_view = MainView::new(sender.clone());
 
         let mut add_channel_view = AddChannelView::new(sender.clone());
@@ -77,12 +80,14 @@ impl Controller {
         let mut add_client_view = AddClientView::new(sender.clone());
         let mut add_client_window = add_client_view.get_view(app.clone());
 
-        let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone());
+        let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
 
         let mut current_conv = "".to_string();
 
         let app_clone = app.clone();
         let sender_clone = sender.clone();
+
+        let mut current_nickname: String = String::from("");
 
         client.start_async_read(move |message| match message {
             Ok(message) => {
@@ -112,7 +117,10 @@ impl Controller {
                 }
                 ChangeViewToMain { nickname } => {
                     register_window.close();
-                    main_view.get_view(app_clone.clone(), nickname).show();
+                    current_nickname = String::from(&nickname.to_string()[..]);
+                    main_view
+                        .get_view(app_clone.clone(), nickname.clone())
+                        .show();
                 }
                 SendPrivMessage { message } => {
                     let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
@@ -147,8 +155,9 @@ impl Controller {
                     main_view.remove_channel(current_conv.clone());
                 }
                 AddInviteView {} => {
-                    invite_window =
-                        InviteView::new(sender_clone.clone()).get_view(app_clone.clone());
+                    let my_channels = main_view.get_my_channels();
+                    invite_window = InviteView::new(sender_clone.clone())
+                        .get_view(app_clone.clone(), my_channels);
                     invite_window.show();
                 }
                 SendInviteMessage { channel } => {
