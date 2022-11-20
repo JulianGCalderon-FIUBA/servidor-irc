@@ -5,7 +5,7 @@ use std::{
 
 use crate::server::connection::Connection;
 
-use super::database_message::DatabaseMessage;
+use super::{database_message::DatabaseMessage, external_server::ExternalServer};
 use super::{Client, ClientInfo};
 /// A DatabaseHandle handles and makes request to the main Database. Works as an intermediary so external structures cannot acces the Database directly.
 pub struct DatabaseHandle<C: Connection> {
@@ -378,6 +378,21 @@ impl<C: Connection> DatabaseHandle<C> {
         let request = DatabaseMessage::ClientMatchesBanmask {
             nickname: nickname.to_string(),
             mask: mask.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn add_server(&self, server: ExternalServer<C>) {
+        let request = DatabaseMessage::AddServer { server };
+        self.sender.send(request).unwrap();
+    }
+
+    pub fn contains_server(&self, servername: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::ContainsServer {
+            servername: servername.to_string(),
             respond_to: sender,
         };
         self.sender.send(request).unwrap();

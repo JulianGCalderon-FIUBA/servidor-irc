@@ -1,5 +1,5 @@
 pub enum ConnectionType {
-    _Server,
+    Server,
     Client,
     Undefined,
 }

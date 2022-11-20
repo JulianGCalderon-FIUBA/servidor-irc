@@ -48,6 +48,27 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         Ok(false)
     }
 
+    fn server_logic(&mut self, mut params: Vec<String>, trail: Option<String>) -> io::Result<bool> {
+        let hopcount = params.pop().unwrap();
+        let servername = params.pop().unwrap();
+        let serverinfo = trail.unwrap();
+
+        self.attributes.insert("servername", servername.clone());
+        self.attributes.insert("hopcount", hopcount);
+        self.attributes.insert("serverinfo", serverinfo);
+
+        if self.database.contains_server(&servername) {
+            return Ok(false);
+        }
+
+        let server = self.build_server().unwrap();
+        self.database.add_server(server);
+
+        self.connection_type = ConnectionType::Server;
+
+        Ok(false)
+    }
+
     fn quit_logic(&mut self, trail: Option<String>) -> io::Result<bool> {
         let message =
             trail.unwrap_or_else(|| self.attributes.remove("nickname").unwrap_or_default());

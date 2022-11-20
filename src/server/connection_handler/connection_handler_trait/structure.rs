@@ -72,6 +72,8 @@ pub trait ConnectionHandlerStructure<C: Connection>:
             KICK_COMMAND => self.kick_command(parameters, trailing),
             MODE_COMMAND => self.mode_command(parameters),
             QUIT_COMMAND => self.quit_command(trailing),
+            SERVER_COMMAND => self.server_command(parameters, trailing),
+            SQUIT_COMMAND => self.squit_command(parameters, trailing),
             _ => self.on_unknown_command(command),
         }
     }

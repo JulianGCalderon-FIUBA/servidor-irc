@@ -155,6 +155,24 @@ pub trait ConnectionHandlerCommands<C: Connection>:
         self.quit_logic(trail)
     }
 
+    fn server_command(&mut self, params: Vec<String>, trail: Option<String>) -> io::Result<bool> {
+        if let Err(error) = self.assert_server_command_is_valid(&params, &trail) {
+            self.send_response(&error)?;
+            return Ok(true);
+        }
+
+        self.server_logic(params, trail)
+    }
+
+    fn squit_command(&mut self, params: Vec<String>, trail: Option<String>) -> io::Result<bool> {
+        if let Err(error) = self.assert_squit_command_is_valid(&params) {
+            self.send_response(&error)?;
+            return Ok(true);
+        }
+
+        self.squit_logic(params, trail)
+    }
+
     fn on_unknown_command(&mut self, command: String) -> io::Result<bool> {
         self.send_response(&ErrorReply::UnknownCommand421 { command })?;
         Ok(true)

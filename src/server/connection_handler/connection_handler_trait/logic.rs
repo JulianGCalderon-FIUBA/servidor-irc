@@ -56,4 +56,10 @@ pub trait ConnectionHandlerLogic<C: Connection> {
     fn quit_logic(&mut self, _trail: Option<String>) -> io::Result<bool> {
         Ok(true)
     }
+    fn server_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<bool> {
+        Ok(true)
+    }
+    fn squit_logic(&mut self, _params: Vec<String>, _trail: Option<String>) -> io::Result<bool> {
+        Ok(true)
+    }
 }

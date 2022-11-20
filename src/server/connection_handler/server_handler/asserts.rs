@@ -92,4 +92,16 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
     fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
         todo!()
     }
+
+    fn assert_server_command_is_valid(
+        &self,
+        _params: &[String],
+        _trail: &Option<String>,
+    ) -> Result<(), ErrorReply> {
+        todo!()
+    }
+
+    fn assert_squit_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        todo!()
+    }
 }

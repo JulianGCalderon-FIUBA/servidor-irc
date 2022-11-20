@@ -313,4 +313,8 @@ impl<C: Connection> Database<C> {
 
         false
     }
+
+    pub fn contains_server(&self, servername: &str) -> bool {
+        self.servers.contains_key(servername)
+    }
 }

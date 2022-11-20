@@ -6,6 +6,7 @@ mod logic;
 
 use crate::server::connection::Connection;
 
+use super::external_server::ExternalServer;
 use super::{ClientInfo, Database};
 
 impl<C: Connection> Database<C> {
@@ -198,6 +199,16 @@ impl<C: Connection> Database<C> {
         sender: Sender<bool>,
     ) {
         let response = self.client_matches_banmask(nickname, banmask);
+        sender.send(response).unwrap();
+    }
+
+    pub fn handle_add_server(&mut self, server: ExternalServer<C>) {
+        let servername = server.servername();
+        self.servers.insert(servername, server);
+    }
+
+    pub fn handle_contains_server(&self, servername: &str, sender: Sender<bool>) {
+        let response = self.contains_server(servername);
         sender.send(response).unwrap();
     }
 }

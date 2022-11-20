@@ -35,4 +35,10 @@ pub trait ConnectionHandlerAsserts<C: Connection> {
     ) -> Result<(), ErrorReply>;
     fn assert_mode_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply>;
     fn assert_quit_command_is_valid(&self, trail: &Option<String>) -> Result<(), ErrorReply>;
+    fn assert_server_command_is_valid(
+        &self,
+        params: &[String],
+        trail: &Option<String>,
+    ) -> Result<(), ErrorReply>;
+    fn assert_squit_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply>;
 }

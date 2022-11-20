@@ -117,6 +117,27 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
     fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
         Ok(())
     }
+
+    fn assert_server_command_is_valid(
+        &self,
+        params: &[String],
+        trail: &Option<String>,
+    ) -> Result<(), ErrorReply> {
+        if params.len() < 2 || trail.is_none() {
+            let command = USER_COMMAND.to_string();
+            return Err(ErrorReply::NeedMoreParameters461 { command });
+        }
+
+        if params[1].parse::<usize>().is_err() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        Ok(())
+    }
+
+    fn assert_squit_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+        Err(ErrorReply::NotRegistered451)
+    }
 }
 
 impl<C: Connection> RegistrationHandler<C> {

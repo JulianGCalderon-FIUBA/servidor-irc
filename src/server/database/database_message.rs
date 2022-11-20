@@ -1,7 +1,7 @@
 use std::io;
 use std::sync::mpsc::Sender;
 
-use super::{Client, ClientInfo};
+use super::{external_server::ExternalServer, Client, ClientInfo};
 use crate::server::connection::Connection;
 
 /// Possible messages or requests a Database can receive.
@@ -167,4 +167,11 @@ pub enum DatabaseMessage<C: Connection> {
     //     channel: String,
     //     respond_to: Sender<Vec<char>>,
     // },
+    ContainsServer {
+        servername: String,
+        respond_to: Sender<bool>,
+    },
+    AddServer {
+        server: ExternalServer<C>,
+    },
 }

@@ -2,6 +2,7 @@ mod channel;
 mod client;
 mod database_handle;
 mod database_message;
+mod external_server;
 mod handlers;
 
 #[cfg(test)]
@@ -16,6 +17,7 @@ use std::thread::{self, JoinHandle};
 pub use channel::Channel;
 pub use client::{Client, ClientBuilder, ClientInfo};
 pub use database_handle::DatabaseHandle;
+pub use external_server::ExternalServer;
 
 use database_message::DatabaseMessage::{
     AddClient, AddClientToChannel, ContainsChannel, ContainsClient, DisconnectClient,
@@ -24,7 +26,7 @@ use database_message::DatabaseMessage::{
     SetServerOperator, UpdateNickname,
 };
 
-use self::database_message::DatabaseMessage;
+use database_message::DatabaseMessage;
 
 use super::connection::Connection;
 /// Represents a Database that implements ClientTrait.
@@ -32,6 +34,7 @@ pub struct Database<C: Connection> {
     receiver: Receiver<DatabaseMessage<C>>,
     clients: HashMap<String, Rc<RefCell<Client<C>>>>,
     channels: HashMap<String, Channel<C>>,
+    servers: HashMap<String, ExternalServer<C>>,
     credentials: HashMap<String, String>,
 }
 
@@ -51,6 +54,7 @@ impl<C: Connection> Database<C> {
             receiver,
             clients: HashMap::new(),
             channels: HashMap::new(),
+            servers: HashMap::new(),
             credentials: HashMap::new(),
         };
 
@@ -206,6 +210,11 @@ impl<C: Connection> Database<C> {
                 mask,
                 respond_to,
             } => self.handle_clients_matches_banmask(&nickname, &mask, respond_to),
+            DatabaseMessage::ContainsServer {
+                servername,
+                respond_to,
+            } => self.handle_contains_server(&servername, respond_to),
+            DatabaseMessage::AddServer { server } => self.handle_add_server(server),
         }
     }
 }
