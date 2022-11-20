@@ -1,15 +1,11 @@
 mod controller_handler;
 pub mod controller_message;
 use crate::{
-    server::client_handler::commands::{
-        INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND, PASS_COMMAND,
-        PRIVMSG_COMMAND, USER_COMMAND,
-    },
     views::{
         view_register::RegisterView,
         views_add::view_add_client::AddClientView,
         views_add::{view_add_channel::AddChannelView, view_invite::InviteView},
-    },
+    }, server::connection_handler::consts::commands::{PASS_COMMAND, NICK_COMMAND, USER_COMMAND, PRIVMSG_COMMAND, JOIN_COMMAND, PART_COMMAND, INVITE_COMMAND, LIST_COMMAND},
 };
 use gtk4 as gtk;
 

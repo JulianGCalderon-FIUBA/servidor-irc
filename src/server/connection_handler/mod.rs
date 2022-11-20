@@ -1,6 +1,6 @@
 mod client_handler;
 mod connection_handler_trait;
-mod consts;
+pub mod consts;
 mod registration_handler;
 mod responses;
 
