@@ -1,11 +1,11 @@
 pub mod requests;
 
-use gtk::{ glib::Sender, prelude::*, Align, Box, Orientation, Button };
+use gtk::{glib::Sender, prelude::*, Align, Box, Orientation};
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::requests::{ add_invite_view_request, change_conversation_request, quit_channel_request };
+use self::requests::{add_invite_view_request, change_conversation_request, quit_channel_request};
 
 use super::MainView;
 
@@ -56,7 +56,7 @@ impl MainView {
         }
     }
 
-    pub fn get_my_channels(&mut self)->Vec<String>{
+    pub fn get_my_channels(&mut self) -> Vec<String> {
         let mut my_channels: Vec<String> = vec![];
         for channel_button in &self.channels_buttons {
             my_channels.push(channel_button.label().unwrap().to_string())

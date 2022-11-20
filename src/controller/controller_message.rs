@@ -29,8 +29,7 @@ pub enum ControllerMessage {
     ChangeConversation {
         nickname: String,
     },
-    AddInviteView {
-    },
+    AddInviteView {},
     SendInviteMessage {
         channel: GString,
     },

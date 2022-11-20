@@ -1,26 +1,25 @@
 mod controller_handler;
 pub mod controller_message;
 use crate::{
+    server::connection_handler::consts::commands::{
+        INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND, PASS_COMMAND,
+        PRIVMSG_COMMAND, USER_COMMAND,
+    },
     views::{
         view_register::RegisterView,
         views_add::view_add_client::AddClientView,
-        views_add::{ view_add_channel::AddChannelView, view_invite::InviteView },
-    },
-    server::connection_handler::consts::commands::{
-        PASS_COMMAND,
-        NICK_COMMAND,
-        USER_COMMAND,
-        PRIVMSG_COMMAND,
-        JOIN_COMMAND,
-        PART_COMMAND,
-        INVITE_COMMAND,
-        LIST_COMMAND,
+        views_add::{view_add_channel::AddChannelView, view_invite::InviteView},
     },
 };
 use gtk4 as gtk;
 
-use crate::{ client::Client, views::view_main::MainView, ADDRESS };
-use gtk::{ gdk::Display, glib::{ self }, prelude::*, Application, CssProvider, StyleContext };
+use crate::{client::Client, views::view_main::MainView, ADDRESS};
+use gtk::{
+    gdk::Display,
+    glib::{self},
+    prelude::*,
+    Application, CssProvider, StyleContext,
+};
 
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
@@ -51,7 +50,7 @@ impl Controller {
         StyleContext::add_provider_for_display(
             &Display::default().expect("Could not connect to a display."),
             &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }
 
@@ -90,28 +89,27 @@ impl Controller {
 
         let mut current_nickname: String = String::from("");
 
-        client.start_async_read(move |message| {
-            match message {
-                Ok(message) => {
-                    let controller_message = to_controller_message(message);
-                    sender.send(controller_message).unwrap();
-                }
-                Err(error) => eprintln!("Failed to read message: {}", error),
+        client.start_async_read(move |message| match message {
+            Ok(message) => {
+                let controller_message = to_controller_message(message);
+                sender.send(controller_message).unwrap();
             }
+            Err(error) => eprintln!("Failed to read message: {}", error),
         });
 
         receiver.attach(None, move |msg| {
             match msg {
-                Register { pass, nickname, username, realname } => {
+                Register {
+                    pass,
+                    nickname,
+                    username,
+                    realname,
+                } => {
                     let pass_command = format!("{} {}", PASS_COMMAND, pass);
                     let nick_command = format!("{} {}", NICK_COMMAND, nickname);
                     let user_command = format!(
                         "{} {} {} {} :{}",
-                        USER_COMMAND,
-                        username,
-                        username,
-                        username,
-                        realname
+                        USER_COMMAND, username, username, username, realname
                     );
                     client.send_raw(&pass_command).expect(ERROR_TEXT);
                     client.send_raw(&nick_command).expect(ERROR_TEXT);
@@ -120,7 +118,9 @@ impl Controller {
                 ChangeViewToMain { nickname } => {
                     register_window.close();
                     current_nickname = String::from(&nickname.to_string()[..]);
-                    main_view.get_view(app_clone.clone(), nickname.clone()).show();
+                    main_view
+                        .get_view(app_clone.clone(), nickname.clone())
+                        .show();
                 }
                 SendPrivMessage { message } => {
                     let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
@@ -128,9 +128,8 @@ impl Controller {
                     main_view.send_message(message.to_string());
                 }
                 AddViewToAddClient {} => {
-                    add_client_window = AddClientView::new(sender_clone.clone()).get_view(
-                        app_clone.clone()
-                    );
+                    add_client_window =
+                        AddClientView::new(sender_clone.clone()).get_view(app_clone.clone());
                     add_client_window.show();
                 }
                 JoinChannel { channel } => {
@@ -155,12 +154,10 @@ impl Controller {
                     client.send_raw(&part_message).expect("ERROR: Part message");
                     main_view.remove_channel(current_conv.clone());
                 }
-                AddInviteView { } => {
+                AddInviteView {} => {
                     let my_channels = main_view.get_my_channels();
-                    invite_window = InviteView::new(sender_clone.clone()).get_view(
-                        app_clone.clone(),
-                        my_channels
-                    );
+                    invite_window = InviteView::new(sender_clone.clone())
+                        .get_view(app_clone.clone(), my_channels);
                     invite_window.show();
                 }
                 SendInviteMessage { channel } => {
@@ -176,10 +173,8 @@ impl Controller {
                     client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
                 }
                 ReceiveListChannels { channels } => {
-                    add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
-                        app_clone.clone(),
-                        channels
-                    );
+                    add_channel_window = AddChannelView::new(sender_clone.clone())
+                        .get_view(app_clone.clone(), channels);
                     add_channel_window.show();
                 }
                 RegularMessage { message } => {

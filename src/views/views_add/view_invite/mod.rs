@@ -1,21 +1,23 @@
 pub mod request;
 
 use gtk::ComboBoxText;
-use gtk::{ glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry };
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button};
 use gtk4 as gtk;
 
 use self::request::invite_request;
 
 use super::view_add_channel::widget_creations::create_combobox;
 use super::widget_creations::create_main_box_add_view;
-use super::{ super::{ view_main::utils::entry_is_valid }, widget_creations::create_title };
+use super::widget_creations::create_title;
 
 use crate::controller::controller_message::ControllerMessage;
 use crate::views::widgets_creation::{
-    build_application_window,
-    create_center_button,
-    create_label_input_box,
+    build_application_window, create_center_button, create_label_input_box,
 };
+
+const TITLE: &str = "Send invite";
+const CHANNEL_LABEL_TEXT: &str = "Channel:";
+const INVITE_BUTTON_TEXT: &str = "Send invite";
 
 pub struct InviteView {
     pub channel_combobox: ComboBoxText,
@@ -27,7 +29,7 @@ impl InviteView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channel_combobox: create_combobox(),
-            invite_button: create_center_button("Send invite"),
+            invite_button: create_center_button(INVITE_BUTTON_TEXT),
             sender,
         }
     }
@@ -38,10 +40,9 @@ impl InviteView {
 
         let main_box = create_main_box_add_view();
 
-        let title = create_title("Send Invite");
-        main_box.append(&title);
+        main_box.append(&create_title(TITLE));
 
-        let channel_box = create_label_input_box("Channel:");
+        let channel_box = create_label_input_box(CHANNEL_LABEL_TEXT);
         self.refill_combobox(channels);
         channel_box.append(&self.channel_combobox);
         main_box.append(&channel_box);

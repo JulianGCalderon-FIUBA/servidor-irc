@@ -1,4 +1,7 @@
-use crate::{ message::Message, server::connection_handler::consts::commands::{PRIVMSG_COMMAND, INVITE_COMMAND} };
+use crate::{
+    message::Message,
+    server::connection_handler::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
+};
 
 use super::controller_message::ControllerMessage;
 
@@ -17,26 +20,23 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
 
     // commands that return ControllerMessage
     match &message.get_command()[..] {
-        PRIVMSG_COMMAND =>
-            ControllerMessage::ReceivePrivMessage {
-                nickname: message.get_prefix().clone().unwrap(),
-                message: message.get_trailing().clone().unwrap(),
-            },
-        INVITE_COMMAND =>
-            ControllerMessage::RecieveInvite {
-                nickname: message.get_prefix().clone().unwrap(),
-                channel: message.get_parameters()[1].clone(),
-            },
+        PRIVMSG_COMMAND => ControllerMessage::ReceivePrivMessage {
+            nickname: message.get_prefix().clone().unwrap(),
+            message: message.get_trailing().clone().unwrap(),
+        },
+        INVITE_COMMAND => ControllerMessage::RecieveInvite {
+            nickname: message.get_prefix().clone().unwrap(),
+            channel: message.get_parameters()[1].clone(),
+        },
         END_LIST_RPL_COMMAND => unsafe {
             let channels_clone = CHANNELS.clone();
             CHANNELS = vec![];
             ControllerMessage::ReceiveListChannels {
                 channels: channels_clone,
             }
-        }
-        _ =>
-            ControllerMessage::RegularMessage {
-                message: message.to_string(),
-            },
+        },
+        _ => ControllerMessage::RegularMessage {
+            message: message.to_string(),
+        },
     }
 }
