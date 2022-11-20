@@ -1,13 +1,20 @@
+pub mod request;
+
 use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry};
 use gtk4 as gtk;
+
+use self::request::invite_request;
 
 use super::widget_creations::create_main_box_add_view;
 use super::{
     super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
-    widget_creations::{create_add_channel_buton, create_label_box, create_title},
+    widget_creations::create_title,
 };
 
 use crate::controller::controller_message::ControllerMessage;
+use crate::views::widgets_creation::{
+    build_application_window, create_center_button, create_label_input_box,
+};
 
 pub struct InviteView {
     pub channel_entry: Entry,
@@ -19,23 +26,21 @@ impl InviteView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channel_entry: create_entry(""),
-            invite_button: create_add_channel_buton("Send invite"),
+            invite_button: create_center_button("Send invite"),
             sender,
         }
     }
 
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
-        let window = ApplicationWindow::builder()
-            .application(&app)
-            .title("Lemon Pie IRC")
-            .build();
+        let window = build_application_window();
+        window.set_application(Some(&app));
 
         let main_box = create_main_box_add_view();
 
         let title = create_title("Send Invite");
         main_box.append(&title);
 
-        let channel_box = create_label_box("Channel:");
+        let channel_box = create_label_input_box("Channel:");
         channel_box.append(&self.channel_entry);
         main_box.append(&channel_box);
 
@@ -53,10 +58,7 @@ impl InviteView {
                 return;
             }
 
-            let invite = ControllerMessage::SendInviteMessage {
-                channel: input.text(),
-            };
-            sender.send(invite).expect("ERROR");
+            invite_request(input.text(), sender.clone());
         });
     }
 }

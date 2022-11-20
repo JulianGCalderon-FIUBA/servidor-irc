@@ -1,3 +1,4 @@
+pub mod requests;
 pub mod widgets_creation;
 
 use gtk::{glib::Sender, prelude::*, Box, Entry};
@@ -7,11 +8,19 @@ use crate::{
     controller::controller_message::ControllerMessage, views::view_main::utils::entry_is_valid,
 };
 
-use self::widgets_creation::{
-    create_chat_box, create_message, create_message_sender_box, create_received_message,
+use self::{
+    requests::priv_message_request,
+    widgets_creation::{
+        create_chat_box, create_message_sender_box, create_received_message, create_send_message,
+    },
 };
 
 use super::{utils::adjust_scrollbar, MainView};
+
+const RECEIVED_MESSAGE_CSS: &str = "received_message";
+const SEND_MESSAGE_CSS: &str = "send_message";
+const CHAT_CSS: &str = "chat";
+const MESSAGE_BOX_CSS: &str = "message_box";
 
 impl MainView {
     pub fn create_chat(&mut self) -> Box {
@@ -43,12 +52,7 @@ impl MainView {
                 return;
             }
 
-            let priv_message = ControllerMessage::SendPrivMessage {
-                message: input_text,
-            };
-            sender
-                .send(priv_message)
-                .expect("Error: private message command");
+            priv_message_request(input_text, sender.clone());
 
             input.set_text("");
         });
@@ -62,7 +66,7 @@ impl MainView {
     }
 
     pub fn send_message(&mut self, message: String) {
-        let message = create_message(&message);
+        let message = create_send_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
         self.messages.push(message);
