@@ -66,6 +66,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
 
         self.connection_type = ConnectionType::Server;
 
+        let server_notification = format!("SERVER {} {} :{}", self.servername, 1, "hola");
+        self.send_response(&server_notification)?;
+
         for client in self.database.get_all_clients() {
             let nickname = client.nickname.clone();
             let hopcount = client.hopcount;

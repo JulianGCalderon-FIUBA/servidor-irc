@@ -109,7 +109,17 @@ impl<C: Connection> Database<C> {
 
     /// Returns if Database contains client.
     pub fn contains_client(&self, nickname: &str) -> bool {
-        self.clients.get(nickname).is_some()
+        if self.clients.contains_key(nickname) {
+            return true;
+        }
+
+        for server in self.servers.values() {
+            println!("{:?}", server.get_all_clients());
+        }
+
+        self.servers
+            .values()
+            .any(|server| server.contains_client(nickname))
     }
 
     /// Returns if Database contains channel.

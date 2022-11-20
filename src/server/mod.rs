@@ -22,7 +22,7 @@ use std::thread::{self, JoinHandle};
 use crate::message::Message;
 
 use self::connection_handler::{ConnectionHandler, ServerHandler};
-use self::database::DatabaseHandle;
+use self::database::{DatabaseHandle, ExternalServer};
 use self::listener::ConnectionListener;
 
 const MAX_CLIENTS: usize = 26;
@@ -77,25 +77,35 @@ impl Server {
     }
 
     pub fn connect_to(&mut self, address: &str) {
-        println!("connecting to {address}");
-
         let mut stream = TcpStream::connect(address).unwrap();
 
         self.register_to(&mut stream);
 
-        println!("registering");
+        let server_info = Message::read_from(&mut stream).unwrap();
+
+        let (_prefix, _, mut parameters, trailing) = server_info.unpack();
+        let hopcount = parameters.pop().unwrap();
+        let servername = parameters.pop().unwrap();
+        let serverinfo = trailing.unwrap();
+
+        let server = ExternalServer::new(
+            stream.try_clone().unwrap(),
+            servername.clone(),
+            serverinfo,
+            hopcount.parse::<usize>().unwrap(),
+        );
+
+        (self.database.as_ref().unwrap()).add_server(server);
 
         let server_handler = ServerHandler::from_connection(
             stream,
-            "otroserver".to_string(),
+            servername,
             self.database.clone().unwrap(),
             Arc::clone(&self.online),
         )
         .unwrap();
 
         thread::spawn(|| server_handler.handle());
-
-        println!("starting handle");
     }
 
     fn register_to(&self, stream: &mut TcpStream) {

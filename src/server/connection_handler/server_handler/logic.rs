@@ -20,7 +20,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         trail: Option<String>,
     ) -> std::io::Result<bool> {
         let nickname = self.hopcounts.keys().next().unwrap().to_string();
-        let hopcount = *self.hopcounts.get("hopcount").unwrap();
+        let hopcount = *self.hopcounts.get(&nickname).unwrap();
         let servername = params.pop().unwrap();
         let hostname = params.pop().unwrap();
         let username = params.pop().unwrap();

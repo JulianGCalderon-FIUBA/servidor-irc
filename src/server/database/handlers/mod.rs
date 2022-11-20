@@ -204,6 +204,9 @@ impl<C: Connection> Database<C> {
 
     pub fn handle_add_server(&mut self, server: ExternalServer<C>) {
         let servername = server.servername();
+
+        println!("adding server named {servername}");
+
         self.servers.insert(servername, server);
     }
 
@@ -214,6 +217,7 @@ impl<C: Connection> Database<C> {
 
     pub fn handle_add_external_client(&mut self, server: &str, client: ExternalClient) {
         if let Some(server) = self.servers.get_mut(server) {
+            println!("Adding external client {}", client.nickname());
             server.add_client(client);
         }
     }
