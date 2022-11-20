@@ -75,7 +75,7 @@ impl MainView {
         let channel_button = create_button_with_margin(&channel);
         self.connect_channel_client_button(channel_button.clone(), channel, self.sender.clone());
         self.channels_box.append(&channel_button);
-        self.channels_button.push(channel_button);
+        self.channels_buttons.push(channel_button);
 
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }

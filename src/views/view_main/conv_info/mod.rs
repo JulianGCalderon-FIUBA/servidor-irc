@@ -45,14 +45,22 @@ impl MainView {
     }
 
     pub fn remove_channel(&mut self, channel: String) {
-        for channel_button in &self.channels_button {
+        for channel_button in &self.channels_buttons {
             if channel_button.label().unwrap() == channel {
                 self.channels_box.remove(channel_button);
                 break;
             }
         }
-        if !self.channels_button.is_empty() {
-            self.channels_button.remove(0);
+        if !self.channels_buttons.is_empty() {
+            self.channels_buttons.remove(0);
         }
+    }
+
+    pub fn get_my_channels(&mut self) -> Vec<String> {
+        let mut my_channels: Vec<String> = vec![];
+        for channel_button in &self.channels_buttons {
+            my_channels.push(channel_button.label().unwrap().to_string())
+        }
+        my_channels
     }
 }

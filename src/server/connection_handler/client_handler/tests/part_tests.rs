@@ -88,7 +88,9 @@ fn part_notifies_users_in_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
     let parameters = vec!["#channel".to_string()];

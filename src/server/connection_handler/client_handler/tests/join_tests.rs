@@ -82,7 +82,10 @@ fn can_join_one_channel() {
 
     assert_eq!("331 #channel :No topic is set", responses[0]);
     assert_eq!("353 #channel :nickname", responses[1]);
-    assert_eq!(handler.database.get_channels_for_client("nickname"), channels);
+    assert_eq!(
+        handler.database.get_channels_for_client("nickname"),
+        channels
+    );
 }
 
 #[test]
@@ -131,7 +134,10 @@ fn can_join_existing_channel() {
     assert_eq!("331 #channel :No topic is set", responses[0]);
     assert_eq!("353 #channel :nick2 nickname", responses[1]);
 
-    assert_eq!(handler.database.get_channels_for_client("nickname"), channels);
+    assert_eq!(
+        handler.database.get_channels_for_client("nickname"),
+        channels
+    );
     assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
 }
 
@@ -156,7 +162,10 @@ fn can_join_channel_with_topic() {
     assert_eq!("332 #channel :topic for channel", responses[0]);
     assert_eq!("353 #channel :nick2 nickname", responses[1]);
 
-    assert_eq!(handler.database.get_channels_for_client("nickname"), channels);
+    assert_eq!(
+        handler.database.get_channels_for_client("nickname"),
+        channels
+    );
     assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
 }
 
@@ -257,9 +266,15 @@ fn can_join_multiple_channels_with_keys() {
     assert_eq!("331 #channel3 :No topic is set", responses[4]);
     assert_eq!("353 #channel3 :nickname", responses[5]);
 
-    assert!(handler.database.is_client_in_channel("nickname", "#channel1"));
-    assert!(handler.database.is_client_in_channel("nickname", "#channel2"));
-    assert!(handler.database.is_client_in_channel("nickname", "#channel3"))
+    assert!(handler
+        .database
+        .is_client_in_channel("nickname", "#channel1"));
+    assert!(handler
+        .database
+        .is_client_in_channel("nickname", "#channel2"));
+    assert!(handler
+        .database
+        .is_client_in_channel("nickname", "#channel3"))
 }
 
 #[test]
@@ -319,7 +334,9 @@ fn join_fails_with_banmask() {
         handler.stream.read_wbuf_to_string()
     );
 
-    assert!(!handler.database.is_client_in_channel("nickname", "#channel"))
+    assert!(!handler
+        .database
+        .is_client_in_channel("nickname", "#channel"))
 }
 
 #[test]
@@ -339,5 +356,7 @@ fn can_join_channel_with_banmask() {
     assert_eq!("331 #channel :No topic is set", responses[0]);
     assert_eq!("353 #channel :nick2 nickname", responses[1]);
 
-    assert!(handler.database.is_client_in_channel("nickname", "#channel"))
+    assert!(handler
+        .database
+        .is_client_in_channel("nickname", "#channel"))
 }

@@ -33,7 +33,7 @@ use super::{
 
 pub struct MainView {
     pub channels_box: Box,
-    pub channels_button: Vec<Button>,
+    pub channels_buttons: Vec<Button>,
     pub scrollwindow_channels: ScrolledWindow,
     pub add_channel: Button,
     pub clients_box: Box,
@@ -65,7 +65,7 @@ impl MainView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channels_box: create_channels_and_client_box(),
-            channels_button: vec![],
+            channels_buttons: vec![],
             scrollwindow_channels: create_scrollwindow_sidebar(),
             add_channel: create_add_button(ADD_BUTTON_TEXT),
             clients_box: create_channels_and_client_box(),
