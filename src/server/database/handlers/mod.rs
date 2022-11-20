@@ -6,7 +6,7 @@ mod logic;
 
 use crate::server::connection::Connection;
 
-use super::external_server::ExternalServer;
+use super::external_server::{ExternalClient, ExternalServer};
 use super::{ClientInfo, Database};
 
 impl<C: Connection> Database<C> {
@@ -210,5 +210,11 @@ impl<C: Connection> Database<C> {
     pub fn handle_contains_server(&self, servername: &str, sender: Sender<bool>) {
         let response = self.contains_server(servername);
         sender.send(response).unwrap();
+    }
+
+    pub fn handle_add_external_client(&mut self, server: &str, client: ExternalClient) {
+        if let Some(server) = self.servers.get_mut(server) {
+            server.add_client(client);
+        }
     }
 }

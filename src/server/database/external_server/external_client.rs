@@ -1,40 +1,56 @@
+use crate::server::database::ClientInfo;
+
 /// Represents a Client that is connected to the Server.
 pub struct ExternalClient {
-    _nicknames: Vec<String>,
-    _username: String,
-    _hostname: String,
-    _servername: String,
-    _realname: String,
-    _hopcount: usize,
+    nicknames: Vec<String>,
+    username: String,
+    hostname: String,
+    servername: String,
+    realname: String,
+    hopcount: usize,
+    operator: bool,
 }
 
 impl ExternalClient {
     pub fn _new(
         nickname: String,
-        _username: String,
-        _hostname: String,
-        _servername: String,
-        _realname: String,
-        _hopcount: usize,
+        username: String,
+        hostname: String,
+        servername: String,
+        realname: String,
+        hopcount: usize,
     ) -> Self {
         Self {
-            _nicknames: vec![nickname],
-            _username,
-            _hostname,
-            _servername,
-            _realname,
-            _hopcount,
+            nicknames: vec![nickname],
+            username,
+            hostname,
+            servername,
+            realname,
+            hopcount,
+            operator: false,
         }
+    }
+
+    pub fn get_info(&self) -> ClientInfo {
+        ClientInfo {
+            nickname: self.nickname(),
+            username: self.username.clone(),
+            hostname: self.hostname.clone(),
+            servername: self.servername.clone(),
+            realname: self.realname.clone(),
+            operator: self.operator,
+            hopcount: self.hopcount,
+        }
+    }
+
+    /// Returns current nickname.
+    pub fn nickname(&self) -> String {
+        self.nicknames.last().unwrap().to_string()
     }
 
     // /// Updates nickname.
     // pub fn update_nickname(&mut self, nickname: String) {
     //     self.nicknames.push(nickname);
-    // }
-
-    // /// Returns current nickname.
-    // pub fn nickname(&self) -> String {
-    //     self.nicknames.last().unwrap().to_string()
     // }
 
     // /// Returns true if Client has or had received nickname.

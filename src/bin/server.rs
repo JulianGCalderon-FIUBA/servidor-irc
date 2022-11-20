@@ -1,12 +1,16 @@
+use std::env;
 use std::io::{stdin, BufRead, BufReader};
 
 use internet_relay_chat::server::Server;
-use internet_relay_chat::ADDRESS;
 
 fn main() {
-    let mut server = Server::start("lemon pie");
+    let mut args: Vec<String> = env::args().collect();
+    let address = args.pop().unwrap();
+    let servername = args.pop().unwrap();
 
-    if let Err(error) = server.listen_to(ADDRESS.to_string()) {
+    let mut server = Server::start(&servername);
+
+    if let Err(error) = server.listen_to(address) {
         return eprintln!("Error: Binding to address: {:?}", error);
     }
 
@@ -17,9 +21,17 @@ fn main() {
             Err(error) => return eprint!("Error reading from stdin: {}", error),
         };
 
-        if let "QUIT" = &line[..] {
-            server.quit();
-            return;
+        let split: Vec<&str> = line.split_whitespace().collect();
+
+        match split[0] {
+            "QUIT" => {
+                server.quit();
+                return;
+            }
+            "CONNECT" => {
+                server.connect_to(split[1]);
+            }
+            _ => (),
         }
     }
 }

@@ -65,6 +65,12 @@ impl<C: Connection> Database<C> {
             return client.borrow().get_stream();
         }
 
+        for server in self.servers.values() {
+            if server.contains_client(nickname) {
+                return server.get_stream();
+            }
+        }
+
         Err(io::Error::new(
             io::ErrorKind::Other,
             "Could not find client",
@@ -132,10 +138,17 @@ impl<C: Connection> Database<C> {
 
     /// Returns array with ClientInfo for connected clients.
     pub fn get_all_clients(&self) -> Vec<ClientInfo> {
-        self.clients
+        let mut local_clients: Vec<ClientInfo> = self
+            .clients
             .values()
             .map(|client| client.borrow().get_info())
-            .collect()
+            .collect();
+
+        for server in self.servers.values() {
+            local_clients.append(&mut server.get_all_clients());
+        }
+
+        local_clients
     }
 
     /// Returns array with ClientInfo for channels that match mask.

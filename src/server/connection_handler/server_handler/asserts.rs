@@ -10,7 +10,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
     }
 
     fn assert_nick_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
-        todo!()
+        Ok(())
     }
 
     fn assert_user_command_is_valid(
@@ -18,7 +18,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         _params: &[String],
         _trail: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        todo!()
+        Ok(())
     }
 
     fn assert_oper_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {

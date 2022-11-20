@@ -66,6 +66,23 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
 
         self.connection_type = ConnectionType::Server;
 
+        for client in self.database.get_all_clients() {
+            let nickname = client.nickname.clone();
+            let hopcount = client.hopcount;
+            let nick_notification = format!("NICK {nickname} {hopcount}");
+            self.send_response(&nick_notification)?;
+
+            let nickname = client.nickname.clone();
+            let servername = client.servername.clone();
+            let username = client.username.clone();
+            let realname = client.realname.clone();
+            let hostname = client.hostname.clone();
+
+            let user_notification =
+                format!(":{nickname} USER {username} {hostname} {servername} :{realname}");
+            self.send_response(&user_notification)?;
+        }
+
         Ok(false)
     }
 

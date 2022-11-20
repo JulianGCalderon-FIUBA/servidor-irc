@@ -6,5 +6,6 @@ pub struct ClientInfo {
     pub hostname: String,
     pub servername: String,
     pub realname: String,
+    pub hopcount: usize,
     pub operator: bool,
 }

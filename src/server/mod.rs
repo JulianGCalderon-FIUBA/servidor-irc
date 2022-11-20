@@ -19,6 +19,9 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 
+use crate::message::Message;
+
+use self::connection_handler::{ConnectionHandler, ServerHandler};
 use self::database::DatabaseHandle;
 use self::listener::ConnectionListener;
 
@@ -60,16 +63,9 @@ impl Server {
 
     /// Listens for incoming clients and handles each request in a new thread.
     pub fn listen_to(&mut self, address: String) -> io::Result<()> {
-        let database = match &self.database {
-            Some(database) => database.clone(),
-            None => {
-                eprintln!("Already listening");
-                return Ok(());
-            }
-        };
-
         let online = Arc::clone(&self.online);
         let servername = self.servername.clone();
+        let database = self.database.clone().unwrap();
 
         let connection_listener = ConnectionListener::new(servername, address, database, online)?;
 
@@ -77,9 +73,35 @@ impl Server {
 
         self.threads.push(thread);
 
-        self.database.take();
-
         Ok(())
+    }
+
+    pub fn connect_to(&mut self, address: &str) {
+        println!("connecting to {address}");
+
+        let mut stream = TcpStream::connect(address).unwrap();
+
+        self.register_to(&mut stream);
+
+        println!("registering");
+
+        let server_handler = ServerHandler::from_connection(
+            stream,
+            "otroserver".to_string(),
+            self.database.clone().unwrap(),
+            Arc::clone(&self.online),
+        )
+        .unwrap();
+
+        thread::spawn(|| server_handler.handle());
+
+        println!("starting handle");
+    }
+
+    fn register_to(&self, stream: &mut TcpStream) {
+        let message =
+            Message::new(&format!("SERVER {} 1 :{}", &self.servername, "motivo")).unwrap();
+        message.send_to(stream).unwrap();
     }
 }
 

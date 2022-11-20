@@ -17,7 +17,7 @@ use std::thread::{self, JoinHandle};
 pub use channel::Channel;
 pub use client::{Client, ClientBuilder, ClientInfo};
 pub use database_handle::DatabaseHandle;
-pub use external_server::ExternalServer;
+pub use external_server::{ExternalClient, ExternalServer};
 
 use database_message::DatabaseMessage::{
     AddClient, AddClientToChannel, ContainsChannel, ContainsClient, DisconnectClient,
@@ -215,6 +215,9 @@ impl<C: Connection> Database<C> {
                 respond_to,
             } => self.handle_contains_server(&servername, respond_to),
             DatabaseMessage::AddServer { server } => self.handle_add_server(server),
+            DatabaseMessage::AddExternalClient { server, client } => {
+                self.handle_add_external_client(&server, client)
+            }
         }
     }
 }

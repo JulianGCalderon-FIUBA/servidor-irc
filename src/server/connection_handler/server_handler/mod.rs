@@ -1,4 +1,7 @@
-use std::sync::{atomic::AtomicBool, Arc};
+use std::{
+    collections::HashMap,
+    sync::{atomic::AtomicBool, Arc},
+};
 
 use crate::server::{connection::Connection, database::DatabaseHandle};
 
@@ -12,11 +15,12 @@ mod logic;
 mod utils;
 
 pub struct ServerHandler<C: Connection> {
-    stream: C,                   // stream del servidor propio
-    _servername: String,         // server al que está conectado (original)
-    database: DatabaseHandle<C>, // handler para el servidor original
-    online: Arc<AtomicBool>,     // sobre el server original
-                                 // falta info del server propio
+    stream: C,
+    _servername: String,
+    database: DatabaseHandle<C>,
+    online: Arc<AtomicBool>,
+    hopcounts: HashMap<String, usize>,
+    // falta info del server propio
 }
 
 impl<C: Connection> ConnectionHandler<C> for ServerHandler<C> {}
@@ -33,6 +37,7 @@ impl<C: Connection> ServerHandler<C> {
             _servername: servername,
             database,
             online,
+            hopcounts: HashMap::new(),
         })
     }
 }
