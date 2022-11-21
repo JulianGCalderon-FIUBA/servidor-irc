@@ -13,11 +13,11 @@ use crate::{
 };
 
 use self::{
-    requests::{ add_view_to_add_client_request, change_conversation_request, send_list_request },
+    requests::{ add_view_to_add_client_request, send_list_request },
     widgets_creation::create_separator_sidebar,
 };
 
-use super::{ utils::adjust_scrollbar, MainView };
+use super::{ utils::adjust_scrollbar, MainView, requests::change_conversation_request };
 
 const CHANNELS_TITLE: &str = "Channels";
 const CLIENTS_TITLE: &str = "Clients";
@@ -78,6 +78,7 @@ impl MainView {
         let client_button = create_button_with_margin(&client);
         self.connect_channel_client_button(client_button.clone(), client, self.sender.clone());
         self.clients_box.append(&client_button);
+        self.clients_buttons.push(client_button);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
@@ -99,12 +100,15 @@ impl MainView {
             self.message_box.remove(message);
         }
 
-        self.quit_channel.set_visible(true);
-        self.channel_info.set_visible(true);
-        if conversation_label.chars().nth(0).unwrap() == '#' {
+        self.quit_channel_button.set_visible(true);
+        if Self::current_conv_is_channel(conversation_label) {
             self.set_channel_chat_mode();
         } else {
             self.set_client_chat_mode();
         }
+    }
+
+    pub fn current_conv_is_channel(label: String)-> bool{
+        label.chars().nth(0).unwrap() == '#'
     }
 }
