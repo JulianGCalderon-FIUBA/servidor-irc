@@ -83,7 +83,7 @@ impl Server {
         let stream = TcpStream::connect(address)?;
         let database = self.database.as_ref().unwrap().clone();
 
-        let mut registerer = Register::outcoming(stream.try_clone()?, database.clone());
+        let mut registerer = Register::new(stream.try_clone()?, database.clone());
         registerer.register_outcoming()?;
 
         let online = Arc::clone(&self.online);

@@ -16,7 +16,7 @@ pub struct Register<C: Connection> {
 }
 
 impl<C: Connection> Register<C> {
-    pub fn outcoming(stream: C, database: DatabaseHandle<C>) -> Self {
+    pub fn new(stream: C, database: DatabaseHandle<C>) -> Self {
         Self {
             stream,
             database,
@@ -26,9 +26,18 @@ impl<C: Connection> Register<C> {
 
     pub fn register_outcoming(&mut self) -> io::Result<()> {
         self.send_server_notification()?;
-
         self.receive_server_notification()?;
+        self.send_server_data()
+    }
 
+    pub fn register_incoming(
+        &mut self,
+        servername: String,
+        hopcount: usize,
+        serverinfo: String,
+    ) -> io::Result<()> {
+        self.handle_server_command(servername, hopcount, serverinfo)?;
+        self.send_server_notification()?;
         self.send_server_data()
     }
 
@@ -53,23 +62,28 @@ impl<C: Connection> Register<C> {
             Err(error) => return Err(parse_creation_error(error)),
         };
 
-        self.handle_server_command(message)?;
+        let (_, command, mut params, trail) = message.unpack();
+        assert_is_valid_server_message(&command, &params, &trail)?;
+
+        let hopcount = params.remove(1).parse::<usize>().unwrap();
+        let servername = params.remove(0);
+        let serverinfo = trail.unwrap();
+        self.handle_server_command(servername, hopcount, serverinfo)?;
 
         Ok(())
     }
 
-    fn handle_server_command(&mut self, message: Message) -> Result<(), io::Error> {
-        let (_, command, mut params, trail) = message.unpack();
-        assert_is_valid_server_message(&command, &params, &trail)?;
-
-        let hopcount = params.remove(1);
-        let servername = params.remove(0);
-        let serverinfo = trail.unwrap();
+    fn handle_server_command(
+        &mut self,
+        servername: String,
+        hopcount: usize,
+        serverinfo: String,
+    ) -> Result<(), io::Error> {
         let server = ExternalServer::new(
             self.stream.try_clone()?,
             servername.clone(),
             serverinfo,
-            hopcount.parse::<usize>().unwrap(),
+            hopcount,
         );
         self.database.add_server(server);
 
