@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::server::connection_handler::consts::commands::*;
+use crate::server::consts::commands::*;
 
 /// Possible notifications that can be sent for different commands.
 pub enum Notification {
@@ -46,6 +46,11 @@ pub enum Notification {
         hostname: String,
         servername: String,
         realname: String,
+    },
+    Server {
+        servername: String,
+        hopcount: usize,
+        serverinfo: String,
     },
 }
 
@@ -104,6 +109,13 @@ impl Display for Notification {
                 realname,
             } => {
                 format!(":{nickname} {USER_COMMAND} {username} {hostname} {servername} :{realname}")
+            }
+            Notification::Server {
+                servername,
+                hopcount,
+                serverinfo,
+            } => {
+                format!("{SERVER_COMMAND} {servername} {hopcount} :{serverinfo}")
             }
         };
 

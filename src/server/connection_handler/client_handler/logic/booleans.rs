@@ -1,10 +1,6 @@
+use crate::server::consts::modes::{PRIVATE, SECRET};
 use crate::server::{
-    connection::Connection,
-    connection_handler::{
-        client_handler::ClientHandler,
-        consts::modes::{PRIVATE, SECRET},
-    },
-    database::ClientInfo,
+    connection::Connection, connection_handler::client_handler::ClientHandler, database::ClientInfo,
 };
 
 impl<C: Connection> ClientHandler<C> {

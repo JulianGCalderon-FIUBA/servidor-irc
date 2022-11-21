@@ -5,8 +5,8 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
-use crate::server::connection_handler::responses::CommandResponse;
 use crate::server::database::ClientInfo;
+use crate::server::responses::CommandResponse;
 
 use self::utils::{collect_list, parse_modes};
 

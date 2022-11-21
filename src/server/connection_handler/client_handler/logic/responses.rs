@@ -1,12 +1,11 @@
 use std::io;
 
+use crate::server::consts::modes::PRIVATE;
+use crate::server::responses::{CommandResponse, Notification};
 use crate::server::{
     connection::Connection,
     connection_handler::{
-        client_handler::ClientHandler,
-        connection_handler_trait::ConnectionHandlerUtils,
-        consts::modes::PRIVATE,
-        responses::{CommandResponse, Notification},
+        client_handler::ClientHandler, connection_handler_trait::ConnectionHandlerUtils,
     },
     database::ClientInfo,
 };

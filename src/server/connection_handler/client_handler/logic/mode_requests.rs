@@ -1,12 +1,11 @@
 use std::io;
 
+use crate::server::consts::{commands::MODE_COMMAND, modes::*};
+use crate::server::responses::ErrorReply;
 use crate::server::{
     connection::Connection,
     connection_handler::{
-        client_handler::ClientHandler,
-        connection_handler_trait::ConnectionHandlerUtils,
-        consts::{commands::MODE_COMMAND, modes::*},
-        responses::ErrorReply,
+        client_handler::ClientHandler, connection_handler_trait::ConnectionHandlerUtils,
     },
 };
 

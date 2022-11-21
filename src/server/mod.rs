@@ -11,6 +11,10 @@ mod database;
 mod connection_handler;
 /// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address
 mod listener;
+mod registerer;
+
+mod consts;
+mod responses;
 
 use database::Database;
 use std::io;
@@ -19,11 +23,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 
-use crate::message::Message;
-
 use self::connection_handler::{ConnectionHandler, ServerHandler};
-use self::database::{DatabaseHandle, ExternalServer};
+use self::database::DatabaseHandle;
 use self::listener::ConnectionListener;
+use self::registerer::Register;
 
 const MAX_CLIENTS: usize = 26;
 
@@ -76,63 +79,28 @@ impl Server {
         Ok(())
     }
 
-    pub fn connect_to(&mut self, address: &str) {
-        let mut stream = TcpStream::connect(address).unwrap();
+    fn try_connect_to(&mut self, address: &str) -> io::Result<()> {
+        let stream = TcpStream::connect(address)?;
+        let database = self.database.as_ref().unwrap().clone();
 
-        let database = self.database.as_ref().unwrap();
+        let mut registerer = Register::outcoming(stream.try_clone()?, database.clone());
+        registerer.register_outcoming()?;
 
-        self.register_to(&mut stream);
+        let online = Arc::clone(&self.online);
+        let servername = registerer.servername();
+        let server_handle =
+            ServerHandler::from_connection(stream.try_clone()?, servername, database, online)?;
 
-        let server_info = Message::read_from(&mut stream).unwrap();
+        let handle = thread::spawn(|| server_handle.handle());
+        self.threads.push(handle);
 
-        let (_prefix, _, mut parameters, trailing) = server_info.unpack();
-        let hopcount = parameters.pop().unwrap();
-        let servername = parameters.pop().unwrap();
-        let serverinfo = trailing.unwrap();
-
-        let server = ExternalServer::new(
-            stream.try_clone().unwrap(),
-            servername.clone(),
-            serverinfo,
-            hopcount.parse::<usize>().unwrap(),
-        );
-
-        database.add_server(server);
-
-        for client in database.get_all_clients() {
-            let nickname = client.nickname.clone();
-            let hopcount = client.hopcount;
-            let msg = Message::new(&format!("NICK {nickname} {hopcount}")).unwrap();
-            msg.send_to(&mut stream).unwrap();
-
-            let nickname = client.nickname.clone();
-            let servername = client.servername.clone();
-            let username = client.username.clone();
-            let realname = client.realname.clone();
-            let hostname = client.hostname.clone();
-
-            let msg = Message::new(&format!(
-                ":{nickname} USER {username} {hostname} {servername} :{realname}"
-            ))
-            .unwrap();
-            msg.send_to(&mut stream).unwrap();
-        }
-
-        let server_handler = ServerHandler::from_connection(
-            stream,
-            servername,
-            self.database.clone().unwrap(),
-            Arc::clone(&self.online),
-        )
-        .unwrap();
-
-        thread::spawn(|| server_handler.handle());
+        Ok(())
     }
 
-    fn register_to(&self, stream: &mut TcpStream) {
-        let message =
-            Message::new(&format!("SERVER {} 1 :{}", &self.servername, "motivo")).unwrap();
-        message.send_to(stream).unwrap();
+    pub fn connect_to(&mut self, address: &str) {
+        if let Err(error) = self.try_connect_to(address) {
+            eprintln!("Could not connect to {address}, with error {error:?}");
+        }
     }
 }
 

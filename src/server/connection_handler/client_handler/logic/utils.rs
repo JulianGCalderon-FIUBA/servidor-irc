@@ -1,7 +1,6 @@
+use crate::server::consts::modes::*;
 use crate::server::{
-    connection::Connection,
-    connection_handler::{client_handler::ClientHandler, consts::modes::*},
-    database::ClientInfo,
+    connection::Connection, connection_handler::client_handler::ClientHandler, database::ClientInfo,
 };
 
 impl<C: Connection> ClientHandler<C> {

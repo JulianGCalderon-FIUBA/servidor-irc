@@ -4,8 +4,8 @@ use std::time::Duration;
 
 use crate::message::{CreationError, Message};
 use crate::server::connection::Connection;
-use crate::server::connection_handler::consts::commands::*;
-use crate::server::connection_handler::responses::ErrorReply;
+use crate::server::consts::commands::*;
+use crate::server::responses::ErrorReply;
 
 use super::{
     ConnectionHandlerCommands, ConnectionHandlerGetters, ConnectionHandlerUtils,
