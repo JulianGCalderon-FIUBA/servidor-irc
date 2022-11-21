@@ -14,7 +14,7 @@ pub enum DatabaseMessage<C: Connection> {
     },
     GetStream {
         nickname: String,
-        respond_to: Sender<io::Result<C>>,
+        respond_to: Sender<Option<io::Result<C>>>,
     },
     DisconnectClient {
         nickname: String,
@@ -149,7 +149,7 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         respond_to: Sender<bool>,
     },
-    SetChannelBanMask {
+    AddChannelBanMask {
         channel: String,
         mask: String,
     },
@@ -157,7 +157,7 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         respond_to: Sender<Vec<String>>,
     },
-    UnsetChannelBanMask {
+    RemoveChannelBanMask {
         channel: String,
         mask: String,
     },

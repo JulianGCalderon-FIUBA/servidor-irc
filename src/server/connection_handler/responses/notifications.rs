@@ -36,6 +36,17 @@ pub enum Notification {
         nickname: String,
         channel: String,
     },
+    Nick {
+        nickname: String,
+        hopcount: usize,
+    },
+    User {
+        nickname: String,
+        username: String,
+        hostname: String,
+        servername: String,
+        realname: String,
+    },
 }
 
 impl Display for Notification {
@@ -81,6 +92,18 @@ impl Display for Notification {
             }
             Notification::Join { nickname, channel } => {
                 format!(":{nickname} {JOIN_COMMAND} {channel}")
+            }
+            Notification::Nick { nickname, hopcount } => {
+                format!("{NICK_COMMAND} {nickname} {hopcount}")
+            }
+            Notification::User {
+                nickname,
+                username,
+                hostname,
+                servername,
+                realname,
+            } => {
+                format!(":{nickname} {USER_COMMAND} {username} {hostname} {servername} :{realname}")
             }
         };
 

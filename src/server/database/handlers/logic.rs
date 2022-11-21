@@ -50,17 +50,13 @@ impl<C: Connection> Database<C> {
     pub fn disconnect_client(&mut self, nickname: &str) {
         println!("Disconnecting {} ", nickname);
 
-        self.clients.remove(nickname);
-
-        let channels = self.get_channels_for_client(nickname);
-
-        for channel in channels {
-            self.remove_client_from_channel(nickname, &channel)
+        if let Some(client) = self.clients.get_mut(nickname) {
+            client.borrow_mut().disconnect();
         }
     }
 
     /// Returns the client's stream or error if client is disconnected.
-    pub fn get_stream(&self, nickname: &str) -> io::Result<C> {
+    pub fn get_stream(&self, nickname: &str) -> Option<io::Result<C>> {
         if let Some(client) = self.clients.get(nickname) {
             return client.borrow().get_stream();
         }
@@ -71,10 +67,7 @@ impl<C: Connection> Database<C> {
             }
         }
 
-        Err(io::Error::new(
-            io::ErrorKind::Other,
-            "Could not find client",
-        ))
+        None
     }
 
     /// Adds client to channel.
@@ -221,12 +214,6 @@ impl<C: Connection> Database<C> {
         None
     }
 
-    pub fn set_channel_key(&mut self, channel: String, key: Option<String>) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.set_key(key);
-        }
-    }
-
     pub fn get_channel_key(&self, channel: String) -> Option<String> {
         if let Some(channel) = self.channels.get(&channel) {
             return channel.get_key();
@@ -234,17 +221,6 @@ impl<C: Connection> Database<C> {
         None
     }
 
-    pub fn set_mode(&mut self, channel: String, mode: char) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.set_mode(mode);
-        }
-    }
-
-    pub fn unset_mode(&mut self, channel: String, mode: char) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.unset_mode(mode);
-        }
-    }
     pub fn channel_has_mode(&self, channel: String, mode: char) -> bool {
         if let Some(channel) = self.channels.get(&channel) {
             return channel.has_mode(mode);
@@ -259,36 +235,6 @@ impl<C: Connection> Database<C> {
         None
     }
 
-    pub fn set_channel_limit(&mut self, channel: String, limit: Option<usize>) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.set_limit(limit)
-        }
-    }
-
-    pub fn add_channop(&mut self, channel: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.add_operator(nickname);
-        }
-    }
-
-    pub fn remove_channop(&mut self, channel: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.remove_operator(nickname);
-        }
-    }
-
-    pub fn add_speaker(&mut self, channel: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.add_speaker(nickname);
-        }
-    }
-
-    pub fn remove_speaker(&mut self, channel: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.remove_speaker(nickname);
-        }
-    }
-
     pub fn is_channel_speaker(&self, channel: String, nickname: String) -> bool {
         if let Some(channel) = self.channels.get(&channel) {
             return channel.is_speaker(nickname);
@@ -296,23 +242,11 @@ impl<C: Connection> Database<C> {
         false
     }
 
-    pub fn set_channel_banmask(&mut self, channel: String, mask: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.set_banmask(mask);
-        }
-    }
-
     pub fn get_channel_banmask(&self, channel: String) -> Vec<String> {
         if let Some(channel) = self.channels.get(&channel) {
             return channel.get_banmasks();
         }
         vec![]
-    }
-
-    pub fn unset_channel_banmask(&mut self, channel: String, mask: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.unset_banmask(mask);
-        }
     }
 
     // pub fn get_all_channel_modes(&self, channel: String) -> Vec<char> {

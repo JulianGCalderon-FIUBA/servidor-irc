@@ -186,15 +186,15 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to,
             } => self.handle_is_channel_speaker(channel, nickname, respond_to),
-            DatabaseMessage::SetChannelBanMask { channel, mask } => {
-                self.handle_set_channel_banmask(channel, mask)
+            DatabaseMessage::AddChannelBanMask { channel, mask } => {
+                self.handle_add_channel_banmask(channel, mask)
             }
             DatabaseMessage::GetChannelBanMask {
                 channel,
                 respond_to,
             } => self.handle_get_channel_banmask(channel, respond_to),
-            DatabaseMessage::UnsetChannelBanMask { channel, mask } => {
-                self.handle_unset_channel_banmask(channel, mask)
+            DatabaseMessage::RemoveChannelBanMask { channel, mask } => {
+                self.handle_remove_channel_banmask(channel, mask)
             }
             // DatabaseMessage::GetAllChannelModes {
             //     channel,

@@ -122,6 +122,11 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
+        let servername = &params[0];
+        if self.database.contains_server(servername) {
+            return Err(ErrorReply::NoReply);
+        }
+
         Ok(())
     }
 

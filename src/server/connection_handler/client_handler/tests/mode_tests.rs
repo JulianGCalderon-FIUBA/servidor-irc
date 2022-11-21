@@ -267,8 +267,8 @@ fn mode_unsets_banmask() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    handler.database.set_channel_banmask("#channel", "banmask");
-    handler.database.set_channel_banmask("#channel", "banmask2");
+    handler.database.add_channel_banmask("#channel", "banmask");
+    handler.database.add_channel_banmask("#channel", "banmask2");
     assert!(!handler.database.get_channel_banmask("#channel").is_empty());
 
     let parameters = vec![
@@ -304,9 +304,9 @@ fn mode_returns_ban_list_with_no_parameters() {
 
     assert!(handler.database.get_channel_banmask("#channel").is_empty());
 
-    handler.database.set_channel_banmask("#channel", "banmask1");
-    handler.database.set_channel_banmask("#channel", "banmask2");
-    handler.database.set_channel_banmask("#channel", "banmask3");
+    handler.database.add_channel_banmask("#channel", "banmask1");
+    handler.database.add_channel_banmask("#channel", "banmask2");
+    handler.database.add_channel_banmask("#channel", "banmask3");
 
     let parameters = vec!["#channel".to_string(), "+b".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -327,7 +327,7 @@ fn mode_fails_with_no_banmask_parameter() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    handler.database.set_channel_banmask("#channel", "banmask");
+    handler.database.add_channel_banmask("#channel", "banmask");
     assert!(!handler.database.get_channel_banmask("#channel").is_empty());
 
     let parameters = vec!["#channel".to_string(), "-b".to_string()];

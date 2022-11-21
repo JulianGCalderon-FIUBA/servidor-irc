@@ -185,6 +185,7 @@ fn join_notifies_users_in_channel() {
             .database
             .get_stream("nick2")
             .unwrap()
+            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -324,7 +325,7 @@ fn join_fails_with_banmask() {
     handler.database.add_client(dummy_client("user2"));
     handler.database.add_client_to_channel("user2", "#channel");
 
-    handler.database.set_channel_banmask("#channel", "nickname");
+    handler.database.add_channel_banmask("#channel", "nickname");
 
     let parameters = vec!["#channel".to_string()];
     handler.join_command((None, parameters, None)).unwrap();
@@ -346,7 +347,7 @@ fn can_join_channel_with_banmask() {
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#channel");
 
-    handler.database.set_channel_banmask("#channel", "user");
+    handler.database.add_channel_banmask("#channel", "user");
 
     let parameters = vec!["#channel".to_string()];
     handler.join_command((None, parameters, None)).unwrap();

@@ -94,6 +94,7 @@ fn can_invite_one_user() {
             .database
             .get_stream("nick2")
             .unwrap()
+            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -123,6 +124,7 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
             .database
             .get_stream("nick2")
             .unwrap()
+            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -150,6 +152,7 @@ fn can_invite_user_in_moderated_channel_if_channop() {
         handler
             .database
             .get_stream("nick2")
+            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

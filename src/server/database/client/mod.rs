@@ -9,7 +9,7 @@ use crate::server::connection::Connection;
 
 /// Represents a Client that is connected to the Server.
 pub struct Client<C: Connection> {
-    stream: C,
+    stream: Option<C>,
     _password: Option<String>,
     nicknames: Vec<String>,
     username: String,
@@ -18,6 +18,7 @@ pub struct Client<C: Connection> {
     realname: String,
     operator: bool,
     away_message: Option<String>,
+    online: bool,
 }
 
 impl<C: Connection> Client<C> {
@@ -32,8 +33,8 @@ impl<C: Connection> Client<C> {
     }
 
     /// Gets stream for Client. Returns error if cannot clone stream.
-    pub fn get_stream(&self) -> io::Result<C> {
-        self.stream.try_clone()
+    pub fn get_stream(&self) -> Option<io::Result<C>> {
+        Some(self.stream.as_ref()?.try_clone())
     }
 
     /// Returns ClientInfo with relevant information.
@@ -109,6 +110,10 @@ impl<C: Connection> Client<C> {
 
     pub fn matches_nickmask(&self, query: &str) -> bool {
         matches(&self.nickname(), query)
+    }
+
+    pub fn disconnect(&mut self) {
+        self.online = false
     }
 }
 

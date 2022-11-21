@@ -18,6 +18,7 @@ fn notice_works_with_valid_target_client() {
             .database
             .get_stream("nick1")
             .unwrap()
+            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -67,6 +68,7 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
             .database
             .get_stream("nick1")
             .unwrap()
+            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -75,6 +77,7 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
         handler
             .database
             .get_stream("nick2")
+            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -107,6 +110,7 @@ fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
         handler
             .database
             .get_stream("nick1")
+            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -142,6 +146,7 @@ fn notice_works_on_channel_with_flag_n() {
             .database
             .get_stream("nick1")
             .unwrap()
+            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -150,6 +155,7 @@ fn notice_works_on_channel_with_flag_n() {
         handler
             .database
             .get_stream("nick2")
+            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -183,6 +189,7 @@ fn notice_works_on_channel_with_flag_m() {
         handler
             .database
             .get_stream("nick1")
+            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

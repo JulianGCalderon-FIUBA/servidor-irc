@@ -72,7 +72,7 @@ impl<C: Connection> ClientBuilder<C> {
     /// Builds and returns new [`Client`] with previously received fields.
     pub fn build(self) -> Option<Client<C>> {
         let client_info = Client {
-            stream: self.stream?,
+            stream: Some(self.stream?),
             _password: self.password,
             nicknames: vec![self.nickname?],
             username: self.username?,
@@ -81,6 +81,7 @@ impl<C: Connection> ClientBuilder<C> {
             realname: self.realname?,
             operator: false,
             away_message: None,
+            online: true,
         };
 
         Some(client_info)

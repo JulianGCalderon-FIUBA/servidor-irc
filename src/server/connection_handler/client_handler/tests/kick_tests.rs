@@ -84,6 +84,7 @@ fn can_kick_user_from_channel() {
             .database
             .get_stream("nick2")
             .unwrap()
+            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -109,6 +110,7 @@ fn can_kick_user_from_channel_with_comment() {
         handler
             .database
             .get_stream("nick2")
+            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -153,6 +155,7 @@ fn kick_notifies_users_in_channel() {
     let responses = handler
         .database
         .get_stream("nick3")
+        .unwrap()
         .unwrap()
         .get_responses();
 

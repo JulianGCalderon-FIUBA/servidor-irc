@@ -114,7 +114,7 @@ impl<C: Connection> ClientHandler<C> {
             return self.send_banlist_response(channel);
         }
         self.database
-            .set_channel_banmask(channel, &banmasks.unwrap());
+            .add_channel_banmask(channel, &banmasks.unwrap());
 
         Ok(())
     }
@@ -125,7 +125,7 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         self.database
-            .unset_channel_banmask(channel, &banmask.unwrap());
+            .remove_channel_banmask(channel, &banmask.unwrap());
         Ok(())
     }
 

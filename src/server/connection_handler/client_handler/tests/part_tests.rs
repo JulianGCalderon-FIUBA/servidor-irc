@@ -106,6 +106,7 @@ fn part_notifies_users_in_channel() {
             .database
             .get_stream("nick2")
             .unwrap()
+            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -114,6 +115,7 @@ fn part_notifies_users_in_channel() {
         handler
             .database
             .get_stream("nickname")
+            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

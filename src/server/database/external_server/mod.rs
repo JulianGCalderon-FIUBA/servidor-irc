@@ -7,9 +7,8 @@ use crate::server::connection::Connection;
 
 use super::ClientInfo;
 
-/// Represents a Client that is connected to the Server.
 pub struct ExternalServer<C: Connection> {
-    stream: C,
+    stream: Option<C>,
     servername: String,
     _serverinfo: String,
     _hopcount: usize,
@@ -19,7 +18,7 @@ pub struct ExternalServer<C: Connection> {
 impl<C: Connection> ExternalServer<C> {
     pub fn new(stream: C, servername: String, _serverinfo: String, _hopcount: usize) -> Self {
         Self {
-            stream,
+            stream: Some(stream),
             servername,
             _serverinfo,
             _hopcount,
@@ -42,8 +41,8 @@ impl<C: Connection> ExternalServer<C> {
         self.clients.contains_key(nickname)
     }
 
-    pub fn get_stream(&self) -> io::Result<C> {
-        self.stream.try_clone()
+    pub fn get_stream(&self) -> Option<io::Result<C>> {
+        Some(self.stream.as_ref()?.try_clone())
     }
 
     pub fn add_client(&mut self, client: ExternalClient) {

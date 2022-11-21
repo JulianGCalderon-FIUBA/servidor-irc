@@ -234,7 +234,7 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     /// Sends GetStream request and returns answer.
-    pub fn get_stream(&self, nickname: &str) -> io::Result<C> {
+    pub fn get_stream(&self, nickname: &str) -> Option<io::Result<C>> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetStream {
             nickname: nickname.to_string(),
@@ -337,8 +337,8 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
-    pub fn set_channel_banmask(&self, channel: &str, banmask: &str) {
-        let request = DatabaseMessage::SetChannelBanMask {
+    pub fn add_channel_banmask(&self, channel: &str, banmask: &str) {
+        let request = DatabaseMessage::AddChannelBanMask {
             channel: channel.to_string(),
             mask: banmask.to_string(),
         };
@@ -385,8 +385,8 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
-    pub fn unset_channel_banmask(&self, channel: &str, banmask: &str) {
-        let request = DatabaseMessage::UnsetChannelBanMask {
+    pub fn remove_channel_banmask(&self, channel: &str, banmask: &str) {
+        let request = DatabaseMessage::RemoveChannelBanMask {
             channel: channel.to_string(),
             mask: banmask.to_string(),
         };

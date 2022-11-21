@@ -16,9 +16,12 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
 
     fn send_message_to_client(&mut self, message: &dyn Display, nickname: &str) -> io::Result<()> {
         let message = Message::new(&message.to_string()).unwrap();
-        let mut stream = self.database().get_stream(nickname)?;
-        println!("consegui el stream");
-        message.send_to(&mut stream)
+
+        if let Some(stream) = self.database().get_stream(nickname) {
+            message.send_to(&mut stream?)?
+        }
+        // cliente desconectado
+        Ok(())
     }
 
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {

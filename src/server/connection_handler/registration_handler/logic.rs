@@ -5,6 +5,7 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 use crate::server::connection_handler::responses::Notification;
+use crate::server::database::ClientInfo;
 
 use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
@@ -51,42 +52,21 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
     fn server_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, mut params, trail) = arguments;
 
-        let hopcount = params.pop().unwrap();
-        let servername = params.pop().unwrap();
+        let hopcount = params.remove(1);
+        let servername = params.remove(0);
         let serverinfo = trail.unwrap();
 
-        self.attributes.insert("servername", servername.clone());
+        self.attributes.insert("servername", servername);
         self.attributes.insert("hopcount", hopcount);
         self.attributes.insert("serverinfo", serverinfo);
-
-        if self.database.contains_server(&servername) {
-            return Ok(false);
-        }
 
         let server = self.build_server().unwrap();
         self.database.add_server(server);
 
         self.connection_type = ConnectionType::Server;
 
-        let server_notification = format!("SERVER {} {} :{}", self.servername, 1, "hola");
-        self.send_response(&server_notification)?;
-
-        for client in self.database.get_all_clients() {
-            let nickname = client.nickname.clone();
-            let hopcount = client.hopcount;
-            let nick_notification = format!("NICK {nickname} {hopcount}");
-            self.send_response(&nick_notification)?;
-
-            let nickname = client.nickname.clone();
-            let servername = client.servername.clone();
-            let username = client.username.clone();
-            let realname = client.realname.clone();
-            let hostname = client.hostname.clone();
-
-            let user_notification =
-                format!(":{nickname} USER {username} {hostname} {servername} :{realname}");
-            self.send_response(&user_notification)?;
-        }
+        self.send_server_response()?;
+        self.send_server_info()?;
 
         Ok(false)
     }
@@ -102,5 +82,42 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         self.send_response(&notification.to_string())?;
 
         Ok(false)
+    }
+}
+
+impl<C: Connection> RegistrationHandler<C> {
+    fn send_server_response(&mut self) -> Result<(), io::Error> {
+        let server_notification = format!("SERVER {} {} :{}", self.servername, 1, "hola");
+        self.send_response(&server_notification)?;
+        Ok(())
+    }
+
+    fn send_server_info(&mut self) -> Result<(), io::Error> {
+        for client in self.database.get_all_clients() {
+            self.send_nick_notification(&client)?;
+            self.send_user_notification(&client)?;
+        }
+        Ok(())
+    }
+
+    fn send_user_notification(&mut self, client: &ClientInfo) -> Result<(), io::Error> {
+        let user_notification = Notification::User {
+            nickname: client.nickname.clone(),
+            username: client.username.clone(),
+            hostname: client.hostname.clone(),
+            servername: client.servername.clone(),
+            realname: client.realname.clone(),
+        };
+        self.send_response(&user_notification)?;
+        Ok(())
+    }
+
+    fn send_nick_notification(&mut self, client: &ClientInfo) -> Result<(), io::Error> {
+        let nick_notification = Notification::Nick {
+            nickname: client.nickname.clone(),
+            hopcount: client.hopcount,
+        };
+        self.send_response(&nick_notification)?;
+        Ok(())
     }
 }

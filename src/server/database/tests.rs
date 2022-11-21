@@ -32,10 +32,10 @@ fn can_get_client_stream() {
 
     let client = dummy_client("nickname");
 
-    let stream_ref_expected = client.get_stream().unwrap();
+    let stream_ref_expected = client.get_stream().unwrap().unwrap();
 
     database.add_client(client);
-    let stream_ref_actual = database.get_stream("nickname").unwrap();
+    let stream_ref_actual = database.get_stream("nickname").unwrap().unwrap();
 
     assert_eq!(stream_ref_expected, stream_ref_actual);
 }
@@ -413,13 +413,13 @@ fn can_set_and_unset_channel_banmask() {
 
     assert_eq!(database.get_channel_banmask("#channel"), banmasks);
 
-    database.set_channel_banmask("#channel", "banmask");
+    database.add_channel_banmask("#channel", "banmask");
 
     banmasks.push("banmask".to_string());
 
     assert_eq!(database.get_channel_banmask("#channel"), banmasks);
 
-    database.unset_channel_banmask("#channel", "banmask");
+    database.remove_channel_banmask("#channel", "banmask");
 
     banmasks.pop();
 

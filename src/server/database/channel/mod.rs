@@ -130,7 +130,7 @@ impl<C: Connection> Channel<C> {
         self.speakers.contains(&nickname)
     }
 
-    pub fn set_banmask(&mut self, mask: String) {
+    pub fn add_banmask(&mut self, mask: String) {
         self.banmasks.push(mask)
     }
 
@@ -138,7 +138,7 @@ impl<C: Connection> Channel<C> {
         self.banmasks.clone()
     }
 
-    pub fn unset_banmask(&mut self, mask: String) {
+    pub fn remove_banmask(&mut self, mask: String) {
         self.banmasks
             .iter()
             .position(|m| m == &mask)
