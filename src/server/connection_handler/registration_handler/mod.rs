@@ -82,8 +82,6 @@ impl<C: Connection> RegistrationHandler<C> {
     }
 
     fn spawn_server_handler(&mut self) {
-        println!("empezando server handler");
-
         let server_handler = match self.build_server_handler() {
             Ok(server_handler) => server_handler,
             Err(error) => return eprintln!("Could not initiate server handler, {error:?}"),

@@ -109,13 +109,12 @@ impl<C: Connection> Database<C> {
 
     /// Returns if Database contains client.
     pub fn contains_client(&self, nickname: &str) -> bool {
+        println!("buscando a {nickname}");
         if self.clients.contains_key(nickname) {
+            println!("encontre a mi cliente");
             return true;
         }
-
-        for server in self.servers.values() {
-            println!("{:?}", server.get_all_clients());
-        }
+        println!("mis clientes: {:?}", self.clients.keys());
 
         self.servers
             .values()

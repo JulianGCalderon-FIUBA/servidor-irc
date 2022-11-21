@@ -215,10 +215,13 @@ impl<C: Connection> Database<C> {
         sender.send(response).unwrap();
     }
 
-    pub fn handle_add_external_client(&mut self, server: &str, client: ExternalClient) {
-        println!("adding to server {server}");
-        if let Some(server) = self.servers.get_mut(server) {
-            println!("Adding external client {}", client.nickname());
+    pub fn handle_add_external_client(&mut self, servername: &str, client: ExternalClient) {
+        if let Some(server) = self.servers.get_mut(servername) {
+            println!(
+                "Adding external client {} to server {:?}",
+                client.nickname(),
+                servername
+            );
             server.add_client(client);
         }
     }

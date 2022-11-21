@@ -8,13 +8,16 @@ use super::ConnectionHandlerGetters;
 
 pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     fn send_response(&mut self, response: &dyn Display) -> io::Result<()> {
-        let response = Message::new(&response.to_string()).unwrap();
-        response.send_to(self.stream())
+        if let Ok(response) = Message::new(&response.to_string()) {
+            return response.send_to(self.stream());
+        }
+        Ok(())
     }
 
     fn send_message_to_client(&mut self, message: &dyn Display, nickname: &str) -> io::Result<()> {
         let message = Message::new(&message.to_string()).unwrap();
         let mut stream = self.database().get_stream(nickname)?;
+        println!("consegui el stream");
         message.send_to(&mut stream)
     }
 
@@ -28,6 +31,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
 
     fn send_message_to_target(&mut self, message: &dyn Display, target: &str) -> io::Result<()> {
         if self.database().contains_client(target) {
+            println!("existe el cliente");
             self.send_message_to_client(message, target)?
         } else {
             self.send_message_to_channel(message, target);

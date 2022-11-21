@@ -88,8 +88,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
             self.send_response(&user_notification)?;
         }
 
-        println!("terminando sincronización");
-
         Ok(false)
     }
 
