@@ -16,7 +16,7 @@ mod utils;
 
 pub struct ServerHandler<C: Connection> {
     stream: C,
-    _servername: String,
+    servername: String,
     database: DatabaseHandle<C>,
     online: Arc<AtomicBool>,
     hopcounts: HashMap<String, usize>,
@@ -34,7 +34,7 @@ impl<C: Connection> ServerHandler<C> {
     ) -> std::io::Result<Self> {
         Ok(Self {
             stream,
-            _servername: servername,
+            servername,
             database,
             online,
             hopcounts: HashMap::new(),
@@ -58,10 +58,10 @@ impl<C: Connection> ConnectionHandlerGetters<C> for ServerHandler<C> {
 
 impl<C: Connection> ConnectionHandlerStructure<C> for ServerHandler<C> {
     fn on_try_handle_error(&mut self) {
-        todo!()
+        eprintln!("Connection with [{}] ended unexpectedly", self.servername)
     }
     fn on_try_handle_success(&mut self) {
-        todo!()
+        eprintln!("Closing conection with [{}]", self.servername)
     }
 }
 

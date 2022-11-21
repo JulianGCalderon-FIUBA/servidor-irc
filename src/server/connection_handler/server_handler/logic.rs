@@ -33,7 +33,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let client =
             ExternalClient::_new(nickname, username, hostname, servername, realname, hopcount);
 
-        self.database.add_external_client(&self._servername, client);
+        self.database.add_external_client(&self.servername, client);
 
         Ok(true)
     }
