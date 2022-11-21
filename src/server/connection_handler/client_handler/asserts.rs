@@ -1,4 +1,5 @@
 use crate::server::connection::Connection;
+use crate::server::connection_handler::connection_handler_trait::CommandArgs;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
 use crate::server::connection_handler::consts::channel::*;
 use crate::server::connection_handler::consts::commands::*;
@@ -9,11 +10,12 @@ use crate::server::database::ClientInfo;
 use super::ClientHandler;
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
-    fn assert_pass_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_pass_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
-    fn assert_nick_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_nick_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         if params.is_empty() {
             return Err(ErrorReply::NoNicknameGiven431);
         }
@@ -22,15 +24,12 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_nickname_not_in_use(nickname)
     }
 
-    fn assert_user_command_is_valid(
-        &self,
-        _params: &[String],
-        _trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_user_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
-    fn assert_oper_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_oper_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(1), OPER_COMMAND)?;
 
         let username = &params[0];
@@ -38,11 +37,8 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_are_credentials_valid(username, password)
     }
 
-    fn assert_privmsg_command_is_valid(
-        &self,
-        params: &[String],
-        trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_privmsg_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, trail) = arguments;
         if params.is_empty() {
             let command = PRIVMSG_COMMAND.to_string();
             return Err(ErrorReply::NoRecipient411 { command });
@@ -55,11 +51,8 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_notice_command_is_valid(
-        &self,
-        params: &[String],
-        trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_notice_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, trail) = arguments;
         if params.is_empty() {
             let command = NOTICE_COMMAND.to_string();
             return Err(ErrorReply::NoRecipient411 { command });
@@ -72,15 +65,18 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_join_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_join_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(0), JOIN_COMMAND)
     }
 
-    fn assert_part_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_part_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(0), PART_COMMAND)
     }
 
-    fn assert_invite_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_invite_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(1), INVITE_COMMAND)?;
 
         let invited_client = &params[0];
@@ -100,19 +96,20 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_names_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_names_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_list_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_list_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_who_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_who_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_whois_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_whois_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         if params.is_empty() {
             return Err(ErrorReply::NoNicknameGiven431);
         }
@@ -120,11 +117,12 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_away_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+    fn assert_away_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_topic_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_topic_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(0), TOPIC_COMMAND)?;
 
         let channel = &params[0];
@@ -138,17 +136,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_kick_command_is_valid(
-        &self,
-        params: &[String],
-        _trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_kick_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(1), KICK_COMMAND)?;
 
         Ok(())
     }
 
-    fn assert_mode_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_mode_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(0), MODE_COMMAND)?;
 
         let channel = &params[0];
@@ -162,19 +158,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+    fn assert_quit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_server_command_is_valid(
-        &self,
-        _params: &[String],
-        _trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_server_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
-    fn assert_squit_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_squit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 }

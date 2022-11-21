@@ -2,7 +2,7 @@ use std::io;
 
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
-    ConnectionHandlerLogic, ConnectionHandlerUtils,
+    CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 use crate::server::connection_handler::responses::Notification;
 
@@ -10,25 +10,25 @@ use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
-    fn pass_logic(&mut self, mut params: Vec<String>) -> io::Result<bool> {
+    fn pass_logic(&mut self, mut arguments: CommandArgs) -> io::Result<bool> {
+        let (_, params, _) = arguments;
         let password = params.pop().unwrap();
         self.attributes.insert("password", password);
 
         Ok(true)
     }
 
-    fn nick_logic(&mut self, mut params: Vec<String>) -> io::Result<bool> {
+    fn nick_logic(&mut self, mut arguments: CommandArgs) -> io::Result<bool> {
+        let (_, params, _) = arguments;
         let nickname = params.pop().unwrap();
         self.attributes.insert("nickname", nickname);
 
         Ok(true)
     }
 
-    fn user_logic(
-        &mut self,
-        mut params: Vec<String>,
-        trail: Option<String>,
-    ) -> std::io::Result<bool> {
+    fn user_logic(&mut self, mut arguments: CommandArgs) -> std::io::Result<bool> {
+        let (_, params, trail) = arguments;
+
         let realname = trail.unwrap();
         let username = params.pop().unwrap();
         let servername = self.servername.to_string();
@@ -48,7 +48,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         Ok(false)
     }
 
-    fn server_logic(&mut self, mut params: Vec<String>, trail: Option<String>) -> io::Result<bool> {
+    fn server_logic(&mut self, mut arguments: CommandArgs) -> io::Result<bool> {
+        let (_, params, trail) = arguments;
+
         let hopcount = params.pop().unwrap();
         let servername = params.pop().unwrap();
         let serverinfo = trail.unwrap();
@@ -91,7 +93,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         Ok(false)
     }
 
-    fn quit_logic(&mut self, trail: Option<String>) -> io::Result<bool> {
+    fn quit_logic(&mut self, mut arguments: CommandArgs) -> io::Result<bool> {
+        let (_, _, trail) = arguments;
+
         let message =
             trail.unwrap_or_else(|| self.attributes.remove("nickname").unwrap_or_default());
 
