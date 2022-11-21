@@ -1,35 +1,43 @@
 pub mod requests;
 
-use gtk::{glib::Sender, prelude::*, Align, Box, Orientation};
+use gtk::{ glib::{Sender, GString}, prelude::*, Align, Box, Orientation };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::requests::{add_invite_view_request, change_conversation_request, quit_channel_request};
+use self::requests::{ add_invite_view_request, change_conversation_request, quit_channel_request };
 
 use super::MainView;
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
 impl MainView {
-    pub fn create_conv_info(&mut self) -> Box {
+    pub fn create_conv_info(&mut self, nickname: &GString) -> Box {
         let conv_info = Box::builder()
             .orientation(Orientation::Vertical)
+            .width_request(100)
             .margin_end(12)
             .halign(Align::Start)
             .build();
-
+        
         self.quit_channel.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
-        self.connect_quit_channel(self.sender.clone());
+        self.user_info.set_label(&nickname);
+
+        self.invite_button.set_focusable(true);
         conv_info.append(&self.quit_channel);
-
         conv_info.append(&self.channel_info);
+        conv_info.append(&self.invite_button);
 
-        self.connect_func_channel(self.sender.clone());
-        conv_info.append(&self.func_channel);
+        
+        self.set_client_chat_mode();
+        self.invite_button.set_visible(false);
+
+        self.connect_quit_channel(self.sender.clone());
+        self.connect_invite_button(self.sender.clone());
 
         conv_info
     }
+
 
     fn connect_quit_channel(&mut self, sender: Sender<ControllerMessage>) {
         self.quit_channel.connect_clicked(move |_| {
@@ -38,8 +46,8 @@ impl MainView {
         });
     }
 
-    fn connect_func_channel(&mut self, sender: Sender<ControllerMessage>) {
-        self.func_channel.connect_clicked(move |_| {
+    fn connect_invite_button(&mut self, sender: Sender<ControllerMessage>) {
+        self.invite_button.connect_clicked(move |_| {
             add_invite_view_request(sender.clone());
         });
     }
@@ -59,8 +67,16 @@ impl MainView {
     pub fn get_my_channels(&mut self) -> Vec<String> {
         let mut my_channels: Vec<String> = vec![];
         for channel_button in &self.channels_buttons {
-            my_channels.push(channel_button.label().unwrap().to_string())
+            my_channels.push(channel_button.label().unwrap().to_string());
         }
         my_channels
+    }
+
+    pub fn set_client_chat_mode(&mut self){
+        self.invite_button.set_visible(true);
+    }
+
+    pub fn set_channel_chat_mode(&mut self){
+        self.invite_button.set_visible(false);
     }
 }

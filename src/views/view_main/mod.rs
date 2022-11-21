@@ -48,7 +48,7 @@ pub struct MainView {
     pub input: Entry,
     pub channel_info: Button,
     pub quit_channel: Button,
-    pub func_channel: Button,
+    pub invite_button: Button,
     sender: Sender<ControllerMessage>,
 }
 
@@ -57,7 +57,7 @@ const ENTRY_PLACEHOLDER: &str = "Message...";
 const SEND_BUTTON_TEXT: &str = "Send";
 const QUIT_BUTTON_TEXT: &str = "x";
 const INFO_BUTTON_TEXT: &str = "Info";
-const FUNC_BUTTON_TEXT: &str = "Func";
+const INVITE_BUTTON_TEXT: &str = "Invite to channel";
 const ADD_BUTTON_CSS: &str = "add";
 const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
 
@@ -80,14 +80,12 @@ impl MainView {
             send_message: create_button_with_margin(SEND_BUTTON_TEXT),
             quit_channel: create_button_with_margin(QUIT_BUTTON_TEXT),
             channel_info: create_button_with_margin(INFO_BUTTON_TEXT),
-            func_channel: create_button_with_margin(FUNC_BUTTON_TEXT),
+            invite_button: create_button_with_margin(INVITE_BUTTON_TEXT),
             sender,
         }
     }
 
     pub fn get_view(&mut self, app: Application, nickname: GString) -> ApplicationWindow {
-        self.user_info.set_label(&nickname);
-
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -100,10 +98,10 @@ impl MainView {
         let separator = create_separator(Vertical);
         main_box.append(&separator);
 
-        let chat = self.create_chat();
+        let chat = self.create_chat(&nickname);
         main_box.append(&chat);
 
-        let conv_info = self.create_conv_info();
+        let conv_info = self.create_conv_info(&nickname);
         main_box.append(&conv_info);
 
         window.set_child(Some(&main_box));

@@ -1,21 +1,25 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry};
+use gtk::{ glib::{Sender, GString}, prelude::*, Box, Entry };
 use gtk4 as gtk;
 
 use crate::{
-    controller::controller_message::ControllerMessage, views::view_main::utils::entry_is_valid,
+    controller::controller_message::ControllerMessage,
+    views::view_main::utils::entry_is_valid,
 };
 
 use self::{
     requests::priv_message_request,
     widgets_creation::{
-        create_chat_box, create_message_sender_box, create_received_message, create_send_message,
+        create_chat_box,
+        create_message_sender_box,
+        create_received_message,
+        create_send_message,
     },
 };
 
-use super::{utils::adjust_scrollbar, MainView};
+use super::{ utils::adjust_scrollbar, MainView };
 
 const RECEIVED_MESSAGE_CSS: &str = "received_message";
 const SEND_MESSAGE_CSS: &str = "send_message";
@@ -23,7 +27,9 @@ const CHAT_CSS: &str = "chat";
 const MESSAGE_BOX_CSS: &str = "message_box";
 
 impl MainView {
-    pub fn create_chat(&mut self) -> Box {
+    pub fn create_chat(&mut self, nickname: &GString) -> Box {
+        self.current_chat.set_label(&nickname);
+        
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
 
