@@ -2,7 +2,7 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerAsserts,
 };
-use crate::server::consts::commands::{PASS_COMMAND, USER_COMMAND};
+use crate::server::consts::commands::*;
 use crate::server::responses::ErrorReply;
 
 use super::RegistrationHandler;
@@ -114,7 +114,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         let (_, params, trail) = arguments;
 
         if params.len() < 2 || trail.is_none() {
-            let command = USER_COMMAND.to_string();
+            let command = SERVER_COMMAND.to_string();
             return Err(ErrorReply::NeedMoreParameters461 { command });
         }
 
