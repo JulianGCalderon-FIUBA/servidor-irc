@@ -46,7 +46,7 @@ impl<C: Connection> Client<C> {
             servername: self.servername.clone(),
             realname: self.realname.clone(),
             operator: self.operator,
-            hopcount: 1,
+            hopcount: 0,
         }
     }
 
