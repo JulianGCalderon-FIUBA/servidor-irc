@@ -5,7 +5,7 @@ fn mode_fails_with_not_enough_parameters() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec![];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 MODE :Not enough parameters\r\n",
@@ -18,7 +18,7 @@ fn mode_fails_with_nonexistent_channel() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec!["#channel".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "403 #channel :No such channel\r\n",
@@ -34,7 +34,7 @@ fn mode_fails_with_user_not_on_channel() {
     handler.database.add_client_to_channel("dummy", "#channel");
 
     let parameters = vec!["#channel".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "442 #channel :You're not on that channel\r\n",
@@ -53,7 +53,7 @@ fn mode_fails_with_user_not_operator() {
         .add_client_to_channel("nickname", "#channel");
 
     let parameters = vec!["#channel".to_string(), "+i".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "482 #channel :You're not channel operator\r\n",
@@ -79,7 +79,7 @@ fn mode_adds_channop() {
         "+o".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
@@ -104,7 +104,7 @@ fn mode_removes_channop() {
         "-o".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.is_channel_operator("#channel", "nickname"));
@@ -125,7 +125,7 @@ fn mode_fails_with_no_oper_parameter() {
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
 
     let parameters = vec!["#channel".to_string(), "+o".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 MODE :Not enough parameters\r\n",
@@ -147,7 +147,7 @@ fn mode_fails_with_nonexistent_oper() {
         "+o".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "401 nick2 :No such nick/channel\r\n",
@@ -171,7 +171,7 @@ fn mode_oper_fails_with_nick_not_on_channel() {
         "+o".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "442 #channel :You're not on that channel\r\n",
@@ -191,7 +191,7 @@ fn mode_sets_limit_to_channel() {
     assert!(handler.database.get_channel_limit("#channel").is_none());
 
     let parameters = vec!["#channel".to_string(), "+l".to_string(), "5".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert_eq!(handler.database.get_channel_limit("#channel"), Some(5));
@@ -209,7 +209,7 @@ fn mode_unsets_channel_limit() {
     assert_eq!(handler.database.get_channel_limit("#channel"), Some(5));
 
     let parameters = vec!["#channel".to_string(), "-l".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.get_channel_limit("#channel").is_none());
@@ -226,7 +226,7 @@ fn mode_fails_with_no_limit_parameter() {
     assert!(handler.database.get_channel_limit("#channel").is_none());
 
     let parameters = vec!["#channel".to_string(), "+l".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 MODE :Not enough parameters\r\n",
@@ -250,7 +250,7 @@ fn mode_sets_banmask() {
         "+b".to_string(),
         "banmask".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
 
@@ -276,7 +276,7 @@ fn mode_unsets_banmask() {
         "-b".to_string(),
         "banmask".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
 
@@ -289,7 +289,7 @@ fn mode_unsets_banmask() {
         "-b".to_string(),
         "banmask2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert!(handler.database.get_channel_banmask("#channel").is_empty())
 }
@@ -309,7 +309,7 @@ fn mode_returns_ban_list_with_no_parameters() {
     handler.database.set_channel_banmask("#channel", "banmask3");
 
     let parameters = vec!["#channel".to_string(), "+b".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -331,7 +331,7 @@ fn mode_fails_with_no_banmask_parameter() {
     assert!(!handler.database.get_channel_banmask("#channel").is_empty());
 
     let parameters = vec!["#channel".to_string(), "-b".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 MODE :Not enough parameters\r\n",
@@ -352,7 +352,7 @@ fn mode_ignores_unknown_banmask_when_unsetting() {
         "-b".to_string(),
         "banmask".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.get_channel_banmask("#channel").is_empty());
@@ -376,7 +376,7 @@ fn mode_adds_speaker_to_channel() {
         "+v".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.is_channel_speaker("#channel", "nick2"));
@@ -401,7 +401,7 @@ fn mode_removes_speakers_from_channel() {
         "-v".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
@@ -421,7 +421,7 @@ fn mode_fails_with_no_speaker_parameter() {
     assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
 
     let parameters = vec!["#channel".to_string(), "+v".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 MODE :Not enough parameters\r\n",
@@ -443,7 +443,7 @@ fn mode_fails_with_nonexistent_speaker() {
         "+v".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "401 nick2 :No such nick/channel\r\n",
@@ -467,7 +467,7 @@ fn mode_speaker_fails_with_nick_not_on_channel() {
         "+v".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "442 #channel :You're not on that channel\r\n",
@@ -487,7 +487,7 @@ fn mode_sets_channel_key() {
     assert!(handler.database.get_channel_key("#channel").is_none());
 
     let parameters = vec!["#channel".to_string(), "+k".to_string(), "key".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert_eq!(
@@ -513,7 +513,7 @@ fn mode_unsets_channel_key() {
     );
 
     let parameters = vec!["#channel".to_string(), "-k".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.get_channel_key("#channel").is_none());
@@ -530,7 +530,7 @@ fn mode_fails_with_no_key_parameter() {
     assert!(handler.database.get_channel_key("#channel").is_none());
 
     let parameters = vec!["#channel".to_string(), "+k".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 MODE :Not enough parameters\r\n",
@@ -560,7 +560,7 @@ fn mode_fails_with_key_already_set() {
         "+k".to_string(),
         "new_key".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "467 #channel :Channel key already set\r\n",
@@ -583,14 +583,14 @@ fn mode_sets_and_unsets_private_flag() {
     assert!(!handler.database.channel_has_mode("#channel", 'p'));
 
     let mut parameters = vec!["#channel".to_string(), "+p".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.channel_has_mode("#channel", 'p'));
 
     parameters = vec!["#channel".to_string(), "-p".to_string()];
 
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 'p'));
@@ -607,14 +607,14 @@ fn mode_sets_and_unsets_secret_flag() {
     assert!(!handler.database.channel_has_mode("#channel", 's'));
 
     let mut parameters = vec!["#channel".to_string(), "+s".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.channel_has_mode("#channel", 's'));
 
     parameters = vec!["#channel".to_string(), "-s".to_string()];
 
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 's'));
@@ -631,14 +631,14 @@ fn mode_sets_and_unsets_invite_only_flag() {
     assert!(!handler.database.channel_has_mode("#channel", 'i'));
 
     let mut parameters = vec!["#channel".to_string(), "+i".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.channel_has_mode("#channel", 'i'));
 
     parameters = vec!["#channel".to_string(), "-i".to_string()];
 
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 'i'));
@@ -655,14 +655,14 @@ fn mode_sets_and_unsets_topic_flag() {
     assert!(!handler.database.channel_has_mode("#channel", 't'));
 
     let mut parameters = vec!["#channel".to_string(), "+t".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.channel_has_mode("#channel", 't'));
 
     parameters = vec!["#channel".to_string(), "-t".to_string()];
 
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 't'));
@@ -678,14 +678,14 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     assert!(!handler.database.channel_has_mode("#channel", 'n'));
 
     let mut parameters = vec!["#channel".to_string(), "+n".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.channel_has_mode("#channel", 'n'));
 
     parameters = vec!["#channel".to_string(), "-n".to_string()];
 
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 'n'));
@@ -702,14 +702,14 @@ fn mode_sets_and_unsets_moderated_flag() {
     assert!(!handler.database.channel_has_mode("#channel", 'm'));
 
     let mut parameters = vec!["#channel".to_string(), "+m".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.channel_has_mode("#channel", 'm'));
 
     parameters = vec!["#channel".to_string(), "-m".to_string()];
 
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 'm'));
@@ -726,7 +726,7 @@ fn mode_fails_when_setting_unknown_mode() {
     assert!(!handler.database.channel_has_mode("#channel", 'w'));
 
     let parameters = vec!["#channel".to_string(), "+w".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "472 w :Is unknown mode char to me\r\n",
@@ -746,7 +746,7 @@ fn mode_fails_when_unsetting_unknown_mode() {
     assert!(!handler.database.channel_has_mode("#channel", 'w'));
 
     let parameters = vec!["#channel".to_string(), "-w".to_string()];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "472 w :Is unknown mode char to me\r\n",
@@ -775,7 +775,7 @@ fn mode_sets_multiple_flags() {
         "+ois".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler.database.channel_has_mode("#channel", 's'));
@@ -803,7 +803,7 @@ fn mode_unsets_multiple_flags() {
         "-ois".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 's'));
@@ -831,7 +831,7 @@ fn mode_sets_and_unsets_multiple_flags() {
         "-os+p-m+i".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler.database.channel_has_mode("#channel", 's'));
@@ -857,7 +857,7 @@ fn mode_sets_and_unsets_multiple_valid_flags() {
         "-os+p-m+i".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "401 nick2 :No such nick/channel\r\n",

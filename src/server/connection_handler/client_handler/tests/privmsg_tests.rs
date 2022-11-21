@@ -6,7 +6,9 @@ fn privmsg_fails_with_no_recipient() {
 
     let parameters = vec![];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     assert_eq!(
         "411 :No recipient given (PRIVMSG)\r\n",
@@ -20,7 +22,9 @@ fn privmsg_fails_with_no_text() {
 
     let parameters = vec!["nick1".to_string()];
     let trailing = None;
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     assert_eq!(
         "412 :No text to send\r\n",
@@ -34,7 +38,9 @@ fn privmsg_fails_with_invalid_target() {
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -49,7 +55,9 @@ fn privmsg_works_with_valid_target_client() {
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     assert_eq!(
         ":nickname PRIVMSG nick1 :message!\r\n",
@@ -75,7 +83,9 @@ fn privmsg_works_with_valid_target_channel() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -109,7 +119,9 @@ fn privmsg_works_with_multiple_targets() {
 
     let parameters = vec!["nick1,nick2".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     assert_eq!(
         ":nickname PRIVMSG nick1 :message!\r\n",
@@ -141,7 +153,9 @@ fn privmsg_with_away_client_returns_away_message() {
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     assert_eq!(
         "301 nick1 :away message!\r\n",
@@ -162,7 +176,9 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -201,7 +217,9 @@ fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -233,7 +251,9 @@ fn privmsg_works_on_channel_with_flag_n() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -273,7 +293,9 @@ fn privmsg_works_on_channel_with_flag_m() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 

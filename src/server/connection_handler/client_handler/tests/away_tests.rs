@@ -5,7 +5,7 @@ fn can_set_away_message_for_client() {
     let mut handler = dummy_client_handler();
 
     let trailing = Some("away message!".to_string());
-    handler.away_command(trailing).unwrap();
+    handler.away_command((None, vec![], trailing)).unwrap();
 
     assert_eq!(
         "306 :You have been marked as being away\r\n",
@@ -23,9 +23,9 @@ fn can_unset_away_message_for_client() {
     let mut handler = dummy_client_handler();
 
     let trailing = Some("away message!".to_string());
-    handler.away_command(trailing).unwrap();
+    handler.away_command((None, vec![], trailing)).unwrap();
     handler.stream.clear();
-    handler.away_command(None).unwrap();
+    handler.away_command((None, vec![], None)).unwrap();
 
     assert_eq!(
         "305 :You are no longer marked as being away\r\n",

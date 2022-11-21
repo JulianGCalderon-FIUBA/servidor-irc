@@ -10,7 +10,7 @@ use crate::server::database::ClientInfo;
 use super::ClientHandler;
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
-    fn assert_pass_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_pass_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
@@ -24,7 +24,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_nickname_not_in_use(nickname)
     }
 
-    fn assert_user_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_user_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
@@ -96,15 +96,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_names_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_names_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_list_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_list_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_who_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_who_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
@@ -117,7 +117,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_away_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_away_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
@@ -158,15 +158,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_quit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_quit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_server_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_server_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
-    fn assert_squit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+    fn assert_squit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 }

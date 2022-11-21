@@ -5,7 +5,7 @@ fn whois_fails_with_empty_params() {
     let mut handler = dummy_client_handler();
     let parameters = vec![];
 
-    handler.whois_command(parameters).unwrap();
+    handler.whois_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "431 :No nickname given\r\n",
@@ -19,7 +19,7 @@ fn whois_fails_with_nonexistent_nickname() {
 
     let parameters: Vec<String> = vec!["nick2".to_string()];
 
-    handler.whois_command(parameters).unwrap();
+    handler.whois_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "401 nick2 :No such nick/channel\r\n",
@@ -33,7 +33,7 @@ fn whois_returns_nick_info() {
 
     let parameters = vec!["nickname".to_string()];
 
-    handler.whois_command(parameters).unwrap();
+    handler.whois_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -50,11 +50,11 @@ fn whois_returns_nick_info_if_oper() {
 
     let parameters_oper = vec!["admin".to_string(), "admin".to_string()];
 
-    handler.oper_command(parameters_oper).unwrap();
+    handler.oper_command((None, parameters_oper, None)).unwrap();
 
     handler.stream.clear();
 
-    handler.whois_command(parameters).unwrap();
+    handler.whois_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -72,7 +72,7 @@ fn whois_returns_nick_info_with_channels() {
 
     handler.database.add_client_to_channel("nickname", "#hola");
 
-    handler.whois_command(parameters).unwrap();
+    handler.whois_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -92,11 +92,11 @@ fn whois_returns_complete_nick_info() {
 
     let parameters_oper = vec!["admin".to_string(), "admin".to_string()];
 
-    handler.oper_command(parameters_oper).unwrap();
+    handler.oper_command((None, parameters_oper, None)).unwrap();
 
     handler.stream.clear();
 
-    handler.whois_command(parameters).unwrap();
+    handler.whois_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -116,7 +116,7 @@ fn whois_works_with_nickmask() {
     handler.database.add_client(dummy_client("nickname2"));
     handler.database.add_client(dummy_client("nickname3"));
 
-    handler.whois_command(parameters).unwrap();
+    handler.whois_command((None, parameters, None)).unwrap();
 
     let mut responses = handler.stream.get_responses();
 

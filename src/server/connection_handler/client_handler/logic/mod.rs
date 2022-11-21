@@ -29,7 +29,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         Ok(true)
     }
 
-    fn oper_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
+    fn oper_logic(&mut self, _arguments: CommandArgs) -> std::io::Result<bool> {
         self.database.set_server_operator(&self.nickname);
         self.send_response(&CommandResponse::YouAreOper381)?;
 
@@ -37,7 +37,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn privmsg_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, trail) = arguments;
+        let (_, mut params, trail) = arguments;
         let content = trail.unwrap();
         let targets = params.remove(0);
 
@@ -54,7 +54,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn notice_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, trail) = arguments;
+        let (_, mut params, trail) = arguments;
         let content = trail.unwrap();
         let targets = params.pop().unwrap();
 
@@ -95,7 +95,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn part_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, _) = arguments;
+        let (_, mut params, _) = arguments;
         let channels = params.pop().unwrap();
 
         for channel in channels.split(',') {
@@ -114,7 +114,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn invite_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, _) = arguments;
+        let (_, mut params, _) = arguments;
         let channel = params.pop().unwrap();
         let invited_client = params.pop().unwrap();
         let inviting_client = self.nickname.clone();
@@ -170,7 +170,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn who_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, _) = arguments;
+        let (_, mut params, _) = arguments;
         let mask = params.pop();
 
         let clients = match &mask {
@@ -188,7 +188,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn whois_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, _) = arguments;
+        let (_, mut params, _) = arguments;
         let nickmasks = params.pop().unwrap();
         let _server = params.get(0);
 
@@ -208,7 +208,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn away_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, trail) = arguments;
+        let (_, _, trail) = arguments;
         self.database.set_away_message(&trail, &self.nickname);
 
         let reply = match trail {
@@ -222,7 +222,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn topic_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, _) = arguments;
+        let (_, mut params, _) = arguments;
         let channel = params.remove(0);
 
         if let Some(topic) = params.pop() {
@@ -251,7 +251,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn mode_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, _) = arguments;
+        let (_, mut params, _) = arguments;
         let modes: Vec<char> = params[1].chars().collect();
 
         let (add, remove) = parse_modes(modes);
@@ -267,7 +267,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     }
 
     fn quit_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, trail) = arguments;
+        let (_, _, trail) = arguments;
         let message = trail.unwrap_or_else(|| self.nickname.clone());
 
         self.database.disconnect_client(&self.nickname);

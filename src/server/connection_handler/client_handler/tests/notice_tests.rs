@@ -8,7 +8,9 @@ fn notice_works_with_valid_target_client() {
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
-    handler.notice_command(parameters, trailing).unwrap();
+    handler
+        .notice_command((None, parameters, trailing))
+        .unwrap();
 
     assert_eq!(
         ":nickname NOTICE nick1 :message!\r\n",
@@ -31,7 +33,9 @@ fn notice_with_away_client_does_not_return_away_message() {
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
-    handler.notice_command(parameters, trailing).unwrap();
+    handler
+        .notice_command((None, parameters, trailing))
+        .unwrap();
 
     assert!(handler.stream.read_wbuf_to_string().is_empty());
 }
@@ -49,7 +53,9 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.notice_command(parameters, trailing).unwrap();
+    handler
+        .notice_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -88,7 +94,9 @@ fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.notice_command(parameters, trailing).unwrap();
+    handler
+        .notice_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -120,7 +128,9 @@ fn notice_works_on_channel_with_flag_n() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.notice_command(parameters, trailing).unwrap();
+    handler
+        .notice_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -160,7 +170,9 @@ fn notice_works_on_channel_with_flag_m() {
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
-    handler.notice_command(parameters, trailing).unwrap();
+    handler
+        .notice_command((None, parameters, trailing))
+        .unwrap();
 
     let responses = handler.stream.get_responses();
 

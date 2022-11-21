@@ -1,13 +1,14 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerLogic;
+use crate::server::connection_handler::connection_handler_trait::{
+    CommandArgs, ConnectionHandlerLogic,
+};
 use crate::server::database::ExternalClient;
 
 use super::ServerHandler;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
-    fn nick_logic(&mut self, mut params: Vec<String>) -> std::io::Result<bool> {
-        println!("nick logic");
-
+    fn nick_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
+        let (_, mut params, _) = arguments;
         let hopcount = params.pop().unwrap().parse::<usize>().unwrap();
         let nickname = params.pop().unwrap();
 
@@ -16,12 +17,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         Ok(true)
     }
 
-    fn user_logic(
-        &mut self,
-        mut params: Vec<String>,
-        trail: Option<String>,
-    ) -> std::io::Result<bool> {
-        println!("user logic");
+    fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
+        let (_, mut params, trail) = arguments;
 
         let nickname = self.hopcounts.keys().next().unwrap().to_string();
         let hopcount = *self.hopcounts.get(&nickname).unwrap();

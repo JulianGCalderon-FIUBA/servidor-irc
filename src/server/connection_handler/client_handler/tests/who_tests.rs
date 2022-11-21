@@ -15,7 +15,7 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
 
     let parameters = vec![];
 
-    handler.who_command(parameters).unwrap();
+    handler.who_command((None, parameters, None)).unwrap();
 
     let mut responses = handler.stream.get_responses();
 
@@ -42,7 +42,7 @@ fn who_with_mask_returns_all_public_clients_matching_mask() {
 
     let parameters = vec!["*k1*".to_string()];
 
-    handler.who_command(parameters).unwrap();
+    handler.who_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 

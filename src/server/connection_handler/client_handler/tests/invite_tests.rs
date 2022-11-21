@@ -6,7 +6,7 @@ fn invite_fails_with_less_than_two_parameters() {
 
     let parameters = vec![];
 
-    handler.invite_command(parameters).unwrap();
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 INVITE :Not enough parameters\r\n",
@@ -14,9 +14,8 @@ fn invite_fails_with_less_than_two_parameters() {
     );
     handler.stream.clear();
 
-    let parameters2 = vec!["nick2".to_string()];
-
-    handler.invite_command(parameters2).unwrap();
+    let parameters = vec!["nick2".to_string()];
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 INVITE :Not enough parameters\r\n",
@@ -30,7 +29,7 @@ fn invite_fails_with_invalid_nickname() {
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
-    handler.invite_command(parameters).unwrap();
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "401 nick2 :No such nick/channel\r\n",
@@ -48,7 +47,7 @@ fn invite_fails_with_user_already_on_channel() {
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
-    handler.invite_command(parameters).unwrap();
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "443 nick2 #hola :Is already on channel\r\n",
@@ -65,7 +64,7 @@ fn invite_fails_with_sending_user_not_on_channel() {
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
-    handler.invite_command(parameters).unwrap();
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "442 #hola :You're not on that channel\r\n",
@@ -82,7 +81,7 @@ fn can_invite_one_user() {
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
-    handler.invite_command(parameters).unwrap();
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "341 #hola nickname\r\n",
@@ -111,7 +110,7 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
-    handler.invite_command(parameters).unwrap();
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "482 #hola :You're not channel operator\r\n",
@@ -139,7 +138,7 @@ fn can_invite_user_in_moderated_channel_if_channop() {
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
-    handler.invite_command(parameters).unwrap();
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "341 #hola nickname\r\n",

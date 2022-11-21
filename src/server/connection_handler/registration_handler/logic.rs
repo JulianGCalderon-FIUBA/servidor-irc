@@ -10,24 +10,24 @@ use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
-    fn pass_logic(&mut self, mut arguments: CommandArgs) -> io::Result<bool> {
-        let (_, params, _) = arguments;
+    fn pass_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, mut params, _) = arguments;
         let password = params.pop().unwrap();
         self.attributes.insert("password", password);
 
         Ok(true)
     }
 
-    fn nick_logic(&mut self, mut arguments: CommandArgs) -> io::Result<bool> {
-        let (_, params, _) = arguments;
+    fn nick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, mut params, _) = arguments;
         let nickname = params.pop().unwrap();
         self.attributes.insert("nickname", nickname);
 
         Ok(true)
     }
 
-    fn user_logic(&mut self, mut arguments: CommandArgs) -> std::io::Result<bool> {
-        let (_, params, trail) = arguments;
+    fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
+        let (_, mut params, trail) = arguments;
 
         let realname = trail.unwrap();
         let username = params.pop().unwrap();
@@ -48,8 +48,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         Ok(false)
     }
 
-    fn server_logic(&mut self, mut arguments: CommandArgs) -> io::Result<bool> {
-        let (_, params, trail) = arguments;
+    fn server_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, mut params, trail) = arguments;
 
         let hopcount = params.pop().unwrap();
         let servername = params.pop().unwrap();
@@ -93,7 +93,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         Ok(false)
     }
 
-    fn quit_logic(&mut self, mut arguments: CommandArgs) -> io::Result<bool> {
+    fn quit_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, _, trail) = arguments;
 
         let message =

@@ -6,7 +6,7 @@ fn list_with_no_channels_prints_start_and_end() {
 
     let parameters = vec![];
 
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -28,7 +28,7 @@ fn list_with_no_parameters_prints_all_channels() {
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#canal");
 
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     let mut responses = handler.stream.get_responses();
 
@@ -52,7 +52,7 @@ fn list_with_parameters_prints_requested_channels() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -71,7 +71,7 @@ fn list_ignores_invalid_channels() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -94,7 +94,7 @@ fn list_ignores_secret_channels() {
     handler.database.set_channel_mode("#secreto", 's');
 
     let parameters = vec![];
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     let mut responses = handler.stream.get_responses();
 
@@ -121,7 +121,7 @@ fn list_prints_priv_channels_as_priv() {
     handler.database.set_channel_mode("#privado", 'p');
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -145,7 +145,7 @@ fn list_prints_secret_channel_if_client_is_in_it() {
     handler.database.set_channel_mode("#secreto", 's');
 
     let parameters = vec![];
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     let mut responses = handler.stream.get_responses();
 
@@ -173,7 +173,7 @@ fn list_prints_private_channel_if_client_is_in_it() {
     handler.database.set_channel_mode("#privado", 'p');
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
