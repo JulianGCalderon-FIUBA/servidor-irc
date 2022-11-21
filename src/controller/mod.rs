@@ -87,7 +87,7 @@ impl Controller {
         let app_clone = app.clone();
         let sender_clone = sender.clone();
 
-        let mut current_nickname: String = String::from("");
+        let mut _current_nickname: String = String::from("");
 
         client.start_async_read(move |message| match message {
             Ok(message) => {
@@ -117,10 +117,8 @@ impl Controller {
                 }
                 ChangeViewToMain { nickname } => {
                     register_window.close();
-                    current_nickname = String::from(&nickname.to_string()[..]);
-                    main_view
-                        .get_view(app_clone.clone(), nickname.clone())
-                        .show();
+                    _current_nickname = String::from(&nickname.to_string()[..]);
+                    main_view.get_view(app_clone.clone(), nickname).show();
                 }
                 SendPrivMessage { message } => {
                     let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
@@ -173,8 +171,10 @@ impl Controller {
                     client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
                 }
                 ReceiveListChannels { channels } => {
-                    add_channel_window = AddChannelView::new(sender_clone.clone())
-                        .get_view(app_clone.clone(), channels);
+                    add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
+                        app_clone.clone(),
+                        Self::not_my_channels(channels, main_view.get_my_channels()),
+                    );
                     add_channel_window.show();
                 }
                 RegularMessage { message } => {
@@ -185,5 +185,15 @@ impl Controller {
             // and have senders fail
             glib::Continue(true)
         });
+    }
+
+    fn not_my_channels(all_channels: Vec<String>, my_channels: Vec<String>) -> Vec<String> {
+        let mut not_my_channels: Vec<String> = vec![];
+        for channel in &all_channels {
+            if !my_channels.contains(channel) {
+                not_my_channels.push(channel.clone());
+            }
+        }
+        not_my_channels
     }
 }
