@@ -6,6 +6,8 @@ use super::ServerHandler;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn nick_logic(&mut self, mut params: Vec<String>) -> std::io::Result<bool> {
+        println!("nick logic");
+
         let hopcount = params.pop().unwrap().parse::<usize>().unwrap();
         let nickname = params.pop().unwrap();
 
@@ -19,6 +21,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         mut params: Vec<String>,
         trail: Option<String>,
     ) -> std::io::Result<bool> {
+        println!("user logic");
+
         let nickname = self.hopcounts.keys().next().unwrap().to_string();
         let hopcount = *self.hopcounts.get(&nickname).unwrap();
         let servername = params.pop().unwrap();

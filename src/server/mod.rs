@@ -79,6 +79,8 @@ impl Server {
     pub fn connect_to(&mut self, address: &str) {
         let mut stream = TcpStream::connect(address).unwrap();
 
+        let database = self.database.as_ref().unwrap();
+
         self.register_to(&mut stream);
 
         let server_info = Message::read_from(&mut stream).unwrap();
@@ -95,7 +97,26 @@ impl Server {
             hopcount.parse::<usize>().unwrap(),
         );
 
-        (self.database.as_ref().unwrap()).add_server(server);
+        database.add_server(server);
+
+        for client in database.get_all_clients() {
+            let nickname = client.nickname.clone();
+            let hopcount = client.hopcount;
+            let msg = Message::new(&format!("NICK {nickname} {hopcount}")).unwrap();
+            msg.send_to(&mut stream).unwrap();
+
+            let nickname = client.nickname.clone();
+            let servername = client.servername.clone();
+            let username = client.username.clone();
+            let realname = client.realname.clone();
+            let hostname = client.hostname.clone();
+
+            let msg = Message::new(&format!(
+                ":{nickname} USER {username} {hostname} {servername} :{realname}"
+            ))
+            .unwrap();
+            msg.send_to(&mut stream).unwrap();
+        }
 
         let server_handler = ServerHandler::from_connection(
             stream,

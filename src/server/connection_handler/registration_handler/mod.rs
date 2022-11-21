@@ -82,6 +82,8 @@ impl<C: Connection> RegistrationHandler<C> {
     }
 
     fn spawn_server_handler(&mut self) {
+        println!("empezando server handler");
+
         let server_handler = match self.build_server_handler() {
             Ok(server_handler) => server_handler,
             Err(error) => return eprintln!("Could not initiate server handler, {error:?}"),
@@ -92,7 +94,7 @@ impl<C: Connection> RegistrationHandler<C> {
     fn build_server_handler(&mut self) -> io::Result<ServerHandler<C>> {
         ServerHandler::from_connection(
             self.stream().try_clone()?,
-            self.servername.clone(),
+            self.attributes.remove("servername").unwrap(),
             self.database().clone(),
             Arc::clone(self.online()),
         )
