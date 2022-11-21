@@ -4,7 +4,6 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
-use crate::server::database::ClientInfo;
 use crate::server::registerer::Register;
 use crate::server::responses::Notification;
 
