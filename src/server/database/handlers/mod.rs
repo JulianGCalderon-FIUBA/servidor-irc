@@ -204,10 +204,6 @@ impl<C: Connection> Database<C> {
         }
     }
 
-    // pub fn handle_get_all_channel_modes(&self, channel: String, sender: Sender<Vec<char>>) {
-    //     let response = self.get_all_channel_modes(channel);
-    //     sender.send(response).unwrap();
-    // }
     pub fn handle_is_channel_operator(&self, channel: &str, nickname: &str, sender: Sender<bool>) {
         let is_channel_operator = self.is_channel_operator(channel, nickname);
         sender.send(is_channel_operator).unwrap();

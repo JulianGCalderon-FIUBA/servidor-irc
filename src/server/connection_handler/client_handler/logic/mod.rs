@@ -264,6 +264,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.add_modes(add, &mut arguments, channel)?;
         self.remove_modes(remove, &mut arguments, channel)?;
 
+        self.send_mode_response(channel)?;
+
         Ok(true)
     }
 

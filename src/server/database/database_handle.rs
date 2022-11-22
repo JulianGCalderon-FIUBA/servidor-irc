@@ -421,16 +421,6 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
-
-    // pub fn get_channel_modes(&self, channel: &str) -> Vec<char> {
-    //     let (sender, receiver) = mpsc::channel();
-    //     let request = DatabaseMessage::GetAllChannelModes {
-    //         channel: channel.to_string(),
-    //         respond_to: sender,
-    //     };
-    //     self.sender.send(request).unwrap();
-    //     receiver.recv().unwrap()
-    // }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

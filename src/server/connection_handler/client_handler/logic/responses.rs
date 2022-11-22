@@ -137,8 +137,6 @@ impl<C: Connection> ClientHandler<C> {
         }
     }
 
-    
-
     pub(super) fn send_kick_notification(
         &mut self,
         channel: &str,
@@ -180,5 +178,9 @@ impl<C: Connection> ClientHandler<C> {
             message: content.to_owned(),
         };
         self.send_message_to_target(&notification, target)
+    }
+
+    pub(super) fn send_mode_response(&mut self, _channel: &str) -> io::Result<()> {
+        Ok(())
     }
 }

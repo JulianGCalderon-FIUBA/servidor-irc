@@ -149,10 +149,6 @@ impl<C: Connection> Channel<C> {
     pub fn is_operator(&self, nickname: &str) -> bool {
         self.operators.contains(&nickname.to_string())
     }
-
-    // pub fn get_modes(&self) -> Vec<char> {
-    //     todo!()
-    // }
 }
 
 fn initialize_modes() -> HashMap<char, bool> {

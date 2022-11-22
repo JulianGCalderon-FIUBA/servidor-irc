@@ -164,10 +164,6 @@ pub enum DatabaseMessage<C: Connection> {
         mask: String,
         respond_to: Sender<bool>,
     },
-    // GetAllChannelModes {
-    //     channel: String,
-    //     respond_to: Sender<Vec<char>>,
-    // },
     ContainsServer {
         servername: String,
         respond_to: Sender<bool>,
