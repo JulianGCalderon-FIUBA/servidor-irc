@@ -3,8 +3,8 @@ use std::{
     sync::mpsc::{self, Sender},
 };
 
-use crate::server::connection::Connection;
 use crate::server::data_structures::*;
+use crate::server::{connection::Connection, consts::modes::ChannelFlag};
 
 use super::database_message::DatabaseMessage;
 
@@ -70,11 +70,11 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn channel_has_mode(&self, channel: &str, mode: char) -> bool {
+    pub fn channel_has_mode(&self, channel: &str, flag: &ChannelFlag) -> bool {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::ChannelHasMode {
             channel: channel.to_string(),
-            mode,
+            flag: flag.clone(),
             respond_to: sender,
         };
         self.sender.send(request).unwrap();
@@ -359,10 +359,10 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
-    pub fn set_channel_mode(&self, channel: &str, mode: char) {
+    pub fn set_channel_mode(&self, channel: &str, flag: ChannelFlag) {
         let request = DatabaseMessage::SetChannelMode {
             channel: channel.to_string(),
-            mode,
+            flag,
         };
         self.sender.send(request).unwrap();
     }
@@ -391,10 +391,10 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
-    pub fn unset_channel_mode(&self, channel: &str, mode: char) {
+    pub fn unset_channel_mode(&self, channel: &str, flag: ChannelFlag) {
         let request = DatabaseMessage::UnsetChannelMode {
             channel: channel.to_string(),
-            mode,
+            flag,
         };
         self.sender.send(request).unwrap();
     }

@@ -1,4 +1,4 @@
-use crate::server::consts::modes::{PRIVATE, SECRET};
+use crate::server::consts::modes::ChannelFlag;
 use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
 
 use crate::server::data_structures::*;
@@ -7,8 +7,12 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn can_name_channel(&mut self, channel: &str) -> bool {
         let exists_channel = self.database.contains_channel(channel);
 
-        let is_priv_or_secret = self.database.channel_has_mode(channel, SECRET)
-            || self.database.channel_has_mode(channel, PRIVATE);
+        let is_priv_or_secret = self
+            .database
+            .channel_has_mode(channel, &ChannelFlag::Secret)
+            || self
+                .database
+                .channel_has_mode(channel, &ChannelFlag::Private);
 
         let is_client_in_channel = self.is_in_channel(channel);
 
@@ -16,7 +20,11 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn can_list_channel(&self, channel: &str) -> bool {
-        if self.database.channel_has_mode(channel, SECRET) && !self.is_in_channel(channel) {
+        if self
+            .database
+            .channel_has_mode(channel, &ChannelFlag::Secret)
+            && !self.is_in_channel(channel)
+        {
             return false;
         }
 

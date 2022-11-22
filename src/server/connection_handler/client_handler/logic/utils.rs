@@ -24,7 +24,9 @@ impl<C: Connection> ClientHandler<C> {
         for channel in channels {
             if self.database.is_channel_operator(channel, nickname) {
                 channel.insert(0, OPERATOR_SYMBOL);
-            } else if self.database.channel_has_mode(channel, MODERATED)
+            } else if self
+                .database
+                .channel_has_mode(channel, &ChannelFlag::Moderated)
                 && self.database.is_channel_speaker(channel, nickname)
             {
                 channel.insert(0, SPEAKER_SYMBOL);

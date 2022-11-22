@@ -3,6 +3,7 @@ use std::io;
 use std::rc::Rc;
 
 use crate::server::connection::Connection;
+use crate::server::consts::modes::ChannelFlag;
 use crate::server::database::{Channel, Client};
 
 use super::{ClientInfo, Database};
@@ -218,7 +219,7 @@ impl<C: Connection> Database<C> {
         None
     }
 
-    pub fn channel_has_mode(&self, channel: String, mode: char) -> bool {
+    pub fn channel_has_mode(&self, channel: String, mode: ChannelFlag) -> bool {
         if let Some(channel) = self.channels.get(&channel) {
             return channel.has_mode(mode);
         }

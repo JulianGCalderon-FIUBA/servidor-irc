@@ -5,6 +5,7 @@ use std::{io, rc::Rc};
 mod logic;
 
 use crate::server::connection::Connection;
+use crate::server::consts::modes::ChannelFlag;
 use crate::server::data_structures::*;
 
 use super::Database;
@@ -134,20 +135,25 @@ impl<C: Connection> Database<C> {
         respond_to.send(key).unwrap();
     }
 
-    pub fn handle_set_mode(&mut self, channel: String, mode: char) {
+    pub fn handle_set_mode(&mut self, channel: String, flag: ChannelFlag) {
         if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.set_mode(mode);
+            channel.set_mode(flag);
         }
     }
 
-    pub fn handle_unset_mode(&mut self, channel: String, mode: char) {
+    pub fn handle_unset_mode(&mut self, channel: String, flag: ChannelFlag) {
         if let Some(channel) = self.channels.get_mut(&channel) {
-            channel.unset_mode(mode);
+            channel.unset_mode(flag);
         }
     }
 
-    pub fn handle_channel_has_mode(&self, channel: String, mode: char, respond_to: Sender<bool>) {
-        let has_mode = self.channel_has_mode(channel, mode);
+    pub fn handle_channel_has_mode(
+        &self,
+        channel: String,
+        flag: ChannelFlag,
+        respond_to: Sender<bool>,
+    ) {
+        let has_mode = self.channel_has_mode(channel, flag);
         respond_to.send(has_mode).unwrap();
     }
 

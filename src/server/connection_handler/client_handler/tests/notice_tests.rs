@@ -50,7 +50,9 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
-    handler.database.set_channel_mode("#channel", 'n');
+    handler
+        .database
+        .set_channel_mode("#channel", ChannelFlag::NoOutsideMessages);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -93,7 +95,9 @@ fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    handler.database.set_channel_mode("#channel", 'm');
+    handler
+        .database
+        .set_channel_mode("#channel", ChannelFlag::Moderated);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -128,7 +132,9 @@ fn notice_works_on_channel_with_flag_n() {
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
-    handler.database.set_channel_mode("#channel", 'n');
+    handler
+        .database
+        .set_channel_mode("#channel", ChannelFlag::NoOutsideMessages);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -171,7 +177,9 @@ fn notice_works_on_channel_with_flag_m() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    handler.database.set_channel_mode("#channel", 'm');
+    handler
+        .database
+        .set_channel_mode("#channel", ChannelFlag::Moderated);
     handler.database.add_speaker("#channel", "nickname");
 
     let parameters = vec!["#channel".to_string()];

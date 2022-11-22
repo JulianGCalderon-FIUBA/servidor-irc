@@ -25,7 +25,10 @@ impl<C: Connection> ClientHandler<C> {
                 self.set_key(channel, arguments.pop())?;
             }
             SET_OPERATOR => self.add_channops(channel, arguments.pop())?,
-            mode if VALID_MODES.contains(&mode) => self.database.set_channel_mode(channel, mode),
+            mode if VALID_MODES.contains(&mode) => {
+                let flag = self.mode_to_flag(mode);
+                self.database.set_channel_mode(channel, flag)
+            }
             mode => self.stream.send(&ErrorReply::UnknownMode472 { mode })?,
         };
         Ok(())
@@ -56,8 +59,9 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     fn unset_mode(&mut self, channel: &str, mode: char) {
-        if self.database.channel_has_mode(channel, mode) {
-            self.database.unset_channel_mode(channel, mode)
+        let flag = self.mode_to_flag(mode);
+        if self.database.channel_has_mode(channel, &flag) {
+            self.database.unset_channel_mode(channel, flag)
         }
     }
 
@@ -165,5 +169,16 @@ impl<C: Connection> ClientHandler<C> {
         self.database.set_channel_key(channel, key);
 
         Ok(())
+    }
+    fn mode_to_flag(&self, mode: char) -> ChannelFlag {
+        match mode {
+            PRIVATE => ChannelFlag::Private,
+            SECRET => ChannelFlag::Secret,
+            INVITE_ONLY => ChannelFlag::InviteOnly,
+            TOPIC_SETTABLE => ChannelFlag::TopicByOperatorOnly,
+            NO_OUTSIDE_MESSAGES => ChannelFlag::NoOutsideMessages,
+            MODERATED => ChannelFlag::Moderated,
+            _ => panic!("Invalid mode"),
+        }
     }
 }

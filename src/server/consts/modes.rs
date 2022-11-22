@@ -30,5 +30,14 @@ pub const VALID_MODES: [char; 11] = [
 pub const ADD_MODE: char = '+';
 pub const REMOVE_MODE: char = '-';
 
-pub const INVISIBLE: char = 'i';
 // pub const OPERATOR: char = 'o';
+
+#[derive(PartialEq, Eq, Clone)]
+pub enum ChannelFlag {
+    Private,
+    Secret,
+    InviteOnly,
+    NoOutsideMessages,
+    TopicByOperatorOnly,
+    Moderated,
+}

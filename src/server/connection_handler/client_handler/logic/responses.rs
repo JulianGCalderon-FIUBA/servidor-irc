@@ -1,6 +1,6 @@
 use std::io;
 
-use crate::server::consts::modes::PRIVATE;
+use crate::server::consts::modes::ChannelFlag;
 use crate::server::responses::{CommandResponse, Notification};
 use crate::server::{
     connection::Connection,
@@ -93,8 +93,10 @@ impl<C: Connection> ClientHandler<C> {
             .get_topic_for_channel(&channel)
             .unwrap_or_else(|| "No topic set".to_string());
 
-        let prv =
-            self.database.channel_has_mode(&channel, PRIVATE) && !self.is_in_channel(&channel);
+        let prv = self
+            .database
+            .channel_has_mode(&channel, &ChannelFlag::Private)
+            && !self.is_in_channel(&channel);
 
         self.stream
             .send(&CommandResponse::list(channel, topic, prv))
@@ -164,6 +166,8 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_mode_response(&mut self, _channel: &str) -> io::Result<()> {
+        // let reply = CommandResponse::channel_mode_is(channel, mode, mode_params);
+
         Ok(())
     }
 }

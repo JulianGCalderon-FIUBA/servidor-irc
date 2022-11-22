@@ -146,17 +146,17 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_channel_key(channel, respond_to),
-            DatabaseMessage::SetChannelMode { channel, mode } => {
-                self.handle_set_mode(channel, mode)
+            DatabaseMessage::SetChannelMode { channel, flag } => {
+                self.handle_set_mode(channel, flag)
             }
-            DatabaseMessage::UnsetChannelMode { channel, mode } => {
-                self.handle_unset_mode(channel, mode)
+            DatabaseMessage::UnsetChannelMode { channel, flag } => {
+                self.handle_unset_mode(channel, flag)
             }
             DatabaseMessage::ChannelHasMode {
                 channel,
-                mode,
                 respond_to,
-            } => self.handle_channel_has_mode(channel, mode, respond_to),
+                flag,
+            } => self.handle_channel_has_mode(channel, flag, respond_to),
             DatabaseMessage::SetLimit { channel, limit } => {
                 self.handle_set_channel_limit(channel, limit)
             }

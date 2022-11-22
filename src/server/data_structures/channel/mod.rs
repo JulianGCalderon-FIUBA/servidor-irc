@@ -1,21 +1,17 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
-
-use crate::server::connection::Connection;
+use self::channel_config::ChannelConfig;
 
 use super::*;
+use crate::server::{connection::Connection, consts::modes::ChannelFlag};
+use std::{cell::RefCell, rc::Rc};
+
+pub mod channel_config;
 
 /// A Channel has clients and a name.
 pub struct Channel<C: Connection> {
     _name: String,
-    //vector de nicknames
     clients: Vec<Rc<RefCell<Client<C>>>>,
     topic: Option<String>,
-    key: Option<String>,
-    modes: HashMap<char, bool>,
-    limit: Option<usize>,
-    operators: Vec<String>,
-    speakers: Vec<String>,
-    banmasks: Vec<String>,
+    config: ChannelConfig,
 }
 
 impl<C: Connection> Channel<C> {
@@ -24,16 +20,14 @@ impl<C: Connection> Channel<C> {
         let operator = creator.borrow().nickname();
         let clients = vec![creator];
 
+        let mut config = ChannelConfig::new();
+        config.operators.push(operator);
+
         Self {
             _name,
             clients,
             topic: None,
-            key: None,
-            modes: initialize_modes(),
-            limit: None,
-            operators: vec![operator],
-            speakers: vec![],
-            banmasks: vec![],
+            config,
         }
     }
 
@@ -78,87 +72,82 @@ impl<C: Connection> Channel<C> {
     }
 
     pub fn set_key(&mut self, key: Option<String>) {
-        self.key = key
+        self.config.key = key
     }
 
     pub fn get_key(&self) -> Option<String> {
-        self.key.clone()
+        self.config.key.clone()
     }
 
-    pub fn set_mode(&mut self, mode: char) {
-        self.modes.entry(mode).and_modify(|value| *value = true);
+    pub fn set_mode(&mut self, flag: ChannelFlag) {
+        self.config.flags.push(flag)
     }
 
-    pub fn unset_mode(&mut self, mode: char) {
-        self.modes.entry(mode).and_modify(|value| *value = false);
+    pub fn unset_mode(&mut self, flag: ChannelFlag) {
+        self.config
+            .flags
+            .iter()
+            .position(|f| f == &flag)
+            .map(|index| self.config.flags.remove(index));
     }
 
-    pub fn has_mode(&self, mode: char) -> bool {
-        self.modes.get(&mode).copied().unwrap_or_default()
+    pub fn has_mode(&self, flag: ChannelFlag) -> bool {
+        self.config.flags.contains(&flag)
     }
 
     pub fn get_limit(&self) -> Option<usize> {
-        self.limit
+        self.config.user_limit
     }
 
     pub fn set_limit(&mut self, limit: Option<usize>) {
-        self.limit = limit
+        self.config.user_limit = limit
     }
 
     pub fn add_operator(&mut self, nickname: String) {
-        self.operators.push(nickname)
+        self.config.operators.push(nickname)
     }
 
     pub fn remove_operator(&mut self, nickname: String) {
-        self.operators
+        self.config
+            .operators
             .iter()
             .position(|nick| nick == &nickname)
-            .map(|index| self.operators.remove(index));
+            .map(|index| self.config.operators.remove(index));
     }
 
     pub fn add_speaker(&mut self, nickname: String) {
-        self.speakers.push(nickname)
+        self.config.speakers.push(nickname)
     }
 
     pub fn remove_speaker(&mut self, nickname: String) {
-        self.speakers
+        self.config
+            .speakers
             .iter()
             .position(|nick| nick == &nickname)
-            .map(|index| self.speakers.remove(index));
+            .map(|index| self.config.speakers.remove(index));
     }
 
     pub fn is_speaker(&self, nickname: String) -> bool {
-        self.speakers.contains(&nickname)
+        self.config.speakers.contains(&nickname)
     }
 
     pub fn add_banmask(&mut self, mask: String) {
-        self.banmasks.push(mask)
+        self.config.banmasks.push(mask)
     }
 
     pub fn get_banmasks(&self) -> Vec<String> {
-        self.banmasks.clone()
+        self.config.banmasks.clone()
     }
 
     pub fn remove_banmask(&mut self, mask: String) {
-        self.banmasks
+        self.config
+            .banmasks
             .iter()
             .position(|m| m == &mask)
-            .map(|index| self.banmasks.remove(index));
+            .map(|index| self.config.banmasks.remove(index));
     }
 
     pub fn is_operator(&self, nickname: &str) -> bool {
-        self.operators.contains(&nickname.to_string())
+        self.config.operators.contains(&nickname.to_string())
     }
-}
-
-fn initialize_modes() -> HashMap<char, bool> {
-    let mut modes = HashMap::new();
-    modes.insert('p', false);
-    modes.insert('s', false);
-    modes.insert('i', false);
-    modes.insert('t', false);
-    modes.insert('n', false);
-    modes.insert('m', false);
-
-    modes
 }
