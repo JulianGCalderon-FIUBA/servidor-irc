@@ -3,7 +3,7 @@ use std::io::{Read, Write};
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::sync::{Arc, Mutex, MutexGuard};
 
-use crate::server::connection::Connection;
+use crate::server::connection::{Connection, ConnectionResponses};
 
 #[derive(Debug)]
 /// Used for testing. It allows the programmer to create a connection and use both ends of the stream.
@@ -27,6 +27,8 @@ impl Write for MockTcpStream {
         self.write_lock().flush()
     }
 }
+
+impl ConnectionResponses for MockTcpStream {}
 
 impl Connection for MockTcpStream {
     fn try_clone(&self) -> io::Result<Self> {

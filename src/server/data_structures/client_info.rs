@@ -1,4 +1,4 @@
-#[derive(PartialEq, Eq, Debug, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, Debug, PartialOrd, Ord, Clone)]
 /// ClientInfo contains public Client information.
 pub struct ClientInfo {
     pub nickname: String,
