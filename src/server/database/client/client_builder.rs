@@ -81,7 +81,6 @@ impl<C: Connection> ClientBuilder<C> {
             realname: self.realname?,
             operator: false,
             away_message: None,
-            online: true,
         };
 
         Some(client_info)

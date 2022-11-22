@@ -18,7 +18,6 @@ pub struct Client<C: Connection> {
     realname: String,
     operator: bool,
     away_message: Option<String>,
-    online: bool,
 }
 
 impl<C: Connection> Client<C> {
@@ -113,7 +112,7 @@ impl<C: Connection> Client<C> {
     }
 
     pub fn disconnect(&mut self) {
-        self.online = false
+        self.stream = None
     }
 }
 
