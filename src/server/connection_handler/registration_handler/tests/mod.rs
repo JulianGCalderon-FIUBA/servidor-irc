@@ -1,4 +1,4 @@
-use crate::server::{database::Database, testing::MockTcpStream};
+use crate::server::testing::{dummy_database, MockTcpStream};
 
 use super::*;
 
@@ -9,8 +9,7 @@ mod user_tests;
 
 fn dummy_registration_handler() -> RegistrationHandler<MockTcpStream> {
     let stream = MockTcpStream::new();
-    let servername = "servername".to_string();
-    let database = Database::start().0;
+    let database = dummy_database();
     let online = Arc::new(AtomicBool::new(true));
-    RegistrationHandler::from_connection(stream, servername, database, online).unwrap()
+    RegistrationHandler::from_connection(stream, database, online).unwrap()
 }

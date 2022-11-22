@@ -1,4 +1,4 @@
-use crate::server::{connection::Connection, connection_handler::responses::ErrorReply};
+use crate::server::{connection::Connection, responses::ErrorReply};
 
 use super::structure::CommandArgs;
 

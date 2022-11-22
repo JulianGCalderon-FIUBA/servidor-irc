@@ -1,4 +1,4 @@
-use crate::server::{connection::Connection, connection_handler::responses::ErrorReply};
+use crate::server::{connection::Connection, responses::ErrorReply};
 use std::io;
 
 use super::{
@@ -11,7 +11,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
 {
     fn pass_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_pass_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -19,7 +19,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn nick_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_nick_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -27,7 +27,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn user_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_user_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -35,7 +35,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn oper_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_oper_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -44,7 +44,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
 
     fn privmsg_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_privmsg_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -52,7 +52,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn notice_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_notice_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -61,7 +61,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
 
     fn join_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_join_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -69,7 +69,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn part_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_part_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -77,7 +77,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn invite_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_invite_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -85,7 +85,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn names_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_names_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -93,7 +93,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn list_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_list_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -101,7 +101,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn who_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_who_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -109,7 +109,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn whois_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_whois_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -117,7 +117,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn away_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_away_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -125,7 +125,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn topic_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_topic_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -133,7 +133,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
     fn kick_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_kick_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -142,7 +142,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
 
     fn mode_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_mode_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -151,7 +151,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
 
     fn quit_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_quit_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -160,7 +160,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
 
     fn server_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_server_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -169,7 +169,7 @@ pub trait ConnectionHandlerCommands<C: Connection>:
 
     fn squit_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         if let Err(error) = self.assert_squit_command_is_valid(&arguments) {
-            self.send_response(&error)?;
+            self.stream().send(&error)?;
             return Ok(true);
         }
 
@@ -177,7 +177,8 @@ pub trait ConnectionHandlerCommands<C: Connection>:
     }
 
     fn on_unknown_command(&mut self, command: String) -> io::Result<bool> {
-        self.send_response(&ErrorReply::UnknownCommand421 { command })?;
+        self.stream()
+            .send(&ErrorReply::UnknownCommand421 { command })?;
         Ok(true)
     }
 }

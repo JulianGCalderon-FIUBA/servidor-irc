@@ -4,8 +4,9 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
-use crate::server::connection_handler::responses::Notification;
-use crate::server::database::ExternalClient;
+
+use crate::server::data_structures::*;
+use crate::server::responses::Notification;
 
 use super::ServerHandler;
 
@@ -31,7 +32,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let realname = trail.unwrap();
 
         let client =
-            ExternalClient::_new(nickname, username, hostname, servername, realname, hopcount);
+            ExternalClient::new(nickname, username, hostname, servername, realname, hopcount);
 
         self.database.add_external_client(&self.servername, client);
 
@@ -45,8 +46,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let target = params.remove(0);
         let content = trail.unwrap();
 
-        println!("Enviando mensaje a {target} de {sender}");
-
         self.send_privmsg_notification(&sender, &target, &content)?;
 
         Ok(true)
@@ -59,12 +58,8 @@ impl<C: Connection> ServerHandler<C> {
         sender: &str,
         target: &str,
         content: &str,
-    ) -> Result<(), io::Error> {
-        let notification = Notification::Privmsg {
-            sender: sender.to_string(),
-            target: target.to_string(),
-            message: content.to_owned(),
-        };
+    ) -> io::Result<()> {
+        let notification = Notification::privmsg(sender, target, content);
         self.send_message_to_target(&notification, target)
     }
 }

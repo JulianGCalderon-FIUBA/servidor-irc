@@ -13,7 +13,7 @@ use super::{
     client_handler::ClientHandler,
     connection_handler_trait::{
         ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
-        ConnectionHandlerStructure, ConnectionHandlerUtils,
+        ConnectionHandlerStructure,
     },
     ServerHandler,
 };
@@ -32,7 +32,6 @@ pub struct RegistrationHandler<C: Connection> {
     stream: C,
     stream_for_database: Option<C>,
     database: DatabaseHandle<C>,
-    servername: String,
     online: Arc<AtomicBool>,
     attributes: HashMap<&'static str, String>,
     timestamp: Instant,
@@ -44,7 +43,6 @@ impl<C: Connection> ConnectionHandler<C> for RegistrationHandler<C> {}
 impl<C: Connection> RegistrationHandler<C> {
     pub fn from_connection(
         stream: C,
-        servername: String,
         database: DatabaseHandle<C>,
         online: Arc<AtomicBool>,
     ) -> std::io::Result<Self> {
@@ -54,7 +52,6 @@ impl<C: Connection> RegistrationHandler<C> {
             stream,
             stream_for_database,
             database,
-            servername,
             online,
             attributes: HashMap::new(),
             timestamp: Instant::now(),
@@ -74,7 +71,6 @@ impl<C: Connection> RegistrationHandler<C> {
     fn build_client_handler(&mut self) -> io::Result<ClientHandler<C>> {
         ClientHandler::from_connection(
             self.stream().try_clone()?,
-            self.servername.clone(),
             self.attributes.remove("nickname").unwrap(),
             self.database().clone(),
             Arc::clone(self.online()),
@@ -133,7 +129,7 @@ impl<C: Connection> ConnectionHandlerStructure<C> for RegistrationHandler<C> {
     }
 
     fn on_timeout(&mut self) -> io::Result<()> {
-        self.send_response(&"Registration timeout")
+        self.stream.send(&"Registration timeout")
     }
 }
 

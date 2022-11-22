@@ -5,9 +5,9 @@ use std::{io, rc::Rc};
 mod logic;
 
 use crate::server::connection::Connection;
+use crate::server::data_structures::*;
 
-use super::external_server::{ExternalClient, ExternalServer};
-use super::{ClientInfo, Database};
+use super::Database;
 
 impl<C: Connection> Database<C> {
     /// Returns response to IsServerOperator request.
@@ -204,10 +204,6 @@ impl<C: Connection> Database<C> {
         }
     }
 
-    // pub fn handle_get_all_channel_modes(&self, channel: String, sender: Sender<Vec<char>>) {
-    //     let response = self.get_all_channel_modes(channel);
-    //     sender.send(response).unwrap();
-    // }
     pub fn handle_is_channel_operator(&self, channel: &str, nickname: &str, sender: Sender<bool>) {
         let is_channel_operator = self.is_channel_operator(channel, nickname);
         sender.send(is_channel_operator).unwrap();
@@ -225,7 +221,7 @@ impl<C: Connection> Database<C> {
 
     pub fn handle_add_server(&mut self, server: ExternalServer<C>) {
         let servername = server.servername();
-        println!("adding server named {servername}");
+        println!("Adding server named {servername}");
 
         self.servers.insert(servername, server);
     }
@@ -238,11 +234,18 @@ impl<C: Connection> Database<C> {
     pub fn handle_add_external_client(&mut self, servername: &str, client: ExternalClient) {
         if let Some(server) = self.servers.get_mut(servername) {
             println!(
-                "Adding external client {} to server {:?}",
+                "Adding external client {} to server {servername}",
                 client.nickname(),
-                servername
             );
             server.add_client(client);
         }
+    }
+
+    pub fn handle_get_servername(&self, sender: Sender<String>) {
+        sender.send(self.servername.clone()).unwrap();
+    }
+
+    pub fn handle_get_serverinfo(&self, sender: Sender<String>) {
+        sender.send(self.serverinfo.clone()).unwrap();
     }
 }

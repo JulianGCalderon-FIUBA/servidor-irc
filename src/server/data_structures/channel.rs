@@ -2,7 +2,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::server::connection::Connection;
 
-use super::Client;
+use super::*;
+
 /// A Channel has clients and a name.
 pub struct Channel<C: Connection> {
     _name: String,
@@ -148,10 +149,6 @@ impl<C: Connection> Channel<C> {
     pub fn is_operator(&self, nickname: &str) -> bool {
         self.operators.contains(&nickname.to_string())
     }
-
-    // pub fn get_modes(&self) -> Vec<char> {
-    //     todo!()
-    // }
 }
 
 fn initialize_modes() -> HashMap<char, bool> {

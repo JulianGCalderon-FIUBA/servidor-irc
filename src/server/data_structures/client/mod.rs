@@ -1,11 +1,12 @@
 mod client_builder;
-mod client_info;
 
-pub use client_builder::ClientBuilder;
-pub use client_info::ClientInfo;
 use std::io;
 
 use crate::server::connection::Connection;
+
+use super::*;
+
+pub use client_builder::ClientBuilder;
 
 /// Represents a Client that is connected to the Server.
 pub struct Client<C: Connection> {
@@ -45,7 +46,7 @@ impl<C: Connection> Client<C> {
             servername: self.servername.clone(),
             realname: self.realname.clone(),
             operator: self.operator,
-            hopcount: 1,
+            hopcount: 0,
         }
     }
 

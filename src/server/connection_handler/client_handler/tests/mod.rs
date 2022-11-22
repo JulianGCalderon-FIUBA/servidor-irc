@@ -1,7 +1,4 @@
-use crate::server::{
-    database::Database,
-    testing::{dummy_client, MockTcpStream},
-};
+use crate::server::testing::{dummy_client, dummy_database, MockTcpStream};
 
 use super::*;
 
@@ -22,9 +19,8 @@ mod who_tests;
 mod whois_tests;
 
 fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
-    let database = Database::start().0;
+    let database = dummy_database();
     let nickname = "nickname".to_string();
-    let servername = "servername".to_string();
     let online = Arc::new(AtomicBool::new(true));
 
     let client = dummy_client(&nickname);
@@ -32,5 +28,5 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
 
     database.add_client(client);
 
-    ClientHandler::from_connection(connection, servername, nickname, database, online).unwrap()
+    ClientHandler::from_connection(connection, nickname, database, online).unwrap()
 }

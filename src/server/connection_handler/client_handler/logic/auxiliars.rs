@@ -1,13 +1,16 @@
 use std::io;
 
-use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
+use crate::server::{
+    connection::Connection, connection_handler::client_handler::ClientHandler,
+    responses::CommandResponse,
+};
 
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_privmsg_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
         self.send_privmsg_notification(target, content)?;
 
         if let Some(message) = self.database.get_away_message(target) {
-            self.send_away_response(target, message)?;
+            self.stream.send(&CommandResponse::away(target, &message))?;
         }
 
         Ok(())

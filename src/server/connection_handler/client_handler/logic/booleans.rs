@@ -1,11 +1,7 @@
-use crate::server::{
-    connection::Connection,
-    connection_handler::{
-        client_handler::ClientHandler,
-        consts::modes::{PRIVATE, SECRET},
-    },
-    database::ClientInfo,
-};
+use crate::server::consts::modes::{PRIVATE, SECRET};
+use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
+
+use crate::server::data_structures::*;
 
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn can_name_channel(&mut self, channel: &str) -> bool {

@@ -102,12 +102,9 @@ impl<C: Connection> Database<C> {
 
     /// Returns if Database contains client.
     pub fn contains_client(&self, nickname: &str) -> bool {
-        println!("buscando a {nickname}");
         if self.clients.contains_key(nickname) {
-            println!("encontre a mi cliente");
             return true;
         }
-        println!("mis clientes: {:?}", self.clients.keys());
 
         self.servers
             .values()
@@ -249,12 +246,6 @@ impl<C: Connection> Database<C> {
         vec![]
     }
 
-    // pub fn get_all_channel_modes(&self, channel: String) -> Vec<char> {
-    //     if let Some(channel) = self.channels.get(&channel) {
-    //         return channel.get_modes();
-    //     }
-    //     vec![]
-    // }
     pub fn is_channel_operator(&self, channel: &str, nickname: &str) -> bool {
         if let Some(channel) = self.channels.get(channel) {
             return channel.is_operator(nickname);

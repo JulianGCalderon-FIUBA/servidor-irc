@@ -2,10 +2,10 @@ use std::io;
 
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
+    CommandArgs, ConnectionHandlerLogic,
 };
-use crate::server::connection_handler::responses::Notification;
-use crate::server::database::ClientInfo;
+use crate::server::registerer::Register;
+use crate::server::responses::Notification;
 
 use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
@@ -32,7 +32,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
 
         let realname = trail.unwrap();
         let username = params.pop().unwrap();
-        let servername = self.servername.to_string();
+        let servername = self.database.get_server_name();
         let hostname = self.stream.peer_address()?.ip().to_string();
 
         self.attributes.insert("username", username);
@@ -52,21 +52,17 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
     fn server_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, mut params, trail) = arguments;
 
-        let hopcount = params.remove(1);
+        let hopcount = params.remove(1).parse::<usize>().unwrap();
         let servername = params.remove(0);
         let serverinfo = trail.unwrap();
 
-        self.attributes.insert("servername", servername);
-        self.attributes.insert("hopcount", hopcount);
-        self.attributes.insert("serverinfo", serverinfo);
-
-        let server = self.build_server().unwrap();
-        self.database.add_server(server);
-
         self.connection_type = ConnectionType::Server;
 
-        self.send_server_response()?;
-        self.send_server_info()?;
+        let mut registerer = Register::new(self.stream.try_clone()?, self.database.clone());
+        registerer.register_incoming(servername, hopcount, serverinfo)?;
+
+        self.attributes
+            .insert("servername", registerer.servername());
 
         Ok(false)
     }
@@ -77,47 +73,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         let message =
             trail.unwrap_or_else(|| self.attributes.remove("nickname").unwrap_or_default());
 
-        let notification = Notification::Quit { message };
-
-        self.send_response(&notification.to_string())?;
+        self.stream.send(&Notification::quit(&message))?;
 
         Ok(false)
-    }
-}
-
-impl<C: Connection> RegistrationHandler<C> {
-    fn send_server_response(&mut self) -> Result<(), io::Error> {
-        let server_notification = format!("SERVER {} {} :{}", self.servername, 1, "hola");
-        self.send_response(&server_notification)?;
-        Ok(())
-    }
-
-    fn send_server_info(&mut self) -> Result<(), io::Error> {
-        for client in self.database.get_all_clients() {
-            self.send_nick_notification(&client)?;
-            self.send_user_notification(&client)?;
-        }
-        Ok(())
-    }
-
-    fn send_user_notification(&mut self, client: &ClientInfo) -> Result<(), io::Error> {
-        let user_notification = Notification::User {
-            nickname: client.nickname.clone(),
-            username: client.username.clone(),
-            hostname: client.hostname.clone(),
-            servername: client.servername.clone(),
-            realname: client.realname.clone(),
-        };
-        self.send_response(&user_notification)?;
-        Ok(())
-    }
-
-    fn send_nick_notification(&mut self, client: &ClientInfo) -> Result<(), io::Error> {
-        let nick_notification = Notification::Nick {
-            nickname: client.nickname.clone(),
-            hopcount: client.hopcount,
-        };
-        self.send_response(&nick_notification)?;
-        Ok(())
     }
 }

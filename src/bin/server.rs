@@ -2,11 +2,11 @@ use std::env;
 use std::io::{stdin, BufRead, BufReader};
 
 use internet_relay_chat::server::Server;
+use internet_relay_chat::{ADDRESS, SERVERNAME};
 
 fn main() {
-    let mut args: Vec<String> = env::args().collect();
-    let address = args.pop().unwrap();
-    let servername = args.pop().unwrap();
+    let args: Vec<String> = env::args().collect();
+    let (address, servername) = unpack_args(args);
 
     let mut server = Server::start(&servername);
 
@@ -33,5 +33,13 @@ fn main() {
             }
             _ => (),
         }
+    }
+}
+
+fn unpack_args(mut args: Vec<String>) -> (String, String) {
+    if args.len() == 3 {
+        (args.remove(2), args.remove(1))
+    } else {
+        (ADDRESS.to_string(), SERVERNAME.to_string())
     }
 }

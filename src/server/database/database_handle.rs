@@ -4,12 +4,10 @@ use std::{
 };
 
 use crate::server::connection::Connection;
+use crate::server::data_structures::*;
 
-use super::{
-    database_message::DatabaseMessage,
-    external_server::{ExternalClient, ExternalServer},
-};
-use super::{Client, ClientInfo};
+use super::database_message::DatabaseMessage;
+
 /// A DatabaseHandle handles and makes request to the main Database. Works as an intermediary so external structures cannot acces the Database directly.
 pub struct DatabaseHandle<C: Connection> {
     sender: Sender<DatabaseMessage<C>>,
@@ -410,15 +408,19 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
-    // pub fn get_channel_modes(&self, channel: &str) -> Vec<char> {
-    //     let (sender, receiver) = mpsc::channel();
-    //     let request = DatabaseMessage::GetAllChannelModes {
-    //         channel: channel.to_string(),
-    //         respond_to: sender,
-    //     };
-    //     self.sender.send(request).unwrap();
-    //     receiver.recv().unwrap()
-    // }
+    pub fn get_server_name(&self) -> String {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetServerName { respond_to: sender };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn get_server_info(&self) -> String {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetServerInfo { respond_to: sender };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

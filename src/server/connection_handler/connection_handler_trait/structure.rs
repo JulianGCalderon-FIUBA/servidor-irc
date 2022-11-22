@@ -4,8 +4,8 @@ use std::time::Duration;
 
 use crate::message::{CreationError, Message};
 use crate::server::connection::Connection;
-use crate::server::connection_handler::consts::commands::*;
-use crate::server::connection_handler::responses::ErrorReply;
+use crate::server::consts::commands::*;
+use crate::server::responses::ErrorReply;
 
 use super::{
     ConnectionHandlerCommands, ConnectionHandlerGetters, ConnectionHandlerUtils,
@@ -93,7 +93,7 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn on_server_shutdown(&mut self) -> io::Result<()> {
-        self.send_response(&"Server has shutdown")
+        self.stream().send(&"Server has shutdown")
     }
 
     fn on_timeout(&mut self) -> io::Result<()> {
@@ -101,6 +101,6 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn on_parsing_error(&mut self) -> io::Result<()> {
-        self.send_response(&ErrorReply::ParsingError)
+        self.stream().send(&ErrorReply::ParsingError)
     }
 }

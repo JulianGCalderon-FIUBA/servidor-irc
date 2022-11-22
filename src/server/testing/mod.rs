@@ -1,6 +1,9 @@
 mod mock_stream;
 
-use super::database::{Client, ClientBuilder};
+use super::{
+    data_structures::*,
+    database::{Database, DatabaseHandle},
+};
 pub use mock_stream::MockTcpStream;
 
 /// Creates dummy client used for tests.
@@ -14,4 +17,9 @@ pub fn dummy_client(nickname: &str) -> Client<MockTcpStream> {
         .stream(MockTcpStream::new());
 
     builder.build().unwrap()
+}
+
+pub fn dummy_database() -> DatabaseHandle<MockTcpStream> {
+    let (handle, _) = Database::start("servername".to_string(), "serverinfo".to_string());
+    handle
 }
