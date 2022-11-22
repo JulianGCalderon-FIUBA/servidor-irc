@@ -113,7 +113,7 @@ impl<C: Connection> Client<C> {
     }
 
     pub fn disconnect(&mut self) {
-        self.stream = None;
+        self.stream = None
     }
 }
 
