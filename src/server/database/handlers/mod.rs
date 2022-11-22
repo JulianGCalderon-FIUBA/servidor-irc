@@ -268,4 +268,13 @@ impl<C: Connection> Database<C> {
     pub fn handle_get_serverinfo(&self, respond_to: Sender<String>) {
         respond_to.send(self.serverinfo.clone()).unwrap();
     }
+
+    pub fn handle_get_channel_config(
+        &self,
+        channel: String,
+        respond_to: Sender<Option<ChannelConfig>>,
+    ) {
+        let channel_config = self.get_channel_config(&channel);
+        respond_to.send(channel_config).unwrap();
+    }
 }

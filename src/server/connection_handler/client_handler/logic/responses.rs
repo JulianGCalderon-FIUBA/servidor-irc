@@ -165,8 +165,14 @@ impl<C: Connection> ClientHandler<C> {
         self.send_message_to_target(&notification, target)
     }
 
-    pub(super) fn send_mode_response(&mut self, _channel: &str) -> io::Result<()> {
-        // let reply = CommandResponse::channel_mode_is(channel, mode, mode_params);
+    pub(super) fn send_mode_response(&mut self, channel: &str) -> io::Result<()> {
+        if let Some(config) = self.database.get_channel_config(channel) {
+            for flag in config.flags {
+                let mode = flag.to_char();
+                let reply = CommandResponse::channel_mode_is(channel, mode, None);
+                self.stream.send(&reply)?;
+            }
+        }
 
         Ok(())
     }

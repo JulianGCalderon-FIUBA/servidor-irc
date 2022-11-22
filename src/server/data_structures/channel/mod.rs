@@ -1,10 +1,9 @@
-use self::channel_config::ChannelConfig;
-
 use super::*;
 use crate::server::{connection::Connection, consts::modes::ChannelFlag};
 use std::{cell::RefCell, rc::Rc};
 
-pub mod channel_config;
+mod channel_config;
+pub use channel_config::ChannelConfig;
 
 /// A Channel has clients and a name.
 pub struct Channel<C: Connection> {
@@ -149,5 +148,9 @@ impl<C: Connection> Channel<C> {
 
     pub fn is_operator(&self, nickname: &str) -> bool {
         self.config.operators.contains(&nickname.to_string())
+    }
+
+    pub(crate) fn get_config(&self) -> Option<ChannelConfig> {
+        Some(self.config.clone())
     }
 }

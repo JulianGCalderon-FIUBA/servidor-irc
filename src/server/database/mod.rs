@@ -215,6 +215,10 @@ impl<C: Connection> Database<C> {
             }
             DatabaseMessage::GetServerName { respond_to } => self.handle_get_servername(respond_to),
             DatabaseMessage::GetServerInfo { respond_to } => self.handle_get_serverinfo(respond_to),
+            DatabaseMessage::GetChannelConfig {
+                channel,
+                respond_to,
+            } => self.handle_get_channel_config(channel, respond_to),
         }
     }
 }

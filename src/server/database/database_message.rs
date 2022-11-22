@@ -182,4 +182,8 @@ pub enum DatabaseMessage<C: Connection> {
     GetServerInfo {
         respond_to: Sender<String>,
     },
+    GetChannelConfig {
+        channel: String,
+        respond_to: Sender<Option<ChannelConfig>>,
+    },
 }
