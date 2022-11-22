@@ -1,17 +1,13 @@
 pub mod requests;
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Align, Box, Button, Label, Orientation,
-};
+use gtk::{ glib::{ GString, Sender }, prelude::*, Align, Box, Button, Label, Orientation };
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::requests::{add_invite_view_request, quit_channel_request, remove_conversation_request};
+use self::requests::{ add_invite_view_request, quit_channel_request, remove_conversation_request };
 
-use super::{requests::change_conversation_request, MainView};
+use super::{ requests::change_conversation_request, MainView };
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
@@ -24,8 +20,7 @@ impl MainView {
             .halign(Align::Start)
             .build();
 
-        self.quit_channel_button
-            .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
+        self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         self.user_info.set_label(nickname);
 
         conv_info.append(&self.quit_channel_button);
@@ -43,7 +38,7 @@ impl MainView {
     fn connect_quit_channel(
         &mut self,
         current_conversation: Label,
-        sender: Sender<ControllerMessage>,
+        sender: Sender<ControllerMessage>
     ) {
         let my_nickname = self.user_info.label().unwrap();
         self.quit_channel_button.connect_clicked(move |_| {
@@ -62,25 +57,25 @@ impl MainView {
     }
 
     pub fn remove_conversation(&mut self, conversation: String) {
-        let colection_of_buttons: &mut Vec<Button>;
-        let conversation_box: &mut Box;
+        let collection_of_buttons: &mut Vec<Button>;
+        let conversation_box: &Box;
         if Self::current_conv_is_channel(conversation.clone()) {
-            colection_of_buttons = &mut self.channels_buttons;
+            collection_of_buttons = &mut self.channels_buttons;
             conversation_box = &mut self.channels_box;
         } else {
-            colection_of_buttons = &mut self.clients_buttons;
+            collection_of_buttons = &mut self.clients_buttons;
             conversation_box = &mut self.clients_box;
         }
         let mut counter = 0;
-        for button in colection_of_buttons.clone() {
+        for button in collection_of_buttons.clone() {
             if button.label().unwrap() == conversation {
                 conversation_box.remove(&button);
                 break;
             }
             counter += 1;
         }
-        if !colection_of_buttons.is_empty() {
-            colection_of_buttons.remove(counter);
+        if !collection_of_buttons.is_empty() {
+            collection_of_buttons.remove(counter);
         }
     }
 

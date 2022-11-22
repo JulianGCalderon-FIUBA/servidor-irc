@@ -106,6 +106,7 @@ impl MainView {
         for message in &self.messages {
             self.message_box.remove(message);
         }
+        self.messages = vec![];
 
         self.quit_channel_button.set_visible(true);
         if Self::current_conv_is_channel(conversation_label.clone()) {
