@@ -22,7 +22,7 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
         let nickname = client_info.nickname.clone();
         let servername = client_info.servername.clone();
-        let serverinfo = "todo: serverinfo";
+        let serverinfo = "serverinfo"; // todo
 
         self.stream.send_whois_user(&client_info)?;
 
