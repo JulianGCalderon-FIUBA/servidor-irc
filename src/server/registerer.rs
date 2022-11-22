@@ -49,7 +49,8 @@ impl<C: Connection> Register<C> {
         let servername = self.database.get_server_name();
         let serverinfo = self.database.get_server_info();
 
-        self.stream.send_server(&servername, 1, &serverinfo)
+        self.stream
+            .send(&Notification::server(&servername, 1, &serverinfo))
     }
 
     fn receive_server_notification(&mut self) -> io::Result<()> {
@@ -98,26 +99,12 @@ impl<C: Connection> Register<C> {
     }
 
     fn send_user_notification(&mut self, client: &ClientInfo) -> io::Result<()> {
-        let user_notification = Notification::User {
-            nickname: client.nickname.clone(),
-            username: client.username.clone(),
-            hostname: client.hostname.clone(),
-            servername: client.servername.clone(),
-            realname: client.realname.clone(),
-        };
-
-        let message = Message::new(&user_notification.to_string()).unwrap();
-        message.send_to(&mut self.stream)
+        self.stream.send(&Notification::user(client))
     }
 
     fn send_nick_notification(&mut self, client: &ClientInfo) -> io::Result<()> {
-        let nick_notification = Notification::Nick {
-            nickname: client.nickname.clone(),
-            hopcount: client.hopcount + 1,
-        };
-        let message = Message::new(&nick_notification.to_string()).unwrap();
-
-        message.send_to(&mut self.stream)
+        self.stream
+            .send(&Notification::nick(&client.nickname, client.hopcount + 1))
     }
 }
 

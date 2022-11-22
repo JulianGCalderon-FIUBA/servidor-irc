@@ -6,7 +6,7 @@ use crate::server::connection_handler::connection_handler_trait::{
 };
 
 use crate::server::data_structures::*;
-use crate::server::responses::CommandResponse;
+use crate::server::responses::{CommandResponse, Notification};
 
 use self::utils::{collect_list, parse_modes};
 
@@ -31,7 +31,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn oper_logic(&mut self, _arguments: CommandArgs) -> std::io::Result<bool> {
         self.database.set_server_operator(&self.nickname);
-        self.stream.send(&CommandResponse::YouAreOper381)?;
+        self.stream.send(&CommandResponse::you_are_oper())?;
 
         Ok(true)
     }
@@ -123,7 +123,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             .send_invite_notification(invited_client, &channel)
             .is_ok()
         {
-            self.stream.send_inviting(inviting_client, channel)?;
+            self.stream
+                .send(&CommandResponse::inviting(inviting_client, channel))?;
         }
 
         Ok(true)
@@ -141,12 +142,12 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_names_response(&channel)?;
 
             if !params.is_empty() {
-                self.stream.send_end_of_names(&channel)?;
+                self.stream.send(&CommandResponse::end_of_names(&channel))?;
             }
         }
 
         if params.is_empty() {
-            self.stream.send_end_of_names("")?;
+            self.stream.send(&CommandResponse::end_of_names(""))?;
         }
 
         Ok(true)
@@ -156,7 +157,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let (_, params, _) = arguments;
         let channels = self.channels_to_list(params.get(0));
 
-        self.stream.send(&CommandResponse::ListStart321)?;
+        self.stream.send(&CommandResponse::list_start())?;
 
         for channel in channels {
             if !self.can_list_channel(&channel) {
@@ -164,7 +165,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             }
             self.send_list_response(channel)?;
         }
-        self.stream.send(&CommandResponse::ListEnd323)?;
+        self.stream.send(&CommandResponse::list_end())?;
 
         Ok(true)
     }
@@ -182,8 +183,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_whoreply_response(client_info)?;
         }
 
-        self.stream
-            .send(&CommandResponse::EndOfWho315 { name: mask })?;
+        self.stream.send(&CommandResponse::end_of_who(mask))?;
 
         Ok(true)
     }
@@ -213,8 +213,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.set_away_message(&trail, &self.nickname);
 
         let reply = match trail {
-            Some(_) => CommandResponse::NowAway,
-            None => CommandResponse::UnAway,
+            Some(_) => CommandResponse::now_away(),
+            None => CommandResponse::unaway(),
         };
 
         self.stream.send(&reply)?;
@@ -229,7 +229,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         if let Some(topic) = params.pop() {
             self.database.set_channel_topic(&channel, &topic);
         } else {
-            self.send_topic_response(channel)?;
+            self.send_topic_response(&channel)?;
         }
 
         Ok(true)
@@ -276,7 +276,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.disconnect_client(&self.nickname);
 
         self.send_quit_notification(&message);
-        self.stream.send_quit(&message)?;
+        self.stream.send(&Notification::quit(&message))?;
 
         Ok(false)
     }

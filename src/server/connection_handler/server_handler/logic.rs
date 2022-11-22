@@ -58,12 +58,8 @@ impl<C: Connection> ServerHandler<C> {
         sender: &str,
         target: &str,
         content: &str,
-    ) -> Result<(), io::Error> {
-        let notification = Notification::Privmsg {
-            sender: sender.to_string(),
-            target: target.to_string(),
-            message: content.to_owned(),
-        };
+    ) -> io::Result<()> {
+        let notification = Notification::privmsg(sender, target, content);
         self.send_message_to_target(&notification, target)
     }
 }

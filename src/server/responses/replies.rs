@@ -2,12 +2,8 @@ use std::fmt::Display;
 
 use crate::server::data_structures::ClientInfo;
 
-/// Possible responses the commands can generate.
+/// Possible s the commands can generate.
 pub enum CommandResponse {
-    // Away301 {
-    //     nickname: String,
-    //     message: String,
-    // },
     WhoisUser311 {
         client_info: ClientInfo,
     },
@@ -86,9 +82,7 @@ pub enum CommandResponse {
 impl Display for CommandResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
-            // CommandResponse::Away301 { nickname, message } => {
-            //     format!("301 {nickname} :{message}")
-            // }
+
             CommandResponse::WhoisUser311 { client_info } => {
                 format!(
                     "311 {} {} {} *: {}",
@@ -187,5 +181,130 @@ impl Display for CommandResponse {
             }
         };
         write!(f, "{string}")
+    }
+}
+
+impl CommandResponse {
+
+    pub fn unaway() -> Self {
+        Self::UnAway
+    }
+
+    pub fn now_away() -> Self {
+        Self::NowAway
+    }
+
+    pub fn list_start() -> Self {
+        Self::ListStart321
+    }
+
+    pub fn list_end() -> Self {
+        Self::ListEnd323
+    }
+
+    pub fn you_are_oper() -> Self {
+        Self::YouAreOper381
+    }
+
+    pub fn end_of_who(name: Option<String>) -> Self {
+        Self::EndOfWho315 { name }
+    }
+
+    pub fn name_reply(channel: &str, clients: &[String]) -> Self {
+        let channel = channel.to_string();
+        let clients = clients.to_vec();
+        Self::NameReply353 { channel, clients }
+    }
+
+    pub fn whois_user(client_info: &ClientInfo) -> Self {
+        let client_info = client_info.clone();
+        Self::WhoisUser311 { client_info }
+    }
+
+    pub fn end_of_whois(nickname: &str) -> Self {
+        let nickname = nickname.to_string();
+        Self::EndOfWhois318 { nickname }
+    }
+
+    pub fn whois_channel(nickname: &str, channels: &[String]) -> Self {
+        let nickname = nickname.to_string();
+        let channels = channels.to_vec();
+        Self::WhoisChannels319 { nickname, channels }
+    }
+
+    pub fn whois_operator(nickname: &str) -> Self {
+        let nickname = nickname.to_string();
+        Self::WhoisOperator313 { nickname }
+    }
+
+    pub fn whois_server(nickname: &str, servername: &str, serverinfo: &str) -> Self {
+        let nickname = nickname.to_string();
+        let servername = servername.to_string();
+        let serverinfo = serverinfo.to_string();
+        Self::WhoisServer312 {
+            nickname,
+            server: servername,
+            server_info: serverinfo,
+        }
+    }
+
+    pub fn banlist(channel: &str, banmask: &str) -> Self {
+        let channel = channel.to_string();
+        let banmask = banmask.to_string();
+        Self::BanList367 { channel, banmask }
+    }
+
+    pub fn end_of_banlist(channel: &str) -> Self {
+        let channel = channel.to_string();
+        Self::EndOfBanList368 { channel }
+    }
+
+    pub fn topic(channel: &str, topic: &str) -> Self {
+        let channel = channel.to_string();
+        let topic = topic.to_string();
+        Self::Topic332 { channel, topic }
+    }
+
+    pub fn whoreply(channel: &Option<String>, client_info: &ClientInfo) -> Self {
+        let channel = channel.clone();
+        let client_info = client_info.clone();
+        Self::WhoReply352 {
+            channel,
+            client_info,
+        }
+    }
+
+    pub fn list(channel: String, topic: String, prv: bool) -> Self {
+        Self::List322 {
+            channel,
+            prv,
+            topic,
+        }
+    }
+
+    pub fn inviting(inviting_client: String, channel: String) -> Self {
+        Self::Inviting341 {
+            nickname: inviting_client,
+            channel,
+        }
+    }
+
+    pub fn end_of_names(channel: &str) -> Self {
+        Self::EndOfNames366 {
+            channel: channel.to_string(),
+        }
+    }
+
+    pub fn away(client: &str, message: &str) -> Self {
+        let nickname = client.to_string();
+        Self::Away {
+            nickname,
+            message: message.to_string(),
+        }
+    }
+
+    pub fn no_topic(channel: &str) -> Self {
+        let channel = channel.to_string();
+        Self::NoTopic331 { channel }
     }
 }
