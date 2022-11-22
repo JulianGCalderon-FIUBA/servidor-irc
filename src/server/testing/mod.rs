@@ -19,6 +19,11 @@ pub fn dummy_client(nickname: &str) -> Client<MockTcpStream> {
     builder.build().unwrap()
 }
 
+pub fn dummy_server(servername: &str) -> ExternalServer<MockTcpStream> {
+    let stream = MockTcpStream::new();
+    ExternalServer::new(stream, servername.to_owned(), "serverinfo".to_owned(), 1)
+}
+
 pub fn dummy_database() -> DatabaseHandle<MockTcpStream> {
     let (handle, _) = Database::start("servername".to_string(), "serverinfo".to_string());
     handle

@@ -3,8 +3,11 @@ use std::io;
 use crate::message::{CreationError, Message};
 
 use super::{
-    connection::Connection, consts::commands::SERVER_COMMAND, data_structures::ClientInfo,
-    database::DatabaseHandle, responses::Notification,
+    connection::Connection,
+    consts::commands::SERVER_COMMAND,
+    data_structures::ClientInfo,
+    database::DatabaseHandle,
+    responses::{ErrorReply, Notification},
 };
 
 use crate::server::data_structures::*;
@@ -82,9 +85,24 @@ impl<C: Connection> Register<C> {
             serverinfo,
             hopcount,
         );
+
+        self.assert_can_add_server(&server.servername())?;
         self.database.add_server(server);
 
         self.servername = servername;
+
+        Ok(())
+    }
+
+    fn assert_can_add_server(&mut self, servername: &str) -> io::Result<()> {
+        if self.database.contains_server(servername) {
+            let command = SERVER_COMMAND.to_string();
+            let message = "Servername already registered".to_string();
+            self.stream
+                .send(&ErrorReply::UnknownError400 { command, message })?;
+
+            return Err(already_registered_error());
+        }
 
         Ok(())
     }
@@ -140,4 +158,8 @@ fn invalid_input_error() -> io::Error {
         io::ErrorKind::InvalidInput,
         "Did not receive valid server notification",
     )
+}
+
+fn already_registered_error() -> io::Error {
+    io::Error::new(io::ErrorKind::Unsupported, "Server is already registered")
 }
