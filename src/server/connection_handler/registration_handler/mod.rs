@@ -15,6 +15,7 @@ use super::{
         ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
         ConnectionHandlerStructure, ConnectionHandlerUtils,
     },
+    ServerHandler,
 };
 
 mod asserts;
@@ -79,6 +80,23 @@ impl<C: Connection> RegistrationHandler<C> {
             Arc::clone(self.online()),
         )
     }
+
+    fn spawn_server_handler(&mut self) {
+        let server_handler = match self.build_server_handler() {
+            Ok(server_handler) => server_handler,
+            Err(error) => return eprintln!("Could not initiate server handler, {error:?}"),
+        };
+        server_handler.handle();
+    }
+
+    fn build_server_handler(&mut self) -> io::Result<ServerHandler<C>> {
+        ServerHandler::from_connection(
+            self.stream().try_clone()?,
+            self.servername.clone(),
+            self.database().clone(),
+            Arc::clone(self.online()),
+        )
+    }
 }
 
 impl<C: Connection> ConnectionHandlerGetters<C> for RegistrationHandler<C> {
@@ -102,7 +120,7 @@ impl<C: Connection> ConnectionHandlerStructure<C> for RegistrationHandler<C> {
     fn on_try_handle_success(&mut self) {
         match self.connection_type {
             ConnectionType::Undefined => println!("Closing connection with unregistered client"),
-            ConnectionType::_Server => todo!(),
+            ConnectionType::_Server => self.spawn_server_handler(),
             ConnectionType::Client => self.spawn_client_handler(),
         }
     }
