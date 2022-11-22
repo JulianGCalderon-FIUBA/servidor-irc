@@ -12,7 +12,7 @@ pub struct ExternalClient {
 }
 
 impl ExternalClient {
-    pub fn _new(
+    pub fn new(
         nickname: String,
         username: String,
         hostname: String,

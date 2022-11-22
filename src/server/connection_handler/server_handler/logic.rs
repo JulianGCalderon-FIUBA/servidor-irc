@@ -31,7 +31,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let realname = trail.unwrap();
 
         let client =
-            ExternalClient::_new(nickname, username, hostname, servername, realname, hopcount);
+            ExternalClient::new(nickname, username, hostname, servername, realname, hopcount);
 
         self.database.add_external_client(&self.servername, client);
 
@@ -44,7 +44,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let sender = prefix.unwrap();
         let target = params.remove(0);
         let content = trail.unwrap();
-
 
         self.send_privmsg_notification(&sender, &target, &content)?;
 
