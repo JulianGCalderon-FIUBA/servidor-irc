@@ -1,35 +1,42 @@
 pub mod requests;
 mod widgets_creation;
 
-use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Button, Orientation };
+use gtk::{
+    glib::{GString, Sender},
+    prelude::*,
+    Box, Button, Orientation,
+};
 use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
-        views_add::widget_creations::create_title,
-        widgets_creation::create_button_with_margin,
+        views_add::widget_creations::create_title, widgets_creation::create_button_with_margin,
     },
 };
 
 use self::{
-    requests::{ add_view_to_add_client_request, send_list_request },
+    requests::{add_view_to_add_client_request, send_list_request},
     widgets_creation::create_separator_sidebar,
 };
 
-use super::{ utils::adjust_scrollbar, MainView, requests::change_conversation_request };
+use super::{requests::change_conversation_request, utils::adjust_scrollbar, MainView};
 
 const CHANNELS_TITLE: &str = "Channels";
 const CLIENTS_TITLE: &str = "Clients";
 
 impl MainView {
     pub fn create_sidebar(&mut self) -> Box {
-        let sidebar = Box::builder().width_request(200).orientation(Orientation::Vertical).build();
+        let sidebar = Box::builder()
+            .width_request(200)
+            .orientation(Orientation::Vertical)
+            .build();
 
         //Channels box
         let channels_title = create_title(CHANNELS_TITLE);
 
-        self.scrollwindow_channels.set_child(Some(&self.channels_box));
+        self.scrollwindow_channels
+            .set_child(Some(&self.channels_box));
 
         self.connect_add_channel_button(self.add_channel.clone(), self.sender.clone());
 
@@ -87,7 +94,7 @@ impl MainView {
         &self,
         button: Button,
         channel_or_client: GString,
-        sender: Sender<ControllerMessage>
+        sender: Sender<ControllerMessage>,
     ) {
         button.connect_clicked(move |_| {
             change_conversation_request(channel_or_client.clone(), sender.clone());
@@ -111,7 +118,7 @@ impl MainView {
         }
     }
 
-    pub fn current_conv_is_channel(label: String)-> bool{
-        label.chars().nth(0).unwrap() == '#'
+    pub fn current_conv_is_channel(label: String) -> bool {
+        label.starts_with('#')
     }
 }

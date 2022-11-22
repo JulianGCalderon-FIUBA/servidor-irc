@@ -1,4 +1,4 @@
-use gtk::glib:: Sender;
+use gtk::glib::Sender;
 use gtk4 as gtk;
 
 use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};

@@ -1,9 +1,9 @@
 mod chat;
 mod conv_info;
+pub mod requests;
 mod sidebar;
 pub mod utils;
 pub mod widgets_creation;
-pub mod requests;
 
 use gtk::{
     glib::{GString, Sender},

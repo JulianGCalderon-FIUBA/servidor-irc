@@ -1,13 +1,17 @@
 pub mod requests;
 
-use gtk::{ glib::{ Sender, GString }, prelude::*, Align, Box, Orientation, Label, Button };
+use gtk::{
+    glib::{GString, Sender},
+    prelude::*,
+    Align, Box, Button, Label, Orientation,
+};
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::requests::{ add_invite_view_request, quit_channel_request, remove_conversation_request };
+use self::requests::{add_invite_view_request, quit_channel_request, remove_conversation_request};
 
-use super::{ MainView, requests::change_conversation_request };
+use super::{requests::change_conversation_request, MainView};
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
@@ -20,8 +24,9 @@ impl MainView {
             .halign(Align::Start)
             .build();
 
-        self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
-        self.user_info.set_label(&nickname);
+        self.quit_channel_button
+            .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
+        self.user_info.set_label(nickname);
 
         conv_info.append(&self.quit_channel_button);
         conv_info.append(&self.channel_members_button);
@@ -38,9 +43,9 @@ impl MainView {
     fn connect_quit_channel(
         &mut self,
         current_conversation: Label,
-        sender: Sender<ControllerMessage>
+        sender: Sender<ControllerMessage>,
     ) {
-        let my_nickname = self.user_info.label().unwrap().clone();
+        let my_nickname = self.user_info.label().unwrap();
         self.quit_channel_button.connect_clicked(move |_| {
             if Self::current_conv_is_channel(current_conversation.label().to_string()) {
                 quit_channel_request(sender.clone());
@@ -74,7 +79,7 @@ impl MainView {
             }
             counter += 1;
         }
-        if colection_of_buttons.len() > 0 {
+        if !colection_of_buttons.is_empty() {
             colection_of_buttons.remove(counter);
         }
     }
