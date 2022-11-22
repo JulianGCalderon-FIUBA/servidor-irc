@@ -16,7 +16,6 @@ use super::{
 };
 
 pub struct ConnectionListener {
-    servername: String,
     database: DatabaseHandle<TcpStream>,
     listener: TcpListener,
     online: Arc<AtomicBool>,
@@ -24,7 +23,6 @@ pub struct ConnectionListener {
 
 impl ConnectionListener {
     pub fn new(
-        servername: String,
         address: String,
         database: DatabaseHandle<TcpStream>,
         online: Arc<AtomicBool>,
@@ -33,7 +31,6 @@ impl ConnectionListener {
         listener.set_nonblocking(true)?;
 
         let connection_listener = Self {
-            servername,
             database,
             listener,
             online,
@@ -64,7 +61,6 @@ impl ConnectionListener {
     fn handler(&self, client: TcpStream) -> io::Result<RegistrationHandler<TcpStream>> {
         let database = self.database.clone();
         let online = Arc::clone(&self.online);
-        let servername = self.servername.clone();
-        RegistrationHandler::<TcpStream>::from_connection(client, servername, database, online)
+        RegistrationHandler::<TcpStream>::from_connection(client, database, online)
     }
 }

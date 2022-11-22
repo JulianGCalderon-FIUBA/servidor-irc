@@ -32,7 +32,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
 
         let realname = trail.unwrap();
         let username = params.pop().unwrap();
-        let servername = self.servername.to_string();
+        let servername = self.database.get_server_name();
         let hostname = self.stream.peer_address()?.ip().to_string();
 
         self.attributes.insert("username", username);

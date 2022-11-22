@@ -181,4 +181,10 @@ pub enum DatabaseMessage<C: Connection> {
         server: String,
         client: ExternalClient,
     },
+    GetServerName {
+        respond_to: Sender<String>,
+    },
+    GetServerInfo {
+        respond_to: Sender<String>,
+    },
 }

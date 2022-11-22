@@ -36,26 +36,31 @@ pub struct Database<C: Connection> {
     channels: HashMap<String, Channel<C>>,
     servers: HashMap<String, ExternalServer<C>>,
     credentials: HashMap<String, String>,
+    servername: String,
+    serverinfo: String,
 }
 
 impl<C: Connection> Database<C> {
     /// Returns new [`DatabaseHandle`] and starts listening for requests.
-    pub fn start() -> (DatabaseHandle<C>, JoinHandle<()>) {
+    pub fn start(servername: String, serverinfo: String) -> (DatabaseHandle<C>, JoinHandle<()>) {
         let (sender, receiver) = mpsc::channel();
 
-        let join_handle = thread::spawn(|| Database::<C>::new(receiver).run());
+        let join_handle =
+            thread::spawn(|| Database::<C>::new(receiver, servername, serverinfo).run());
         let database_handle = DatabaseHandle::new(sender);
 
         (database_handle, join_handle)
     }
 
-    fn new(receiver: Receiver<DatabaseMessage<C>>) -> Self {
+    fn new(receiver: Receiver<DatabaseMessage<C>>, servername: String, serverinfo: String) -> Self {
         let mut database = Self {
             receiver,
             clients: HashMap::new(),
             channels: HashMap::new(),
             servers: HashMap::new(),
             credentials: HashMap::new(),
+            servername,
+            serverinfo,
         };
 
         database
@@ -218,6 +223,8 @@ impl<C: Connection> Database<C> {
             DatabaseMessage::AddExternalClient { server, client } => {
                 self.handle_add_external_client(&server, client)
             }
+            DatabaseMessage::GetServerName { respond_to } => self.handle_get_servername(respond_to),
+            DatabaseMessage::GetServerInfo { respond_to } => self.handle_get_serverinfo(respond_to),
         }
     }
 }

@@ -24,7 +24,7 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
         let nickname = client_info.nickname.clone();
-        let server = self.servername.to_string();
+        let server = client_info.servername.clone();
 
         self.send_response(&CommandResponse::WhoisUser311 { client_info })?;
         self.send_whois_server_response(&nickname, server)?;

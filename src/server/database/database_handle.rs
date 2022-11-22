@@ -410,6 +410,20 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
+    pub fn get_server_name(&self) -> String {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetServerName { respond_to: sender };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn get_server_info(&self) -> String {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetServerInfo { respond_to: sender };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
     // pub fn get_channel_modes(&self, channel: &str) -> Vec<char> {
     //     let (sender, receiver) = mpsc::channel();
     //     let request = DatabaseMessage::GetAllChannelModes {

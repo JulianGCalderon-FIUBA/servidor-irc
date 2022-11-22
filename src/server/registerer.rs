@@ -47,9 +47,9 @@ impl<C: Connection> Register<C> {
 
     fn send_server_notification(&mut self) -> io::Result<()> {
         let notification = Notification::Server {
-            servername: self.servername.clone(), //self.database.get_server_name()
+            servername: self.database.get_server_name(), //self.database.get_server_name()
             hopcount: 1,
-            serverinfo: "info".to_string(), //self.database.get_server_info()
+            serverinfo: self.database.get_server_info(), //self.database.get_server_info()
         };
 
         let message = Message::new(&notification.to_string()).unwrap();

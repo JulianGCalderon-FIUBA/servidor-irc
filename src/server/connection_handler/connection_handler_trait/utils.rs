@@ -34,7 +34,6 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
 
     fn send_message_to_target(&mut self, message: &dyn Display, target: &str) -> io::Result<()> {
         if self.database().contains_client(target) {
-            println!("existe el cliente");
             self.send_message_to_client(message, target)?
         } else {
             self.send_message_to_channel(message, target);

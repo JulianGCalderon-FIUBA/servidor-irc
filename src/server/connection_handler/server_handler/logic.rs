@@ -45,7 +45,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let target = params.remove(0);
         let content = trail.unwrap();
 
-        println!("Enviando mensaje a {target} de {sender}");
 
         self.send_privmsg_notification(&sender, &target, &content)?;
 

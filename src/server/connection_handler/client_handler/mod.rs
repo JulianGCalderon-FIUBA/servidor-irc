@@ -18,7 +18,6 @@ pub struct ClientHandler<C: Connection> {
     stream: C,
     database: DatabaseHandle<C>,
     nickname: String,
-    servername: String,
     online: Arc<AtomicBool>,
 }
 impl<C: Connection> ConnectionHandler<C> for ClientHandler<C> {}
@@ -26,7 +25,6 @@ impl<C: Connection> ConnectionHandler<C> for ClientHandler<C> {}
 impl<C: Connection> ClientHandler<C> {
     pub fn from_connection(
         stream: C,
-        servername: String,
         nickname: String,
         database: DatabaseHandle<C>,
         online: Arc<AtomicBool>,
@@ -34,7 +32,6 @@ impl<C: Connection> ClientHandler<C> {
         Ok(Self {
             stream,
             database,
-            servername,
             online,
             nickname,
         })

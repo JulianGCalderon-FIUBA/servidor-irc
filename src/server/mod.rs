@@ -35,7 +35,6 @@ pub const OPER_PASSWORD: &str = "admin";
 
 /// Represents a Server clients can connect to it contains a Database that stores relevant information.
 pub struct Server {
-    servername: String,
     database: Option<DatabaseHandle<TcpStream>>,
     online: Arc<AtomicBool>,
     threads: Vec<JoinHandle<()>>,
@@ -47,13 +46,12 @@ impl Server {
         let servername = servername.to_string();
         let online = Arc::new(AtomicBool::new(true));
 
-        let (database, database_thread) = Database::start();
+        let (database, database_thread) = Database::start(servername.clone(), servername);
 
         let threads = vec![database_thread];
         let database = Some(database);
 
         Self {
-            servername,
             online,
             database,
             threads,
@@ -67,10 +65,9 @@ impl Server {
     /// Listens for incoming clients and handles each request in a new thread.
     pub fn listen_to(&mut self, address: String) -> io::Result<()> {
         let online = Arc::clone(&self.online);
-        let servername = self.servername.clone();
         let database = self.database.clone().unwrap();
 
-        let connection_listener = ConnectionListener::new(servername, address, database, online)?;
+        let connection_listener = ConnectionListener::new(address, database, online)?;
 
         let thread = thread::spawn(|| connection_listener.listen());
 
