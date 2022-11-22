@@ -150,13 +150,17 @@ impl Controller {
                 QuitChannel {} => {
                     let part_message = format!("{} {}", PART_COMMAND, current_conv);
                     client.send_raw(&part_message).expect("ERROR: Part message");
-                    main_view.remove_channel(current_conv.clone());
+                }
+                RemoveConversation {} => {
+                    main_view.remove_conversation(current_conv.clone());
                 }
                 AddInviteView {} => {
                     let my_channels = main_view.get_my_channels();
-                    invite_window = InviteView::new(sender_clone.clone())
-                        .get_view(app_clone.clone(), my_channels);
-                    invite_window.show();
+                    if !my_channels.is_empty() {
+                        invite_window = InviteView::new(sender_clone.clone())
+                            .get_view(app_clone.clone(), my_channels);
+                        invite_window.show();
+                    }
                 }
                 SendInviteMessage { channel } => {
                     invite_window.close();

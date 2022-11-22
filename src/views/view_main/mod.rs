@@ -1,5 +1,6 @@
 mod chat;
 mod conv_info;
+pub mod requests;
 mod sidebar;
 pub mod utils;
 pub mod widgets_creation;
@@ -37,6 +38,7 @@ pub struct MainView {
     pub scrollwindow_channels: ScrolledWindow,
     pub add_channel: Button,
     pub clients_box: Box,
+    pub clients_buttons: Vec<Button>,
     pub scrollwindow_clients: ScrolledWindow,
     pub add_client: Button,
     pub current_chat: Label,
@@ -46,9 +48,9 @@ pub struct MainView {
     pub user_info: Button,
     pub send_message: Button,
     pub input: Entry,
-    pub channel_info: Button,
-    pub quit_channel: Button,
-    pub func_channel: Button,
+    pub channel_members_button: Button,
+    pub quit_channel_button: Button,
+    pub invite_button: Button,
     sender: Sender<ControllerMessage>,
 }
 
@@ -56,8 +58,8 @@ const ADD_BUTTON_TEXT: &str = "+";
 const ENTRY_PLACEHOLDER: &str = "Message...";
 const SEND_BUTTON_TEXT: &str = "Send";
 const QUIT_BUTTON_TEXT: &str = "x";
-const INFO_BUTTON_TEXT: &str = "Info";
-const FUNC_BUTTON_TEXT: &str = "Func";
+const MEMBERS_BUTTON_TEXT: &str = "Members";
+const INVITE_BUTTON_TEXT: &str = "Invite to channel";
 const ADD_BUTTON_CSS: &str = "add";
 const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
 
@@ -69,6 +71,7 @@ impl MainView {
             scrollwindow_channels: create_scrollwindow_sidebar(),
             add_channel: create_add_button(ADD_BUTTON_TEXT),
             clients_box: create_channels_and_client_box(),
+            clients_buttons: vec![],
             scrollwindow_clients: create_scrollwindow_sidebar(),
             add_client: create_add_button(ADD_BUTTON_TEXT),
             current_chat: create_current_chat(""),
@@ -78,16 +81,14 @@ impl MainView {
             user_info: create_button_with_margin(""),
             input: create_entry(ENTRY_PLACEHOLDER),
             send_message: create_button_with_margin(SEND_BUTTON_TEXT),
-            quit_channel: create_button_with_margin(QUIT_BUTTON_TEXT),
-            channel_info: create_button_with_margin(INFO_BUTTON_TEXT),
-            func_channel: create_button_with_margin(FUNC_BUTTON_TEXT),
+            quit_channel_button: create_button_with_margin(QUIT_BUTTON_TEXT),
+            channel_members_button: create_button_with_margin(MEMBERS_BUTTON_TEXT),
+            invite_button: create_button_with_margin(INVITE_BUTTON_TEXT),
             sender,
         }
     }
 
     pub fn get_view(&mut self, app: Application, nickname: GString) -> ApplicationWindow {
-        self.user_info.set_label(&nickname);
-
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -100,10 +101,10 @@ impl MainView {
         let separator = create_separator(Vertical);
         main_box.append(&separator);
 
-        let chat = self.create_chat();
+        let chat = self.create_chat(&nickname);
         main_box.append(&chat);
 
-        let conv_info = self.create_conv_info();
+        let conv_info = self.create_conv_info(&nickname);
         main_box.append(&conv_info);
 
         window.set_child(Some(&main_box));

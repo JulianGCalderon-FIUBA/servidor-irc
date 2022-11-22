@@ -9,11 +9,10 @@ pub fn quit_channel_request(sender: Sender<ControllerMessage>) {
         .expect(ERROR_TEXT);
 }
 
-pub fn change_conversation_request(sender: Sender<ControllerMessage>) {
-    let change_conv = ControllerMessage::ChangeConversation {
-        nickname: "".to_string(),
-    };
-    sender.send(change_conv).expect(ERROR_TEXT);
+pub fn remove_conversation_request(sender: Sender<ControllerMessage>) {
+    sender
+        .send(ControllerMessage::RemoveConversation {})
+        .expect(ERROR_TEXT);
 }
 
 pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
