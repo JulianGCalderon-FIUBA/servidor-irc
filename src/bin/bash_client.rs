@@ -4,10 +4,14 @@ use std::time::Duration;
 use std::{env, io};
 
 use internet_relay_chat::client::Client;
+use internet_relay_chat::ADDRESS;
 
 fn main() {
     let mut args: Vec<String> = env::args().collect();
-    let address = args.pop().unwrap();
+    let address = match args.pop() {
+        Some(address) => address,
+        None => ADDRESS.to_string(),
+    };
 
     let mut client = match Client::new(address) {
         Ok(stream) => stream,

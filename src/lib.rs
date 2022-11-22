@@ -17,4 +17,5 @@ pub mod controller;
 
 pub mod views;
 
-pub const ADDRESS: &str = "127.0.0.1:9002";
+pub const ADDRESS: &str = "127.0.0.1:9000";
+pub const SERVERNAME: &str = "lemonpie";
