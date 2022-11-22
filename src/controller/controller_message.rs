@@ -26,6 +26,7 @@ pub enum ControllerMessage {
         client: GString,
     },
     QuitChannel {},
+    RemoveConversation {},
     ChangeConversation {
         nickname: String,
     },

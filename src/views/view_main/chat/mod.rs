@@ -1,7 +1,11 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry};
+use gtk::{
+    glib::{GString, Sender},
+    prelude::*,
+    Box, Entry,
+};
 use gtk4 as gtk;
 
 use crate::{
@@ -23,7 +27,9 @@ const CHAT_CSS: &str = "chat";
 const MESSAGE_BOX_CSS: &str = "message_box";
 
 impl MainView {
-    pub fn create_chat(&mut self) -> Box {
+    pub fn create_chat(&mut self, nickname: &GString) -> Box {
+        self.current_chat.set_label(nickname);
+
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
 
