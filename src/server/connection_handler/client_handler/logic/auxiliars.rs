@@ -7,7 +7,7 @@ impl<C: Connection> ClientHandler<C> {
         self.send_privmsg_notification(target, content)?;
 
         if let Some(message) = self.database.get_away_message(target) {
-            self.send_away_response(target, &message)?;
+            self.stream.send_away(target, &message)?;
         }
 
         Ok(())

@@ -20,15 +20,17 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
-        let nickname = client_info.nickname.clone();
-        let servername = client_info.servername.clone();
+        let nickname = &client_info.nickname;
+        let servername = &client_info.servername;
         let serverinfo = "serverinfo"; // todo
 
         self.stream.send_whois_user(&client_info)?;
 
-        self.send_whois_server_response(&nickname, &servername, serverinfo)?;
-        self.send_whois_operator_response(&nickname)?;
-        self.send_whois_channels_response(&nickname)?;
+        self.stream
+            .send_whois_server(nickname, servername, serverinfo)?;
+
+        self.send_whois_operator_response(nickname)?;
+        self.send_whois_channels_response(nickname)?;
 
         self.stream.send_end_of_whois(&client_info.nickname)?;
 
@@ -50,16 +52,6 @@ impl<C: Connection> ClientHandler<C> {
             self.stream.send_whois_operator(nickname)?;
         };
         Ok(())
-    }
-
-    fn send_whois_server_response(
-        &mut self,
-        nickname: &str,
-        servername: &str,
-        serverinfo: &str,
-    ) -> Result<(), io::Error> {
-        self.stream
-            .send_whois_server(nickname, servername, serverinfo)
     }
 
     pub(super) fn send_banlist_response(&mut self, channel: &str) -> io::Result<()> {
@@ -100,24 +92,9 @@ impl<C: Connection> ClientHandler<C> {
         self.stream.send_list(channel, topic, prv)
     }
 
-    pub(super) fn send_invite_response(
-        &mut self,
-        inviting_client: String,
-        channel: String,
-    ) -> Result<(), io::Error> {
-        self.stream.send_inviting(inviting_client, channel)
-    }
-
     pub(super) fn send_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
         let clients = self.database.get_clients_for_channel(channel);
         self.stream.send_name_reply(channel, &clients)
-    }
-
-    pub(super) fn send_end_of_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
-        self.stream.send_end_of_names(channel)
-    }
-    pub(super) fn send_quit_response(&mut self, message: &str) -> io::Result<()> {
-        self.stream.send_quit(message)
     }
 
     pub(super) fn send_join_notification(&mut self, channel: &str) {
@@ -160,13 +137,7 @@ impl<C: Connection> ClientHandler<C> {
         }
     }
 
-    pub(super) fn send_away_response(
-        &mut self,
-        client: &str,
-        message: &str,
-    ) -> Result<(), io::Error> {
-        self.stream.send_away(client, message)
-    }
+    
 
     pub(super) fn send_kick_notification(
         &mut self,

@@ -123,7 +123,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             .send_invite_notification(invited_client, &channel)
             .is_ok()
         {
-            self.send_invite_response(inviting_client, channel)?;
+            self.stream.send_inviting(inviting_client, channel)?;
         }
 
         Ok(true)
@@ -141,12 +141,12 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_names_response(&channel)?;
 
             if !params.is_empty() {
-                self.send_end_of_names_response(&channel)?;
+                self.stream.send_end_of_names(&channel)?;
             }
         }
 
         if params.is_empty() {
-            self.send_end_of_names_response("")?;
+            self.stream.send_end_of_names("")?;
         }
 
         Ok(true)
@@ -273,7 +273,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.disconnect_client(&self.nickname);
 
         self.send_quit_notification(&message);
-        self.send_quit_response(&message)?;
+        self.stream.send_quit(&message)?;
 
         Ok(false)
     }
