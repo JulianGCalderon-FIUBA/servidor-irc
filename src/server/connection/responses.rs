@@ -105,7 +105,7 @@ pub trait ConnectionResponses: Write + Sized {
         self.send(&response)
     }
 
-    fn send_list_response(&mut self, channel: String, topic: String, prv: bool) -> io::Result<()> {
+    fn send_list(&mut self, channel: String, topic: String, prv: bool) -> io::Result<()> {
         let response = CommandResponse::List322 {
             channel,
             prv,
@@ -128,17 +128,40 @@ pub trait ConnectionResponses: Write + Sized {
         };
         self.send(&response)
     }
-    fn send_quit_notificatio(&mut self, message: &str) -> io::Result<()> {
+    fn send_quit(&mut self, message: &str) -> io::Result<()> {
         let notification = Notification::Quit {
             message: message.to_string(),
         };
         self.send(&notification)
     }
 
-    fn send_away(&mut self, client: &str, message: String) -> Result<(), io::Error> {
+    fn send_away(&mut self, client: &str, message: &str) -> Result<(), io::Error> {
         let nickname = client.to_string();
-        let response = CommandResponse::Away { nickname, message };
+        let response = CommandResponse::Away { nickname, message: message.to_string() };
         self.send(&response)
+    }
+
+    fn send_server(
+        &mut self,
+        servername: &str,
+        hopcount: usize,
+        serverinfo: &str,
+    ) -> io::Result<()> {
+        let servername = servername.to_string();
+        let serverinfo = serverinfo.to_string();
+        let notification = Notification::Server {
+            servername,
+            hopcount,
+            serverinfo,
+        };
+
+        self.send(&notification)
+    }
+
+    fn send_no_topic(&mut self, channel: &str) -> io::Result<()> {
+        let channel = channel.to_string();
+        let reply = CommandResponse::NoTopic331 { channel };
+        self.send(&reply)
     }
 }
 

@@ -2,10 +2,9 @@ use std::io;
 
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
+    CommandArgs, ConnectionHandlerLogic,
 };
 use crate::server::registerer::Register;
-use crate::server::responses::Notification;
 
 use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
@@ -73,9 +72,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         let message =
             trail.unwrap_or_else(|| self.attributes.remove("nickname").unwrap_or_default());
 
-        let notification = Notification::Quit { message };
-
-        self.send_response(&notification.to_string())?;
+        self.stream.send_quit(&message)?;
 
         Ok(false)
     }

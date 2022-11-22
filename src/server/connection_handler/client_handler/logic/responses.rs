@@ -1,7 +1,7 @@
 use std::io;
 
 use crate::server::consts::modes::PRIVATE;
-use crate::server::responses::{CommandResponse, Notification};
+use crate::server::responses::Notification;
 use crate::server::{
     connection::Connection,
     connection_handler::{
@@ -15,23 +15,22 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_join_response(&mut self, channel: &str) -> io::Result<()> {
         self.send_topic_response(channel.to_string())?;
 
-        let name_reply = &CommandResponse::NameReply353 {
-            channel: channel.to_string(),
-            clients: self.database.get_clients_for_channel(channel),
-        };
-
-        self.send_response(name_reply)
+        let clients = self.database.get_clients_for_channel(channel);
+        self.stream.send_name_reply(channel, &clients)
     }
 
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
         let nickname = client_info.nickname.clone();
-        let server = client_info.servername.clone();
+        let servername = client_info.servername.clone();
+        let serverinfo = "todo: serverinfo";
 
-        self.send_response(&CommandResponse::WhoisUser311 { client_info })?;
-        self.send_whois_server_response(&nickname, server)?;
+        self.stream.send_whois_user(&client_info)?;
+
+        self.send_whois_server_response(&nickname, &servername, serverinfo)?;
         self.send_whois_operator_response(&nickname)?;
         self.send_whois_channels_response(&nickname)?;
-        self.send_response(&CommandResponse::EndOfWhois318 { nickname })?;
+
+        self.stream.send_end_of_whois(&client_info.nickname)?;
 
         Ok(())
     }
@@ -40,19 +39,15 @@ impl<C: Connection> ClientHandler<C> {
         let mut channels = self.database.get_channels_for_client(nickname);
         if !channels.is_empty() {
             self.append_channel_role(&mut channels, nickname);
-            self.send_response(&CommandResponse::WhoisChannels319 {
-                nickname: nickname.to_string(),
-                channels,
-            })?;
+            self.stream.send_whois_channel(nickname, &channels)?;
         };
+
         Ok(())
     }
 
     fn send_whois_operator_response(&mut self, nickname: &str) -> Result<(), io::Error> {
         if self.database.is_server_operator(nickname) {
-            self.send_response(&CommandResponse::WhoisOperator313 {
-                nickname: nickname.to_string(),
-            })?;
+            self.stream.send_whois_operator(nickname)?;
         };
         Ok(())
     }
@@ -60,32 +55,26 @@ impl<C: Connection> ClientHandler<C> {
     fn send_whois_server_response(
         &mut self,
         nickname: &str,
-        server: String,
+        servername: &str,
+        serverinfo: &str,
     ) -> Result<(), io::Error> {
-        self.send_response(&CommandResponse::WhoisServer312 {
-            nickname: nickname.to_string(),
-            server,
-            server_info: "Lemon pie server".to_string(),
-        })
+        self.stream
+            .send_whois_server(nickname, servername, serverinfo)
     }
 
     pub(super) fn send_banlist_response(&mut self, channel: &str) -> io::Result<()> {
         let banmasks = self.database.get_channel_banmask(channel);
         for banmask in banmasks {
-            self.send_response(&CommandResponse::BanList367 {
-                channel: channel.to_string(),
-                banmask,
-            })?;
+            self.stream.send_banlist(channel, &banmask)?;
         }
-        self.send_response(&CommandResponse::EndOfBanList368 {
-            channel: channel.to_string(),
-        })
+
+        self.stream.send_end_of_banlist(channel)
     }
 
     pub(super) fn send_topic_response(&mut self, channel: String) -> io::Result<()> {
         match self.database.get_topic_for_channel(&channel) {
-            Some(topic) => self.send_response(&CommandResponse::Topic332 { channel, topic }),
-            None => self.send_response(&CommandResponse::NoTopic331 { channel }),
+            Some(topic) => self.stream.send_topic(&channel, &topic),
+            None => self.stream.send_no_topic(&channel),
         }
     }
 
@@ -96,26 +85,19 @@ impl<C: Connection> ClientHandler<C> {
             .get(0)
             .map(|string| string.to_owned());
 
-        self.send_response(&CommandResponse::WhoReply352 {
-            channel,
-            client_info,
-        })
+        self.stream.send_whoreply_response(&channel, &client_info)
     }
 
     pub(super) fn send_list_response(&mut self, channel: String) -> io::Result<()> {
-        let topic = match self.database.get_topic_for_channel(&channel) {
-            Some(topic) => topic,
-            None => "No topic set".to_string(),
-        };
+        let topic = self
+            .database
+            .get_topic_for_channel(&channel)
+            .unwrap_or_else(|| "No topic set".to_string());
 
         let prv =
             self.database.channel_has_mode(&channel, PRIVATE) && !self.is_in_channel(&channel);
 
-        self.send_response(&CommandResponse::List322 {
-            channel,
-            prv,
-            topic,
-        })
+        self.stream.send_list(channel, topic, prv)
     }
 
     pub(super) fn send_invite_response(
@@ -123,33 +105,19 @@ impl<C: Connection> ClientHandler<C> {
         inviting_client: String,
         channel: String,
     ) -> Result<(), io::Error> {
-        let invite_response = CommandResponse::Inviting341 {
-            nickname: inviting_client,
-            channel,
-        };
-        self.send_response(&invite_response)
+        self.stream.send_inviting(inviting_client, channel)
     }
 
     pub(super) fn send_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
         let clients = self.database.get_clients_for_channel(channel);
-        let name_reply = CommandResponse::NameReply353 {
-            channel: channel.to_string(),
-            clients,
-        };
-        self.send_response(&name_reply)
+        self.stream.send_name_reply(channel, &clients)
     }
 
     pub(super) fn send_end_of_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
-        let end_of_names = CommandResponse::EndOfNames366 {
-            channel: channel.to_string(),
-        };
-        self.send_response(&end_of_names)
+        self.stream.send_end_of_names(channel)
     }
     pub(super) fn send_quit_response(&mut self, message: &str) -> io::Result<()> {
-        let notification = Notification::Quit {
-            message: message.to_string(),
-        };
-        self.send_response(&notification)
+        self.stream.send_quit(message)
     }
 
     pub(super) fn send_join_notification(&mut self, channel: &str) {
@@ -185,6 +153,7 @@ impl<C: Connection> ClientHandler<C> {
         let notification = Notification::Quit {
             message: message.to_string(),
         };
+
         let channels = self.database.get_channels_for_client(&self.nickname);
         for channel in channels {
             self.send_message_to_channel(&channel, &notification.to_string());
@@ -194,11 +163,9 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_away_response(
         &mut self,
         client: &str,
-        message: String,
+        message: &str,
     ) -> Result<(), io::Error> {
-        let nickname = client.to_string();
-        let reply = CommandResponse::Away { nickname, message };
-        self.send_response(&reply)
+        self.stream.send_away(client, message)
     }
 
     pub(super) fn send_kick_notification(
