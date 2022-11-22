@@ -1,6 +1,6 @@
 use crate::server::connection::Connection;
 
-use super::Client;
+use super::*;
 
 /// A ClientBuilder is used to build a Client using a Builder pattern.
 pub struct ClientBuilder<C: Connection> {
@@ -81,7 +81,6 @@ impl<C: Connection> ClientBuilder<C> {
             realname: self.realname?,
             operator: false,
             away_message: None,
-            online: true,
         };
 
         Some(client_info)

@@ -4,12 +4,10 @@ use std::{
 };
 
 use crate::server::connection::Connection;
+use crate::server::data_structures::*;
 
-use super::{
-    database_message::DatabaseMessage,
-    external_server::{ExternalClient, ExternalServer},
-};
-use super::{Client, ClientInfo};
+use super::database_message::DatabaseMessage;
+
 /// A DatabaseHandle handles and makes request to the main Database. Works as an intermediary so external structures cannot acces the Database directly.
 pub struct DatabaseHandle<C: Connection> {
     sender: Sender<DatabaseMessage<C>>,

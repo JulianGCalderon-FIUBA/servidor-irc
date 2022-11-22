@@ -7,8 +7,9 @@ use crate::server::{
     connection_handler::{
         client_handler::ClientHandler, connection_handler_trait::ConnectionHandlerUtils,
     },
-    database::ClientInfo,
 };
+
+use crate::server::data_structures::*;
 
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_join_response(&mut self, channel: &str) -> io::Result<()> {

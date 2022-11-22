@@ -1,11 +1,8 @@
-mod external_client;
-pub use external_client::ExternalClient;
-
 use std::{collections::HashMap, io};
 
 use crate::server::connection::Connection;
 
-use super::ClientInfo;
+use super::*;
 
 pub struct ExternalServer<C: Connection> {
     stream: Option<C>,

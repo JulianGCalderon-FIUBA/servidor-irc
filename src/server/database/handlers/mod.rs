@@ -5,9 +5,9 @@ use std::{io, rc::Rc};
 mod logic;
 
 use crate::server::connection::Connection;
+use crate::server::data_structures::*;
 
-use super::external_server::{ExternalClient, ExternalServer};
-use super::{ClientInfo, Database};
+use super::Database;
 
 impl<C: Connection> Database<C> {
     /// Returns response to IsServerOperator request.

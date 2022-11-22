@@ -2,7 +2,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::server::connection::Connection;
 
-use super::Client;
+use super::*;
+
 /// A Channel has clients and a name.
 pub struct Channel<C: Connection> {
     _name: String,

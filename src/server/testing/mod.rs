@@ -1,6 +1,9 @@
 mod mock_stream;
 
-use super::database::{Client, ClientBuilder, Database, DatabaseHandle};
+use super::{
+    data_structures::*,
+    database::{Database, DatabaseHandle},
+};
 pub use mock_stream::MockTcpStream;
 
 /// Creates dummy client used for tests.

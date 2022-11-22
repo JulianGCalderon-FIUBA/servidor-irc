@@ -1,10 +1,8 @@
 use std::io;
 use std::sync::mpsc::Sender;
 
-use super::{
-    external_server::{ExternalClient, ExternalServer},
-    Client, ClientInfo,
-};
+use crate::server::data_structures::*;
+
 use crate::server::connection::Connection;
 
 /// Possible messages or requests a Database can receive.

@@ -4,7 +4,8 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
-use crate::server::database::ExternalClient;
+
+use crate::server::data_structures::*;
 use crate::server::responses::Notification;
 
 use super::ServerHandler;

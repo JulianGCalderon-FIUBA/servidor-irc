@@ -7,11 +7,8 @@ use internet_relay_chat::client::Client;
 use internet_relay_chat::ADDRESS;
 
 fn main() {
-    let mut args: Vec<String> = env::args().collect();
-    let address = match args.pop() {
-        Some(address) => address,
-        None => ADDRESS.to_string(),
-    };
+    let args: Vec<String> = env::args().collect();
+    let address = unpack_args(args);
 
     let mut client = match Client::new(address) {
         Ok(stream) => stream,
@@ -42,6 +39,13 @@ fn main() {
 
     drop(stdin);
     handle.join().ok();
+}
+
+fn unpack_args(mut args: Vec<String>) -> String {
+    match args.pop() {
+        Some(address) => address,
+        None => ADDRESS.to_string(),
+    }
 }
 
 fn spawn_stdin_channel() -> (Receiver<String>, JoinHandle<()>) {

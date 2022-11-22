@@ -1,8 +1,5 @@
-mod channel;
-mod client;
 mod database_handle;
 mod database_message;
-mod external_server;
 mod handlers;
 
 #[cfg(test)]
@@ -14,10 +11,7 @@ use std::rc::Rc;
 use std::sync::mpsc::{self, Receiver};
 use std::thread::{self, JoinHandle};
 
-pub use channel::Channel;
-pub use client::{Client, ClientBuilder, ClientInfo};
-pub use database_handle::DatabaseHandle;
-pub use external_server::{ExternalClient, ExternalServer};
+use crate::server::data_structures::*;
 
 use database_message::DatabaseMessage::{
     AddClient, AddClientToChannel, ContainsChannel, ContainsClient, DisconnectClient,
@@ -26,6 +20,7 @@ use database_message::DatabaseMessage::{
     SetServerOperator, UpdateNickname,
 };
 
+pub use database_handle::DatabaseHandle;
 use database_message::DatabaseMessage;
 
 use super::connection::Connection;

@@ -3,11 +3,11 @@ use std::io;
 use crate::message::{CreationError, Message};
 
 use super::{
-    connection::Connection,
-    consts::commands::SERVER_COMMAND,
-    database::{ClientInfo, DatabaseHandle, ExternalServer},
-    responses::Notification,
+    connection::Connection, consts::commands::SERVER_COMMAND, data_structures::ClientInfo,
+    database::DatabaseHandle, responses::Notification,
 };
+
+use crate::server::data_structures::*;
 
 pub struct Register<C: Connection> {
     stream: C,
@@ -155,6 +155,6 @@ fn assert_is_valid_server_message(
 fn invalid_input_error() -> io::Error {
     io::Error::new(
         io::ErrorKind::InvalidInput,
-        "Did not receiver server response",
+        "Did not receive valid server notification",
     )
 }

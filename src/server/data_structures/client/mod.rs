@@ -1,11 +1,12 @@
 mod client_builder;
-mod client_info;
 
-pub use client_builder::ClientBuilder;
-pub use client_info::ClientInfo;
 use std::io;
 
 use crate::server::connection::Connection;
+
+use super::*;
+
+pub use client_builder::ClientBuilder;
 
 /// Represents a Client that is connected to the Server.
 pub struct Client<C: Connection> {
@@ -18,7 +19,6 @@ pub struct Client<C: Connection> {
     realname: String,
     operator: bool,
     away_message: Option<String>,
-    online: bool,
 }
 
 impl<C: Connection> Client<C> {
@@ -113,7 +113,6 @@ impl<C: Connection> Client<C> {
     }
 
     pub fn disconnect(&mut self) {
-        self.online = false;
         self.stream = None;
     }
 }
