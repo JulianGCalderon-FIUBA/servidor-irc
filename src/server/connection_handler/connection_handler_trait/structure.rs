@@ -93,7 +93,7 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn on_server_shutdown(&mut self) -> io::Result<()> {
-        self.send_response(&"Server has shutdown")
+        self.stream().send(&"Server has shutdown")
     }
 
     fn on_timeout(&mut self) -> io::Result<()> {
@@ -101,6 +101,6 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn on_parsing_error(&mut self) -> io::Result<()> {
-        self.send_response(&ErrorReply::ParsingError)
+        self.stream().send(&ErrorReply::ParsingError)
     }
 }

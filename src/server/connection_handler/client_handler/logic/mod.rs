@@ -2,7 +2,7 @@ use std::io;
 
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
+    CommandArgs, ConnectionHandlerLogic,
 };
 
 use crate::server::data_structures::*;
@@ -31,7 +31,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn oper_logic(&mut self, _arguments: CommandArgs) -> std::io::Result<bool> {
         self.database.set_server_operator(&self.nickname);
-        self.send_response(&CommandResponse::YouAreOper381)?;
+        self.stream.send(&CommandResponse::YouAreOper381)?;
 
         Ok(true)
     }
@@ -43,7 +43,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         for target in targets.split(',') {
             if let Err(error) = self.assert_target_is_valid(target) {
-                self.send_response(&error)?;
+                self.stream.send(&error)?;
                 continue;
             }
 
@@ -60,7 +60,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         for target in targets.split(',') {
             if let Err(error) = self.assert_target_is_valid(target) {
-                self.send_response(&error)?;
+                self.stream.send(&error)?;
                 continue;
             }
 
@@ -80,7 +80,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             let key = keys.next();
 
             if let Err(error) = self.assert_can_join_channel(channel, &key) {
-                self.send_response(&error)?;
+                self.stream.send(&error)?;
                 continue;
             }
 
@@ -100,7 +100,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         for channel in channels.split(',') {
             if let Err(error) = self.assert_can_part_channel(channel) {
-                self.send_response(&error)?;
+                self.stream.send(&error)?;
                 continue;
             }
 
@@ -156,7 +156,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let (_, params, _) = arguments;
         let channels = self.channels_to_list(params.get(0));
 
-        self.send_response(&CommandResponse::ListStart321)?;
+        self.stream.send(&CommandResponse::ListStart321)?;
 
         for channel in channels {
             if !self.can_list_channel(&channel) {
@@ -164,7 +164,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             }
             self.send_list_response(channel)?;
         }
-        self.send_response(&CommandResponse::ListEnd323)?;
+        self.stream.send(&CommandResponse::ListEnd323)?;
 
         Ok(true)
     }
@@ -182,7 +182,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_whoreply_response(client_info)?;
         }
 
-        self.send_response(&CommandResponse::EndOfWho315 { name: mask })?;
+        self.stream
+            .send(&CommandResponse::EndOfWho315 { name: mask })?;
 
         Ok(true)
     }
@@ -196,7 +197,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             let clients: Vec<ClientInfo> = self.database.get_clients_for_nickmask(nickmask);
 
             if let Err(error) = self.assert_can_send_whois_response(&clients, nickmask) {
-                self.send_response(&error)?;
+                self.stream.send(&error)?;
                 continue;
             }
             for client in clients {
@@ -216,7 +217,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             None => CommandResponse::UnAway,
         };
 
-        self.send_response(&reply)?;
+        self.stream.send(&reply)?;
 
         Ok(true)
     }
@@ -241,7 +242,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         for (channel, nickname) in channel.zip(nickname) {
             if let Err(error) = self.assert_can_kick_from_channel(channel) {
-                self.send_response(&error)?;
+                self.stream.send(&error)?;
             } else {
                 self.kick_client_from_channel(nickname, channel, &trail);
             }

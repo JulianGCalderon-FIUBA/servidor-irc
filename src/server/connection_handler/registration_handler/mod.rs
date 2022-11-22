@@ -13,7 +13,7 @@ use super::{
     client_handler::ClientHandler,
     connection_handler_trait::{
         ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
-        ConnectionHandlerStructure, ConnectionHandlerUtils,
+        ConnectionHandlerStructure,
     },
     ServerHandler,
 };
@@ -129,7 +129,7 @@ impl<C: Connection> ConnectionHandlerStructure<C> for RegistrationHandler<C> {
     }
 
     fn on_timeout(&mut self) -> io::Result<()> {
-        self.send_response(&"Registration timeout")
+        self.stream.send(&"Registration timeout")
     }
 }
 
