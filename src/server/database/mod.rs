@@ -13,12 +13,7 @@ use std::thread::{self, JoinHandle};
 
 use crate::server::data_structures::*;
 
-use database_message::DatabaseMessage::{
-    AddClient, AddClientToChannel, ContainsChannel, ContainsClient, DisconnectClient,
-    GetAllChannels, GetAllClients, GetChannelsForClient, GetClientsForMask, GetClientsForNickMask,
-    GetClientsFromChannel, GetStream, IsClientInChannel, IsServerOperator, RemoveClientFromChannel,
-    SetServerOperator, UpdateNickname,
-};
+use database_message::DatabaseMessage::*;
 
 pub use database_handle::DatabaseHandle;
 use database_message::DatabaseMessage;
