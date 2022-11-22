@@ -1,13 +1,19 @@
 pub mod requests;
 
-use gtk::{ glib::{ GString, Sender }, prelude::*, Align, Box, Button, Label, Orientation };
+use gtk::{
+    glib::{GString, Sender},
+    prelude::*,
+    Align, Box, Button, Label, Orientation,
+};
 use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-use self::requests::{ add_invite_view_request, quit_channel_request, remove_conversation_request };
+use self::requests::{
+    add_invite_view_request, quit_channel_request, remove_conversation_request, send_names_request,
+};
 
-use super::{ requests::change_conversation_request, MainView };
+use super::{requests::change_conversation_request, MainView};
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
@@ -20,7 +26,8 @@ impl MainView {
             .halign(Align::Start)
             .build();
 
-        self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
+        self.quit_channel_button
+            .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         self.user_info.set_label(nickname);
 
         conv_info.append(&self.quit_channel_button);
@@ -31,6 +38,7 @@ impl MainView {
 
         self.connect_quit_channel(self.current_chat.clone(), self.sender.clone());
         self.connect_invite_button(self.sender.clone());
+        self.connect_members_button(self.sender.clone());
 
         conv_info
     }
@@ -38,7 +46,7 @@ impl MainView {
     fn connect_quit_channel(
         &mut self,
         current_conversation: Label,
-        sender: Sender<ControllerMessage>
+        sender: Sender<ControllerMessage>,
     ) {
         let my_nickname = self.user_info.label().unwrap();
         self.quit_channel_button.connect_clicked(move |_| {
@@ -53,6 +61,12 @@ impl MainView {
     fn connect_invite_button(&mut self, sender: Sender<ControllerMessage>) {
         self.invite_button.connect_clicked(move |_| {
             add_invite_view_request(sender.clone());
+        });
+    }
+
+    fn connect_members_button(&mut self, sender: Sender<ControllerMessage>) {
+        self.channel_members_button.connect_clicked(move |_| {
+            send_names_request(sender.clone());
         });
     }
 

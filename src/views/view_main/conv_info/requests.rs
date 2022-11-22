@@ -20,3 +20,9 @@ pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
         .send(ControllerMessage::AddInviteView {})
         .expect(ERROR_TEXT);
 }
+
+pub fn send_names_request(sender: Sender<ControllerMessage>) {
+    sender
+        .send(ControllerMessage::SendNamesMessage {})
+        .expect(ERROR_TEXT);
+}
