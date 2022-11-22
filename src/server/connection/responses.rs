@@ -137,7 +137,10 @@ pub trait ConnectionResponses: Write + Sized {
 
     fn send_away(&mut self, client: &str, message: &str) -> Result<(), io::Error> {
         let nickname = client.to_string();
-        let response = CommandResponse::Away { nickname, message: message.to_string() };
+        let response = CommandResponse::Away {
+            nickname,
+            message: message.to_string(),
+        };
         self.send(&response)
     }
 
