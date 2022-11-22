@@ -4,7 +4,6 @@ use gtk4 as gtk;
 use crate::{ controller::controller_message::ControllerMessage, views::ERROR_TEXT };
 
 pub fn quit_channel_request(sender: Sender<ControllerMessage>) {
-    println!("## hago una request de quit channel");
     sender.send(ControllerMessage::QuitChannel {}).expect(ERROR_TEXT);
 }
 

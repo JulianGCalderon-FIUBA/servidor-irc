@@ -101,10 +101,13 @@ impl MainView {
         }
 
         self.quit_channel_button.set_visible(true);
-        if Self::current_conv_is_channel(conversation_label) {
+        if Self::current_conv_is_channel(conversation_label.clone()) {
             self.set_channel_chat_mode();
         } else {
             self.set_client_chat_mode();
+            if conversation_label == self.user_info.label().unwrap() {
+                self.set_my_chat_mode();
+            }
         }
     }
 
