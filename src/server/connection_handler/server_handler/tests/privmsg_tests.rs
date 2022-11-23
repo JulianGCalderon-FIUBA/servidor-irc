@@ -30,6 +30,8 @@ fn privmsg_is_relayed_to_client() {
 
 // fn privmsg_to_client_is_relayed_to_necesary_server() {}
 
-// fn privmsg_to_channel_is_relayed_to_each_server_once() {}
+// fn privmsg_to_channel_is_relayed_to_each_necesary_server_once() {}
+
+// fn privmsg_is_never_relayed_to_sending_server() {}
 
 // fn privmsg_fails_with_unexistent_client() {}

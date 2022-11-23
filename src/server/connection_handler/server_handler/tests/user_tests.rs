@@ -51,5 +51,6 @@ fn user_fails_with_no_previuos_nick() {
     assert!(!handler.database.contains_client("nickname"));
 }
 
-#[test]
-fn user_is_relayed_to_all_other_servers() {}
+// fn user_is_relayed_to_all_other_servers() {}
+
+// fn nick_is_not_relayed_to_sending_server() {}

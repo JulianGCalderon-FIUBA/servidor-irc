@@ -50,5 +50,6 @@ fn nick_with_used_nickname_returns_nick_collision() {
     );
 }
 
-#[test]
-fn nick_is_relayed_to_all_other_servers() {}
+// fn nick_is_relayed_to_all_other_servers() {}
+
+// fn nick_is_not_relayed_to_sending_server() {}
