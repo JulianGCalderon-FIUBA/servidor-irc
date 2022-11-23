@@ -159,7 +159,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_is_in_channel(channel)?;
 
         self.assert_is_channel_operator(channel)?;
-        self.assert_modes_starts_correctly(&params[1])?;
+        if params.len() > 1 {
+            self.assert_modes_starts_correctly(&params[1])?;
+        }
 
         Ok(())
     }

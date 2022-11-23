@@ -944,3 +944,28 @@ fn mode_sets_and_unsets_multiple_valid_flags() {
         .database
         .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
 }
+
+#[test]
+fn mode_returns_channel_mode() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .set_channel_key("#channel", Some("key".to_string()));
+    handler
+        .database
+        .set_channel_mode("#channel", ChannelFlag::Moderated);
+
+    let parameters = vec!["#channel".to_string()];
+
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("324 #channel m", responses[0]);
+    assert_eq!("324 #channel k key", responses[1]);
+    assert_eq!("324 #channel o nickname", responses[2]);
+}
