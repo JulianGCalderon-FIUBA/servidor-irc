@@ -1,6 +1,7 @@
 use crate::server::testing::{dummy_database, dummy_server, MockTcpStream};
 
 mod nick_tests;
+mod privmsg_tests;
 mod user_tests;
 
 use super::*;

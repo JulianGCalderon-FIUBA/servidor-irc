@@ -13,7 +13,11 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
     fn assert_nick_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         let (_, params, _) = arguments;
-        if params.is_empty() {
+        if params.len() < 2 {
+            return Err(ErrorReply::NoReply);
+        }
+
+        if params.get(1).unwrap().parse::<usize>().is_err() {
             return Err(ErrorReply::NoReply);
         }
 
