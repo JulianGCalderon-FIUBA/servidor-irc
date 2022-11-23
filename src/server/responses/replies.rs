@@ -170,8 +170,8 @@ impl Display for CommandResponse {
                 mode,
                 mode_params,
             } => format!(
-                "324 {channel} {mode} {:?}",
-                mode_params.as_ref().unwrap_or(&vec!["".to_string()])
+                "324 {channel} {mode} {}",
+                mode_params.as_ref().unwrap_or(&vec![]).join(",")
             ),
             CommandResponse::UnAway => "305 :You are no longer marked as being away".to_string(),
             CommandResponse::NowAway => "306 :You have been marked as being away".to_string(),
