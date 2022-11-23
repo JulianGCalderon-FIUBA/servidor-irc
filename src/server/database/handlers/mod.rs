@@ -1,3 +1,4 @@
+use std::cell::RefCell;
 use std::sync::mpsc::Sender;
 use std::{io, rc::Rc};
 
@@ -14,6 +15,70 @@ impl<C: Connection> Database<C> {
     pub fn handle_is_server_operator(&mut self, nickname: &str, respond_to: Sender<bool>) {
         let is_server_operator = self.is_server_operator(nickname);
         respond_to.send(is_server_operator).unwrap();
+    }
+
+    pub fn handle_add_client(&mut self, client: Client<C>) {
+        debug_print!("Adding client {:?}", client.get_info());
+
+        let nickname = client.nickname();
+        let client = Rc::new(RefCell::new(client));
+        self.clients.insert(nickname, client);
+    }
+
+    /// Sets client as server operator.
+    pub fn handle_set_server_operator(&mut self, nickname: &str) {
+        if let Some(client) = self.clients.get_mut(nickname) {
+            debug_print!("Setting {} as server operator", nickname);
+
+            client.borrow_mut().set_server_operator();
+        }
+    }
+
+    /// Adds client to channel.
+    pub fn add_client_to_channel(&mut self, nickname: &str, channel_name: &str) {
+        let channel: Option<&mut Channel<C>> = self.channels.get_mut(&channel_name.to_string());
+        if let Some(client) = self.clients.get(nickname) {
+            debug_print!("Adding {} to channel {}", nickname, channel_name);
+
+            let client_rc = client.clone();
+
+            match channel {
+                Some(channel) => channel.add_client(client_rc),
+                None => {
+                    let new_channel = Channel::new(channel_name.to_string(), client_rc);
+                    self.channels.insert(channel_name.to_string(), new_channel);
+                }
+            }
+        }
+    }
+
+    /// Removes client from channel.
+    pub fn remove_client_from_channel(&mut self, nickname: &str, channel_name: &str) {
+        if let Some(channel) = self.channels.get_mut(&channel_name.to_string()) {
+            debug_print!("Removing {} from channel {}", nickname, channel_name);
+
+            channel.remove_client(nickname);
+            if channel.get_clients().is_empty() {
+                self.channels.remove(channel_name);
+            }
+        }
+    }
+
+    /// Disconnects client from server, removing it from Database.
+    pub fn disconnect_client(&mut self, nickname: &str) {
+        if let Some(client) = self.clients.get_mut(nickname) {
+            debug_print!("Disconnecting client {} ", nickname);
+
+            client.borrow_mut().disconnect();
+        }
+    }
+
+    pub fn set_channel_topic(&mut self, channel_name: &str, topic: &str) {
+        if let Some(channel) = self.channels.get_mut(channel_name) {
+            debug_print!("Setting {channel_name}'s topic to {topic}");
+
+            channel.set_topic(topic);
+        }
     }
 
     /// Returns response to GetStream request.
