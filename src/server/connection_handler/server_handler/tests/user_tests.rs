@@ -52,4 +52,4 @@ fn user_fails_with_no_previuos_nick() {
 }
 
 #[test]
-fn user_is_relayed_to_other_servers() {}
+fn user_is_relayed_to_all_other_servers() {}
