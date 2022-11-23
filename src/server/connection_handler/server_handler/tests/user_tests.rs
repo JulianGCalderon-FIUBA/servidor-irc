@@ -23,7 +23,7 @@ fn user_adds_client_to_database() {
 }
 
 #[test]
-fn user_fails_without_enough_parameters() {
+fn user_is_ignored_without_enough_parameters() {
     let mut handler = dummy_server_handler();
     handler.hopcounts.insert("nickname".to_string(), 1);
 
@@ -34,7 +34,7 @@ fn user_fails_without_enough_parameters() {
 }
 
 #[test]
-fn user_fails_with_no_previuos_nick() {
+fn user_is_ignored_with_no_previuos_nick() {
     let mut handler = dummy_server_handler();
 
     let prefix = Some("nickname".to_string());

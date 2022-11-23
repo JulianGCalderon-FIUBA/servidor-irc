@@ -57,7 +57,7 @@ fn server_sets_connection_type() {
 }
 
 #[test]
-fn server_sends_server_info_back() {
+fn server_sends_back_server() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec!["servername1".to_string(), "1".to_string()];
@@ -71,10 +71,11 @@ fn server_sends_server_info_back() {
 }
 
 #[test]
-fn server_with_client_sends_client_info() {
+fn server_sends_back_client_info() {
     let mut handler = dummy_registration_handler();
 
-    handler.database.add_client(dummy_client("nickname"));
+    handler.database.add_client(dummy_client("nickname1"));
+    handler.database.add_client(dummy_client("nickname2"));
 
     let parameters = vec!["servername1".to_string(), "1".to_string()];
     let trail = Some("serverinfo".to_string());
@@ -82,9 +83,14 @@ fn server_with_client_sends_client_info() {
 
     let responses = handler.stream.get_responses();
     assert_eq!("SERVER servername 1 :serverinfo", responses[0]);
-    assert_eq!("NICK nickname 1", responses[1]);
+    assert_eq!("NICK nickname1 1", responses[1]);
     assert_eq!(
-        ":nickname USER username 127.0.0.1 servername :realname",
+        ":nickname1 USER username 127.0.0.1 servername :realname",
         responses[2]
+    );
+    assert_eq!("NICK nickname2 1", responses[3]);
+    assert_eq!(
+        ":nickname2 USER username 127.0.0.1 servername :realname",
+        responses[4]
     );
 }

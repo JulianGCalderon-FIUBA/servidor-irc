@@ -7,7 +7,7 @@ use crate::server::{
 };
 
 #[test]
-fn nick_fails_without_enough_parameters() {
+fn nick_is_ignored_without_enough_parameters() {
     let mut handler = dummy_server_handler();
 
     let parameters = vec!["nickname".to_string()];
@@ -17,7 +17,7 @@ fn nick_fails_without_enough_parameters() {
 }
 
 #[test]
-fn nick_fails_with_non_numeric_hopcount() {
+fn nick_is_ignored_with_non_numeric_hopcount() {
     let mut handler = dummy_server_handler();
 
     let parameters = vec!["nickname".to_string()];
