@@ -5,7 +5,7 @@ use std::{io, rc::Rc};
 mod logic;
 
 use crate::server::connection::Connection;
-use crate::server::data_structures::*;
+use crate::server::{data_structures::*, debug_print};
 
 use super::Database;
 
@@ -88,6 +88,8 @@ impl<C: Connection> Database<C> {
     /// Returns response to UpdateNickname request.
     pub fn handle_update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
         if let Some(client) = self.clients.get_mut(old_nickname) {
+            debug_print!("Updating nickname from {old_nickname} to {new_nickname}");
+
             let client = Rc::get_mut(client).unwrap();
             client
                 .borrow_mut()
@@ -110,6 +112,8 @@ impl<C: Connection> Database<C> {
 
     pub fn handle_set_away_message(&self, message: &Option<String>, nickname: &str) {
         if let Some(client) = self.clients.get(nickname) {
+            debug_print!("Setting {nickname}'s away message to {message:?}");
+
             client.borrow_mut().set_away_message(message.to_owned());
         }
     }
@@ -123,8 +127,10 @@ impl<C: Connection> Database<C> {
         respond_to.send(topic).unwrap();
     }
 
-    pub fn handle_set_channel_key(&mut self, channel: String, key: Option<String>) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_set_channel_key(&mut self, channel_name: String, key: Option<String>) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Setting {channel_name}'s key to {key:?}");
+
             channel.set_key(key);
         }
     }
@@ -134,14 +140,18 @@ impl<C: Connection> Database<C> {
         respond_to.send(key).unwrap();
     }
 
-    pub fn handle_set_mode(&mut self, channel: String, mode: char) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_set_mode(&mut self, channel_name: String, mode: char) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Setting {channel_name}'s mode {mode:?}");
+
             channel.set_mode(mode);
         }
     }
 
-    pub fn handle_unset_mode(&mut self, channel: String, mode: char) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_unset_mode(&mut self, channel_name: String, mode: char) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Unsetting {channel_name}'s mode {mode:?}");
+
             channel.unset_mode(mode);
         }
     }
@@ -151,8 +161,10 @@ impl<C: Connection> Database<C> {
         respond_to.send(has_mode).unwrap();
     }
 
-    pub fn handle_set_channel_limit(&mut self, channel: String, limit: Option<usize>) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_set_channel_limit(&mut self, channel_name: String, limit: Option<usize>) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Setting {channel_name}'s limit to {limit:?}");
+
             channel.set_limit(limit)
         }
     }
@@ -162,26 +174,34 @@ impl<C: Connection> Database<C> {
         respond_to.send(limit).unwrap();
     }
 
-    pub fn handle_add_channop(&mut self, channel: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_add_channop(&mut self, channel_name: String, nickname: String) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Setting {nickname} as operator of {channel_name}");
+
             channel.add_operator(nickname);
         }
     }
 
-    pub fn handle_remove_channop(&mut self, channel: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_remove_channop(&mut self, channel_name: String, nickname: String) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Setting {nickname} as operator of {channel_name}");
+
             channel.remove_operator(nickname);
         }
     }
 
-    pub fn handle_add_speaker(&mut self, channel: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_add_speaker(&mut self, channel_name: String, nickname: String) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Setting {nickname} as speaker of {channel_name}");
+
             channel.add_speaker(nickname);
         }
     }
 
-    pub fn handle_remove_speaker(&mut self, channel: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_remove_speaker(&mut self, channel_name: String, nickname: String) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Unsetting {nickname} as speaker of {channel_name}");
+
             channel.remove_speaker(nickname);
         }
     }
@@ -196,8 +216,10 @@ impl<C: Connection> Database<C> {
         respond_to.send(is_speaker).unwrap();
     }
 
-    pub fn handle_add_channel_banmask(&mut self, channel: String, mask: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_add_channel_banmask(&mut self, channel_name: String, mask: String) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Adding banmask {mask} to {channel_name}");
+
             channel.add_banmask(mask);
         }
     }
@@ -207,8 +229,10 @@ impl<C: Connection> Database<C> {
         respond_to.send(banmask).unwrap();
     }
 
-    pub fn handle_remove_channel_banmask(&mut self, channel: String, mask: String) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_remove_channel_banmask(&mut self, channel_name: String, mask: String) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Removing banmask {mask} from {channel_name}");
+
             channel.remove_banmask(mask);
         }
     }
@@ -235,7 +259,7 @@ impl<C: Connection> Database<C> {
 
     pub fn handle_add_server(&mut self, server: ExternalServer<C>) {
         let servername = server.servername();
-        println!("Adding server named {servername}");
+        debug_print!("Adding external server {servername}");
 
         self.servers.insert(servername, server);
     }
@@ -247,9 +271,9 @@ impl<C: Connection> Database<C> {
 
     pub fn handle_add_external_client(&mut self, servername: &str, client: ExternalClient) {
         if let Some(server) = self.servers.get_mut(servername) {
-            println!(
+            debug_print!(
                 "Adding external client {} to server {servername}",
-                client.nickname(),
+                client.nickname()
             );
             server.add_client(client);
         }

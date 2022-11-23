@@ -12,8 +12,6 @@ impl<C: Connection> Database<C> {
     pub fn add_client(&mut self, client: Client<C>) {
         let clientinfo = client.get_info();
 
-        println!("Client registered: {clientinfo:?}",);
-
         let client = Rc::new(RefCell::new(client));
 
         self.clients.insert(clientinfo.nickname, client);

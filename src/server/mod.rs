@@ -115,3 +115,15 @@ impl Drop for Server {
         }
     }
 }
+
+#[cfg(debug_assertions)]
+macro_rules! debug_print {
+    ($( $args:expr ),*) => { println!( $( $args ),* ); }
+}
+
+#[cfg(not(debug_assertions))]
+macro_rules! debug_print {
+    ($( $args:expr ),*) => {};
+}
+
+pub(crate) use debug_print;
