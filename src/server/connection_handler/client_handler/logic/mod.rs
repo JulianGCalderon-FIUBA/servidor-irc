@@ -253,18 +253,23 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn mode_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
+
+        let channel = params[0].clone();
+
+        if params.len() == 1 {
+            self.send_mode_response(&channel)?;
+            return Ok(true);
+        }
+
         let modes: Vec<char> = params[1].chars().collect();
 
         let (add, remove) = parse_modes(modes);
 
         let mut arguments: Vec<String> = params.drain(2..).collect();
         arguments.reverse();
-        let channel = &params[0];
 
-        self.add_modes(add, &mut arguments, channel)?;
-        self.remove_modes(remove, &mut arguments, channel)?;
-
-        self.send_mode_response(channel)?;
+        self.add_modes(add, &mut arguments, &channel)?;
+        self.remove_modes(remove, &mut arguments, &channel)?;
 
         Ok(true)
     }
