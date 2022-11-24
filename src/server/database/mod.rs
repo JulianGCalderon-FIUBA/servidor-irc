@@ -210,6 +210,13 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to,
             } => self.handle_get_local_stream_request(nickname, respond_to),
+            IsLocalClient {
+                nickname,
+                respond_to,
+            } => self.handle_is_local_client(nickname, respond_to),
+            GetImmediateServer { client, respond_to } => {
+                self.handle_get_immediate_server(client, respond_to)
+            }
         }
     }
 }

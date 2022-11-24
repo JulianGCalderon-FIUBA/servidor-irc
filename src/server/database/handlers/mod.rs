@@ -391,4 +391,14 @@ impl<C: Connection> Database<C> {
         let stream = self.get_local_clients_for_channel(&channel);
         respond_to.send(stream).unwrap();
     }
+
+    pub fn handle_is_local_client(&self, nickname: String, respond_to: Sender<bool>) {
+        let is_local = self.is_local_client(nickname);
+        respond_to.send(is_local).unwrap();
+    }
+
+    pub fn handle_get_immediate_server(&self, client: String, respond_to: Sender<Option<String>>) {
+        let server = self.get_immediate_server(&client);
+        respond_to.send(server).unwrap();
+    }
 }

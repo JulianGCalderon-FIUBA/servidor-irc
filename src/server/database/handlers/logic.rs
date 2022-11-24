@@ -55,6 +55,10 @@ impl<C: Connection> Database<C> {
         false
     }
 
+    pub fn is_local_client(&self, nickname: String) -> bool {
+        self.local_clients.contains_key(&nickname)
+    }
+
     /// Returns if Database contains channel.
     pub fn contains_channel(&self, channel: &str) -> bool {
         self.channels.contains_key(channel)

@@ -15,6 +15,7 @@ impl<C: Connection> RegistrationHandler<C> {
             .hostname(self.attributes.get("hostname")?)
             .servername(self.attributes.get("servername")?)
             .realname(self.attributes.get("realname")?)
+            .password(self.attributes.get("password"))
             .stream(self.stream_for_database.take()?)
             .build_local_client()
     }

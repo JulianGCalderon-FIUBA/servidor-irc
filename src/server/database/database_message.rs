@@ -199,4 +199,12 @@ pub enum DatabaseMessage<C: Connection> {
         old_nickname: String,
         new_nickname: String,
     },
+    IsLocalClient {
+        nickname: String,
+        respond_to: Sender<bool>,
+    },
+    GetImmediateServer {
+        client: String,
+        respond_to: Sender<Option<String>>,
+    },
 }

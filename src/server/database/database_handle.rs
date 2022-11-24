@@ -461,6 +461,26 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub(crate) fn is_local_client(&self, client: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::IsLocalClient {
+            nickname: client.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub(crate) fn get_immediate_server(&self, client: &str) -> Option<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetImmediateServer {
+            client: client.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {
