@@ -103,9 +103,14 @@ impl MainView {
 
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
-        for message in self.messages.get(&last_conv).unwrap() {
-            self.message_box.remove(message);
+        
+        if self.messages.contains_key(&last_conv) {
+            for message in self.messages.get(&last_conv).unwrap() {
+                self.message_box.remove(message);
+            }
         }
+
+        
         
         // self.messages = vec![];
 
