@@ -112,8 +112,10 @@ impl MainView {
             }
         }        
 
-        for message in self.messages.get(&conversation_label).unwrap() {
-            self.message_box.append(message);
+        if self.messages.contains_key(&conversation_label) {
+            for message in self.messages.get(&conversation_label).unwrap() {
+                self.message_box.append(message);
+            }
         }
         
         // self.messages = vec![];
