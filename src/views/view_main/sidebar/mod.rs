@@ -83,9 +83,11 @@ impl MainView {
     pub fn add_client(&mut self, client: GString) {
         change_conversation_request(client.clone(), self.sender.clone());
         let client_button = create_button_with_margin(&client);
-        self.connect_channel_client_button(client_button.clone(), client, self.sender.clone());
+        self.connect_channel_client_button(client_button.clone(), client.clone(), self.sender.clone());
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
+
+        self.messages.insert(client.clone().to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
@@ -108,9 +110,11 @@ impl MainView {
             for message in self.messages.get(&last_conv).unwrap() {
                 self.message_box.remove(message);
             }
-        }
+        }        
 
-        
+        for message in self.messages.get(&conversation_label).unwrap() {
+            self.message_box.append(message);
+        }
         
         // self.messages = vec![];
 
