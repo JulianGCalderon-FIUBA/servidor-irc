@@ -123,7 +123,7 @@ impl Controller {
                 SendPrivMessage { message } => {
                     let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
                     client.send_raw(&priv_message).expect(ERROR_TEXT);
-                    main_view.send_message(message.to_string(), current_conv);
+                    main_view.send_message(message.to_string(), current_conv.clone());
                 }
                 AddViewToAddClient {} => {
                     add_client_window =
