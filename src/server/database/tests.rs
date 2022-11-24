@@ -1,4 +1,7 @@
-use crate::server::testing::{dummy_client, dummy_database, MockTcpStream};
+use crate::server::{
+    consts::modes::ChannelFlag,
+    testing::{dummy_client, dummy_database, MockTcpStream},
+};
 
 use super::*;
 
@@ -333,15 +336,15 @@ fn can_set_and_unset_channel_mode() {
     database.add_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert!(!database.channel_has_mode("#channel", 'p'));
+    assert!(!database.channel_has_mode("#channel", &ChannelFlag::Private));
 
-    database.set_channel_mode("#channel", 'p');
+    database.set_channel_mode("#channel", ChannelFlag::Private);
 
-    assert!(database.channel_has_mode("#channel", 'p'));
+    assert!(database.channel_has_mode("#channel", &ChannelFlag::Private));
 
-    database.unset_channel_mode("#channel", 'p');
+    database.unset_channel_mode("#channel", ChannelFlag::Private);
 
-    assert!(!database.channel_has_mode("#channel", 'p'));
+    assert!(!database.channel_has_mode("#channel", &ChannelFlag::Private));
 }
 
 #[test]

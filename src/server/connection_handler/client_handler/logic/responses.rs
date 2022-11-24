@@ -1,6 +1,8 @@
 use std::io;
 
-use crate::server::consts::modes::PRIVATE;
+use crate::server::consts::modes::{
+    ChannelFlag, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
+};
 use crate::server::responses::{CommandResponse, Notification};
 use crate::server::{
     connection::Connection,
@@ -93,8 +95,10 @@ impl<C: Connection> ClientHandler<C> {
             .get_topic_for_channel(&channel)
             .unwrap_or_else(|| "No topic set".to_string());
 
-        let prv =
-            self.database.channel_has_mode(&channel, PRIVATE) && !self.is_in_channel(&channel);
+        let prv = self
+            .database
+            .channel_has_mode(&channel, &ChannelFlag::Private)
+            && !self.is_in_channel(&channel);
 
         self.stream
             .send(&CommandResponse::list(channel, topic, prv))
@@ -163,7 +167,49 @@ impl<C: Connection> ClientHandler<C> {
         self.send_message_to_target(&notification, target)
     }
 
-    pub(super) fn send_mode_response(&mut self, _channel: &str) -> io::Result<()> {
+    pub(super) fn send_mode_response(&mut self, channel: &str) -> io::Result<()> {
+        if let Some(config) = self.database.get_channel_config(channel) {
+            let flags = config.flags;
+            let limit = config.user_limit;
+            let operators = config.operators;
+            let banmasks = config.banmasks;
+            let speakers = config.speakers;
+            let key = config.key;
+
+            for flag in flags {
+                let mode = flag.to_char();
+                let reply = CommandResponse::channel_mode_is(channel, mode, None);
+                self.stream.send(&reply)?;
+            }
+
+            if limit.is_some() {
+                let params = vec![limit.unwrap().to_string()];
+                let reply = CommandResponse::channel_mode_is(channel, SET_USER_LIMIT, Some(params));
+                self.stream.send(&reply)?;
+            }
+
+            if key.is_some() {
+                let params = vec![key.unwrap()];
+                let reply = CommandResponse::channel_mode_is(channel, SET_KEY, Some(params));
+                self.stream.send(&reply)?;
+            }
+
+            if !operators.is_empty() {
+                let reply =
+                    CommandResponse::channel_mode_is(channel, SET_OPERATOR, Some(operators));
+                self.stream.send(&reply)?;
+            }
+
+            if !banmasks.is_empty() {
+                let reply = CommandResponse::channel_mode_is(channel, SET_BANMASK, Some(banmasks));
+                self.stream.send(&reply)?;
+            }
+
+            if !speakers.is_empty() {
+                let reply = CommandResponse::channel_mode_is(channel, SET_SPEAKER, Some(speakers));
+                self.stream.send(&reply)?;
+            }
+        }
         Ok(())
     }
 }

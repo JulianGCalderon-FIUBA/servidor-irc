@@ -89,7 +89,10 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
             self.assert_client_not_on_channel(invited_client, channel)?;
         }
 
-        if self.database.channel_has_mode(channel, INVISIBLE) {
+        if self
+            .database
+            .channel_has_mode(channel, &ChannelFlag::InviteOnly)
+        {
             self.assert_is_channel_operator(channel)?;
         }
 
@@ -129,7 +132,10 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 
         self.assert_is_in_channel(channel)?;
 
-        if self.database.channel_has_mode(channel, TOPIC_SETTABLE) {
+        if self
+            .database
+            .channel_has_mode(channel, &ChannelFlag::TopicByOperatorOnly)
+        {
             self.assert_is_channel_operator(channel)?;
         }
 
@@ -153,7 +159,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_is_in_channel(channel)?;
 
         self.assert_is_channel_operator(channel)?;
-        self.assert_modes_starts_correctly(&params[1])?;
+        if params.len() > 1 {
+            self.assert_modes_starts_correctly(&params[1])?;
+        }
 
         Ok(())
     }
@@ -302,13 +310,15 @@ impl<C: Connection> ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(&channel, NO_OUTSIDE_MESSAGES)
+            .channel_has_mode(&channel, &ChannelFlag::NoOutsideMessages)
             && !self.is_in_channel(&channel)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
         }
 
-        if self.database.channel_has_mode(&channel, MODERATED)
+        if self
+            .database
+            .channel_has_mode(&channel, &ChannelFlag::Moderated)
             && !self.database.is_channel_speaker(&channel, &self.nickname)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });

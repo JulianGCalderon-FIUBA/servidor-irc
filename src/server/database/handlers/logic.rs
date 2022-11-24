@@ -3,6 +3,8 @@ use std::io;
 use std::rc::Rc;
 
 use crate::server::connection::Connection;
+use crate::server::consts::modes::ChannelFlag;
+use crate::server::data_structures::ChannelConfig;
 use crate::server::database::{Channel, Client};
 
 use super::{ClientInfo, Database};
@@ -218,7 +220,7 @@ impl<C: Connection> Database<C> {
         None
     }
 
-    pub fn channel_has_mode(&self, channel: String, mode: char) -> bool {
+    pub fn channel_has_mode(&self, channel: String, mode: ChannelFlag) -> bool {
         if let Some(channel) = self.channels.get(&channel) {
             return channel.has_mode(mode);
         }
@@ -263,5 +265,12 @@ impl<C: Connection> Database<C> {
 
     pub fn contains_server(&self, servername: &str) -> bool {
         self.servers.contains_key(servername)
+    }
+
+    pub fn get_channel_config(&self, channel: &str) -> Option<ChannelConfig> {
+        if let Some(channel) = self.channels.get(channel) {
+            return channel.get_config();
+        }
+        None
     }
 }

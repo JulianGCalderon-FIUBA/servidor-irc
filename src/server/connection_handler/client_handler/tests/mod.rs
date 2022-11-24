@@ -1,6 +1,6 @@
-use crate::server::testing::{dummy_client, dummy_database, MockTcpStream};
-
 use super::*;
+use crate::server::consts::modes::ChannelFlag;
+use crate::server::testing::{dummy_client, dummy_database, MockTcpStream};
 
 mod away_tests;
 mod invite_tests;

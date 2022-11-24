@@ -30,5 +30,38 @@ pub const VALID_MODES: [char; 11] = [
 pub const ADD_MODE: char = '+';
 pub const REMOVE_MODE: char = '-';
 
-pub const INVISIBLE: char = 'i';
 // pub const OPERATOR: char = 'o';
+
+#[derive(PartialEq, Eq, Clone)]
+pub enum ChannelFlag {
+    Private,
+    Secret,
+    InviteOnly,
+    NoOutsideMessages,
+    TopicByOperatorOnly,
+    Moderated,
+}
+
+impl ChannelFlag {
+    pub fn to_char(&self) -> char {
+        match self {
+            ChannelFlag::Private => PRIVATE,
+            ChannelFlag::Secret => SECRET,
+            ChannelFlag::InviteOnly => INVITE_ONLY,
+            ChannelFlag::NoOutsideMessages => NO_OUTSIDE_MESSAGES,
+            ChannelFlag::TopicByOperatorOnly => TOPIC_SETTABLE,
+            ChannelFlag::Moderated => MODERATED,
+        }
+    }
+    pub fn from_char(mode: char) -> Self {
+        match mode {
+            PRIVATE => ChannelFlag::Private,
+            SECRET => ChannelFlag::Secret,
+            INVITE_ONLY => ChannelFlag::InviteOnly,
+            TOPIC_SETTABLE => ChannelFlag::TopicByOperatorOnly,
+            NO_OUTSIDE_MESSAGES => ChannelFlag::NoOutsideMessages,
+            MODERATED => ChannelFlag::Moderated,
+            _ => panic!("Invalid mode"),
+        }
+    }
+}

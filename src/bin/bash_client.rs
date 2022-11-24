@@ -42,6 +42,8 @@ fn main() {
 }
 
 fn unpack_args(mut args: Vec<String>) -> String {
+    args.remove(0);
+
     match args.pop() {
         Some(address) => address,
         None => ADDRESS.to_string(),

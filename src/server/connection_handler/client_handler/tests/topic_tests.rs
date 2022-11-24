@@ -75,7 +75,9 @@ fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
-    handler.database.set_channel_mode("#hola", 't');
+    handler
+        .database
+        .set_channel_mode("#hola", ChannelFlag::TopicByOperatorOnly);
     handler.database.remove_channop("#hola", "nickname");
 
     let parameters = vec!["#hola".to_string(), "topic".to_string()];
@@ -95,7 +97,9 @@ fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
-    handler.database.set_channel_mode("#hola", 't');
+    handler
+        .database
+        .set_channel_mode("#hola", ChannelFlag::TopicByOperatorOnly);
 
     let mut parameters = vec!["#hola".to_string(), "topic".to_string()];
 

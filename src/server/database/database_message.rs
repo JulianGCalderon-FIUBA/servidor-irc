@@ -1,6 +1,7 @@
 use std::io;
 use std::sync::mpsc::Sender;
 
+use crate::server::consts::modes::ChannelFlag;
 use crate::server::data_structures::*;
 
 use crate::server::connection::Connection;
@@ -107,15 +108,15 @@ pub enum DatabaseMessage<C: Connection> {
     },
     SetChannelMode {
         channel: String,
-        mode: char,
+        flag: ChannelFlag,
     },
     UnsetChannelMode {
         channel: String,
-        mode: char,
+        flag: ChannelFlag,
     },
     ChannelHasMode {
         channel: String,
-        mode: char,
+        flag: ChannelFlag,
         respond_to: Sender<bool>,
     },
     SetLimit {
@@ -180,5 +181,9 @@ pub enum DatabaseMessage<C: Connection> {
     },
     GetServerInfo {
         respond_to: Sender<String>,
+    },
+    GetChannelConfig {
+        channel: String,
+        respond_to: Sender<Option<ChannelConfig>>,
     },
 }

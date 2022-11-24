@@ -106,7 +106,9 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
-    handler.database.set_channel_mode("#hola", 'i');
+    handler
+        .database
+        .set_channel_mode("#hola", ChannelFlag::InviteOnly);
     handler.database.remove_channop("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
@@ -136,7 +138,9 @@ fn can_invite_user_in_moderated_channel_if_channop() {
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
-    handler.database.set_channel_mode("#hola", 'i');
+    handler
+        .database
+        .set_channel_mode("#hola", ChannelFlag::InviteOnly);
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
