@@ -103,10 +103,11 @@ impl MainView {
 
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
-        for message in &self.messages {
+        for message in self.messages.get(&last_conv).unwrap() {
             self.message_box.remove(message);
         }
-        self.messages = vec![];
+        
+        // self.messages = vec![];
 
         self.quit_channel_button.set_visible(true);
         if Self::current_conv_is_channel(conversation_label.clone()) {
