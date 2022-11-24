@@ -71,13 +71,15 @@ impl MainView {
         let message = create_received_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
-        self.messages.push(message);
+        self.messages.get(&nickname).unwrap().push(message);
+        // self.messages.push(message);
     }
 
-    pub fn send_message(&mut self, message: String) {
+    pub fn send_message(&mut self, message: String, nickname: String) {
         let message = create_send_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
-        self.messages.push(message);
+        self.messages.get(&nickname).unwrap().push(message);
+        // self.messages.push(message);
     }
 }
