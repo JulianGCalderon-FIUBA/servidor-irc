@@ -71,11 +71,9 @@ impl MainView {
         let message = create_received_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
-        if self.messages.contains_key(&nickname) {
-            self.messages.get_mut(&nickname).unwrap().push(message);
-        } else {
-            self.messages.insert(nickname, vec![message]);
-        }
+        
+        self.messages.get_mut(&nickname).unwrap().push(message);
+        
         // self.messages.push(message);
     }
 
@@ -83,11 +81,8 @@ impl MainView {
         let message = create_send_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
-        if self.messages.contains_key(&nickname) {
-            self.messages.get_mut(&nickname).unwrap().push(message);
-        } else {
-            self.messages.insert(nickname, vec![message]);
-        }
+
+        self.messages.get_mut(&nickname).unwrap().push(message);
         
         // self.messages.push(message);
     }
