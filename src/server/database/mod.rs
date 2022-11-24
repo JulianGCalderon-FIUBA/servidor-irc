@@ -28,6 +28,19 @@ pub struct Database<C: Connection> {
     credentials: HashMap<String, String>,
     servername: String,
     serverinfo: String,
+    /*
+    receiver: Receiver<DatabaseMessage<C>>,
+    info: ServerInfo,
+    credentials: HashMap<String, String>,
+
+    local_clients: HashMap<String, LocalClient<C>>,
+    external_clients: HashMap<String, ExternalClient>,
+
+    channels: HashMap<String, Channel>,
+
+    immediate_servers: HashMap<String, ImmediateServer<C>>,
+    distant_servers: HashMap<String, ServerInfo>,
+    */
 }
 
 impl<C: Connection> Database<C> {

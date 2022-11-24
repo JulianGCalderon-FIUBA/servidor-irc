@@ -1,9 +1,7 @@
 use crate::server::{
     consts::modes::ChannelFlag,
-    testing::{dummy_client, dummy_database, MockTcpStream},
+    testing::{dummy_client, dummy_database},
 };
-
-use super::*;
 
 #[test]
 fn can_add_client() {
@@ -167,34 +165,34 @@ fn can_get_all_channels_from_client() {
     assert_eq!(channels_expected, channels_real);
 }
 
-#[test]
-fn can_get_all_clients_matching_mask() {
-    let database = dummy_database();
+// #[test]
+// fn can_get_all_clients_matching_mask() {
+//     let database = dummy_database();
 
-    let client = ClientBuilder::new()
-        .nickname("nickAname".to_string())
-        .username("userBname".to_string())
-        .hostname("hostCname".to_string())
-        .servername("serverDname".to_string())
-        .realname("realEname".to_string())
-        .stream(MockTcpStream::new())
-        .build()
-        .unwrap();
+//     let client = ClientBuilder::new()
+//         .nickname("nickAname".to_string())
+//         .username("userBname".to_string())
+//         .hostname("hostCname".to_string())
+//         .servername("serverDname".to_string())
+//         .realname("realEname".to_string())
+//         .stream(MockTcpStream::new())
+//         .build()
+//         .unwrap();
 
-    let clientinfo = client.get_info();
+//     let clientinfo = client.get_info();
 
-    database.add_client(client);
+//     database.add_client(client);
 
-    database.add_client(dummy_client("othernick"));
+//     database.add_client(dummy_client("othernick"));
 
-    let expected = vec![clientinfo];
+//     let expected = vec![clientinfo];
 
-    assert_eq!(database.get_clients_for_mask("*A*"), expected);
-    assert_eq!(database.get_clients_for_mask("*B*"), expected);
-    assert_eq!(database.get_clients_for_mask("*C*"), expected);
-    assert_eq!(database.get_clients_for_mask("*D*"), expected);
-    assert_eq!(database.get_clients_for_mask("*E*"), expected);
-}
+//     assert_eq!(database.get_clients_for_mask("*A*"), expected);
+//     assert_eq!(database.get_clients_for_mask("*B*"), expected);
+//     assert_eq!(database.get_clients_for_mask("*C*"), expected);
+//     assert_eq!(database.get_clients_for_mask("*D*"), expected);
+//     assert_eq!(database.get_clients_for_mask("*E*"), expected);
+// }
 
 #[test]
 fn can_get_all_clients_matching_nickmask() {
