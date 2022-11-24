@@ -74,6 +74,10 @@ impl ClientInfo {
     pub fn matches_nickmask(&self, query: &str) -> bool {
         matches(&self.nickname(), query)
     }
+
+    pub fn update_nickname(&mut self, nickname: String) {
+        self.nicknames.push(nickname)
+    }
 }
 
 pub fn matches(base: &str, pattern: &str) -> bool {

@@ -5,7 +5,7 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 use crate::server::responses::{CommandResponse, Notification};
 
 use self::utils::{collect_list, parse_modes};

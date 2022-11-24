@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::server::consts::commands::*;
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 
 /// Possible notifications that can be sent for different commands.
 pub enum Notification {

@@ -6,7 +6,7 @@ mod logic;
 
 use crate::server::connection::Connection;
 use crate::server::consts::modes::ChannelFlag;
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 use crate::server::debug_print;
 
 use super::Database;
@@ -68,8 +68,13 @@ impl<C: Connection> Database<C> {
     }
 
     /// Disconnects client from server, removing it from Database.
-    pub fn disconnect_client(&mut self, _nickname: &str) {
-        // todo!()
+    pub fn disconnect_client(&mut self, nickname: &str) {
+        if let Some(client) = self.local_clients.get_mut(nickname) {
+            client.disconnect();
+        }
+        if let Some(client) = self.external_clients.get_mut(nickname) {
+            client.disconnect();
+        }
     }
 
     pub fn set_channel_topic(&mut self, channel_name: &str, topic: &str) {
@@ -150,19 +155,20 @@ impl<C: Connection> Database<C> {
     }
 
     /// Returns response to UpdateNickname request.
-    pub fn handle_update_nickname(&mut self, _old_nickname: &str, _new_nickname: &str) {
-        // if let Some(client) = self.clients.get_mut(old_nickname) {
-        //     debug_print!("Updating nickname from {old_nickname} to {new_nickname}");
+    pub fn handle_update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
+        if let Some(client) = self.get_client_info(old_nickname) {
+            debug_print!("Updating nickname from {old_nickname} to {new_nickname}");
 
-        //     let client = Rc::get_mut(client).unwrap();
-        //     client
-        //         .borrow_mut()
-        //         .update_nickname(new_nickname.to_string());
+            client.update_nickname(new_nickname.to_string());
 
-        //     let client = self.clients.remove(old_nickname).unwrap();
-        //     self.clients.insert(new_nickname.to_string(), client);
-        // }
-        todo!()
+            if let Some(client) = self.local_clients.remove(old_nickname) {
+                self.local_clients.insert(new_nickname.to_string(), client);
+            }
+            if let Some(client) = self.external_clients.remove(old_nickname) {
+                self.external_clients
+                    .insert(new_nickname.to_string(), client);
+            }
+        }
     }
 
     pub fn handle_are_credentials_valid(

@@ -9,7 +9,7 @@ use super::{
     responses::{ErrorReply, Notification},
 };
 
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 
 pub struct Register<C: Connection> {
     stream: C,
@@ -117,7 +117,7 @@ impl<C: Connection> Register<C> {
 
     fn send_nick_notification(&mut self, client: &ClientInfo) -> io::Result<()> {
         self.stream
-            .send(&Notification::nick(&client.nickname(), client.hopcount + 1))
+            .send(&Notification::nick(&client.nickname(), client.hopcount))
     }
 }
 

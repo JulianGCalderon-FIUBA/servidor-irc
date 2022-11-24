@@ -1,7 +1,7 @@
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerUtils;
 
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 
 use super::RegistrationHandler;
 

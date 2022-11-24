@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::server::{consts::commands::QUIT_COMMAND, data_structures_2::ClientInfo};
+use crate::server::{consts::commands::QUIT_COMMAND, data_structures::ClientInfo};
 
 /// Possible s the commands can generate.
 pub enum CommandResponse {

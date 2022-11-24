@@ -25,4 +25,8 @@ impl<C: Connection> LocalClient<C> {
     pub fn get_info(&self) -> ClientInfo {
         self.info.clone()
     }
+
+    pub fn disconnect(&mut self) {
+        self.stream = None;
+    }
 }

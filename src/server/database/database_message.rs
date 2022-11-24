@@ -2,7 +2,7 @@ use std::io;
 use std::sync::mpsc::Sender;
 
 use crate::server::consts::modes::ChannelFlag;
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 
 use crate::server::connection::Connection;
 

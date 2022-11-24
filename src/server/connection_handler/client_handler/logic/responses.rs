@@ -11,7 +11,7 @@ use crate::server::{
     },
 };
 
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 
 use super::booleans::is_distributed_channel;
 

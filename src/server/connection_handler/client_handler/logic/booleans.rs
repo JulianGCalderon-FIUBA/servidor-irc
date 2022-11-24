@@ -2,7 +2,7 @@ use crate::server::consts::channel::DISTRIBUTED_CHANNEL;
 use crate::server::consts::modes::ChannelFlag;
 use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
 
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn can_name_channel(&mut self, channel: &str) -> bool {

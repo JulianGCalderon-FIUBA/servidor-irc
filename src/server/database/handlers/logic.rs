@@ -2,7 +2,7 @@ use std::io;
 
 use crate::server::connection::Connection;
 use crate::server::consts::modes::ChannelFlag;
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 use crate::server::database::Database;
 
 impl<C: Connection> Database<C> {
@@ -225,7 +225,10 @@ impl<C: Connection> Database<C> {
     }
 
     pub fn get_all_servers(&self) -> Vec<String> {
-        todo!()
+        self.immediate_servers
+            .keys()
+            .map(|key| key.to_string())
+            .collect()
     }
 
     pub fn get_local_clients_for_channel(&self, channel: &str) -> Vec<String> {

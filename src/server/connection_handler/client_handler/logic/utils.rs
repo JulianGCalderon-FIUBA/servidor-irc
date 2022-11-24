@@ -1,7 +1,7 @@
 use crate::server::consts::modes::*;
 use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
 
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn channels_to_list(&mut self, channels: Option<&String>) -> Vec<String> {

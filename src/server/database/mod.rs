@@ -9,7 +9,7 @@ use std::collections::HashMap;
 use std::sync::mpsc::{self, Receiver};
 use std::thread::{self, JoinHandle};
 
-use crate::server::data_structures_2::*;
+use crate::server::data_structures::*;
 
 use database_message::DatabaseMessage::*;
 

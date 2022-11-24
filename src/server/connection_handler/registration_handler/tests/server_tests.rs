@@ -77,7 +77,6 @@ fn server_sends_back_client_info() {
     let mut handler = dummy_registration_handler();
 
     handler.database.add_local_client(dummy_client("nickname1"));
-    handler.database.add_local_client(dummy_client("nickname2"));
 
     let parameters = vec!["servername1".to_string(), "1".to_string()];
     let trail = Some("serverinfo".to_string());
@@ -89,10 +88,5 @@ fn server_sends_back_client_info() {
     assert_eq!(
         ":nickname1 USER username 127.0.0.1 servername :realname",
         responses[2]
-    );
-    assert_eq!("NICK nickname2 1", responses[3]);
-    assert_eq!(
-        ":nickname2 USER username 127.0.0.1 servername :realname",
-        responses[4]
     );
 }

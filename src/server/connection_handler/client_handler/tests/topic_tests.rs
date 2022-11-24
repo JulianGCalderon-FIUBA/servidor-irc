@@ -66,7 +66,8 @@ fn topic_sets_and_gets_channel_topic() {
     let responses = handler.stream.get_responses();
 
     assert_eq!("331 #canal :No topic is set", responses[0]);
-    assert_eq!("332 #canal :topic", responses[1]);
+    assert_eq!(":nickname TOPIC #canal topic", responses[1]);
+    assert_eq!("332 #canal :topic", responses[2]);
 }
 #[test]
 fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
@@ -105,7 +106,12 @@ fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
 
     handler.topic_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname TOPIC #hola topic\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    handler.stream.clear();
 
     parameters = vec!["#hola".to_string()];
 

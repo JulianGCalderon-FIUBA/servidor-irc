@@ -1,7 +1,7 @@
 mod mock_stream;
 
 use super::{
-    data_structures_2::*,
+    data_structures::*,
     database::{Database, DatabaseHandle},
 };
 pub use mock_stream::MockTcpStream;
