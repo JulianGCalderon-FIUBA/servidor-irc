@@ -73,9 +73,11 @@ impl MainView {
     pub fn add_channel(&mut self, channel: GString) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
-        self.connect_channel_client_button(channel_button.clone(), channel, self.sender.clone());
+        self.connect_channel_client_button(channel_button.clone(), channel.clone(), self.sender.clone());
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
+
+        self.messages.insert(channel.clone().to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
