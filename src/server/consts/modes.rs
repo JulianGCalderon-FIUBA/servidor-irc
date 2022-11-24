@@ -32,7 +32,7 @@ pub const REMOVE_MODE: char = '-';
 
 // pub const OPERATOR: char = 'o';
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug)]
 pub enum ChannelFlag {
     Private,
     Secret,

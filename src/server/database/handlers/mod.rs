@@ -6,12 +6,9 @@ use std::{io, rc::Rc};
 mod logic;
 
 use crate::server::connection::Connection;
-<<<<<<< HEAD
-use crate::server::{data_structures::*, debug_print};
-=======
 use crate::server::consts::modes::ChannelFlag;
 use crate::server::data_structures::*;
->>>>>>> feature/server_handler
+use crate::server::debug_print;
 
 use super::Database;
 
@@ -210,31 +207,19 @@ impl<C: Connection> Database<C> {
         respond_to.send(key).unwrap();
     }
 
-<<<<<<< HEAD
-    pub fn handle_set_mode(&mut self, channel_name: String, mode: char) {
+    pub fn handle_set_mode(&mut self, channel_name: String, flag: ChannelFlag) {
         if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Setting {channel_name}'s mode {mode:?}");
+            debug_print!("Setting {channel_name}'s mode {flag:?}");
 
-            channel.set_mode(mode);
-        }
-    }
-
-    pub fn handle_unset_mode(&mut self, channel_name: String, mode: char) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Unsetting {channel_name}'s mode {mode:?}");
-
-            channel.unset_mode(mode);
-=======
-    pub fn handle_set_mode(&mut self, channel: String, flag: ChannelFlag) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
             channel.set_mode(flag);
         }
     }
 
-    pub fn handle_unset_mode(&mut self, channel: String, flag: ChannelFlag) {
-        if let Some(channel) = self.channels.get_mut(&channel) {
+    pub fn handle_unset_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
+            debug_print!("Unsetting {channel_name}'s mode {flag:?}");
+
             channel.unset_mode(flag);
->>>>>>> feature/server_handler
         }
     }
 

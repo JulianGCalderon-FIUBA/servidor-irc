@@ -1,15 +1,9 @@
 use std::io;
 
 use crate::server::connection::Connection;
-<<<<<<< HEAD
-use crate::server::database::Client;
-=======
 use crate::server::consts::modes::ChannelFlag;
-use crate::server::data_structures::ChannelConfig;
-use crate::server::database::{Channel, Client};
->>>>>>> feature/server_handler
-
-use super::{ClientInfo, Database};
+use crate::server::data_structures::{ChannelConfig, Client, ClientInfo};
+use crate::server::database::Database;
 
 impl<C: Connection> Database<C> {
     /// Adds client to Database.
