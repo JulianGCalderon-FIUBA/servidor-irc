@@ -1,6 +1,5 @@
 use std::io;
 use std::sync::atomic::Ordering;
-use std::sync::mpsc::{Receiver, RecvTimeoutError};
 use std::time::Duration;
 
 use crate::message::{CreationError, Message};
@@ -8,14 +7,20 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::consts::commands::*;
 use crate::server::connection_handler::responses::ErrorReply;
 
-use super::{ConnectionHandlerCommands, ConnectionHandlerGetters, ConnectionHandlerUtils};
+use super::{
+    ConnectionHandlerCommands, ConnectionHandlerGetters, ConnectionHandlerUtils,
+    READ_FROM_STREAM_TIMEOUT_MS,
+};
 
-const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
+// const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
 
 pub trait ConnectionHandlerStructure<C: Connection>:
     ConnectionHandlerCommands<C> + ConnectionHandlerGetters<C> + ConnectionHandlerUtils<C>
 {
-    fn try_handle(&mut self, receiver: Receiver<Result<Message, CreationError>>) -> io::Result<()> {
+    fn try_handle(&mut self) -> io::Result<()> {
+        let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
+        self.stream().set_read_timeout(Some(timeout)).unwrap();
+
         loop {
             if self.server_shutdown() {
                 return self.on_server_shutdown();
@@ -25,18 +30,14 @@ pub trait ConnectionHandlerStructure<C: Connection>:
                 return self.on_timeout();
             }
 
-            let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
-            let message = match receiver.recv_timeout(timeout) {
-                Ok(message) => message,
-                Err(RecvTimeoutError::Timeout) => continue,
-                Err(RecvTimeoutError::Disconnected) => panic!(),
-            };
+            let message = Message::read_from(self.stream());
 
             let message = match message {
                 Ok(message) => message,
-                Err(CreationError::IoError(error)) => {
-                    return Err(error);
-                }
+                Err(CreationError::IoError(error)) => match error.kind() {
+                    io::ErrorKind::WouldBlock => continue,
+                    _ => return Err(error),
+                },
                 Err(CreationError::ParsingError(_)) => {
                     self.on_parsing_error()?;
                     continue;

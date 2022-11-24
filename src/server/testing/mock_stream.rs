@@ -46,6 +46,10 @@ impl Connection for MockTcpStream {
     fn shutdown(&self) -> io::Result<()> {
         Ok(())
     }
+
+    fn set_read_timeout(&self, _duration: Option<std::time::Duration>) -> io::Result<()> {
+        Ok(())
+    }
 }
 
 impl PartialEq for MockTcpStream {
