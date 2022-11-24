@@ -218,4 +218,13 @@ impl<C: Connection> Database<C> {
     pub fn get_all_servers(&self) -> Vec<String> {
         todo!()
     }
+
+    pub fn get_local_clients_for_channel(&self, channel: &str) -> Vec<String> {
+        let channel_info = self.channels.get(channel);
+
+        match channel_info {
+            Some(channel_info) => channel_info.get_local_clients(),
+            None => vec![],
+        }
+    }
 }

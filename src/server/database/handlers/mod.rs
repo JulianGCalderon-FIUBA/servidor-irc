@@ -381,4 +381,13 @@ impl<C: Connection> Database<C> {
         let stream = self.get_all_servers();
         respond_to.send(stream).unwrap();
     }
+
+    pub fn handle_get_local_clients_for_channel(
+        &self,
+        channel: String,
+        respond_to: Sender<Vec<String>>,
+    ) {
+        let stream = self.get_local_clients_for_channel(&channel);
+        respond_to.send(stream).unwrap();
+    }
 }

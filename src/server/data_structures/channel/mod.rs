@@ -153,4 +153,12 @@ impl<C: Connection> Channel<C> {
     pub(crate) fn get_config(&self) -> Option<ChannelConfig> {
         Some(self.config.clone())
     }
+
+    pub(crate) fn get_local_clients(&self) -> Vec<String> {
+        let mut names = vec![];
+        for client in self.clients.iter() {
+            names.push(client.borrow().nickname());
+        }
+        names
+    }
 }

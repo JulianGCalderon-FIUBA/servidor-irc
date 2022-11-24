@@ -2,7 +2,7 @@ use std::io;
 
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerLogic,
+    CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
 use crate::server::data_structures::*;
@@ -24,9 +24,11 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         let new_nickname = params[0].clone();
         self.database.update_nickname(&self.nickname, &new_nickname);
-        self.nickname = new_nickname;
 
-        
+        let nick_notification = Notification::nick_update(&self.nickname, &new_nickname);
+        self.send_message_to_all_servers(&nick_notification);
+
+        self.nickname = new_nickname;
 
         Ok(true)
     }
@@ -34,6 +36,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn oper_logic(&mut self, _arguments: CommandArgs) -> std::io::Result<bool> {
         self.database.set_server_operator(&self.nickname);
         self.stream.send(&CommandResponse::you_are_oper())?;
+
+        // TODO: RELAY MODE TO OTHER SERVERS
 
         Ok(true)
     }
@@ -214,11 +218,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let (_, _, trail) = arguments;
         self.database.set_away_message(&trail, &self.nickname);
 
+        let away_notification = Notification::away(&self.nickname, &trail);
         let reply = match trail {
             Some(_) => CommandResponse::now_away(),
             None => CommandResponse::unaway(),
         };
 
+        self.send_message_to_all_servers(&away_notification);
         self.stream.send(&reply)?;
 
         Ok(true)
@@ -230,6 +236,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         if let Some(topic) = params.pop() {
             self.database.set_channel_topic(&channel, &topic);
+            self.send_topic_notification(&channel, &topic);
         } else {
             self.send_topic_response(&channel)?;
         }
@@ -283,7 +290,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.disconnect_client(&self.nickname);
 
         self.send_quit_notification(&message);
-        self.stream.send(&Notification::quit(&message))?;
+        self.stream
+            .send(&Notification::quit(&self.nickname, &message))?;
 
         Ok(false)
     }

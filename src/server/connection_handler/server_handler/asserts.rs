@@ -12,13 +12,18 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
     }
 
     fn assert_nick_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        let (_, params, _) = arguments;
-        if params.len() < 2 {
+        let (prefix, params, _) = arguments;
+        if params.len() < 2 && prefix.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+        if params.is_empty() && prefix.is_some() {
             return Err(ErrorReply::NoReply);
         }
 
-        if params.get(1).unwrap().parse::<usize>().is_err() {
-            return Err(ErrorReply::NoReply);
+        if let Some(hopcount) = params.get(1) {
+            if hopcount.parse::<usize>().is_err() {
+                return Err(ErrorReply::NoReply);
+            }
         }
 
         let nickname = &params[0];

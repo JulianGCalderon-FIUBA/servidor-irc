@@ -5,7 +5,7 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic,
 };
 use crate::server::registerer::Register;
-use crate::server::responses::Notification;
+use crate::server::responses::CommandResponse;
 
 use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
@@ -73,7 +73,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         let message =
             trail.unwrap_or_else(|| self.attributes.remove("nickname").unwrap_or_default());
 
-        self.stream.send(&Notification::quit(&message))?;
+        self.stream.send(&CommandResponse::quit(&message))?;
 
         Ok(false)
     }

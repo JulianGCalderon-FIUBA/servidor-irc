@@ -6,6 +6,7 @@ use crate::server::data_structures::*;
 /// Possible notifications that can be sent for different commands.
 pub enum Notification {
     Quit {
+        nickname: String,
         message: String,
     },
     Invite {
@@ -41,6 +42,10 @@ pub enum Notification {
         nickname: String,
         hopcount: usize,
     },
+    NickUpdate {
+        old_nickname: String,
+        new_nickname: String,
+    },
     User {
         client: ClientInfo,
     },
@@ -49,13 +54,22 @@ pub enum Notification {
         hopcount: usize,
         serverinfo: String,
     },
+    Away {
+        nickname: String,
+        message: Option<String>,
+    },
+    Topic {
+        channel: String,
+        topic: String,
+        nickname: String,
+    },
 }
 
 impl Display for Notification {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
-            Notification::Quit { message } => {
-                format!("{} :{}", QUIT_COMMAND, message)
+            Notification::Quit { nickname, message } => {
+                format!(":{nickname} {QUIT_COMMAND} :{message}")
             }
             Notification::Invite {
                 inviting_client,
@@ -115,6 +129,23 @@ impl Display for Notification {
             } => {
                 format!("{SERVER_COMMAND} {servername} {hopcount} :{serverinfo}")
             }
+            Notification::NickUpdate {
+                old_nickname,
+                new_nickname,
+            } => format!("{old_nickname} NICK {new_nickname}"),
+            Notification::Away { nickname, message } => {
+                format!(
+                    ":{nickname} {AWAY_COMMAND} {}",
+                    message.clone().unwrap_or_default()
+                )
+            }
+            Notification::Topic {
+                nickname,
+                channel,
+                topic,
+            } => {
+                format!(":{nickname} {TOPIC_COMMAND} {channel} {topic}")
+            }
         };
 
         write!(f, "{string}")
@@ -122,10 +153,10 @@ impl Display for Notification {
 }
 
 impl Notification {
-    pub fn quit(message: &str) -> Self {
-        Notification::Quit {
-            message: message.to_string(),
-        }
+    pub fn quit(nickname: &str, message: &str) -> Self {
+        let message = message.to_string();
+        let nickname = nickname.to_string();
+        Notification::Quit { message, nickname }
     }
 
     pub fn server(servername: &str, hopcount: usize, serverinfo: &str) -> Self {
@@ -158,6 +189,15 @@ impl Notification {
     pub fn nick(nickname: &str, hopcount: usize) -> Self {
         let nickname = nickname.to_string();
         Notification::Nick { nickname, hopcount }
+    }
+
+    pub fn nick_update(old_nickname: &str, new_nickname: &str) -> Self {
+        let old_nickname = old_nickname.to_string();
+        let new_nickname = new_nickname.to_string();
+        Notification::NickUpdate {
+            old_nickname,
+            new_nickname,
+        }
     }
 
     pub fn privmsg(sender: &str, target: &str, message: &str) -> Self {
@@ -209,5 +249,24 @@ impl Notification {
         let channel = channel.to_string();
 
         Notification::Join { nickname, channel }
+    }
+
+    pub fn away(nickname: &str, message: &Option<String>) -> Self {
+        let nickname = nickname.to_string();
+        let message = message.clone();
+
+        Notification::Away { nickname, message }
+    }
+
+    pub fn topic(nickname: &str, channel: &str, topic: &str) -> Self {
+        let nickname = nickname.to_string();
+        let channel = channel.to_string();
+        let topic = topic.to_string();
+
+        Notification::Topic {
+            nickname,
+            channel,
+            topic,
+        }
     }
 }

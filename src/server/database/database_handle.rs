@@ -448,6 +448,16 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub fn get_local_clients_for_channel(&self, channel: &str) -> Vec<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetLocalClientsForChannel {
+            channel: channel.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

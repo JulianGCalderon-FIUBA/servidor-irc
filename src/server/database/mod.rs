@@ -203,6 +203,10 @@ impl<C: Connection> Database<C> {
                 self.handle_get_server_stream(server, respond_to)
             }
             GetAllServers { respond_to } => self.handle_get_all_servers(respond_to),
+            GetLocalClientsForChannel {
+                channel,
+                respond_to,
+            } => self.handle_get_local_clients_for_channel(channel, respond_to),
         }
     }
 }

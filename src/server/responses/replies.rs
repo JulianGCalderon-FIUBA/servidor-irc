@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::server::data_structures::ClientInfo;
+use crate::server::{consts::commands::QUIT_COMMAND, data_structures::ClientInfo};
 
 /// Possible s the commands can generate.
 pub enum CommandResponse {
@@ -75,6 +75,9 @@ pub enum CommandResponse {
     NowAway,
     Away {
         nickname: String,
+        message: String,
+    },
+    Quit {
         message: String,
     },
 }
@@ -177,6 +180,9 @@ impl Display for CommandResponse {
             CommandResponse::NowAway => "306 :You have been marked as being away".to_string(),
             CommandResponse::Away { nickname, message } => {
                 format!("301 {nickname} :{message}")
+            }
+            CommandResponse::Quit { message } => {
+                format!("{QUIT_COMMAND} {message}")
             }
         };
         write!(f, "{string}")
@@ -314,5 +320,10 @@ impl CommandResponse {
     pub fn no_topic(channel: &str) -> Self {
         let channel = channel.to_string();
         Self::NoTopic331 { channel }
+    }
+
+    pub fn quit(message: &str) -> Self {
+        let message = message.to_string();
+        Self::Quit { message }
     }
 }

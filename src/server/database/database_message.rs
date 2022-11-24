@@ -193,4 +193,8 @@ pub enum DatabaseMessage<C: Connection> {
     GetAllServers {
         respond_to: Sender<Vec<String>>,
     },
+    GetLocalClientsForChannel {
+        channel: String,
+        respond_to: Sender<Vec<String>>,
+    },
 }

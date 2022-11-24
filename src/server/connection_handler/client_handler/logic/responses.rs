@@ -13,6 +13,8 @@ use crate::server::{
 
 use crate::server::data_structures::*;
 
+use super::booleans::is_distributed_channel;
+
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_join_response(&mut self, channel: &str) -> io::Result<()> {
         self.send_topic_response(channel)?;
@@ -112,12 +114,30 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_join_notification(&mut self, channel: &str) {
         let notification = Notification::join(&self.nickname, channel);
-        self.send_message_to_channel(&notification, channel);
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+
+        if is_distributed_channel(channel) {
+            self.send_message_to_all_servers(&notification);
+        }
     }
 
     pub(super) fn send_part_notification(&mut self, channel: &str) {
         let notification = Notification::part(&self.nickname, channel);
-        self.send_message_to_channel(&notification, channel);
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+
+        if is_distributed_channel(channel) {
+            self.send_message_to_all_servers(&notification);
+        }
+    }
+
+    pub(super) fn send_topic_notification(&mut self, channel: &str, topic: &str) {
+        let notification = Notification::topic(&self.nickname, channel, topic);
+
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+
+        if is_distributed_channel(channel) {
+            self.send_message_to_all_servers(&notification);
+        }
     }
 
     pub(super) fn send_invite_notification(
@@ -130,7 +150,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_quit_notification(&mut self, message: &str) {
-        let notification = Notification::quit(message);
+        let notification = Notification::quit(&self.nickname, message);
 
         let channels = self.database.get_channels_for_client(&self.nickname);
         for channel in channels {
@@ -145,7 +165,11 @@ impl<C: Connection> ClientHandler<C> {
         comment: &Option<String>,
     ) {
         let notification = Notification::kick(&self.nickname, channel, nickname, comment);
-        self.send_message_to_channel(&notification, channel);
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+
+        if is_distributed_channel(channel) {
+            self.send_message_to_all_servers(&notification);
+        }
     }
 
     pub(super) fn send_privmsg_notification(
