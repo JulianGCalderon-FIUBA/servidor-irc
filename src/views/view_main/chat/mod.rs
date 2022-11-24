@@ -69,8 +69,10 @@ impl MainView {
             return;
         }
         let message = create_received_message(&message);
-        self.message_box.append(&message);
-        adjust_scrollbar(self.scrollwindow_chat.clone());
+        if nickname == current_conv {
+            self.message_box.append(&message);
+            adjust_scrollbar(self.scrollwindow_chat.clone());
+        }        
         
         self.messages.get_mut(&nickname).unwrap().push(message);
         
