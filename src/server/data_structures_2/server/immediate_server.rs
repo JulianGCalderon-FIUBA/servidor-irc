@@ -14,4 +14,8 @@ impl<C: Connection> ImmediateServer<C> {
             info: ServerInfo::new(servername, serverinfo),
         }
     }
+
+    pub(crate) fn get_stream(&self) -> Result<C, std::io::Error> {
+        self.stream.try_clone()
+    }
 }

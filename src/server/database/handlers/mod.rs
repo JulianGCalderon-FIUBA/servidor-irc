@@ -1,4 +1,3 @@
-use std::cell::RefCell;
 use std::sync::mpsc::Sender;
 use std::{io, rc::Rc};
 
@@ -7,7 +6,7 @@ mod logic;
 
 use crate::server::connection::Connection;
 use crate::server::consts::modes::ChannelFlag;
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 use crate::server::debug_print;
 
 use super::Database;
@@ -19,38 +18,40 @@ impl<C: Connection> Database<C> {
         respond_to.send(is_server_operator).unwrap();
     }
 
-    pub fn handle_add_client(&mut self, client: Client<C>) {
-        debug_print!("Adding client {:?}", client.get_info());
+    pub fn handle_add_local_client(&mut self, client: LocalClient<C>) {
+        debug_print!("Adding local client {:?}", client.info);
 
-        let nickname = client.nickname();
-        let client = Rc::new(RefCell::new(client));
-        self.clients.insert(nickname, client);
+        let nickname = client.info.nickname();
+        self.local_clients.insert(nickname, client);
+    }
+
+    pub fn handle_add_external_client(&mut self, client: ExternalClient) {
+        debug_print!("Adding external client {:?}", client.info);
+
+        let nickname = client.info.nickname();
+        self.external_clients.insert(nickname, client);
     }
 
     /// Sets client as server operator.
-    pub fn handle_set_server_operator(&mut self, nickname: &str) {
-        if let Some(client) = self.clients.get_mut(nickname) {
+    pub fn handle_set_server_operator(&mut self, nickname: String) {
+        if let Some(info) = self.get_client_info(&nickname) {
             debug_print!("Setting {} as server operator", nickname);
 
-            client.borrow_mut().set_server_operator();
+            info.operator = true;
         }
     }
 
     /// Adds client to channel.
-    pub fn add_client_to_channel(&mut self, nickname: &str, channel_name: &str) {
-        let channel: Option<&mut Channel<C>> = self.channels.get_mut(&channel_name.to_string());
-        if let Some(client) = self.clients.get(nickname) {
+    pub fn add_client_to_channel(&mut self, nickname: String, channel_name: String) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
             debug_print!("Adding {} to channel {}", nickname, channel_name);
 
-            let client_rc = client.clone();
+            channel.add_client(&nickname)
+        } else {
+            debug_print!("Creating channel {} with client {}", channel_name, nickname);
 
-            match channel {
-                Some(channel) => channel.add_client(client_rc),
-                None => {
-                    let new_channel = Channel::new(channel_name.to_string(), client_rc);
-                    self.channels.insert(channel_name.to_string(), new_channel);
-                }
-            }
+            self.channels
+                .insert(channel_name, Channel::new(&channel_name, &nickname));
         }
     }
 
@@ -68,11 +69,7 @@ impl<C: Connection> Database<C> {
 
     /// Disconnects client from server, removing it from Database.
     pub fn disconnect_client(&mut self, nickname: &str) {
-        if let Some(client) = self.clients.get_mut(nickname) {
-            debug_print!("Disconnecting client {} ", nickname);
-
-            client.borrow_mut().disconnect();
-        }
+        // todo!()
     }
 
     pub fn set_channel_topic(&mut self, channel_name: &str, topic: &str) {
@@ -329,7 +326,7 @@ impl<C: Connection> Database<C> {
         respond_to.send(matches_banmask).unwrap();
     }
 
-    pub fn handle_add_server(&mut self, server: ExternalServer<C>) {
+    pub fn handle_add_immediate_server(&mut self, server: ImmediateServer<C>) {
         let servername = server.servername();
         debug_print!("Adding external server {servername}");
 
@@ -341,7 +338,7 @@ impl<C: Connection> Database<C> {
         respond_to.send(contains_server).unwrap();
     }
 
-    pub fn handle_add_external_client(&mut self, servername: &str, client: ExternalClient) {
+    pub fn handle_add_distant_server(&mut self, servername: &str, client: ServerInfo) {
         if let Some(server) = self.servers.get_mut(servername) {
             debug_print!(
                 "Adding external client {} to server {servername}",
@@ -362,7 +359,7 @@ impl<C: Connection> Database<C> {
     pub fn handle_get_channel_config(
         &self,
         channel: String,
-        respond_to: Sender<Option<ChannelConfig>>,
+        respond_to: Sender<Option<ChannelConfiguration>>,
     ) {
         let channel_config = self.get_channel_config(&channel);
         respond_to.send(channel_config).unwrap();

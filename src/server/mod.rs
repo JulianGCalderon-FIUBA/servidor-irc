@@ -45,10 +45,9 @@ pub struct Server {
 impl Server {
     /// Starts new [`Server`].
     pub fn start(servername: &str) -> Self {
-        let servername = servername.to_string();
         let online = Arc::new(AtomicBool::new(true));
 
-        let (database, database_thread) = Database::start(servername.clone(), servername);
+        let (database, database_thread) = Database::start(servername, servername);
 
         let threads = vec![database_thread];
         let database = Some(database);

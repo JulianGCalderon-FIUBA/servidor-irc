@@ -5,13 +5,11 @@ mod handlers;
 #[cfg(test)]
 mod tests;
 
-use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
 use std::sync::mpsc::{self, Receiver};
 use std::thread::{self, JoinHandle};
 
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 
 use database_message::DatabaseMessage::*;
 
@@ -22,30 +20,20 @@ use super::connection::Connection;
 /// Represents a Database that implements ClientTrait.
 pub struct Database<C: Connection> {
     receiver: Receiver<DatabaseMessage<C>>,
-    clients: HashMap<String, Rc<RefCell<Client<C>>>>,
-    channels: HashMap<String, Channel<C>>,
-    servers: HashMap<String, ExternalServer<C>>,
-    credentials: HashMap<String, String>,
-    servername: String,
-    serverinfo: String,
-    /*
-    receiver: Receiver<DatabaseMessage<C>>,
     info: ServerInfo,
     credentials: HashMap<String, String>,
 
     local_clients: HashMap<String, LocalClient<C>>,
     external_clients: HashMap<String, ExternalClient>,
-
     channels: HashMap<String, Channel>,
 
     immediate_servers: HashMap<String, ImmediateServer<C>>,
     distant_servers: HashMap<String, ServerInfo>,
-    */
 }
 
 impl<C: Connection> Database<C> {
     /// Returns new [`DatabaseHandle`] and starts listening for requests.
-    pub fn start(servername: String, serverinfo: String) -> (DatabaseHandle<C>, JoinHandle<()>) {
+    pub fn start(servername: &str, serverinfo: &str) -> (DatabaseHandle<C>, JoinHandle<()>) {
         let (sender, receiver) = mpsc::channel();
 
         let join_handle =
@@ -55,15 +43,16 @@ impl<C: Connection> Database<C> {
         (database_handle, join_handle)
     }
 
-    fn new(receiver: Receiver<DatabaseMessage<C>>, servername: String, serverinfo: String) -> Self {
+    fn new(receiver: Receiver<DatabaseMessage<C>>, servername: &str, serverinfo: &str) -> Self {
         let mut database = Self {
             receiver,
-            clients: HashMap::new(),
-            channels: HashMap::new(),
-            servers: HashMap::new(),
-            credentials: HashMap::new(),
-            servername,
-            serverinfo,
+            info: ServerInfo::new(servername, serverinfo),
+            credentials: Default::default(),
+            local_clients: Default::default(),
+            external_clients: Default::default(),
+            channels: Default::default(),
+            immediate_servers: Default::default(),
+            distant_servers: Default::default(),
         };
 
         database

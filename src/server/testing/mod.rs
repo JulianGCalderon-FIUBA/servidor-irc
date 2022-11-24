@@ -25,6 +25,6 @@ pub fn dummy_server(servername: &str) -> ExternalServer<MockTcpStream> {
 }
 
 pub fn dummy_database() -> DatabaseHandle<MockTcpStream> {
-    let (handle, _) = Database::start("servername".to_string(), "serverinfo".to_string());
+    let (handle, _) = Database::start("servername", "serverinfo");
     handle
 }

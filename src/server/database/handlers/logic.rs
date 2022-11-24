@@ -2,7 +2,7 @@ use std::io;
 
 use crate::server::connection::Connection;
 use crate::server::consts::modes::ChannelFlag;
-use crate::server::data_structures::{ChannelConfig, Client, ClientInfo};
+use crate::server::data_structures_2::*;
 use crate::server::database::Database;
 
 impl<C: Connection> Database<C> {
@@ -19,23 +19,25 @@ impl<C: Connection> Database<C> {
 
     /// Returns if client is server operator.
     pub fn is_server_operator(&mut self, nickname: &str) -> bool {
-        if let Some(client) = self.clients.get(nickname) {
-            return client.borrow_mut().is_server_operator();
+        if let Some(client) = self.get_client_info(nickname) {
+            return client.operator;
         }
 
         false
     }
 
     /// Returns the client's stream or error if client is disconnected.
-    pub fn get_stream(&self, nickname: &str) -> Option<io::Result<C>> {
-        if let Some(client) = self.clients.get(nickname) {
-            return client.borrow().get_stream();
+    pub fn get_local_stream(&self, nickname: &str) -> Option<io::Result<C>> {
+        if let Some(client) = self.local_clients.get(nickname) {
+            return client.get_stream();
         }
 
-        for server in self.servers.values() {
-            if server.contains_client(nickname) {
-                return server.get_stream();
-            }
+        None
+    }
+
+    pub fn get_immediate_server(&self, nickname: &str) -> Option<String> {
+        if let Some(client) = self.external_clients.get(nickname) {
+            return Some(client.immediate.clone());
         }
 
         None
@@ -43,13 +45,14 @@ impl<C: Connection> Database<C> {
 
     /// Returns if Database contains client.
     pub fn contains_client(&self, nickname: &str) -> bool {
-        if self.clients.contains_key(nickname) {
+        if self.local_clients.contains_key(nickname) {
+            return true;
+        }
+        if self.external_clients.contains_key(nickname) {
             return true;
         }
 
-        self.servers
-            .values()
-            .any(|server| server.contains_client(nickname))
+        false
     }
 
     /// Returns if Database contains channel.
@@ -78,27 +81,31 @@ impl<C: Connection> Database<C> {
 
     /// Returns array with ClientInfo for connected clients.
     pub fn get_all_clients(&self) -> Vec<ClientInfo> {
-        let mut local_clients: Vec<ClientInfo> = self
-            .clients
+        let mut clients: Vec<ClientInfo> = self
+            .local_clients
             .values()
-            .map(|client| client.borrow().get_info())
+            .map(LocalClient::get_info)
             .collect();
 
-        for server in self.servers.values() {
-            local_clients.append(&mut server.get_all_clients());
-        }
+        let external_clients: Vec<ClientInfo> = self
+            .external_clients
+            .values()
+            .map(ExternalClient::get_info)
+            .collect();
 
-        local_clients
+        clients.append(&mut external_clients);
+
+        clients
     }
 
     /// Returns array with ClientInfo for channels that match mask.
     pub fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
-        self.filtered_clients(mask, Client::matches_mask)
+        self.filtered_clients(mask, ClientInfo::matches_mask)
     }
 
     /// Returns array with ClientInfo for channels that match nick mask.
     pub fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
-        self.filtered_clients(mask, Client::matches_nickmask)
+        self.filtered_clients(mask, ClientInfo::matches_nickmask)
     }
 
     /// Returns array of channels in Database.
@@ -120,8 +127,8 @@ impl<C: Connection> Database<C> {
     }
 
     pub fn get_away_message(&self, nickname: &str) -> Option<String> {
-        if let Some(client) = self.clients.get(nickname) {
-            return client.borrow().away_message();
+        if let Some(info) = self.get_client_info(nickname) {
+            return info.away.clone();
         }
 
         None
@@ -130,12 +137,13 @@ impl<C: Connection> Database<C> {
     fn filtered_clients(
         &self,
         mask: &str,
-        filter: fn(&Client<C>, &str) -> bool,
+        filter: fn(&ClientInfo, &str) -> bool,
     ) -> Vec<ClientInfo> {
-        self.clients
-            .values()
-            .filter(|client| filter(&client.borrow(), mask))
-            .map(|client| client.borrow().get_info())
+        let clients = self.get_all_clients();
+
+        clients
+            .into_iter()
+            .filter(|client| filter(&client, mask))
             .collect()
     }
 
@@ -189,18 +197,19 @@ impl<C: Connection> Database<C> {
     }
 
     pub fn client_matches_banmask(&self, nickname: &str, banmask: &str) -> bool {
-        if let Some(client) = self.clients.get(nickname) {
-            return client.borrow().matches_banmask(banmask);
+        if let Some(client) = self.get_client_info(nickname) {
+            return client.matches_banmask(banmask);
         }
 
         false
     }
 
     pub fn contains_server(&self, servername: &str) -> bool {
-        self.servers.contains_key(servername)
+        self.immediate_servers.contains_key(servername)
+            || self.distant_servers.contains_key(servername)
     }
 
-    pub fn get_channel_config(&self, channel: &str) -> Option<ChannelConfig> {
+    pub fn get_channel_config(&self, channel: &str) -> Option<ChannelConfiguration> {
         if let Some(channel) = self.channels.get(channel) {
             return channel.get_config();
         }
@@ -208,8 +217,8 @@ impl<C: Connection> Database<C> {
     }
 
     pub fn get_server_stream(&self, server: &str) -> Option<Result<C, std::io::Error>> {
-        if let Some(server) = self.servers.get(server) {
-            return server.get_stream();
+        if let Some(server) = self.immediate_servers.get(server) {
+            return Some(server.get_stream());
         }
 
         None
@@ -226,5 +235,15 @@ impl<C: Connection> Database<C> {
             Some(channel_info) => channel_info.get_local_clients(),
             None => vec![],
         }
+    }
+
+    pub fn get_client_info(&self, nickname: &str) -> Option<&mut ClientInfo> {
+        if let Some(client) = self.local_clients.get(nickname) {
+            return Some(&mut client.info);
+        }
+        if let Some(client) = self.external_clients.get(nickname) {
+            return Some(&mut client.info);
+        }
+        None
     }
 }

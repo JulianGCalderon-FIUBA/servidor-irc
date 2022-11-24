@@ -13,4 +13,8 @@ impl ExternalClient {
             info,
         }
     }
+
+    pub fn get_info(&self) -> ClientInfo {
+        self.info.clone()
+    }
 }
