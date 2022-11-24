@@ -68,13 +68,13 @@ impl<C: Connection> Database<C> {
 
     fn handle_message(&mut self, request: DatabaseMessage<C>) {
         match request {
-            AddClient { client } => self.add_client(client),
+            AddClient { client } => self.handle_add_client(client),
             GetStream {
                 nickname,
                 respond_to: response,
             } => self.handle_get_stream_request(&nickname, response),
             DisconnectClient { nickname } => self.disconnect_client(&nickname),
-            SetServerOperator { nickname } => self.set_server_operator(&nickname),
+            SetServerOperator { nickname } => self.handle_set_server_operator(&nickname),
             IsServerOperator {
                 nickname,
                 respond_to: response,

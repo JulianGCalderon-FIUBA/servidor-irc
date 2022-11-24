@@ -5,6 +5,7 @@ use super::*;
 mod nick_tests;
 mod non_registration_tests;
 mod pass_tests;
+mod server_tests;
 mod user_tests;
 
 fn dummy_registration_handler() -> RegistrationHandler<MockTcpStream> {

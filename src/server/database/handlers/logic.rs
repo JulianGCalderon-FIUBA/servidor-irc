@@ -1,25 +1,18 @@
-use std::cell::RefCell;
 use std::io;
-use std::rc::Rc;
 
 use crate::server::connection::Connection;
+<<<<<<< HEAD
+use crate::server::database::Client;
+=======
 use crate::server::consts::modes::ChannelFlag;
 use crate::server::data_structures::ChannelConfig;
 use crate::server::database::{Channel, Client};
+>>>>>>> feature/server_handler
 
 use super::{ClientInfo, Database};
 
 impl<C: Connection> Database<C> {
     /// Adds client to Database.
-    pub fn add_client(&mut self, client: Client<C>) {
-        let clientinfo = client.get_info();
-
-        println!("Client registered: {clientinfo:?}",);
-
-        let client = Rc::new(RefCell::new(client));
-
-        self.clients.insert(clientinfo.nickname, client);
-    }
 
     /// Verifies if operator credentials are valid.
     pub fn are_credentials_valid(&self, username: &str, password: &str) -> bool {
@@ -30,15 +23,6 @@ impl<C: Connection> Database<C> {
         false
     }
 
-    /// Sets client as server operator.
-    pub fn set_server_operator(&mut self, nickname: &str) {
-        println!("Setting {} as operator", nickname);
-
-        if let Some(client) = self.clients.get_mut(nickname) {
-            client.borrow_mut().set_server_operator();
-        }
-    }
-
     /// Returns if client is server operator.
     pub fn is_server_operator(&mut self, nickname: &str) -> bool {
         if let Some(client) = self.clients.get(nickname) {
@@ -46,15 +30,6 @@ impl<C: Connection> Database<C> {
         }
 
         false
-    }
-
-    /// Disconnects client from server, removing it from Database.
-    pub fn disconnect_client(&mut self, nickname: &str) {
-        println!("Disconnecting {} ", nickname);
-
-        if let Some(client) = self.clients.get_mut(nickname) {
-            client.borrow_mut().disconnect();
-        }
     }
 
     /// Returns the client's stream or error if client is disconnected.
@@ -70,36 +45,6 @@ impl<C: Connection> Database<C> {
         }
 
         None
-    }
-
-    /// Adds client to channel.
-    pub fn add_client_to_channel(&mut self, nickname: &str, channel_name: &str) {
-        println!("Adding {} to channel {}", nickname, channel_name);
-
-        let channel: Option<&mut Channel<C>> = self.channels.get_mut(&channel_name.to_string());
-        if let Some(client) = self.clients.get(nickname) {
-            let client_rc = client.clone();
-
-            match channel {
-                Some(channel) => channel.add_client(client_rc),
-                None => {
-                    let new_channel = Channel::new(channel_name.to_string(), client_rc);
-                    self.channels.insert(channel_name.to_string(), new_channel);
-                }
-            }
-        }
-    }
-
-    /// Removes client from channel.
-    pub fn remove_client_from_channel(&mut self, nickname: &str, channel_name: &str) {
-        println!("Removing {} from channel {}", nickname, channel_name);
-
-        if let Some(channel) = self.channels.get_mut(&channel_name.to_string()) {
-            channel.remove_client(nickname);
-            if channel.get_clients().is_empty() {
-                self.channels.remove(channel_name);
-            }
-        }
     }
 
     /// Returns if Database contains client.
@@ -198,12 +143,6 @@ impl<C: Connection> Database<C> {
             .filter(|client| filter(&client.borrow(), mask))
             .map(|client| client.borrow().get_info())
             .collect()
-    }
-
-    pub fn set_channel_topic(&mut self, channel: &str, topic: &str) {
-        if let Some(channel) = self.channels.get_mut(channel) {
-            channel.set_topic(topic);
-        }
     }
 
     pub fn get_channel_topic(&self, channel: &str) -> Option<String> {

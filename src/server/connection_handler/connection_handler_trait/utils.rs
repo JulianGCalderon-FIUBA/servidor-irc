@@ -10,7 +10,6 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         if let Some(stream) = self.database().get_stream(nickname) {
             stream?.send(&message)?;
         }
-        // cliente desconectado
         Ok(())
     }
 

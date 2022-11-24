@@ -119,12 +119,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         }
 
         if params[1].parse::<usize>().is_err() {
-            return Err(ErrorReply::NoReply);
-        }
-
-        let servername = &params[0];
-        if self.database.contains_server(servername) {
-            return Err(ErrorReply::NoReply);
+            let command = SERVER_COMMAND.to_string();
+            let message = "Hopcount is not numeric".to_string();
+            return Err(ErrorReply::UnknownError400 { command, message });
         }
 
         Ok(())

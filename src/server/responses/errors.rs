@@ -1,6 +1,7 @@
 use std::fmt::Display;
 /// Possible errors the commands may have.
 pub enum ErrorReply {
+    UnknownError400 { command: String, message: String },
     NoSuchNickname401 { nickname: String },
     NoSuchChannel403 { channel: String },
     TooManyChannels405 { channel: String },
@@ -92,6 +93,9 @@ impl Display for ErrorReply {
                 format!("474 {channel} :Cannot join channel (+b)")
             }
             ErrorReply::NoReply => "".to_string(),
+            ErrorReply::UnknownError400 { command, message } => {
+                format!("400 {command} :{message}")
+            }
         };
         write!(f, "{string}")
     }
