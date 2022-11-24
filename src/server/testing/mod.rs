@@ -8,15 +8,15 @@ pub use mock_stream::MockTcpStream;
 
 /// Creates dummy client used for tests.
 pub fn dummy_client(nickname: &str) -> LocalClient<MockTcpStream> {
-    let info = ClientInfo::new(
-        nickname,
-        "username",
-        "127.0.0.1",
-        "servername",
-        "realname",
-        1,
-    );
-    LocalClient::new(MockTcpStream::new(), &None, info)
+    ClientBuilder::new()
+        .nickname(nickname)
+        .username("username")
+        .hostname("127.0.0.1")
+        .servername("servername")
+        .realname("realname")
+        .stream(MockTcpStream::new())
+        .build_local_client()
+        .unwrap()
 }
 
 pub fn dummy_server(servername: &str) -> ImmediateServer<MockTcpStream> {

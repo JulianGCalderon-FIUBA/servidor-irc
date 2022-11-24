@@ -27,34 +27,19 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     }
 
     fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (prefix, mut params, trail) = arguments;
+        let (prefix, params, trail) = arguments;
 
-        let nickname = prefix.unwrap();
-        let hopcount = *self.hopcounts.get(&nickname).unwrap();
-        let servername = params.pop().unwrap();
-        let hostname = params.pop().unwrap();
-        let username = params.pop().unwrap();
-        let realname = trail.unwrap();
-
-        // let client = ExternalClient::new(
-        //     nickname,
-        //     username,
-        //     hostname,
-        //     servername,
-        //     realname,
-        //     hopcount,
-        //     self.servername.clone(),
-        // );
-
-        let info = ClientInfo::new(
-            &nickname,
-            &username,
-            &hostname,
-            &servername,
-            &realname,
-            hopcount,
-        );
-        let client = ExternalClient::new(&self.servername, info);
+        let nickname = &prefix.unwrap();
+        let client = ClientBuilder::<C>::new()
+            .nickname(nickname)
+            .hopcount(self.hopcounts.remove(nickname).unwrap())
+            .username(params.get(0).unwrap())
+            .hostname(params.get(1).unwrap())
+            .servername(params.get(2).unwrap())
+            .realname(&trail.unwrap())
+            .immediate(&self.servername)
+            .build_external_client()
+            .unwrap();
 
         self.database.add_external_client(client);
 

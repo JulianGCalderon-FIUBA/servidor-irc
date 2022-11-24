@@ -8,14 +8,6 @@ pub struct ExternalClient {
 }
 
 impl ExternalClient {
-    pub fn new(immediate: &str, info: ClientInfo) -> Self {
-        Self {
-            immediate: immediate.to_string(),
-            online: true,
-            info,
-        }
-    }
-
     pub fn get_info(&self) -> ClientInfo {
         self.info.clone()
     }

@@ -103,7 +103,8 @@ impl<C: Connection> Register<C> {
     }
 
     fn send_server_data(&mut self) -> io::Result<()> {
-        for client in self.database.get_all_clients() {
+        for mut client in self.database.get_all_clients() {
+            client.hopcount += 1;
             self.send_nick_notification(&client)?;
             self.send_user_notification(&client)?;
         }

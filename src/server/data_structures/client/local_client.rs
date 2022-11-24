@@ -10,14 +10,6 @@ pub struct LocalClient<C: Connection> {
 }
 
 impl<C: Connection> LocalClient<C> {
-    pub fn new(stream: C, password: &Option<String>, info: ClientInfo) -> Self {
-        Self {
-            stream: Some(stream),
-            password: password.clone(),
-            info,
-        }
-    }
-
     pub(crate) fn get_stream(&self) -> Option<Result<C, std::io::Error>> {
         Some(self.stream.as_ref()?.try_clone())
     }

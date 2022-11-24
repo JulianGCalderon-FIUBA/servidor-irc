@@ -12,26 +12,6 @@ pub struct ClientInfo {
 }
 
 impl ClientInfo {
-    pub fn new(
-        nickname: &str,
-        username: &str,
-        hostname: &str,
-        servername: &str,
-        realname: &str,
-        hopcount: usize,
-    ) -> Self {
-        Self {
-            nicknames: vec![nickname.to_string()],
-            username: username.to_string(),
-            hostname: hostname.to_string(),
-            servername: servername.to_string(),
-            realname: realname.to_string(),
-            hopcount,
-            operator: false,
-            away: None,
-        }
-    }
-
     pub fn nickname(&self) -> String {
         self.nicknames.last().unwrap().clone()
     }
