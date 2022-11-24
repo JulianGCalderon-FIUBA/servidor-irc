@@ -87,7 +87,9 @@ fn name_ignores_secret_channels() {
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#secreto");
 
-    handler.database.set_channel_mode("#secreto", 's');
+    handler
+        .database
+        .set_channel_mode("#secreto", ChannelFlag::Secret);
 
     let parameters = vec!["#hola,#secreto,#chau".to_string()];
     handler.names_command((None, parameters, None)).unwrap();
@@ -110,7 +112,9 @@ fn name_ignores_private_channels() {
     handler.database.add_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#privado");
 
-    handler.database.set_channel_mode("#privado", 'p');
+    handler
+        .database
+        .set_channel_mode("#privado", ChannelFlag::Private);
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
     handler.names_command((None, parameters, None)).unwrap();
@@ -133,7 +137,9 @@ fn name_prints_secret_channel_if_client_is_in_it() {
         .database
         .add_client_to_channel("nickname", "#secreto");
 
-    handler.database.set_channel_mode("#secreto", 's');
+    handler
+        .database
+        .set_channel_mode("#secreto", ChannelFlag::Secret);
 
     let parameters = vec!["#hola,#secreto,#chau".to_string()];
     handler.names_command((None, parameters, None)).unwrap();
@@ -158,7 +164,9 @@ fn name_prints_private_channel_if_client_is_in_it() {
         .database
         .add_client_to_channel("nickname", "#privado");
 
-    handler.database.set_channel_mode("#privado", 'p');
+    handler
+        .database
+        .set_channel_mode("#privado", ChannelFlag::Private);
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
     handler.names_command((None, parameters, None)).unwrap();

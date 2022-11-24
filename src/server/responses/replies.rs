@@ -66,11 +66,11 @@ pub enum CommandResponse {
     EndOfBanList368 {
         channel: String,
     },
-    // ChannelModeIs324 {
-    //     channel: String,
-    //     mode: char,
-    //     mode_params: Option<Vec<String>>,
-    // },
+    ChannelModeIs324 {
+        channel: String,
+        mode: char,
+        mode_params: Option<Vec<String>>,
+    },
     UnAway,
     NowAway,
     Away {
@@ -82,7 +82,6 @@ pub enum CommandResponse {
 impl Display for CommandResponse {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let string = match self {
-
             CommandResponse::WhoisUser311 { client_info } => {
                 format!(
                     "311 {} {} {} *: {}",
@@ -166,14 +165,14 @@ impl Display for CommandResponse {
             CommandResponse::EndOfBanList368 { channel } => {
                 format!("368 {channel} :End of channel ban list")
             }
-            // CommandResponse::ChannelModeIs324 {
-            //     channel,
-            //     mode,
-            //     mode_params,
-            // } => format!(
-            //     "324 {channel} {mode} {:?}",
-            //     mode_params.as_ref().unwrap_or(&vec!["".to_string()])
-            // ),
+            CommandResponse::ChannelModeIs324 {
+                channel,
+                mode,
+                mode_params,
+            } => format!(
+                "324 {channel} {mode} {}",
+                mode_params.as_ref().unwrap_or(&vec![]).join(",")
+            ),
             CommandResponse::UnAway => "305 :You are no longer marked as being away".to_string(),
             CommandResponse::NowAway => "306 :You have been marked as being away".to_string(),
             CommandResponse::Away { nickname, message } => {
@@ -185,6 +184,15 @@ impl Display for CommandResponse {
 }
 
 impl CommandResponse {
+    pub fn channel_mode_is(channel: &str, mode: char, mode_params: Option<Vec<String>>) -> Self {
+        let channel = channel.to_string();
+
+        CommandResponse::ChannelModeIs324 {
+            channel,
+            mode,
+            mode_params,
+        }
+    }
 
     pub fn unaway() -> Self {
         Self::UnAway

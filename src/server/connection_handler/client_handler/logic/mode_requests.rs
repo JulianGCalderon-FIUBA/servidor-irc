@@ -25,7 +25,10 @@ impl<C: Connection> ClientHandler<C> {
                 self.set_key(channel, arguments.pop())?;
             }
             SET_OPERATOR => self.add_channops(channel, arguments.pop())?,
-            mode if VALID_MODES.contains(&mode) => self.database.set_channel_mode(channel, mode),
+            mode if VALID_MODES.contains(&mode) => {
+                let flag = ChannelFlag::from_char(mode);
+                self.database.set_channel_mode(channel, flag)
+            }
             mode => self.stream.send(&ErrorReply::UnknownMode472 { mode })?,
         };
         Ok(())
@@ -56,8 +59,9 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     fn unset_mode(&mut self, channel: &str, mode: char) {
-        if self.database.channel_has_mode(channel, mode) {
-            self.database.unset_channel_mode(channel, mode)
+        let flag = ChannelFlag::from_char(mode);
+        if self.database.channel_has_mode(channel, &flag) {
+            self.database.unset_channel_mode(channel, flag)
         }
     }
 
