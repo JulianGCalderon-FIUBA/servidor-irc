@@ -126,7 +126,7 @@ impl Controller {
                 SendPrivMessage { message } => {
                     let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
                     client.send_raw(&priv_message).expect(ERROR_TEXT);
-                    main_view.send_message(message.to_string());
+                    main_view.send_message(message.to_string(), current_conv.clone());
                 }
                 AddViewToAddClient {} => {
                     add_client_window =
@@ -144,11 +144,12 @@ impl Controller {
                     main_view.add_client(client);
                 }
                 ReceivePrivMessage { nickname, message } => {
-                    main_view.receive_priv_message(message, nickname);
+                    main_view.receive_priv_message(message, nickname, current_conv.clone());
                 }
                 ChangeConversation { nickname } => {
+                    let last_conv = current_conv.clone();
                     current_conv = nickname;
-                    main_view.change_conversation(current_conv.clone());
+                    main_view.change_conversation(last_conv, current_conv.clone());
                 }
                 QuitChannel {} => {
                     let part_message = format!("{} {}", PART_COMMAND, current_conv);
@@ -172,7 +173,7 @@ impl Controller {
                 }
                 RecieveInvite { nickname, channel } => {
                     let message = format!("{} has invited you to join {}", nickname, channel);
-                    main_view.receive_priv_message(message, channel);
+                    main_view.receive_priv_message(message, channel, current_conv.clone());
                 }
                 SendListMessage {} => {
                     client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);

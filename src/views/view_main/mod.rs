@@ -5,6 +5,8 @@ mod sidebar;
 pub mod utils;
 pub mod widgets_creation;
 
+use std::collections::HashMap;
+
 use gtk::{
     glib::{GString, Sender},
     prelude::*,
@@ -44,7 +46,7 @@ pub struct MainView {
     pub current_chat: Label,
     scrollwindow_chat: ScrolledWindow,
     pub message_box: Box,
-    pub messages: Vec<Label>,
+    pub messages: HashMap<String,Vec<Label>>,
     pub user_info: Button,
     pub send_message: Button,
     pub input: Entry,
@@ -77,7 +79,7 @@ impl MainView {
             current_chat: create_current_chat(""),
             scrollwindow_chat: create_scrollwindow_chat(),
             message_box: create_message_box(),
-            messages: vec![],
+            messages: HashMap::new(),
             user_info: create_button_with_margin(""),
             input: create_entry(ENTRY_PLACEHOLDER),
             send_message: create_button_with_margin(SEND_BUTTON_TEXT),
