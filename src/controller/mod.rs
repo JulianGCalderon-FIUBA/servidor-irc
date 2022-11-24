@@ -1,14 +1,15 @@
 mod controller_handler;
 pub mod controller_message;
+
 use crate::{
     server::connection_handler::consts::commands::{
-        INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND, PASS_COMMAND,
-        PRIVMSG_COMMAND, USER_COMMAND,
+        INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
+        PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND,
     },
     views::{
         view_register::RegisterView,
-        views_add::view_add_client::AddClientView,
         views_add::{view_add_channel::AddChannelView, view_invite::InviteView},
+        views_add::{view_add_client::AddClientView, view_channel_members::ChannelMembersView},
     },
 };
 use gtk4 as gtk;
@@ -81,6 +82,8 @@ impl Controller {
         let mut add_client_window = add_client_view.get_view(app.clone());
 
         let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
+
+        let mut channel_members_window = ChannelMembersView::new().get_view(app.clone(), vec![]);
 
         let mut current_conv = "".to_string();
 
@@ -180,6 +183,18 @@ impl Controller {
                         Self::not_my_channels(channels, main_view.get_my_channels()),
                     );
                     add_channel_window.show();
+                }
+                SendNamesMessage {} => {
+                    client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
+                }
+                ReceiveNamesChannels {
+                    channels_and_clients,
+                } => {
+                    channel_members_window = ChannelMembersView::new().get_view(
+                        app_clone.clone(),
+                        channels_and_clients[&current_conv].clone(),
+                    );
+                    channel_members_window.show();
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
