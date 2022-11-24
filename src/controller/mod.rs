@@ -144,8 +144,9 @@ impl Controller {
                     main_view.receive_priv_message(message, nickname);
                 }
                 ChangeConversation { nickname } => {
+                    let last_conv = current_conv.clone();
                     current_conv = nickname;
-                    main_view.change_conversation(current_conv.clone());
+                    main_view.change_conversation(last_conv, current_conv.clone());
                 }
                 QuitChannel {} => {
                     let part_message = format!("{} {}", PART_COMMAND, current_conv);

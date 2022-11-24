@@ -101,7 +101,7 @@ impl MainView {
         });
     }
 
-    pub fn change_conversation(&mut self, conversation_label: String) {
+    pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
         for message in &self.messages {
             self.message_box.remove(message);
