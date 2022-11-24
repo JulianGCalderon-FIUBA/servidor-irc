@@ -431,6 +431,23 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub fn get_server_stream(&self, server: &str) -> Option<io::Result<C>> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetServerStream {
+            server: server.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn get_all_servers(&self) -> Vec<String> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetAllServers { respond_to: sender };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

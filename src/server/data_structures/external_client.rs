@@ -9,6 +9,9 @@ pub struct ExternalClient {
     realname: String,
     hopcount: usize,
     operator: bool,
+    _away_message: Option<String>,
+    _online: bool,
+    _immediate_server: String,
 }
 
 impl ExternalClient {
@@ -19,6 +22,7 @@ impl ExternalClient {
         servername: String,
         realname: String,
         hopcount: usize,
+        _immediate_server: String,
     ) -> Self {
         Self {
             nicknames: vec![nickname],
@@ -28,6 +32,9 @@ impl ExternalClient {
             realname,
             hopcount,
             operator: false,
+            _away_message: None,
+            _online: true,
+            _immediate_server,
         }
     }
 
@@ -48,13 +55,8 @@ impl ExternalClient {
         self.nicknames.last().unwrap().to_string()
     }
 
-    // /// Updates nickname.
-    // pub fn update_nickname(&mut self, nickname: String) {
-    //     self.nicknames.push(nickname);
-    // }
-
-    // /// Returns true if Client has or had received nickname.
-    // pub fn had_nickname(&self, nickname: &str) -> bool {
-    //     self.nicknames.contains(&nickname.to_string())
-    // }
+    /// Returns current nickname.
+    pub fn _immediate_server(&self) -> String {
+        self._immediate_server.clone()
+    }
 }

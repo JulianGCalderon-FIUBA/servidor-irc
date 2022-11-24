@@ -21,6 +21,21 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         }
     }
 
+    fn send_message_to_server(&mut self, message: &dyn Display, server: &str) -> io::Result<()> {
+        if let Some(stream) = self.database().get_server_stream(server) {
+            stream?.send(&message)?;
+        }
+        Ok(())
+    }
+
+    fn send_message_to_all_servers(&mut self, message: &dyn Display) {
+        let servers = self.database().get_all_servers();
+
+        for server in servers {
+            self.send_message_to_server(message, &server).ok();
+        }
+    }
+
     fn send_message_to_target(&mut self, message: &dyn Display, target: &str) -> io::Result<()> {
         if self.database().contains_client(target) {
             self.send_message_to_client(message, target)?

@@ -186,4 +186,11 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         respond_to: Sender<Option<ChannelConfig>>,
     },
+    GetServerStream {
+        server: String,
+        respond_to: Sender<Option<io::Result<C>>>,
+    },
+    GetAllServers {
+        respond_to: Sender<Vec<String>>,
+    },
 }

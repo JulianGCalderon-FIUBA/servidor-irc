@@ -206,4 +206,16 @@ impl<C: Connection> Database<C> {
         }
         None
     }
+
+    pub fn get_server_stream(&self, server: &str) -> Option<Result<C, std::io::Error>> {
+        if let Some(server) = self.servers.get(server) {
+            return server.get_stream();
+        }
+
+        None
+    }
+
+    pub fn get_all_servers(&self) -> Vec<String> {
+        todo!()
+    }
 }

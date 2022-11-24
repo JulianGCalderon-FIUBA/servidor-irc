@@ -31,8 +31,15 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let username = params.pop().unwrap();
         let realname = trail.unwrap();
 
-        let client =
-            ExternalClient::new(nickname, username, hostname, servername, realname, hopcount);
+        let client = ExternalClient::new(
+            nickname,
+            username,
+            hostname,
+            servername,
+            realname,
+            hopcount,
+            self.servername.clone(),
+        );
 
         self.database.add_external_client(&self.servername, client);
 

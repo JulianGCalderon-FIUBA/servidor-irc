@@ -367,4 +367,18 @@ impl<C: Connection> Database<C> {
         let channel_config = self.get_channel_config(&channel);
         respond_to.send(channel_config).unwrap();
     }
+
+    pub fn handle_get_server_stream(
+        &self,
+        server: String,
+        respond_to: Sender<Option<io::Result<C>>>,
+    ) {
+        let stream = self.get_server_stream(&server);
+        respond_to.send(stream).unwrap();
+    }
+
+    pub fn handle_get_all_servers(&self, respond_to: Sender<Vec<String>>) {
+        let stream = self.get_all_servers();
+        respond_to.send(stream).unwrap();
+    }
 }

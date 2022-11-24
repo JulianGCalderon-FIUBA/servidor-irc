@@ -26,6 +26,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.update_nickname(&self.nickname, &new_nickname);
         self.nickname = new_nickname;
 
+        
+
         Ok(true)
     }
 
