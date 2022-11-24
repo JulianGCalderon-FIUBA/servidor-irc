@@ -2,7 +2,7 @@ use crate::server::consts::channel::DISTRIBUTED_CHANNEL;
 use crate::server::consts::modes::ChannelFlag;
 use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
 
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn can_name_channel(&mut self, channel: &str) -> bool {
@@ -33,7 +33,9 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn shares_channel_with(&self, client_info: &ClientInfo) -> bool {
-        let client_channels = self.database.get_channels_for_client(&client_info.nickname);
+        let client_channels = self
+            .database
+            .get_channels_for_client(&client_info.nickname());
         let own_channels = self.database.get_channels_for_client(&self.nickname);
 
         !client_channels

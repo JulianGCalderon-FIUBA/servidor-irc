@@ -19,7 +19,7 @@ impl<C: Connection> LocalClient<C> {
     }
 
     pub(crate) fn get_stream(&self) -> Option<Result<C, std::io::Error>> {
-        Some(self.stream?.try_clone())
+        Some(self.stream.as_ref()?.try_clone())
     }
 
     pub fn get_info(&self) -> ClientInfo {

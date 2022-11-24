@@ -5,12 +5,11 @@ use crate::message::{CreationError, Message};
 use super::{
     connection::Connection,
     consts::commands::SERVER_COMMAND,
-    data_structures::ClientInfo,
     database::DatabaseHandle,
     responses::{ErrorReply, Notification},
 };
 
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 
 pub struct Register<C: Connection> {
     stream: C,
@@ -79,15 +78,11 @@ impl<C: Connection> Register<C> {
         hopcount: usize,
         serverinfo: String,
     ) -> Result<(), io::Error> {
-        let server = ExternalServer::new(
-            self.stream.try_clone()?,
-            servername.clone(),
-            serverinfo,
-            hopcount,
-        );
+        let server =
+            ImmediateServer::new(self.stream.try_clone()?, &servername, &serverinfo, hopcount);
 
-        self.assert_can_add_server(&server.servername())?;
-        self.database.add_server(server);
+        self.assert_can_add_server(&server.info.servername)?;
+        self.database.add_immediate_server(server);
 
         self.servername = servername;
 
@@ -122,7 +117,7 @@ impl<C: Connection> Register<C> {
 
     fn send_nick_notification(&mut self, client: &ClientInfo) -> io::Result<()> {
         self.stream
-            .send(&Notification::nick(&client.nickname, client.hopcount + 1))
+            .send(&Notification::nick(&client.nickname(), client.hopcount + 1))
     }
 }
 

@@ -2,62 +2,101 @@ use std::io;
 use std::sync::mpsc::Sender;
 
 use crate::server::consts::modes::ChannelFlag;
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 
 use crate::server::connection::Connection;
 
 /// Possible messages or requests a Database can receive.
 pub enum DatabaseMessage<C: Connection> {
-    AddClient {
-        client: Client<C>,
+    AddChannelBanMask {
+        channel: String,
+        mask: String,
     },
-    GetStream {
-        nickname: String,
-        respond_to: Sender<Option<io::Result<C>>>,
-    },
-    DisconnectClient {
+    AddChanop {
+        channel: String,
         nickname: String,
     },
-    SetServerOperator {
+    AddClientToChannel {
+        nickname: String,
+        channel: String,
+    },
+    AddDistantServer {
+        server: ServerInfo,
+    },
+    AddExternalClient {
+        client: ExternalClient,
+    },
+    AddImmediateServer {
+        server: ImmediateServer<C>,
+    },
+    AddLocalClient {
+        client: LocalClient<C>,
+    },
+    AddSpeaker {
+        channel: String,
         nickname: String,
     },
-    IsServerOperator {
-        nickname: String,
+    AreCredentialsValid {
+        username: String,
+        password: String,
         respond_to: Sender<bool>,
     },
-    ContainsClient {
+    ChannelHasMode {
+        channel: String,
+        flag: ChannelFlag,
+        respond_to: Sender<bool>,
+    },
+    ClientMatchesBanmask {
         nickname: String,
+        mask: String,
         respond_to: Sender<bool>,
     },
     ContainsChannel {
         channel: String,
         respond_to: Sender<bool>,
     },
-    AddClientToChannel {
+    ContainsClient {
         nickname: String,
-        channel: String,
-    },
-    RemoveClientFromChannel {
-        nickname: String,
-        channel: String,
-    },
-    IsClientInChannel {
-        nickname: String,
-        channel: String,
         respond_to: Sender<bool>,
     },
-    GetChannelsForClient {
-        nickname: String,
-        respond_to: Sender<Vec<String>>,
+    ContainsServer {
+        servername: String,
+        respond_to: Sender<bool>,
     },
-    GetClientsFromChannel {
-        channel: String,
+    DisconnectClient {
+        nickname: String,
+    },
+    GetAllChannels {
         respond_to: Sender<Vec<String>>,
     },
     GetAllClients {
         respond_to: Sender<Vec<ClientInfo>>,
     },
-    GetAllChannels {
+    GetAllServers {
+        respond_to: Sender<Vec<String>>,
+    },
+    GetAwayMessage {
+        nickname: String,
+        respond_to: Sender<Option<String>>,
+    },
+    GetChannelBanMask {
+        channel: String,
+        respond_to: Sender<Vec<String>>,
+    },
+    GetChannelConfig {
+        channel: String,
+        respond_to: Sender<Option<ChannelConfiguration>>,
+    },
+    GetChannelKey {
+        channel: String,
+        respond_to: Sender<Option<String>>,
+    },
+    GetChannelTopic {
+        channel: String,
+        respond_to: Sender<Option<String>>,
+    },
+    GetChannelsForClient {
+        nickname: String,
         respond_to: Sender<Vec<String>>,
     },
     GetClientsForMask {
@@ -68,133 +107,96 @@ pub enum DatabaseMessage<C: Connection> {
         nickmask: String,
         respond_to: Sender<Vec<ClientInfo>>,
     },
-    UpdateNickname {
-        old_nickname: String,
-        new_nickname: String,
-    },
-    AreCredentialsValid {
-        username: String,
-        password: String,
-        respond_to: Sender<bool>,
-    },
-    SetAwayMessage {
-        message: Option<String>,
-        nickname: String,
-    },
-    GetAwayMessage {
-        nickname: String,
-        respond_to: Sender<Option<String>>,
-    },
-    SetChannelTopic {
+    GetClientsFromChannel {
         channel: String,
-        topic: String,
+        respond_to: Sender<Vec<String>>,
     },
-    GetChannelTopic {
+    GetLimit {
         channel: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Option<usize>>,
+    },
+    GetLocalClientsForChannel {
+        channel: String,
+        respond_to: Sender<Vec<String>>,
+    },
+    GetLocalStream {
+        nickname: String,
+        respond_to: Sender<Option<io::Result<C>>>,
+    },
+    GetServerInfo {
+        respond_to: Sender<String>,
+    },
+    GetServerName {
+        respond_to: Sender<String>,
+    },
+    GetServerStream {
+        server: String,
+        respond_to: Sender<Option<io::Result<C>>>,
     },
     IsChannelOperator {
         channel: String,
         nickname: String,
         respond_to: Sender<bool>,
     },
-    SetChannelKey {
-        channel: String,
-        key: Option<String>,
-    },
-    GetChannelKey {
-        channel: String,
-        respond_to: Sender<Option<String>>,
-    },
-    SetChannelMode {
-        channel: String,
-        flag: ChannelFlag,
-    },
-    UnsetChannelMode {
-        channel: String,
-        flag: ChannelFlag,
-    },
-    ChannelHasMode {
-        channel: String,
-        flag: ChannelFlag,
-        respond_to: Sender<bool>,
-    },
-    SetLimit {
-        channel: String,
-        limit: Option<usize>,
-    },
-    GetLimit {
-        channel: String,
-        respond_to: Sender<Option<usize>>,
-    },
-    AddChanop {
-        channel: String,
-        nickname: String,
-    },
-    RemoveChanop {
-        channel: String,
-        nickname: String,
-    },
-    AddSpeaker {
-        channel: String,
-        nickname: String,
-    },
-    RemoveSpeaker {
-        channel: String,
-        nickname: String,
-    },
     IsChannelSpeaker {
         channel: String,
         nickname: String,
         respond_to: Sender<bool>,
     },
-    AddChannelBanMask {
+    IsClientInChannel {
+        nickname: String,
         channel: String,
-        mask: String,
+        respond_to: Sender<bool>,
     },
-    GetChannelBanMask {
-        channel: String,
-        respond_to: Sender<Vec<String>>,
+    IsServerOperator {
+        nickname: String,
+        respond_to: Sender<bool>,
     },
     RemoveChannelBanMask {
         channel: String,
         mask: String,
     },
-    ClientMatchesBanmask {
+    RemoveChanop {
+        channel: String,
         nickname: String,
-        mask: String,
-        respond_to: Sender<bool>,
     },
-    ContainsServer {
-        servername: String,
-        respond_to: Sender<bool>,
-    },
-    AddServer {
-        server: ExternalServer<C>,
-    },
-    AddExternalClient {
-        server: String,
-        client: ExternalClient,
-    },
-    GetServerName {
-        respond_to: Sender<String>,
-    },
-    GetServerInfo {
-        respond_to: Sender<String>,
-    },
-    GetChannelConfig {
+    RemoveClientFromChannel {
+        nickname: String,
         channel: String,
-        respond_to: Sender<Option<ChannelConfig>>,
     },
-    GetServerStream {
-        server: String,
-        respond_to: Sender<Option<io::Result<C>>>,
-    },
-    GetAllServers {
-        respond_to: Sender<Vec<String>>,
-    },
-    GetLocalClientsForChannel {
+    RemoveSpeaker {
         channel: String,
-        respond_to: Sender<Vec<String>>,
+        nickname: String,
+    },
+    SetAwayMessage {
+        message: Option<String>,
+        nickname: String,
+    },
+    SetChannelKey {
+        channel: String,
+        key: Option<String>,
+    },
+    SetChannelMode {
+        channel: String,
+        flag: ChannelFlag,
+    },
+    SetChannelTopic {
+        channel: String,
+        topic: String,
+    },
+    SetLimit {
+        channel: String,
+        limit: Option<usize>,
+    },
+    SetServerOperator {
+        nickname: String,
+    },
+    UnsetChannelMode {
+        channel: String,
+        flag: ChannelFlag,
+    },
+    UpdateNickname {
+        old_nickname: String,
+        new_nickname: String,
     },
 }

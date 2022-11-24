@@ -17,7 +17,7 @@ fn nick_fails_with_no_nickname_given() {
 fn changing_nick_fails_with_nickname_in_use() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
 
     let parameters = vec!["nick2".to_string()];
     handler.nick_command((None, parameters, None)).unwrap();

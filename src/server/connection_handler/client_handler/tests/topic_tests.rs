@@ -17,7 +17,7 @@ fn topic_fails_with_empty_params() {
 fn cannot_modify_topic_if_not_in_channel() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("dummy"));
+    handler.database.add_local_client(dummy_client("dummy"));
     handler.database.add_client_to_channel("dummy", "#canal");
 
     let parameters = vec!["#canal".to_string(), "topic".to_string()];
@@ -48,7 +48,7 @@ fn topic_ignores_nonexistent_channels() {
 fn topic_sets_and_gets_channel_topic() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("dummy"));
+    handler.database.add_local_client(dummy_client("dummy"));
     handler.database.add_client_to_channel("dummy", "#canal");
     handler.database.add_client_to_channel("nickname", "#canal");
 
@@ -72,7 +72,7 @@ fn topic_sets_and_gets_channel_topic() {
 fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
     handler
@@ -94,7 +94,7 @@ fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
 fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
     handler

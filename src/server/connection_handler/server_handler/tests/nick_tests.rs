@@ -39,7 +39,7 @@ fn nick_adds_client_to_hopcounts() {
 #[test]
 fn nick_with_used_nickname_returns_nick_collision() {
     let mut handler = dummy_server_handler();
-    handler.database.add_client(dummy_client("nickname"));
+    handler.database.add_local_client(dummy_client("nickname"));
 
     let parameters = vec!["nickname".to_string(), "1".to_string()];
     handler.nick_command((None, parameters, None)).unwrap();

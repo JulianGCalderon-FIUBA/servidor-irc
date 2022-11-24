@@ -25,7 +25,7 @@ fn privmsg_is_ignored_with_unknown_target() {
 
 fn privmsg_is_relayed_to_client() {
     let mut handler = dummy_server_handler();
-    handler.database.add_client(dummy_client("target"));
+    handler.database.add_local_client(dummy_client("target"));
 
     let prefix = Some("sender".to_string());
     let params = vec!["target".to_string()];
@@ -36,7 +36,7 @@ fn privmsg_is_relayed_to_client() {
         ":sender PRIVMSG target :message\r\n",
         handler
             .database
-            .get_stream("target")
+            .get_local_stream("target")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()

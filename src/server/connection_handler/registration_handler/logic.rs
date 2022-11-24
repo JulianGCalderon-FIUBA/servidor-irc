@@ -42,7 +42,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
 
         let client = self.build_client();
 
-        self.database.add_client(client.unwrap());
+        self.database.add_local_client(client.unwrap());
 
         self.connection_type = ConnectionType::Client;
 

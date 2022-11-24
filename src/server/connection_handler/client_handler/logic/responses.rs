@@ -11,7 +11,7 @@ use crate::server::{
     },
 };
 
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 
 use super::booleans::is_distributed_channel;
 
@@ -25,7 +25,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
-        let nickname = &client_info.nickname;
+        let nickname = &client_info.nickname();
         let servername = &client_info.servername;
         let serverinfo = "serverinfo"; // todo
 
@@ -83,7 +83,7 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_whoreply_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
         let channel = self
             .database
-            .get_channels_for_client(&client_info.nickname)
+            .get_channels_for_client(&client_info.nickname())
             .get(0)
             .map(|string| string.to_owned());
 

@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
 use crate::server::consts::commands::*;
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 
 /// Possible notifications that can be sent for different commands.
 pub enum Notification {
@@ -115,7 +115,7 @@ impl Display for Notification {
             Notification::User { client } => {
                 format!(
                     ":{} {USER_COMMAND} {} {} {} :{}",
-                    client.nickname,
+                    client.nickname(),
                     client.username,
                     client.hostname,
                     client.servername,

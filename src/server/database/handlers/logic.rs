@@ -87,7 +87,7 @@ impl<C: Connection> Database<C> {
             .map(LocalClient::get_info)
             .collect();
 
-        let external_clients: Vec<ClientInfo> = self
+        let mut external_clients: Vec<ClientInfo> = self
             .external_clients
             .values()
             .map(ExternalClient::get_info)
@@ -126,7 +126,7 @@ impl<C: Connection> Database<C> {
         channels
     }
 
-    pub fn get_away_message(&self, nickname: &str) -> Option<String> {
+    pub fn get_away_message(&mut self, nickname: &str) -> Option<String> {
         if let Some(info) = self.get_client_info(nickname) {
             return info.away.clone();
         }
@@ -143,7 +143,7 @@ impl<C: Connection> Database<C> {
 
         clients
             .into_iter()
-            .filter(|client| filter(&client, mask))
+            .filter(|client| filter(client, mask))
             .collect()
     }
 
@@ -196,7 +196,7 @@ impl<C: Connection> Database<C> {
         false
     }
 
-    pub fn client_matches_banmask(&self, nickname: &str, banmask: &str) -> bool {
+    pub fn client_matches_banmask(&mut self, nickname: &str, banmask: &str) -> bool {
         if let Some(client) = self.get_client_info(nickname) {
             return client.matches_banmask(banmask);
         }
@@ -229,19 +229,22 @@ impl<C: Connection> Database<C> {
     }
 
     pub fn get_local_clients_for_channel(&self, channel: &str) -> Vec<String> {
-        let channel_info = self.channels.get(channel);
-
-        match channel_info {
-            Some(channel_info) => channel_info.get_local_clients(),
-            None => vec![],
+        if let Some(channel) = self.channels.get(channel) {
+            return channel
+                .get_clients()
+                .into_iter()
+                .filter(|client| self.local_clients.contains_key(client))
+                .collect();
         }
+
+        vec![]
     }
 
-    pub fn get_client_info(&self, nickname: &str) -> Option<&mut ClientInfo> {
-        if let Some(client) = self.local_clients.get(nickname) {
+    pub fn get_client_info(&mut self, nickname: &str) -> Option<&mut ClientInfo> {
+        if let Some(client) = self.local_clients.get_mut(nickname) {
             return Some(&mut client.info);
         }
-        if let Some(client) = self.external_clients.get(nickname) {
+        if let Some(client) = self.external_clients.get_mut(nickname) {
             return Some(&mut client.info);
         }
         None

@@ -51,7 +51,7 @@ fn privmsg_fails_with_invalid_target() {
 fn privmsg_works_with_valid_target_client() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick1"));
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
@@ -63,7 +63,7 @@ fn privmsg_works_with_valid_target_client() {
         ":nickname PRIVMSG nick1 :message!\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -74,8 +74,8 @@ fn privmsg_works_with_valid_target_client() {
 fn privmsg_works_with_valid_target_channel() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
     handler
@@ -96,7 +96,7 @@ fn privmsg_works_with_valid_target_channel() {
         ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -106,7 +106,7 @@ fn privmsg_works_with_valid_target_channel() {
         ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -117,8 +117,8 @@ fn privmsg_works_with_valid_target_channel() {
 fn privmsg_works_with_multiple_targets() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick2"));
 
     let parameters = vec!["nick1,nick2".to_string()];
     let trailing = Some("message!".to_string());
@@ -130,7 +130,7 @@ fn privmsg_works_with_multiple_targets() {
         ":nickname PRIVMSG nick1 :message!\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -140,7 +140,7 @@ fn privmsg_works_with_multiple_targets() {
         ":nickname PRIVMSG nick2 :message!\r\n",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -151,7 +151,7 @@ fn privmsg_works_with_multiple_targets() {
 fn privmsg_with_away_client_returns_away_message() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick1"));
     handler
         .database
         .set_away_message(&Some("away message!".to_string()), "nick1");
@@ -172,8 +172,8 @@ fn privmsg_with_away_client_returns_away_message() {
 fn privmsg_fails_with_not_on_channel_with_flag_n() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
@@ -195,7 +195,7 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
         "",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -205,7 +205,7 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
         "",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -216,7 +216,7 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
 fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
     handler
         .database
@@ -240,7 +240,7 @@ fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
         "",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -251,8 +251,8 @@ fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
 fn privmsg_works_on_channel_with_flag_n() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler
         .database
         .add_client_to_channel("nickname", "#channel");
@@ -277,7 +277,7 @@ fn privmsg_works_on_channel_with_flag_n() {
         ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -287,7 +287,7 @@ fn privmsg_works_on_channel_with_flag_n() {
         ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -298,7 +298,7 @@ fn privmsg_works_on_channel_with_flag_n() {
 fn privmsg_works_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
     handler
         .database
@@ -323,7 +323,7 @@ fn privmsg_works_on_channel_with_flag_m() {
         ":nickname PRIVMSG #channel :message!\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()

@@ -31,7 +31,9 @@ fn server_fails_with_no_numeric_hopcount() {
 #[test]
 fn server_fails_when_servername_already_registered() {
     let mut handler = dummy_registration_handler();
-    handler.database.add_server(dummy_server("servername1"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername1"));
 
     let parameters = vec!["servername1".to_string(), "1".to_string()];
     let trail = Some("serverinfo".to_string());
@@ -74,8 +76,8 @@ fn server_sends_back_server() {
 fn server_sends_back_client_info() {
     let mut handler = dummy_registration_handler();
 
-    handler.database.add_client(dummy_client("nickname1"));
-    handler.database.add_client(dummy_client("nickname2"));
+    handler.database.add_local_client(dummy_client("nickname1"));
+    handler.database.add_local_client(dummy_client("nickname2"));
 
     let parameters = vec!["servername1".to_string(), "1".to_string()];
     let trail = Some("serverinfo".to_string());

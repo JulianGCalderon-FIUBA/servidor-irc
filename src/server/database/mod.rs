@@ -36,6 +36,8 @@ impl<C: Connection> Database<C> {
     pub fn start(servername: &str, serverinfo: &str) -> (DatabaseHandle<C>, JoinHandle<()>) {
         let (sender, receiver) = mpsc::channel();
 
+        let servername = servername.to_string();
+        let serverinfo = serverinfo.to_string();
         let join_handle =
             thread::spawn(|| Database::<C>::new(receiver, servername, serverinfo).run());
         let database_handle = DatabaseHandle::new(sender);
@@ -43,10 +45,10 @@ impl<C: Connection> Database<C> {
         (database_handle, join_handle)
     }
 
-    fn new(receiver: Receiver<DatabaseMessage<C>>, servername: &str, serverinfo: &str) -> Self {
+    fn new(receiver: Receiver<DatabaseMessage<C>>, servername: String, serverinfo: String) -> Self {
         let mut database = Self {
             receiver,
-            info: ServerInfo::new(servername, serverinfo),
+            info: ServerInfo::new(&servername, &serverinfo, 0),
             credentials: Default::default(),
             local_clients: Default::default(),
             external_clients: Default::default(),
@@ -70,13 +72,8 @@ impl<C: Connection> Database<C> {
 
     fn handle_message(&mut self, request: DatabaseMessage<C>) {
         match request {
-            AddClient { client } => self.handle_add_client(client),
-            GetStream {
-                nickname,
-                respond_to: response,
-            } => self.handle_get_stream_request(&nickname, response),
             DisconnectClient { nickname } => self.disconnect_client(&nickname),
-            SetServerOperator { nickname } => self.handle_set_server_operator(&nickname),
+            SetServerOperator { nickname } => self.handle_set_server_operator(nickname),
             IsServerOperator {
                 nickname,
                 respond_to: response,
@@ -91,7 +88,7 @@ impl<C: Connection> Database<C> {
                 respond_to: response,
             } => self.handle_contains_channel(&channel, response),
             AddClientToChannel { nickname, channel } => {
-                self.add_client_to_channel(&nickname, &channel)
+                self.add_client_to_channel(nickname, channel)
             }
             RemoveClientFromChannel { nickname, channel } => {
                 self.remove_client_from_channel(&nickname, &channel)
@@ -128,7 +125,7 @@ impl<C: Connection> Database<C> {
                 respond_to,
             } => self.handle_are_credentials_valid(&username, &password, respond_to),
             SetAwayMessage { message, nickname } => {
-                self.handle_set_away_message(&message, &nickname)
+                self.handle_set_away_message(message, &nickname)
             }
             GetAwayMessage {
                 nickname,
@@ -191,10 +188,7 @@ impl<C: Connection> Database<C> {
                 servername,
                 respond_to,
             } => self.handle_contains_server(&servername, respond_to),
-            AddServer { server } => self.handle_add_server(server),
-            AddExternalClient { server, client } => {
-                self.handle_add_external_client(&server, client)
-            }
+            AddExternalClient { client } => self.handle_add_external_client(client),
             GetServerName { respond_to } => self.handle_get_servername(respond_to),
             GetServerInfo { respond_to } => self.handle_get_serverinfo(respond_to),
             GetChannelConfig {
@@ -209,6 +203,13 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_local_clients_for_channel(channel, respond_to),
+            AddDistantServer { server } => self.handle_add_distant_server(server),
+            AddImmediateServer { server } => self.handle_add_immediate_server(server),
+            AddLocalClient { client } => self.handle_add_local_client(client),
+            GetLocalStream {
+                nickname,
+                respond_to,
+            } => self.handle_get_local_stream_request(nickname, respond_to),
         }
     }
 }

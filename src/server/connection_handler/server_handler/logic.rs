@@ -5,7 +5,7 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 use crate::server::responses::Notification;
 
 use super::ServerHandler;
@@ -36,17 +36,27 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let username = params.pop().unwrap();
         let realname = trail.unwrap();
 
-        let client = ExternalClient::new(
-            nickname,
-            username,
-            hostname,
-            servername,
-            realname,
-            hopcount,
-            self.servername.clone(),
-        );
+        // let client = ExternalClient::new(
+        //     nickname,
+        //     username,
+        //     hostname,
+        //     servername,
+        //     realname,
+        //     hopcount,
+        //     self.servername.clone(),
+        // );
 
-        self.database.add_external_client(&self.servername, client);
+        let info = ClientInfo::new(
+            &nickname,
+            &username,
+            &hostname,
+            &servername,
+            &realname,
+            hopcount,
+        );
+        let client = ExternalClient::new(&self.servername, info);
+
+        self.database.add_external_client(client);
 
         Ok(true)
     }
@@ -143,9 +153,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let server_notification = Notification::server(&servername, hopcount + 1, &serverinfo);
         self.send_message_to_all_other_servers(&server_notification);
 
-        let stream = self.stream.try_clone()?;
-        let server = ExternalServer::new(stream, servername, serverinfo, hopcount);
-        self.database.add_server(server);
+        let server = ServerInfo::new(&servername, &serverinfo, hopcount);
+        self.database.add_distant_server(server);
 
         Ok(true)
     }

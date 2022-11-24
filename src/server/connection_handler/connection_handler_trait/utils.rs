@@ -7,7 +7,7 @@ use super::ConnectionHandlerGetters;
 
 pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     fn send_message_to_client(&mut self, message: &dyn Display, nickname: &str) -> io::Result<()> {
-        if let Some(stream) = self.database().get_stream(nickname) {
+        if let Some(stream) = self.database().get_local_stream(nickname) {
             stream?.send(&message)?;
         }
         Ok(())

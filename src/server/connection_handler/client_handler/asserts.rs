@@ -4,7 +4,7 @@ use crate::server::connection_handler::connection_handler_trait::ConnectionHandl
 use crate::server::consts::channel::*;
 use crate::server::consts::commands::*;
 use crate::server::consts::modes::*;
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 use crate::server::responses::ErrorReply;
 
 use super::ClientHandler;

@@ -27,13 +27,13 @@ impl Channel {
         }
     }
 
-    pub fn add_client(&self, nickname: &str) {
+    pub fn add_client(&mut self, nickname: &str) {
         self.clients.push(nickname.to_string())
     }
 
-    pub fn remove_client(&self, nickname: &str) {
+    pub fn remove_client(&mut self, nickname: &str) {
         if let Some(index) = self.clients.iter().position(|nick| nick == nickname) {
-            self.clients.remove(index)
+            self.clients.remove(index);
         }
     }
 
@@ -42,7 +42,7 @@ impl Channel {
     }
 
     pub fn contains_client(&self, nickname: &str) -> bool {
-        self.clients.contains(nickname)
+        self.clients.contains(&nickname.to_string())
     }
 
     pub fn set_topic(&mut self, topic: &str) {
@@ -133,15 +133,7 @@ impl Channel {
         self.config.operators.contains(&nickname.to_string())
     }
 
-    pub(crate) fn get_config(&self) -> Option<ChannelConfiguration> {
+    pub fn get_config(&self) -> Option<ChannelConfiguration> {
         Some(self.config.clone())
-    }
-
-    pub(crate) fn get_local_clients(&self) -> Vec<String> {
-        let mut names = vec![];
-        for client in self.clients.iter() {
-            names.push(client.borrow().nickname());
-        }
-        names
     }
 }

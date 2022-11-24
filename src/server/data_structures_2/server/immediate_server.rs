@@ -8,10 +8,10 @@ pub struct ImmediateServer<C: Connection> {
 }
 
 impl<C: Connection> ImmediateServer<C> {
-    pub fn new(stream: C, servername: &str, serverinfo: &str) -> Self {
+    pub fn new(stream: C, servername: &str, serverinfo: &str, hopcount: usize) -> Self {
         Self {
             stream,
-            info: ServerInfo::new(servername, serverinfo),
+            info: ServerInfo::new(servername, serverinfo, hopcount),
         }
     }
 

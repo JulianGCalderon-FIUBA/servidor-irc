@@ -26,7 +26,7 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let client = dummy_client(&nickname);
     let connection = client.get_stream().unwrap().unwrap();
 
-    database.add_client(client);
+    database.add_local_client(client);
 
     ClientHandler::from_connection(connection, nickname, database, online).unwrap()
 }

@@ -3,7 +3,7 @@ use std::{
     sync::mpsc::{self, Sender},
 };
 
-use crate::server::data_structures::*;
+use crate::server::data_structures_2::*;
 use crate::server::{connection::Connection, consts::modes::ChannelFlag};
 
 use super::database_message::DatabaseMessage;
@@ -23,8 +23,14 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     /// Sends AddClient request.
-    pub fn add_client(&self, client: Client<C>) {
-        let request = DatabaseMessage::AddClient { client };
+    pub fn add_local_client(&self, client: LocalClient<C>) {
+        let request = DatabaseMessage::AddLocalClient { client };
+        self.sender.send(request).unwrap();
+    }
+
+    /// Sends AddClient request.
+    pub fn add_external_client(&self, client: ExternalClient) {
+        let request = DatabaseMessage::AddExternalClient { client };
         self.sender.send(request).unwrap();
     }
 
@@ -37,16 +43,13 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
     }
 
-    pub fn add_external_client(&self, server: &str, client: ExternalClient) {
-        let request = DatabaseMessage::AddExternalClient {
-            server: server.to_string(),
-            client,
-        };
+    pub fn add_immediate_server(&self, server: ImmediateServer<C>) {
+        let request = DatabaseMessage::AddImmediateServer { server };
         self.sender.send(request).unwrap();
     }
 
-    pub fn add_server(&self, server: ExternalServer<C>) {
-        let request = DatabaseMessage::AddServer { server };
+    pub fn add_distant_server(&self, server: ServerInfo) {
+        let request = DatabaseMessage::AddDistantServer { server };
         self.sender.send(request).unwrap();
     }
 
@@ -232,10 +235,20 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     /// Sends GetStream request and returns answer.
-    pub fn get_stream(&self, nickname: &str) -> Option<io::Result<C>> {
+    pub fn get_local_stream(&self, nickname: &str) -> Option<io::Result<C>> {
         let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetStream {
+        let request = DatabaseMessage::GetLocalStream {
             nickname: nickname.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub fn get_server_stream(&self, severname: &str) -> Option<io::Result<C>> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetServerStream {
+            server: severname.to_string(),
             respond_to: sender,
         };
         self.sender.send(request).unwrap();
@@ -422,20 +435,10 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_channel_config(&self, channel: &str) -> Option<ChannelConfig> {
+    pub fn get_channel_config(&self, channel: &str) -> Option<ChannelConfiguration> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelConfig {
             channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn get_server_stream(&self, server: &str) -> Option<io::Result<C>> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetServerStream {
-            server: server.to_string(),
             respond_to: sender,
         };
         self.sender.send(request).unwrap();

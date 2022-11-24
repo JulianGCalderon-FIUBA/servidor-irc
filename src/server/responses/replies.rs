@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::server::{consts::commands::QUIT_COMMAND, data_structures::ClientInfo};
+use crate::server::{consts::commands::QUIT_COMMAND, data_structures_2::ClientInfo};
 
 /// Possible s the commands can generate.
 pub enum CommandResponse {
@@ -88,7 +88,7 @@ impl Display for CommandResponse {
             CommandResponse::WhoisUser311 { client_info } => {
                 format!(
                     "311 {} {} {} *: {}",
-                    client_info.nickname,
+                    client_info.nickname(),
                     client_info.username,
                     client_info.hostname,
                     client_info.realname,
@@ -151,7 +151,7 @@ impl Display for CommandResponse {
                     client_info.username,
                     client_info.hostname,
                     client_info.servername,
-                    client_info.nickname,
+                    client_info.nickname(),
                     client_info.realname,
                 )
             }

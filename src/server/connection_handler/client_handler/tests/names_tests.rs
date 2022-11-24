@@ -20,7 +20,7 @@ fn names_with_no_parameters_prints_all_channels() {
 
     let parameters = vec![];
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
 
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
@@ -84,7 +84,7 @@ fn name_ignores_secret_channels() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#secreto");
 
     handler
@@ -109,7 +109,7 @@ fn name_ignores_private_channels() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#privado");
 
     handler
