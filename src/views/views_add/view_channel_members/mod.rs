@@ -36,7 +36,7 @@ impl ChannelMembersView {
 
         for client in &clients {
             //mejorar
-            let label = create_label(client);
+            let label = create_label(&format!("\t •\t{}", client));
             label.set_halign(Start);
             label.set_margin_start(20);
             main_box.append(&label);
