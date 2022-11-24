@@ -64,7 +64,7 @@ impl MainView {
         });
     }
 
-    pub fn receive_priv_message(&mut self, message: String, nickname: String) {
+    pub fn receive_priv_message(&mut self, message: String, nickname: String, current_conv: String) {
         if nickname == self.user_info.label().unwrap() {
             return;
         }
