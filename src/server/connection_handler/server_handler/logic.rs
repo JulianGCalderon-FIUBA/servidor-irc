@@ -124,11 +124,29 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         Ok(true)
     }
 
-    fn topic_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+    fn topic_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, params, _) = arguments;
+
+        let nickname = &prefix.unwrap();
+        let channel = &params[0];
+        let topic = &params[1];
+        self.database.set_channel_topic(channel, topic);
+
+        self.send_topic_notification(nickname, channel, topic);
         Ok(true)
     }
 
-    fn kick_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+    fn kick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, mut params, trail) = arguments;
+
+        let kicker = prefix.unwrap();
+        let kicked = params.remove(1);
+        let channel = params.remove(0);
+        let message = trail;
+
+        self.send_kick_notification(&kicker, &channel, &kicked, &message);
+        self.database.remove_client_from_channel(&kicked, &channel);
+
         Ok(true)
     }
 
@@ -226,6 +244,24 @@ impl<C: Connection> ServerHandler<C> {
 
     fn send_away_notification(&mut self, nickname: &str, message: &Option<String>) {
         let notification = Notification::away(nickname, message);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_topic_notification(&mut self, nickname: &str, channel: &str, topic: &str) {
+        let notification = Notification::topic(nickname, channel, topic);
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_kick_notification(
+        &mut self,
+        kicker: &str,
+        channel: &str,
+        kicked: &str,
+        message: &Option<String>,
+    ) {
+        let notification = Notification::kick(kicker, channel, kicked, message);
+        self.send_message_to_local_clients_on_channel(&notification, channel);
         self.send_message_to_all_other_servers(&notification);
     }
 }
