@@ -14,39 +14,38 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn nick_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (prefix, mut params, _) = arguments;
 
+        let nickname = params.remove(0);
+
         if let Some(old_nickname) = prefix {
-            let new_nickname = &params.remove(0);
-            self.database.update_nickname(&old_nickname, new_nickname);
-        } else {
-            let hopcount = params.pop().unwrap().parse::<usize>().unwrap();
-            let nickname = params.pop().unwrap();
-            self.hopcounts.insert(nickname, hopcount);
+            self.database.update_nickname(&old_nickname, &nickname);
+            self.send_nick_update_notification(&old_nickname, &nickname);
+            return Ok(true);
         }
+
+        let hopcount = params[0].parse::<usize>().unwrap();
+        self.send_nick_notification(&nickname, hopcount);
+        self.hopcounts.insert(nickname, hopcount);
 
         Ok(true)
     }
 
     fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
-        let (prefix, mut params, trail) = arguments;
+        let (prefix, params, trail) = arguments;
 
-        let nickname = prefix.unwrap();
-        let hopcount = *self.hopcounts.get(&nickname).unwrap();
-        let servername = params.pop().unwrap();
-        let hostname = params.pop().unwrap();
-        let username = params.pop().unwrap();
-        let realname = trail.unwrap();
+        let nickname = &prefix.unwrap();
+        let client = ClientBuilder::<C>::new()
+            .nickname(nickname)
+            .hopcount(self.hopcounts.remove(nickname).unwrap())
+            .username(params.get(0).unwrap())
+            .hostname(params.get(1).unwrap())
+            .servername(params.get(2).unwrap())
+            .realname(&trail.unwrap())
+            .immediate(&self.servername)
+            .build_external_client()
+            .unwrap();
 
-        let client = ExternalClient::new(
-            nickname,
-            username,
-            hostname,
-            servername,
-            realname,
-            hopcount,
-            self.servername.clone(),
-        );
-
-        self.database.add_external_client(&self.servername, client);
+        self.send_user_notification(&client.get_info());
+        self.database.add_external_client(client);
 
         Ok(true)
     }
@@ -79,11 +78,24 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         Ok(true)
     }
 
-    fn join_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+    fn join_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, mut params, _) = arguments;
+
+        let nickname = prefix.unwrap();
+        let channel = params.remove(0);
+        self.database.add_client_to_channel(&nickname, &channel);
+        self.send_join_notification(&nickname, &channel);
         Ok(true)
     }
 
-    fn part_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+    fn part_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, mut params, _) = arguments;
+
+        let nickname = prefix.unwrap();
+        let channel = params.remove(0);
+        self.database
+            .remove_client_from_channel(&nickname, &channel);
+        self.send_part_notification(&nickname, &channel);
         Ok(true)
     }
 
@@ -94,10 +106,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let invited = &params[0];
         let channel = &params[1];
 
-        let invite_notification = Notification::invite(inviting, invited, channel);
-        self.send_message_to_client(&invite_notification, invited)
-            .ok();
-
+        self.send_invite_notification(inviting, invited, channel);
         Ok(true)
     }
 
@@ -106,17 +115,36 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         self.database
             .set_away_message(&trail, prefix.as_ref().unwrap());
 
-        let away_notification = Notification::away(&prefix.unwrap(), &trail);
-        self.send_message_to_all_other_servers(&away_notification);
+        let nickname = prefix.unwrap();
+        let message = trail;
 
+        self.send_away_notification(&nickname, &message);
         Ok(true)
     }
 
-    fn topic_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+    fn topic_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, params, _) = arguments;
+
+        let nickname = &prefix.unwrap();
+        let channel = &params[0];
+        let topic = &params[1];
+        self.database.set_channel_topic(channel, topic);
+
+        self.send_topic_notification(nickname, channel, topic);
         Ok(true)
     }
 
-    fn kick_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+    fn kick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, mut params, trail) = arguments;
+
+        let kicker = prefix.unwrap();
+        let kicked = params.remove(1);
+        let channel = params.remove(0);
+        let message = trail;
+
+        self.send_kick_notification(&kicker, &channel, &kicked, &message);
+        self.database.remove_client_from_channel(&kicked, &channel);
+
         Ok(true)
     }
 
@@ -128,7 +156,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let (prefix, _, trail) = arguments;
 
         let nickname = prefix.unwrap();
-        self.send_quit_notification(nickname, trail.unwrap());
+        let message = trail.unwrap();
+
+        self.database.disconnect_client(&nickname);
+        self.send_quit_notification(nickname, message);
 
         Ok(true)
     }
@@ -140,12 +171,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let servername = params.remove(0);
         let serverinfo = trail.unwrap();
 
-        let server_notification = Notification::server(&servername, hopcount + 1, &serverinfo);
-        self.send_message_to_all_other_servers(&server_notification);
+        self.send_server_notification(&servername, hopcount + 1, &serverinfo);
 
-        let stream = self.stream.try_clone()?;
-        let server = ExternalServer::new(stream, servername, serverinfo, hopcount);
-        self.database.add_server(server);
+        self.add_server(&servername, &serverinfo, hopcount);
 
         Ok(true)
     }
@@ -173,5 +201,76 @@ impl<C: Connection> ServerHandler<C> {
             self.send_message_to_local_clients_on_channel(&quit_notification, &channel);
         }
         self.send_message_to_all_other_servers(&quit_notification);
+    }
+
+    fn send_nick_update_notification(&mut self, old_nickname: &str, new_nickname: &str) {
+        let notification = Notification::nick_update(old_nickname, new_nickname);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_nick_notification(&mut self, nickname: &str, hopcount: usize) {
+        let notification = Notification::nick(nickname, hopcount + 1);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_user_notification(&mut self, client: &ClientInfo) {
+        let notification = Notification::user(client);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_join_notification(&mut self, nickname: &str, channel: &str) {
+        let notification = Notification::join(nickname, channel);
+
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_part_notification(&mut self, nickname: &str, channel: &str) {
+        let notification = Notification::part(nickname, channel);
+
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_invite_notification(&mut self, inviting: &str, invited: &str, channel: &str) {
+        let invite_notification = Notification::invite(inviting, invited, channel);
+        if self.database.is_local_client(invited) {
+            self.send_message_to_client(&invite_notification, invited)
+                .ok();
+        }
+        self.send_message_to_all_other_servers(&invite_notification);
+    }
+
+    fn send_away_notification(&mut self, nickname: &str, message: &Option<String>) {
+        let notification = Notification::away(nickname, message);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_topic_notification(&mut self, nickname: &str, channel: &str, topic: &str) {
+        let notification = Notification::topic(nickname, channel, topic);
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_kick_notification(
+        &mut self,
+        kicker: &str,
+        channel: &str,
+        kicked: &str,
+        message: &Option<String>,
+    ) {
+        let notification = Notification::kick(kicker, channel, kicked, message);
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_server_notification(&mut self, servername: &str, hopcount: usize, serverinfo: &str) {
+        let server_notification = Notification::server(servername, hopcount, serverinfo);
+        self.send_message_to_all_other_servers(&server_notification);
+    }
+
+    fn add_server(&mut self, servername: &str, serverinfo: &str, hopcount: usize) {
+        let server = ServerInfo::new(servername, serverinfo, hopcount);
+        self.database.add_distant_server(server);
     }
 }

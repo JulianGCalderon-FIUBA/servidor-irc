@@ -1,6 +1,7 @@
 use crate::server::consts::modes::ChannelFlag;
+
 #[derive(Clone)]
-pub struct ChannelConfig {
+pub struct ChannelConfiguration {
     pub operators: Vec<String>,
     pub banmasks: Vec<String>,
     pub speakers: Vec<String>,
@@ -9,7 +10,7 @@ pub struct ChannelConfig {
     pub flags: Vec<ChannelFlag>,
 }
 
-impl ChannelConfig {
+impl ChannelConfiguration {
     pub fn new() -> Self {
         Self {
             operators: vec![],

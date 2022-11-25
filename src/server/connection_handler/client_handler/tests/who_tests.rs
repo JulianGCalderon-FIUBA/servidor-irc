@@ -4,9 +4,9 @@ use super::*;
 fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
-    handler.database.add_client(dummy_client("nick2"));
-    handler.database.add_client(dummy_client("nick3"));
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick3"));
     handler
         .database
         .add_client_to_channel("nickname", "#channel");
@@ -38,7 +38,7 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
 fn who_with_mask_returns_all_public_clients_matching_mask() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1name"));
+    handler.database.add_local_client(dummy_client("nick1name"));
 
     let parameters = vec!["*k1*".to_string()];
 

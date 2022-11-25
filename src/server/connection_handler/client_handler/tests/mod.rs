@@ -14,6 +14,7 @@ mod notice_tests;
 mod oper_tests;
 mod part_tests;
 mod privmsg_tests;
+mod quit_tests;
 mod topic_tests;
 mod who_tests;
 mod whois_tests;
@@ -26,7 +27,7 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let client = dummy_client(&nickname);
     let connection = client.get_stream().unwrap().unwrap();
 
-    database.add_client(client);
+    database.add_local_client(client);
 
     ClientHandler::from_connection(connection, nickname, database, online).unwrap()
 }

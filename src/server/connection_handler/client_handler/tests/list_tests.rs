@@ -25,7 +25,7 @@ fn list_with_no_parameters_prints_all_channels() {
         .database
         .set_channel_topic("#hola", "topic for #hola");
     handler.database.add_client_to_channel("nickname", "#chau");
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#canal");
 
     handler.list_command((None, parameters, None)).unwrap();
@@ -88,7 +88,7 @@ fn list_ignores_secret_channels() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#secreto");
 
     handler
@@ -117,7 +117,7 @@ fn list_prints_priv_channels_as_priv() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#privado");
 
     handler

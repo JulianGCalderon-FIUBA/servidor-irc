@@ -25,7 +25,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
-        let nickname = &client_info.nickname;
+        let nickname = &client_info.nickname();
         let servername = &client_info.servername;
         let serverinfo = "serverinfo"; // todo
 
@@ -83,7 +83,7 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_whoreply_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
         let channel = self
             .database
-            .get_channels_for_client(&client_info.nickname)
+            .get_channels_for_client(&client_info.nickname())
             .get(0)
             .map(|string| string.to_owned());
 
@@ -132,7 +132,6 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_topic_notification(&mut self, channel: &str, topic: &str) {
         let notification = Notification::topic(&self.nickname, channel, topic);
-
         self.send_message_to_local_clients_on_channel(&notification, channel);
 
         if is_distributed_channel(channel) {
@@ -154,8 +153,10 @@ impl<C: Connection> ClientHandler<C> {
 
         let channels = self.database.get_channels_for_client(&self.nickname);
         for channel in channels {
-            self.send_message_to_channel(&channel, &notification.to_string());
+            self.send_message_to_local_clients_on_channel(&notification, &channel);
         }
+
+        self.send_message_to_all_servers(&notification);
     }
 
     pub(super) fn send_kick_notification(

@@ -115,7 +115,7 @@ impl Display for Notification {
             Notification::User { client } => {
                 format!(
                     ":{} {USER_COMMAND} {} {} {} :{}",
-                    client.nickname,
+                    client.nickname(),
                     client.username,
                     client.hostname,
                     client.servername,
@@ -132,13 +132,11 @@ impl Display for Notification {
             Notification::NickUpdate {
                 old_nickname,
                 new_nickname,
-            } => format!("{old_nickname} NICK {new_nickname}"),
-            Notification::Away { nickname, message } => {
-                format!(
-                    ":{nickname} {AWAY_COMMAND} {}",
-                    message.clone().unwrap_or_default()
-                )
-            }
+            } => format!(":{old_nickname} NICK {new_nickname}"),
+            Notification::Away { nickname, message } => match message {
+                Some(message) => format!(":{nickname} {AWAY_COMMAND} :{message}"),
+                None => format!(":{nickname} {AWAY_COMMAND}"),
+            },
             Notification::Topic {
                 nickname,
                 channel,

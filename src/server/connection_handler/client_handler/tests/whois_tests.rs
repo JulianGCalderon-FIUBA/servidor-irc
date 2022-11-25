@@ -113,8 +113,8 @@ fn whois_works_with_nickmask() {
 
     let parameters = vec!["nic*".to_string()];
 
-    handler.database.add_client(dummy_client("nickname2"));
-    handler.database.add_client(dummy_client("nickname3"));
+    handler.database.add_local_client(dummy_client("nickname2"));
+    handler.database.add_local_client(dummy_client("nickname3"));
 
     handler.whois_command((None, parameters, None)).unwrap();
 

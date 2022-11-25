@@ -13,7 +13,9 @@ use super::RegistrationHandler;
 impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
     fn pass_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, mut params, _) = arguments;
-        let password = params.pop().unwrap();
+
+        let password = params.remove(0);
+
         self.attributes.insert("password", password);
 
         Ok(true)
@@ -21,7 +23,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
 
     fn nick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, mut params, _) = arguments;
-        let nickname = params.pop().unwrap();
+
+        let nickname = params.remove(0);
+
         self.attributes.insert("nickname", nickname);
 
         Ok(true)
@@ -31,7 +35,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         let (_, mut params, trail) = arguments;
 
         let realname = trail.unwrap();
-        let username = params.pop().unwrap();
+        let username = params.remove(0);
         let servername = self.database.get_server_name();
         let hostname = self.stream.peer_address()?.ip().to_string();
 
@@ -40,9 +44,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         self.attributes.insert("servername", servername);
         self.attributes.insert("realname", realname);
 
-        let client = self.build_client();
+        let client = self.build_client().unwrap();
 
-        self.database.add_client(client.unwrap());
+        self.send_new_client_notification(&client.get_info());
+        self.database.add_local_client(client);
 
         self.connection_type = ConnectionType::Client;
 
@@ -56,11 +61,12 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         let servername = params.remove(0);
         let serverinfo = trail.unwrap();
 
-        self.connection_type = ConnectionType::Server;
+        self.send_server_notification(&servername, hopcount, &serverinfo);
 
         let mut registerer = Register::new(self.stream.try_clone()?, self.database.clone());
         registerer.register_incoming(servername, hopcount, serverinfo)?;
 
+        self.connection_type = ConnectionType::Server;
         self.attributes
             .insert("servername", registerer.servername());
 

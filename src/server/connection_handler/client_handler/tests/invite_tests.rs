@@ -1,3 +1,5 @@
+use crate::server::testing::{dummy_external_client, dummy_server};
+
 use super::*;
 
 #[test]
@@ -41,7 +43,7 @@ fn invite_fails_with_invalid_nickname() {
 fn invite_fails_with_user_already_on_channel() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#hola");
     handler.database.add_client_to_channel("nickname", "#hola");
 
@@ -59,7 +61,7 @@ fn invite_fails_with_user_already_on_channel() {
 fn invite_fails_with_sending_user_not_on_channel() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#hola");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
@@ -76,7 +78,7 @@ fn invite_fails_with_sending_user_not_on_channel() {
 fn can_invite_one_user() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
@@ -92,7 +94,7 @@ fn can_invite_one_user() {
         ":nickname INVITE nick2 #hola\r\n",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -103,7 +105,7 @@ fn can_invite_one_user() {
 fn invite_fails_with_not_channop_on_moderated_channel() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
     handler
@@ -124,7 +126,7 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
         "",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -135,7 +137,7 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
 fn can_invite_user_in_moderated_channel_if_channop() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nickname", "#hola");
 
     handler
@@ -155,7 +157,32 @@ fn can_invite_user_in_moderated_channel_if_channop() {
         ":nickname INVITE nick2 #hola\r\n",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn invite_is_relayed_to_neccesary_server() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername1"));
+    handler
+        .database
+        .add_external_client(dummy_external_client("nick2", "servername1"));
+
+    let parameters = vec!["nick2".to_string(), "#hola".to_string()];
+    handler.invite_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        ":nickname INVITE nick2 #hola\r\n",
+        handler
+            .database
+            .get_server_stream("servername1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()

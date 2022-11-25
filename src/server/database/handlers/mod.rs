@@ -1,6 +1,5 @@
-use std::cell::RefCell;
+use std::io;
 use std::sync::mpsc::Sender;
-use std::{io, rc::Rc};
 
 /// This module contains the functions with the logic regarding the database's functionalities.
 mod logic;
@@ -19,38 +18,40 @@ impl<C: Connection> Database<C> {
         respond_to.send(is_server_operator).unwrap();
     }
 
-    pub fn handle_add_client(&mut self, client: Client<C>) {
-        debug_print!("Adding client {:?}", client.get_info());
+    pub fn handle_add_local_client(&mut self, client: LocalClient<C>) {
+        debug_print!("Adding local client {:?}", client.info);
 
-        let nickname = client.nickname();
-        let client = Rc::new(RefCell::new(client));
-        self.clients.insert(nickname, client);
+        let nickname = client.info.nickname();
+        self.local_clients.insert(nickname, client);
+    }
+
+    pub fn handle_add_external_client(&mut self, client: ExternalClient) {
+        debug_print!("Adding external client {:?}", client.info);
+
+        let nickname = client.info.nickname();
+        self.external_clients.insert(nickname, client);
     }
 
     /// Sets client as server operator.
-    pub fn handle_set_server_operator(&mut self, nickname: &str) {
-        if let Some(client) = self.clients.get_mut(nickname) {
+    pub fn handle_set_server_operator(&mut self, nickname: String) {
+        if let Some(info) = self.get_client_info(&nickname) {
             debug_print!("Setting {} as server operator", nickname);
 
-            client.borrow_mut().set_server_operator();
+            info.operator = true;
         }
     }
 
     /// Adds client to channel.
-    pub fn add_client_to_channel(&mut self, nickname: &str, channel_name: &str) {
-        let channel: Option<&mut Channel<C>> = self.channels.get_mut(&channel_name.to_string());
-        if let Some(client) = self.clients.get(nickname) {
+    pub fn add_client_to_channel(&mut self, nickname: String, channel_name: String) {
+        if let Some(channel) = self.channels.get_mut(&channel_name) {
             debug_print!("Adding {} to channel {}", nickname, channel_name);
 
-            let client_rc = client.clone();
+            channel.add_client(&nickname)
+        } else {
+            debug_print!("Creating channel {} with client {}", channel_name, nickname);
 
-            match channel {
-                Some(channel) => channel.add_client(client_rc),
-                None => {
-                    let new_channel = Channel::new(channel_name.to_string(), client_rc);
-                    self.channels.insert(channel_name.to_string(), new_channel);
-                }
-            }
+            self.channels
+                .insert(channel_name.clone(), Channel::new(&channel_name, &nickname));
         }
     }
 
@@ -68,10 +69,11 @@ impl<C: Connection> Database<C> {
 
     /// Disconnects client from server, removing it from Database.
     pub fn disconnect_client(&mut self, nickname: &str) {
-        if let Some(client) = self.clients.get_mut(nickname) {
-            debug_print!("Disconnecting client {} ", nickname);
-
-            client.borrow_mut().disconnect();
+        if let Some(client) = self.local_clients.get_mut(nickname) {
+            client.disconnect();
+        }
+        if let Some(client) = self.external_clients.get_mut(nickname) {
+            client.disconnect();
         }
     }
 
@@ -84,12 +86,12 @@ impl<C: Connection> Database<C> {
     }
 
     /// Returns response to GetStream request.
-    pub fn handle_get_stream_request(
+    pub fn handle_get_local_stream_request(
         &self,
-        nickname: &str,
+        nickname: String,
         respond_to: Sender<Option<io::Result<C>>>,
     ) {
-        let stream = self.get_stream(nickname);
+        let stream = self.get_local_stream(&nickname);
         respond_to.send(stream).unwrap();
     }
 
@@ -154,16 +156,21 @@ impl<C: Connection> Database<C> {
 
     /// Returns response to UpdateNickname request.
     pub fn handle_update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
-        if let Some(client) = self.clients.get_mut(old_nickname) {
+        if let Some(client) = self.get_client_info(old_nickname) {
             debug_print!("Updating nickname from {old_nickname} to {new_nickname}");
 
-            let client = Rc::get_mut(client).unwrap();
-            client
-                .borrow_mut()
-                .update_nickname(new_nickname.to_string());
+            client.update_nickname(new_nickname.to_string());
 
-            let client = self.clients.remove(old_nickname).unwrap();
-            self.clients.insert(new_nickname.to_string(), client);
+            if let Some(client) = self.local_clients.remove(old_nickname) {
+                self.local_clients.insert(new_nickname.to_string(), client);
+            }
+            if let Some(client) = self.external_clients.remove(old_nickname) {
+                self.external_clients
+                    .insert(new_nickname.to_string(), client);
+            }
+            for channel in self.channels.values_mut() {
+                channel.update_nickname(old_nickname, new_nickname);
+            }
         }
     }
 
@@ -177,15 +184,15 @@ impl<C: Connection> Database<C> {
         respond_to.send(are_credentials_valid).unwrap();
     }
 
-    pub fn handle_set_away_message(&self, message: &Option<String>, nickname: &str) {
-        if let Some(client) = self.clients.get(nickname) {
+    pub fn handle_set_away_message(&mut self, message: Option<String>, nickname: &str) {
+        if let Some(client) = self.get_client_info(nickname) {
             debug_print!("Setting {nickname}'s away message to {message:?}");
 
-            client.borrow_mut().set_away_message(message.to_owned());
+            client.away = message
         }
     }
 
-    pub fn handle_get_away_message(&self, nickname: &str, respond_to: Sender<Option<String>>) {
+    pub fn handle_get_away_message(&mut self, nickname: &str, respond_to: Sender<Option<String>>) {
         let message = self.get_away_message(nickname);
         respond_to.send(message).unwrap();
     }
@@ -320,7 +327,7 @@ impl<C: Connection> Database<C> {
     }
 
     pub fn handle_clients_matches_banmask(
-        &self,
+        &mut self,
         nickname: &str,
         banmask: &str,
         respond_to: Sender<bool>,
@@ -329,11 +336,18 @@ impl<C: Connection> Database<C> {
         respond_to.send(matches_banmask).unwrap();
     }
 
-    pub fn handle_add_server(&mut self, server: ExternalServer<C>) {
-        let servername = server.servername();
-        debug_print!("Adding external server {servername}");
+    pub fn handle_add_immediate_server(&mut self, server: ImmediateServer<C>) {
+        let servername = server.info.servername.clone();
+        debug_print!("Adding immediate server {servername}");
 
-        self.servers.insert(servername, server);
+        self.immediate_servers.insert(servername, server);
+    }
+
+    pub fn handle_add_distant_server(&mut self, server: ServerInfo) {
+        let servername = server.servername.clone();
+        debug_print!("Adding distant server {servername}");
+
+        self.distant_servers.insert(servername, server);
     }
 
     pub fn handle_contains_server(&self, servername: &str, respond_to: Sender<bool>) {
@@ -341,28 +355,18 @@ impl<C: Connection> Database<C> {
         respond_to.send(contains_server).unwrap();
     }
 
-    pub fn handle_add_external_client(&mut self, servername: &str, client: ExternalClient) {
-        if let Some(server) = self.servers.get_mut(servername) {
-            debug_print!(
-                "Adding external client {} to server {servername}",
-                client.nickname()
-            );
-            server.add_client(client);
-        }
-    }
-
     pub fn handle_get_servername(&self, respond_to: Sender<String>) {
-        respond_to.send(self.servername.clone()).unwrap();
+        respond_to.send(self.info.servername.clone()).unwrap();
     }
 
     pub fn handle_get_serverinfo(&self, respond_to: Sender<String>) {
-        respond_to.send(self.serverinfo.clone()).unwrap();
+        respond_to.send(self.info.serverinfo.clone()).unwrap();
     }
 
     pub fn handle_get_channel_config(
         &self,
         channel: String,
-        respond_to: Sender<Option<ChannelConfig>>,
+        respond_to: Sender<Option<ChannelConfiguration>>,
     ) {
         let channel_config = self.get_channel_config(&channel);
         respond_to.send(channel_config).unwrap();
@@ -389,5 +393,15 @@ impl<C: Connection> Database<C> {
     ) {
         let stream = self.get_local_clients_for_channel(&channel);
         respond_to.send(stream).unwrap();
+    }
+
+    pub fn handle_is_local_client(&self, nickname: String, respond_to: Sender<bool>) {
+        let is_local = self.is_local_client(nickname);
+        respond_to.send(is_local).unwrap();
+    }
+
+    pub fn handle_get_immediate_server(&self, client: String, respond_to: Sender<Option<String>>) {
+        let server = self.get_immediate_server(&client);
+        respond_to.send(server).unwrap();
     }
 }

@@ -1,65 +1,48 @@
-use super::*;
-use crate::server::{connection::Connection, consts::modes::ChannelFlag};
-use std::{cell::RefCell, rc::Rc};
+mod channel_configuration;
+pub use channel_configuration::ChannelConfiguration;
 
-mod channel_config;
-pub use channel_config::ChannelConfig;
+use crate::server::consts::modes::ChannelFlag;
 
 /// A Channel has clients and a name.
-pub struct Channel<C: Connection> {
-    _name: String,
-    clients: Vec<Rc<RefCell<Client<C>>>>,
-    topic: Option<String>,
-    config: ChannelConfig,
+pub struct Channel {
+    pub name: String,
+    pub clients: Vec<String>,
+    pub topic: Option<String>,
+    pub config: ChannelConfiguration,
 }
 
-impl<C: Connection> Channel<C> {
+impl Channel {
     /// Creates a new [`Channel`].
-    pub fn new(_name: String, creator: Rc<RefCell<Client<C>>>) -> Self {
-        let operator = creator.borrow().nickname();
-        let clients = vec![creator];
+    pub fn new(name: &str, creator: &str) -> Self {
+        let clients = vec![creator.to_string()];
 
-        let mut config = ChannelConfig::new();
-        config.operators.push(operator);
+        let mut config = ChannelConfiguration::new();
+        config.operators.push(creator.to_string());
 
         Self {
-            _name,
+            name: name.to_string(),
             clients,
             topic: None,
             config,
         }
     }
 
-    /// Returns clients in Channel.
-    pub fn get_clients(&self) -> Vec<String> {
-        let mut names = vec![];
-        for client in self.clients.iter() {
-            names.push(client.borrow().nickname());
-        }
-        names
+    pub fn add_client(&mut self, nickname: &str) {
+        self.clients.push(nickname.to_string())
     }
 
-    /// Adds client to Channel.
-    pub fn add_client(&mut self, client: Rc<RefCell<Client<C>>>) {
-        self.clients.push(client);
-    }
-
-    /// Returns true if the client is in Channel.
-    pub fn contains_client(&self, nickname: &str) -> bool {
-        self.clients
-            .iter()
-            .any(|c| c.borrow().nickname() == nickname)
-    }
-
-    /// Removes client from Channel.
-    pub fn remove_client(&mut self, client: &str) {
-        if let Some(index) = self
-            .clients
-            .iter()
-            .position(|c| c.borrow().had_nickname(client))
-        {
+    pub fn remove_client(&mut self, nickname: &str) {
+        if let Some(index) = self.clients.iter().position(|nick| nick == nickname) {
             self.clients.remove(index);
         }
+    }
+
+    pub fn get_clients(&self) -> Vec<String> {
+        self.clients.clone()
+    }
+
+    pub fn contains_client(&self, nickname: &str) -> bool {
+        self.clients.contains(&nickname.to_string())
     }
 
     pub fn set_topic(&mut self, topic: &str) {
@@ -150,15 +133,15 @@ impl<C: Connection> Channel<C> {
         self.config.operators.contains(&nickname.to_string())
     }
 
-    pub(crate) fn get_config(&self) -> Option<ChannelConfig> {
+    pub fn get_config(&self) -> Option<ChannelConfiguration> {
         Some(self.config.clone())
     }
 
-    pub(crate) fn get_local_clients(&self) -> Vec<String> {
-        let mut names = vec![];
-        for client in self.clients.iter() {
-            names.push(client.borrow().nickname());
+    pub fn update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
+        for client in &mut self.clients {
+            if client == old_nickname {
+                *client = new_nickname.to_string()
+            }
         }
-        names
     }
 }

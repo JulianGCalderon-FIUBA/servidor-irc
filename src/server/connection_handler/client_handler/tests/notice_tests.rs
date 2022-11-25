@@ -4,7 +4,7 @@ use super::*;
 fn notice_works_with_valid_target_client() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick1"));
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
@@ -16,7 +16,7 @@ fn notice_works_with_valid_target_client() {
         ":nickname NOTICE nick1 :message!\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -27,7 +27,7 @@ fn notice_works_with_valid_target_client() {
 fn notice_with_away_client_does_not_return_away_message() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick1"));
     handler
         .database
         .set_away_message(&Some("away message!".to_string()), "nick1");
@@ -45,8 +45,8 @@ fn notice_with_away_client_does_not_return_away_message() {
 fn notice_fails_with_not_on_channel_with_flag_n() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick1", "#channel");
     handler.database.add_client_to_channel("nick2", "#channel");
 
@@ -68,7 +68,7 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
         "",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -78,7 +78,7 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
         "",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -89,7 +89,7 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
 fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
     handler
         .database
@@ -113,7 +113,7 @@ fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
         "",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -124,8 +124,8 @@ fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
 fn notice_works_on_channel_with_flag_n() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler
         .database
         .add_client_to_channel("nickname", "#channel");
@@ -150,7 +150,7 @@ fn notice_works_on_channel_with_flag_n() {
         ":nickname NOTICE #channel :message!\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -160,7 +160,7 @@ fn notice_works_on_channel_with_flag_n() {
         ":nickname NOTICE #channel :message!\r\n",
         handler
             .database
-            .get_stream("nick2")
+            .get_local_stream("nick2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
@@ -171,7 +171,7 @@ fn notice_works_on_channel_with_flag_n() {
 fn notice_works_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_client_to_channel("nick1", "#channel");
     handler
         .database
@@ -196,7 +196,7 @@ fn notice_works_on_channel_with_flag_m() {
         ":nickname NOTICE #channel :message!\r\n",
         handler
             .database
-            .get_stream("nick1")
+            .get_local_stream("nick1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()

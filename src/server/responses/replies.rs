@@ -88,7 +88,7 @@ impl Display for CommandResponse {
             CommandResponse::WhoisUser311 { client_info } => {
                 format!(
                     "311 {} {} {} *: {}",
-                    client_info.nickname,
+                    client_info.nickname(),
                     client_info.username,
                     client_info.hostname,
                     client_info.realname,
@@ -151,7 +151,7 @@ impl Display for CommandResponse {
                     client_info.username,
                     client_info.hostname,
                     client_info.servername,
-                    client_info.nickname,
+                    client_info.nickname(),
                     client_info.realname,
                 )
             }
@@ -182,7 +182,7 @@ impl Display for CommandResponse {
                 format!("301 {nickname} :{message}")
             }
             CommandResponse::Quit { message } => {
-                format!("{QUIT_COMMAND} {message}")
+                format!("{QUIT_COMMAND} :{message}")
             }
         };
         write!(f, "{string}")

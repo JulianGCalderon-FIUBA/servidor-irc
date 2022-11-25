@@ -131,6 +131,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         {
             self.stream
                 .send(&CommandResponse::inviting(inviting_client, channel))?;
+
+            // ADD TO CLIENT/CHANNEL INVITATIONS
         }
 
         Ok(true)
@@ -280,6 +282,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.add_modes(add, &mut arguments, &channel)?;
         self.remove_modes(remove, &mut arguments, &channel)?;
 
+        // TODO: REFACTOR MODE
+        // TODO: RELAY TO ALL SERVERS
+
         Ok(true)
     }
 
@@ -290,8 +295,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.disconnect_client(&self.nickname);
 
         self.send_quit_notification(&message);
-        self.stream
-            .send(&Notification::quit(&self.nickname, &message))?;
+
+        self.stream.send(&CommandResponse::quit(&message))?;
 
         Ok(false)
     }

@@ -1,3 +1,5 @@
+use crate::server::testing::dummy_server;
+
 use super::*;
 
 #[test]
@@ -17,7 +19,7 @@ fn nick_fails_with_no_nickname_given() {
 fn changing_nick_fails_with_nickname_in_use() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
 
     let parameters = vec!["nick2".to_string()];
     handler.nick_command((None, parameters, None)).unwrap();
@@ -51,4 +53,54 @@ fn can_update_nickname() {
 
     assert!(!handler.database.contains_client("nickname"));
     assert!(handler.database.contains_client("nick2"));
+}
+
+#[test]
+fn after_nick_update_channel_info_is_updated() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    let parameters = vec!["nick2".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        vec!["nick2".to_string()],
+        handler.database.get_clients_for_channel("#channel")
+    );
+}
+
+#[test]
+fn nick_update_is_relayed_to_all_servers() {
+    let mut handler = dummy_client_handler();
+    handler
+        .database()
+        .add_immediate_server(dummy_server("servername1"));
+    handler
+        .database()
+        .add_immediate_server(dummy_server("servername2"));
+
+    let parameters = vec!["nick2".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        ":nickname NICK nick2\r\n",
+        handler
+            .database
+            .get_server_stream("servername1")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+    assert_eq!(
+        ":nickname NICK nick2\r\n",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
 }

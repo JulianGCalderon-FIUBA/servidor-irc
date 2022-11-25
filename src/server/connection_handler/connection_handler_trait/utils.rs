@@ -7,17 +7,34 @@ use super::ConnectionHandlerGetters;
 
 pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     fn send_message_to_client(&mut self, message: &dyn Display, nickname: &str) -> io::Result<()> {
-        if let Some(stream) = self.database().get_stream(nickname) {
-            stream?.send(&message)?;
+        if let Some(stream) = self.database().get_local_stream(nickname) {
+            return stream?.send(&message);
         }
+
+        if let Some(server) = self.database().get_immediate_server(nickname) {
+            self.send_message_to_server(message, &server).ok();
+        }
+
         Ok(())
     }
 
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
         let clients = self.database().get_clients_for_channel(channel);
 
+        let mut servers = vec![];
+
         for client in clients {
-            self.send_message_to_client(message, &client).ok();
+            if self.database().is_local_client(&client) {
+                self.send_message_to_client(message, &client).ok();
+            } else if let Some(server) = self.database().get_immediate_server(&client) {
+                if !servers.contains(&server) {
+                    servers.push(server);
+                }
+            }
+        }
+
+        for server in servers {
+            self.send_message_to_server(message, &server).ok();
         }
     }
 
