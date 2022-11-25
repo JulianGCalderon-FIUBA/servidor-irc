@@ -45,6 +45,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         self.attributes.insert("realname", realname);
 
         let client = self.build_client().unwrap();
+
+        self.send_new_client_notification(&client.get_info());
         self.database.add_local_client(client);
 
         self.connection_type = ConnectionType::Client;

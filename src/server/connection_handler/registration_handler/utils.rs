@@ -30,4 +30,13 @@ impl<C: Connection> RegistrationHandler<C> {
         let notification = Notification::server(servername, hopcount, serverinfo);
         self.send_message_to_all_servers(&notification)
     }
+
+    pub fn send_new_client_notification(&mut self, info: &ClientInfo) {
+        let nickname = info.nickname();
+        let nick_notification = Notification::nick(&nickname, 1);
+        self.send_message_to_all_servers(&nick_notification);
+
+        let user_notification = Notification::user(info);
+        self.send_message_to_all_servers(&user_notification);
+    }
 }
