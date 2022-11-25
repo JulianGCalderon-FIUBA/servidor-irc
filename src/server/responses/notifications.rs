@@ -133,12 +133,10 @@ impl Display for Notification {
                 old_nickname,
                 new_nickname,
             } => format!(":{old_nickname} NICK {new_nickname}"),
-            Notification::Away { nickname, message } => {
-                format!(
-                    ":{nickname} {AWAY_COMMAND} {}",
-                    message.clone().unwrap_or_default()
-                )
-            }
+            Notification::Away { nickname, message } => match message {
+                Some(message) => format!(":{nickname} {AWAY_COMMAND} :{message}"),
+                None => format!(":{nickname} {AWAY_COMMAND}"),
+            },
             Notification::Topic {
                 nickname,
                 channel,
