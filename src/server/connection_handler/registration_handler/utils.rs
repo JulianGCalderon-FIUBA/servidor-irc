@@ -2,6 +2,7 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerUtils;
 
 use crate::server::data_structures::*;
+use crate::server::responses::Notification;
 
 use super::RegistrationHandler;
 
@@ -18,5 +19,15 @@ impl<C: Connection> RegistrationHandler<C> {
             .password(self.attributes.get("password"))
             .stream(self.stream_for_database.take()?)
             .build_local_client()
+    }
+
+    pub fn send_server_notification(
+        &mut self,
+        servername: &str,
+        hopcount: usize,
+        serverinfo: &str,
+    ) {
+        let notification = Notification::server(servername, hopcount, serverinfo);
+        self.send_message_to_all_servers(&notification)
     }
 }

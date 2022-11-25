@@ -90,3 +90,40 @@ fn server_sends_back_client_info() {
         responses[2]
     );
 }
+
+#[test]
+fn server_is_relayed_to_all_other_servers() {
+    let mut handler = dummy_registration_handler();
+
+    handler.database.add_local_client(dummy_client("nickname1"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername3"));
+
+    let parameters = vec!["servername1".to_string(), "1".to_string()];
+    let trail = Some("serverinfo".to_string());
+    handler.server_command((None, parameters, trail)).unwrap();
+
+    assert_eq!(
+        "SERVER servername1 1 :serverinfo\r\n",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+
+    assert_eq!(
+        "SERVER servername1 1 :serverinfo\r\n",
+        handler
+            .database
+            .get_server_stream("servername3")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
