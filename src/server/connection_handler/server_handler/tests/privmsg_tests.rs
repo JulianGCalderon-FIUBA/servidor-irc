@@ -175,7 +175,7 @@ fn privmsg_is_never_relayed_to_sending_server() {
         "",
         handler
             .database
-            .get_server_stream("severname1")
+            .get_server_stream("servername1")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()

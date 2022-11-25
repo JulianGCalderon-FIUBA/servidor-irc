@@ -14,14 +14,17 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn nick_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (prefix, mut params, _) = arguments;
 
+        let nickname = params.remove(0);
+
         if let Some(old_nickname) = prefix {
-            let new_nickname = &params.remove(0);
-            self.database.update_nickname(&old_nickname, new_nickname);
-        } else {
-            let hopcount = params.pop().unwrap().parse::<usize>().unwrap();
-            let nickname = params.pop().unwrap();
-            self.hopcounts.insert(nickname, hopcount);
+            self.database.update_nickname(&old_nickname, &nickname);
+            self.send_nick_update_notification(&old_nickname, &nickname);
+            return Ok(true);
         }
+
+        let hopcount = params[0].parse::<usize>().unwrap();
+        self.send_nick_notification(&nickname, hopcount);
+        self.hopcounts.insert(nickname, hopcount);
 
         Ok(true)
     }
@@ -41,6 +44,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
             .build_external_client()
             .unwrap();
 
+        self.send_user_notification(&client.get_info());
         self.database.add_external_client(client);
 
         Ok(true)
@@ -74,7 +78,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         Ok(true)
     }
 
-    fn join_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+    fn join_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, mut params, _) = arguments;
+
+        let nickname = prefix.unwrap();
+        let channel = params.remove(0);
+        self.database.add_client_to_channel(&nickname, &channel);
+        self.send_join_notification(&nickname, &channel);
         Ok(true)
     }
 
@@ -167,5 +177,27 @@ impl<C: Connection> ServerHandler<C> {
             self.send_message_to_local_clients_on_channel(&quit_notification, &channel);
         }
         self.send_message_to_all_other_servers(&quit_notification);
+    }
+
+    fn send_nick_update_notification(&mut self, old_nickname: &str, new_nickname: &str) {
+        let notification = Notification::nick_update(old_nickname, new_nickname);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_nick_notification(&mut self, nickname: &str, hopcount: usize) {
+        let notification = Notification::nick(nickname, hopcount + 1);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_user_notification(&mut self, client: &ClientInfo) {
+        let notification = Notification::user(client);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_join_notification(&mut self, nickname: &str, channel: &str) {
+        let notification = Notification::join(nickname, channel);
+
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_other_servers(&notification);
     }
 }

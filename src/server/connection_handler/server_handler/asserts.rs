@@ -56,15 +56,40 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
+        let target = &params[0];
+        if !self.database.contains_channel(target) && !self.database.contains_client(target) {
+            return Err(ErrorReply::NoReply);
+        }
+
         Ok(())
     }
 
-    fn assert_notice_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        todo!()
+    fn assert_notice_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (prefix, params, trail) = arguments;
+        if params.is_empty() || prefix.is_none() || trail.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        let target = &params[0];
+        if !self.database.contains_channel(target) || !self.database.contains_client(target) {
+            return Err(ErrorReply::NoReply);
+        }
+
+        Ok(())
     }
 
-    fn assert_join_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        todo!()
+    fn assert_join_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (prefix, params, _) = arguments;
+        if params.is_empty() || prefix.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        let nickname = prefix.as_ref().unwrap();
+        if !self.database.contains_client(nickname) {
+            return Err(ErrorReply::NoReply);
+        }
+
+        Ok(())
     }
 
     fn assert_part_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {

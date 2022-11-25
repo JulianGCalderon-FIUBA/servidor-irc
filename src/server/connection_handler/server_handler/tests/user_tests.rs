@@ -63,6 +63,7 @@ fn user_is_relayed_to_all_other_servers() {
     handler
         .database
         .add_immediate_server(dummy_server("servername3"));
+    handler.hopcounts.insert("nickname".to_string(), 1);
 
     let parameters = vec![
         "username".to_string(),

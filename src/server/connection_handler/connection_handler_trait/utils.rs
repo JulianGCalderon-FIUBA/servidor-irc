@@ -26,8 +26,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         for client in clients {
             if self.database().is_local_client(&client) {
                 self.send_message_to_client(message, &client).ok();
-            } else {
-                let server = self.database().get_immediate_server(&client).unwrap();
+            } else if let Some(server) = self.database().get_immediate_server(&client) {
                 if !servers.contains(&server) {
                     servers.push(server);
                 }

@@ -245,10 +245,10 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_server_stream(&self, severname: &str) -> Option<io::Result<C>> {
+    pub fn get_server_stream(&self, servername: &str) -> Option<io::Result<C>> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetServerStream {
-            server: severname.to_string(),
+            server: servername.to_string(),
             respond_to: sender,
         };
         self.sender.send(request).unwrap();

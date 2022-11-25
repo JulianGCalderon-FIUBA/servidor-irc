@@ -4,6 +4,8 @@ mod nick_tests;
 mod privmsg_tests;
 mod user_tests;
 
+mod join_tests;
+
 use super::*;
 
 fn dummy_server_handler() -> ServerHandler<MockTcpStream> {
