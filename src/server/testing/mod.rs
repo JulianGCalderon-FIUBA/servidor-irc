@@ -28,3 +28,15 @@ pub fn dummy_database() -> DatabaseHandle<MockTcpStream> {
     let (handle, _) = Database::start("servername", "serverinfo");
     handle
 }
+
+pub fn dummy_external_client(nickname: &str, servername: &str) -> ExternalClient {
+    ClientBuilder::<MockTcpStream>::new()
+        .nickname(nickname)
+        .username("username")
+        .hostname("127.0.0.1")
+        .servername("servername")
+        .realname("realname")
+        .immediate(servername)
+        .build_external_client()
+        .unwrap()
+}

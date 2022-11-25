@@ -1,3 +1,5 @@
+use crate::server::testing::{dummy_external_client, dummy_server};
+
 use super::*;
 
 #[test]
@@ -324,6 +326,57 @@ fn privmsg_works_on_channel_with_flag_m() {
         handler
             .database
             .get_local_stream("nick1")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn privmsg_to_distributed_channel_is_only_relayed_once_to_each_server() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername1"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    handler
+        .database
+        .add_external_client(dummy_external_client("nickname1", "servername1"));
+    handler
+        .database
+        .add_external_client(dummy_external_client("nickname2", "servername1"));
+
+    handler
+        .database
+        .add_client_to_channel("nickname1", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname2", "#channel");
+
+    let parameters = vec!["#channel".to_string()];
+    let trailing = Some("message!".to_string());
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
+
+    assert_eq!(
+        ":nickname PRIVMSG #channel :message!\r\n",
+        handler
+            .database
+            .get_server_stream("servername1")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
             .unwrap()
             .unwrap()
             .read_wbuf_to_string()
