@@ -77,6 +77,8 @@ impl MainView {
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
 
+        println!("Added to {}", channel);
+
         self.messages.insert(channel.clone().to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_channels.clone());
