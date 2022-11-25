@@ -1,10 +1,10 @@
 use crate::server::testing::{dummy_database, dummy_server, MockTcpStream};
 
+mod join_tests;
 mod nick_tests;
+mod part_tests;
 mod privmsg_tests;
 mod user_tests;
-
-mod join_tests;
 
 use super::*;
 

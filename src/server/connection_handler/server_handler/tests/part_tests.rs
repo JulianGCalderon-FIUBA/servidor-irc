@@ -6,23 +6,27 @@ use crate::server::{
     testing::{dummy_client, dummy_external_client, dummy_server},
 };
 #[test]
-fn join_adds_client_to_channel() {
+fn part_removes_client_from_channel() {
     let mut handler = dummy_server_handler();
     handler
         .database
         .add_external_client(dummy_external_client("nickname1", "servername1"));
 
+    handler
+        .database
+        .add_client_to_channel("nickname1", "#channel");
+
     let prefix = Some("nickname1".to_string());
     let params = vec!["#channel".to_string()];
-    handler.join_command((prefix, params, None)).unwrap();
+    handler.part_command((prefix, params, None)).unwrap();
 
-    assert!(handler
+    assert!(!handler
         .database
         .is_client_in_channel("nickname1", "#channel"));
 }
 
 #[test]
-fn join_is_relayed_to_all_other_servers() {
+fn part_is_relayed_to_all_other_servers() {
     let mut handler = dummy_server_handler();
     handler
         .database
@@ -34,12 +38,16 @@ fn join_is_relayed_to_all_other_servers() {
         .database
         .add_immediate_server(dummy_server("servername3"));
 
+    handler
+        .database
+        .add_client_to_channel("nickname1", "#channel");
+
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string()];
-    handler.join_command((prefix, parameters, None)).unwrap();
+    handler.part_command((prefix, parameters, None)).unwrap();
 
     assert_eq!(
-        ":nickname1 JOIN #channel\r\n",
+        ":nickname1 PART #channel\r\n",
         handler
             .database
             .get_server_stream("servername2")
@@ -48,7 +56,7 @@ fn join_is_relayed_to_all_other_servers() {
             .read_wbuf_to_string()
     );
     assert_eq!(
-        ":nickname1 JOIN #channel\r\n",
+        ":nickname1 PART #channel\r\n",
         handler
             .database
             .get_server_stream("servername3")
@@ -59,21 +67,25 @@ fn join_is_relayed_to_all_other_servers() {
 }
 
 #[test]
-fn join_is_never_relayed_to_sending_server() {
+fn part_is_never_relayed_to_sending_server() {
     let mut handler = dummy_server_handler();
     handler
         .database
         .add_external_client(dummy_external_client("nickname1", "servername1"));
 
+    handler
+        .database
+        .add_client_to_channel("nickname1", "#channel");
+
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string()];
-    handler.join_command((prefix, parameters, None)).unwrap();
+    handler.part_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
 }
 
 #[test]
-fn join_is_relayed_to_local_clients_on_channel() {
+fn part_is_relayed_to_local_clients_on_channel() {
     let mut handler = dummy_server_handler();
     handler
         .database
@@ -85,12 +97,16 @@ fn join_is_relayed_to_local_clients_on_channel() {
         .database
         .add_client_to_channel("nickname2", "#channel");
 
+    handler
+        .database
+        .add_client_to_channel("nickname1", "#channel");
+
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string()];
-    handler.join_command((prefix, parameters, None)).unwrap();
+    handler.part_command((prefix, parameters, None)).unwrap();
 
     assert_eq!(
-        ":nickname1 JOIN #channel\r\n",
+        ":nickname1 PART #channel\r\n",
         handler
             .database
             .get_local_stream("nickname2")

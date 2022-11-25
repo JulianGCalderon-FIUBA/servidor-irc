@@ -92,8 +92,18 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         Ok(())
     }
 
-    fn assert_part_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        todo!()
+    fn assert_part_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (prefix, params, _) = arguments;
+        if params.is_empty() || prefix.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        let nickname = prefix.as_ref().unwrap();
+        let channel = &params[0];
+        if !self.database.contains_client(nickname) || !self.database.contains_channel(channel){
+            return Err(ErrorReply::NoReply);
+        }
+        Ok(())
     }
 
     fn assert_invite_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {

@@ -88,7 +88,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         Ok(true)
     }
 
-    fn part_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+    fn part_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, mut params, _) = arguments;
+
+        let nickname = prefix.unwrap();
+        let channel = params.remove(0);
+        self.database.remove_client_from_channel(&nickname, &channel);
+        self.send_part_notification(&nickname, &channel);
         Ok(true)
     }
 
@@ -196,6 +202,13 @@ impl<C: Connection> ServerHandler<C> {
 
     fn send_join_notification(&mut self, nickname: &str, channel: &str) {
         let notification = Notification::join(nickname, channel);
+
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_part_notification(&mut self, nickname: &str, channel: &str) {
+        let notification = Notification::part(nickname, channel);
 
         self.send_message_to_local_clients_on_channel(&notification, channel);
         self.send_message_to_all_other_servers(&notification);
