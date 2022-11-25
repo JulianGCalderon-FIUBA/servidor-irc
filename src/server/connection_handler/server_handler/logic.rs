@@ -106,8 +106,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let invited = &params[0];
         let channel = &params[1];
 
-        println!("holaa");
-
         self.send_invite_notification(inviting, invited, channel);
         Ok(true)
     }
@@ -173,7 +171,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let servername = params.remove(0);
         let serverinfo = trail.unwrap();
 
-        self.send_server_notification(&servername, hopcount +1, &serverinfo);
+        self.send_server_notification(&servername, hopcount + 1, &serverinfo);
 
         self.add_server(&servername, &serverinfo, hopcount);
 
