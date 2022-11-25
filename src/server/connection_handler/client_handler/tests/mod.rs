@@ -14,6 +14,7 @@ mod notice_tests;
 mod oper_tests;
 mod part_tests;
 mod privmsg_tests;
+mod quit_tests;
 mod topic_tests;
 mod who_tests;
 mod whois_tests;

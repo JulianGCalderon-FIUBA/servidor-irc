@@ -182,7 +182,7 @@ impl Display for CommandResponse {
                 format!("301 {nickname} :{message}")
             }
             CommandResponse::Quit { message } => {
-                format!("{QUIT_COMMAND} {message}")
+                format!("{QUIT_COMMAND} :{message}")
             }
         };
         write!(f, "{string}")

@@ -154,7 +154,7 @@ impl<C: Connection> ClientHandler<C> {
 
         let channels = self.database.get_channels_for_client(&self.nickname);
         for channel in channels {
-            self.send_message_to_channel(&channel, &notification.to_string());
+            self.send_message_to_channel(&notification, &channel);
         }
     }
 

@@ -1,3 +1,5 @@
+use crate::server::testing::dummy_server;
+
 use super::*;
 
 #[test]
@@ -118,4 +120,43 @@ fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
     handler.topic_command((None, parameters, None)).unwrap();
 
     assert_eq!("332 #hola :topic\r\n", handler.stream.read_wbuf_to_string());
+}
+
+#[test]
+fn distributed_channel_topics_are_relayed_to_all_servers() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database()
+        .add_immediate_server(dummy_server("servername1"));
+    handler
+        .database()
+        .add_immediate_server(dummy_server("servername2"));
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    let params = vec!["#channel".to_string(), "topic".to_string()];
+    handler.topic_command((None, params, None)).unwrap();
+
+    assert_eq!(
+        ":nickname TOPIC #channel topic\r\n",
+        handler
+            .database
+            .get_server_stream("servername1")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+
+    assert_eq!(
+        ":nickname TOPIC #channel topic\r\n",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
 }

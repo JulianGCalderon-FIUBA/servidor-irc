@@ -290,8 +290,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.disconnect_client(&self.nickname);
 
         self.send_quit_notification(&message);
-        self.stream
-            .send(&Notification::quit(&self.nickname, &message))?;
+
+        self.stream.send(&CommandResponse::quit(&message))?;
 
         Ok(false)
     }
