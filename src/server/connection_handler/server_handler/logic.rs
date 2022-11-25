@@ -93,7 +93,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
 
         let nickname = prefix.unwrap();
         let channel = params.remove(0);
-        self.database.remove_client_from_channel(&nickname, &channel);
+        self.database
+            .remove_client_from_channel(&nickname, &channel);
         self.send_part_notification(&nickname, &channel);
         Ok(true)
     }
@@ -105,10 +106,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let invited = &params[0];
         let channel = &params[1];
 
-        let invite_notification = Notification::invite(inviting, invited, channel);
-        self.send_message_to_client(&invite_notification, invited)
-            .ok();
+        println!("holaa");
 
+        self.send_invite_notification(inviting, invited, channel);
         Ok(true)
     }
 
@@ -117,9 +117,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         self.database
             .set_away_message(&trail, prefix.as_ref().unwrap());
 
-        let away_notification = Notification::away(&prefix.unwrap(), &trail);
-        self.send_message_to_all_other_servers(&away_notification);
+        let nickname = prefix.unwrap();
+        let message = trail;
 
+        self.send_away_notification(&nickname, &message);
         Ok(true)
     }
 
@@ -211,6 +212,20 @@ impl<C: Connection> ServerHandler<C> {
         let notification = Notification::part(nickname, channel);
 
         self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_invite_notification(&mut self, inviting: &str, invited: &str, channel: &str) {
+        let invite_notification = Notification::invite(inviting, invited, channel);
+        if self.database.is_local_client(invited) {
+            self.send_message_to_client(&invite_notification, invited)
+                .ok();
+        }
+        self.send_message_to_all_other_servers(&invite_notification);
+    }
+
+    fn send_away_notification(&mut self, nickname: &str, message: &Option<String>) {
+        let notification = Notification::away(nickname, message);
         self.send_message_to_all_other_servers(&notification);
     }
 }

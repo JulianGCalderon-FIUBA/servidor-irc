@@ -100,14 +100,24 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
         let nickname = prefix.as_ref().unwrap();
         let channel = &params[0];
-        if !self.database.contains_client(nickname) || !self.database.contains_channel(channel){
+        if !self.database.contains_client(nickname) || !self.database.contains_channel(channel) {
             return Err(ErrorReply::NoReply);
         }
         Ok(())
     }
 
-    fn assert_invite_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        todo!()
+    fn assert_invite_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (prefix, params, _) = arguments;
+        if params.len() < 2 || prefix.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        let inviting = prefix.as_ref().unwrap();
+        if !self.database.contains_client(inviting) {
+            return Err(ErrorReply::NoReply);
+        }
+
+        Ok(())
     }
 
     fn assert_names_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
@@ -126,8 +136,18 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         Err(ErrorReply::NoReply)
     }
 
-    fn assert_away_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        Err(ErrorReply::NoReply)
+    fn assert_away_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (prefix, _, _) = arguments;
+        if prefix.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        let nickname = prefix.as_ref().unwrap();
+        if !self.database.contains_client(nickname) {
+            return Err(ErrorReply::NoReply);
+        }
+
+        Ok(())
     }
 
     fn assert_topic_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
