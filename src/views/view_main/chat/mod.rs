@@ -72,7 +72,9 @@ impl MainView {
         if nickname == current_conv {
             self.message_box.append(&message);
             adjust_scrollbar(self.scrollwindow_chat.clone());
-        }        
+        }     
+        
+        println!("Recieve {} from {}", message, nickname);
         
         self.messages.get_mut(&nickname).unwrap().push(message);
         
