@@ -132,7 +132,6 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_topic_notification(&mut self, channel: &str, topic: &str) {
         let notification = Notification::topic(&self.nickname, channel, topic);
-
         self.send_message_to_local_clients_on_channel(&notification, channel);
 
         if is_distributed_channel(channel) {
@@ -154,8 +153,10 @@ impl<C: Connection> ClientHandler<C> {
 
         let channels = self.database.get_channels_for_client(&self.nickname);
         for channel in channels {
-            self.send_message_to_channel(&notification, &channel);
+            self.send_message_to_local_clients_on_channel(&notification, &channel);
         }
+
+        self.send_message_to_all_servers(&notification);
     }
 
     pub(super) fn send_kick_notification(

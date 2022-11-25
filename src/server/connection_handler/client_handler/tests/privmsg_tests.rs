@@ -333,7 +333,7 @@ fn privmsg_works_on_channel_with_flag_m() {
 }
 
 #[test]
-fn privmsg_to_distributed_channel_is_only_relayed_once_to_each_server() {
+fn privmsg_to_distributed_channel_is_only_relayed_to_each_neccesary_server_once() {
     let mut handler = dummy_client_handler();
 
     handler

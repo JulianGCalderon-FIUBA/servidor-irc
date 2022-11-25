@@ -365,6 +365,27 @@ fn can_join_channel_with_banmask() {
 }
 
 #[test]
+fn joins_notifies_user_in_channel() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("nick2", "#channel");
+
+    let parameters = vec!["#channel".to_string()];
+    handler.join_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        ":nickname JOIN #channel\r\n",
+        handler
+            .database
+            .get_local_stream("nick2")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
 fn distributed_channels_joins_are_relayed_to_all_servers() {
     let mut handler = dummy_client_handler();
 

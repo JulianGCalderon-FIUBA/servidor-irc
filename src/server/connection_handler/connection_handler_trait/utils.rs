@@ -8,7 +8,6 @@ use super::ConnectionHandlerGetters;
 pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     fn send_message_to_client(&mut self, message: &dyn Display, nickname: &str) -> io::Result<()> {
         if let Some(stream) = self.database().get_local_stream(nickname) {
-            println!("{nickname} is localA");
             return stream?.send(&message);
         }
 
@@ -20,7 +19,6 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     }
 
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
-        println!("sending to channel {channel}");
         let clients = self.database().get_clients_for_channel(channel);
 
         let mut servers = vec![];
