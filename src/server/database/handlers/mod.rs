@@ -168,6 +168,9 @@ impl<C: Connection> Database<C> {
                 self.external_clients
                     .insert(new_nickname.to_string(), client);
             }
+            for channel in self.channels.values_mut() {
+                channel.update_nickname(old_nickname, new_nickname);
+            }
         }
     }
 

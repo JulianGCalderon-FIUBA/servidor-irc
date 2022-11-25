@@ -56,6 +56,23 @@ fn can_update_nickname() {
 }
 
 #[test]
+fn after_nick_update_channel_info_is_updated() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    let parameters = vec!["nick2".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        vec!["nick2".to_string()],
+        handler.database.get_clients_for_channel("#channel")
+    );
+}
+
+#[test]
 fn nick_update_is_relayed_to_all_servers() {
     let mut handler = dummy_client_handler();
     handler

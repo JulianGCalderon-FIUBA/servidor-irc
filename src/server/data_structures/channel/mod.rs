@@ -136,4 +136,12 @@ impl Channel {
     pub fn get_config(&self) -> Option<ChannelConfiguration> {
         Some(self.config.clone())
     }
+
+    pub fn update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
+        for client in &mut self.clients {
+            if client == old_nickname {
+                *client = new_nickname.to_string()
+            }
+        }
+    }
 }
