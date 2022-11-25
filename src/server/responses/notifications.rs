@@ -132,7 +132,7 @@ impl Display for Notification {
             Notification::NickUpdate {
                 old_nickname,
                 new_nickname,
-            } => format!("{old_nickname} NICK {new_nickname}"),
+            } => format!(":{old_nickname} NICK {new_nickname}"),
             Notification::Away { nickname, message } => {
                 format!(
                     ":{nickname} {AWAY_COMMAND} {}",

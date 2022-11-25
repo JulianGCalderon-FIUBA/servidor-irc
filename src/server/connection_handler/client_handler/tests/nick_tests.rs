@@ -1,3 +1,5 @@
+use crate::server::testing::dummy_server;
+
 use super::*;
 
 #[test]
@@ -51,4 +53,37 @@ fn can_update_nickname() {
 
     assert!(!handler.database.contains_client("nickname"));
     assert!(handler.database.contains_client("nick2"));
+}
+
+#[test]
+fn nick_update_is_relayed_to_all_servers() {
+    let mut handler = dummy_client_handler();
+    handler
+        .database()
+        .add_immediate_server(dummy_server("servername1"));
+    handler
+        .database()
+        .add_immediate_server(dummy_server("servername2"));
+
+    let parameters = vec!["nick2".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        ":nickname NICK nick2\r\n",
+        handler
+            .database
+            .get_server_stream("servername1")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+    assert_eq!(
+        ":nickname NICK nick2\r\n",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
 }
