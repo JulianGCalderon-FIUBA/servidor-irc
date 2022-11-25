@@ -158,7 +158,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let (prefix, _, trail) = arguments;
 
         let nickname = prefix.unwrap();
-        self.send_quit_notification(nickname, trail.unwrap());
+        let message = trail.unwrap();
+
+        self.database.disconnect_client(&nickname);
+        self.send_quit_notification(nickname, message);
 
         Ok(true)
     }
@@ -170,11 +173,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let servername = params.remove(0);
         let serverinfo = trail.unwrap();
 
-        let server_notification = Notification::server(&servername, hopcount + 1, &serverinfo);
-        self.send_message_to_all_other_servers(&server_notification);
+        self.send_server_notification(&servername, hopcount +1, &serverinfo);
 
-        let server = ServerInfo::new(&servername, &serverinfo, hopcount);
-        self.database.add_distant_server(server);
+        self.add_server(&servername, &serverinfo, hopcount);
 
         Ok(true)
     }
@@ -263,5 +264,15 @@ impl<C: Connection> ServerHandler<C> {
         let notification = Notification::kick(kicker, channel, kicked, message);
         self.send_message_to_local_clients_on_channel(&notification, channel);
         self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn send_server_notification(&mut self, servername: &str, hopcount: usize, serverinfo: &str) {
+        let server_notification = Notification::server(servername, hopcount, serverinfo);
+        self.send_message_to_all_other_servers(&server_notification);
+    }
+
+    fn add_server(&mut self, servername: &str, serverinfo: &str, hopcount: usize) {
+        let server = ServerInfo::new(servername, serverinfo, hopcount);
+        self.database.add_distant_server(server);
     }
 }

@@ -187,12 +187,30 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         todo!()
     }
 
-    fn assert_quit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        todo!()
+    fn assert_quit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (prefix, _, trail) = arguments;
+        if prefix.is_none() || trail.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+        let nickname = prefix.as_ref().unwrap();
+        if !self.database.contains_client(nickname) {
+            return Err(ErrorReply::NoReply);
+        }
+        Ok(())
     }
 
-    fn assert_server_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        todo!()
+    fn assert_server_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, trail) = arguments;
+        if params.len() < 2 || trail.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        let hopcount = &params[1];
+        if hopcount.parse::<usize>().is_err() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        Ok(())
     }
 
     fn assert_squit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
