@@ -3,7 +3,7 @@ use crate::server::{
         connection_handler_trait::ConnectionHandlerCommands,
         server_handler::tests::dummy_server_handler,
     },
-    testing::dummy_client,
+    testing::{dummy_client, dummy_external_client, dummy_server},
 };
 
 #[test]
@@ -37,6 +37,20 @@ fn nick_adds_client_to_hopcounts() {
 }
 
 #[test]
+fn nick_with_prefix_updates_nick() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_external_client(dummy_external_client("nickname1", "servername1"));
+
+    let parameters = vec!["nickname2".to_string()];
+    let prefix = Some("nickname1".to_string());
+    handler.nick_command((prefix, parameters, None)).unwrap();
+
+    handler.database.contains_client("nickname2");
+}
+
+#[test]
 fn nick_with_used_nickname_returns_nick_collision() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
@@ -50,6 +64,53 @@ fn nick_with_used_nickname_returns_nick_collision() {
     );
 }
 
-// fn nick_is_relayed_to_all_other_servers() {}
+#[test]
+fn nick_is_relayed_to_all_other_servers() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername3"));
 
-// fn nick_is_not_relayed_to_sending_server() {}
+    let parameters = vec!["nickname".to_string(), "1".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "NICK nickname 2\r\n",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+    assert_eq!(
+        "NICK nickname 2\r\n",
+        handler
+            .database
+            .get_server_stream("servername3")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn nick_is_not_relayed_to_sending_server() {
+    let mut handler = dummy_server_handler();
+
+    let parameters = vec!["nickname".to_string(), "1".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername1")
+            .unwrap()
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
