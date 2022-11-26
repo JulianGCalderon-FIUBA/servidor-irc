@@ -1,6 +1,6 @@
 use crate::server::consts::modes::ChannelFlag;
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ChannelConfiguration {
     pub operators: Vec<String>,
     pub banmasks: Vec<String>,

@@ -169,7 +169,7 @@ impl<C: Connection> DatabaseHandle<C> {
 
     pub fn get_channel_limit(&self, channel: &str) -> Result<Option<usize>, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetLimit {
+        let request = DatabaseMessage::GetChannelLimit {
             channel: channel.to_string(),
             respond_to: sender,
         };
@@ -330,7 +330,7 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     pub fn set_channel_limit(&self, channel: &str, limit: Option<usize>) {
-        let request = DatabaseMessage::SetLimit {
+        let request = DatabaseMessage::SetChannelLimit {
             channel: channel.to_string(),
             limit,
         };

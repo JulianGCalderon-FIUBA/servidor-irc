@@ -138,8 +138,8 @@ impl<C: Connection> Database<C> {
                 respond_to,
                 flag,
             } => self.handle_channel_has_mode(channel, flag, respond_to),
-            SetLimit { channel, limit } => self.handle_set_channel_limit(channel, limit),
-            GetLimit {
+            SetChannelLimit { channel, limit } => self.handle_set_channel_limit(channel, limit),
+            GetChannelLimit {
                 channel,
                 respond_to,
             } => self.handle_get_channel_limit(channel, respond_to),
