@@ -1,12 +1,12 @@
-use std::{io, sync::mpsc::Sender};
+use std::sync::mpsc::Sender;
 
 use crate::server::{
     connection::Connection,
     data_structures::{ImmediateServer, ServerInfo},
-    database::Database,
+    database::{database_error::DatabaseError, Database},
 };
 
-use crate::macros::{debug_print, unwrap_or_return};
+use crate::macros::{debug_print, some_or_return};
 
 impl<C: Connection> Database<C> {
     pub fn handle_add_immediate_server(&mut self, server: ImmediateServer<C>) {
@@ -30,7 +30,7 @@ impl<C: Connection> Database<C> {
     pub fn handle_get_server_stream(
         &self,
         server: String,
-        respond_to: Sender<Option<io::Result<C>>>,
+        respond_to: Sender<Result<C, DatabaseError>>,
     ) {
         let stream = self.get_server_stream(&server);
         respond_to.send(stream).unwrap();
@@ -43,9 +43,15 @@ impl<C: Connection> Database<C> {
 }
 
 impl<C: Connection> Database<C> {
-    fn get_server_stream(&self, server: &str) -> Option<Result<C, std::io::Error>> {
-        let server = unwrap_or_return!(self.immediate_servers.get(server), None);
-        Some(server.get_stream())
+    fn get_server_stream(&self, server: &str) -> Result<C, DatabaseError> {
+        let server = some_or_return!(
+            self.immediate_servers.get(server),
+            Err(DatabaseError::NoSuchServer)
+        );
+
+        server
+            .get_stream()
+            .map_err(|_| DatabaseError::CannotCloneStream)
     }
 
     fn get_all_servers(&self) -> Vec<String> {

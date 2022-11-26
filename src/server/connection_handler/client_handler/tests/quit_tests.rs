@@ -46,7 +46,6 @@ fn quit_notifies_all_users_in_clients_channels() {
             .database
             .get_local_stream("nickname1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     )
 }
@@ -71,7 +70,6 @@ fn quit_is_sent_to_all_servers() {
             .database
             .get_server_stream("servername1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -79,7 +77,6 @@ fn quit_is_sent_to_all_servers() {
         handler
             .database
             .get_server_stream("servername2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -105,7 +102,6 @@ fn quit_is_sent_to_servers_only_once() {
         handler
             .database
             .get_server_stream("servername1")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

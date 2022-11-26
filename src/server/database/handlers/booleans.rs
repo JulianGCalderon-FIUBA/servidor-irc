@@ -1,6 +1,6 @@
 use std::sync::mpsc::Sender;
 
-use crate::macros::unwrap_or_return;
+use crate::macros::{ok_or_return, some_or_return};
 use crate::server::{connection::Connection, database::Database};
 
 impl<C: Connection> Database<C> {
@@ -70,16 +70,17 @@ impl<C: Connection> Database<C> {
 
 impl<C: Connection> Database<C> {
     fn are_credentials_valid(&self, username: String, password: String) -> bool {
-        let real_password = unwrap_or_return!(self.credentials.get(&username), false);
+        let real_password = some_or_return!(self.credentials.get(&username), false);
         &password == real_password
     }
 
     fn is_server_operator(&mut self, nickname: String) -> bool {
-        let client = unwrap_or_return!(self.get_client_info(&nickname), false);
+        let client = ok_or_return!(self.get_client_info(&nickname), false);
+
         client.operator
     }
 
-    fn contains_client(&self, nickname: String) -> bool {
+    pub fn contains_client(&self, nickname: String) -> bool {
         self.local_clients.contains_key(&nickname) || self.external_clients.contains_key(&nickname)
     }
 
@@ -92,17 +93,17 @@ impl<C: Connection> Database<C> {
     }
 
     fn is_client_in_channel(&self, nickname: String, channel: String) -> bool {
-        let channel = unwrap_or_return!(self.channels.get(&channel), false);
+        let channel = some_or_return!(self.channels.get(&channel), false);
         channel.is_member(&nickname)
     }
 
     fn is_channel_operator(&self, channel: String, nickname: String) -> bool {
-        let channel = unwrap_or_return!(self.channels.get(&channel), false);
+        let channel = some_or_return!(self.channels.get(&channel), false);
         channel.is_operator(&nickname)
     }
 
     fn is_channel_speaker(&self, channel: String, nickname: String) -> bool {
-        let channel = unwrap_or_return!(self.channels.get(&channel), false);
+        let channel = some_or_return!(self.channels.get(&channel), false);
         channel.is_speaker(&nickname)
     }
 

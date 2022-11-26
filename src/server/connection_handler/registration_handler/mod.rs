@@ -22,8 +22,8 @@ mod asserts;
 mod connection_type;
 mod logic;
 
-#[cfg(test)]
-mod tests;
+// #[cfg(test)]
+// mod tests;
 mod utils;
 
 const REGISTRATION_TIMELIMIT_SECS: u64 = 60;

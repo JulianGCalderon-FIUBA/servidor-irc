@@ -91,7 +91,6 @@ fn nick_update_is_relayed_to_all_servers() {
             .database
             .get_server_stream("servername1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -99,7 +98,6 @@ fn nick_update_is_relayed_to_all_servers() {
         handler
             .database
             .get_server_stream("servername2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

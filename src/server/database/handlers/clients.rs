@@ -1,12 +1,15 @@
-use std::{io, sync::mpsc::Sender};
+use std::sync::mpsc::Sender;
 
-use crate::server::{
-    connection::Connection,
-    data_structures::{ClientInfo, ExternalClient, LocalClient},
-    database::Database,
+use crate::{
+    macros::ok_or_return,
+    server::{
+        connection::Connection,
+        data_structures::{ClientInfo, ExternalClient, LocalClient},
+        database::{database_error::DatabaseError, Database},
+    },
 };
 
-use crate::macros::{debug_print, unwrap_or_return};
+use crate::macros::{debug_print, some_or_return};
 
 impl<C: Connection> Database<C> {
     pub fn handle_add_local_client(&mut self, client: LocalClient<C>) {
@@ -22,7 +25,11 @@ impl<C: Connection> Database<C> {
         self.set_server_operator(nickname);
     }
 
-    pub fn handle_get_immediate_server(&self, client: String, respond_to: Sender<Option<String>>) {
+    pub fn handle_get_immediate_server(
+        &self,
+        client: String,
+        respond_to: Sender<Result<String, DatabaseError>>,
+    ) {
         let server = self.get_immediate_server(client);
         respond_to.send(server).unwrap();
     }
@@ -45,7 +52,7 @@ impl<C: Connection> Database<C> {
     pub fn handle_get_away_message(
         &mut self,
         nickname: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Result<Option<String>, DatabaseError>>,
     ) {
         let message = self.get_away_message(nickname);
         respond_to.send(message).unwrap();
@@ -55,7 +62,7 @@ impl<C: Connection> Database<C> {
     pub fn handle_get_channels_for_client(
         &self,
         nickname: String,
-        respond_to: Sender<Vec<String>>,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     ) {
         let channels = self.get_channels_for_client(nickname);
         respond_to.send(channels).unwrap();
@@ -64,7 +71,7 @@ impl<C: Connection> Database<C> {
     pub fn handle_get_local_stream_request(
         &self,
         nickname: String,
-        respond_to: Sender<Option<io::Result<C>>>,
+        respond_to: Sender<Result<C, DatabaseError>>,
     ) {
         let stream = self.get_local_stream(nickname);
         respond_to.send(stream).unwrap();
@@ -76,7 +83,7 @@ impl<C: Connection> Database<C> {
     pub fn handle_get_client_info(
         &mut self,
         client: String,
-        respond_to: Sender<Option<ClientInfo>>,
+        respond_to: Sender<Result<ClientInfo, DatabaseError>>,
     ) {
         let client_info = self.get_client_info(&client);
         respond_to.send(client_info.cloned()).unwrap();
@@ -93,7 +100,7 @@ impl<C: Connection> Database<C> {
         }
     }
     fn set_away_message(&mut self, nickname: String, message: Option<String>) {
-        let client = unwrap_or_return!(self.get_client_info(&nickname));
+        let client = ok_or_return!(self.get_client_info(&nickname));
         debug_print!("Setting {nickname}'s away message to {message:?}");
 
         client.away = message
@@ -107,7 +114,7 @@ impl<C: Connection> Database<C> {
     }
 
     fn set_server_operator(&mut self, nickname: String) {
-        let info = unwrap_or_return!(self.get_client_info(&nickname));
+        let info = ok_or_return!(self.get_client_info(&nickname));
         debug_print!("Setting {} as server operator", nickname);
 
         info.operator = true;
@@ -120,7 +127,7 @@ impl<C: Connection> Database<C> {
     }
 
     fn update_nickname(&mut self, old_nickname: String, new_nickname: String) {
-        let client_info = unwrap_or_return!(self.get_client_info(&old_nickname));
+        let client_info = ok_or_return!(self.get_client_info(&old_nickname));
         debug_print!("Updating nickname from {old_nickname} to {new_nickname}");
 
         client_info.update_nickname(new_nickname.to_string());
@@ -129,7 +136,11 @@ impl<C: Connection> Database<C> {
         self.update_nickname_in_channels(old_nickname, new_nickname);
     }
 
-    fn get_channels_for_client(&self, nickname: String) -> Vec<String> {
+    fn get_channels_for_client(&self, nickname: String) -> Result<Vec<String>, DatabaseError> {
+        if !self.contains_client(nickname.clone()) {
+            return Err(DatabaseError::NoSuchClient);
+        }
+
         let mut channels = vec![];
 
         for (channel_name, channel) in self.channels.iter() {
@@ -138,25 +149,40 @@ impl<C: Connection> Database<C> {
                 channels.push(channel_name.clone());
             }
         }
-        channels
+
+        Ok(channels)
     }
 
-    fn get_away_message(&mut self, nickname: String) -> Option<String> {
-        let info = unwrap_or_return!(self.get_client_info(&nickname), None);
+    fn get_away_message(&mut self, nickname: String) -> Result<Option<String>, DatabaseError> {
+        let info = ok_or_return!(
+            self.get_client_info(&nickname),
+            Err(DatabaseError::NoSuchClient)
+        );
 
-        info.away.clone()
+        Ok(info.away.clone())
     }
 
-    fn get_local_stream(&self, nickname: String) -> Option<io::Result<C>> {
-        let client = unwrap_or_return!(self.local_clients.get(&nickname), None);
+    fn get_local_stream(&self, nickname: String) -> Result<C, DatabaseError> {
+        let client = some_or_return!(
+            self.local_clients.get(&nickname),
+            Err(DatabaseError::NoSuchClient)
+        );
 
-        client.get_stream()
+        match &client.stream {
+            Some(stream) => stream
+                .try_clone()
+                .map_err(|_| DatabaseError::CannotCloneStream),
+            None => Err(DatabaseError::ClientIsOffline),
+        }
     }
 
-    fn get_immediate_server(&self, nickname: String) -> Option<String> {
-        let client = unwrap_or_return!(self.external_clients.get(&nickname), None);
+    fn get_immediate_server(&self, nickname: String) -> Result<String, DatabaseError> {
+        let client = some_or_return!(
+            self.external_clients.get(&nickname),
+            Err(DatabaseError::NoSuchClient)
+        );
 
-        Some(client.immediate.clone())
+        Ok(client.immediate.clone())
     }
 
     /// Returns array with ClientInfo for connected clients.

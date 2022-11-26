@@ -196,7 +196,7 @@ impl<C: Connection> ServerHandler<C> {
 
     fn send_quit_notification(&mut self, nickname: String, message: String) {
         let quit_notification = Notification::quit(&nickname, &message);
-        let channels = self.database.get_channels_for_client(&nickname);
+        let channels = self.database.get_channels_for_client(&nickname).unwrap();
         for channel in channels {
             self.send_message_to_local_clients_on_channel(&quit_notification, &channel);
         }

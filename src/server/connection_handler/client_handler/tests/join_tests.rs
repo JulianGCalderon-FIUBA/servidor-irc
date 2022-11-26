@@ -187,7 +187,6 @@ fn join_notifies_users_in_channel() {
             .database
             .get_local_stream("nick2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -380,7 +379,6 @@ fn joins_notifies_user_in_channel() {
             .database
             .get_local_stream("nick2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -405,7 +403,6 @@ fn distributed_channels_joins_are_relayed_to_all_servers() {
             .database
             .get_server_stream("servername1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -413,7 +410,6 @@ fn distributed_channels_joins_are_relayed_to_all_servers() {
         handler
             .database
             .get_server_stream("servername2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

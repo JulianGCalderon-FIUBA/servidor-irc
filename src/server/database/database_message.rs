@@ -1,10 +1,11 @@
-use std::io;
 use std::sync::mpsc::Sender;
 
 use crate::server::consts::modes::ChannelFlag;
 use crate::server::data_structures::*;
 
 use crate::server::connection::Connection;
+
+use super::database_error::DatabaseError;
 
 /// Possible messages or requests a Database can receive.
 pub enum DatabaseMessage<C: Connection> {
@@ -72,40 +73,39 @@ pub enum DatabaseMessage<C: Connection> {
     },
     GetAwayMessage {
         nickname: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Result<Option<String>, DatabaseError>>,
     },
     GetChannelBanMask {
         channel: String,
-        respond_to: Sender<Vec<String>>,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
     GetChannelConfig {
         channel: String,
-        respond_to: Sender<Option<ChannelConfiguration>>,
+        respond_to: Sender<Result<ChannelConfiguration, DatabaseError>>,
     },
     GetChannelKey {
         channel: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Result<Option<String>, DatabaseError>>,
     },
     GetChannelTopic {
         channel: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Result<Option<String>, DatabaseError>>,
     },
     GetChannelsForClient {
         nickname: String,
-        respond_to: Sender<Vec<String>>,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
     GetChannelClients {
         channel: String,
-        respond_to: Sender<Vec<String>>,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
     GetLimit {
         channel: String,
-        respond_to: Sender<Option<usize>>,
+        respond_to: Sender<Result<Option<usize>, DatabaseError>>,
     },
-
     GetLocalStream {
         nickname: String,
-        respond_to: Sender<Option<io::Result<C>>>,
+        respond_to: Sender<Result<C, DatabaseError>>,
     },
     GetServerInfo {
         respond_to: Sender<String>,
@@ -115,7 +115,7 @@ pub enum DatabaseMessage<C: Connection> {
     },
     GetServerStream {
         server: String,
-        respond_to: Sender<Option<io::Result<C>>>,
+        respond_to: Sender<Result<C, DatabaseError>>,
     },
     IsChannelOperator {
         channel: String,
@@ -189,10 +189,10 @@ pub enum DatabaseMessage<C: Connection> {
     },
     GetImmediateServer {
         client: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Result<String, DatabaseError>>,
     },
     GetClientInfo {
         client: String,
-        respond_to: Sender<Option<ClientInfo>>,
+        respond_to: Sender<Result<ClientInfo, DatabaseError>>,
     },
 }

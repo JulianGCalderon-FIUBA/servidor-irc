@@ -1,3 +1,4 @@
+mod database_error;
 mod database_handle;
 mod database_message;
 mod handlers;

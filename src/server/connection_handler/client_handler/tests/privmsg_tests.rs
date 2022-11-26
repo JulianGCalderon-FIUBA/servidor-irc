@@ -67,7 +67,6 @@ fn privmsg_works_with_valid_target_client() {
             .database
             .get_local_stream("nick1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -100,7 +99,6 @@ fn privmsg_works_with_valid_target_channel() {
             .database
             .get_local_stream("nick1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -109,7 +107,6 @@ fn privmsg_works_with_valid_target_channel() {
         handler
             .database
             .get_local_stream("nick2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -134,7 +131,6 @@ fn privmsg_works_with_multiple_targets() {
             .database
             .get_local_stream("nick1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -143,7 +139,6 @@ fn privmsg_works_with_multiple_targets() {
         handler
             .database
             .get_local_stream("nick2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -199,7 +194,6 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
             .database
             .get_local_stream("nick1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -208,7 +202,6 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
         handler
             .database
             .get_local_stream("nick2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -243,7 +236,6 @@ fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
         handler
             .database
             .get_local_stream("nick1")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -281,7 +273,6 @@ fn privmsg_works_on_channel_with_flag_n() {
             .database
             .get_local_stream("nick1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -290,7 +281,6 @@ fn privmsg_works_on_channel_with_flag_n() {
         handler
             .database
             .get_local_stream("nick2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -326,7 +316,6 @@ fn privmsg_works_on_channel_with_flag_m() {
         handler
             .database
             .get_local_stream("nick1")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -369,7 +358,6 @@ fn privmsg_to_distributed_channel_is_only_relayed_to_each_neccesary_server_once(
             .database
             .get_server_stream("servername1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -377,7 +365,6 @@ fn privmsg_to_distributed_channel_is_only_relayed_to_each_neccesary_server_once(
         handler
             .database
             .get_server_stream("servername2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

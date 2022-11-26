@@ -1,4 +1,5 @@
 use crate::server::{
+    connection::Connection,
     consts::modes::ChannelFlag,
     testing::{dummy_client, dummy_database},
 };
@@ -33,10 +34,10 @@ fn can_get_client_stream() {
 
     let client = dummy_client("nickname");
 
-    let stream_ref_expected = client.get_stream().unwrap().unwrap();
+    let stream_ref_expected = client.stream.as_ref().unwrap().try_clone().unwrap();
 
     database.add_local_client(client);
-    let stream_ref_actual = database.get_local_stream("nickname").unwrap().unwrap();
+    let stream_ref_actual = database.get_local_stream("nickname").unwrap();
 
     assert_eq!(stream_ref_expected, stream_ref_actual);
 }
@@ -49,9 +50,9 @@ fn disconnecting_sets_client_not_online() {
 
     database.add_local_client(client);
 
-    assert!(database.get_local_stream("nickname").is_some());
+    assert!(database.get_local_stream("nickname").is_ok());
     database.disconnect_client("nickname");
-    assert!(database.get_local_stream("nickname").is_none());
+    assert!(database.get_local_stream("nickname").is_err());
 }
 
 #[test]
@@ -91,7 +92,7 @@ fn can_get_all_clients_from_channel() {
     database.add_client_to_channel("nickname1", "channel");
     database.add_client_to_channel("nickname2", "channel");
 
-    let mut value = database.get_channel_clients("channel");
+    let mut value = database.get_channel_clients("channel").unwrap();
     let expected = vec!["nickname1".to_string(), "nickname2".to_string()];
     value.sort();
 
@@ -112,7 +113,7 @@ fn can_remove_client_from_channel() {
     database.add_client_to_channel("nickname2", "channel");
     database.remove_client_from_channel("nickname1", "channel");
 
-    let value = database.get_channel_clients("channel");
+    let value = database.get_channel_clients("channel").unwrap();
     let expected = vec!["nickname2".to_string()];
 
     assert_eq!(value, expected);
@@ -157,7 +158,7 @@ fn can_get_all_channels_from_client() {
     database.add_client_to_channel("nickname", "channel1");
     database.add_client_to_channel("nickname", "channel2");
 
-    let mut channels_real = database.get_channels_for_client("nickname");
+    let mut channels_real = database.get_channels_for_client("nickname").unwrap();
     let channels_expected = vec!["channel1".to_string(), "channel2".to_string()];
 
     channels_real.sort();
@@ -207,19 +208,19 @@ fn can_set_and_get_channel_topic() {
     database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert_eq!(database.get_topic_for_channel("#channel"), None);
+    assert_eq!(database.get_topic_for_channel("#channel").unwrap(), None);
 
     database.set_channel_topic("#channel", "topic");
 
     assert_eq!(
-        database.get_topic_for_channel("#channel"),
+        database.get_topic_for_channel("#channel").unwrap(),
         Some("topic".to_string())
     );
 
     database.set_channel_topic("#channel", "new topic");
 
     assert_eq!(
-        database.get_topic_for_channel("#channel"),
+        database.get_topic_for_channel("#channel").unwrap(),
         Some("new topic".to_string())
     );
 }
@@ -245,7 +246,10 @@ fn can_set_away_message_for_client() {
     database.add_local_client(client);
 
     database.set_away_message(&Some("away".to_string()), "nick");
-    assert_eq!(Some("away".to_string()), database.get_away_message("nick"));
+    assert_eq!(
+        Some("away".to_string()),
+        database.get_away_message("nick").unwrap()
+    );
 }
 
 #[test]
@@ -256,18 +260,18 @@ fn can_set_and_get_channel_key() {
     database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert_eq!(database.get_channel_key("#channel"), None);
+    assert_eq!(database.get_channel_key("#channel").unwrap(), None);
 
     database.set_channel_key("#channel", Some("key".to_string()));
 
     assert_eq!(
-        database.get_channel_key("#channel"),
+        database.get_channel_key("#channel").unwrap(),
         Some("key".to_string())
     );
 
     database.set_channel_key("#channel", None);
 
-    assert_eq!(database.get_channel_key("#channel"), None);
+    assert_eq!(database.get_channel_key("#channel").unwrap(), None);
 }
 
 #[test]
@@ -297,35 +301,35 @@ fn can_set_and_get_channel_limit() {
     database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert_eq!(database.get_channel_limit("#channel"), None);
+    assert_eq!(database.get_channel_limit("#channel").unwrap(), None);
 
     database.set_channel_limit("#channel", Some(4));
 
-    assert_eq!(database.get_channel_limit("#channel"), Some(4));
+    assert_eq!(database.get_channel_limit("#channel").unwrap(), Some(4));
 
     database.set_channel_limit("#channel", None);
 
-    assert_eq!(database.get_channel_limit("#channel"), None);
+    assert_eq!(database.get_channel_limit("#channel").unwrap(), None);
 }
 
-// #[test]
-// fn can_add_and_remove_channel_operator() {
-//     let database = dummy_database();
+#[test]
+fn can_add_and_remove_channel_operator() {
+    let database = dummy_database();
 
-//     let client = dummy_client("nick");
-//     database.add_local_client(client);
-//     database.add_client_to_channel("nick", "#channel");
+    let client = dummy_client("nick");
+    database.add_local_client(client);
+    database.add_client_to_channel("nick", "#channel");
 
-//     assert!(!database.is_channel_operator("#channel", "nick"));
+    assert!(!database.is_channel_operator("#channel", "nick"));
 
-//     database.add_channop("#channel", "nick");
+    database.add_channop("#channel", "nick");
 
-//      assert!(database.is_channel_operator("#channel", "nick"));
+    assert!(database.is_channel_operator("#channel", "nick"));
 
-//     database.remove_channop("#channel", "nick");
+    database.remove_channop("#channel", "nick");
 
-//      assert!(!database.is_channel_operator("#channel", "nick"));
-// }
+    assert!(!database.is_channel_operator("#channel", "nick"));
+}
 
 #[test]
 fn can_add_and_remove_channel_speaker() {
@@ -356,17 +360,17 @@ fn can_set_and_unset_channel_banmask() {
 
     let mut banmasks: Vec<String> = vec![];
 
-    assert_eq!(database.get_channel_banmask("#channel"), banmasks);
+    assert_eq!(database.get_channel_banmask("#channel").unwrap(), banmasks);
 
     database.add_channel_banmask("#channel", "banmask");
 
     banmasks.push("banmask".to_string());
 
-    assert_eq!(database.get_channel_banmask("#channel"), banmasks);
+    assert_eq!(database.get_channel_banmask("#channel").unwrap(), banmasks);
 
     database.remove_channel_banmask("#channel", "banmask");
 
     banmasks.pop();
 
-    assert_eq!(database.get_channel_banmask("#channel"), banmasks);
+    assert_eq!(database.get_channel_banmask("#channel").unwrap(), banmasks);
 }

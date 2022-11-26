@@ -1,12 +1,9 @@
-use std::{
-    io,
-    sync::mpsc::{self, Sender},
-};
+use std::sync::mpsc::{self, Sender};
 
 use crate::server::data_structures::*;
 use crate::server::{connection::Connection, consts::modes::ChannelFlag};
 
-use super::database_message::DatabaseMessage;
+use super::{database_error::DatabaseError, database_message::DatabaseMessage};
 
 /// A DatabaseHandle handles and makes request to the main Database. Works as an intermediary so external structures cannot acces the Database directly.
 pub struct DatabaseHandle<C: Connection> {
@@ -140,7 +137,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_away_message(&self, nickname: &str) -> Option<String> {
+    pub fn get_away_message(&self, nickname: &str) -> Result<Option<String>, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetAwayMessage {
             nickname: nickname.to_string(),
@@ -150,7 +147,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_channel_banmask(&self, channel: &str) -> Vec<String> {
+    pub fn get_channel_banmask(&self, channel: &str) -> Result<Vec<String>, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelBanMask {
             channel: channel.to_string(),
@@ -160,7 +157,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_channel_key(&self, channel: &str) -> Option<String> {
+    pub fn get_channel_key(&self, channel: &str) -> Result<Option<String>, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelKey {
             channel: channel.to_string(),
@@ -170,7 +167,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_channel_limit(&self, channel: &str) -> Option<usize> {
+    pub fn get_channel_limit(&self, channel: &str) -> Result<Option<usize>, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetLimit {
             channel: channel.to_string(),
@@ -181,7 +178,7 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     /// Sends GetChannelsForClient request and returns answer.
-    pub fn get_channels_for_client(&self, nickname: &str) -> Vec<String> {
+    pub fn get_channels_for_client(&self, nickname: &str) -> Result<Vec<String>, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelsForClient {
             nickname: nickname.to_string(),
@@ -192,7 +189,7 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     /// Sends GetClientsForChannel request and returns answer.
-    pub fn get_channel_clients(&self, channel: &str) -> Vec<String> {
+    pub fn get_channel_clients(&self, channel: &str) -> Result<Vec<String>, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelClients {
             channel: channel.to_string(),
@@ -203,7 +200,7 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     /// Sends GetStream request and returns answer.
-    pub fn get_local_stream(&self, nickname: &str) -> Option<io::Result<C>> {
+    pub fn get_local_stream(&self, nickname: &str) -> Result<C, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetLocalStream {
             nickname: nickname.to_string(),
@@ -213,7 +210,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_server_stream(&self, servername: &str) -> Option<io::Result<C>> {
+    pub fn get_server_stream(&self, servername: &str) -> Result<C, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetServerStream {
             server: servername.to_string(),
@@ -223,7 +220,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_topic_for_channel(&self, channel: &str) -> Option<String> {
+    pub fn get_topic_for_channel(&self, channel: &str) -> Result<Option<String>, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelTopic {
             channel: channel.to_string(),
@@ -403,7 +400,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn get_channel_config(&self, channel: &str) -> Option<ChannelConfiguration> {
+    pub fn get_channel_config(&self, channel: &str) -> Result<ChannelConfiguration, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelConfig {
             channel: channel.to_string(),
@@ -430,7 +427,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub(crate) fn get_immediate_server(&self, client: &str) -> Option<String> {
+    pub(crate) fn get_immediate_server(&self, client: &str) -> Result<String, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetImmediateServer {
             client: client.to_string(),
@@ -440,7 +437,7 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub(crate) fn get_client_info(&self, nickname: &str) -> Option<ClientInfo> {
+    pub(crate) fn get_client_info(&self, nickname: &str) -> Result<ClientInfo, DatabaseError> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetClientInfo {
             client: nickname.to_string(),

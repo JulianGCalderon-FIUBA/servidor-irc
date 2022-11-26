@@ -1,4 +1,4 @@
-use crate::macros::unwrap_or_return;
+use crate::macros::ok_or_return;
 use crate::server::consts::channel::DISTRIBUTED_CHANNEL;
 use crate::server::consts::modes::ChannelFlag;
 use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
@@ -36,8 +36,12 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn shares_channel_with(&self, client_info: &ClientInfo) -> bool {
         let client_channels = self
             .database
-            .get_channels_for_client(&client_info.nickname());
-        let own_channels = self.database.get_channels_for_client(&self.nickname);
+            .get_channels_for_client(&client_info.nickname())
+            .unwrap();
+        let own_channels = self
+            .database
+            .get_channels_for_client(&self.nickname)
+            .unwrap();
 
         !client_channels
             .iter()
@@ -49,7 +53,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn client_matches_banmask(&self, nickname: &str, mask: &str) -> bool {
-        let client = unwrap_or_return!(self.database.get_client_info(nickname), false);
+        let client = ok_or_return!(self.database.get_client_info(nickname), false);
 
         client.matches_banmask(mask)
     }

@@ -12,8 +12,8 @@ use super::connection_handler_trait::{
 
 mod asserts;
 mod logic;
-#[cfg(test)]
-mod tests;
+// #[cfg(test)]
+// mod tests;
 mod utils;
 
 pub struct ServerHandler<C: Connection> {

@@ -1,11 +1,16 @@
 use std::sync::mpsc::Sender;
 
+use crate::server::database::database_error::DatabaseError;
 use crate::server::{connection::Connection, data_structures::Channel, database::Database};
 
-use crate::macros::{debug_print, unwrap_or_return};
+use crate::macros::{debug_print, some_or_return};
 
 impl<C: Connection> Database<C> {
-    pub fn handle_get_channel_clients(&self, channel: String, respond_to: Sender<Vec<String>>) {
+    pub fn handle_get_channel_clients(
+        &self,
+        channel: String,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
+    ) {
         let clients = self.get_channel_clients(channel);
         respond_to.send(clients).unwrap();
     }
@@ -39,7 +44,7 @@ impl<C: Connection> Database<C> {
     }
 
     fn remove_client_from_channel(&mut self, channel_name: String, nickname: String) {
-        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name.to_string()));
+        let channel = some_or_return!(self.channels.get_mut(&channel_name.to_string()));
 
         debug_print!("Removing {} from channel {}", nickname, channel_name);
         channel.remove_client(&nickname);
@@ -47,23 +52,17 @@ impl<C: Connection> Database<C> {
             self.channels.remove(&channel_name);
         }
     }
-    fn get_channel_clients(&self, channel: String) -> Vec<String> {
-        let channel = unwrap_or_return!(self.channels.get(&channel), vec![]);
-        channel.get_clients()
+    fn get_channel_clients(&self, channel: String) -> Result<Vec<String>, DatabaseError> {
+        let channel = some_or_return!(
+            self.channels.get(&channel),
+            Err(DatabaseError::NoSuchChannel)
+        );
+        Ok(channel.get_clients())
     }
 
     fn get_channels(&self) -> Vec<String> {
         self.channels.keys().cloned().collect()
     }
-
-    // fn get_local_clients_for_channel(&self, channel: String) -> Vec<String> {
-    //     let channel = unwrap_or_return!(self.channels.get(&channel), vec![]);
-    //     channel
-    //         .get_clients()
-    //         .into_iter()
-    //         .filter(|client| self.local_clients.contains_key(client))
-    //         .collect()
-    // }
 }
 
 impl<C: Connection> Database<C> {
