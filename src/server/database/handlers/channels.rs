@@ -1,9 +1,8 @@
 use std::sync::mpsc::Sender;
 
-use crate::server::{
-    connection::Connection, data_structures::Channel, database::Database, debug_print,
-    unwrap_or_return,
-};
+use crate::server::{connection::Connection, data_structures::Channel, database::Database};
+
+use crate::macros::{debug_print, unwrap_or_return};
 
 impl<C: Connection> Database<C> {
     pub fn handle_get_channel_clients(&self, channel: String, respond_to: Sender<Vec<String>>) {

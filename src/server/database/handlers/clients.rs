@@ -4,8 +4,9 @@ use crate::server::{
     connection::Connection,
     data_structures::{ClientInfo, ExternalClient, LocalClient},
     database::Database,
-    debug_print, unwrap_or_return,
 };
+
+use crate::macros::{debug_print, unwrap_or_return};
 
 impl<C: Connection> Database<C> {
     pub fn handle_add_local_client(&mut self, client: LocalClient<C>) {
