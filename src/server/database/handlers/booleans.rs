@@ -66,23 +66,9 @@ impl<C: Connection> Database<C> {
         let contains_server = self.contains_server(servername);
         respond_to.send(contains_server).unwrap();
     }
-
-    pub fn handle_clients_matches_banmask(
-        &mut self,
-        nickname: String,
-        banmask: String,
-        respond_to: Sender<bool>,
-    ) {
-        let matches_banmask = self.client_matches_banmask(nickname, banmask);
-        respond_to.send(matches_banmask).unwrap();
-    }
 }
 
 impl<C: Connection> Database<C> {
-    fn client_matches_banmask(&mut self, nickname: String, banmask: String) -> bool {
-        let client = unwrap_or_return!(self.get_client_info(&nickname), false);
-        client.matches_banmask(&banmask)
-    }
     fn are_credentials_valid(&self, username: String, password: String) -> bool {
         let real_password = unwrap_or_return!(self.credentials.get(&username), false);
         &password == real_password

@@ -432,7 +432,7 @@ impl<C: Connection> ClientHandler<C> {
 
     pub fn assert_is_not_banned_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
         for mask in self.database.get_channel_banmask(channel) {
-            if self.database.client_matches_banmask(&self.nickname, &mask) {
+            if self.client_matches_banmask(&self.nickname, &mask) {
                 let channel = channel.to_string();
                 return Err(ErrorReply::BannedFromChannel474 { channel });
             }

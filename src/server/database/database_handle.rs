@@ -84,17 +84,6 @@ impl<C: Connection> DatabaseHandle<C> {
         receiver.recv().unwrap()
     }
 
-    pub fn client_matches_banmask(&self, nickname: &str, mask: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::ClientMatchesBanmask {
-            nickname: nickname.to_string(),
-            mask: mask.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
     /// Sends ContainsChannel request and returns answer.
     pub fn contains_channel(&self, channel: &str) -> bool {
         let (sender, receiver) = mpsc::channel();
@@ -207,27 +196,6 @@ impl<C: Connection> DatabaseHandle<C> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetChannelClients {
             channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-    /// Sends GetClientsForMask request and returns answer.
-    pub fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetClientsForMask {
-            mask: mask.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends GetClientsForNickMask request and returns answer.
-    pub fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetClientsForNickMask {
-            nickmask: mask.to_string(),
             respond_to: sender,
         };
         self.sender.send(request).unwrap();
@@ -466,6 +434,16 @@ impl<C: Connection> DatabaseHandle<C> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetImmediateServer {
             client: client.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub(crate) fn get_client_info(&self, nickname: &str) -> Option<ClientInfo> {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::GetClientInfo {
+            client: nickname.to_string(),
             respond_to: sender,
         };
         self.sender.send(request).unwrap();

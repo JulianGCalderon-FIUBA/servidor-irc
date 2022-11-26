@@ -106,13 +106,6 @@ impl<C: Connection> Database<C> {
             } => self.handle_get_channel_clients(channel, respond_to),
             GetAllClients { respond_to } => self.handle_get_all_clients(respond_to),
             GetAllChannels { respond_to } => self.handle_get_all_channels(respond_to),
-            GetClientsForMask { mask, respond_to } => {
-                self.handle_get_clients_for_mask(mask, respond_to)
-            }
-            GetClientsForNickMask {
-                nickmask,
-                respond_to,
-            } => self.handle_get_clients_for_nickmask(nickmask, respond_to),
             UpdateNickname {
                 old_nickname,
                 new_nickname,
@@ -173,11 +166,6 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to,
             } => self.handle_is_channel_operator(channel, nickname, respond_to),
-            ClientMatchesBanmask {
-                nickname,
-                mask,
-                respond_to,
-            } => self.handle_clients_matches_banmask(nickname, mask, respond_to),
             ContainsServer {
                 servername,
                 respond_to,
@@ -207,6 +195,7 @@ impl<C: Connection> Database<C> {
             GetImmediateServer { client, respond_to } => {
                 self.handle_get_immediate_server(client, respond_to)
             }
+            GetClientInfo { client, respond_to } => self.handle_get_client_info(client, respond_to),
         }
     }
 }

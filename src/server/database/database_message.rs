@@ -46,11 +46,6 @@ pub enum DatabaseMessage<C: Connection> {
         flag: ChannelFlag,
         respond_to: Sender<bool>,
     },
-    ClientMatchesBanmask {
-        nickname: String,
-        mask: String,
-        respond_to: Sender<bool>,
-    },
     ContainsChannel {
         channel: String,
         respond_to: Sender<bool>,
@@ -98,14 +93,6 @@ pub enum DatabaseMessage<C: Connection> {
     GetChannelsForClient {
         nickname: String,
         respond_to: Sender<Vec<String>>,
-    },
-    GetClientsForMask {
-        mask: String,
-        respond_to: Sender<Vec<ClientInfo>>,
-    },
-    GetClientsForNickMask {
-        nickmask: String,
-        respond_to: Sender<Vec<ClientInfo>>,
     },
     GetChannelClients {
         channel: String,
@@ -203,5 +190,9 @@ pub enum DatabaseMessage<C: Connection> {
     GetImmediateServer {
         client: String,
         respond_to: Sender<Option<String>>,
+    },
+    GetClientInfo {
+        client: String,
+        respond_to: Sender<Option<ClientInfo>>,
     },
 }

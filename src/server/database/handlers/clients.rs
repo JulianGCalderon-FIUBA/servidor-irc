@@ -33,22 +33,6 @@ impl<C: Connection> Database<C> {
         respond_to.send(clients).unwrap();
     }
 
-    /// Returns response to GetClientsForMask request.
-    pub fn handle_get_clients_for_mask(&self, mask: String, respond_to: Sender<Vec<ClientInfo>>) {
-        let clients = self.get_clients_for_mask(mask);
-        respond_to.send(clients).unwrap();
-    }
-
-    /// Returns response to GetClientsForNickMask request.
-    pub fn handle_get_clients_for_nickmask(
-        &self,
-        mask: String,
-        respond_to: Sender<Vec<ClientInfo>>,
-    ) {
-        let clients = self.get_clients_for_nickmask(mask);
-        respond_to.send(clients).unwrap();
-    }
-
     /// Returns response to UpdateNickname request.
     pub fn handle_update_nickname(&mut self, old_nickname: String, new_nickname: String) {
         self.update_nickname(old_nickname, new_nickname);
@@ -87,6 +71,15 @@ impl<C: Connection> Database<C> {
     }
     pub fn handle_disconnect_client(&mut self, nickname: String) {
         self.disconnect_client(nickname);
+    }
+
+    pub fn handle_get_client_info(
+        &mut self,
+        client: String,
+        respond_to: Sender<Option<ClientInfo>>,
+    ) {
+        let client_info = self.get_client_info(&client);
+        respond_to.send(client_info.cloned()).unwrap();
     }
 }
 
@@ -184,16 +177,6 @@ impl<C: Connection> Database<C> {
 
         clients
     }
-
-    /// Returns array with ClientInfo for channels that match mask.
-    fn get_clients_for_mask(&self, mask: String) -> Vec<ClientInfo> {
-        self.filtered_clients(mask, ClientInfo::matches_mask)
-    }
-
-    /// Returns array with ClientInfo for channels that match nick mask.
-    fn get_clients_for_nickmask(&self, mask: String) -> Vec<ClientInfo> {
-        self.filtered_clients(mask, ClientInfo::matches_nickmask)
-    }
 }
 
 impl<C: Connection> Database<C> {
@@ -211,18 +194,5 @@ impl<C: Connection> Database<C> {
         for channel in self.channels.values_mut() {
             channel.update_nickname(&old_nickname, &new_nickname);
         }
-    }
-
-    fn filtered_clients(
-        &self,
-        mask: String,
-        filter: fn(&ClientInfo, &str) -> bool,
-    ) -> Vec<ClientInfo> {
-        let clients = self.get_all_clients();
-
-        clients
-            .into_iter()
-            .filter(|client| filter(client, &mask))
-            .collect()
     }
 }

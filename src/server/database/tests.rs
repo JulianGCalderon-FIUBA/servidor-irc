@@ -165,62 +165,6 @@ fn can_get_all_channels_from_client() {
     assert_eq!(channels_expected, channels_real);
 }
 
-// #[test]
-// fn can_get_all_clients_matching_mask() {
-//     let database = dummy_database();
-
-//     let client = ClientBuilder::new()
-//         .nickname("nickAname".to_string())
-//         .username("userBname".to_string())
-//         .hostname("hostCname".to_string())
-//         .servername("serverDname".to_string())
-//         .realname("realEname".to_string())
-//         .stream(MockTcpStream::new())
-//         .build()
-//         .unwrap();
-
-//     let clientinfo = client.get_info();
-
-//     database.add_local_client(client);
-
-//     database.add_local_client(dummy_client("othernick"));
-
-//     let expected = vec![clientinfo];
-
-//     assert_eq!(database.get_clients_for_mask("*A*"), expected);
-//     assert_eq!(database.get_clients_for_mask("*B*"), expected);
-//     assert_eq!(database.get_clients_for_mask("*C*"), expected);
-//     assert_eq!(database.get_clients_for_mask("*D*"), expected);
-//     assert_eq!(database.get_clients_for_mask("*E*"), expected);
-// }
-
-#[test]
-fn can_get_all_clients_matching_nickmask() {
-    let database = dummy_database();
-
-    let client1 = dummy_client("nick1");
-    let client2 = dummy_client("nick2");
-    let client3 = dummy_client("nick3");
-
-    let client1_info = client1.get_info();
-    let client2_info = client2.get_info();
-    let client3_info = client3.get_info();
-
-    database.add_local_client(client1);
-    database.add_local_client(client2);
-    database.add_local_client(client3);
-
-    let expected = vec![client1_info, client2_info, client3_info];
-    let mut actual1 = database.get_clients_for_nickmask("nick*");
-    let mut actual2 = database.get_clients_for_nickmask("*ni*");
-
-    actual1.sort();
-    actual2.sort();
-
-    assert_eq!(actual1, expected);
-    assert_eq!(actual2, expected);
-}
-
 #[test]
 fn can_get_all_clients() {
     let database = dummy_database();

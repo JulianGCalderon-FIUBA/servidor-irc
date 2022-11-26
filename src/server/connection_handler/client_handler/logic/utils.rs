@@ -33,6 +33,24 @@ impl<C: Connection> ClientHandler<C> {
             }
         }
     }
+
+    pub(super) fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
+        let clients = self.database.get_all_clients();
+
+        clients
+            .into_iter()
+            .filter(|client| client.matches_mask(mask))
+            .collect()
+    }
+
+    pub(super) fn get_clients_for_nickmask(&self, nickmask: &str) -> Vec<ClientInfo> {
+        let clients = self.database.get_all_clients();
+
+        clients
+            .into_iter()
+            .filter(|client| client.matches_nickmask(nickmask))
+            .collect()
+    }
 }
 
 pub fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
