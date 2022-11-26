@@ -9,7 +9,7 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_privmsg_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
         self.send_privmsg_notification(target, content)?;
 
-        if let Some(message) = self.database.get_away_message(target).unwrap() {
+        if let Ok(Some(message)) = self.database.get_away_message(target) {
             self.stream.send(&CommandResponse::away(target, &message))?;
         }
 

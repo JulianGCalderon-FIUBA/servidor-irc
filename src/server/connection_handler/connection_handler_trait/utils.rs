@@ -1,6 +1,7 @@
 use std::fmt::Display;
 use std::io;
 
+use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
 
 use super::ConnectionHandlerGetters;
@@ -39,7 +40,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     }
 
     fn send_message_to_local_clients_on_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database().get_channel_clients(channel).unwrap();
+        let clients = ok_or_return!(self.database().get_channel_clients(channel));
 
         for client in clients {
             if self.database().is_local_client(&client) {

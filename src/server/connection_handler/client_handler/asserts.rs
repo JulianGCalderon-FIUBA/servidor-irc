@@ -414,9 +414,10 @@ impl<C: Connection> ClientHandler<C> {
         key: &Option<String>,
     ) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
-        let channel_key = self.database.get_channel_key(&channel).unwrap();
-        if channel_key != *key {
-            return Err(ErrorReply::BadChannelKey475 { channel });
+        if let Ok(channel_key) = self.database.get_channel_key(&channel) {
+            if channel_key != *key {
+                return Err(ErrorReply::BadChannelKey475 { channel });
+            }
         }
 
         Ok(())
@@ -425,7 +426,7 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_channel_is_not_full(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
-        if let Some(limit) = self.database.get_channel_limit(&channel).unwrap() {
+        if let Ok(Some(limit)) = self.database.get_channel_limit(&channel) {
             if self.database.get_channel_clients(&channel).unwrap().len() >= limit {
                 return Err(ErrorReply::ChannelIsFull471 { channel });
             }
