@@ -17,5 +17,12 @@ macro_rules! unwrap_or_return {
     };
 }
 
+macro_rules! own {
+    ($( $var:ident ),*) => {
+        let var = var.to_owned();
+    };
+}
+
 pub(crate) use debug_print;
+pub(crate) use own;
 pub(crate) use unwrap_or_return;
