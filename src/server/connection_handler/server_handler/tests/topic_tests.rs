@@ -22,7 +22,7 @@ fn topic_sets_channel_topic() {
 
     assert_eq!(
         Some("new_topic".to_string()),
-        handler.database.get_topic_for_channel("#channel")
+        handler.database.get_topic_for_channel("#channel").unwrap()
     )
 }
 

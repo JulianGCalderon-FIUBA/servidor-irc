@@ -25,7 +25,7 @@ fn dummy_client_handler() -> ClientHandler<MockTcpStream> {
     let online = Arc::new(AtomicBool::new(true));
 
     let client = dummy_client(&nickname);
-    let connection = client.get_stream().unwrap().unwrap();
+    let connection = client.stream.as_ref().unwrap().try_clone().unwrap();
 
     database.add_local_client(client);
 

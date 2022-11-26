@@ -85,7 +85,10 @@ fn can_join_one_channel() {
     assert_eq!("331 #channel :No topic is set", responses[0]);
     assert_eq!("353 #channel :nickname", responses[1]);
     assert_eq!(
-        handler.database.get_channels_for_client("nickname"),
+        handler
+            .database
+            .get_channels_for_client("nickname")
+            .unwrap(),
         channels
     );
 }
@@ -112,7 +115,10 @@ fn can_join_multiple_channels() {
         "#channel3".to_string(),
     ];
     channels.sort();
-    let mut channels_for_client = handler.database.get_channels_for_client("nickname");
+    let mut channels_for_client = handler
+        .database
+        .get_channels_for_client("nickname")
+        .unwrap();
     channels_for_client.sort();
     assert_eq!(channels_for_client, channels);
 }
@@ -137,10 +143,16 @@ fn can_join_existing_channel() {
     assert_eq!("353 #channel :nick2 nickname", responses[1]);
 
     assert_eq!(
-        handler.database.get_channels_for_client("nickname"),
+        handler
+            .database
+            .get_channels_for_client("nickname")
+            .unwrap(),
         channels
     );
-    assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
+    assert_eq!(
+        handler.database.get_channels_for_client("nick2").unwrap(),
+        channels
+    );
 }
 
 #[test]
@@ -165,10 +177,16 @@ fn can_join_channel_with_topic() {
     assert_eq!("353 #channel :nick2 nickname", responses[1]);
 
     assert_eq!(
-        handler.database.get_channels_for_client("nickname"),
+        handler
+            .database
+            .get_channels_for_client("nickname")
+            .unwrap(),
         channels
     );
-    assert_eq!(handler.database.get_channels_for_client("nick2"), channels);
+    assert_eq!(
+        handler.database.get_channels_for_client("nick2").unwrap(),
+        channels
+    );
 }
 
 #[test]

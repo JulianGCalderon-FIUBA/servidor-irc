@@ -17,7 +17,7 @@ fn away_sets_away_message_for_client() {
     handler.away_command((prefix, vec![], trail)).unwrap();
 
     assert_eq!(
-        "message",
+        Some("message".to_string()),
         handler.database.get_away_message("nickname").unwrap()
     );
 }

@@ -174,7 +174,6 @@ fn kick_notifies_users_in_channel() {
         .database
         .get_local_stream("nick3")
         .unwrap()
-        .unwrap()
         .get_responses();
 
     assert_eq!(

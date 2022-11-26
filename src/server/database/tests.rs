@@ -316,19 +316,21 @@ fn can_set_and_get_channel_limit() {
 fn can_add_and_remove_channel_operator() {
     let database = dummy_database();
 
-    let client = dummy_client("nick");
-    database.add_local_client(client);
+    database.add_local_client(dummy_client("nick"));
+    database.add_local_client(dummy_client("nick2"));
     database.add_client_to_channel("nick", "#channel");
-
-    assert!(!database.is_channel_operator("#channel", "nick"));
-
-    database.add_channop("#channel", "nick");
+    database.add_client_to_channel("nick2", "#channel");
 
     assert!(database.is_channel_operator("#channel", "nick"));
+    assert!(!database.is_channel_operator("#channel", "nick2"));
 
-    database.remove_channop("#channel", "nick");
+    database.add_channop("#channel", "nick2");
 
-    assert!(!database.is_channel_operator("#channel", "nick"));
+    assert!(database.is_channel_operator("#channel", "nick2"));
+
+    database.remove_channop("#channel", "nick2");
+
+    assert!(!database.is_channel_operator("#channel", "nick2"));
 }
 
 #[test]
