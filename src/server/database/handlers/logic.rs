@@ -55,8 +55,8 @@ impl<C: Connection> Database<C> {
         false
     }
 
-    pub fn is_local_client(&self, nickname: String) -> bool {
-        self.local_clients.contains_key(&nickname)
+    pub fn is_local_client(&self, nickname: &str) -> bool {
+        self.local_clients.contains_key(nickname)
     }
 
     /// Returns if Database contains channel.
@@ -67,7 +67,7 @@ impl<C: Connection> Database<C> {
     /// Returns if client is in channel.
     pub fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
         if let Some(channel) = self.channels.get(channel) {
-            return channel.contains_client(nickname);
+            return channel.is_member(nickname);
         }
 
         false
@@ -165,29 +165,29 @@ impl<C: Connection> Database<C> {
         None
     }
 
-    pub fn channel_has_mode(&self, channel: String, mode: ChannelFlag) -> bool {
-        if let Some(channel) = self.channels.get(&channel) {
+    pub fn channel_has_mode(&self, channel: &str, mode: &ChannelFlag) -> bool {
+        if let Some(channel) = self.channels.get(channel) {
             return channel.has_mode(mode);
         }
         false
     }
 
-    pub fn get_channel_limit(&self, channel: String) -> Option<usize> {
-        if let Some(channel) = self.channels.get(&channel) {
+    pub fn get_channel_limit(&self, channel: &str) -> Option<usize> {
+        if let Some(channel) = self.channels.get(channel) {
             return channel.get_limit();
         }
         None
     }
 
-    pub fn is_channel_speaker(&self, channel: String, nickname: String) -> bool {
-        if let Some(channel) = self.channels.get(&channel) {
+    pub fn is_channel_speaker(&self, channel: &str, nickname: &str) -> bool {
+        if let Some(channel) = self.channels.get(channel) {
             return channel.is_speaker(nickname);
         }
         false
     }
 
-    pub fn get_channel_banmask(&self, channel: String) -> Vec<String> {
-        if let Some(channel) = self.channels.get(&channel) {
+    pub fn get_channel_banmask(&self, channel: &str) -> Vec<String> {
+        if let Some(channel) = self.channels.get(channel) {
             return channel.get_banmasks();
         }
         vec![]
@@ -215,7 +215,7 @@ impl<C: Connection> Database<C> {
 
     pub fn get_channel_config(&self, channel: &str) -> Option<ChannelConfiguration> {
         if let Some(channel) = self.channels.get(channel) {
-            return channel.get_config();
+            return Some(channel.get_config());
         }
         None
     }

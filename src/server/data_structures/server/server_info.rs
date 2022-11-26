@@ -5,10 +5,10 @@ pub struct ServerInfo {
 }
 
 impl ServerInfo {
-    pub fn new(servername: &str, serverinfo: &str, hopcount: usize) -> Self {
+    pub fn new(servername: String, serverinfo: String, hopcount: usize) -> Self {
         Self {
-            servername: servername.to_string(),
-            serverinfo: serverinfo.to_string(),
+            servername,
+            serverinfo,
             hopcount,
         }
     }

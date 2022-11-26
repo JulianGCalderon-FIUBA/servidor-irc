@@ -7,7 +7,6 @@ use crate::server::consts::modes::ChannelFlag;
 pub struct Channel {
     pub name: String,
     pub clients: Vec<String>,
-    pub topic: Option<String>,
     pub config: ChannelConfiguration,
 }
 
@@ -22,119 +21,100 @@ impl Channel {
         Self {
             name: name.to_string(),
             clients,
-            topic: None,
             config,
         }
     }
 
-    pub fn add_client(&mut self, nickname: &str) {
-        self.clients.push(nickname.to_string())
+    pub fn add_banmask(&mut self, banmask: String) {
+        self.config.banmasks.push(banmask)
     }
 
-    pub fn remove_client(&mut self, nickname: &str) {
-        if let Some(index) = self.clients.iter().position(|nick| nick == nickname) {
-            self.clients.remove(index);
-        }
-    }
-
-    pub fn get_clients(&self) -> Vec<String> {
-        self.clients.clone()
-    }
-
-    pub fn contains_client(&self, nickname: &str) -> bool {
-        self.clients.contains(&nickname.to_string())
-    }
-
-    pub fn set_topic(&mut self, topic: &str) {
-        self.topic = Some(topic.to_string())
-    }
-
-    pub fn get_topic(&self) -> Option<String> {
-        self.topic.clone()
-    }
-
-    pub fn set_key(&mut self, key: Option<String>) {
-        self.config.key = key
-    }
-
-    pub fn get_key(&self) -> Option<String> {
-        self.config.key.clone()
-    }
-
-    pub fn set_mode(&mut self, flag: ChannelFlag) {
-        self.config.flags.push(flag)
-    }
-
-    pub fn unset_mode(&mut self, flag: ChannelFlag) {
-        self.config
-            .flags
-            .iter()
-            .position(|f| f == &flag)
-            .map(|index| self.config.flags.remove(index));
-    }
-
-    pub fn has_mode(&self, flag: ChannelFlag) -> bool {
-        self.config.flags.contains(&flag)
-    }
-
-    pub fn get_limit(&self) -> Option<usize> {
-        self.config.user_limit
-    }
-
-    pub fn set_limit(&mut self, limit: Option<usize>) {
-        self.config.user_limit = limit
+    pub fn add_member(&mut self, nickname: String) {
+        self.clients.push(nickname)
     }
 
     pub fn add_operator(&mut self, nickname: String) {
         self.config.operators.push(nickname)
     }
 
-    pub fn remove_operator(&mut self, nickname: String) {
-        self.config
-            .operators
-            .iter()
-            .position(|nick| nick == &nickname)
-            .map(|index| self.config.operators.remove(index));
-    }
-
     pub fn add_speaker(&mut self, nickname: String) {
         self.config.speakers.push(nickname)
-    }
-
-    pub fn remove_speaker(&mut self, nickname: String) {
-        self.config
-            .speakers
-            .iter()
-            .position(|nick| nick == &nickname)
-            .map(|index| self.config.speakers.remove(index));
-    }
-
-    pub fn is_speaker(&self, nickname: String) -> bool {
-        self.config.speakers.contains(&nickname)
-    }
-
-    pub fn add_banmask(&mut self, mask: String) {
-        self.config.banmasks.push(mask)
     }
 
     pub fn get_banmasks(&self) -> Vec<String> {
         self.config.banmasks.clone()
     }
 
-    pub fn remove_banmask(&mut self, mask: String) {
-        self.config
-            .banmasks
-            .iter()
-            .position(|m| m == &mask)
-            .map(|index| self.config.banmasks.remove(index));
+    pub fn get_clients(&self) -> Vec<String> {
+        self.clients.clone()
+    }
+
+    pub fn get_config(&self) -> ChannelConfiguration {
+        self.config.clone()
+    }
+
+    pub fn get_key(&self) -> Option<String> {
+        self.config.key.clone()
+    }
+
+    pub fn get_limit(&self) -> Option<usize> {
+        self.config.user_limit
+    }
+
+    pub fn get_topic(&self) -> Option<String> {
+        self.config.topic.clone()
+    }
+
+    pub fn has_mode(&self, flag: &ChannelFlag) -> bool {
+        self.config.flags.contains(flag)
+    }
+
+    pub fn is_member(&self, nickname: &str) -> bool {
+        self.clients.iter().any(|n| n == nickname)
     }
 
     pub fn is_operator(&self, nickname: &str) -> bool {
-        self.config.operators.contains(&nickname.to_string())
+        self.config.operators.iter().any(|n| n == nickname)
     }
 
-    pub fn get_config(&self) -> Option<ChannelConfiguration> {
-        Some(self.config.clone())
+    pub fn is_speaker(&self, nickname: &str) -> bool {
+        self.config.speakers.iter().any(|n| n == nickname)
+    }
+
+    pub fn remove_banmask(&mut self, mask: &str) {
+        remove(&mut self.config.banmasks, &mask.to_string())
+    }
+
+    pub fn remove_client(&mut self, nickname: &str) {
+        remove_string(&mut self.clients, nickname);
+    }
+
+    pub fn remove_operator(&mut self, nickname: &str) {
+        remove_string(&mut self.config.operators, nickname);
+    }
+
+    pub fn remove_speaker(&mut self, nickname: &str) {
+        remove_string(&mut self.config.speakers, nickname)
+    }
+
+    pub fn set_key(&mut self, key: Option<String>) {
+        self.config.key = key
+    }
+
+    pub fn set_limit(&mut self, limit: Option<usize>) {
+        self.config.user_limit = limit
+    }
+
+    pub fn set_mode(&mut self, flag: ChannelFlag) {
+        self.config.flags.push(flag)
+    }
+
+    pub fn set_topic(&mut self, topic: String) {
+        self.config.topic = Some(topic)
+    }
+
+    pub fn unset_mode(&mut self, flag: &ChannelFlag) {
+        remove(&mut self.config.flags, flag);
     }
 
     pub fn update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
@@ -144,4 +124,18 @@ impl Channel {
             }
         }
     }
+}
+
+fn remove<T: Eq>(elements: &mut Vec<T>, element: &T) {
+    elements
+        .iter()
+        .position(|e| e == element)
+        .map(|index| elements.remove(index));
+}
+
+fn remove_string(elements: &mut Vec<String>, element: &str) {
+    elements
+        .iter()
+        .position(|e| e == element)
+        .map(|index| elements.remove(index));
 }

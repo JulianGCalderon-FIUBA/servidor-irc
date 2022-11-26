@@ -78,12 +78,15 @@ impl<C: Connection> Register<C> {
         hopcount: usize,
         serverinfo: String,
     ) -> Result<(), io::Error> {
-        let server =
-            ImmediateServer::new(self.stream.try_clone()?, &servername, &serverinfo, hopcount);
+        let server = ImmediateServer::new(
+            self.stream.try_clone()?,
+            servername.clone(),
+            serverinfo,
+            hopcount,
+        );
 
         self.assert_can_add_server(&server.info.servername)?;
         self.database.add_immediate_server(server);
-
         self.servername = servername;
 
         Ok(())

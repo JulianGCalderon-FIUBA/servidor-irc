@@ -8,7 +8,8 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let (address, servername) = unpack_args(args);
 
-    let mut server = Server::start(&servername);
+    let serverinfo = "serverinfo".to_string();
+    let mut server = Server::start(servername, serverinfo);
 
     if let Err(error) = server.listen_to(address) {
         return eprintln!("Error: Binding to address: {:?}", error);

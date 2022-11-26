@@ -6,6 +6,7 @@ pub struct ChannelConfiguration {
     pub banmasks: Vec<String>,
     pub speakers: Vec<String>,
     pub key: Option<String>,
+    pub topic: Option<String>,
     pub user_limit: Option<usize>,
     pub flags: Vec<ChannelFlag>,
 }
@@ -18,6 +19,7 @@ impl ChannelConfiguration {
             speakers: vec![],
             key: None,
             user_limit: None,
+            topic: None,
             flags: vec![],
         }
     }

@@ -173,7 +173,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
 
         self.send_server_notification(&servername, hopcount + 1, &serverinfo);
 
-        self.add_server(&servername, &serverinfo, hopcount);
+        self.add_server(servername, serverinfo, hopcount);
 
         Ok(true)
     }
@@ -269,7 +269,7 @@ impl<C: Connection> ServerHandler<C> {
         self.send_message_to_all_other_servers(&server_notification);
     }
 
-    fn add_server(&mut self, servername: &str, serverinfo: &str, hopcount: usize) {
+    fn add_server(&mut self, servername: String, serverinfo: String, hopcount: usize) {
         let server = ServerInfo::new(servername, serverinfo, hopcount);
         self.database.add_distant_server(server);
     }
