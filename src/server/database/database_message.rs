@@ -79,6 +79,10 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
+    GetChannelClients {
+        channel: String,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
+    },
     GetChannelConfig {
         channel: String,
         respond_to: Sender<Result<ChannelConfiguration, DatabaseError>>,
@@ -95,11 +99,15 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
-    GetChannelClients {
-        channel: String,
-        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
+    GetClientInfo {
+        client: String,
+        respond_to: Sender<Result<ClientInfo, DatabaseError>>,
     },
-    GetLimit {
+    GetImmediateServer {
+        client: String,
+        respond_to: Sender<Result<String, DatabaseError>>,
+    },
+    GetChannelLimit {
         channel: String,
         respond_to: Sender<Result<Option<usize>, DatabaseError>>,
     },
@@ -130,6 +138,10 @@ pub enum DatabaseMessage<C: Connection> {
     IsClientInChannel {
         nickname: String,
         channel: String,
+        respond_to: Sender<bool>,
+    },
+    IsLocalClient {
+        nickname: String,
         respond_to: Sender<bool>,
     },
     IsServerOperator {
@@ -168,7 +180,7 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         topic: String,
     },
-    SetLimit {
+    SetChannelLimit {
         channel: String,
         limit: Option<usize>,
     },
@@ -182,17 +194,5 @@ pub enum DatabaseMessage<C: Connection> {
     UpdateNickname {
         old_nickname: String,
         new_nickname: String,
-    },
-    IsLocalClient {
-        nickname: String,
-        respond_to: Sender<bool>,
-    },
-    GetImmediateServer {
-        client: String,
-        respond_to: Sender<Result<String, DatabaseError>>,
-    },
-    GetClientInfo {
-        client: String,
-        respond_to: Sender<Result<ClientInfo, DatabaseError>>,
     },
 }
