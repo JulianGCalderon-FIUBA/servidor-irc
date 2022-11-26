@@ -68,7 +68,7 @@ fn after_nick_update_channel_info_is_updated() {
 
     assert_eq!(
         vec!["nick2".to_string()],
-        handler.database.get_clients_for_channel("#channel")
+        handler.database.get_channel_clients("#channel")
     );
 }
 

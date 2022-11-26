@@ -423,7 +423,7 @@ impl<C: Connection> ClientHandler<C> {
         let channel = channel.to_string();
 
         if let Some(limit) = self.database.get_channel_limit(&channel) {
-            if self.database.get_clients_for_channel(&channel).len() >= limit {
+            if self.database.get_channel_clients(&channel).len() >= limit {
                 return Err(ErrorReply::ChannelIsFull471 { channel });
             }
         }

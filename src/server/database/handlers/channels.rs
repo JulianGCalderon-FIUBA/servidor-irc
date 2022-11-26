@@ -15,15 +15,6 @@ impl<C: Connection> Database<C> {
         respond_to.send(channels).unwrap();
     }
 
-    pub fn handle_get_local_clients_for_channel(
-        &self,
-        channel: String,
-        respond_to: Sender<Vec<String>>,
-    ) {
-        let stream = self.get_local_clients_for_channel(channel);
-        respond_to.send(stream).unwrap();
-    }
-
     pub fn handle_add_client_to_channel(&mut self, nickname: String, channel: String) {
         self.add_client_to_channel(channel, nickname);
     }
@@ -65,14 +56,14 @@ impl<C: Connection> Database<C> {
         self.channels.keys().cloned().collect()
     }
 
-    fn get_local_clients_for_channel(&self, channel: String) -> Vec<String> {
-        let channel = unwrap_or_return!(self.channels.get(&channel), vec![]);
-        channel
-            .get_clients()
-            .into_iter()
-            .filter(|client| self.local_clients.contains_key(client))
-            .collect()
-    }
+    // fn get_local_clients_for_channel(&self, channel: String) -> Vec<String> {
+    //     let channel = unwrap_or_return!(self.channels.get(&channel), vec![]);
+    //     channel
+    //         .get_clients()
+    //         .into_iter()
+    //         .filter(|client| self.local_clients.contains_key(client))
+    //         .collect()
+    // }
 }
 
 impl<C: Connection> Database<C> {

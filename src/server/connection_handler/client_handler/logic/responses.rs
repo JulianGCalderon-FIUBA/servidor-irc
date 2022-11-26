@@ -19,7 +19,7 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_join_response(&mut self, channel: &str) -> io::Result<()> {
         self.send_topic_response(channel)?;
 
-        let clients = self.database.get_clients_for_channel(channel);
+        let clients = self.database.get_channel_clients(channel);
         self.stream
             .send(&CommandResponse::name_reply(channel, &clients))
     }
@@ -107,7 +107,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
-        let clients = self.database.get_clients_for_channel(channel);
+        let clients = self.database.get_channel_clients(channel);
         self.stream
             .send(&CommandResponse::name_reply(channel, &clients))
     }

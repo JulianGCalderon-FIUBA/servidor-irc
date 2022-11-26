@@ -19,7 +19,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     }
 
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database().get_clients_for_channel(channel);
+        let clients = self.database().get_channel_clients(channel);
 
         let mut servers = vec![];
 
@@ -39,10 +39,12 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     }
 
     fn send_message_to_local_clients_on_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database().get_local_clients_for_channel(channel);
+        let clients = self.database().get_channel_clients(channel);
 
         for client in clients {
-            self.send_message_to_client(message, &client).ok();
+            if self.database().is_local_client(&client) {
+                self.send_message_to_client(message, &client).ok();
+            }
         }
     }
 

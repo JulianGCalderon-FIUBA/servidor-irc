@@ -8,7 +8,7 @@ use super::ServerHandler;
 
 impl<C: Connection> ConnectionHandlerUtils<C> for ServerHandler<C> {
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database.get_clients_for_channel(channel);
+        let clients = self.database.get_channel_clients(channel);
 
         let mut servers = vec![];
 

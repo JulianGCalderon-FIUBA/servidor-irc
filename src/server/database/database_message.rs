@@ -107,7 +107,7 @@ pub enum DatabaseMessage<C: Connection> {
         nickmask: String,
         respond_to: Sender<Vec<ClientInfo>>,
     },
-    GetClientsFromChannel {
+    GetChannelClients {
         channel: String,
         respond_to: Sender<Vec<String>>,
     },
@@ -115,10 +115,7 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         respond_to: Sender<Option<usize>>,
     },
-    GetLocalClientsForChannel {
-        channel: String,
-        respond_to: Sender<Vec<String>>,
-    },
+
     GetLocalStream {
         nickname: String,
         respond_to: Sender<Option<io::Result<C>>>,

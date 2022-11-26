@@ -91,7 +91,7 @@ fn can_get_all_clients_from_channel() {
     database.add_client_to_channel("nickname1", "channel");
     database.add_client_to_channel("nickname2", "channel");
 
-    let mut value = database.get_clients_for_channel("channel");
+    let mut value = database.get_channel_clients("channel");
     let expected = vec!["nickname1".to_string(), "nickname2".to_string()];
     value.sort();
 
@@ -112,7 +112,7 @@ fn can_remove_client_from_channel() {
     database.add_client_to_channel("nickname2", "channel");
     database.remove_client_from_channel("nickname1", "channel");
 
-    let value = database.get_clients_for_channel("channel");
+    let value = database.get_channel_clients("channel");
     let expected = vec!["nickname2".to_string()];
 
     assert_eq!(value, expected);

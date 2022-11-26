@@ -100,7 +100,7 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to,
             } => self.handle_get_channels_for_client(nickname, respond_to),
-            GetClientsFromChannel {
+            GetChannelClients {
                 channel,
                 respond_to,
             } => self.handle_get_channel_clients(channel, respond_to),
@@ -193,10 +193,6 @@ impl<C: Connection> Database<C> {
                 self.handle_get_server_stream(server, respond_to)
             }
             GetAllServers { respond_to } => self.handle_get_all_servers(respond_to),
-            GetLocalClientsForChannel {
-                channel,
-                respond_to,
-            } => self.handle_get_local_clients_for_channel(channel, respond_to),
             AddDistantServer { server } => self.handle_add_distant_server(server),
             AddImmediateServer { server } => self.handle_add_immediate_server(server),
             AddLocalClient { client } => self.handle_add_local_client(client),

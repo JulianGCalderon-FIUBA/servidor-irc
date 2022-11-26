@@ -203,9 +203,9 @@ impl<C: Connection> DatabaseHandle<C> {
     }
 
     /// Sends GetClientsForChannel request and returns answer.
-    pub fn get_clients_for_channel(&self, channel: &str) -> Vec<String> {
+    pub fn get_channel_clients(&self, channel: &str) -> Vec<String> {
         let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetClientsFromChannel {
+        let request = DatabaseMessage::GetChannelClients {
             channel: channel.to_string(),
             respond_to: sender,
         };
@@ -448,16 +448,6 @@ impl<C: Connection> DatabaseHandle<C> {
     pub fn get_all_servers(&self) -> Vec<String> {
         let (sender, receiver) = mpsc::channel();
         let request = DatabaseMessage::GetAllServers { respond_to: sender };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn get_local_clients_for_channel(&self, channel: &str) -> Vec<String> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetLocalClientsForChannel {
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
