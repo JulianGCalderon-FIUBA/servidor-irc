@@ -1,8 +1,8 @@
 use crate::server::{
     connection::Connection,
     consts::modes::ChannelFlag,
-    data_structures::{ChannelConfiguration, ClientInfo},
-    testing::{dummy_client, dummy_database},
+    data_structures::{ChannelConfiguration, ClientInfo, ServerInfo},
+    testing::{dummy_client, dummy_database, dummy_external_client, dummy_server},
 };
 
 #[test]
@@ -479,4 +479,137 @@ fn can_get_client_info() {
 fn cannot_get_info_for_nonexistent_client() {
     let database = dummy_database();
     assert!(database.get_client_info("nickname").is_err())
+}
+
+#[test]
+fn can_add_immediate_server() {
+    let database = dummy_database();
+    let server = dummy_server("servername");
+
+    assert!(!database.contains_server("servername"));
+    database.add_immediate_server(server);
+    assert!(database.contains_server("servername"))
+}
+
+#[test]
+fn can_add_external_client() {
+    let database = dummy_database();
+    let client = dummy_external_client("nickname", "servername");
+
+    assert!(!database.contains_client("nickname"));
+    database.add_external_client(client);
+    assert!(database.contains_client("nickname"))
+}
+
+#[test]
+fn can_get_immediate_server_for_external_client() {
+    let database = dummy_database();
+    let client = dummy_external_client("nickname", "servername");
+
+    database.add_external_client(client);
+    assert_eq!(
+        "servername",
+        database.get_immediate_server("nickname").unwrap()
+    )
+}
+
+#[test]
+fn cannot_get_immediate_server_for_nonexistent_client() {
+    let database = dummy_database();
+    assert!(database.get_immediate_server("nickname").is_err())
+}
+
+#[test]
+fn cannot_get_immediate_server_for_local_client() {
+    let database = dummy_database();
+    let client = dummy_client("nickname");
+    database.add_local_client(client);
+    assert!(database.get_immediate_server("nickname").is_err())
+}
+
+#[test]
+fn can_get_server_info() {
+    let database = dummy_database();
+    assert_eq!("serverinfo".to_string(), database.get_server_info())
+}
+
+#[test]
+fn can_get_server_name() {
+    let database = dummy_database();
+    assert_eq!("servername".to_string(), database.get_server_name())
+}
+
+#[test]
+fn can_get_server_stream() {
+    let database = dummy_database();
+
+    let server = dummy_server("servername");
+    let stream_ref_expected = server.stream.try_clone().unwrap();
+    database.add_immediate_server(server);
+
+    let stream_ref_actual = database.get_server_stream("servername").unwrap();
+    assert_eq!(stream_ref_expected, stream_ref_actual);
+}
+
+#[test]
+fn cannot_get_stream_from_nonexistent_server() {
+    let database = dummy_database();
+    assert!(database.get_server_stream("servername").is_err())
+}
+
+#[test]
+fn external_client_is_not_local() {
+    let database = dummy_database();
+    let local = dummy_client("local");
+    let external = dummy_external_client("external", "servername");
+
+    database.add_local_client(local);
+    database.add_external_client(external);
+
+    assert!(database.is_local_client("local"));
+    assert!(!database.is_local_client("external"))
+}
+
+#[test]
+fn can_add_distant_server() {
+    let database = dummy_database();
+
+    let distant = ServerInfo::new("servername".to_string(), "serverinfo".to_string(), 2);
+
+    assert!(!database.contains_server("servername"));
+    database.add_distant_server(distant);
+    assert!(database.contains_server("servername"))
+}
+
+#[test]
+fn can_get_all_immediate_servers() {
+    let database = dummy_database();
+    let server1 = dummy_server("servername1");
+    let server2 = dummy_server("servername2");
+    database.add_immediate_server(server1);
+    database.add_immediate_server(server2);
+
+    let expected = vec!["servername1".to_string(), "servername2".to_string()];
+    let mut result = database.get_all_servers();
+
+    result.sort();
+
+    assert_eq!(expected, result)
+}
+
+#[test]
+fn can_get_local_and_external_clients() {
+    let database = dummy_database();
+    let local = dummy_client("local");
+    let external = dummy_external_client("external", "servername");
+
+    database.add_local_client(local);
+    database.add_external_client(external);
+
+    let local_info = database.get_client_info("local").unwrap();
+    let external_info = database.get_client_info("external").unwrap();
+
+    let expected = vec![local_info, external_info];
+
+    assert_eq!(expected, database.get_all_clients())
 }
