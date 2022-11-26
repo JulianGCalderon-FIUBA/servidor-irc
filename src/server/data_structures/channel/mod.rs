@@ -12,14 +12,14 @@ pub struct Channel {
 
 impl Channel {
     /// Creates a new [`Channel`].
-    pub fn new(name: &str, creator: &str) -> Self {
-        let clients = vec![creator.to_string()];
+    pub fn new(name: String, creator: String) -> Self {
+        let clients = vec![creator.clone()];
 
         let mut config = ChannelConfiguration::new();
-        config.operators.push(creator.to_string());
+        config.operators.push(creator);
 
         Self {
-            name: name.to_string(),
+            name,
             clients,
             config,
         }

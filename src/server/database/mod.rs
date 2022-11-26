@@ -80,7 +80,7 @@ impl<C: Connection> Database<C> {
             ContainsClient {
                 nickname,
                 respond_to: response,
-            } => self.handle_contains_client_request(nickname, response),
+            } => self.handle_contains_client(nickname, response),
             ContainsChannel {
                 channel,
                 respond_to: response,
