@@ -4,8 +4,9 @@ use crate::server::{
     connection::Connection,
     data_structures::{ImmediateServer, ServerInfo},
     database::Database,
-    debug_print, unwrap_or_return,
 };
+
+use crate::macros::{debug_print, unwrap_or_return};
 
 impl<C: Connection> Database<C> {
     pub fn handle_add_immediate_server(&mut self, server: ImmediateServer<C>) {

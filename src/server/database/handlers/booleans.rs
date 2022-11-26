@@ -1,6 +1,7 @@
 use std::sync::mpsc::Sender;
 
-use crate::server::{connection::Connection, database::Database, unwrap_or_return};
+use crate::macros::unwrap_or_return;
+use crate::server::{connection::Connection, database::Database};
 
 impl<C: Connection> Database<C> {
     pub fn handle_is_server_operator(&mut self, nickname: String, respond_to: Sender<bool>) {
