@@ -127,3 +127,20 @@ macro_rules! debug_print {
 }
 
 pub(crate) use debug_print;
+
+macro_rules! unwrap_or_return {
+    ( $a:expr, $b:expr ) => {
+        match $a {
+            Some(x) => x,
+            None => return $b,
+        }
+    };
+    ( $a:expr) => {
+        match $a {
+            Some(x) => x,
+            None => return,
+        }
+    };
+}
+
+pub(crate) use unwrap_or_return;

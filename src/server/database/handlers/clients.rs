@@ -4,35 +4,25 @@ use crate::server::{
     connection::Connection,
     data_structures::{ClientInfo, ExternalClient, LocalClient},
     database::Database,
-    debug_print,
+    debug_print, unwrap_or_return,
 };
 
 impl<C: Connection> Database<C> {
     pub fn handle_add_local_client(&mut self, client: LocalClient<C>) {
-        debug_print!("Adding local client {:?}", client.info);
-
-        let nickname = client.info.nickname();
-        self.local_clients.insert(nickname, client);
+        self.add_local_client(client);
     }
 
     pub fn handle_add_external_client(&mut self, client: ExternalClient) {
-        debug_print!("Adding external client {:?}", client.info);
-
-        let nickname = client.info.nickname();
-        self.external_clients.insert(nickname, client);
+        self.add_external_client(client);
     }
 
     /// Sets client as server operator.
     pub fn handle_set_server_operator(&mut self, nickname: String) {
-        if let Some(info) = self.get_client_info(&nickname) {
-            debug_print!("Setting {} as server operator", nickname);
-
-            info.operator = true;
-        }
+        self.set_server_operator(nickname);
     }
 
     pub fn handle_get_immediate_server(&self, client: String, respond_to: Sender<Option<String>>) {
-        let server = self.get_immediate_server(&client);
+        let server = self.get_immediate_server(client);
         respond_to.send(server).unwrap();
     }
 
@@ -44,7 +34,7 @@ impl<C: Connection> Database<C> {
 
     /// Returns response to GetClientsForMask request.
     pub fn handle_get_clients_for_mask(&self, mask: String, respond_to: Sender<Vec<ClientInfo>>) {
-        let clients = self.get_clients_for_mask(&mask);
+        let clients = self.get_clients_for_mask(mask);
         respond_to.send(clients).unwrap();
     }
 
@@ -54,36 +44,17 @@ impl<C: Connection> Database<C> {
         mask: String,
         respond_to: Sender<Vec<ClientInfo>>,
     ) {
-        let clients = self.get_clients_for_nickmask(&mask);
+        let clients = self.get_clients_for_nickmask(mask);
         respond_to.send(clients).unwrap();
     }
 
     /// Returns response to UpdateNickname request.
     pub fn handle_update_nickname(&mut self, old_nickname: String, new_nickname: String) {
-        if let Some(client) = self.get_client_info(&old_nickname) {
-            debug_print!("Updating nickname from {old_nickname} to {new_nickname}");
-
-            client.update_nickname(new_nickname.to_string());
-
-            if let Some(client) = self.local_clients.remove(&old_nickname) {
-                self.local_clients.insert(new_nickname.to_string(), client);
-            }
-            if let Some(client) = self.external_clients.remove(&old_nickname) {
-                self.external_clients
-                    .insert(new_nickname.to_string(), client);
-            }
-            for channel in self.channels.values_mut() {
-                channel.update_nickname(&old_nickname, &new_nickname);
-            }
-        }
+        self.update_nickname(old_nickname, new_nickname);
     }
 
     pub fn handle_set_away_message(&mut self, message: Option<String>, nickname: String) {
-        if let Some(client) = self.get_client_info(&nickname) {
-            debug_print!("Setting {nickname}'s away message to {message:?}");
-
-            client.away = message
-        }
+        self.set_away_message(nickname, message);
     }
 
     pub fn handle_get_away_message(
@@ -91,7 +62,7 @@ impl<C: Connection> Database<C> {
         nickname: String,
         respond_to: Sender<Option<String>>,
     ) {
-        let message = self.get_away_message(&nickname);
+        let message = self.get_away_message(nickname);
         respond_to.send(message).unwrap();
     }
 
@@ -101,51 +72,101 @@ impl<C: Connection> Database<C> {
         nickname: String,
         respond_to: Sender<Vec<String>>,
     ) {
-        let channels = self.get_channels_for_client(&nickname);
+        let channels = self.get_channels_for_client(nickname);
         respond_to.send(channels).unwrap();
+    }
+
+    pub fn handle_get_local_stream_request(
+        &self,
+        nickname: String,
+        respond_to: Sender<Option<io::Result<C>>>,
+    ) {
+        let stream = self.get_local_stream(nickname);
+        respond_to.send(stream).unwrap();
+    }
+    pub fn handle_disconnect_client(&mut self, nickname: String) {
+        self.disconnect_client(nickname);
     }
 }
 
 impl<C: Connection> Database<C> {
-    fn filtered_clients(
-        &self,
-        mask: &str,
-        filter: fn(&ClientInfo, &str) -> bool,
-    ) -> Vec<ClientInfo> {
-        let clients = self.get_all_clients();
+    fn disconnect_client(&mut self, nickname: String) {
+        if let Some(client) = self.local_clients.get_mut(&nickname) {
+            client.disconnect();
+        }
+        if let Some(client) = self.external_clients.get_mut(&nickname) {
+            client.disconnect();
+        }
+    }
+    fn set_away_message(&mut self, nickname: String, message: Option<String>) {
+        let client = unwrap_or_return!(self.get_client_info(&nickname));
+        debug_print!("Setting {nickname}'s away message to {message:?}");
 
-        clients
-            .into_iter()
-            .filter(|client| filter(client, mask))
-            .collect()
+        client.away = message
     }
 
-    pub fn get_away_message(&mut self, nickname: &str) -> Option<String> {
-        if let Some(info) = self.get_client_info(nickname) {
-            return info.away.clone();
-        }
+    fn add_external_client(&mut self, client: ExternalClient) {
+        debug_print!("Adding external client {:?}", client.info);
 
-        None
+        let nickname = client.info.nickname();
+        self.external_clients.insert(nickname, client);
     }
 
-    pub fn get_local_stream(&self, nickname: &str) -> Option<io::Result<C>> {
-        if let Some(client) = self.local_clients.get(nickname) {
-            return client.get_stream();
-        }
+    fn set_server_operator(&mut self, nickname: String) {
+        let info = unwrap_or_return!(self.get_client_info(&nickname));
+        debug_print!("Setting {} as server operator", nickname);
 
-        None
+        info.operator = true;
+    }
+    fn add_local_client(&mut self, client: LocalClient<C>) {
+        debug_print!("Adding local client {:?}", client.info);
+
+        let nickname = client.info.nickname();
+        self.local_clients.insert(nickname, client);
     }
 
-    pub fn get_immediate_server(&self, nickname: &str) -> Option<String> {
-        if let Some(client) = self.external_clients.get(nickname) {
-            return Some(client.immediate.clone());
-        }
+    fn update_nickname(&mut self, old_nickname: String, new_nickname: String) {
+        let client_info = unwrap_or_return!(self.get_client_info(&old_nickname));
+        debug_print!("Updating nickname from {old_nickname} to {new_nickname}");
 
-        None
+        client_info.update_nickname(new_nickname.to_string());
+
+        self.update_nickname_keys(&old_nickname, &new_nickname);
+        self.update_nickname_in_channels(old_nickname, new_nickname);
+    }
+
+    fn get_channels_for_client(&self, nickname: String) -> Vec<String> {
+        let mut channels = vec![];
+
+        for (channel_name, channel) in self.channels.iter() {
+            let clients = channel.get_clients();
+            if clients.contains(&nickname.to_string()) {
+                channels.push(channel_name.clone());
+            }
+        }
+        channels
+    }
+
+    fn get_away_message(&mut self, nickname: String) -> Option<String> {
+        let info = unwrap_or_return!(self.get_client_info(&nickname), None);
+
+        info.away.clone()
+    }
+
+    fn get_local_stream(&self, nickname: String) -> Option<io::Result<C>> {
+        let client = unwrap_or_return!(self.local_clients.get(&nickname), None);
+
+        client.get_stream()
+    }
+
+    fn get_immediate_server(&self, nickname: String) -> Option<String> {
+        let client = unwrap_or_return!(self.external_clients.get(&nickname), None);
+
+        Some(client.immediate.clone())
     }
 
     /// Returns array with ClientInfo for connected clients.
-    pub fn get_all_clients(&self) -> Vec<ClientInfo> {
+    fn get_all_clients(&self) -> Vec<ClientInfo> {
         let mut clients: Vec<ClientInfo> = self
             .local_clients
             .values()
@@ -164,33 +185,43 @@ impl<C: Connection> Database<C> {
     }
 
     /// Returns array with ClientInfo for channels that match mask.
-    pub fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {
+    fn get_clients_for_mask(&self, mask: String) -> Vec<ClientInfo> {
         self.filtered_clients(mask, ClientInfo::matches_mask)
     }
 
     /// Returns array with ClientInfo for channels that match nick mask.
-    pub fn get_clients_for_nickmask(&self, mask: &str) -> Vec<ClientInfo> {
+    fn get_clients_for_nickmask(&self, mask: String) -> Vec<ClientInfo> {
         self.filtered_clients(mask, ClientInfo::matches_nickmask)
     }
+}
 
-    pub fn disconnect_client(&mut self, nickname: String) {
-        if let Some(client) = self.local_clients.get_mut(&nickname) {
-            client.disconnect();
+impl<C: Connection> Database<C> {
+    fn update_nickname_keys(&mut self, old_nickname: &String, new_nickname: &String) {
+        if let Some(client) = self.local_clients.remove(old_nickname) {
+            self.local_clients.insert(new_nickname.to_string(), client);
         }
-        if let Some(client) = self.external_clients.get_mut(&nickname) {
-            client.disconnect();
+        if let Some(client) = self.external_clients.remove(old_nickname) {
+            self.external_clients
+                .insert(new_nickname.to_string(), client);
         }
     }
 
-    pub fn get_client_info(&mut self, nickname: &str) -> Option<&mut ClientInfo> {
-        if let Some(client) = self.local_clients.get_mut(nickname) {
-            return Some(&mut client.info);
+    fn update_nickname_in_channels(&mut self, old_nickname: String, new_nickname: String) {
+        for channel in self.channels.values_mut() {
+            channel.update_nickname(&old_nickname, &new_nickname);
         }
-        if let Some(client) = self.external_clients.get_mut(nickname) {
-            return Some(&mut client.info);
-        }
-        None
     }
 
-   
+    fn filtered_clients(
+        &self,
+        mask: String,
+        filter: fn(&ClientInfo, &str) -> bool,
+    ) -> Vec<ClientInfo> {
+        let clients = self.get_all_clients();
+
+        clients
+            .into_iter()
+            .filter(|client| filter(client, &mask))
+            .collect()
+    }
 }

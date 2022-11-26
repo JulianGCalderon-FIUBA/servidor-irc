@@ -70,7 +70,7 @@ impl<C: Connection> Database<C> {
 
     fn handle_message(&mut self, request: DatabaseMessage<C>) {
         match request {
-            DisconnectClient { nickname } => self.disconnect_client(nickname),
+            DisconnectClient { nickname } => self.handle_disconnect_client(nickname),
             SetServerOperator { nickname } => self.handle_set_server_operator(nickname),
             IsServerOperator {
                 nickname,
@@ -86,10 +86,10 @@ impl<C: Connection> Database<C> {
                 respond_to: response,
             } => self.handle_contains_channel(channel, response),
             AddClientToChannel { nickname, channel } => {
-                self.add_client_to_channel(nickname, channel)
+                self.handle_add_client_to_channel(nickname, channel)
             }
             RemoveClientFromChannel { nickname, channel } => {
-                self.remove_client_from_channel(nickname, channel)
+                self.handle_remove_client_from_channel(nickname, channel)
             }
             IsClientInChannel {
                 nickname,
@@ -103,7 +103,7 @@ impl<C: Connection> Database<C> {
             GetClientsFromChannel {
                 channel,
                 respond_to,
-            } => self.handle_get_clients_for_channel(channel, respond_to),
+            } => self.handle_get_channel_clients(channel, respond_to),
             GetAllClients { respond_to } => self.handle_get_all_clients(respond_to),
             GetAllChannels { respond_to } => self.handle_get_all_channels(respond_to),
             GetClientsForMask { mask, respond_to } => {
@@ -127,7 +127,7 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to,
             } => self.handle_get_away_message(nickname, respond_to),
-            SetChannelTopic { channel, topic } => self.set_channel_topic(channel, topic),
+            SetChannelTopic { channel, topic } => self.handle_set_channel_topic(channel, topic),
             GetChannelTopic {
                 channel,
                 respond_to,
@@ -137,8 +137,8 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_channel_key(channel, respond_to),
-            SetChannelMode { channel, flag } => self.handle_set_mode(channel, flag),
-            UnsetChannelMode { channel, flag } => self.handle_unset_mode(channel, flag),
+            SetChannelMode { channel, flag } => self.handle_set_channel_mode(channel, flag),
+            UnsetChannelMode { channel, flag } => self.handle_unset_channel_mode(channel, flag),
             ChannelHasMode {
                 channel,
                 respond_to,
@@ -151,8 +151,10 @@ impl<C: Connection> Database<C> {
             } => self.handle_get_channel_limit(channel, respond_to),
             AddChanop { channel, nickname } => self.handle_add_channop(channel, nickname),
             RemoveChanop { channel, nickname } => self.handle_remove_channop(channel, nickname),
-            AddSpeaker { channel, nickname } => self.handle_add_speaker(channel, nickname),
-            RemoveSpeaker { channel, nickname } => self.handle_remove_speaker(channel, nickname),
+            AddSpeaker { channel, nickname } => self.handle_add_channel_speaker(channel, nickname),
+            RemoveSpeaker { channel, nickname } => {
+                self.handle_remove_channel_speaker(channel, nickname)
+            }
             IsChannelSpeaker {
                 channel,
                 nickname,
@@ -166,10 +168,6 @@ impl<C: Connection> Database<C> {
             RemoveChannelBanMask { channel, mask } => {
                 self.handle_remove_channel_banmask(channel, mask)
             }
-            // DatabaseMessage::GetAllChannelModes {
-            //     channel,
-            //     respond_to,
-            // } => self.handle_get_all_channel_modes(channel, respond_to),
             IsChannelOperator {
                 channel,
                 nickname,

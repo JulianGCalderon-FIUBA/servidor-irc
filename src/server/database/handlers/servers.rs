@@ -4,39 +4,26 @@ use crate::server::{
     connection::Connection,
     data_structures::{ImmediateServer, ServerInfo},
     database::Database,
-    debug_print,
+    debug_print, unwrap_or_return,
 };
 
 impl<C: Connection> Database<C> {
-    pub fn handle_get_local_stream_request(
-        &self,
-        nickname: String,
-        respond_to: Sender<Option<io::Result<C>>>,
-    ) {
-        let stream = self.get_local_stream(&nickname);
-        respond_to.send(stream).unwrap();
-    }
-
     pub fn handle_add_immediate_server(&mut self, server: ImmediateServer<C>) {
-        let servername = server.info.servername.clone();
-        debug_print!("Adding immediate server {servername}");
-
-        self.immediate_servers.insert(servername, server);
+        self.add_immediate_server(server);
     }
 
     pub fn handle_add_distant_server(&mut self, server: ServerInfo) {
-        let servername = server.servername.clone();
-        debug_print!("Adding distant server {servername}");
-
-        self.distant_servers.insert(servername, server);
+        self.add_distant_server(server);
     }
 
     pub fn handle_get_servername(&self, respond_to: Sender<String>) {
-        respond_to.send(self.info.servername.clone()).unwrap();
+        let servername = self.info.servername.clone();
+        respond_to.send(servername).unwrap();
     }
 
     pub fn handle_get_serverinfo(&self, respond_to: Sender<String>) {
-        respond_to.send(self.info.serverinfo.clone()).unwrap();
+        let serverinfo = self.info.serverinfo.clone();
+        respond_to.send(serverinfo).unwrap();
     }
 
     pub fn handle_get_server_stream(
@@ -55,18 +42,26 @@ impl<C: Connection> Database<C> {
 }
 
 impl<C: Connection> Database<C> {
-    pub fn get_server_stream(&self, server: &str) -> Option<Result<C, std::io::Error>> {
-        if let Some(server) = self.immediate_servers.get(server) {
-            return Some(server.get_stream());
-        }
-
-        None
+    fn get_server_stream(&self, server: &str) -> Option<Result<C, std::io::Error>> {
+        let server = unwrap_or_return!(self.immediate_servers.get(server), None);
+        Some(server.get_stream())
     }
 
-    pub fn get_all_servers(&self) -> Vec<String> {
+    fn get_all_servers(&self) -> Vec<String> {
         self.immediate_servers
             .keys()
             .map(|key| key.to_string())
             .collect()
+    }
+
+    fn add_immediate_server(&mut self, server: ImmediateServer<C>) {
+        let servername = server.info.servername.clone();
+        debug_print!("Adding immediate server {servername}");
+        self.immediate_servers.insert(servername, server);
+    }
+    fn add_distant_server(&mut self, server: ServerInfo) {
+        let servername = server.servername.clone();
+        debug_print!("Adding distant server {servername}");
+        self.distant_servers.insert(servername, server);
     }
 }

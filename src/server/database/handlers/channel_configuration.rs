@@ -2,7 +2,7 @@ use std::sync::mpsc::Sender;
 
 use crate::server::{
     connection::Connection, consts::modes::ChannelFlag, data_structures::ChannelConfiguration,
-    database::Database, debug_print,
+    database::Database, debug_print, unwrap_or_return,
 };
 
 impl<C: Connection> Database<C> {
@@ -10,13 +10,17 @@ impl<C: Connection> Database<C> {
         let topic = self.get_channel_topic(&channel);
         respond_to.send(topic).unwrap();
     }
+    pub fn handle_set_channel_topic(&mut self, channel_name: String, topic: String) {
+        self.set_channel_topic(channel_name, topic);
+    }
 
     pub fn handle_set_channel_key(&mut self, channel_name: String, key: Option<String>) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Setting {channel_name}'s key to {key:?}");
+        self.set_channel_key(channel_name, key);
+    }
 
-            channel.set_key(key);
-        }
+    pub fn handle_get_channel_key(&self, channel: String, respond_to: Sender<Option<String>>) {
+        let key = self.get_channel_key(channel);
+        respond_to.send(key).unwrap();
     }
 
     pub fn handle_channel_has_mode(
@@ -25,95 +29,54 @@ impl<C: Connection> Database<C> {
         flag: ChannelFlag,
         respond_to: Sender<bool>,
     ) {
-        let has_mode = self.channel_has_mode(&channel, &flag);
+        let has_mode = self.channel_has_mode(channel, &flag);
         respond_to.send(has_mode).unwrap();
     }
 
-    pub fn handle_get_channel_key(&self, channel: String, respond_to: Sender<Option<String>>) {
-        let key = self.get_channel_key(channel);
-        respond_to.send(key).unwrap();
+    pub fn handle_set_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+        self.set_channel_mode(channel_name, flag);
     }
 
-    pub fn handle_set_mode(&mut self, channel_name: String, flag: ChannelFlag) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Setting {channel_name}'s mode {flag:?}");
-
-            channel.set_mode(flag);
-        }
-    }
-
-    pub fn handle_unset_mode(&mut self, channel_name: String, flag: ChannelFlag) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Unsetting {channel_name}'s mode {flag:?}");
-
-            channel.unset_mode(&flag);
-        }
+    pub fn handle_unset_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+        self.unset_channel_mode(channel_name, flag);
     }
 
     pub fn handle_set_channel_limit(&mut self, channel_name: String, limit: Option<usize>) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Setting {channel_name}'s limit to {limit:?}");
-
-            channel.set_limit(limit)
-        }
+        self.set_channel_limit(channel_name, limit);
     }
 
     pub fn handle_get_channel_limit(&self, channel: String, respond_to: Sender<Option<usize>>) {
-        let limit = self.get_channel_limit(&channel);
+        let limit = self.get_channel_limit(channel);
         respond_to.send(limit).unwrap();
     }
 
     pub fn handle_add_channop(&mut self, channel_name: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Setting {nickname} as operator of {channel_name}");
-
-            channel.add_operator(nickname);
-        }
+        self.add_channop(channel_name, nickname);
     }
 
     pub fn handle_remove_channop(&mut self, channel_name: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Setting {nickname} as operator of {channel_name}");
-
-            channel.remove_operator(&nickname);
-        }
+        self.remove_channop(channel_name, nickname);
     }
 
-    pub fn handle_add_speaker(&mut self, channel_name: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Setting {nickname} as speaker of {channel_name}");
-
-            channel.add_speaker(nickname);
-        }
+    pub fn handle_add_channel_speaker(&mut self, channel_name: String, nickname: String) {
+        self.add_channel_speaker(channel_name, nickname);
     }
 
-    pub fn handle_remove_speaker(&mut self, channel_name: String, nickname: String) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Unsetting {nickname} as speaker of {channel_name}");
-
-            channel.remove_speaker(&nickname);
-        }
+    pub fn handle_remove_channel_speaker(&mut self, channel_name: String, nickname: String) {
+        self.remove_channel_speaker(channel_name, nickname);
     }
 
     pub fn handle_add_channel_banmask(&mut self, channel_name: String, mask: String) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Adding banmask {mask} to {channel_name}");
-
-            channel.add_banmask(mask);
-        }
+        self.add_channel_banmask(channel_name, mask);
     }
 
     pub fn handle_get_channel_banmask(&self, channel: String, respond_to: Sender<Vec<String>>) {
-        let banmask = self.get_channel_banmask(&channel);
+        let banmask = self.get_channel_banmask(channel);
         respond_to.send(banmask).unwrap();
     }
 
     pub fn handle_remove_channel_banmask(&mut self, channel_name: String, mask: String) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Removing banmask {mask} from {channel_name}");
-
-            channel.remove_banmask(&mask);
-        }
+        self.remove_channel_banmask(channel_name, mask);
     }
 
     pub fn handle_get_channel_config(
@@ -127,53 +90,99 @@ impl<C: Connection> Database<C> {
 }
 
 impl<C: Connection> Database<C> {
-    pub fn get_channel_topic(&self, channel: &str) -> Option<String> {
-        if let Some(channel) = self.channels.get(channel) {
-            return channel.get_topic();
-        }
-        None
+    fn remove_channel_banmask(&mut self, channel_name: String, mask: String) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Removing banmask {mask} from {channel_name}");
+
+        channel.remove_banmask(&mask);
+    }
+    fn add_channel_banmask(&mut self, channel_name: String, mask: String) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Adding banmask {mask} to {channel_name}");
+
+        channel.add_banmask(mask);
+    }
+    pub fn get_channel_banmask(&self, channel: String) -> Vec<String> {
+        let channel = unwrap_or_return!(self.channels.get(&channel), vec![]);
+
+        channel.get_banmasks()
+    }
+
+    fn remove_channel_speaker(&mut self, channel_name: String, nickname: String) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Unsetting {nickname} as speaker of {channel_name}");
+
+        channel.remove_speaker(&nickname);
+    }
+    fn add_channel_speaker(&mut self, channel_name: String, nickname: String) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Setting {nickname} as speaker of {channel_name}");
+
+        channel.add_speaker(nickname);
+    }
+
+    pub fn get_channel_limit(&self, channel: String) -> Option<usize> {
+        let channel = unwrap_or_return!(self.channels.get(&channel), None);
+        channel.get_limit()
+    }
+    fn set_channel_limit(&mut self, channel: String, limit: Option<usize>) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel));
+        debug_print!("Setting {}'s limit to {limit:?}", channel.name);
+        channel.set_limit(limit);
+    }
+
+    fn add_channop(&mut self, channel_name: String, nickname: String) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Setting {nickname} as operator of {channel_name}");
+
+        channel.add_operator(nickname);
+    }
+    fn remove_channop(&mut self, channel_name: String, nickname: String) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Removing {nickname} as operator of {channel_name}");
+
+        channel.remove_operator(&nickname);
+    }
+
+    fn set_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Setting {channel_name}'s mode {flag:?}");
+
+        channel.set_mode(flag);
+    }
+    fn unset_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Unsetting {channel_name}'s mode {flag:?}");
+
+        channel.unset_mode(&flag);
+    }
+    fn channel_has_mode(&self, channel: String, mode: &ChannelFlag) -> bool {
+        let channel = unwrap_or_return!(self.channels.get(&channel), false);
+        channel.has_mode(mode)
     }
 
     pub fn get_channel_key(&self, channel: String) -> Option<String> {
-        if let Some(channel) = self.channels.get(&channel) {
-            return channel.get_key();
-        }
-        None
+        let channel = unwrap_or_return!(self.channels.get(&channel), None);
+        channel.get_key()
+    }
+    fn set_channel_key(&mut self, channel_name: String, key: Option<String>) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Setting {channel_name}'s key to {key:?}");
+        channel.set_key(key)
     }
 
-    pub fn get_channel_limit(&self, channel: &str) -> Option<usize> {
-        if let Some(channel) = self.channels.get(channel) {
-            return channel.get_limit();
-        }
-        None
+    fn set_channel_topic(&mut self, channel_name: String, topic: String) {
+        let channel = unwrap_or_return!(self.channels.get_mut(&channel_name));
+        debug_print!("Setting {channel_name}'s topic to {topic}");
+        channel.set_topic(topic)
     }
-
-    pub fn get_channel_banmask(&self, channel: &str) -> Vec<String> {
-        if let Some(channel) = self.channels.get(channel) {
-            return channel.get_banmasks();
-        }
-        vec![]
+    pub fn get_channel_topic(&self, channel: &str) -> Option<String> {
+        let channel = unwrap_or_return!(self.channels.get(channel), None);
+        channel.get_topic()
     }
 
     pub fn get_channel_config(&self, channel: &str) -> Option<ChannelConfiguration> {
-        if let Some(channel) = self.channels.get(channel) {
-            return Some(channel.get_config());
-        }
-        None
-    }
-
-    pub fn set_channel_topic(&mut self, channel_name: String, topic: String) {
-        if let Some(channel) = self.channels.get_mut(&channel_name) {
-            debug_print!("Setting {channel_name}'s topic to {topic}");
-
-            channel.set_topic(topic);
-        }
-    }
-
-    fn channel_has_mode(&self, channel: &str, mode: &ChannelFlag) -> bool {
-        if let Some(channel) = self.channels.get(channel) {
-            return channel.has_mode(mode);
-        }
-        false
+        let channel = unwrap_or_return!(self.channels.get(channel), None);
+        Some(channel.get_config())
     }
 }
