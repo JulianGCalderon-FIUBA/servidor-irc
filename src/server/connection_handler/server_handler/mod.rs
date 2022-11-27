@@ -12,6 +12,7 @@ use super::connection_handler_trait::{
 
 mod asserts;
 mod logic;
+mod responses;
 #[cfg(test)]
 mod tests;
 mod utils;
