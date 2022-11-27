@@ -1,17 +1,18 @@
 use std::fmt::Display;
 use std::io;
 
+use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
 
 use super::ConnectionHandlerGetters;
 
 pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     fn send_message_to_client(&mut self, message: &dyn Display, nickname: &str) -> io::Result<()> {
-        if let Some(stream) = self.database().get_local_stream(nickname) {
-            return stream?.send(&message);
+        if let Ok(mut stream) = self.database().get_local_stream(nickname) {
+            return stream.send(&message);
         }
 
-        if let Some(server) = self.database().get_immediate_server(nickname) {
+        if let Ok(server) = self.database().get_immediate_server(nickname) {
             self.send_message_to_server(message, &server).ok();
         }
 
@@ -19,14 +20,14 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     }
 
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database().get_clients_for_channel(channel);
+        let clients = self.database().get_channel_clients(channel).unwrap();
 
         let mut servers = vec![];
 
         for client in clients {
             if self.database().is_local_client(&client) {
                 self.send_message_to_client(message, &client).ok();
-            } else if let Some(server) = self.database().get_immediate_server(&client) {
+            } else if let Ok(server) = self.database().get_immediate_server(&client) {
                 if !servers.contains(&server) {
                     servers.push(server);
                 }
@@ -39,16 +40,18 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     }
 
     fn send_message_to_local_clients_on_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database().get_local_clients_for_channel(channel);
+        let clients = ok_or_return!(self.database().get_channel_clients(channel));
 
         for client in clients {
-            self.send_message_to_client(message, &client).ok();
+            if self.database().is_local_client(&client) {
+                self.send_message_to_client(message, &client).ok();
+            }
         }
     }
 
     fn send_message_to_server(&mut self, message: &dyn Display, server: &str) -> io::Result<()> {
-        if let Some(stream) = self.database().get_server_stream(server) {
-            stream?.send(&message)?;
+        if let Ok(mut stream) = self.database().get_server_stream(server) {
+            stream.send(&message)?;
         }
         Ok(())
     }

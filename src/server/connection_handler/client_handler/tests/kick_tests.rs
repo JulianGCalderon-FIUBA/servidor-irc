@@ -86,7 +86,6 @@ fn can_kick_user_from_channel() {
             .database
             .get_local_stream("nick2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -130,7 +129,6 @@ fn can_kick_user_from_channel_with_comment() {
         handler
             .database
             .get_local_stream("nick2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -176,7 +174,6 @@ fn kick_notifies_users_in_channel() {
         .database
         .get_local_stream("nick3")
         .unwrap()
-        .unwrap()
         .get_responses();
 
     assert_eq!(
@@ -217,7 +214,6 @@ fn on_distributed_channels_kick_is_relayed_to_all_servers() {
             .database
             .get_server_stream("servername1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -225,7 +221,6 @@ fn on_distributed_channels_kick_is_relayed_to_all_servers() {
         handler
             .database
             .get_server_stream("servername2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

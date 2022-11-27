@@ -188,13 +188,20 @@ fn mode_sets_limit_to_channel() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    assert!(handler.database.get_channel_limit("#channel").is_none());
+    assert!(handler
+        .database
+        .get_channel_limit("#channel")
+        .unwrap()
+        .is_none());
 
     let parameters = vec!["#channel".to_string(), "+l".to_string(), "5".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
-    assert_eq!(handler.database.get_channel_limit("#channel"), Some(5));
+    assert_eq!(
+        handler.database.get_channel_limit("#channel").unwrap(),
+        Some(5)
+    );
 }
 
 #[test]
@@ -206,13 +213,20 @@ fn mode_unsets_channel_limit() {
         .add_client_to_channel("nickname", "#channel");
     handler.database.set_channel_limit("#channel", Some(5));
 
-    assert_eq!(handler.database.get_channel_limit("#channel"), Some(5));
+    assert_eq!(
+        handler.database.get_channel_limit("#channel").unwrap(),
+        Some(5)
+    );
 
     let parameters = vec!["#channel".to_string(), "-l".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
-    assert!(handler.database.get_channel_limit("#channel").is_none());
+    assert!(handler
+        .database
+        .get_channel_limit("#channel")
+        .unwrap()
+        .is_none());
 }
 
 #[test]
@@ -223,7 +237,11 @@ fn mode_fails_with_no_limit_parameter() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    assert!(handler.database.get_channel_limit("#channel").is_none());
+    assert!(handler
+        .database
+        .get_channel_limit("#channel")
+        .unwrap()
+        .is_none());
 
     let parameters = vec!["#channel".to_string(), "+l".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -232,7 +250,11 @@ fn mode_fails_with_no_limit_parameter() {
         "461 MODE :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    assert!(handler.database.get_channel_limit("#channel").is_none());
+    assert!(handler
+        .database
+        .get_channel_limit("#channel")
+        .unwrap()
+        .is_none());
 }
 
 #[test]
@@ -243,7 +265,11 @@ fn mode_sets_banmask() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    assert!(handler.database.get_channel_banmask("#channel").is_empty());
+    assert!(handler
+        .database
+        .get_channel_banmask("#channel")
+        .unwrap()
+        .is_empty());
 
     let parameters = vec![
         "#channel".to_string(),
@@ -256,7 +282,10 @@ fn mode_sets_banmask() {
 
     let masks = vec!["banmask".to_string()];
 
-    assert_eq!(masks, handler.database.get_channel_banmask("#channel"))
+    assert_eq!(
+        masks,
+        handler.database.get_channel_banmask("#channel").unwrap()
+    )
 }
 
 #[test]
@@ -269,7 +298,11 @@ fn mode_unsets_banmask() {
 
     handler.database.add_channel_banmask("#channel", "banmask");
     handler.database.add_channel_banmask("#channel", "banmask2");
-    assert!(!handler.database.get_channel_banmask("#channel").is_empty());
+    assert!(!handler
+        .database
+        .get_channel_banmask("#channel")
+        .unwrap()
+        .is_empty());
 
     let parameters = vec![
         "#channel".to_string(),
@@ -282,7 +315,10 @@ fn mode_unsets_banmask() {
 
     let masks = vec!["banmask2".to_string()];
 
-    assert_eq!(masks, handler.database.get_channel_banmask("#channel"));
+    assert_eq!(
+        masks,
+        handler.database.get_channel_banmask("#channel").unwrap()
+    );
 
     let parameters = vec![
         "#channel".to_string(),
@@ -291,7 +327,11 @@ fn mode_unsets_banmask() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert!(handler.database.get_channel_banmask("#channel").is_empty())
+    assert!(handler
+        .database
+        .get_channel_banmask("#channel")
+        .unwrap()
+        .is_empty())
 }
 
 #[test]
@@ -302,7 +342,11 @@ fn mode_returns_ban_list_with_no_parameters() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    assert!(handler.database.get_channel_banmask("#channel").is_empty());
+    assert!(handler
+        .database
+        .get_channel_banmask("#channel")
+        .unwrap()
+        .is_empty());
 
     handler.database.add_channel_banmask("#channel", "banmask1");
     handler.database.add_channel_banmask("#channel", "banmask2");
@@ -328,7 +372,11 @@ fn mode_fails_with_no_banmask_parameter() {
         .add_client_to_channel("nickname", "#channel");
 
     handler.database.add_channel_banmask("#channel", "banmask");
-    assert!(!handler.database.get_channel_banmask("#channel").is_empty());
+    assert!(!handler
+        .database
+        .get_channel_banmask("#channel")
+        .unwrap()
+        .is_empty());
 
     let parameters = vec!["#channel".to_string(), "-b".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -355,7 +403,11 @@ fn mode_ignores_unknown_banmask_when_unsetting() {
     handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
-    assert!(handler.database.get_channel_banmask("#channel").is_empty());
+    assert!(handler
+        .database
+        .get_channel_banmask("#channel")
+        .unwrap()
+        .is_empty());
 }
 
 #[test]
@@ -484,14 +536,18 @@ fn mode_sets_channel_key() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    assert!(handler.database.get_channel_key("#channel").is_none());
+    assert!(handler
+        .database
+        .get_channel_key("#channel")
+        .unwrap()
+        .is_none());
 
     let parameters = vec!["#channel".to_string(), "+k".to_string(), "key".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert_eq!(
-        handler.database.get_channel_key("#channel"),
+        handler.database.get_channel_key("#channel").unwrap(),
         Some("key".to_string())
     );
 }
@@ -508,7 +564,7 @@ fn mode_unsets_channel_key() {
         .set_channel_key("#channel", Some("key".to_string()));
 
     assert_eq!(
-        handler.database.get_channel_key("#channel"),
+        handler.database.get_channel_key("#channel").unwrap(),
         Some("key".to_string())
     );
 
@@ -516,7 +572,11 @@ fn mode_unsets_channel_key() {
     handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
-    assert!(handler.database.get_channel_key("#channel").is_none());
+    assert!(handler
+        .database
+        .get_channel_key("#channel")
+        .unwrap()
+        .is_none());
 }
 
 #[test]
@@ -527,7 +587,11 @@ fn mode_fails_with_no_key_parameter() {
         .database
         .add_client_to_channel("nickname", "#channel");
 
-    assert!(handler.database.get_channel_key("#channel").is_none());
+    assert!(handler
+        .database
+        .get_channel_key("#channel")
+        .unwrap()
+        .is_none());
 
     let parameters = vec!["#channel".to_string(), "+k".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -536,7 +600,11 @@ fn mode_fails_with_no_key_parameter() {
         "461 MODE :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    assert!(handler.database.get_channel_key("#channel").is_none());
+    assert!(handler
+        .database
+        .get_channel_key("#channel")
+        .unwrap()
+        .is_none());
 }
 
 #[test]
@@ -551,7 +619,7 @@ fn mode_fails_with_key_already_set() {
         .set_channel_key("#channel", Some("key".to_string()));
 
     assert_eq!(
-        handler.database.get_channel_key("#channel"),
+        handler.database.get_channel_key("#channel").unwrap(),
         Some("key".to_string())
     );
 
@@ -567,7 +635,7 @@ fn mode_fails_with_key_already_set() {
         handler.stream.read_wbuf_to_string()
     );
     assert_eq!(
-        handler.database.get_channel_key("#channel"),
+        handler.database.get_channel_key("#channel").unwrap(),
         Some("key".to_string())
     );
 }

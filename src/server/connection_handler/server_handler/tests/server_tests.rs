@@ -37,7 +37,6 @@ fn server_is_relayed_to_all_other_servers() {
             .database
             .get_server_stream("servername2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -45,7 +44,6 @@ fn server_is_relayed_to_all_other_servers() {
         handler
             .database
             .get_server_stream("servername3")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -64,7 +62,6 @@ fn server_is_not_relayed_to_sending_server() {
         handler
             .database
             .get_server_stream("servername1")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

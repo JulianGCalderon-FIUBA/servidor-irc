@@ -17,7 +17,7 @@ fn away_sets_away_message_for_client() {
     handler.away_command((prefix, vec![], trail)).unwrap();
 
     assert_eq!(
-        "message",
+        Some("message".to_string()),
         handler.database.get_away_message("nickname").unwrap()
     );
 }
@@ -46,7 +46,6 @@ fn away_is_relayed_to_all_other_servers() {
             .database
             .get_server_stream("servername2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -55,7 +54,6 @@ fn away_is_relayed_to_all_other_servers() {
         handler
             .database
             .get_server_stream("servername3")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

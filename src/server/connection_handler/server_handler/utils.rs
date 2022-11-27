@@ -8,14 +8,14 @@ use super::ServerHandler;
 
 impl<C: Connection> ConnectionHandlerUtils<C> for ServerHandler<C> {
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database.get_clients_for_channel(channel);
+        let clients = self.database.get_channel_clients(channel).unwrap();
 
         let mut servers = vec![];
 
         for client in clients {
             if self.database.is_local_client(&client) {
                 self.send_message_to_client(message, &client).ok();
-            } else if let Some(server) = self.database.get_immediate_server(&client) {
+            } else if let Ok(server) = self.database.get_immediate_server(&client) {
                 if !servers.contains(&server) && server != self.servername {
                     servers.push(server);
                 }

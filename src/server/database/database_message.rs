@@ -1,10 +1,11 @@
-use std::io;
 use std::sync::mpsc::Sender;
 
 use crate::server::consts::modes::ChannelFlag;
 use crate::server::data_structures::*;
 
 use crate::server::connection::Connection;
+
+use super::database_error::DatabaseError;
 
 /// Possible messages or requests a Database can receive.
 pub enum DatabaseMessage<C: Connection> {
@@ -46,11 +47,6 @@ pub enum DatabaseMessage<C: Connection> {
         flag: ChannelFlag,
         respond_to: Sender<bool>,
     },
-    ClientMatchesBanmask {
-        nickname: String,
-        mask: String,
-        respond_to: Sender<bool>,
-    },
     ContainsChannel {
         channel: String,
         respond_to: Sender<bool>,
@@ -77,51 +73,47 @@ pub enum DatabaseMessage<C: Connection> {
     },
     GetAwayMessage {
         nickname: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Result<Option<String>, DatabaseError>>,
     },
     GetChannelBanMask {
         channel: String,
-        respond_to: Sender<Vec<String>>,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
+    },
+    GetChannelClients {
+        channel: String,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
     GetChannelConfig {
         channel: String,
-        respond_to: Sender<Option<ChannelConfiguration>>,
+        respond_to: Sender<Result<ChannelConfiguration, DatabaseError>>,
     },
     GetChannelKey {
         channel: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Result<Option<String>, DatabaseError>>,
     },
     GetChannelTopic {
         channel: String,
-        respond_to: Sender<Option<String>>,
+        respond_to: Sender<Result<Option<String>, DatabaseError>>,
     },
     GetChannelsForClient {
         nickname: String,
-        respond_to: Sender<Vec<String>>,
+        respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
-    GetClientsForMask {
-        mask: String,
-        respond_to: Sender<Vec<ClientInfo>>,
+    GetClientInfo {
+        client: String,
+        respond_to: Sender<Result<ClientInfo, DatabaseError>>,
     },
-    GetClientsForNickMask {
-        nickmask: String,
-        respond_to: Sender<Vec<ClientInfo>>,
+    GetImmediateServer {
+        client: String,
+        respond_to: Sender<Result<String, DatabaseError>>,
     },
-    GetClientsFromChannel {
+    GetChannelLimit {
         channel: String,
-        respond_to: Sender<Vec<String>>,
-    },
-    GetLimit {
-        channel: String,
-        respond_to: Sender<Option<usize>>,
-    },
-    GetLocalClientsForChannel {
-        channel: String,
-        respond_to: Sender<Vec<String>>,
+        respond_to: Sender<Result<Option<usize>, DatabaseError>>,
     },
     GetLocalStream {
         nickname: String,
-        respond_to: Sender<Option<io::Result<C>>>,
+        respond_to: Sender<Result<C, DatabaseError>>,
     },
     GetServerInfo {
         respond_to: Sender<String>,
@@ -131,7 +123,7 @@ pub enum DatabaseMessage<C: Connection> {
     },
     GetServerStream {
         server: String,
-        respond_to: Sender<Option<io::Result<C>>>,
+        respond_to: Sender<Result<C, DatabaseError>>,
     },
     IsChannelOperator {
         channel: String,
@@ -146,6 +138,10 @@ pub enum DatabaseMessage<C: Connection> {
     IsClientInChannel {
         nickname: String,
         channel: String,
+        respond_to: Sender<bool>,
+    },
+    IsLocalClient {
+        nickname: String,
         respond_to: Sender<bool>,
     },
     IsServerOperator {
@@ -184,7 +180,7 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         topic: String,
     },
-    SetLimit {
+    SetChannelLimit {
         channel: String,
         limit: Option<usize>,
     },
@@ -198,13 +194,5 @@ pub enum DatabaseMessage<C: Connection> {
     UpdateNickname {
         old_nickname: String,
         new_nickname: String,
-    },
-    IsLocalClient {
-        nickname: String,
-        respond_to: Sender<bool>,
-    },
-    GetImmediateServer {
-        client: String,
-        respond_to: Sender<Option<String>>,
     },
 }

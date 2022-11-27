@@ -41,7 +41,6 @@ fn privmsg_is_relayed_to_client() {
             .database
             .get_local_stream("target")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     )
 }
@@ -69,7 +68,6 @@ fn privmsg_to_client_is_relayed_to_necesary_server() {
         handler
             .database
             .get_server_stream("servername2")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     )
@@ -103,7 +101,6 @@ fn privmsg_to_channel_is_relayed_to_all_local_clients_in_channel() {
             .database
             .get_local_stream("nickname1")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 
@@ -112,7 +109,6 @@ fn privmsg_to_channel_is_relayed_to_all_local_clients_in_channel() {
         handler
             .database
             .get_local_stream("nickname1")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -152,7 +148,6 @@ fn privmsg_to_channel_is_relayed_to_each_necesary_server_once() {
             .database
             .get_server_stream("servername2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -176,7 +171,6 @@ fn privmsg_is_never_relayed_to_sending_server() {
         handler
             .database
             .get_server_stream("servername1")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

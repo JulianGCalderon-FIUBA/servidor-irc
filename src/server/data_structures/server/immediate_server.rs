@@ -8,7 +8,7 @@ pub struct ImmediateServer<C: Connection> {
 }
 
 impl<C: Connection> ImmediateServer<C> {
-    pub fn new(stream: C, servername: &str, serverinfo: &str, hopcount: usize) -> Self {
+    pub fn new(stream: C, servername: String, serverinfo: String, hopcount: usize) -> Self {
         Self {
             stream,
             info: ServerInfo::new(servername, serverinfo, hopcount),

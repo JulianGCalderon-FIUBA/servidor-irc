@@ -173,7 +173,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
 
         self.send_server_notification(&servername, hopcount + 1, &serverinfo);
 
-        self.add_server(&servername, &serverinfo, hopcount);
+        self.add_server(servername, serverinfo, hopcount);
 
         Ok(true)
     }
@@ -196,7 +196,7 @@ impl<C: Connection> ServerHandler<C> {
 
     fn send_quit_notification(&mut self, nickname: String, message: String) {
         let quit_notification = Notification::quit(&nickname, &message);
-        let channels = self.database.get_channels_for_client(&nickname);
+        let channels = self.database.get_channels_for_client(&nickname).unwrap();
         for channel in channels {
             self.send_message_to_local_clients_on_channel(&quit_notification, &channel);
         }
@@ -269,7 +269,7 @@ impl<C: Connection> ServerHandler<C> {
         self.send_message_to_all_other_servers(&server_notification);
     }
 
-    fn add_server(&mut self, servername: &str, serverinfo: &str, hopcount: usize) {
+    fn add_server(&mut self, servername: String, serverinfo: String, hopcount: usize) {
         let server = ServerInfo::new(servername, serverinfo, hopcount);
         self.database.add_distant_server(server);
     }

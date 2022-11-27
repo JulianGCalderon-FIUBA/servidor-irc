@@ -21,11 +21,15 @@ pub fn dummy_client(nickname: &str) -> LocalClient<MockTcpStream> {
 
 pub fn dummy_server(servername: &str) -> ImmediateServer<MockTcpStream> {
     let stream = MockTcpStream::new();
-    ImmediateServer::new(stream, servername, "serverinfo", 1)
+    let servername = servername.to_string();
+    let serverinfo = "serverinfo".to_string();
+    ImmediateServer::new(stream, servername, serverinfo, 1)
 }
 
 pub fn dummy_database() -> DatabaseHandle<MockTcpStream> {
-    let (handle, _) = Database::start("servername", "serverinfo");
+    let servername = "servername".to_string();
+    let serverinfo = "serverinfo".to_string();
+    let (handle, _) = Database::start(servername, serverinfo);
     handle
 }
 

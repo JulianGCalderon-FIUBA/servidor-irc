@@ -22,7 +22,7 @@ fn topic_sets_channel_topic() {
 
     assert_eq!(
         Some("new_topic".to_string()),
-        handler.database.get_topic_for_channel("#channel")
+        handler.database.get_topic_for_channel("#channel").unwrap()
     )
 }
 
@@ -49,7 +49,6 @@ fn topic_is_sent_to_local_clients() {
             .database
             .get_local_stream("nickname2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -57,7 +56,6 @@ fn topic_is_sent_to_local_clients() {
         handler
             .database
             .get_local_stream("nickname3")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -89,7 +87,6 @@ fn topic_is_relayed_to_all_other_servers() {
             .database
             .get_server_stream("servername2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string(),
     );
 
@@ -98,7 +95,6 @@ fn topic_is_relayed_to_all_other_servers() {
         handler
             .database
             .get_server_stream("servername3")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string(),
     );

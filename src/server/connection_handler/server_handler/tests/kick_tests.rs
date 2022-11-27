@@ -42,7 +42,6 @@ fn kick_is_relayed_to_all_other_servers() {
             .database
             .get_server_stream("servername2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -50,7 +49,6 @@ fn kick_is_relayed_to_all_other_servers() {
         handler
             .database
             .get_server_stream("servername3")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
@@ -109,7 +107,6 @@ fn kick_is_relayed_to_local_clients_on_channel() {
             .database
             .get_local_stream("nickname2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -118,7 +115,6 @@ fn kick_is_relayed_to_local_clients_on_channel() {
             .database
             .get_local_stream("nickname3")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
     assert_eq!(
@@ -126,7 +122,6 @@ fn kick_is_relayed_to_local_clients_on_channel() {
         handler
             .database
             .get_local_stream("nickname4")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );

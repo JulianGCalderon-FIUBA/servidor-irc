@@ -332,7 +332,10 @@ impl<C: Connection> ClientHandler<C> {
         channel: &str,
         key: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        let channels_for_client = self.database.get_channels_for_client(&self.nickname);
+        let channels_for_client = self
+            .database
+            .get_channels_for_client(&self.nickname)
+            .unwrap();
         if channels_for_client.len() == MAX_CHANNELS {
             let channel = channel.to_string();
             return Err(ErrorReply::TooManyChannels405 { channel });
@@ -388,7 +391,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_can_set_key(&mut self, channel: &str) -> Result<(), ErrorReply> {
-        if self.database.get_channel_key(channel).is_some() {
+        if self.database.get_channel_key(channel).unwrap().is_some() {
             return Err(ErrorReply::KeySet467 {
                 channel: channel.to_string(),
             });
@@ -411,9 +414,10 @@ impl<C: Connection> ClientHandler<C> {
         key: &Option<String>,
     ) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
-
-        if self.database.get_channel_key(&channel) != *key {
-            return Err(ErrorReply::BadChannelKey475 { channel });
+        if let Ok(channel_key) = self.database.get_channel_key(&channel) {
+            if channel_key != *key {
+                return Err(ErrorReply::BadChannelKey475 { channel });
+            }
         }
 
         Ok(())
@@ -422,8 +426,8 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_channel_is_not_full(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
-        if let Some(limit) = self.database.get_channel_limit(&channel) {
-            if self.database.get_clients_for_channel(&channel).len() >= limit {
+        if let Ok(Some(limit)) = self.database.get_channel_limit(&channel) {
+            if self.database.get_channel_clients(&channel).unwrap().len() >= limit {
                 return Err(ErrorReply::ChannelIsFull471 { channel });
             }
         }
@@ -431,8 +435,8 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_is_not_banned_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
-        for mask in self.database.get_channel_banmask(channel) {
-            if self.database.client_matches_banmask(&self.nickname, &mask) {
+        for mask in self.database.get_channel_banmask(channel).unwrap() {
+            if self.client_matches_banmask(&self.nickname, &mask) {
                 let channel = channel.to_string();
                 return Err(ErrorReply::BannedFromChannel474 { channel });
             }

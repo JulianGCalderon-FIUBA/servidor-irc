@@ -19,7 +19,7 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_join_response(&mut self, channel: &str) -> io::Result<()> {
         self.send_topic_response(channel)?;
 
-        let clients = self.database.get_clients_for_channel(channel);
+        let clients = self.database.get_channel_clients(channel).unwrap();
         self.stream
             .send(&CommandResponse::name_reply(channel, &clients))
     }
@@ -45,7 +45,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     fn send_whois_channels_response(&mut self, nickname: &str) -> Result<(), io::Error> {
-        let mut channels = self.database.get_channels_for_client(nickname);
+        let mut channels = self.database.get_channels_for_client(nickname).unwrap();
         if !channels.is_empty() {
             self.append_channel_role(&mut channels, nickname);
             self.stream
@@ -64,7 +64,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_banlist_response(&mut self, channel: &str) -> io::Result<()> {
-        let banmasks = self.database.get_channel_banmask(channel);
+        let banmasks = self.database.get_channel_banmask(channel).unwrap();
         for banmask in banmasks {
             self.stream
                 .send(&CommandResponse::banlist(channel, &banmask))?;
@@ -74,7 +74,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_topic_response(&mut self, channel: &str) -> io::Result<()> {
-        match &self.database.get_topic_for_channel(channel) {
+        match &self.database.get_topic_for_channel(channel).unwrap() {
             Some(topic) => self.stream.send(&CommandResponse::topic(channel, topic)),
             None => self.stream.send(&CommandResponse::no_topic(channel)),
         }
@@ -84,6 +84,7 @@ impl<C: Connection> ClientHandler<C> {
         let channel = self
             .database
             .get_channels_for_client(&client_info.nickname())
+            .unwrap()
             .get(0)
             .map(|string| string.to_owned());
 
@@ -95,6 +96,7 @@ impl<C: Connection> ClientHandler<C> {
         let topic = self
             .database
             .get_topic_for_channel(&channel)
+            .unwrap()
             .unwrap_or_else(|| "No topic set".to_string());
 
         let prv = self
@@ -107,7 +109,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
-        let clients = self.database.get_clients_for_channel(channel);
+        let clients = self.database.get_channel_clients(channel).unwrap();
         self.stream
             .send(&CommandResponse::name_reply(channel, &clients))
     }
@@ -151,7 +153,10 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_quit_notification(&mut self, message: &str) {
         let notification = Notification::quit(&self.nickname, message);
 
-        let channels = self.database.get_channels_for_client(&self.nickname);
+        let channels = self
+            .database
+            .get_channels_for_client(&self.nickname)
+            .unwrap();
         for channel in channels {
             self.send_message_to_local_clients_on_channel(&notification, &channel);
         }
@@ -193,7 +198,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_mode_response(&mut self, channel: &str) -> io::Result<()> {
-        if let Some(config) = self.database.get_channel_config(channel) {
+        if let Ok(config) = self.database.get_channel_config(channel) {
             let flags = config.flags;
             let limit = config.user_limit;
             let operators = config.operators;

@@ -44,10 +44,10 @@ pub struct Server {
 
 impl Server {
     /// Starts new [`Server`].
-    pub fn start(servername: &str) -> Self {
+    pub fn start(servername: String, serverinfo: String) -> Self {
         let online = Arc::new(AtomicBool::new(true));
 
-        let (database, database_thread) = Database::start(servername, servername);
+        let (database, database_thread) = Database::start(servername, serverinfo);
 
         let threads = vec![database_thread];
         let database = Some(database);
@@ -115,15 +115,3 @@ impl Drop for Server {
         }
     }
 }
-
-#[cfg(debug_assertions)]
-macro_rules! debug_print {
-    ($( $args:expr ),*) => { println!( $( $args ),* ); }
-}
-
-#[cfg(not(debug_assertions))]
-macro_rules! debug_print {
-    ($( $args:expr ),*) => {};
-}
-
-pub(crate) use debug_print;

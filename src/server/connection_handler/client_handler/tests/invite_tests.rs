@@ -96,7 +96,6 @@ fn can_invite_one_user() {
             .database
             .get_local_stream("nick2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -128,7 +127,6 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
             .database
             .get_local_stream("nick2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -159,7 +157,6 @@ fn can_invite_user_in_moderated_channel_if_channop() {
             .database
             .get_local_stream("nick2")
             .unwrap()
-            .unwrap()
             .read_wbuf_to_string()
     );
 }
@@ -183,7 +180,6 @@ fn invite_is_relayed_to_neccesary_server() {
         handler
             .database
             .get_server_stream("servername1")
-            .unwrap()
             .unwrap()
             .read_wbuf_to_string()
     );
