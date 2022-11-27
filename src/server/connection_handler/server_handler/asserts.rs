@@ -2,6 +2,7 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerAsserts,
 };
+use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE, VALID_MODES};
 use crate::server::responses::ErrorReply;
 
 use super::ServerHandler;
@@ -183,8 +184,19 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         Ok(())
     }
 
-    fn assert_mode_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        todo!()
+    fn assert_mode_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
+        if params.len() < 2 {
+            return Err(ErrorReply::NoReply);
+        }
+        let mode = &params[1];
+        if mode.len() != 2 {
+            return Err(ErrorReply::NoReply);
+        }
+        if !mode.starts_with([ADD_MODE, REMOVE_MODE]) || !mode.ends_with(VALID_MODES) {
+            return Err(ErrorReply::NoReply);
+        }
+        Ok(())
     }
 
     fn assert_quit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {

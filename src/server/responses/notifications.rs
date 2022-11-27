@@ -63,6 +63,11 @@ pub enum Notification {
         topic: String,
         nickname: String,
     },
+    Mode {
+        target: String,
+        mode: String,
+        argument: Option<String>,
+    },
 }
 
 impl Display for Notification {
@@ -143,6 +148,16 @@ impl Display for Notification {
                 topic,
             } => {
                 format!(":{nickname} {TOPIC_COMMAND} {channel} {topic}")
+            }
+            Notification::Mode {
+                target,
+                mode,
+                argument,
+            } => {
+                format!(
+                    "{MODE_COMMAND} {target} {mode} {}",
+                    argument.clone().unwrap_or_default()
+                )
             }
         };
 
@@ -265,6 +280,18 @@ impl Notification {
             nickname,
             channel,
             topic,
+        }
+    }
+
+    pub fn mode(target: &str, mode: &str, argument: Option<String>) -> Self {
+        let target = target.to_string();
+        let mode = mode.to_string();
+        let argument = argument;
+
+        Notification::Mode {
+            target,
+            mode,
+            argument,
         }
     }
 }

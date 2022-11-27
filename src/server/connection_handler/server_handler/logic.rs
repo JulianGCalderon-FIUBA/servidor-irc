@@ -1,10 +1,16 @@
 use std::io;
 
+use crate::macros::{ok_or_return, some_or_return};
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
+use crate::server::consts::channel::DISTRIBUTED_CHANNEL;
+use crate::server::consts::modes::{
+    ChannelFlag, ADD_MODE, REMOVE_MODE, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER,
+    SET_USER_LIMIT,
+};
 use crate::server::data_structures::*;
 use crate::server::responses::Notification;
 
@@ -148,8 +154,25 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         Ok(true)
     }
 
-    fn mode_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
-        todo!()
+    fn mode_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, mut params, _) = arguments;
+
+        let channel = params[0].clone();
+        let mode: Vec<char> = params[1].chars().collect();
+        let mut argument = None;
+        if params.len() > 2 {
+            argument = params.pop();
+        }
+        if mode[0] == ADD_MODE {
+            self.handle_add_mode(mode[1], &channel, argument.clone());
+        }
+        if mode[0] == REMOVE_MODE {
+            self.handle_remove_mode(mode[1], &channel, argument.clone());
+        }
+
+        self.send_mode_notification(&channel, &params[1], argument);
+
+        Ok(true)
     }
 
     fn quit_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
@@ -269,8 +292,109 @@ impl<C: Connection> ServerHandler<C> {
         self.send_message_to_all_other_servers(&server_notification);
     }
 
+    fn send_mode_notification(&mut self, target: &str, mode: &str, argument: Option<String>) {
+        let notification = Notification::mode(target, mode, argument);
+        if self.is_channel(target) {
+            self.send_message_to_local_clients_on_channel(&notification, target);
+        }
+        self.send_message_to_all_other_servers(&notification);
+    }
+
+    fn is_channel(&self, target: &str) -> bool {
+        target.starts_with(DISTRIBUTED_CHANNEL)
+    }
+
     fn add_server(&mut self, servername: String, serverinfo: String, hopcount: usize) {
         let server = ServerInfo::new(servername, serverinfo, hopcount);
         self.database.add_distant_server(server);
+    }
+
+    fn set_limit(&self, channel: &str, argument: Option<String>) {
+        let limit = some_or_return!(argument);
+        let limit = ok_or_return!(limit.parse::<usize>());
+        self.database.set_channel_limit(channel, Some(limit))
+    }
+
+    fn add_banmasks(&self, channel: &str, argument: Option<String>) {
+        let banmask = some_or_return!(argument);
+        self.database.add_channel_banmask(channel, &banmask);
+    }
+
+    fn remove_banmasks(&self, channel: &str, argument: Option<String>) {
+        let banmask = some_or_return!(argument);
+        self.database.remove_channel_banmask(channel, &banmask);
+    }
+
+    fn add_speakers(&self, channel: &str, argument: Option<String>) {
+        let speaker = some_or_return!(argument);
+        self.database.add_speaker(channel, &speaker);
+    }
+
+    fn set_key(&self, channel: &str, argument: Option<String>) {
+        let key = some_or_return!(argument);
+        self.database.set_channel_key(channel, Some(key));
+    }
+
+    fn add_channops(&self, channel: &str, argument: Option<String>) {
+        let channop = some_or_return!(argument);
+        self.database.add_channop(channel, &channop);
+    }
+
+    fn unset_limit(&self, channel: &str) {
+        self.database.set_channel_limit(channel, None)
+    }
+
+    fn remove_speakers(&self, channel: &str, argument: Option<String>) {
+        let speaker = some_or_return!(argument);
+        self.database.remove_speaker(channel, &speaker);
+    }
+
+    fn unset_key(&self, channel: &str) {
+        self.database.set_channel_key(channel, None)
+    }
+
+    fn remove_channops(&self, channel: &str, argument: Option<String>) {
+        let channop = some_or_return!(argument);
+        self.database.remove_channop(channel, &channop)
+    }
+
+    fn handle_add_mode(&mut self, mode: char, channel: &str, argument: Option<String>) {
+        match mode {
+            SET_USER_LIMIT => self.set_limit(channel, argument),
+            SET_BANMASK => {
+                self.add_banmasks(channel, argument);
+            }
+            SET_SPEAKER => {
+                self.add_speakers(channel, argument);
+            }
+            SET_KEY => {
+                self.set_key(channel, argument);
+            }
+            SET_OPERATOR => self.add_channops(channel, argument),
+            char => {
+                let flag = ChannelFlag::from_char(char);
+                self.database.set_channel_mode(channel, flag)
+            }
+        }
+    }
+
+    fn handle_remove_mode(&mut self, mode: char, channel: &str, argument: Option<String>) {
+        match mode {
+            SET_USER_LIMIT => self.unset_limit(channel),
+            SET_BANMASK => {
+                self.remove_banmasks(channel, argument);
+            }
+            SET_SPEAKER => {
+                self.remove_speakers(channel, argument);
+            }
+            SET_KEY => {
+                self.unset_key(channel);
+            }
+            SET_OPERATOR => self.remove_channops(channel, argument),
+            char => {
+                let flag = ChannelFlag::from_char(char);
+                self.database.unset_channel_mode(channel, flag)
+            }
+        }
     }
 }
