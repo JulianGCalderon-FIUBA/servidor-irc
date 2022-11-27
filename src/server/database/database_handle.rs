@@ -446,6 +446,23 @@ impl<C: Connection> DatabaseHandle<C> {
         self.sender.send(request).unwrap();
         receiver.recv().unwrap()
     }
+
+    pub(crate) fn is_immediate_server(&self, servername: &str) -> bool {
+        let (sender, receiver) = mpsc::channel();
+        let request = DatabaseMessage::IsImmediateServer {
+            server: servername.to_string(),
+            respond_to: sender,
+        };
+        self.sender.send(request).unwrap();
+        receiver.recv().unwrap()
+    }
+
+    pub(crate) fn remove_server(&self, servername: &str) {
+        let request = DatabaseMessage::RemoveServer {
+            servername: servername.to_string(),
+        };
+        self.sender.send(request).unwrap();
+    }
 }
 
 impl<C: Connection> Clone for DatabaseHandle<C> {

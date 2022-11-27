@@ -305,12 +305,19 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         self.send_squit_notification(servername, comment);
 
-        if self.database.get_server_stream(servername).is_ok() {
-            // self.database.remove_server(servername);
-            // get all clients
-            // filter
-            // remove clients
-            // send quit
+        if self.database.is_immediate_server(servername) {
+            self.database.remove_server(servername);
+
+            let all_clients = self.database.get_all_clients();
+            let server_clients: Vec<ClientInfo> = all_clients
+                .into_iter()
+                .filter(|client| client.servername == *servername)
+                .collect();
+
+            for client in server_clients {
+                self.database.disconnect_client(&client.nickname());
+                self.send_quit_notification("Net split");
+            }
         }
 
         Ok(true)

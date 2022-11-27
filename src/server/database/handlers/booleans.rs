@@ -66,9 +66,17 @@ impl<C: Connection> Database<C> {
         let contains_server = self.contains_server(servername);
         respond_to.send(contains_server).unwrap();
     }
+
+    pub fn handle_is_immediate_server(&self, server: String, respond_to: Sender<bool>) {
+        let response = self.is_immediate_server(&server);
+        respond_to.send(response).unwrap();
+    }
 }
 
 impl<C: Connection> Database<C> {
+    fn is_immediate_server(&self, server: &str) -> bool {
+        self.immediate_servers.contains_key(server)
+    }
     fn are_credentials_valid(&self, username: String, password: String) -> bool {
         let real_password = some_or_return!(self.credentials.get(&username), false);
         &password == real_password

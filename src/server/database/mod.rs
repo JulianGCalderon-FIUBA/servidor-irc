@@ -197,6 +197,10 @@ impl<C: Connection> Database<C> {
                 self.handle_get_immediate_server(client, respond_to)
             }
             GetClientInfo { client, respond_to } => self.handle_get_client_info(client, respond_to),
+            IsImmediateServer { server, respond_to } => {
+                self.handle_is_immediate_server(server, respond_to)
+            }
+            RemoveServer { servername } => self.handle_remove_server(servername),
         }
     }
 }

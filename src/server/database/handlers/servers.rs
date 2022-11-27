@@ -37,12 +37,23 @@ impl<C: Connection> Database<C> {
     }
 
     pub fn handle_get_all_servers(&self, respond_to: Sender<Vec<String>>) {
-        let stream = self.get_all_servers();
-        respond_to.send(stream).unwrap();
+        let servers = self.get_all_servers();
+        respond_to.send(servers).unwrap();
+    }
+
+    pub fn handle_remove_server(&mut self, servername: String) {
+        self.remove_server(servername);
     }
 }
 
 impl<C: Connection> Database<C> {
+    fn remove_server(&mut self, servername: String) {
+        let removed = self.immediate_servers.remove(&servername);
+        if removed.is_none() {
+            self.distant_servers.remove(&servername);
+        }
+    }
+
     fn get_server_stream(&self, server: &str) -> Result<C, DatabaseError> {
         let server = some_or_return!(
             self.immediate_servers.get(server),

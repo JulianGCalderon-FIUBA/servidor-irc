@@ -195,4 +195,11 @@ pub enum DatabaseMessage<C: Connection> {
         old_nickname: String,
         new_nickname: String,
     },
+    IsImmediateServer {
+        server: String,
+        respond_to: Sender<bool>,
+    },
+    RemoveServer {
+        servername: String,
+    },
 }
