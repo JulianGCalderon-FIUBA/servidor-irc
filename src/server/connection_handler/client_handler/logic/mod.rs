@@ -318,6 +318,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 self.database.disconnect_client(&client.nickname());
                 self.send_quit_notification("Net split");
             }
+
+            // preguntar si hay que desconectarlos o eliminarlos
         }
 
         Ok(true)

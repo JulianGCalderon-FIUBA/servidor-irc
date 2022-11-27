@@ -198,8 +198,33 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         Ok(true)
     }
 
-    fn squit_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
-        todo!()
+    fn squit_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, params, trail) = arguments;
+
+        let sender = prefix.unwrap();
+        let servername = &params[0];
+        let comment = trail;
+
+        self.send_squit_notification(&sender, servername, comment);
+
+        if self.database.is_immediate_server(servername) {
+            self.database.remove_server(servername);
+
+            let all_clients = self.database.get_all_clients();
+            let server_clients: Vec<ClientInfo> = all_clients
+                .into_iter()
+                .filter(|client| client.servername == *servername)
+                .collect();
+
+            for client in server_clients {
+                self.database.disconnect_client(&client.nickname());
+                self.send_quit_notification(client.nickname(), "Net split".to_string());
+            }
+
+            // preguntar si hay que desconectarlos o eliminarlos
+        }
+
+        Ok(true)
     }
 }
 

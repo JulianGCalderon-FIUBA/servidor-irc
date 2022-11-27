@@ -113,4 +113,14 @@ impl<C: Connection> ServerHandler<C> {
         }
         self.send_message_to_all_other_servers(&notification);
     }
+
+    pub(super) fn send_squit_notification(
+        &mut self,
+        sender: &str,
+        servername: &str,
+        comment: Option<String>,
+    ) {
+        let notification = Notification::squit(sender, servername, comment);
+        self.send_message_to_all_other_servers(&notification);
+    }
 }

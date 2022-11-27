@@ -2,6 +2,7 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerAsserts,
 };
+
 use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE, VALID_MODES};
 use crate::server::responses::ErrorReply;
 
@@ -225,8 +226,18 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         Ok(())
     }
 
-    fn assert_squit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        todo!()
+    fn assert_squit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (prefix, params, _) = arguments;
+        if params.is_empty() || prefix.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        let servername = &params[0];
+
+        if !self.database.contains_server(servername) {
+            return Err(ErrorReply::NoReply);
+        }
+        Ok(())
     }
 }
 
