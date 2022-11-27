@@ -13,7 +13,6 @@ use self::utils::{collect_list, parse_modes};
 use super::ClientHandler;
 
 mod mode_requests;
-mod responses;
 mod utils;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {

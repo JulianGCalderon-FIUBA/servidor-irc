@@ -20,7 +20,7 @@ impl<C: Connection> ClientHandler<C> {
             .collect()
     }
 
-    pub(super) fn append_channel_role(&mut self, channels: &mut Vec<String>, nickname: &str) {
+    pub fn append_channel_role(&mut self, channels: &mut Vec<String>, nickname: &str) {
         for channel in channels {
             if self.database.is_channel_operator(channel, nickname) {
                 channel.insert(0, OPERATOR_SYMBOL);

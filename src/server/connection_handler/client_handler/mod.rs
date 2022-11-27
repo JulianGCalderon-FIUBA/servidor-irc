@@ -10,6 +10,7 @@ use super::connection_handler_trait::{
 mod asserts;
 mod booleans;
 mod logic;
+mod responses;
 mod utils;
 
 #[cfg(test)]
