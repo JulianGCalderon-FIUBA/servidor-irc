@@ -1,5 +1,6 @@
 use std::io;
 
+use crate::server::connection_handler::client_handler::booleans::is_distributed_channel;
 use crate::server::consts::modes::{
     ChannelFlag, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
 };
@@ -12,8 +13,6 @@ use crate::server::{
 };
 
 use crate::server::data_structures::*;
-
-use super::booleans::is_distributed_channel;
 
 impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_join_response(&mut self, channel: &str) -> io::Result<()> {

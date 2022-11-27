@@ -12,8 +12,6 @@ use self::utils::{collect_list, parse_modes};
 
 use super::ClientHandler;
 
-mod auxiliars;
-mod booleans;
 mod mode_requests;
 mod responses;
 mod utils;
@@ -307,6 +305,67 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let comment = trail;
 
         self.send_squit_notification(servername, comment);
+
+        if self.database.get_server_stream(servername).is_ok() {
+            // self.database.remove_server(servername);
+            // get all clients
+            // filter
+            // remove clients
+            // send quit
+        }
+
         Ok(true)
+    }
+}
+
+impl<C: Connection> ClientHandler<C> {
+    fn send_privmsg_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
+        self.send_privmsg_notification(target, content)?;
+
+        if let Ok(Some(message)) = self.database.get_away_message(target) {
+            self.stream.send(&CommandResponse::away(target, &message))?;
+        }
+
+        Ok(())
+    }
+
+    fn send_notice_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
+        self.send_notice_notification(target, content)?;
+
+        Ok(())
+    }
+
+    fn kick_client_from_channel(
+        &mut self,
+        nickname: &str,
+        channel: &str,
+        comment: &Option<String>,
+    ) {
+        self.send_kick_notification(channel, nickname, comment);
+        self.database.remove_client_from_channel(nickname, channel);
+    }
+
+    fn add_modes(
+        &mut self,
+        add: Vec<char>,
+        arguments: &mut Vec<String>,
+        channel: &str,
+    ) -> io::Result<()> {
+        for mode in add {
+            self.handle_add_mode(mode, channel, arguments)?;
+        }
+        Ok(())
+    }
+
+    fn remove_modes(
+        &mut self,
+        remove: Vec<char>,
+        arguments: &mut Vec<String>,
+        channel: &str,
+    ) -> io::Result<()> {
+        for mode in remove {
+            self.handle_remove_mode(mode, channel, arguments)?;
+        }
+        Ok(())
     }
 }
