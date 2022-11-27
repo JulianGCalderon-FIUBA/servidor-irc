@@ -283,7 +283,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.remove_modes(remove, &mut arguments, &channel)?;
 
         // TODO: REFACTOR MODE
-        // TODO: RELAY TO ALL SERVERS
 
         Ok(true)
     }
@@ -299,5 +298,15 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.stream.send(&CommandResponse::quit(&message))?;
 
         Ok(false)
+    }
+
+    fn squit_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
+        let (_, params, trail) = arguments;
+
+        let servername = &params[0];
+        let comment = trail;
+
+        self.send_squit_notification(servername, comment);
+        Ok(true)
     }
 }

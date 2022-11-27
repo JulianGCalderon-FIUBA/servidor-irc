@@ -68,6 +68,11 @@ pub enum Notification {
         mode: String,
         argument: Option<String>,
     },
+    SQuit {
+        sender: Option<String>,
+        servername: String,
+        comment: Option<String>,
+    },
 }
 
 impl Display for Notification {
@@ -159,6 +164,24 @@ impl Display for Notification {
                     argument.clone().unwrap_or_default()
                 )
             }
+            Notification::SQuit {
+                sender,
+                servername,
+                comment,
+            } => match sender {
+                Some(sender) => {
+                    format!(
+                        ":{sender} {SQUIT_COMMAND} {servername} {}",
+                        comment.clone().unwrap_or_default()
+                    )
+                }
+                None => {
+                    format!(
+                        "{SQUIT_COMMAND} {servername} {}",
+                        comment.clone().unwrap_or_default()
+                    )
+                }
+            },
         };
 
         write!(f, "{string}")
@@ -292,6 +315,17 @@ impl Notification {
             target,
             mode,
             argument,
+        }
+    }
+
+    pub fn squit(sender: &str, servername: &str, comment: Option<String>) -> Self {
+        let sender = Some(sender.to_string());
+        let servername = servername.to_string();
+
+        Notification::SQuit {
+            sender,
+            servername,
+            comment,
         }
     }
 }

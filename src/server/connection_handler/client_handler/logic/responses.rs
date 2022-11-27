@@ -164,6 +164,11 @@ impl<C: Connection> ClientHandler<C> {
         self.send_message_to_all_servers(&notification);
     }
 
+    pub(super) fn send_squit_notification(&mut self, servername: &str, comment: Option<String>) {
+        let notification = Notification::squit(&self.nickname, servername, comment);
+        self.send_message_to_all_servers(&notification);
+    }
+
     pub(super) fn send_kick_notification(
         &mut self,
         channel: &str,

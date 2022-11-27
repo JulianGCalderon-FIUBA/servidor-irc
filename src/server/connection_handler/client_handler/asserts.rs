@@ -174,8 +174,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
-    fn assert_squit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
-        Err(ErrorReply::AlreadyRegistered462)
+    fn assert_squit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
+        self.assert_has_enough_params(&params.get(0), SQUIT_COMMAND)?;
+        self.assert_is_server_operator()?;
+
+        let server = &params[0];
+
+        self.assert_exists_server(server)?;
+        Ok(())
     }
 }
 
@@ -200,6 +207,13 @@ impl<C: Connection> ClientHandler<C> {
             return Err(ErrorReply::ChanOPrivIsNeeded482 { channel });
         }
 
+        Ok(())
+    }
+
+    fn assert_is_server_operator(&self) -> Result<(), ErrorReply> {
+        if !self.database.is_server_operator(&self.nickname) {
+            return Err(ErrorReply::NoPrivileges481);
+        }
         Ok(())
     }
 
@@ -243,6 +257,16 @@ impl<C: Connection> ClientHandler<C> {
 
         if !self.database.contains_channel(&channel) {
             return Err(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        Ok(())
+    }
+
+    fn assert_exists_server(&self, server: &str) -> Result<(), ErrorReply> {
+        let server = server.to_string();
+
+        if !self.database.contains_server(&server) {
+            return Err(ErrorReply::NoSuchServer402 { server });
         }
 
         Ok(())

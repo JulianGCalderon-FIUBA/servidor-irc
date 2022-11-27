@@ -16,12 +16,11 @@ pub enum ErrorReply {
     NeedMoreParameters461 { command: String },
     AlreadyRegistered462,
     PasswordMismatch464,
-    // InviteOnlyChannel473 { channel: String },
     BadChannelKey475 { channel: String },
     NoNickname,
     NotRegistered451,
     ParsingError,
-    // NoSuchServer { server: String},
+    NoSuchServer402 { server: String },
     UnknownMode472 { mode: char },
     KeySet467 { channel: String },
     ChanOPrivIsNeeded482 { channel: String },
@@ -29,6 +28,7 @@ pub enum ErrorReply {
     ChannelIsFull471 { channel: String },
     BannedFromChannel474 { channel: String },
     NoReply,
+    NoPrivileges481,
 }
 
 impl Display for ErrorReply {
@@ -96,6 +96,10 @@ impl Display for ErrorReply {
             ErrorReply::UnknownError400 { command, message } => {
                 format!("400 {command} :{message}")
             }
+            ErrorReply::NoPrivileges481 => {
+                ":Permission Denied- You're not an IRC operator".to_string()
+            }
+            ErrorReply::NoSuchServer402 { server } => format!("{server} :No such server"),
         };
         write!(f, "{string}")
     }
