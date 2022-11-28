@@ -65,6 +65,7 @@ const MEMBERS_BUTTON_TEXT: &str = "Members";
 const INVITE_BUTTON_TEXT: &str = "Invite to channel";
 const ADD_BUTTON_CSS: &str = "add";
 const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
+const WELCOME_MESSAGE: &str = "Welcome to Lemon Pie IRC";
 
 impl MainView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {

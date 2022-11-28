@@ -9,7 +9,7 @@ use gtk4 as gtk;
 
 use crate::views::widgets_creation::create_button_with_margin;
 
-use super::{ADD_BUTTON_CSS, CURRENT_CHAT_TITLE_CSS};
+use super::{ADD_BUTTON_CSS, CURRENT_CHAT_TITLE_CSS, WELCOME_MESSAGE};
 
 pub fn create_add_button(label: &str) -> Button {
     let add_button = create_button_with_margin(label);
@@ -54,7 +54,7 @@ pub fn create_scrollwindow_sidebar(/*child: &Box*/) -> ScrolledWindow {
 
 pub fn create_welcome_label() -> Label {
     let message = Label::builder()
-        .label("Welcome to Lemon Pie IRC")
+        .label(WELCOME_MESSAGE)
         .margin_top(20)
         .margin_start(20)
         .margin_end(12)
