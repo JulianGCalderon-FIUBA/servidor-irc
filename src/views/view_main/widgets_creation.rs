@@ -67,6 +67,7 @@ pub fn create_welcome_box() -> Box {
         .margin_start(20)
         .margin_end(12)
         .halign(Start)
+        .valign(Start)
         .build();
     message.add_css_class(WELCOME_MESSAGE_CSS);
     let welcome_box = Box::builder()
@@ -75,7 +76,8 @@ pub fn create_welcome_box() -> Box {
         .margin_bottom(10)
         .margin_start(10)
         .margin_bottom(10)
-        .width_request(620)
+        .width_request(660)
+        .valign(Start)
         .valign(Start)
         .build();
     welcome_box.append(&title);
