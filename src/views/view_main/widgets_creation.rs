@@ -51,3 +51,15 @@ pub fn create_current_chat(label: &str) -> Label {
 pub fn create_scrollwindow_sidebar(/*child: &Box*/) -> ScrolledWindow {
     ScrolledWindow::builder().min_content_height(280).build()
 }
+
+pub fn create_welcome_label() -> Label {
+    let message = Label::builder()
+        .label("Welcome to Lemon Pie IRC")
+        .margin_top(20)
+        .margin_start(20)
+        .margin_end(12)
+        .halign(Center)
+        .build();
+    message.add_css_class(CURRENT_CHAT_TITLE_CSS);
+    message
+}

@@ -54,7 +54,6 @@ impl MainView {
                 quit_channel_request(sender.clone());
             }
             remove_conversation_request(sender.clone());
-            change_conversation_request(my_nickname.clone(), sender.clone());
         });
     }
 
@@ -91,6 +90,11 @@ impl MainView {
         if !collection_of_buttons.is_empty() {
             collection_of_buttons.remove(counter);
         }
+        self.welcome_view();
+    }
+
+    fn welcome_view(&mut self) {
+        self.scrollwindow_chat.set_visible(false);
     }
 
     pub fn get_my_channels(&mut self) -> Vec<String> {
