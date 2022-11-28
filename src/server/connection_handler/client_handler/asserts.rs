@@ -1,19 +1,21 @@
 use crate::server::connection::Connection;
+use crate::server::connection_handler::connection_handler_trait::CommandArgs;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
-use crate::server::connection_handler::consts::channel::*;
-use crate::server::connection_handler::consts::commands::*;
-use crate::server::connection_handler::consts::modes::*;
-use crate::server::connection_handler::responses::ErrorReply;
-use crate::server::database::ClientInfo;
+use crate::server::consts::channel::*;
+use crate::server::consts::commands::*;
+use crate::server::consts::modes::*;
+use crate::server::data_structures::*;
+use crate::server::responses::ErrorReply;
 
 use super::ClientHandler;
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
-    fn assert_pass_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_pass_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
-    fn assert_nick_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_nick_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         if params.is_empty() {
             return Err(ErrorReply::NoNicknameGiven431);
         }
@@ -22,15 +24,12 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_nickname_not_in_use(nickname)
     }
 
-    fn assert_user_command_is_valid(
-        &self,
-        _params: &[String],
-        _trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_user_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::AlreadyRegistered462)
     }
 
-    fn assert_oper_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_oper_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(1), OPER_COMMAND)?;
 
         let username = &params[0];
@@ -38,11 +37,8 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_are_credentials_valid(username, password)
     }
 
-    fn assert_privmsg_command_is_valid(
-        &self,
-        params: &[String],
-        trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_privmsg_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, trail) = arguments;
         if params.is_empty() {
             let command = PRIVMSG_COMMAND.to_string();
             return Err(ErrorReply::NoRecipient411 { command });
@@ -55,11 +51,8 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_notice_command_is_valid(
-        &self,
-        params: &[String],
-        trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_notice_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, trail) = arguments;
         if params.is_empty() {
             let command = NOTICE_COMMAND.to_string();
             return Err(ErrorReply::NoRecipient411 { command });
@@ -72,15 +65,18 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_join_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_join_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(0), JOIN_COMMAND)
     }
 
-    fn assert_part_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_part_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(0), PART_COMMAND)
     }
 
-    fn assert_invite_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_invite_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(1), INVITE_COMMAND)?;
 
         let invited_client = &params[0];
@@ -93,26 +89,30 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
             self.assert_client_not_on_channel(invited_client, channel)?;
         }
 
-        if self.database.channel_has_mode(channel, INVISIBLE) {
+        if self
+            .database
+            .channel_has_mode(channel, &ChannelFlag::InviteOnly)
+        {
             self.assert_is_channel_operator(channel)?;
         }
 
         Ok(())
     }
 
-    fn assert_names_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_names_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_list_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_list_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_who_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_who_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_whois_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_whois_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         if params.is_empty() {
             return Err(ErrorReply::NoNicknameGiven431);
         }
@@ -120,49 +120,72 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         Ok(())
     }
 
-    fn assert_away_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+    fn assert_away_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
     }
 
-    fn assert_topic_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_topic_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(0), TOPIC_COMMAND)?;
 
         let channel = &params[0];
 
         self.assert_is_in_channel(channel)?;
 
-        if self.database.channel_has_mode(channel, TOPIC_SETTABLE) {
+        if self
+            .database
+            .channel_has_mode(channel, &ChannelFlag::TopicByOperatorOnly)
+        {
             self.assert_is_channel_operator(channel)?;
         }
 
         Ok(())
     }
 
-    fn assert_kick_command_is_valid(
-        &self,
-        params: &[String],
-        _trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_kick_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(1), KICK_COMMAND)?;
 
         Ok(())
     }
 
-    fn assert_mode_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_mode_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
         self.assert_has_enough_params(&params.get(0), MODE_COMMAND)?;
 
-        let channel = &params[0];
+        let target = &params[0];
 
-        self.assert_exists_channel(channel)?;
-        self.assert_is_in_channel(channel)?;
+        if target.starts_with([DISTRIBUTED_CHANNEL, LOCAL_CHANNEL]) {
+            self.assert_exists_channel(target)?;
+            self.assert_is_in_channel(target)?;
+            self.assert_is_channel_operator(target)?;
+        } else if target != &self.nickname {
+            return Err(ErrorReply::UsersDontMatch502);
+        }
 
-        self.assert_is_channel_operator(channel)?;
-        self.assert_modes_starts_correctly(&params[1])?;
+        if params.len() > 1 {
+            self.assert_modes_starts_correctly(&params[1])?;
+        }
 
         Ok(())
     }
 
-    fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+    fn assert_quit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        Ok(())
+    }
+
+    fn assert_server_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        Err(ErrorReply::AlreadyRegistered462)
+    }
+
+    fn assert_squit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
+        self.assert_has_enough_params(&params.get(0), SQUIT_COMMAND)?;
+        self.assert_is_server_operator()?;
+
+        let server = &params[0];
+
+        self.assert_exists_server(server)?;
         Ok(())
     }
 }
@@ -188,6 +211,13 @@ impl<C: Connection> ClientHandler<C> {
             return Err(ErrorReply::ChanOPrivIsNeeded482 { channel });
         }
 
+        Ok(())
+    }
+
+    fn assert_is_server_operator(&self) -> Result<(), ErrorReply> {
+        if !self.database.is_server_operator(&self.nickname) {
+            return Err(ErrorReply::NoPrivileges481);
+        }
         Ok(())
     }
 
@@ -231,6 +261,16 @@ impl<C: Connection> ClientHandler<C> {
 
         if !self.database.contains_channel(&channel) {
             return Err(ErrorReply::NoSuchChannel403 { channel });
+        }
+
+        Ok(())
+    }
+
+    fn assert_exists_server(&self, server: &str) -> Result<(), ErrorReply> {
+        let server = server.to_string();
+
+        if !self.database.contains_server(&server) {
+            return Err(ErrorReply::NoSuchServer402 { server });
         }
 
         Ok(())
@@ -298,13 +338,15 @@ impl<C: Connection> ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(&channel, NO_OUTSIDE_MESSAGES)
+            .channel_has_mode(&channel, &ChannelFlag::NoOutsideMessages)
             && !self.is_in_channel(&channel)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
         }
 
-        if self.database.channel_has_mode(&channel, MODERATED)
+        if self
+            .database
+            .channel_has_mode(&channel, &ChannelFlag::Moderated)
             && !self.database.is_channel_speaker(&channel, &self.nickname)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
@@ -318,7 +360,10 @@ impl<C: Connection> ClientHandler<C> {
         channel: &str,
         key: &Option<String>,
     ) -> Result<(), ErrorReply> {
-        let channels_for_client = self.database.get_channels_for_client(&self.nickname);
+        let channels_for_client = self
+            .database
+            .get_channels_for_client(&self.nickname)
+            .unwrap();
         if channels_for_client.len() == MAX_CHANNELS {
             let channel = channel.to_string();
             return Err(ErrorReply::TooManyChannels405 { channel });
@@ -349,21 +394,13 @@ impl<C: Connection> ClientHandler<C> {
         self.assert_is_in_channel(channel)
     }
 
-    pub fn assert_can_modify_client_status_in_channel(
+    pub fn assert_is_client_in_channel(
         &self,
         channel: &str,
         client: &str,
     ) -> Result<(), ErrorReply> {
         self.assert_exists_client(client)?;
 
-        self.assert_is_client_in_channel(channel, client)
-    }
-
-    pub fn assert_is_client_in_channel(
-        &self,
-        channel: &str,
-        client: &str,
-    ) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
         if !self.database.is_client_in_channel(client, &channel) {
@@ -374,7 +411,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_can_set_key(&mut self, channel: &str) -> Result<(), ErrorReply> {
-        if self.database.get_channel_key(channel).is_some() {
+        if self.database.get_channel_key(channel).unwrap().is_some() {
             return Err(ErrorReply::KeySet467 {
                 channel: channel.to_string(),
             });
@@ -397,9 +434,10 @@ impl<C: Connection> ClientHandler<C> {
         key: &Option<String>,
     ) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
-
-        if self.database.get_channel_key(&channel) != *key {
-            return Err(ErrorReply::BadChannelKey475 { channel });
+        if let Ok(channel_key) = self.database.get_channel_key(&channel) {
+            if channel_key != *key {
+                return Err(ErrorReply::BadChannelKey475 { channel });
+            }
         }
 
         Ok(())
@@ -408,8 +446,8 @@ impl<C: Connection> ClientHandler<C> {
     pub fn assert_channel_is_not_full(&self, channel: &str) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
-        if let Some(limit) = self.database.get_channel_limit(&channel) {
-            if self.database.get_clients_for_channel(&channel).len() >= limit {
+        if let Ok(Some(limit)) = self.database.get_channel_limit(&channel) {
+            if self.database.get_channel_clients(&channel).unwrap().len() >= limit {
                 return Err(ErrorReply::ChannelIsFull471 { channel });
             }
         }
@@ -417,8 +455,8 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_is_not_banned_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
-        for mask in self.database.get_channel_banmask(channel) {
-            if self.database.client_matches_banmask(&self.nickname, &mask) {
+        for mask in self.database.get_channel_banmask(channel).unwrap() {
+            if self.client_matches_banmask(&self.nickname, &mask) {
                 let channel = channel.to_string();
                 return Err(ErrorReply::BannedFromChannel474 { channel });
             }

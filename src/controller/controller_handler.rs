@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     message::Message,
-    server::connection_handler::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
+    server::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
 };
 
 use super::controller_message::ControllerMessage;
@@ -32,18 +32,19 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
 
     // commands that return ControllerMessage
     match &message.get_command()[..] {
-        PRIVMSG_COMMAND => 
-        if is_channel(message.get_parameters()[0].clone()) {
-            ControllerMessage::ReceivePrivMessage {
-                nickname: message.get_parameters()[0].clone(),
-                message: message.get_trailing().clone().unwrap(),
+        PRIVMSG_COMMAND => {
+            if is_channel(message.get_parameters()[0].clone()) {
+                ControllerMessage::ReceivePrivMessage {
+                    nickname: message.get_parameters()[0].clone(),
+                    message: message.get_trailing().clone().unwrap(),
+                }
+            } else {
+                ControllerMessage::ReceivePrivMessage {
+                    nickname: message.get_prefix().clone().unwrap(),
+                    message: message.get_trailing().clone().unwrap(),
+                }
             }
-        } else {
-            ControllerMessage::ReceivePrivMessage {
-                nickname: message.get_prefix().clone().unwrap(),
-                message: message.get_trailing().clone().unwrap(),
-            }
-        },
+        }
         INVITE_COMMAND => ControllerMessage::RecieveInvite {
             nickname: message.get_prefix().clone().unwrap(),
             channel: message.get_parameters()[1].clone(),

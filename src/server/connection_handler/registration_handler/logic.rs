@@ -2,36 +2,41 @@ use std::io;
 
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
-    ConnectionHandlerLogic, ConnectionHandlerUtils,
+    CommandArgs, ConnectionHandlerLogic,
 };
-use crate::server::connection_handler::responses::Notification;
+use crate::server::registerer::Register;
+use crate::server::responses::CommandResponse;
 
 use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
-    fn pass_logic(&mut self, mut params: Vec<String>) -> io::Result<bool> {
-        let password = params.pop().unwrap();
+    fn pass_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, mut params, _) = arguments;
+
+        let password = params.remove(0);
+
         self.attributes.insert("password", password);
 
         Ok(true)
     }
 
-    fn nick_logic(&mut self, mut params: Vec<String>) -> io::Result<bool> {
-        let nickname = params.pop().unwrap();
+    fn nick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, mut params, _) = arguments;
+
+        let nickname = params.remove(0);
+
         self.attributes.insert("nickname", nickname);
 
         Ok(true)
     }
 
-    fn user_logic(
-        &mut self,
-        mut params: Vec<String>,
-        trail: Option<String>,
-    ) -> std::io::Result<bool> {
+    fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
+        let (_, mut params, trail) = arguments;
+
         let realname = trail.unwrap();
-        let username = params.pop().unwrap();
-        let servername = self.servername.to_string();
+        let username = params.remove(0);
+        let servername = self.database.get_server_name();
         let hostname = self.stream.peer_address()?.ip().to_string();
 
         self.attributes.insert("username", username);
@@ -39,22 +44,42 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         self.attributes.insert("servername", servername);
         self.attributes.insert("realname", realname);
 
-        let client = self.build_client();
+        let client = self.build_client().unwrap();
 
-        self.database.add_client(client.unwrap());
+        self.send_new_client_notification(&client.get_info());
+        self.database.add_local_client(client);
 
         self.connection_type = ConnectionType::Client;
 
         Ok(false)
     }
 
-    fn quit_logic(&mut self, trail: Option<String>) -> io::Result<bool> {
+    fn server_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, mut params, trail) = arguments;
+
+        let hopcount = params.remove(1).parse::<usize>().unwrap();
+        let servername = params.remove(0);
+        let serverinfo = trail.unwrap();
+
+        self.send_server_notification(&servername, hopcount, &serverinfo);
+
+        let mut registerer = Register::new(self.stream.try_clone()?, self.database.clone());
+        registerer.register_incoming(servername, hopcount, serverinfo)?;
+
+        self.connection_type = ConnectionType::Server;
+        self.attributes
+            .insert("servername", registerer.servername());
+
+        Ok(false)
+    }
+
+    fn quit_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, _, trail) = arguments;
+
         let message =
             trail.unwrap_or_else(|| self.attributes.remove("nickname").unwrap_or_default());
 
-        let notification = Notification::Quit { message };
-
-        self.send_response(&notification.to_string())?;
+        self.stream.send(&CommandResponse::quit(&message))?;
 
         Ok(false)
     }

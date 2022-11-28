@@ -1,13 +1,16 @@
-use std::io;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
+use std::{env, io};
 
 use internet_relay_chat::client::Client;
 use internet_relay_chat::ADDRESS;
 
 fn main() {
-    let mut client = match Client::new(ADDRESS.to_string()) {
+    let args: Vec<String> = env::args().collect();
+    let address = unpack_args(args);
+
+    let mut client = match Client::new(address) {
         Ok(stream) => stream,
         Err(error) => return eprintln!("Error connecting to server: {:?}", error),
     };
@@ -36,6 +39,15 @@ fn main() {
 
     drop(stdin);
     handle.join().ok();
+}
+
+fn unpack_args(mut args: Vec<String>) -> String {
+    args.remove(0);
+
+    match args.pop() {
+        Some(address) => address,
+        None => ADDRESS.to_string(),
+    }
 }
 
 fn spawn_stdin_channel() -> (Receiver<String>, JoinHandle<()>) {

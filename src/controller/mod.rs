@@ -2,7 +2,7 @@ mod controller_handler;
 pub mod controller_message;
 
 use crate::{
-    server::connection_handler::consts::commands::{
+    server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
         PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND,
     },

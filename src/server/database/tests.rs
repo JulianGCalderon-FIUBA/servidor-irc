@@ -1,25 +1,32 @@
-use crate::server::testing::{dummy_client, MockTcpStream};
+use std::collections::HashMap;
 
-use super::*;
+use crate::server::{
+    connection::Connection,
+    consts::modes::ChannelFlag,
+    data_structures::{ChannelConfiguration, ClientInfo},
+    testing::{
+        dummy_client, dummy_database, dummy_distant_server, dummy_external_client, dummy_server,
+    },
+};
 
 #[test]
 fn can_add_client() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     assert!(!database.contains_client("nickname"));
-    database.add_client(dummy_client("nickname"));
+    database.add_local_client(dummy_client("nickname"));
     assert!(database.contains_client("nickname"));
 
     assert!(!database.contains_client("nickname2"));
-    database.add_client(dummy_client("nickname2"));
+    database.add_local_client(dummy_client("nickname2"));
     assert!(database.contains_client("nickname2"));
 }
 
 #[test]
 fn can_set_server_operator() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
-    database.add_client(dummy_client("nickname"));
+    database.add_local_client(dummy_client("nickname"));
 
     assert!(!database.is_server_operator("nickname"));
     database.set_server_operator("nickname");
@@ -28,37 +35,41 @@ fn can_set_server_operator() {
 
 #[test]
 fn can_get_client_stream() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname");
+    let stream_ref_expected = client.stream.as_ref().unwrap().try_clone().unwrap();
+    database.add_local_client(client);
 
-    let stream_ref_expected = client.get_stream().unwrap();
-
-    database.add_client(client);
-    let stream_ref_actual = database.get_stream("nickname").unwrap();
-
+    let stream_ref_actual = database.get_local_stream("nickname").unwrap();
     assert_eq!(stream_ref_expected, stream_ref_actual);
 }
 
 #[test]
+fn cannot_get_stream_from_nonexistent_client() {
+    let database = dummy_database();
+    assert!(database.get_local_stream("nickname").is_err())
+}
+
+#[test]
 fn disconnecting_sets_client_not_online() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname");
 
-    database.add_client(client);
+    database.add_local_client(client);
 
-    assert!(database.contains_client("nickname"));
+    assert!(database.get_local_stream("nickname").is_ok());
     database.disconnect_client("nickname");
-    assert!(!database.contains_client("nickname"));
+    assert!(database.get_local_stream("nickname").is_err());
 }
 
 #[test]
 fn can_add_client_to_channel() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname");
-    database.add_client(client);
+    database.add_local_client(client);
 
     assert!(!database.contains_channel("channel"));
     database.add_client_to_channel("nickname", "channel");
@@ -67,10 +78,11 @@ fn can_add_client_to_channel() {
 
 #[test]
 fn after_adding_client_to_channel_it_contains_client() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname");
-    database.add_client(client);
+    database.add_local_client(client);
+    assert!(!database.is_client_in_channel("nickname", "channel"));
     database.add_client_to_channel("nickname", "channel");
     assert!(database.contains_channel("channel"));
 
@@ -79,18 +91,18 @@ fn after_adding_client_to_channel_it_contains_client() {
 
 #[test]
 fn can_get_all_clients_from_channel() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname1");
-    database.add_client(client);
+    database.add_local_client(client);
 
     let client = dummy_client("nickname2");
-    database.add_client(client);
+    database.add_local_client(client);
 
     database.add_client_to_channel("nickname1", "channel");
     database.add_client_to_channel("nickname2", "channel");
 
-    let mut value = database.get_clients_for_channel("channel");
+    let mut value = database.get_channel_clients("channel").unwrap();
     let expected = vec!["nickname1".to_string(), "nickname2".to_string()];
     value.sort();
 
@@ -98,20 +110,27 @@ fn can_get_all_clients_from_channel() {
 }
 
 #[test]
+fn cannot_get_clients_from_nonexistent_channel() {
+    let database = dummy_database();
+    assert!(database.get_channel_clients("channel").is_err())
+}
+
+#[test]
 fn can_remove_client_from_channel() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname1");
-    database.add_client(client);
+    database.add_local_client(client);
 
     let client = dummy_client("nickname2");
-    database.add_client(client);
+    database.add_local_client(client);
 
     database.add_client_to_channel("nickname1", "channel");
     database.add_client_to_channel("nickname2", "channel");
     database.remove_client_from_channel("nickname1", "channel");
 
-    let value = database.get_clients_for_channel("channel");
+    assert!(!database.is_client_in_channel("nickname1", "channel"));
+    let value = database.get_channel_clients("channel").unwrap();
     let expected = vec!["nickname2".to_string()];
 
     assert_eq!(value, expected);
@@ -119,10 +138,10 @@ fn can_remove_client_from_channel() {
 
 #[test]
 fn removing_last_client_from_channel_deletes_channel() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname1");
-    database.add_client(client);
+    database.add_local_client(client);
 
     database.add_client_to_channel("nickname1", "channel");
     database.remove_client_from_channel("nickname1", "channel");
@@ -132,10 +151,10 @@ fn removing_last_client_from_channel_deletes_channel() {
 
 #[test]
 fn can_get_all_channels() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname");
-    database.add_client(client);
+    database.add_local_client(client);
     database.add_client_to_channel("nickname", "channel1");
     database.add_client_to_channel("nickname", "channel2");
 
@@ -149,14 +168,14 @@ fn can_get_all_channels() {
 
 #[test]
 fn can_get_all_channels_from_client() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nickname");
-    database.add_client(client);
+    database.add_local_client(client);
     database.add_client_to_channel("nickname", "channel1");
     database.add_client_to_channel("nickname", "channel2");
 
-    let mut channels_real = database.get_channels_for_client("nickname");
+    let mut channels_real = database.get_channels_for_client("nickname").unwrap();
     let channels_expected = vec!["channel1".to_string(), "channel2".to_string()];
 
     channels_real.sort();
@@ -165,64 +184,14 @@ fn can_get_all_channels_from_client() {
 }
 
 #[test]
-fn can_get_all_clients_matching_mask() {
-    let (database, _) = Database::start();
-
-    let client = ClientBuilder::new()
-        .nickname("nickAname".to_string())
-        .username("userBname".to_string())
-        .hostname("hostCname".to_string())
-        .servername("serverDname".to_string())
-        .realname("realEname".to_string())
-        .stream(MockTcpStream::new())
-        .build()
-        .unwrap();
-
-    let clientinfo = client.get_info();
-
-    database.add_client(client);
-
-    database.add_client(dummy_client("othernick"));
-
-    let expected = vec![clientinfo];
-
-    assert_eq!(database.get_clients_for_mask("*A*"), expected);
-    assert_eq!(database.get_clients_for_mask("*B*"), expected);
-    assert_eq!(database.get_clients_for_mask("*C*"), expected);
-    assert_eq!(database.get_clients_for_mask("*D*"), expected);
-    assert_eq!(database.get_clients_for_mask("*E*"), expected);
-}
-
-#[test]
-fn can_get_all_clients_matching_nickmask() {
-    let (database, _) = Database::start();
-
-    let client1 = dummy_client("nick1");
-    let client2 = dummy_client("nick2");
-    let client3 = dummy_client("nick3");
-
-    let client1_info = client1.get_info();
-    let client2_info = client2.get_info();
-    let client3_info = client3.get_info();
-
-    database.add_client(client1);
-    database.add_client(client2);
-    database.add_client(client3);
-
-    let expected = vec![client1_info, client2_info, client3_info];
-    let mut actual1 = database.get_clients_for_nickmask("nick*");
-    let mut actual2 = database.get_clients_for_nickmask("*ni*");
-
-    actual1.sort();
-    actual2.sort();
-
-    assert_eq!(actual1, expected);
-    assert_eq!(actual2, expected);
+fn cannot_get_channels_for_nonexistent_client() {
+    let database = dummy_database();
+    assert!(database.get_channels_for_client("nickname").is_err())
 }
 
 #[test]
 fn can_get_all_clients() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client1 = dummy_client("nick1");
     let client2 = dummy_client("nick2");
@@ -230,23 +199,23 @@ fn can_get_all_clients() {
     let clientinfo1 = client1.get_info();
     let clientinfo2 = client2.get_info();
 
-    database.add_client(client1);
-    database.add_client(client2);
+    database.add_local_client(client1);
+    database.add_local_client(client2);
 
     let expected = vec![clientinfo1, clientinfo2];
     let mut real = database.get_all_clients();
-    real.sort();
+    real.sort_by_key(|client| client.nickname());
 
     assert_eq!(real, expected);
 }
 
 #[test]
 fn can_update_nickname() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nick");
 
-    database.add_client(client);
+    database.add_local_client(client);
 
     database.update_nickname("nick", "new_nick");
 
@@ -256,35 +225,41 @@ fn can_update_nickname() {
 
 #[test]
 fn can_set_and_get_channel_topic() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nick");
-    database.add_client(client);
+    database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert_eq!(database.get_topic_for_channel("#channel"), None);
+    assert_eq!(database.get_topic_for_channel("#channel").unwrap(), None);
 
     database.set_channel_topic("#channel", "topic");
 
     assert_eq!(
-        database.get_topic_for_channel("#channel"),
+        database.get_topic_for_channel("#channel").unwrap(),
         Some("topic".to_string())
     );
 
     database.set_channel_topic("#channel", "new topic");
 
     assert_eq!(
-        database.get_topic_for_channel("#channel"),
+        database.get_topic_for_channel("#channel").unwrap(),
         Some("new topic".to_string())
     );
 }
 
 #[test]
-fn can_verify_channel_operator() {
-    let (database, _) = Database::start();
+fn cannot_get_topic_for_nonexistent_channel() {
+    let database = dummy_database();
+    assert!(database.get_topic_for_channel("channel").is_err())
+}
 
-    database.add_client(dummy_client("nickname1"));
-    database.add_client(dummy_client("nickname2"));
+#[test]
+fn can_verify_channel_operator() {
+    let database = dummy_database();
+
+    database.add_local_client(dummy_client("nickname1"));
+    database.add_local_client(dummy_client("nickname2"));
     database.add_client_to_channel("nickname1", "#channel");
     database.add_client_to_channel("nickname2", "#channel");
 
@@ -294,100 +269,123 @@ fn can_verify_channel_operator() {
 
 #[test]
 fn can_set_away_message_for_client() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nick");
-    database.add_client(client);
+    database.add_local_client(client);
 
     database.set_away_message(&Some("away".to_string()), "nick");
-    assert_eq!(Some("away".to_string()), database.get_away_message("nick"));
+    assert_eq!(
+        Some("away".to_string()),
+        database.get_away_message("nick").unwrap()
+    );
+}
+
+#[test]
+fn cannot_get_away_message_for_nonexistent_client() {
+    let database = dummy_database();
+    assert!(database.get_away_message("nickname").is_err())
 }
 
 #[test]
 fn can_set_and_get_channel_key() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nick");
-    database.add_client(client);
+    database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert_eq!(database.get_channel_key("#channel"), None);
+    assert_eq!(database.get_channel_key("#channel").unwrap(), None);
 
     database.set_channel_key("#channel", Some("key".to_string()));
 
     assert_eq!(
-        database.get_channel_key("#channel"),
+        database.get_channel_key("#channel").unwrap(),
         Some("key".to_string())
     );
 
     database.set_channel_key("#channel", None);
 
-    assert_eq!(database.get_channel_key("#channel"), None);
+    assert_eq!(database.get_channel_key("#channel").unwrap(), None);
+}
+
+#[test]
+fn cannot_get_key_for_nonexistent_channel() {
+    let database = dummy_database();
+    assert!(database.get_channel_key("channel").is_err());
 }
 
 #[test]
 fn can_set_and_unset_channel_mode() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nick");
-    database.add_client(client);
+    database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert!(!database.channel_has_mode("#channel", 'p'));
+    assert!(!database.channel_has_mode("#channel", &ChannelFlag::Private));
 
-    database.set_channel_mode("#channel", 'p');
+    database.set_channel_mode("#channel", ChannelFlag::Private);
 
-    assert!(database.channel_has_mode("#channel", 'p'));
+    assert!(database.channel_has_mode("#channel", &ChannelFlag::Private));
 
-    database.unset_channel_mode("#channel", 'p');
+    database.unset_channel_mode("#channel", ChannelFlag::Private);
 
-    assert!(!database.channel_has_mode("#channel", 'p'));
+    assert!(!database.channel_has_mode("#channel", &ChannelFlag::Private));
 }
 
 #[test]
 fn can_set_and_get_channel_limit() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nick");
-    database.add_client(client);
+    database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert_eq!(database.get_channel_limit("#channel"), None);
+    assert_eq!(database.get_channel_limit("#channel").unwrap(), None);
 
     database.set_channel_limit("#channel", Some(4));
 
-    assert_eq!(database.get_channel_limit("#channel"), Some(4));
+    assert_eq!(database.get_channel_limit("#channel").unwrap(), Some(4));
 
     database.set_channel_limit("#channel", None);
 
-    assert_eq!(database.get_channel_limit("#channel"), None);
+    assert_eq!(database.get_channel_limit("#channel").unwrap(), None);
 }
 
-// #[test]
-// fn can_add_and_remove_channel_operator() {
-//     let (database, _) = Database::start();
+#[test]
+fn cannot_get_limit_for_nonexistent_channel() {
+    let database = dummy_database();
+    assert!(database.get_channel_limit("channel").is_err());
+}
 
-//     let client = dummy_client("nick");
-//     database.add_client(client);
-//     database.add_client_to_channel("nick", "#channel");
+#[test]
+fn can_add_and_remove_channel_operator() {
+    let database = dummy_database();
 
-//     assert!(!database.is_channel_operator("#channel", "nick"));
+    database.add_local_client(dummy_client("nick"));
+    database.add_local_client(dummy_client("nick2"));
+    database.add_client_to_channel("nick", "#channel");
+    database.add_client_to_channel("nick2", "#channel");
 
-//     database.add_channop("#channel", "nick");
+    assert!(database.is_channel_operator("#channel", "nick"));
+    assert!(!database.is_channel_operator("#channel", "nick2"));
 
-//      assert!(database.is_channel_operator("#channel", "nick"));
+    database.add_channop("#channel", "nick2");
 
-//     database.remove_channop("#channel", "nick");
+    assert!(database.is_channel_operator("#channel", "nick2"));
 
-//      assert!(!database.is_channel_operator("#channel", "nick"));
-// }
+    database.remove_channop("#channel", "nick2");
+
+    assert!(!database.is_channel_operator("#channel", "nick2"));
+}
 
 #[test]
 fn can_add_and_remove_channel_speaker() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nick");
-    database.add_client(client);
+    database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
     assert!(!database.is_channel_speaker("#channel", "nick"));
@@ -403,25 +401,219 @@ fn can_add_and_remove_channel_speaker() {
 
 #[test]
 fn can_set_and_unset_channel_banmask() {
-    let (database, _) = Database::start();
+    let database = dummy_database();
 
     let client = dummy_client("nick");
-    database.add_client(client);
+    database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
     let mut banmasks: Vec<String> = vec![];
 
-    assert_eq!(database.get_channel_banmask("#channel"), banmasks);
+    assert_eq!(database.get_channel_banmask("#channel").unwrap(), banmasks);
 
-    database.set_channel_banmask("#channel", "banmask");
+    database.add_channel_banmask("#channel", "banmask");
 
     banmasks.push("banmask".to_string());
 
-    assert_eq!(database.get_channel_banmask("#channel"), banmasks);
+    assert_eq!(database.get_channel_banmask("#channel").unwrap(), banmasks);
 
-    database.unset_channel_banmask("#channel", "banmask");
+    database.remove_channel_banmask("#channel", "banmask");
 
     banmasks.pop();
 
-    assert_eq!(database.get_channel_banmask("#channel"), banmasks);
+    assert_eq!(database.get_channel_banmask("#channel").unwrap(), banmasks);
+}
+
+#[test]
+fn can_ask_if_operator_credentials_are_valid() {
+    let database = dummy_database();
+
+    assert!(!database.are_credentials_valid("username", "password"));
+    assert!(database.are_credentials_valid("admin", "admin"));
+}
+
+#[test]
+fn can_get_channel_configuration() {
+    let database = dummy_database();
+    let client = dummy_client("nick");
+    database.add_local_client(client);
+    database.add_client_to_channel("nick", "#channel");
+
+    database.set_channel_limit("#channel", Some(5));
+    database.set_channel_mode("#channel", ChannelFlag::Moderated);
+    database.set_channel_topic("#channel", "topic");
+
+    let mut expected = ChannelConfiguration::new();
+    expected.operators.push("nick".to_string());
+    expected.user_limit = Some(5);
+    expected.flags.push(ChannelFlag::Moderated);
+    expected.topic = Some("topic".to_string());
+
+    assert_eq!(expected, database.get_channel_config("#channel").unwrap());
+}
+
+#[test]
+fn cannot_get_configuration_for_nonexistent_channel() {
+    let database = dummy_database();
+    assert!(database.get_channel_config("channel").is_err());
+}
+
+#[test]
+fn can_get_client_info() {
+    let database = dummy_database();
+    let client = dummy_client("nickname");
+
+    database.add_local_client(client);
+
+    let expected_info = ClientInfo {
+        nicknames: vec!["nickname".to_string()],
+        username: "username".to_string(),
+        hostname: "127.0.0.1".to_string(),
+        servername: "servername".to_string(),
+        realname: "realname".to_string(),
+        hopcount: 0,
+        away: None,
+        flags: HashMap::new(),
+    };
+
+    assert_eq!(expected_info, database.get_client_info("nickname").unwrap());
+}
+
+#[test]
+fn cannot_get_info_for_nonexistent_client() {
+    let database = dummy_database();
+    assert!(database.get_client_info("nickname").is_err())
+}
+
+#[test]
+fn can_add_immediate_server() {
+    let database = dummy_database();
+    let server = dummy_server("servername");
+
+    assert!(!database.contains_server("servername"));
+    database.add_immediate_server(server);
+    assert!(database.contains_server("servername"))
+}
+
+#[test]
+fn can_add_external_client() {
+    let database = dummy_database();
+    let client = dummy_external_client("nickname", "servername");
+
+    assert!(!database.contains_client("nickname"));
+    database.add_external_client(client);
+    assert!(database.contains_client("nickname"))
+}
+
+#[test]
+fn can_get_immediate_server_for_external_client() {
+    let database = dummy_database();
+    let client = dummy_external_client("nickname", "servername");
+
+    database.add_external_client(client);
+    assert_eq!(
+        "servername",
+        database.get_immediate_server("nickname").unwrap()
+    )
+}
+
+#[test]
+fn cannot_get_immediate_server_for_nonexistent_client() {
+    let database = dummy_database();
+    assert!(database.get_immediate_server("nickname").is_err())
+}
+
+#[test]
+fn cannot_get_immediate_server_for_local_client() {
+    let database = dummy_database();
+    let client = dummy_client("nickname");
+    database.add_local_client(client);
+    assert!(database.get_immediate_server("nickname").is_err())
+}
+
+#[test]
+fn can_get_server_info() {
+    let database = dummy_database();
+    assert_eq!("serverinfo".to_string(), database.get_server_info())
+}
+
+#[test]
+fn can_get_server_name() {
+    let database = dummy_database();
+    assert_eq!("servername".to_string(), database.get_server_name())
+}
+
+#[test]
+fn can_get_server_stream() {
+    let database = dummy_database();
+
+    let server = dummy_server("servername");
+    let stream_ref_expected = server.stream.try_clone().unwrap();
+    database.add_immediate_server(server);
+
+    let stream_ref_actual = database.get_server_stream("servername").unwrap();
+    assert_eq!(stream_ref_expected, stream_ref_actual);
+}
+
+#[test]
+fn cannot_get_stream_from_nonexistent_server() {
+    let database = dummy_database();
+    assert!(database.get_server_stream("servername").is_err())
+}
+
+#[test]
+fn external_client_is_not_local() {
+    let database = dummy_database();
+    let local = dummy_client("local");
+    let external = dummy_external_client("external", "servername");
+
+    database.add_local_client(local);
+    database.add_external_client(external);
+
+    assert!(database.is_local_client("local"));
+    assert!(!database.is_local_client("external"))
+}
+
+#[test]
+fn can_add_distant_server() {
+    let database = dummy_database();
+
+    let distant = dummy_distant_server("servername");
+
+    assert!(!database.contains_server("servername"));
+    database.add_distant_server(distant);
+    assert!(database.contains_server("servername"))
+}
+
+#[test]
+fn can_get_all_immediate_servers() {
+    let database = dummy_database();
+    let server1 = dummy_server("servername1");
+    let server2 = dummy_server("servername2");
+    database.add_immediate_server(server1);
+    database.add_immediate_server(server2);
+
+    let expected = vec!["servername1".to_string(), "servername2".to_string()];
+    let mut result = database.get_all_servers();
+
+    result.sort();
+
+    assert_eq!(expected, result)
+}
+
+#[test]
+fn can_get_local_and_external_clients() {
+    let database = dummy_database();
+    let local = dummy_client("local");
+    let external = dummy_external_client("external", "servername");
+
+    database.add_local_client(local);
+    database.add_external_client(external);
+
+    let local_info = database.get_client_info("local").unwrap();
+    let external_info = database.get_client_info("external").unwrap();
+
+    let expected = vec![local_info, external_info];
+
+    assert_eq!(expected, database.get_all_clients())
 }
