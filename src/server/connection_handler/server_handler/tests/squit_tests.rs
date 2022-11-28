@@ -3,7 +3,7 @@ use crate::server::{
         connection_handler_trait::ConnectionHandlerCommands,
         server_handler::tests::dummy_server_handler,
     },
-    testing::{dummy_client, dummy_external_client, dummy_server},
+    testing::{dummy_client, dummy_distant_server, dummy_external_client, dummy_server},
 };
 
 #[test]
@@ -16,8 +16,9 @@ fn squit_removes_server_from_database() {
     let prefix = Some("oper".to_string());
     let parameters = vec!["servername2".to_string()];
     let trail = Some("Closing connection".to_string());
-    handler.squit_command((prefix, parameters, trail)).unwrap();
 
+    assert!(handler.database.contains_server("servername2"));
+    handler.squit_command((prefix, parameters, trail)).unwrap();
     assert!(!handler.database.contains_server("servername2"));
 }
 
@@ -153,29 +154,22 @@ fn squit_does_not_relay_client_quit_to_sending_server() {
     );
 }
 
-// #[test]
-// fn squit_does_not_work_with_distant_servers() {
-//     let handler = dummy_server_handler();
+#[test]
+fn squit_does_not_disconnect_distant_servers() {
+    let mut handler = dummy_server_handler();
 
-//     let distant = dummy_distant_server("servername2");
-//     handler.database.add_distant_server(distant);
+    let distant = dummy_distant_server("servername2");
+    handler.database.add_distant_server(distant);
 
-//     let parameters = vec!["servername2".to_string()];
-//     handler.squit_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    let parameters = vec!["servername2".to_string()];
 
-//     let stream2 = handler.database.get_server_stream("servername2");
+    assert!(handler.database.contains_server("servername2"));
 
-//     assert_eq!(
-//         "",
-//         handler
-//             .database
-//             .get_server_stream("servername1")
-//             .unwrap()
-//             .read_wbuf_to_string()
-//     );
+    handler.squit_command((prefix, parameters, None)).unwrap();
 
-//     assert_eq!("", stream2.unwrap().read_wbuf_to_string());
-// }
+    assert!(handler.database.contains_server("servername2"));
+}
 
 #[test]
 fn squit_relays_client_quit_to_local_clients_on_channel() {
