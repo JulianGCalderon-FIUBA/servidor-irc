@@ -1037,3 +1037,75 @@ fn mode_returns_channel_mode() {
     assert_eq!("324 #channel k key", responses[1]);
     assert_eq!("324 #channel o nickname", responses[2]);
 }
+
+#[test]
+fn mode_works_with_multiples_arguments() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nickname2"));
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname2", "#channel");
+
+    handler.database.add_channop("#channel", "nickname2");
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "-o+bl".to_string(),
+        "nickname2".to_string(),
+        "banmask".to_string(),
+        "32".to_string(),
+    ];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    assert!(!handler
+        .database
+        .is_channel_operator("#channel", "nickname2"));
+    assert_eq!(
+        vec!["banmask".to_string()],
+        handler.database.get_channel_banmask("#channel").unwrap()
+    );
+    assert_eq!(
+        Some(32),
+        handler.database.get_channel_limit("#channel").unwrap()
+    );
+}
+
+#[test]
+fn mode_works_with_multiples_arguments_in_disorder() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nickname2"));
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname2", "#channel");
+
+    handler.database.add_channop("#channel", "nickname2");
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+b-o+l".to_string(),
+        "banmask".to_string(),
+        "nickname2".to_string(),
+        "32".to_string(),
+    ];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    assert!(!handler
+        .database
+        .is_channel_operator("#channel", "nickname2"));
+    assert_eq!(
+        vec!["banmask".to_string()],
+        handler.database.get_channel_banmask("#channel").unwrap()
+    );
+    assert_eq!(
+        Some(32),
+        handler.database.get_channel_limit("#channel").unwrap()
+    );
+}
