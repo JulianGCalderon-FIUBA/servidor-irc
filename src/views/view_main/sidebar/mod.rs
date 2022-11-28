@@ -1,42 +1,35 @@
 pub mod requests;
 mod widgets_creation;
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Box, Button, Orientation,
-};
+use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Button, Orientation };
 use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
-        views_add::widget_creations::create_title, widgets_creation::create_button_with_margin,
+        views_add::widget_creations::create_title,
+        widgets_creation::create_button_with_margin,
     },
 };
 
 use self::{
-    requests::{add_view_to_add_client_request, send_list_request},
+    requests::{ add_view_to_add_client_request, send_list_request },
     widgets_creation::create_separator_sidebar,
 };
 
-use super::{requests::change_conversation_request, utils::adjust_scrollbar, MainView};
+use super::{ requests::change_conversation_request, utils::adjust_scrollbar, MainView };
 
 const CHANNELS_TITLE: &str = "Channels";
 const CLIENTS_TITLE: &str = "Clients";
 
 impl MainView {
     pub fn create_sidebar(&mut self) -> Box {
-        let sidebar = Box::builder()
-            .width_request(200)
-            .orientation(Orientation::Vertical)
-            .build();
+        let sidebar = Box::builder().width_request(200).orientation(Orientation::Vertical).build();
 
         //Channels box
         let channels_title = create_title(CHANNELS_TITLE);
 
-        self.scrollwindow_channels
-            .set_child(Some(&self.channels_box));
+        self.scrollwindow_channels.set_child(Some(&self.channels_box));
 
         self.connect_add_channel_button(self.add_channel.clone(), self.sender.clone());
 
@@ -73,21 +66,29 @@ impl MainView {
     pub fn add_channel(&mut self, channel: GString) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
-        self.connect_channel_client_button(channel_button.clone(), channel.clone(), self.sender.clone());
+        self.connect_channel_client_button(
+            channel_button.clone(),
+            channel.clone(),
+            self.sender.clone()
+        );
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
 
         println!("Added to {}", channel);
 
         self.messages.insert(channel.clone().to_string(), vec![]);
-
+        self.messages_senders.insert(channel.clone().to_string(), vec![]);
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
     pub fn add_client(&mut self, client: GString) {
         change_conversation_request(client.clone(), self.sender.clone());
         let client_button = create_button_with_margin(&client);
-        self.connect_channel_client_button(client_button.clone(), client.clone(), self.sender.clone());
+        self.connect_channel_client_button(
+            client_button.clone(),
+            client.clone(),
+            self.sender.clone()
+        );
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
 
@@ -100,7 +101,7 @@ impl MainView {
         &self,
         button: Button,
         channel_or_client: GString,
-        sender: Sender<ControllerMessage>,
+        sender: Sender<ControllerMessage>
     ) {
         button.connect_clicked(move |_| {
             change_conversation_request(channel_or_client.clone(), sender.clone());
@@ -109,20 +110,41 @@ impl MainView {
 
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
-        
-        if self.messages.contains_key(&last_conv) {
-            for message in self.messages.get(&last_conv).unwrap() {
-                self.message_box.remove(message);
-            }
-        }        
 
-        if self.messages.contains_key(&conversation_label) {
-            for message in self.messages.get(&conversation_label).unwrap() {
-                self.message_box.append(message);
+        if self.messages.contains_key(&last_conv) {
+            let mut cont1 = 0;
+            let messages = self.messages.get(&last_conv).unwrap();
+            for number in 0..messages.len() {
+                self.message_box.remove(&messages[number]);
+                if
+                    self.messages_senders.get(&last_conv).is_some() &&
+                    self.messages_senders.get(&last_conv).unwrap().len() > 0 &&
+                    messages[number].css_classes()[0] == "received_message"
+                {
+                    let senders = self.messages_senders.get(&last_conv).unwrap();
+                    self.message_box.remove(&senders[cont1]);
+                    cont1 += 1;
+                }
             }
         }
-        
-        // self.messages = vec![];
+
+        if self.messages.contains_key(&conversation_label) {
+            let mut cont2 = 0;
+            let messages = self.messages.get(&conversation_label).unwrap();
+
+            for number in 0..messages.len() {
+                if
+                    self.messages_senders.get(&conversation_label).is_some() &&
+                    self.messages_senders.get(&conversation_label).unwrap().len() > 0 &&
+                    messages[number].css_classes()[0] == "received_message"
+                {
+                    let senders = self.messages_senders.get(&conversation_label).unwrap();
+                    self.message_box.append(&senders[cont2]);
+                    cont2 += 1;
+                }
+                self.message_box.append(&messages[number]);
+            }
+        }
 
         self.quit_channel_button.set_visible(true);
         if Self::current_conv_is_channel(conversation_label.clone()) {
