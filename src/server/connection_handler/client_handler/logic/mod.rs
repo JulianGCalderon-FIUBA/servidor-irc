@@ -15,7 +15,6 @@ use self::utils::collect_list;
 use super::ClientHandler;
 
 mod mode_logic;
-mod mode_requests;
 mod utils;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
