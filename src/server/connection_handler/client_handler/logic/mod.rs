@@ -1,5 +1,6 @@
 use std::io;
 
+use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
@@ -312,7 +313,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             let all_clients = self.database.get_all_clients();
             let server_clients: Vec<ClientInfo> = all_clients
                 .into_iter()
-                .filter(|client| client.servername == *servername)
+                .filter(|client| {
+                    let server = ok_or_return!(
+                        self.database.get_immediate_server(&client.nickname()),
+                        false
+                    );
+                    server == *servername
+                })
                 .collect();
 
             for client in server_clients {
