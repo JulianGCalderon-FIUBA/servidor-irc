@@ -53,26 +53,6 @@ impl<C: Connection> ClientHandler<C> {
     }
 }
 
-pub fn parse_modes(modes: Vec<char>) -> (Vec<char>, Vec<char>) {
-    let mut add_modes: Vec<char> = vec![];
-    let mut remove_modes: Vec<char> = vec![];
-    let mut add: bool = false;
-    for char in modes {
-        match char {
-            ADD_MODE => add = true,
-            REMOVE_MODE => add = false,
-            char => {
-                if add {
-                    add_modes.push(char);
-                } else {
-                    remove_modes.push(char);
-                }
-            }
-        }
-    }
-    (add_modes, remove_modes)
-}
-
 pub fn collect_list(parameters: Option<&String>) -> Vec<String> {
     match parameters {
         Some(parameters) => parameters.split(',').map(|s| s.to_string()).collect(),

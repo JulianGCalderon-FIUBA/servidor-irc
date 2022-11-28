@@ -40,6 +40,7 @@ pub enum ChannelFlag {
     NoOutsideMessages,
     TopicByOperatorOnly,
     Moderated,
+    InvalidFlag,
 }
 
 impl ChannelFlag {
@@ -51,17 +52,18 @@ impl ChannelFlag {
             ChannelFlag::NoOutsideMessages => NO_OUTSIDE_MESSAGES,
             ChannelFlag::TopicByOperatorOnly => TOPIC_SETTABLE,
             ChannelFlag::Moderated => MODERATED,
+            ChannelFlag::InvalidFlag => panic!("Flag is invalid"),
         }
     }
-    pub fn from_char(mode: char) -> Self {
-        match mode {
+    pub fn from_char(character: char) -> Self {
+        match character {
             PRIVATE => ChannelFlag::Private,
             SECRET => ChannelFlag::Secret,
             INVITE_ONLY => ChannelFlag::InviteOnly,
             TOPIC_SETTABLE => ChannelFlag::TopicByOperatorOnly,
             NO_OUTSIDE_MESSAGES => ChannelFlag::NoOutsideMessages,
             MODERATED => ChannelFlag::Moderated,
-            _ => panic!("Invalid mode"),
+            _ => ChannelFlag::InvalidFlag,
         }
     }
 }

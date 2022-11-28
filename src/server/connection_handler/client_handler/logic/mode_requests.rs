@@ -1,63 +1,9 @@
 use std::io;
 
 use crate::server::consts::{commands::MODE_COMMAND, modes::*};
-use crate::server::responses::ErrorReply;
 use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
 
 impl<C: Connection> ClientHandler<C> {
-    pub(super) fn handle_add_mode(
-        &mut self,
-        mode: char,
-        channel: &str,
-        arguments: &mut Vec<String>,
-    ) -> Result<(), io::Error> {
-        match mode {
-            SET_USER_LIMIT => {
-                self.set_limit(channel, arguments.pop())?;
-            }
-            SET_BANMASK => {
-                self.add_banmasks(channel, arguments.pop())?;
-            }
-            SET_SPEAKER => {
-                self.add_speakers(channel, arguments.pop())?;
-            }
-            SET_KEY => {
-                self.set_key(channel, arguments.pop())?;
-            }
-            SET_OPERATOR => self.add_channops(channel, arguments.pop())?,
-            mode if VALID_MODES.contains(&mode) => {
-                let flag = ChannelFlag::from_char(mode);
-                self.database.set_channel_mode(channel, flag)
-            }
-            mode => self.stream.send(&ErrorReply::UnknownMode472 { mode })?,
-        };
-        Ok(())
-    }
-
-    pub(super) fn handle_remove_mode(
-        &mut self,
-        mode: char,
-        channel: &str,
-        arguments: &mut Vec<String>,
-    ) -> Result<(), io::Error> {
-        match mode {
-            SET_OPERATOR => {
-                self.remove_channops(channel, arguments.pop())?;
-            }
-            SET_BANMASK => {
-                self.remove_banmasks(channel, arguments.pop())?;
-            }
-            SET_SPEAKER => {
-                self.remove_speakers(channel, arguments.pop())?;
-            }
-            SET_USER_LIMIT => self.database.set_channel_limit(channel, None),
-            SET_KEY => self.database.set_channel_key(channel, None),
-            mode if VALID_MODES.contains(&mode) => self.unset_mode(channel, mode),
-            mode => self.stream.send(&ErrorReply::UnknownMode472 { mode })?,
-        };
-        Ok(())
-    }
-
     fn unset_mode(&mut self, channel: &str, mode: char) {
         let flag = ChannelFlag::from_char(mode);
         if self.database.channel_has_mode(channel, &flag) {

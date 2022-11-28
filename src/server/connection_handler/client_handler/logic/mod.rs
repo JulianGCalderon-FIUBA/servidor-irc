@@ -9,10 +9,12 @@ use crate::server::connection_handler::connection_handler_trait::{
 use crate::server::data_structures::*;
 use crate::server::responses::{CommandResponse, Notification};
 
-use self::utils::{collect_list, parse_modes};
+use self::mode_logic::parse_mode_string;
+use self::utils::collect_list;
 
 use super::ClientHandler;
 
+mod mode_logic;
 mod mode_requests;
 mod utils;
 
@@ -263,24 +265,22 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn mode_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
 
-        let channel = params[0].clone();
+        let target = params.remove(0);
 
-        if params.len() == 1 {
-            self.send_mode_response(&channel)?;
+        if params.is_empty() {
+            self.send_mode_response(&target)?; // falta soporte para usuarios
             return Ok(true);
         }
 
-        let modes: Vec<char> = params[1].chars().collect();
+        let mode_string = params.remove(1);
+        let mut mode_arguments = params;
+        mode_arguments.reverse();
 
-        let (add, remove) = parse_modes(modes);
+        let mode_requests = parse_mode_string(mode_string, mode_arguments);
 
-        let mut arguments: Vec<String> = params.drain(2..).collect();
-        arguments.reverse();
-
-        self.add_modes(add, &mut arguments, &channel)?;
-        self.remove_modes(remove, &mut arguments, &channel)?;
-
-        // TODO: REFACTOR MODE
+        for request in mode_requests {
+            self.handle_mode_request(&target, request)?;
+        }
 
         Ok(true)
     }
@@ -359,29 +359,5 @@ impl<C: Connection> ClientHandler<C> {
     ) {
         self.send_kick_notification(channel, nickname, comment);
         self.database.remove_client_from_channel(nickname, channel);
-    }
-
-    fn add_modes(
-        &mut self,
-        add: Vec<char>,
-        arguments: &mut Vec<String>,
-        channel: &str,
-    ) -> io::Result<()> {
-        for mode in add {
-            self.handle_add_mode(mode, channel, arguments)?;
-        }
-        Ok(())
-    }
-
-    fn remove_modes(
-        &mut self,
-        remove: Vec<char>,
-        arguments: &mut Vec<String>,
-        channel: &str,
-    ) -> io::Result<()> {
-        for mode in remove {
-            self.handle_remove_mode(mode, channel, arguments)?;
-        }
-        Ok(())
     }
 }
