@@ -271,7 +271,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             return Ok(true);
         }
 
-        let mode_string = params.remove(1);
+        let mode_string = params.remove(0);
         let mut mode_arguments = params;
         mode_arguments.reverse();
 
