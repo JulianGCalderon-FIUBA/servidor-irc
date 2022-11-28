@@ -1,5 +1,6 @@
 use std::io;
 
+use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic,
@@ -213,11 +214,19 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
             let all_clients = self.database.get_all_clients();
             let server_clients: Vec<ClientInfo> = all_clients
                 .into_iter()
-                .filter(|client| client.servername == *servername)
+                .filter(|client| {
+                    let server = ok_or_return!(
+                        self.database.get_immediate_server(&client.nickname()),
+                        false
+                    );
+                    server == *servername
+                })
                 .collect();
 
             for client in server_clients {
+                println!("desconectando al cliente: {}", client.nickname());
                 self.database.disconnect_client(&client.nickname());
+
                 self.send_quit_notification(client.nickname(), "Net split".to_string());
             }
 

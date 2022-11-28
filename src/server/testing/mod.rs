@@ -38,9 +38,25 @@ pub fn dummy_external_client(nickname: &str, servername: &str) -> ExternalClient
         .nickname(nickname)
         .username("username")
         .hostname("127.0.0.1")
-        .servername("servername")
+        .servername(servername)
         .realname("realname")
         .immediate(servername)
         .build_external_client()
         .unwrap()
 }
+
+// pub fn dummy_distant_client(
+//     nickname: &str,
+//     servername: &str,
+//     immediate_server: &str,
+// ) -> ExternalClient {
+//     ClientBuilder::<MockTcpStream>::new()
+//         .nickname(nickname)
+//         .username("username")
+//         .hostname("127.0.0.1")
+//         .servername(servername)
+//         .realname("realname")
+//         .immediate(immediate_server)
+//         .build_external_client()
+//         .unwrap()
+// }
