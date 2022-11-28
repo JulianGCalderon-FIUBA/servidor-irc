@@ -24,3 +24,9 @@ impl ChannelConfiguration {
         }
     }
 }
+
+impl Default for ChannelConfiguration {
+    fn default() -> Self {
+        Self::new()
+    }
+}

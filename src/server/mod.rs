@@ -13,7 +13,7 @@ pub mod connection_handler;
 mod listener;
 mod registerer;
 
-mod consts;
+pub(crate) mod consts;
 // mod data_structures;
 mod data_structures;
 mod responses;
