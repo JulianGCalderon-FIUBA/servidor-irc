@@ -1,46 +1,52 @@
-use gtk::{prelude::*, Align, Box, Label, Orientation, ScrolledWindow};
+use gtk::{
+    prelude::*,
+    Align::{Center, End, Start},
+    Box, Label,
+    Orientation::{Horizontal, Vertical},
+    ScrolledWindow,
+};
 use gtk4 as gtk;
 
+use super::{CHAT_CSS, MESSAGE_BOX_CSS, RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS};
+
 pub fn create_message(label: &str) -> Label {
-    let message = Label::builder()
+    Label::builder()
         .label(label)
         .margin_top(10)
         .margin_bottom(10)
         .margin_start(12)
         .margin_end(12)
-        .halign(Align::End)
-        .build();
-    message.add_css_class("send_message");
+        .build()
+}
+
+pub fn create_send_message(label: &str) -> Label {
+    let message = create_message(label);
+    message.set_halign(End);
+    message.add_css_class(SEND_MESSAGE_CSS);
     message
 }
 
 pub fn create_received_message(label: &str) -> Label {
-    let message = Label::builder()
-        .label(label)
-        .margin_top(10)
-        .margin_bottom(10)
-        .margin_start(12)
-        .margin_end(12)
-        .halign(Align::Start)
-        .build();
-    message.add_css_class("received_message");
+    let message = create_message(label);
+    message.set_halign(Start);
+    message.add_css_class(RECEIVED_MESSAGE_CSS);
     message
 }
 
 pub fn create_chat_box() -> Box {
     let chat = Box::builder()
-        .orientation(Orientation::Vertical)
-        .halign(gtk::Align::Center)
-        .valign(gtk::Align::End)
+        .orientation(Vertical)
+        .halign(Center)
+        .valign(End)
         .hexpand(true)
         .build();
-    chat.add_css_class("chat");
+    chat.add_css_class(CHAT_CSS);
     chat
 }
 
 pub fn create_message_sender_box() -> Box {
     Box::builder()
-        .orientation(Orientation::Horizontal)
+        .orientation(Horizontal)
         .margin_top(20)
         .margin_bottom(20)
         .halign(gtk::Align::Center)
@@ -57,6 +63,6 @@ pub fn create_scrollwindow_chat() -> ScrolledWindow {
         .margin_end(20)
         .margin_bottom(20)
         .build();
-    scrolled_window.add_css_class("message_box");
+    scrolled_window.add_css_class(MESSAGE_BOX_CSS);
     scrolled_window
 }

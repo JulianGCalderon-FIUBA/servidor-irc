@@ -1,22 +1,78 @@
-use crate::message::Message;
+use std::collections::HashMap;
+
+use crate::{
+    message::Message,
+    server::connection_handler::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
+};
 
 use super::controller_message::ControllerMessage;
 
-pub const PRIVMSG_COMMAND: &str = "PRIVMSG";
-pub const INVITE_COMMAND: &str = "INVITE";
+pub const LIST_RPL_COMMAND: &str = "322";
+pub const END_LIST_RPL_COMMAND: &str = "323";
+pub const NAMES_RPL_COMMAND: &str = "353";
+pub const END_NAMES_RPL_COMMAND: &str = "366";
+
+static mut CHANNELS: Vec<String> = vec![];
+static mut CLIENTS: Vec<Vec<String>> = vec![];
 
 pub fn to_controller_message(message: Message) -> ControllerMessage {
+    // commands with no ControllerMessage
     match &message.get_command()[..] {
-        PRIVMSG_COMMAND => ControllerMessage::ReceivePrivMessage {
-            nickname: message.get_prefix().clone().unwrap(),
-            message: message.get_trailing().clone().unwrap(),
+        LIST_RPL_COMMAND => unsafe {
+            CHANNELS.push(message.get_parameters()[0].clone());
+        },
+        NAMES_RPL_COMMAND => unsafe {
+            CHANNELS.push(message.get_parameters()[0].clone());
+            let trailing: String = message.get_trailing().clone().unwrap();
+            let current_clients: Vec<String> = trailing.split(' ').map(|s| s.to_string()).collect();
+            CLIENTS.push(current_clients);
+        },
+        _ => (),
+    }
+
+    // commands that return ControllerMessage
+    match &message.get_command()[..] {
+        PRIVMSG_COMMAND => 
+        if is_channel(message.get_parameters()[0].clone()) {
+            ControllerMessage::ReceivePrivMessage {
+                nickname: message.get_parameters()[0].clone(),
+                message: message.get_trailing().clone().unwrap(),
+            }
+        } else {
+            ControllerMessage::ReceivePrivMessage {
+                nickname: message.get_prefix().clone().unwrap(),
+                message: message.get_trailing().clone().unwrap(),
+            }
         },
         INVITE_COMMAND => ControllerMessage::RecieveInvite {
             nickname: message.get_prefix().clone().unwrap(),
             channel: message.get_parameters()[1].clone(),
         },
+        END_LIST_RPL_COMMAND => unsafe {
+            CHANNELS.dedup();
+            let channels_clone: Vec<String> = CHANNELS.clone();
+            CHANNELS = vec![];
+            ControllerMessage::ReceiveListChannels {
+                channels: channels_clone,
+            }
+        },
+        END_NAMES_RPL_COMMAND => unsafe {
+            let mut hashmap: HashMap<String, Vec<String>> = HashMap::new();
+            for i in 0..CHANNELS.len() {
+                hashmap.insert(CHANNELS[i].clone(), CLIENTS[i].clone());
+            }
+            CHANNELS = vec![];
+            CLIENTS = vec![];
+            ControllerMessage::ReceiveNamesChannels {
+                channels_and_clients: hashmap,
+            }
+        },
         _ => ControllerMessage::RegularMessage {
             message: message.to_string(),
         },
     }
+}
+
+fn is_channel(parameter: String) -> bool {
+    parameter.starts_with("#")
 }

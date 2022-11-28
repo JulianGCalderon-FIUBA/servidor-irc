@@ -1,20 +1,35 @@
+pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry};
+use gtk::{
+    glib::Sender,
+    prelude::*,
+    Box, Entry,
+};
 use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage, views::view_main::utils::entry_is_valid,
 };
 
-use self::widgets_creation::{
-    create_chat_box, create_message, create_message_sender_box, create_received_message,
+use self::{
+    requests::priv_message_request,
+    widgets_creation::{
+        create_chat_box, create_message_sender_box, create_received_message, create_send_message,
+    },
 };
 
 use super::{utils::adjust_scrollbar, MainView};
 
+const RECEIVED_MESSAGE_CSS: &str = "received_message";
+const SEND_MESSAGE_CSS: &str = "send_message";
+const CHAT_CSS: &str = "chat";
+const MESSAGE_BOX_CSS: &str = "message_box";
+
 impl MainView {
     pub fn create_chat(&mut self) -> Box {
+        // self.current_chat.set_label(nickname);
+
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
 
@@ -26,12 +41,16 @@ impl MainView {
         message_sender_box.append(&self.input);
 
         self.scrollwindow_chat.set_child(Some(&self.message_box));
+        self.scrollwindow_chat.set_visible(false);
 
         self.connect_send_button(self.input.clone(), self.sender.clone());
         message_sender_box.append(&self.send_message);
+        self.send_message.set_sensitive(false);
+        
 
         chat.append(&self.current_chat);
         chat.append(&self.scrollwindow_chat);
+        chat.append(&self.welcome_box);
         chat.append(&message_sender_box);
         chat
     }
@@ -43,28 +62,36 @@ impl MainView {
                 return;
             }
 
-            let priv_message = ControllerMessage::SendPrivMessage {
-                message: input_text,
-            };
-            sender
-                .send(priv_message)
-                .expect("Error: private message command");
+            priv_message_request(input_text, sender.clone());
 
             input.set_text("");
         });
     }
 
-    pub fn receive_priv_message(&mut self, message: String, _nickname: String) {
+    pub fn receive_priv_message(&mut self, message: String, nickname: String, current_conv: String) {
+        if nickname == self.user_info.label().unwrap() {
+            return;
+        }
         let message = create_received_message(&message);
-        self.message_box.append(&message);
-        adjust_scrollbar(self.scrollwindow_chat.clone());
-        self.messages.push(message);
+        if nickname == current_conv {
+            self.message_box.append(&message);
+            adjust_scrollbar(self.scrollwindow_chat.clone());
+        }     
+        
+        println!("Recieve {} from {}", message, nickname);
+        
+        self.messages.get_mut(&nickname).unwrap().push(message);
+        
+        // self.messages.push(message);
     }
 
-    pub fn send_message(&mut self, message: String) {
-        let message = create_message(&message);
+    pub fn send_message(&mut self, message: String, nickname: String) {
+        let message = create_send_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
-        self.messages.push(message);
+
+        self.messages.get_mut(&nickname).unwrap().push(message);
+        
+        // self.messages.push(message);
     }
 }

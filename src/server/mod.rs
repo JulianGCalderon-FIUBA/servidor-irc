@@ -8,7 +8,7 @@ mod connection;
 /// Contains structure for database. A Database stores and updates information regarding clients, channels and related.
 mod database;
 
-mod connection_handler;
+pub mod connection_handler;
 /// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address
 mod listener;
 mod registerer;
