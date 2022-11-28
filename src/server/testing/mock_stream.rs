@@ -89,12 +89,14 @@ impl MockTcpStream {
     }
 
     /// Obtains what is in write buffer and returns it as string.
-    pub fn read_wbuf_to_string(&self) -> String {
-        String::from_utf8(self.read_wbuf()).unwrap()
+    pub fn read_wbuf_to_string(&mut self) -> String {
+        let vec = self.read_wbuf();
+        self.clear();
+        String::from_utf8(vec).unwrap()
     }
 
     /// Obtains what is in write buffer and returns it as a vector of strings.
-    pub fn get_responses(&self) -> Vec<String> {
+    pub fn get_responses(&mut self) -> Vec<String> {
         let mut responses: Vec<String> = self
             .read_wbuf_to_string()
             .split("\r\n")

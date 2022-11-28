@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::server::{
     connection::Connection,
     consts::modes::ChannelFlag,
@@ -202,7 +204,7 @@ fn can_get_all_clients() {
 
     let expected = vec![clientinfo1, clientinfo2];
     let mut real = database.get_all_clients();
-    real.sort();
+    real.sort_by_key(|client| client.nickname());
 
     assert_eq!(real, expected);
 }
@@ -470,9 +472,8 @@ fn can_get_client_info() {
         servername: "servername".to_string(),
         realname: "realname".to_string(),
         hopcount: 0,
-        operator: false,
         away: None,
-        flags: vec![],
+        flags: HashMap::new(),
     };
 
     assert_eq!(expected_info, database.get_client_info("nickname").unwrap());

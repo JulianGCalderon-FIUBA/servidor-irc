@@ -81,7 +81,10 @@ fn mode_adds_channop() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +o nick2\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
 }
 
@@ -106,7 +109,10 @@ fn mode_removes_channop() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -o nick2\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler.database.is_channel_operator("#channel", "nickname"));
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
 }
@@ -197,7 +203,10 @@ fn mode_sets_limit_to_channel() {
     let parameters = vec!["#channel".to_string(), "+l".to_string(), "5".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +l 5\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert_eq!(
         handler.database.get_channel_limit("#channel").unwrap(),
         Some(5)
@@ -221,7 +230,10 @@ fn mode_unsets_channel_limit() {
     let parameters = vec!["#channel".to_string(), "-l".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -l\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler
         .database
         .get_channel_limit("#channel")
@@ -278,7 +290,10 @@ fn mode_sets_banmask() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +b banmask\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
 
     let masks = vec!["banmask".to_string()];
 
@@ -311,7 +326,10 @@ fn mode_unsets_banmask() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -b banmask\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
 
     let masks = vec!["banmask2".to_string()];
 
@@ -430,7 +448,10 @@ fn mode_adds_speaker_to_channel() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +v nick2\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler.database.is_channel_speaker("#channel", "nick2"));
 }
 
@@ -455,7 +476,10 @@ fn mode_removes_speakers_from_channel() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -v nick2\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
 }
 
@@ -545,7 +569,10 @@ fn mode_sets_channel_key() {
     let parameters = vec!["#channel".to_string(), "+k".to_string(), "key".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +k key\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert_eq!(
         handler.database.get_channel_key("#channel").unwrap(),
         Some("key".to_string())
@@ -571,7 +598,10 @@ fn mode_unsets_channel_key() {
     let parameters = vec!["#channel".to_string(), "-k".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -k\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler
         .database
         .get_channel_key("#channel")
@@ -655,7 +685,10 @@ fn mode_sets_and_unsets_private_flag() {
     let mut parameters = vec!["#channel".to_string(), "+p".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +p\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Private));
@@ -664,7 +697,10 @@ fn mode_sets_and_unsets_private_flag() {
 
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -p\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Private));
@@ -685,7 +721,10 @@ fn mode_sets_and_unsets_secret_flag() {
     let mut parameters = vec!["#channel".to_string(), "+s".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +s\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Secret));
@@ -694,7 +733,10 @@ fn mode_sets_and_unsets_secret_flag() {
 
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -s\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Secret));
@@ -715,7 +757,10 @@ fn mode_sets_and_unsets_invite_only_flag() {
     let mut parameters = vec!["#channel".to_string(), "+i".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +i\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
@@ -724,7 +769,10 @@ fn mode_sets_and_unsets_invite_only_flag() {
 
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -i\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
@@ -745,7 +793,10 @@ fn mode_sets_and_unsets_topic_flag() {
     let mut parameters = vec!["#channel".to_string(), "+t".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +t\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
@@ -754,7 +805,10 @@ fn mode_sets_and_unsets_topic_flag() {
 
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -t\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
@@ -774,7 +828,10 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     let mut parameters = vec!["#channel".to_string(), "+n".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +n\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
@@ -783,7 +840,10 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
 
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -n\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
@@ -804,7 +864,10 @@ fn mode_sets_and_unsets_moderated_flag() {
     let mut parameters = vec!["#channel".to_string(), "+m".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel +m\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Moderated));
@@ -813,51 +876,48 @@ fn mode_sets_and_unsets_moderated_flag() {
 
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    assert_eq!(
+        ":nickname MODE #channel -m\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Moderated));
 }
 
-// #[test]
-// fn mode_fails_when_setting_unknown_mode() {
-//     let mut handler = dummy_client_handler();
+#[test]
+fn mode_fails_when_setting_unknown_mode() {
+    let mut handler = dummy_client_handler();
 
-//     handler
-//         .database
-//         .add_client_to_channel("nickname", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
 
-//     assert!(!handler.database.channel_has_mode("#channel", 'w'));
+    let parameters = vec!["#channel".to_string(), "+w".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
 
-//     let parameters = vec!["#channel".to_string(), "+w".to_string()];
-//     handler.mode_command((None, parameters, None)).unwrap();
+    assert_eq!(
+        "472 w :Is unknown mode char to me\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
 
-//     assert_eq!(
-//         "472 w :Is unknown mode char to me\r\n",
-//         handler.stream.read_wbuf_to_string()
-//     );
-//     assert!(!handler.database.channel_has_mode("#channel", 'w'));
-// }
+#[test]
+fn mode_fails_when_unsetting_unknown_mode() {
+    let mut handler = dummy_client_handler();
 
-// #[test]
-// fn mode_fails_when_unsetting_unknown_mode() {
-//     let mut handler = dummy_client_handler();
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
 
-//     handler
-//         .database
-//         .add_client_to_channel("nickname", "#channel");
+    let parameters = vec!["#channel".to_string(), "-w".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
 
-//     assert!(!handler.database.channel_has_mode("#channel", 'w'));
-
-//     let parameters = vec!["#channel".to_string(), "-w".to_string()];
-//     handler.mode_command((None, parameters, None)).unwrap();
-
-//     assert_eq!(
-//         "472 w :Is unknown mode char to me\r\n",
-//         handler.stream.read_wbuf_to_string()
-//     );
-//     assert!(!handler.database.channel_has_mode("#channel", 'w'));
-// }
+    assert_eq!(
+        "472 w :Is unknown mode char to me\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
 
 #[test]
 fn mode_sets_multiple_flags() {
@@ -885,7 +945,11 @@ fn mode_sets_multiple_flags() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    let responses = handler.stream.get_responses();
+
+    assert_eq!(":nickname MODE #channel +o nick2", responses[0]);
+    assert_eq!(":nickname MODE #channel +i", responses[1]);
+    assert_eq!(":nickname MODE #channel +s", responses[2]);
     assert!(handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Secret));
@@ -921,7 +985,11 @@ fn mode_unsets_multiple_flags() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    let responses = handler.stream.get_responses();
+
+    assert_eq!(":nickname MODE #channel -o nick2", responses[0]);
+    assert_eq!(":nickname MODE #channel -i", responses[1]);
+    assert_eq!(":nickname MODE #channel -s", responses[2]);
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Secret));
@@ -957,7 +1025,14 @@ fn mode_sets_and_unsets_multiple_flags() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!("", handler.stream.read_wbuf_to_string());
+    let responses = handler.stream.get_responses();
+
+    assert_eq!(":nickname MODE #channel -o nick2", responses[0]);
+    assert_eq!(":nickname MODE #channel -s", responses[1]);
+    assert_eq!(":nickname MODE #channel +p", responses[2]);
+    assert_eq!(":nickname MODE #channel -m", responses[3]);
+    assert_eq!(":nickname MODE #channel +i", responses[4]);
+
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Secret));
@@ -995,10 +1070,14 @@ fn mode_sets_and_unsets_multiple_valid_flags() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
-    assert_eq!(
-        "401 nick2 :No such nick/channel\r\n",
-        handler.stream.read_wbuf_to_string()
-    );
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("401 nick2 :No such nick/channel", responses[0]);
+    assert_eq!(":nickname MODE #channel -s", responses[1]);
+    assert_eq!(":nickname MODE #channel +p", responses[2]);
+    assert_eq!(":nickname MODE #channel -m", responses[3]);
+    assert_eq!(":nickname MODE #channel +i", responses[4]);
+
     assert!(!handler
         .database
         .channel_has_mode("#channel", &ChannelFlag::Secret));
@@ -1061,6 +1140,12 @@ fn mode_works_with_multiples_arguments() {
     ];
     handler.mode_command((None, parameters, None)).unwrap();
 
+    let responses = handler.stream.get_responses();
+
+    assert_eq!(":nickname MODE #channel -o nickname2", responses[0]);
+    assert_eq!(":nickname MODE #channel +b banmask", responses[1]);
+    assert_eq!(":nickname MODE #channel +l 32", responses[2]);
+
     assert!(!handler
         .database
         .is_channel_operator("#channel", "nickname2"));
@@ -1096,6 +1181,12 @@ fn mode_works_with_multiples_arguments_in_disorder() {
         "32".to_string(),
     ];
     handler.mode_command((None, parameters, None)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!(":nickname MODE #channel +b banmask", responses[0]);
+    assert_eq!(":nickname MODE #channel -o nickname2", responses[1]);
+    assert_eq!(":nickname MODE #channel +l 32", responses[2]);
 
     assert!(!handler
         .database

@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::server::connection::Connection;
 
 use super::{ClientInfo, ExternalClient, LocalClient};
@@ -82,9 +84,8 @@ impl<C: Connection> ClientBuilder<C> {
             servername: self.servername.take()?,
             realname: self.realname.take()?,
             hopcount: self.hopcount,
-            operator: false,
             away: None,
-            flags: vec![],
+            flags: HashMap::new(),
         };
         Some(info)
     }

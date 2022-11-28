@@ -85,7 +85,7 @@ impl<C: Connection> Database<C> {
     fn is_server_operator(&mut self, nickname: String) -> bool {
         let client = ok_or_return!(self.get_client_info(&nickname), false);
 
-        client.operator
+        client.is_operator()
     }
 
     pub fn contains_client(&self, nickname: String) -> bool {

@@ -108,7 +108,7 @@ fn privmsg_to_channel_is_relayed_to_all_local_clients_in_channel() {
         ":sender PRIVMSG #channel :message\r\n",
         handler
             .database
-            .get_local_stream("nickname1")
+            .get_local_stream("nickname2")
             .unwrap()
             .read_wbuf_to_string()
     );

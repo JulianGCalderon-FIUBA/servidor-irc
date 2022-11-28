@@ -2,6 +2,7 @@ use std::io;
 
 use crate::macros::ok_or_return;
 use crate::server::connection_handler::client_handler::booleans::is_distributed_channel;
+use crate::server::connection_handler::mode_requests::{ChannelModeRequest, UserModeRequest};
 use crate::server::consts::modes::{
     ChannelFlag, UserFlag, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
 };
@@ -245,9 +246,30 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_user_mode_is_response(&mut self, user: &str) -> io::Result<()> {
         let client_info = self.database.get_client_info(user).expect("User exists");
-        let user_modes = client_info.flags.iter().map(UserFlag::to_char).collect();
+        let user_modes = client_info.flags.keys().map(UserFlag::to_char).collect();
 
         let response = CommandResponse::UserModeIs221 { user_modes };
         self.stream.send(&response)
+    }
+
+    pub(super) fn send_channel_mode_request_notification(
+        &mut self,
+        channel: &str,
+        request: ChannelModeRequest,
+    ) {
+        let request = request.to_string();
+        let notification = Notification::mode(&self.nickname, channel, &request);
+        self.send_message_to_local_clients_on_channel(&notification, channel);
+        self.send_message_to_all_servers(&notification);
+    }
+
+    pub(super) fn send_user_mode_request_notification(
+        &mut self,
+        request: UserModeRequest,
+        user: &str,
+    ) {
+        let request = request.to_string();
+        let notification = Notification::mode(&self.nickname, user, &request);
+        self.send_message_to_all_servers(&notification);
     }
 }

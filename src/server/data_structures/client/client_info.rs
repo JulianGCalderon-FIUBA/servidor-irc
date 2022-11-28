@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use crate::server::consts::modes::UserFlag;
 
-#[derive(PartialEq, Eq, Debug, PartialOrd, Ord, Clone)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 /// ClientInfo contains public Client information.
 pub struct ClientInfo {
     pub nicknames: Vec<String>,
@@ -9,9 +11,8 @@ pub struct ClientInfo {
     pub servername: String,
     pub realname: String,
     pub hopcount: usize,
-    pub operator: bool,
     pub away: Option<String>,
-    pub flags: Vec<UserFlag>,
+    pub flags: HashMap<UserFlag, ()>,
 }
 
 impl ClientInfo {
@@ -32,6 +33,10 @@ impl ClientInfo {
         }
 
         false
+    }
+
+    pub fn is_operator(&self) -> bool {
+        self.flags.contains_key(&UserFlag::Operator)
     }
 
     pub fn matches_mask(&self, query: &str) -> bool {
@@ -63,19 +68,12 @@ impl ClientInfo {
     }
 
     pub fn add_flag(&mut self, flag: UserFlag) {
-        self.flags.push(flag);
+        self.flags.insert(flag, ());
     }
 
     pub fn remove_flag(&mut self, flag: UserFlag) {
-        remove(&mut self.flags, &flag);
+        self.flags.remove(&flag);
     }
-}
-
-fn remove<T: Eq>(elements: &mut Vec<T>, element: &T) {
-    elements
-        .iter()
-        .position(|e| e == element)
-        .map(|index| elements.remove(index));
 }
 
 pub fn matches(base: &str, pattern: &str) -> bool {

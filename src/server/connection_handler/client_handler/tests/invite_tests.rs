@@ -14,7 +14,6 @@ fn invite_fails_with_less_than_two_parameters() {
         "461 INVITE :Not enough parameters\r\n",
         handler.stream.read_wbuf_to_string()
     );
-    handler.stream.clear();
 
     let parameters = vec!["nick2".to_string()];
     handler.invite_command((None, parameters, None)).unwrap();

@@ -113,8 +113,6 @@ fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
         handler.stream.read_wbuf_to_string()
     );
 
-    handler.stream.clear();
-
     parameters = vec!["#hola".to_string()];
 
     handler.topic_command((None, parameters, None)).unwrap();

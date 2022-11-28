@@ -34,3 +34,13 @@ impl UserModeRequest {
         Self::UnsetFlag(flag)
     }
 }
+
+impl std::fmt::Display for UserModeRequest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            UserModeRequest::SetFlag(flag) => write!(f, "+{}", flag.to_char()),
+            UserModeRequest::UnsetFlag(flag) => write!(f, "-{}", flag.to_char()),
+            UserModeRequest::UnknownRequest(_) => Ok(()),
+        }
+    }
+}

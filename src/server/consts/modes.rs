@@ -71,7 +71,7 @@ impl ChannelFlag {
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, PartialOrd, Ord)]
+#[derive(PartialEq, Eq, Clone, Debug, Hash)]
 pub enum UserFlag {
     Invisible,
     Operator,

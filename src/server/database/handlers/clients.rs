@@ -126,7 +126,7 @@ impl<C: Connection> Database<C> {
         let info = ok_or_return!(self.get_client_info(&nickname));
         debug_print!("Setting {} as server operator", nickname);
 
-        info.operator = true;
+        info.add_flag(UserFlag::Operator)
     }
     fn add_local_client(&mut self, client: LocalClient<C>) {
         debug_print!("Adding local client {:?}", client.info);
