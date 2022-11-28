@@ -36,11 +36,18 @@ impl<C: Connection> ClientHandler<C> {
             ModeRequest::InvalidArgument(character, argument) => {
                 self.invalid_argument_request(character, argument)
             }
+            ModeRequest::GetBanmasks => self.get_banmasks_request(channel),
         }
     }
 
     fn add_banmask_request(&mut self, channel: &str, banmask: String) -> io::Result<()> {
+        self.database.add_channel_banmask(channel, &banmask);
+
         Ok(())
+    }
+
+    fn get_banmasks_request(&mut self, channel: &str) -> io::Result<()> {
+        self.send_banlist_response(channel)
     }
 
     fn add_operator_request(&mut self, channel: &str, operator: String) -> io::Result<()> {
@@ -53,6 +60,11 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
     fn add_speaker_request(&mut self, channel: &str, speaker: String) -> io::Result<()> {
+        if let Err(error) = self.assert_can_modify_client_status_in_channel(channel, &speaker) {
+            return self.stream.send(&error);
+        }
+        self.database.add_speaker(channel, &speaker);
+
         Ok(())
     }
     fn remove_banmask_request(&mut self, channel: &str, banmask: String) -> io::Result<()> {
@@ -65,9 +77,16 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
     fn set_flag_request(&mut self, channel: &str, flag: ChannelFlag) -> io::Result<()> {
+        self.database.set_channel_mode(channel, flag);
+
         Ok(())
     }
     fn set_key_request(&mut self, channel: &str, key: String) -> io::Result<()> {
+        if let Err(error) = self.assert_can_set_key(channel) {
+            return self.stream.send(&error);
+        }
+        self.database.set_channel_key(channel, Some(key));
+
         Ok(())
     }
     fn set_limit_request(&mut self, channel: &str, limit: usize) -> io::Result<()> {

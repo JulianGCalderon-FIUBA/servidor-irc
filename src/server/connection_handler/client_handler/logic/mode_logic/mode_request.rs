@@ -7,6 +7,7 @@ use crate::{
 
 pub enum ModeRequest {
     AddBanmask(String),
+    GetBanmasks,
     AddOperator(String),
     AddSpeaker(String),
     RemoveBanmask(String),
@@ -55,7 +56,7 @@ impl ModeRequest {
     }
 
     fn build_add_banmask_variant(arguments: &mut Vec<String>) -> ModeRequest {
-        let banmask = some_or_return!(arguments.pop(), Self::NeedArgument(SET_BANMASK));
+        let banmask = some_or_return!(arguments.pop(), Self::GetBanmasks);
         Self::AddBanmask(banmask)
     }
 
