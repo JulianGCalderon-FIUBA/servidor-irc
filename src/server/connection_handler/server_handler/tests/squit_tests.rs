@@ -3,7 +3,7 @@ use crate::server::{
         connection_handler_trait::ConnectionHandlerCommands,
         server_handler::tests::dummy_server_handler,
     },
-    testing::{dummy_external_client, dummy_server},
+    testing::{dummy_client, dummy_external_client, dummy_server},
 };
 
 #[test]
@@ -176,3 +176,48 @@ fn squit_does_not_relay_client_quit_to_sending_server() {
 
 //     assert_eq!("", stream2.unwrap().read_wbuf_to_string());
 // }
+
+#[test]
+fn squit_relays_client_quit_to_local_clients_on_channel() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    let client1 = dummy_external_client("nickname1", "servername2");
+    let client2 = dummy_client("nickname2");
+    let client3 = dummy_client("nickname3");
+
+    handler.database.add_local_client(client2);
+    handler.database.add_local_client(client3);
+    handler.database.add_external_client(client1);
+
+    handler
+        .database
+        .add_client_to_channel("nickname1", "#channel");
+    handler
+        .database
+        .add_client_to_channel("nickname2", "#channel");
+
+    let prefix = Some("oper".to_string());
+    let parameters = vec!["servername2".to_string()];
+
+    handler.squit_command((prefix, parameters, None)).unwrap();
+
+    assert_eq!(
+        ":nickname1 QUIT :Net split\r\n",
+        handler
+            .database
+            .get_local_stream("nickname2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_local_stream("nickname3")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
