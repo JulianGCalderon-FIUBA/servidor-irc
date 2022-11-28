@@ -110,9 +110,9 @@ impl MainView {
 
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
+        let mut cont = 0;
 
         if self.messages.contains_key(&last_conv) {
-            let mut cont1 = 0;
             let messages = self.messages.get(&last_conv).unwrap();
             for number in 0..messages.len() {
                 self.message_box.remove(&messages[number]);
@@ -122,14 +122,14 @@ impl MainView {
                     messages[number].css_classes()[0] == "received_message"
                 {
                     let senders = self.messages_senders.get(&last_conv).unwrap();
-                    self.message_box.remove(&senders[cont1]);
-                    cont1 += 1;
+                    self.message_box.remove(&senders[cont]);
+                    cont += 1;
                 }
             }
         }
-
+        
+        cont = 0;
         if self.messages.contains_key(&conversation_label) {
-            let mut cont2 = 0;
             let messages = self.messages.get(&conversation_label).unwrap();
 
             for number in 0..messages.len() {
@@ -139,8 +139,8 @@ impl MainView {
                     messages[number].css_classes()[0] == "received_message"
                 {
                     let senders = self.messages_senders.get(&conversation_label).unwrap();
-                    self.message_box.append(&senders[cont2]);
-                    cont2 += 1;
+                    self.message_box.append(&senders[cont]);
+                    cont += 1;
                 }
                 self.message_box.append(&messages[number]);
             }

@@ -80,7 +80,7 @@ impl MainView {
             .margin_end(12)
             .halign(gtk::Align::Start)
             .build();
-        sender_nickname_label.add_css_class("white_text");
+        sender_nickname_label.add_css_class("message_sender_name");
         self.message_box.append(&sender_nickname_label);
 
         let message = create_received_message(&message);
