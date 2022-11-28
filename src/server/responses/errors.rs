@@ -29,6 +29,8 @@ pub enum ErrorReply {
     BannedFromChannel474 { channel: String },
     NoReply,
     NoPrivileges481,
+    UsersDontMatch502,
+    UserModeUnknownFlag501,
 }
 
 impl Display for ErrorReply {
@@ -100,6 +102,8 @@ impl Display for ErrorReply {
                 "481 :Permission Denied- You're not an IRC operator".to_string()
             }
             ErrorReply::NoSuchServer402 { server } => format!("402 {server} :No such server"),
+            ErrorReply::UsersDontMatch502 => "502 :Cant change mode for other users".to_string(),
+            ErrorReply::UserModeUnknownFlag501 => "501 :Unknown MODE flag".to_string(),
         };
         write!(f, "{string}")
     }

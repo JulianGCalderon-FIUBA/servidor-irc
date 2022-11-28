@@ -5,42 +5,51 @@ use crate::server::{
     connection_handler::client_handler::ClientHandler,
     consts::{
         commands::MODE_COMMAND,
-        modes::{ChannelFlag, ADD_MODE, REMOVE_MODE},
+        modes::{ChannelFlag, UserFlag, ADD_MODE, REMOVE_MODE},
     },
     responses::ErrorReply,
 };
 
-mod mode_request;
-pub use mode_request::ModeRequest;
+mod channel_mode_request;
+mod user_mode_request;
+pub use channel_mode_request::ChannelModeRequest;
+
+use self::user_mode_request::UserModeRequest;
 
 impl<C: Connection> ClientHandler<C> {
-    pub(super) fn handle_mode_request(
+    pub(super) fn handle_channel_mode_request(
         &mut self,
         channel: &str,
-        request: ModeRequest,
+        request: ChannelModeRequest,
     ) -> io::Result<()> {
         match request {
-            ModeRequest::AddBanmask(banmask) => self.add_banmask_request(channel, banmask),
-            ModeRequest::AddOperator(operator) => self.add_operator_request(channel, operator),
-            ModeRequest::AddSpeaker(speaker) => self.add_speaker_request(channel, speaker),
-            ModeRequest::RemoveBanmask(banmask) => self.remove_banmask_request(channel, banmask),
-            ModeRequest::RemoveOperator(operator) => {
+            ChannelModeRequest::AddBanmask(banmask) => self.add_banmask_request(channel, banmask),
+            ChannelModeRequest::AddOperator(operator) => {
+                self.add_operator_request(channel, operator)
+            }
+            ChannelModeRequest::AddSpeaker(speaker) => self.add_speaker_request(channel, speaker),
+            ChannelModeRequest::RemoveBanmask(banmask) => {
+                self.remove_banmask_request(channel, banmask)
+            }
+            ChannelModeRequest::RemoveOperator(operator) => {
                 self.remove_operator_request(channel, operator)
             }
-            ModeRequest::RemoveSpeaker(speaker) => self.remove_speaker_request(channel, speaker),
-            ModeRequest::SetFlag(flag) => self.set_flag_request(channel, flag),
-            ModeRequest::SetKey(key) => self.set_key_request(channel, key),
-            ModeRequest::SetLimit(limit) => self.set_limit_request(channel, limit),
-            ModeRequest::UnsetLimit() => self.unset_limit_request(channel),
-            ModeRequest::UnsetKey() => self.unset_key_request(channel),
-            ModeRequest::UnsetFlag(flag) => self.unset_flag_request(channel, flag),
+            ChannelModeRequest::RemoveSpeaker(speaker) => {
+                self.remove_speaker_request(channel, speaker)
+            }
+            ChannelModeRequest::SetFlag(flag) => self.set_flag_request(channel, flag),
+            ChannelModeRequest::SetKey(key) => self.set_key_request(channel, key),
+            ChannelModeRequest::SetLimit(limit) => self.set_limit_request(channel, limit),
+            ChannelModeRequest::UnsetLimit() => self.unset_limit_request(channel),
+            ChannelModeRequest::UnsetKey() => self.unset_key_request(channel),
+            ChannelModeRequest::UnsetFlag(flag) => self.unset_flag_request(channel, flag),
 
-            ModeRequest::UnknownMode(character) => self.unknown_mode_request(character),
-            ModeRequest::NeedArgument(character) => self.need_argument_request(character),
-            ModeRequest::InvalidArgument(character, argument) => {
+            ChannelModeRequest::UnknownMode(character) => self.unknown_mode_request(character),
+            ChannelModeRequest::NeedArgument(character) => self.need_argument_request(character),
+            ChannelModeRequest::InvalidArgument(character, argument) => {
                 self.invalid_argument_request(character, argument)
             }
-            ModeRequest::GetBanmasks => self.get_banmasks_request(channel),
+            ChannelModeRequest::GetBanmasks => self.get_banmasks_request(channel),
         }
     }
 
@@ -136,7 +145,39 @@ impl<C: Connection> ClientHandler<C> {
     }
 }
 
-pub fn parse_mode_string(mode_string: String, mut mode_arguments: Vec<String>) -> Vec<ModeRequest> {
+impl<C: Connection> ClientHandler<C> {
+    pub(super) fn handle_user_mode_request(
+        &mut self,
+        user: &str,
+        request: UserModeRequest,
+    ) -> io::Result<()> {
+        match request {
+            UserModeRequest::SetFlag(flag) => self.set_flag(flag, user),
+            UserModeRequest::UnsetFlag(flag) => self.unset_flag(flag, user),
+            UserModeRequest::UnknownRequest(character) => self.unknown_request(character),
+        }
+    }
+
+    fn set_flag(&mut self, flag: UserFlag, user: &str) -> io::Result<()> {
+        self.database.set_user_mode(user, flag);
+
+        Ok(())
+    }
+    fn unset_flag(&mut self, flag: UserFlag, user: &str) -> io::Result<()> {
+        self.database.unset_user_mode(user, flag);
+
+        Ok(())
+    }
+    fn unknown_request(&mut self, _character: char) -> io::Result<()> {
+        let error = ErrorReply::UserModeUnknownFlag501;
+        self.stream.send(&error)
+    }
+}
+
+pub fn parse_channel_mode_string(
+    mode_string: String,
+    mut mode_arguments: Vec<String>,
+) -> Vec<ChannelModeRequest> {
     let mut add: bool = Default::default();
 
     let mut requests = Vec::new();
@@ -144,7 +185,21 @@ pub fn parse_mode_string(mode_string: String, mut mode_arguments: Vec<String>) -
         match char {
             ADD_MODE => add = true,
             REMOVE_MODE => add = false,
-            char => requests.push(ModeRequest::from(char, add, &mut mode_arguments)),
+            char => requests.push(ChannelModeRequest::from(char, add, &mut mode_arguments)),
+        }
+    }
+    requests
+}
+
+pub fn parse_user_mode_string(mode_string: String) -> Vec<UserModeRequest> {
+    let mut add: bool = Default::default();
+
+    let mut requests = Vec::new();
+    for char in mode_string.chars() {
+        match char {
+            ADD_MODE => add = true,
+            REMOVE_MODE => add = false,
+            char => requests.push(UserModeRequest::from(char, add)),
         }
     }
     requests

@@ -6,10 +6,11 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
+use crate::server::consts::channel::{DISTRIBUTED_CHANNEL, LOCAL_CHANNEL};
 use crate::server::data_structures::*;
 use crate::server::responses::{CommandResponse, Notification};
 
-use self::mode_logic::parse_mode_string;
+use self::mode_logic::{parse_channel_mode_string, parse_user_mode_string};
 use self::utils::collect_list;
 
 use super::ClientHandler;
@@ -266,19 +267,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         let target = params.remove(0);
 
-        if params.is_empty() {
-            self.send_mode_response(&target)?; // falta soporte para usuarios
-            return Ok(true);
-        }
-
-        let mode_string = params.remove(0);
-        let mut mode_arguments = params;
-        mode_arguments.reverse();
-
-        let mode_requests = parse_mode_string(mode_string, mode_arguments);
-
-        for request in mode_requests {
-            self.handle_mode_request(&target, request)?;
+        if target.starts_with([DISTRIBUTED_CHANNEL, LOCAL_CHANNEL]) {
+            self.mode_command_for_channel(target, params)?;
+        } else {
+            self.mode_command_for_user(target, params)?;
         }
 
         Ok(true)
@@ -358,5 +350,43 @@ impl<C: Connection> ClientHandler<C> {
     ) {
         self.send_kick_notification(channel, nickname, comment);
         self.database.remove_client_from_channel(nickname, channel);
+    }
+
+    fn mode_command_for_channel(
+        &mut self,
+        channel: String,
+        mut args: Vec<String>,
+    ) -> Result<(), io::Error> {
+        if args.is_empty() {
+            self.send_channel_mode_is_response(&channel)?; // falta soporte para usuarios
+            return Ok(());
+        }
+
+        let mode_string = args.remove(0);
+        let mut mode_arguments = args;
+        mode_arguments.reverse();
+
+        let mode_requests = parse_channel_mode_string(mode_string, mode_arguments);
+        for request in mode_requests {
+            self.handle_channel_mode_request(&channel, request)?;
+        }
+
+        Ok(())
+    }
+
+    fn mode_command_for_user(&mut self, user: String, mut args: Vec<String>) -> io::Result<()> {
+        if args.is_empty() {
+            self.send_user_mode_is_response(&user)?; // falta soporte para usuarios
+            return Ok(());
+        }
+
+        let mode_string = args.remove(0);
+
+        let mode_requests = parse_user_mode_string(mode_string);
+        for request in mode_requests {
+            self.handle_user_mode_request(&user, request)?;
+        }
+
+        Ok(())
     }
 }

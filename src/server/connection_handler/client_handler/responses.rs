@@ -1,8 +1,9 @@
 use std::io;
 
+use crate::macros::ok_or_return;
 use crate::server::connection_handler::client_handler::booleans::is_distributed_channel;
 use crate::server::consts::modes::{
-    ChannelFlag, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
+    ChannelFlag, UserFlag, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
 };
 use crate::server::responses::{CommandResponse, Notification};
 use crate::server::{
@@ -196,49 +197,57 @@ impl<C: Connection> ClientHandler<C> {
         self.send_message_to_target(&notification, target)
     }
 
-    pub(super) fn send_mode_response(&mut self, channel: &str) -> io::Result<()> {
-        if let Ok(config) = self.database.get_channel_config(channel) {
-            let flags = config.flags;
-            let limit = config.user_limit;
-            let operators = config.operators;
-            let banmasks = config.banmasks;
-            let speakers = config.speakers;
-            let key = config.key;
+    pub(super) fn send_channel_mode_is_response(&mut self, channel: &str) -> io::Result<()> {
+        let config = ok_or_return!(self.database.get_channel_config(channel), Ok(()));
 
-            for flag in flags {
-                let mode = flag.to_char();
-                let reply = CommandResponse::channel_mode_is(channel, mode, None);
-                self.stream.send(&reply)?;
-            }
+        let flags = config.flags;
+        let limit = config.user_limit;
+        let operators = config.operators;
+        let banmasks = config.banmasks;
+        let speakers = config.speakers;
+        let key = config.key;
 
-            if limit.is_some() {
-                let params = vec![limit.unwrap().to_string()];
-                let reply = CommandResponse::channel_mode_is(channel, SET_USER_LIMIT, Some(params));
-                self.stream.send(&reply)?;
-            }
-
-            if key.is_some() {
-                let params = vec![key.unwrap()];
-                let reply = CommandResponse::channel_mode_is(channel, SET_KEY, Some(params));
-                self.stream.send(&reply)?;
-            }
-
-            if !operators.is_empty() {
-                let reply =
-                    CommandResponse::channel_mode_is(channel, SET_OPERATOR, Some(operators));
-                self.stream.send(&reply)?;
-            }
-
-            if !banmasks.is_empty() {
-                let reply = CommandResponse::channel_mode_is(channel, SET_BANMASK, Some(banmasks));
-                self.stream.send(&reply)?;
-            }
-
-            if !speakers.is_empty() {
-                let reply = CommandResponse::channel_mode_is(channel, SET_SPEAKER, Some(speakers));
-                self.stream.send(&reply)?;
-            }
+        for flag in flags {
+            let mode = flag.to_char();
+            let reply = CommandResponse::channel_mode_is(channel, mode, None);
+            self.stream.send(&reply)?;
         }
+
+        if limit.is_some() {
+            let params = vec![limit.unwrap().to_string()];
+            let reply = CommandResponse::channel_mode_is(channel, SET_USER_LIMIT, Some(params));
+            self.stream.send(&reply)?;
+        }
+
+        if key.is_some() {
+            let params = vec![key.unwrap()];
+            let reply = CommandResponse::channel_mode_is(channel, SET_KEY, Some(params));
+            self.stream.send(&reply)?;
+        }
+
+        if !operators.is_empty() {
+            let reply = CommandResponse::channel_mode_is(channel, SET_OPERATOR, Some(operators));
+            self.stream.send(&reply)?;
+        }
+
+        if !banmasks.is_empty() {
+            let reply = CommandResponse::channel_mode_is(channel, SET_BANMASK, Some(banmasks));
+            self.stream.send(&reply)?;
+        }
+
+        if !speakers.is_empty() {
+            let reply = CommandResponse::channel_mode_is(channel, SET_SPEAKER, Some(speakers));
+            self.stream.send(&reply)?;
+        }
+
         Ok(())
+    }
+
+    pub(super) fn send_user_mode_is_response(&mut self, user: &str) -> io::Result<()> {
+        let client_info = self.database.get_client_info(user).expect("User exists");
+        let user_modes = client_info.flags.iter().map(UserFlag::to_char).collect();
+
+        let response = CommandResponse::UserModeIs221 { user_modes };
+        self.stream.send(&response)
     }
 }

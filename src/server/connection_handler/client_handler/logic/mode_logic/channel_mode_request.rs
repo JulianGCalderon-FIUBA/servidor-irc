@@ -5,7 +5,7 @@ use crate::{
     },
 };
 
-pub enum ModeRequest {
+pub enum ChannelModeRequest {
     AddBanmask(String),
     GetBanmasks,
     AddOperator(String),
@@ -24,7 +24,7 @@ pub enum ModeRequest {
     InvalidArgument(char, String),
 }
 
-impl ModeRequest {
+impl ChannelModeRequest {
     pub fn from(character: char, add: bool, arguments: &mut Vec<String>) -> Self {
         println!("char {character}");
 
@@ -48,7 +48,7 @@ impl ModeRequest {
         }
     }
 
-    fn build_set_limit_variant(arguments: &mut Vec<String>) -> ModeRequest {
+    fn build_set_limit_variant(arguments: &mut Vec<String>) -> ChannelModeRequest {
         let limit = some_or_return!(arguments.pop(), Self::NeedArgument(SET_USER_LIMIT));
         let limit = ok_or_return!(
             limit.parse::<usize>(),
@@ -57,42 +57,42 @@ impl ModeRequest {
         Self::SetLimit(limit)
     }
 
-    fn build_add_banmask_variant(arguments: &mut Vec<String>) -> ModeRequest {
+    fn build_add_banmask_variant(arguments: &mut Vec<String>) -> ChannelModeRequest {
         let banmask = some_or_return!(arguments.pop(), Self::GetBanmasks);
         Self::AddBanmask(banmask)
     }
 
-    fn build_remove_banmask_variant(arguments: &mut Vec<String>) -> ModeRequest {
+    fn build_remove_banmask_variant(arguments: &mut Vec<String>) -> ChannelModeRequest {
         let banmask = some_or_return!(arguments.pop(), Self::NeedArgument(SET_BANMASK));
         Self::RemoveBanmask(banmask)
     }
 
-    fn build_add_speaker_variant(arguments: &mut Vec<String>) -> ModeRequest {
+    fn build_add_speaker_variant(arguments: &mut Vec<String>) -> ChannelModeRequest {
         let speaker = some_or_return!(arguments.pop(), Self::NeedArgument(SET_SPEAKER));
         Self::AddSpeaker(speaker)
     }
 
-    fn build_remove_speaker_variant(arguments: &mut Vec<String>) -> ModeRequest {
+    fn build_remove_speaker_variant(arguments: &mut Vec<String>) -> ChannelModeRequest {
         let speaker = some_or_return!(arguments.pop(), Self::NeedArgument(SET_SPEAKER));
         Self::RemoveSpeaker(speaker)
     }
 
-    fn build_add_operator_variant(arguments: &mut Vec<String>) -> ModeRequest {
+    fn build_add_operator_variant(arguments: &mut Vec<String>) -> ChannelModeRequest {
         let operator = some_or_return!(arguments.pop(), Self::NeedArgument(SET_OPERATOR));
         Self::AddOperator(operator)
     }
 
-    fn build_remove_operator_variant(arguments: &mut Vec<String>) -> ModeRequest {
+    fn build_remove_operator_variant(arguments: &mut Vec<String>) -> ChannelModeRequest {
         let operator = some_or_return!(arguments.pop(), Self::NeedArgument(SET_OPERATOR));
         Self::RemoveOperator(operator)
     }
 
-    fn build_set_key_variant(arguments: &mut Vec<String>) -> ModeRequest {
+    fn build_set_key_variant(arguments: &mut Vec<String>) -> ChannelModeRequest {
         let key = some_or_return!(arguments.pop(), Self::NeedArgument(SET_OPERATOR));
         Self::SetKey(key)
     }
 
-    fn build_unset_flag_variant(character: char) -> ModeRequest {
+    fn build_unset_flag_variant(character: char) -> ChannelModeRequest {
         let flag = ChannelFlag::from_char(character);
         if let ChannelFlag::InvalidFlag = flag {
             return Self::UnknownMode(character);
@@ -101,7 +101,7 @@ impl ModeRequest {
         Self::UnsetFlag(flag)
     }
 
-    fn build_set_flag_variant(character: char) -> ModeRequest {
+    fn build_set_flag_variant(character: char) -> ChannelModeRequest {
         let flag = ChannelFlag::from_char(character);
         if let ChannelFlag::InvalidFlag = flag {
             return Self::UnknownMode(character);

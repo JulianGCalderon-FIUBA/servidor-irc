@@ -201,6 +201,12 @@ impl<C: Connection> Database<C> {
                 self.handle_is_immediate_server(server, respond_to)
             }
             RemoveServer { servername } => self.handle_remove_server(servername),
+            SetUserMode { user, flag } => self.handle_set_user_mode(user, flag),
+            UnsetUserMode { user, flag } => self.handle_unset_user_mode(user, flag),
         }
     }
+
+  
+
+    
 }

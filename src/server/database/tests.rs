@@ -472,6 +472,7 @@ fn can_get_client_info() {
         hopcount: 0,
         operator: false,
         away: None,
+        flags: vec![],
     };
 
     assert_eq!(expected_info, database.get_client_info("nickname").unwrap());

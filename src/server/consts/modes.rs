@@ -30,7 +30,10 @@ pub const VALID_MODES: [char; 11] = [
 pub const ADD_MODE: char = '+';
 pub const REMOVE_MODE: char = '-';
 
-// pub const OPERATOR: char = 'o';
+pub const INVISIBLE: char = 'i';
+pub const OPERATOR: char = 'o';
+pub const RECEIVES_SERVER_NOTICES: char = 's';
+pub const RECEIVES_WALLOPS: char = 'w';
 
 #[derive(PartialEq, Eq, Clone, Debug)]
 pub enum ChannelFlag {
@@ -64,6 +67,36 @@ impl ChannelFlag {
             NO_OUTSIDE_MESSAGES => ChannelFlag::NoOutsideMessages,
             MODERATED => ChannelFlag::Moderated,
             _ => ChannelFlag::InvalidFlag,
+        }
+    }
+}
+
+#[derive(PartialEq, Eq, Clone, Debug, PartialOrd, Ord)]
+pub enum UserFlag {
+    Invisible,
+    Operator,
+    ReceiveServerNotices,
+    ReceivesWallops,
+    InvalidFlag,
+}
+
+impl UserFlag {
+    pub fn to_char(&self) -> char {
+        match self {
+            Self::Invisible => INVISIBLE,
+            Self::Operator => OPERATOR,
+            Self::ReceiveServerNotices => RECEIVES_SERVER_NOTICES,
+            Self::ReceivesWallops => RECEIVES_WALLOPS,
+            Self::InvalidFlag => panic!("Flag is invalid"),
+        }
+    }
+    pub fn from_char(character: char) -> Self {
+        match character {
+            INVISIBLE => Self::Invisible,
+            OPERATOR => Self::Operator,
+            RECEIVES_SERVER_NOTICES => Self::ReceiveServerNotices,
+            RECEIVES_WALLOPS => Self::ReceivesWallops,
+            _ => Self::InvalidFlag,
         }
     }
 }

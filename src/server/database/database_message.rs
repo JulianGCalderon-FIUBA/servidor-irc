@@ -1,6 +1,6 @@
 use std::sync::mpsc::Sender;
 
-use crate::server::consts::modes::ChannelFlag;
+use crate::server::consts::modes::{ChannelFlag, UserFlag};
 use crate::server::data_structures::*;
 
 use crate::server::connection::Connection;
@@ -201,5 +201,13 @@ pub enum DatabaseMessage<C: Connection> {
     },
     RemoveServer {
         servername: String,
+    },
+    SetUserMode {
+        user: String,
+        flag: UserFlag,
+    },
+    UnsetUserMode {
+        user: String,
+        flag: UserFlag,
     },
 }

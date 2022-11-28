@@ -84,6 +84,7 @@ impl<C: Connection> ClientBuilder<C> {
             hopcount: self.hopcount,
             operator: false,
             away: None,
+            flags: vec![],
         };
         Some(info)
     }

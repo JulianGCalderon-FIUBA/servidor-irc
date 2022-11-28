@@ -1,5 +1,6 @@
 use std::sync::mpsc::{self, Sender};
 
+use crate::server::consts::modes::UserFlag;
 use crate::server::data_structures::*;
 use crate::server::{connection::Connection, consts::modes::ChannelFlag};
 
@@ -461,6 +462,18 @@ impl<C: Connection> DatabaseHandle<C> {
         let request = DatabaseMessage::RemoveServer {
             servername: servername.to_string(),
         };
+        self.sender.send(request).unwrap();
+    }
+
+    pub(crate) fn set_user_mode(&self, user: &str, flag: UserFlag) {
+        let user = user.to_string();
+        let request = DatabaseMessage::SetUserMode { user, flag };
+        self.sender.send(request).unwrap();
+    }
+
+    pub(crate) fn unset_user_mode(&self, user: &str, flag: UserFlag) {
+        let user = user.to_string();
+        let request = DatabaseMessage::UnsetUserMode { user, flag };
         self.sender.send(request).unwrap();
     }
 }

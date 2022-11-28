@@ -1,3 +1,5 @@
+use crate::server::consts::modes::UserFlag;
+
 #[derive(PartialEq, Eq, Debug, PartialOrd, Ord, Clone)]
 /// ClientInfo contains public Client information.
 pub struct ClientInfo {
@@ -9,6 +11,7 @@ pub struct ClientInfo {
     pub hopcount: usize,
     pub operator: bool,
     pub away: Option<String>,
+    pub flags: Vec<UserFlag>,
 }
 
 impl ClientInfo {
@@ -58,6 +61,21 @@ impl ClientInfo {
     pub fn update_nickname(&mut self, nickname: String) {
         self.nicknames.push(nickname)
     }
+
+    pub fn add_flag(&mut self, flag: UserFlag) {
+        self.flags.push(flag);
+    }
+
+    pub fn remove_flag(&mut self, flag: UserFlag) {
+        remove(&mut self.flags, &flag);
+    }
+}
+
+fn remove<T: Eq>(elements: &mut Vec<T>, element: &T) {
+    elements
+        .iter()
+        .position(|e| e == element)
+        .map(|index| elements.remove(index));
 }
 
 pub fn matches(base: &str, pattern: &str) -> bool {

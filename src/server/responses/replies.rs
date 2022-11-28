@@ -80,6 +80,9 @@ pub enum CommandResponse {
     Quit {
         message: String,
     },
+    UserModeIs221 {
+        user_modes: String,
+    },
 }
 
 impl Display for CommandResponse {
@@ -184,6 +187,7 @@ impl Display for CommandResponse {
             CommandResponse::Quit { message } => {
                 format!("{QUIT_COMMAND} :{message}")
             }
+            CommandResponse::UserModeIs221 { user_modes } => format!("221 {user_modes}"),
         };
         write!(f, "{string}")
     }

@@ -4,6 +4,7 @@ use crate::{
     macros::ok_or_return,
     server::{
         connection::Connection,
+        consts::modes::UserFlag,
         data_structures::{ClientInfo, ExternalClient, LocalClient},
         database::{database_error::DatabaseError, Database},
     },
@@ -87,6 +88,14 @@ impl<C: Connection> Database<C> {
     ) {
         let client_info = self.get_client_info(&client);
         respond_to.send(client_info.cloned()).unwrap();
+    }
+
+    pub fn handle_set_user_mode(&mut self, user: String, flag: UserFlag) {
+        self.set_user_mode(user, flag);
+    }
+
+    pub fn handle_unset_user_mode(&mut self, user: String, flag: UserFlag) {
+        self.unset_user_mode(user, flag);
     }
 }
 
@@ -202,6 +211,16 @@ impl<C: Connection> Database<C> {
         clients.append(&mut external_clients);
 
         clients
+    }
+
+    fn set_user_mode(&mut self, user: String, flag: UserFlag) {
+        let info = ok_or_return!(self.get_client_info(&user));
+        info.add_flag(flag);
+    }
+
+    fn unset_user_mode(&mut self, user: String, flag: UserFlag) {
+        let info = ok_or_return!(self.get_client_info(&user));
+        info.remove_flag(flag);
     }
 }
 
