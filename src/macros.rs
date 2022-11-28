@@ -28,7 +28,9 @@ macro_rules! ok_or_return {
 
 macro_rules! own {
     ($( $var:ident ),*) => {
-        let var = var.to_owned();
+        $(
+        let $var = $var.to_owned();
+        )*
     };
 }
 

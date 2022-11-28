@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use crate::macros::own;
 use crate::server::consts::commands::*;
 use crate::server::data_structures::*;
 
@@ -184,14 +185,12 @@ impl Display for Notification {
 
 impl Notification {
     pub fn quit(nickname: &str, message: &str) -> Self {
-        let message = message.to_string();
-        let nickname = nickname.to_string();
+        own!(message, nickname);
         Notification::Quit { message, nickname }
     }
 
     pub fn server(servername: &str, hopcount: usize, serverinfo: &str) -> Self {
-        let servername = servername.to_string();
-        let serverinfo = serverinfo.to_string();
+        own!(servername, serverinfo);
         Notification::Server {
             servername,
             hopcount,
