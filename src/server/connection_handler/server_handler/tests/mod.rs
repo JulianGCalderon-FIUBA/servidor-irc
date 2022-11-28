@@ -9,10 +9,10 @@ mod nick_tests;
 mod part_tests;
 mod privmsg_tests;
 mod quit_tests;
+mod server_tests;
+mod squit_tests;
 mod topic_tests;
 mod user_tests;
-
-mod server_tests;
 
 use super::*;
 

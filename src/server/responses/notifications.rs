@@ -3,6 +3,8 @@ use std::fmt::Display;
 use crate::server::consts::commands::*;
 use crate::server::data_structures::*;
 
+use super::to_trail;
+
 /// Possible notifications that can be sent for different commands.
 pub enum Notification {
     Quit {
@@ -107,12 +109,12 @@ impl Display for Notification {
                 channel,
                 kicked,
                 comment,
-            } => match comment {
-                Some(comment) => {
-                    format!(":{kicker} {KICK_COMMAND} {channel} {kicked} :{comment}")
-                }
-                None => format!(":{kicker} {KICK_COMMAND} {channel} {kicked}"),
-            },
+            } => {
+                format!(
+                    ":{kicker} {KICK_COMMAND} {channel} {kicked} {}",
+                    to_trail(comment)
+                )
+            }
             Notification::Part { nickname, channel } => {
                 format!(":{nickname} {PART_COMMAND} {channel}")
             }
@@ -143,10 +145,9 @@ impl Display for Notification {
                 old_nickname,
                 new_nickname,
             } => format!(":{old_nickname} NICK {new_nickname}"),
-            Notification::Away { nickname, message } => match message {
-                Some(message) => format!(":{nickname} {AWAY_COMMAND} :{message}"),
-                None => format!(":{nickname} {AWAY_COMMAND}"),
-            },
+            Notification::Away { nickname, message } => {
+                format!(":{nickname} {AWAY_COMMAND} {}", to_trail(message))
+            }
             Notification::Topic {
                 nickname,
                 channel,
@@ -168,20 +169,13 @@ impl Display for Notification {
                 sender,
                 servername,
                 comment,
-            } => match sender {
-                Some(sender) => {
-                    format!(
-                        ":{sender} {SQUIT_COMMAND} {servername} {}",
-                        comment.clone().unwrap_or_default()
-                    )
-                }
-                None => {
-                    format!(
-                        "{SQUIT_COMMAND} {servername} {}",
-                        comment.clone().unwrap_or_default()
-                    )
-                }
-            },
+            } => {
+                format!(
+                    "{} {SQUIT_COMMAND} {servername} {}",
+                    to_trail(sender),
+                    to_trail(comment)
+                )
+            }
         };
 
         write!(f, "{string}")
