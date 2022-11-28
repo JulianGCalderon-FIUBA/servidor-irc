@@ -3,7 +3,11 @@ use std::io;
 use crate::server::{
     connection::Connection,
     connection_handler::client_handler::ClientHandler,
-    consts::modes::{ChannelFlag, ADD_MODE, REMOVE_MODE},
+    consts::{
+        commands::MODE_COMMAND,
+        modes::{ChannelFlag, ADD_MODE, REMOVE_MODE},
+    },
+    responses::ErrorReply,
 };
 
 mod mode_request;
@@ -52,16 +56,26 @@ impl<C: Connection> ClientHandler<C> {
 
         Ok(())
     }
+
     fn add_speaker_request(&mut self, channel: &str, speaker: String) -> io::Result<()> {
         Ok(())
     }
     fn remove_banmask_request(&mut self, channel: &str, banmask: String) -> io::Result<()> {
+        self.database.remove_channel_banmask(channel, &banmask);
         Ok(())
     }
     fn remove_operator_request(&mut self, channel: &str, operator: String) -> io::Result<()> {
+        if let Err(error) = self.assert_can_modify_client_status_in_channel(channel, &operator) {
+            return self.stream.send(&error);
+        }
+        self.database.remove_channop(channel, &operator);
         Ok(())
     }
     fn remove_speaker_request(&mut self, channel: &str, speaker: String) -> io::Result<()> {
+        if let Err(error) = self.assert_can_modify_client_status_in_channel(channel, &speaker) {
+            return self.stream.send(&error);
+        }
+        self.database.remove_speaker(channel, &speaker);
         Ok(())
     }
     fn set_flag_request(&mut self, channel: &str, flag: ChannelFlag) -> io::Result<()> {
@@ -76,21 +90,29 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
     fn unset_limit_request(&mut self, channel: &str) -> io::Result<()> {
+        self.database.set_channel_limit(channel, None);
         Ok(())
     }
     fn unset_key_request(&mut self, channel: &str) -> io::Result<()> {
+        self.database.set_channel_key(channel, None);
         Ok(())
     }
     fn unset_flag_request(&mut self, channel: &str, flag: ChannelFlag) -> io::Result<()> {
+        if self.database.channel_has_mode(channel, &flag) {
+            self.database.unset_channel_mode(channel, flag)
+        }
         Ok(())
     }
     fn unknown_mode_request(&mut self, character: char) -> io::Result<()> {
-        Ok(())
+        self.stream
+            .send(&ErrorReply::UnknownMode472 { mode: character })
     }
-    fn need_argument_request(&mut self, character: char) -> io::Result<()> {
-        Ok(())
+    fn need_argument_request(&mut self, _character: char) -> io::Result<()> {
+        self.stream.send(&ErrorReply::NeedMoreParameters461 {
+            command: MODE_COMMAND.to_string(),
+        })
     }
-    fn invalid_argument_request(&mut self, character: char, argument: String) -> io::Result<()> {
+    fn invalid_argument_request(&mut self, _character: char, _argument: String) -> io::Result<()> {
         Ok(())
     }
 }
