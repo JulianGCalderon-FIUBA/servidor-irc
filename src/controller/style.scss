@@ -58,6 +58,17 @@ label {
     font-family: monospace;
 }
 
+.welcome_title {
+    font-size: 30px;
+    font-family: monospace;
+}
+
+.welcome_message {
+    font-size: 25px;
+    font-family: monospace;
+    color: rgb(173, 172, 172);
+}
+
 .active_select_button{
     border: solid 1px white;
     border-radius: 0px;
