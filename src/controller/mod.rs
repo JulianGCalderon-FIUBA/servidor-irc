@@ -173,7 +173,8 @@ impl Controller {
                 }
                 RecieveInvite { nickname, channel } => {
                     let message = format!("{} has invited you to join {}", nickname, channel);
-                    main_view.receive_priv_message(message, channel, current_conv.clone());
+                    println!("{}", message);
+                    main_view.receive_priv_message(message, nickname, current_conv.clone());
                 }
                 SendListMessage {} => {
                     client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
