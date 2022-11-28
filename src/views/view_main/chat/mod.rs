@@ -28,7 +28,7 @@ const MESSAGE_BOX_CSS: &str = "message_box";
 
 impl MainView {
     pub fn create_chat(&mut self, nickname: &GString) -> Box {
-        self.current_chat.set_label(nickname);
+        self.current_chat.set_label("Welcome to Lemon Pie IRC!");
 
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
@@ -41,6 +41,7 @@ impl MainView {
         message_sender_box.append(&self.input);
 
         self.scrollwindow_chat.set_child(Some(&self.message_box));
+        self.scrollwindow_chat.set_visible(false);
 
         self.connect_send_button(self.input.clone(), self.sender.clone());
         message_sender_box.append(&self.send_message);
