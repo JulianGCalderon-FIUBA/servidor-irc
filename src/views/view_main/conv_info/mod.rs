@@ -95,7 +95,7 @@ impl MainView {
     fn welcome_view(&mut self) {
         self.current_chat.set_label("");
         self.scrollwindow_chat.set_visible(false);
-        self.send_message.set_visible(false);
+        self.send_message.set_sensitive(false);
         self.welcome_box.set_visible(true);
     }
 

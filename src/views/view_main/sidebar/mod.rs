@@ -110,7 +110,7 @@ impl MainView {
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
         self.scrollwindow_chat.set_visible(true);
-        self.send_message.set_visible(true);
+        self.send_message.set_sensitive(true);
         self.welcome_box.set_visible(false);
         
         if self.messages.contains_key(&last_conv) {

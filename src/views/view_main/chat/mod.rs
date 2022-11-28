@@ -45,7 +45,7 @@ impl MainView {
 
         self.connect_send_button(self.input.clone(), self.sender.clone());
         message_sender_box.append(&self.send_message);
-        self.send_message.set_visible(false);
+        self.send_message.set_sensitive(false);
         
 
         chat.append(&self.current_chat);
