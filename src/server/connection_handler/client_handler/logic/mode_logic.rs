@@ -4,14 +4,13 @@ use crate::server::{
     connection::Connection,
     connection_handler::{
         client_handler::ClientHandler,
-        connection_handler_trait::ConnectionHandlerUtils,
         mode_requests::{ChannelModeRequest, UserModeRequest},
     },
     consts::{
         commands::MODE_COMMAND,
         modes::{ChannelFlag, UserFlag},
     },
-    responses::{ErrorReply, Notification},
+    responses::ErrorReply,
 };
 
 impl<C: Connection> ClientHandler<C> {
@@ -20,8 +19,6 @@ impl<C: Connection> ClientHandler<C> {
         channel: &str,
         request: ChannelModeRequest,
     ) -> io::Result<()> {
-        eprintln!("{request}");
-
         match request {
             ChannelModeRequest::AddBanmask(banmask) => self.add_banmask_request(channel, banmask),
             ChannelModeRequest::AddOperator(operator) => {
