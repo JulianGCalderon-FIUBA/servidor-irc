@@ -27,8 +27,6 @@ pub enum ChannelModeRequest {
 
 impl ChannelModeRequest {
     pub fn from(character: char, add: bool, arguments: &mut Vec<String>) -> Self {
-        println!("char {character}");
-
         match add {
             true => match character {
                 SET_USER_LIMIT => Self::build_set_limit_variant(arguments),

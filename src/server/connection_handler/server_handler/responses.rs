@@ -104,8 +104,6 @@ impl<C: Connection> ServerHandler<C> {
     pub(super) fn send_mode_notification(&mut self, sender: &str, target: &str, request: &str) {
         let notification = Notification::mode(sender, target, request);
 
-        println!("aaaa {notification}");
-
         if self.is_channel(target) {
             self.send_message_to_local_clients_on_channel(&notification, target);
         }

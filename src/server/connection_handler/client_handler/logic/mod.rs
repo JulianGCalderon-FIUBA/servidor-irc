@@ -269,8 +269,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         let target = params.remove(0);
 
-        println!("{}", target);
-
         if target.starts_with([DISTRIBUTED_CHANNEL, LOCAL_CHANNEL]) {
             self.mode_command_for_channel(target, params)?;
         } else {

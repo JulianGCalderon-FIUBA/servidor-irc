@@ -53,7 +53,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         if let Ok(mut stream) = self.database().get_server_stream(server) {
             stream.send(&message)?;
         }
-        println!("mensaje enviado");
+
         Ok(())
     }
 

@@ -8,8 +8,6 @@ pub enum UserModeRequest {
 
 impl UserModeRequest {
     pub fn from(character: char, add: bool) -> Self {
-        println!("char {character}");
-
         match add {
             true => Self::build_set_flag_variant(character),
             false => Self::build_unset_flag_variant(character),
