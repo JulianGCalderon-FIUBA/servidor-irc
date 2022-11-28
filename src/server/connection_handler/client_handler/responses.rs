@@ -149,18 +149,13 @@ impl<C: Connection> ClientHandler<C> {
         self.send_message_to_client(&invitation, &invited_client)
     }
 
-    pub(super) fn send_quit_notification(&mut self, message: &str) {
-        let notification = Notification::quit(&self.nickname, message);
-
-        let channels = self
-            .database
-            .get_channels_for_client(&self.nickname)
-            .unwrap();
+    pub(super) fn send_quit_notification(&mut self, nickname: &str, message: &str) {
+        let quit_notification = Notification::quit(nickname, message);
+        let channels = self.database.get_channels_for_client(nickname).unwrap();
         for channel in channels {
-            self.send_message_to_local_clients_on_channel(&notification, &channel);
+            self.send_message_to_local_clients_on_channel(&quit_notification, &channel);
         }
-
-        self.send_message_to_all_servers(&notification);
+        self.send_message_to_all_servers(&quit_notification);
     }
 
     pub(super) fn send_squit_notification(&mut self, servername: &str, comment: Option<String>) {

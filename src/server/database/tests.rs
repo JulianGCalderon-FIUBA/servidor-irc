@@ -1,8 +1,10 @@
 use crate::server::{
     connection::Connection,
     consts::modes::ChannelFlag,
-    data_structures::{ChannelConfiguration, ClientInfo, ServerInfo},
-    testing::{dummy_client, dummy_database, dummy_external_client, dummy_server},
+    data_structures::{ChannelConfiguration, ClientInfo},
+    testing::{
+        dummy_client, dummy_database, dummy_distant_server, dummy_external_client, dummy_server,
+    },
 };
 
 #[test]
@@ -574,7 +576,7 @@ fn external_client_is_not_local() {
 fn can_add_distant_server() {
     let database = dummy_database();
 
-    let distant = ServerInfo::new("servername".to_string(), "serverinfo".to_string(), 2);
+    let distant = dummy_distant_server("servername");
 
     assert!(!database.contains_server("servername"));
     database.add_distant_server(distant);
