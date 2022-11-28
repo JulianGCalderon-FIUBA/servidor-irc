@@ -9,7 +9,7 @@ use gtk4 as gtk;
 
 use crate::views::widgets_creation::create_button_with_margin;
 
-use super::{ADD_BUTTON_CSS, CURRENT_CHAT_TITLE_CSS, WELCOME_MESSAGE};
+use super::{ADD_BUTTON_CSS, CURRENT_CHAT_TITLE_CSS, WELCOME_MESSAGE, WELCOME_MESSAGE_CSS};
 
 pub fn create_add_button(label: &str) -> Button {
     let add_button = create_button_with_margin(label);
@@ -60,6 +60,6 @@ pub fn create_welcome_label() -> Label {
         .margin_end(12)
         .halign(Center)
         .build();
-    message.add_css_class(CURRENT_CHAT_TITLE_CSS);
+    message.add_css_class(WELCOME_MESSAGE_CSS);
     message
 }
