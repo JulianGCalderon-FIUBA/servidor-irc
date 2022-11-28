@@ -288,9 +288,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let (_, _, trail) = arguments;
         let message = trail.unwrap_or_else(|| self.nickname.clone());
 
-        self.database.disconnect_client(&self.nickname);
+        let nickname = self.nickname.clone();
+        self.database.disconnect_client(&nickname);
 
-        self.send_quit_notification(&message);
+        self.send_quit_notification(&nickname, &message);
 
         self.stream.send(&CommandResponse::quit(&message))?;
 
@@ -316,7 +317,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
             for client in server_clients {
                 self.database.disconnect_client(&client.nickname());
-                self.send_quit_notification("Net split");
+                self.send_quit_notification(&client.nickname(), "Net split");
             }
 
             // preguntar si hay que desconectarlos o eliminarlos

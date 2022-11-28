@@ -45,6 +45,10 @@ pub fn dummy_external_client(nickname: &str, servername: &str) -> ExternalClient
         .unwrap()
 }
 
+pub fn dummy_distant_server(servername: &str) -> ServerInfo {
+    ServerInfo::new(servername.to_string(), "serverinfo".to_string(), 2)
+}
+
 // pub fn dummy_distant_client(
 //     nickname: &str,
 //     servername: &str,

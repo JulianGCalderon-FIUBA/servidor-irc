@@ -97,9 +97,9 @@ impl Display for ErrorReply {
                 format!("400 {command} :{message}")
             }
             ErrorReply::NoPrivileges481 => {
-                ":Permission Denied- You're not an IRC operator".to_string()
+                "481 :Permission Denied- You're not an IRC operator".to_string()
             }
-            ErrorReply::NoSuchServer402 { server } => format!("{server} :No such server"),
+            ErrorReply::NoSuchServer402 { server } => format!("402 {server} :No such server"),
         };
         write!(f, "{string}")
     }
