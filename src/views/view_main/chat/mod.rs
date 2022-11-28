@@ -49,6 +49,7 @@ impl MainView {
         chat.append(&self.current_chat);
         chat.append(&self.scrollwindow_chat);
         chat.append(&message_sender_box);
+        chat.append(&self.welcome_label);
         chat
     }
 
