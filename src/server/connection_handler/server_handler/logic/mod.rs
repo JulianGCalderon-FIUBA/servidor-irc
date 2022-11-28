@@ -255,6 +255,7 @@ impl<C: Connection> ServerHandler<C> {
         mode_arguments.reverse();
 
         let mut mode_requests = parse_channel_mode_string(mode_string, mode_arguments);
+
         let request = mode_requests.remove(0);
 
         self.handle_channel_mode_request(&channel, request);

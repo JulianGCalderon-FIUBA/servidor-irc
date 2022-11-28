@@ -20,7 +20,9 @@ impl<C: Connection> ClientHandler<C> {
         channel: &str,
         request: ChannelModeRequest,
     ) -> io::Result<()> {
-        let result = match request.clone() {
+        eprintln!("{request}");
+
+        match request {
             ChannelModeRequest::AddBanmask(banmask) => self.add_banmask_request(channel, banmask),
             ChannelModeRequest::AddOperator(operator) => {
                 self.add_operator_request(channel, operator)
@@ -41,28 +43,23 @@ impl<C: Connection> ClientHandler<C> {
             ChannelModeRequest::UnsetLimit() => self.unset_limit_request(channel),
             ChannelModeRequest::UnsetKey() => self.unset_key_request(channel),
             ChannelModeRequest::UnsetFlag(flag) => self.unset_channel_flag_request(channel, flag),
-
             ChannelModeRequest::UnknownMode(character) => {
-                return self.unknown_channel_mode_request(character)
+                self.unknown_channel_mode_request(character)
             }
-            ChannelModeRequest::NeedArgument(character) => {
-                return self.need_argument_request(character)
-            }
+            ChannelModeRequest::NeedArgument(character) => self.need_argument_request(character),
             ChannelModeRequest::InvalidArgument(character, argument) => {
-                return self.invalid_argument_request(character, argument)
+                self.invalid_argument_request(character, argument)
             }
-            ChannelModeRequest::GetBanmasks => return self.get_banmasks_request(channel),
-        };
+            ChannelModeRequest::GetBanmasks => self.get_banmasks_request(channel),
+        }
 
-        let sender = &self.nickname;
-        let target = channel;
-        let request = request.to_string();
+        // let sender = &self.nickname;
+        // let target = channel;
+        // let request = request.to_string();
 
-        let notification = Notification::mode(sender, target, &request);
-        self.send_message_to_local_clients_on_channel(&notification, channel);
-        self.send_message_to_all_servers(&notification);
-
-        result
+        // let notification = Notification::mode(sender, target, &request);
+        // self.send_message_to_local_clients_on_channel(&notification, channel);
+        // self.send_message_to_all_servers(&notification);
     }
 
     fn add_banmask_request(&mut self, channel: &str, banmask: String) -> io::Result<()> {

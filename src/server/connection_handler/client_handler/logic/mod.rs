@@ -269,6 +269,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         let target = params.remove(0);
 
+        println!("{}", target);
+
         if target.starts_with([DISTRIBUTED_CHANNEL, LOCAL_CHANNEL]) {
             self.mode_command_for_channel(target, params)?;
         } else {
@@ -369,6 +371,7 @@ impl<C: Connection> ClientHandler<C> {
         mode_arguments.reverse();
 
         let mode_requests = parse_channel_mode_string(mode_string, mode_arguments);
+
         for request in mode_requests {
             self.handle_channel_mode_request(&channel, request)?;
         }

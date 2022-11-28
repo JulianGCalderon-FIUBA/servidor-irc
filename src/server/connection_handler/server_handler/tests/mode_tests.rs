@@ -20,15 +20,16 @@ fn mode_is_relayed_to_all_other_servers() {
         .database
         .add_immediate_server(dummy_server("servername3"));
 
+    let prefix = Some("sender".to_string());
     let parameters = vec![
         "#channel".to_string(),
         "+b".to_string(),
         "banmask".to_string(),
     ];
-    handler.mode_command((None, parameters, None)).unwrap();
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!(
-        "MODE #channel +b banmask\r\n",
+        ":sender MODE #channel +b banmask\r\n",
         handler
             .database
             .get_server_stream("servername2")
@@ -36,7 +37,7 @@ fn mode_is_relayed_to_all_other_servers() {
             .read_wbuf_to_string()
     );
     assert_eq!(
-        "MODE #channel +b banmask\r\n",
+        ":sender MODE #channel +b banmask\r\n",
         handler
             .database
             .get_server_stream("servername3")
@@ -53,7 +54,8 @@ fn mode_is_never_relayed_to_sending_server() {
         .add_external_client(dummy_external_client("nickname1", "servername1"));
 
     let parameters = vec!["#channel".to_string(), "+p".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
 }
@@ -72,10 +74,11 @@ fn mode_is_relayed_to_local_clients_on_channel() {
         .add_client_to_channel("nickname2", "#channel");
 
     let parameters = vec!["#channel".to_string(), "+s".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!(
-        "MODE #channel +s\r\n",
+        ":sender MODE #channel +s\r\n",
         handler
             .database
             .get_local_stream("nickname2")
@@ -110,7 +113,8 @@ fn mode_adds_channop() {
         "+o".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
 }
 
@@ -133,7 +137,8 @@ fn mode_removes_channop() {
         "-o".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert!(handler.database.is_channel_operator("#channel", "nickname"));
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
@@ -155,7 +160,8 @@ fn mode_sets_limit_to_channel() {
         .is_none());
 
     let parameters = vec!["#channel".to_string(), "+l".to_string(), "5".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!(
         handler.database.get_channel_limit("#channel").unwrap(),
@@ -179,7 +185,8 @@ fn mode_unsets_channel_limit() {
     );
 
     let parameters = vec!["#channel".to_string(), "-l".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert!(handler
         .database
@@ -208,7 +215,8 @@ fn mode_sets_banmask() {
         "+b".to_string(),
         "banmask".to_string(),
     ];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     let masks = vec!["banmask".to_string()];
 
@@ -240,7 +248,8 @@ fn mode_unsets_banmask() {
         "-b".to_string(),
         "banmask".to_string(),
     ];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     let masks = vec!["banmask2".to_string()];
 
@@ -254,7 +263,8 @@ fn mode_unsets_banmask() {
         "-b".to_string(),
         "banmask2".to_string(),
     ];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert!(handler
         .database
@@ -282,7 +292,8 @@ fn mode_adds_speaker_to_channel() {
         "+v".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert!(handler.database.is_channel_speaker("#channel", "nick2"));
 }
@@ -307,7 +318,8 @@ fn mode_removes_speakers_from_channel() {
         "-v".to_string(),
         "nick2".to_string(),
     ];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
 }
@@ -328,7 +340,8 @@ fn mode_sets_channel_key() {
         .is_none());
 
     let parameters = vec!["#channel".to_string(), "+k".to_string(), "key".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!(
         handler.database.get_channel_key("#channel").unwrap(),
@@ -354,7 +367,8 @@ fn mode_unsets_channel_key() {
     );
 
     let parameters = vec!["#channel".to_string(), "-k".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert!(handler
         .database
@@ -377,7 +391,8 @@ fn mode_sets_and_unsets_private_flag() {
         .channel_has_mode("#channel", &ChannelFlag::Private));
 
     let mut parameters = vec!["#channel".to_string(), "+p".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
@@ -386,7 +401,8 @@ fn mode_sets_and_unsets_private_flag() {
 
     parameters = vec!["#channel".to_string(), "-p".to_string()];
 
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
@@ -408,7 +424,8 @@ fn mode_sets_and_unsets_secret_flag() {
         .channel_has_mode("#channel", &ChannelFlag::Secret));
 
     let mut parameters = vec!["#channel".to_string(), "+s".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
@@ -417,7 +434,8 @@ fn mode_sets_and_unsets_secret_flag() {
 
     parameters = vec!["#channel".to_string(), "-s".to_string()];
 
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
@@ -439,7 +457,8 @@ fn mode_sets_and_unsets_invite_only_flag() {
         .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
 
     let mut parameters = vec!["#channel".to_string(), "+i".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
@@ -448,7 +467,8 @@ fn mode_sets_and_unsets_invite_only_flag() {
 
     parameters = vec!["#channel".to_string(), "-i".to_string()];
 
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
@@ -470,7 +490,8 @@ fn mode_sets_and_unsets_topic_flag() {
         .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
 
     let mut parameters = vec!["#channel".to_string(), "+t".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
@@ -479,7 +500,8 @@ fn mode_sets_and_unsets_topic_flag() {
 
     parameters = vec!["#channel".to_string(), "-t".to_string()];
 
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
@@ -500,7 +522,8 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
         .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
 
     let mut parameters = vec!["#channel".to_string(), "+n".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
@@ -509,7 +532,8 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
 
     parameters = vec!["#channel".to_string(), "-n".to_string()];
 
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
@@ -531,7 +555,8 @@ fn mode_sets_and_unsets_moderated_flag() {
         .channel_has_mode("#channel", &ChannelFlag::Moderated));
 
     let mut parameters = vec!["#channel".to_string(), "+m".to_string()];
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
@@ -540,7 +565,8 @@ fn mode_sets_and_unsets_moderated_flag() {
 
     parameters = vec!["#channel".to_string(), "-m".to_string()];
 
-    handler.mode_command((None, parameters, None)).unwrap();
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
