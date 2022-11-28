@@ -5,7 +5,7 @@ fn pass_fails_with_empty_params() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.pass_command(parameters).unwrap();
+    handler.pass_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 PASS :Not enough parameters\r\n",
@@ -18,10 +18,10 @@ fn pass_sets_connection_password() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec!["pass".to_string()];
-    handler.pass_command(parameters).unwrap();
+    handler.pass_command((None, parameters, None)).unwrap();
 
     let parameters = vec!["pass2".to_string()];
-    handler.pass_command(parameters).unwrap();
+    handler.pass_command((None, parameters, None)).unwrap();
 
     assert_eq!("pass2", handler.attributes.get("password").unwrap())
 }
@@ -31,10 +31,10 @@ fn pass_fails_after_nick() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec!["nick".to_string()];
-    handler.nick_command(parameters).unwrap();
+    handler.nick_command((None, parameters, None)).unwrap();
 
     let parameters = vec!["pass".to_string()];
-    handler.pass_command(parameters).unwrap();
+    handler.pass_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
     assert_eq!("462 :You may not reregister", responses[0]);

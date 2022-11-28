@@ -1,5 +1,4 @@
-mod channel;
-mod client;
+mod database_error;
 mod database_handle;
 mod database_message;
 mod handlers;
@@ -7,51 +6,54 @@ mod handlers;
 #[cfg(test)]
 mod tests;
 
-use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
 use std::sync::mpsc::{self, Receiver};
 use std::thread::{self, JoinHandle};
 
-pub use channel::Channel;
-pub use client::{Client, ClientBuilder, ClientInfo};
+use crate::server::data_structures::*;
+
+use database_message::DatabaseMessage::*;
+
 pub use database_handle::DatabaseHandle;
-
-use database_message::DatabaseMessage::{
-    AddClient, AddClientToChannel, ContainsChannel, ContainsClient, DisconnectClient,
-    GetAllChannels, GetAllClients, GetChannelsForClient, GetClientsForMask, GetClientsForNickMask,
-    GetClientsFromChannel, GetStream, IsClientInChannel, IsServerOperator, RemoveClientFromChannel,
-    SetServerOperator, UpdateNickname,
-};
-
-use self::database_message::DatabaseMessage;
+use database_message::DatabaseMessage;
 
 use super::connection::Connection;
 /// Represents a Database that implements ClientTrait.
 pub struct Database<C: Connection> {
     receiver: Receiver<DatabaseMessage<C>>,
-    clients: HashMap<String, Rc<RefCell<Client<C>>>>,
-    channels: HashMap<String, Channel<C>>,
+    info: ServerInfo,
     credentials: HashMap<String, String>,
+
+    local_clients: HashMap<String, LocalClient<C>>,
+    external_clients: HashMap<String, ExternalClient>,
+    channels: HashMap<String, Channel>,
+
+    immediate_servers: HashMap<String, ImmediateServer<C>>,
+    distant_servers: HashMap<String, ServerInfo>,
 }
 
 impl<C: Connection> Database<C> {
     /// Returns new [`DatabaseHandle`] and starts listening for requests.
-    pub fn start() -> (DatabaseHandle<C>, JoinHandle<()>) {
+    pub fn start(servername: String, serverinfo: String) -> (DatabaseHandle<C>, JoinHandle<()>) {
         let (sender, receiver) = mpsc::channel();
 
-        let join_handle = thread::spawn(|| Database::<C>::new(receiver).run());
+        let join_handle =
+            thread::spawn(|| Database::<C>::new(receiver, servername, serverinfo).run());
         let database_handle = DatabaseHandle::new(sender);
 
         (database_handle, join_handle)
     }
 
-    fn new(receiver: Receiver<DatabaseMessage<C>>) -> Self {
+    fn new(receiver: Receiver<DatabaseMessage<C>>, servername: String, serverinfo: String) -> Self {
         let mut database = Self {
             receiver,
-            clients: HashMap::new(),
-            channels: HashMap::new(),
-            credentials: HashMap::new(),
+            info: ServerInfo::new(servername, serverinfo, 0),
+            credentials: Default::default(),
+            local_clients: Default::default(),
+            external_clients: Default::default(),
+            channels: Default::default(),
+            immediate_servers: Default::default(),
+            distant_servers: Default::default(),
         };
 
         database
@@ -69,143 +71,142 @@ impl<C: Connection> Database<C> {
 
     fn handle_message(&mut self, request: DatabaseMessage<C>) {
         match request {
-            AddClient { client } => self.add_client(client),
-            GetStream {
-                nickname,
-                respond_to: response,
-            } => self.handle_get_stream_request(&nickname, response),
-            DisconnectClient { nickname } => self.disconnect_client(&nickname),
-            SetServerOperator { nickname } => self.set_server_operator(&nickname),
+            DisconnectClient { nickname } => self.handle_disconnect_client(nickname),
+            SetServerOperator { nickname } => self.handle_set_server_operator(nickname),
             IsServerOperator {
                 nickname,
                 respond_to: response,
-            } => self.handle_is_server_operator(&nickname, response),
-            //IsOnline { nickname, response } => self.is_online_request(&nickname, response),
+            } => self.handle_is_server_operator(nickname, response),
+            //IsOnline { nickname, response } => self.is_online_request(nickname, response),
             ContainsClient {
                 nickname,
                 respond_to: response,
-            } => self.handle_contains_client_request(&nickname, response),
+            } => self.handle_contains_client(nickname, response),
             ContainsChannel {
                 channel,
                 respond_to: response,
-            } => self.handle_contains_channel(&channel, response),
+            } => self.handle_contains_channel(channel, response),
             AddClientToChannel { nickname, channel } => {
-                self.add_client_to_channel(&nickname, &channel)
+                self.handle_add_client_to_channel(nickname, channel)
             }
             RemoveClientFromChannel { nickname, channel } => {
-                self.remove_client_from_channel(&nickname, &channel)
+                self.handle_remove_client_from_channel(nickname, channel)
             }
             IsClientInChannel {
                 nickname,
                 channel,
                 respond_to,
-            } => self.handle_is_client_in_channel(&nickname, &channel, respond_to),
+            } => self.handle_is_client_in_channel(nickname, channel, respond_to),
             GetChannelsForClient {
                 nickname,
                 respond_to,
-            } => self.handle_get_channels_for_client(&nickname, respond_to),
-            GetClientsFromChannel {
+            } => self.handle_get_channels_for_client(nickname, respond_to),
+            GetChannelClients {
                 channel,
                 respond_to,
-            } => self.handle_get_clients_for_channel(&channel, respond_to),
+            } => self.handle_get_channel_clients(channel, respond_to),
             GetAllClients { respond_to } => self.handle_get_all_clients(respond_to),
             GetAllChannels { respond_to } => self.handle_get_all_channels(respond_to),
-            GetClientsForMask { mask, respond_to } => {
-                self.handle_get_clients_for_mask(&mask, respond_to)
-            }
-            GetClientsForNickMask {
-                nickmask,
-                respond_to,
-            } => self.handle_get_clients_for_nickmask(&nickmask, respond_to),
             UpdateNickname {
                 old_nickname,
                 new_nickname,
-            } => self.handle_update_nickname(&old_nickname, &new_nickname),
-            DatabaseMessage::AreCredentialsValid {
+            } => self.handle_update_nickname(old_nickname, new_nickname),
+            AreCredentialsValid {
                 username,
                 password,
                 respond_to,
-            } => self.handle_are_credentials_valid(&username, &password, respond_to),
-            DatabaseMessage::SetAwayMessage { message, nickname } => {
-                self.handle_set_away_message(&message, &nickname)
-            }
-            DatabaseMessage::GetAwayMessage {
+            } => self.handle_are_credentials_valid(username, password, respond_to),
+            SetAwayMessage { message, nickname } => self.handle_set_away_message(message, nickname),
+            GetAwayMessage {
                 nickname,
                 respond_to,
-            } => self.handle_get_away_message(&nickname, respond_to),
-            DatabaseMessage::SetChannelTopic { channel, topic } => {
-                self.set_channel_topic(&channel, &topic)
-            }
-            DatabaseMessage::GetChannelTopic {
+            } => self.handle_get_away_message(nickname, respond_to),
+            SetChannelTopic { channel, topic } => self.handle_set_channel_topic(channel, topic),
+            GetChannelTopic {
                 channel,
                 respond_to,
-            } => self.handle_get_channel_topic(&channel, respond_to),
-            DatabaseMessage::SetChannelKey { channel, key } => {
-                self.handle_set_channel_key(channel, key)
-            }
-            DatabaseMessage::GetChannelKey {
+            } => self.handle_get_channel_topic(channel, respond_to),
+            SetChannelKey { channel, key } => self.handle_set_channel_key(channel, key),
+            GetChannelKey {
                 channel,
                 respond_to,
             } => self.handle_get_channel_key(channel, respond_to),
-            DatabaseMessage::SetChannelMode { channel, mode } => {
-                self.handle_set_mode(channel, mode)
-            }
-            DatabaseMessage::UnsetChannelMode { channel, mode } => {
-                self.handle_unset_mode(channel, mode)
-            }
-            DatabaseMessage::ChannelHasMode {
+            SetChannelMode { channel, flag } => self.handle_set_channel_mode(channel, flag),
+            UnsetChannelMode { channel, flag } => self.handle_unset_channel_mode(channel, flag),
+            ChannelHasMode {
                 channel,
-                mode,
                 respond_to,
-            } => self.handle_channel_has_mode(channel, mode, respond_to),
-            DatabaseMessage::SetLimit { channel, limit } => {
-                self.handle_set_channel_limit(channel, limit)
-            }
-            DatabaseMessage::GetLimit {
+                flag,
+            } => self.handle_channel_has_mode(channel, flag, respond_to),
+            SetChannelLimit { channel, limit } => self.handle_set_channel_limit(channel, limit),
+            GetChannelLimit {
                 channel,
                 respond_to,
             } => self.handle_get_channel_limit(channel, respond_to),
-            DatabaseMessage::AddChanop { channel, nickname } => {
-                self.handle_add_channop(channel, nickname)
+            AddChanop { channel, nickname } => self.handle_add_channop(channel, nickname),
+            RemoveChanop { channel, nickname } => self.handle_remove_channop(channel, nickname),
+            AddSpeaker { channel, nickname } => self.handle_add_channel_speaker(channel, nickname),
+            RemoveSpeaker { channel, nickname } => {
+                self.handle_remove_channel_speaker(channel, nickname)
             }
-            DatabaseMessage::RemoveChanop { channel, nickname } => {
-                self.handle_remove_channop(channel, nickname)
-            }
-            DatabaseMessage::AddSpeaker { channel, nickname } => {
-                self.handle_add_speaker(channel, nickname)
-            }
-            DatabaseMessage::RemoveSpeaker { channel, nickname } => {
-                self.handle_remove_speaker(channel, nickname)
-            }
-            DatabaseMessage::IsChannelSpeaker {
+            IsChannelSpeaker {
                 channel,
                 nickname,
                 respond_to,
             } => self.handle_is_channel_speaker(channel, nickname, respond_to),
-            DatabaseMessage::SetChannelBanMask { channel, mask } => {
-                self.handle_set_channel_banmask(channel, mask)
-            }
-            DatabaseMessage::GetChannelBanMask {
+            AddChannelBanMask { channel, mask } => self.handle_add_channel_banmask(channel, mask),
+            GetChannelBanMask {
                 channel,
                 respond_to,
             } => self.handle_get_channel_banmask(channel, respond_to),
-            DatabaseMessage::UnsetChannelBanMask { channel, mask } => {
-                self.handle_unset_channel_banmask(channel, mask)
+            RemoveChannelBanMask { channel, mask } => {
+                self.handle_remove_channel_banmask(channel, mask)
             }
-            // DatabaseMessage::GetAllChannelModes {
-            //     channel,
-            //     respond_to,
-            // } => self.handle_get_all_channel_modes(channel, respond_to),
-            DatabaseMessage::IsChannelOperator {
+            IsChannelOperator {
                 channel,
                 nickname,
                 respond_to,
-            } => self.handle_is_channel_operator(&channel, &nickname, respond_to),
-            DatabaseMessage::ClientMatchesBanmask {
-                nickname,
-                mask,
+            } => self.handle_is_channel_operator(channel, nickname, respond_to),
+            ContainsServer {
+                servername,
                 respond_to,
-            } => self.handle_clients_matches_banmask(&nickname, &mask, respond_to),
+            } => self.handle_contains_server(servername, respond_to),
+            AddExternalClient { client } => self.handle_add_external_client(client),
+            GetServerName { respond_to } => self.handle_get_servername(respond_to),
+            GetServerInfo { respond_to } => self.handle_get_serverinfo(respond_to),
+            GetChannelConfig {
+                channel,
+                respond_to,
+            } => self.handle_get_channel_config(channel, respond_to),
+            GetServerStream { server, respond_to } => {
+                self.handle_get_server_stream(server, respond_to)
+            }
+            GetAllServers { respond_to } => self.handle_get_all_servers(respond_to),
+            AddDistantServer { server } => self.handle_add_distant_server(server),
+            AddImmediateServer { server } => self.handle_add_immediate_server(server),
+            AddLocalClient { client } => self.handle_add_local_client(client),
+            GetLocalStream {
+                nickname,
+                respond_to,
+            } => self.handle_get_local_stream_request(nickname, respond_to),
+            IsLocalClient {
+                nickname,
+                respond_to,
+            } => self.handle_is_local_client(nickname, respond_to),
+            GetImmediateServer { client, respond_to } => {
+                self.handle_get_immediate_server(client, respond_to)
+            }
+            GetClientInfo { client, respond_to } => self.handle_get_client_info(client, respond_to),
+            IsImmediateServer { server, respond_to } => {
+                self.handle_is_immediate_server(server, respond_to)
+            }
+            RemoveServer { servername } => self.handle_remove_server(servername),
+            SetUserMode { user, flag } => self.handle_set_user_mode(user, flag),
+            UnsetUserMode { user, flag } => self.handle_unset_user_mode(user, flag),
         }
     }
+
+  
+
+    
 }
