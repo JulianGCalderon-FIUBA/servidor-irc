@@ -2,7 +2,7 @@ pub mod requests;
 pub mod widgets_creation;
 
 use gtk::{
-    glib::{GString, Sender},
+    glib::Sender,
     prelude::*,
     Box, Entry,
 };
@@ -27,7 +27,7 @@ const CHAT_CSS: &str = "chat";
 const MESSAGE_BOX_CSS: &str = "message_box";
 
 impl MainView {
-    pub fn create_chat(&mut self, nickname: &GString) -> Box {
+    pub fn create_chat(&mut self) -> Box {
         // self.current_chat.set_label(nickname);
 
         let chat = create_chat_box();

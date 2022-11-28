@@ -13,7 +13,7 @@ use self::requests::{
     add_invite_view_request, quit_channel_request, remove_conversation_request, send_names_request,
 };
 
-use super::{requests::change_conversation_request, MainView};
+use super::MainView;
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
@@ -48,7 +48,6 @@ impl MainView {
         current_conversation: Label,
         sender: Sender<ControllerMessage>,
     ) {
-        let my_nickname = self.user_info.label().unwrap();
         self.quit_channel_button.connect_clicked(move |_| {
             if Self::current_conv_is_channel(current_conversation.label().to_string()) {
                 quit_channel_request(sender.clone());

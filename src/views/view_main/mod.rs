@@ -105,7 +105,7 @@ impl MainView {
         let separator = create_separator(Vertical);
         main_box.append(&separator);
 
-        let chat = self.create_chat(&nickname);
+        let chat = self.create_chat();
         main_box.append(&chat);
 
         let conv_info = self.create_conv_info(&nickname);
