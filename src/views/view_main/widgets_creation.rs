@@ -59,6 +59,7 @@ pub fn create_welcome_box() -> Box {
         .margin_start(20)
         .margin_end(12)
         .halign(Start)
+        .valign(Start)
         .build();
     title.add_css_class(WELCOME_TITLE_CSS);
     let message = Label::builder()
@@ -77,6 +78,7 @@ pub fn create_welcome_box() -> Box {
         .margin_start(10)
         .margin_bottom(10)
         .width_request(660)
+        .height_request(600)
         .valign(Start)
         .valign(Start)
         .build();
