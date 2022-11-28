@@ -5,6 +5,7 @@ use crate::{
     },
 };
 
+#[derive(Clone)]
 pub enum ChannelModeRequest {
     AddBanmask(String),
     GetBanmasks,
@@ -108,5 +109,29 @@ impl ChannelModeRequest {
         }
 
         Self::SetFlag(flag)
+    }
+}
+
+impl std::fmt::Display for ChannelModeRequest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ChannelModeRequest::AddBanmask(banmask) => write!(f, "+b {banmask}"),
+            ChannelModeRequest::AddOperator(operator) => write!(f, "+o {operator}"),
+            ChannelModeRequest::AddSpeaker(speaker) => write!(f, "+v {speaker}"),
+            ChannelModeRequest::RemoveBanmask(banmask) => write!(f, "-b {banmask}"),
+            ChannelModeRequest::RemoveOperator(operator) => write!(f, "-o {operator}"),
+            ChannelModeRequest::RemoveSpeaker(speaker) => write!(f, "-v {speaker}"),
+            ChannelModeRequest::SetFlag(flag) => write!(f, "+{}", flag.to_char()),
+            ChannelModeRequest::SetKey(key) => write!(f, "+k {key}"),
+            ChannelModeRequest::SetLimit(limit) => write!(f, "+l {limit}"),
+            ChannelModeRequest::UnsetLimit() => write!(f, "-l",),
+            ChannelModeRequest::UnsetKey() => write!(f, "-k"),
+            ChannelModeRequest::UnsetFlag(flag) => write!(f, "-{}", flag.to_char()),
+
+            ChannelModeRequest::UnknownMode(_) => Ok(()),
+            ChannelModeRequest::NeedArgument(_) => Ok(()),
+            ChannelModeRequest::InvalidArgument(_, _) => Ok(()),
+            ChannelModeRequest::GetBanmasks => Ok(()),
+        }
     }
 }

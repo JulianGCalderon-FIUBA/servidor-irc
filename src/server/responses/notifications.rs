@@ -67,9 +67,9 @@ pub enum Notification {
         nickname: String,
     },
     Mode {
+        sender: String,
         target: String,
-        mode: String,
-        argument: Option<String>,
+        request: String,
     },
     SQuit {
         sender: Option<String>,
@@ -157,14 +157,11 @@ impl Display for Notification {
                 format!(":{nickname} {TOPIC_COMMAND} {channel} {topic}")
             }
             Notification::Mode {
+                sender,
                 target,
-                mode,
-                argument,
+                request,
             } => {
-                format!(
-                    "{MODE_COMMAND} {target} {mode} {}",
-                    argument.clone().unwrap_or_default()
-                )
+                format!(":{sender} {MODE_COMMAND} {target} {request}",)
             }
             Notification::SQuit {
                 sender,
@@ -299,15 +296,15 @@ impl Notification {
         }
     }
 
-    pub fn mode(target: &str, mode: &str, argument: Option<String>) -> Self {
+    pub fn mode(sender: &str, target: &str, request: &str) -> Self {
+        let sender = sender.to_string();
         let target = target.to_string();
-        let mode = mode.to_string();
-        let argument = argument;
+        let request = request.to_string();
 
         Notification::Mode {
+            sender,
             target,
-            mode,
-            argument,
+            request,
         }
     }
 

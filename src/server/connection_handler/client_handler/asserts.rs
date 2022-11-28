@@ -394,21 +394,13 @@ impl<C: Connection> ClientHandler<C> {
         self.assert_is_in_channel(channel)
     }
 
-    pub fn assert_can_modify_client_status_in_channel(
+    pub fn assert_is_client_in_channel(
         &self,
         channel: &str,
         client: &str,
     ) -> Result<(), ErrorReply> {
         self.assert_exists_client(client)?;
 
-        self.assert_is_client_in_channel(channel, client)
-    }
-
-    pub fn assert_is_client_in_channel(
-        &self,
-        channel: &str,
-        client: &str,
-    ) -> Result<(), ErrorReply> {
         let channel = channel.to_string();
 
         if !self.database.is_client_in_channel(client, &channel) {

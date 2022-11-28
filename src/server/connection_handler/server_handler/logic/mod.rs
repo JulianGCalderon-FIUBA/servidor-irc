@@ -6,13 +6,15 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic,
 };
 
+use crate::server::connection_handler::mode_requests::{
+    parse_channel_mode_string, parse_user_mode_string,
+};
 use crate::server::consts::channel::DISTRIBUTED_CHANNEL;
-use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE};
 use crate::server::data_structures::*;
 
 use super::ServerHandler;
 
-mod mode_requests;
+mod mode_logic;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn nick_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
@@ -153,22 +155,22 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     }
 
     fn mode_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
-        let (_, mut params, _) = arguments;
+        let (prefix, mut params, _) = arguments;
 
-        let channel = params[0].clone();
-        let mode: Vec<char> = params[1].chars().collect();
-        let mut argument = None;
-        if params.len() > 2 {
-            argument = params.pop();
-        }
-        if mode[0] == ADD_MODE {
-            self.handle_add_mode(mode[1], &channel, argument.clone());
-        }
-        if mode[0] == REMOVE_MODE {
-            self.handle_remove_mode(mode[1], &channel, argument.clone());
-        }
+        let sender = prefix.unwrap();
+        let target = params.remove(0);
 
-        self.send_mode_notification(&channel, &params[1], argument);
+        let mode = params.get(0).unwrap().to_string();
+        let argument = params.get(1).map(|s| s.to_string()).unwrap_or_default();
+        let request = format!("{mode} {argument}");
+
+        self.send_mode_notification(&sender, &target, &request);
+
+        if self.is_channel(&target) {
+            self.mode_command_for_channel(target, params);
+        } else {
+            self.mode_command_for_user(target, params);
+        }
 
         Ok(true)
     }
@@ -245,5 +247,25 @@ impl<C: Connection> ServerHandler<C> {
     fn add_server(&mut self, servername: String, serverinfo: String, hopcount: usize) {
         let server = ServerInfo::new(servername, serverinfo, hopcount);
         self.database.add_distant_server(server);
+    }
+
+    fn mode_command_for_channel(&mut self, channel: String, mut args: Vec<String>) {
+        let mode_string = args.remove(0);
+        let mut mode_arguments = args;
+        mode_arguments.reverse();
+
+        let mut mode_requests = parse_channel_mode_string(mode_string, mode_arguments);
+        let request = mode_requests.remove(0);
+
+        self.handle_channel_mode_request(&channel, request);
+    }
+
+    fn mode_command_for_user(&mut self, user: String, mut args: Vec<String>) {
+        let mode_string = args.remove(0);
+
+        let mut mode_requests = parse_user_mode_string(mode_string);
+        let request = mode_requests.remove(0);
+
+        self.handle_user_mode_request(&user, request);
     }
 }

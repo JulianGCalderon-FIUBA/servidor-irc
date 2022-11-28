@@ -6,11 +6,13 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
+use crate::server::connection_handler::mode_requests::{
+    parse_channel_mode_string, parse_user_mode_string,
+};
 use crate::server::consts::channel::{DISTRIBUTED_CHANNEL, LOCAL_CHANNEL};
 use crate::server::data_structures::*;
 use crate::server::responses::{CommandResponse, Notification};
 
-use self::mode_logic::{parse_channel_mode_string, parse_user_mode_string};
 use self::utils::collect_list;
 
 use super::ClientHandler;

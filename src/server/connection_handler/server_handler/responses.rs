@@ -101,13 +101,8 @@ impl<C: Connection> ServerHandler<C> {
         self.send_message_to_all_other_servers(&server_notification);
     }
 
-    pub(super) fn send_mode_notification(
-        &mut self,
-        target: &str,
-        mode: &str,
-        argument: Option<String>,
-    ) {
-        let notification = Notification::mode(target, mode, argument);
+    pub(super) fn send_mode_notification(&mut self, sender: &str, target: &str, request: &str) {
+        let notification = Notification::mode(sender, target, request);
         if self.is_channel(target) {
             self.send_message_to_local_clients_on_channel(&notification, target);
         }
