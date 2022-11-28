@@ -1,13 +1,11 @@
-use gtk::{ prelude::*, Align::Start, Application, ApplicationWindow, Button };
+use gtk::{prelude::*, Align::Start, Application, ApplicationWindow, Button};
 use gtk4 as gtk;
 
 use crate::views::widgets_creation::{
-    build_application_window,
-    create_center_button,
-    create_label,
+    build_application_window, create_center_button, create_label,
 };
 
-use super::widget_creations::{ create_main_box_add_view, create_title };
+use super::widget_creations::{create_main_box_add_view, create_title};
 
 pub struct ChannelMembersView {
     button: Button,

@@ -3,26 +3,24 @@ pub mod controller_message;
 
 use crate::{
     server::connection_handler::consts::commands::{
-        INVITE_COMMAND,
-        JOIN_COMMAND,
-        LIST_COMMAND,
-        NAMES_COMMAND,
-        NICK_COMMAND,
-        PART_COMMAND,
-        PASS_COMMAND,
-        PRIVMSG_COMMAND,
-        USER_COMMAND,
+        INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
+        PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND,
     },
     views::{
         view_register::RegisterView,
-        views_add::{ view_add_channel::AddChannelView, view_invite::InviteView },
-        views_add::{ view_add_client::AddClientView, view_channel_members::ChannelMembersView },
+        views_add::{view_add_channel::AddChannelView, view_invite::InviteView},
+        views_add::{view_add_client::AddClientView, view_channel_members::ChannelMembersView},
     },
 };
 use gtk4 as gtk;
 
-use crate::{ client::Client, views::view_main::MainView, ADDRESS };
-use gtk::{ gdk::Display, glib::{ self }, prelude::*, Application, CssProvider, StyleContext };
+use crate::{client::Client, views::view_main::MainView, ADDRESS};
+use gtk::{
+    gdk::Display,
+    glib::{self},
+    prelude::*,
+    Application, CssProvider, StyleContext,
+};
 
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
@@ -53,7 +51,7 @@ impl Controller {
         StyleContext::add_provider_for_display(
             &Display::default().expect("Could not connect to a display."),
             &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }
 
@@ -94,28 +92,27 @@ impl Controller {
 
         let mut _current_nickname: String = String::from("");
 
-        client.start_async_read(move |message| {
-            match message {
-                Ok(message) => {
-                    let controller_message = to_controller_message(message);
-                    sender.send(controller_message).unwrap();
-                }
-                Err(error) => eprintln!("Failed to read message: {}", error),
+        client.start_async_read(move |message| match message {
+            Ok(message) => {
+                let controller_message = to_controller_message(message);
+                sender.send(controller_message).unwrap();
             }
+            Err(error) => eprintln!("Failed to read message: {}", error),
         });
 
         receiver.attach(None, move |msg| {
             match msg {
-                Register { pass, nickname, username, realname } => {
+                Register {
+                    pass,
+                    nickname,
+                    username,
+                    realname,
+                } => {
                     let pass_command = format!("{} {}", PASS_COMMAND, pass);
                     let nick_command = format!("{} {}", NICK_COMMAND, nickname);
                     let user_command = format!(
                         "{} {} {} {} :{}",
-                        USER_COMMAND,
-                        username,
-                        username,
-                        username,
-                        realname
+                        USER_COMMAND, username, username, username, realname
                     );
                     client.send_raw(&pass_command).expect(ERROR_TEXT);
                     client.send_raw(&nick_command).expect(ERROR_TEXT);
@@ -132,9 +129,8 @@ impl Controller {
                     main_view.send_message(message.to_string(), current_conv.clone());
                 }
                 AddViewToAddClient {} => {
-                    add_client_window = AddClientView::new(sender_clone.clone()).get_view(
-                        app_clone.clone()
-                    );
+                    add_client_window =
+                        AddClientView::new(sender_clone.clone()).get_view(app_clone.clone());
                     add_client_window.show();
                 }
                 JoinChannel { channel } => {
@@ -147,19 +143,23 @@ impl Controller {
                     add_client_window.close();
                     main_view.add_client(client);
                 }
-                ReceivePrivMessage { sender_nickname, message, channel } => {
-                    if channel.is_some() {
+                ReceivePrivMessage {
+                    sender_nickname,
+                    message,
+                    channel,
+                } => {
+                    if let Some(..) = channel {
                         main_view.receive_priv_channel_message(
                             message,
                             sender_nickname,
                             channel.unwrap(),
-                            current_conv.clone()
+                            current_conv.clone(),
                         );
                     } else {
                         main_view.receive_priv_client_message(
                             message,
                             sender_nickname,
-                            current_conv.clone()
+                            current_conv.clone(),
                         );
                     }
                 }
@@ -178,10 +178,8 @@ impl Controller {
                 AddInviteView {} => {
                     let my_channels = main_view.get_my_channels();
                     if !my_channels.is_empty() {
-                        invite_window = InviteView::new(sender_clone.clone()).get_view(
-                            app_clone.clone(),
-                            my_channels
-                        );
+                        invite_window = InviteView::new(sender_clone.clone())
+                            .get_view(app_clone.clone(), my_channels);
                         invite_window.show();
                     }
                 }
@@ -200,17 +198,19 @@ impl Controller {
                 ReceiveListChannels { channels } => {
                     add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
                         app_clone.clone(),
-                        Self::not_my_channels(channels, main_view.get_my_channels())
+                        Self::not_my_channels(channels, main_view.get_my_channels()),
                     );
                     add_channel_window.show();
                 }
                 SendNamesMessage {} => {
                     client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
                 }
-                ReceiveNamesChannels { channels_and_clients } => {
+                ReceiveNamesChannels {
+                    channels_and_clients,
+                } => {
                     channel_members_window = ChannelMembersView::new().get_view(
                         app_clone.clone(),
-                        channels_and_clients[&current_conv].clone()
+                        channels_and_clients[&current_conv].clone(),
                     );
                     channel_members_window.show();
                 }

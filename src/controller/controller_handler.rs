@@ -84,5 +84,5 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
 }
 
 fn is_channel(parameter: String) -> bool {
-    parameter.starts_with("#")
+    parameter.starts_with('#')
 }

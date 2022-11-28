@@ -76,8 +76,8 @@ impl MainView {
 
         println!("Added to {}", channel);
 
-        self.messages.insert(channel.clone().to_string(), vec![]);
-        self.messages_senders.insert(channel.clone().to_string(), vec![]);
+        self.messages.insert(channel.to_string(), vec![]);
+        self.messages_senders.insert(channel.to_string(), vec![]);
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
@@ -92,7 +92,7 @@ impl MainView {
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
 
-        self.messages.insert(client.clone().to_string(), vec![]);
+        self.messages.insert(client.to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
@@ -114,12 +114,12 @@ impl MainView {
 
         if self.messages.contains_key(&last_conv) {
             let messages = self.messages.get(&last_conv).unwrap();
-            for number in 0..messages.len() {
-                self.message_box.remove(&messages[number]);
+            for message in messages {
+                self.message_box.remove(message);
                 if
                     self.messages_senders.get(&last_conv).is_some() &&
-                    self.messages_senders.get(&last_conv).unwrap().len() > 0 &&
-                    messages[number].css_classes()[0] == "received_message"
+                    !self.messages_senders.get(&last_conv).unwrap().is_empty() &&
+                    message.css_classes()[0] == "received_message"
                 {
                     let senders = self.messages_senders.get(&last_conv).unwrap();
                     self.message_box.remove(&senders[cont]);
@@ -127,22 +127,22 @@ impl MainView {
                 }
             }
         }
-        
+
         cont = 0;
         if self.messages.contains_key(&conversation_label) {
             let messages = self.messages.get(&conversation_label).unwrap();
 
-            for number in 0..messages.len() {
+            for message in messages {
                 if
                     self.messages_senders.get(&conversation_label).is_some() &&
-                    self.messages_senders.get(&conversation_label).unwrap().len() > 0 &&
-                    messages[number].css_classes()[0] == "received_message"
+                    !self.messages_senders.get(&conversation_label).unwrap().is_empty() &&
+                    message.css_classes()[0] == "received_message"
                 {
                     let senders = self.messages_senders.get(&conversation_label).unwrap();
                     self.message_box.append(&senders[cont]);
                     cont += 1;
                 }
-                self.message_box.append(&messages[number]);
+                self.message_box.append(message);
             }
         }
 
