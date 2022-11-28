@@ -96,7 +96,7 @@ impl MainView {
         self.current_chat.set_label("");
         self.scrollwindow_chat.set_visible(false);
         self.send_message.set_visible(false);
-        self.welcome_label.set_visible(true);
+        self.welcome_box.set_visible(true);
     }
 
     pub fn get_my_channels(&mut self) -> Vec<String> {

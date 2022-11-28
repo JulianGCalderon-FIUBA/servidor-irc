@@ -22,7 +22,7 @@ use self::{
     chat::widgets_creation::create_scrollwindow_chat,
     widgets_creation::{
         create_add_button, create_channels_and_client_box, create_current_chat, create_message_box,
-        create_scrollwindow_sidebar, create_welcome_label,
+        create_scrollwindow_sidebar, create_welcome_box,
     },
 };
 
@@ -43,7 +43,7 @@ pub struct MainView {
     pub clients_buttons: Vec<Button>,
     pub scrollwindow_clients: ScrolledWindow,
     pub add_client: Button,
-    pub welcome_label: Label,
+    pub welcome_box: Box,
     pub current_chat: Label,
     scrollwindow_chat: ScrolledWindow,
     pub message_box: Box,
@@ -65,8 +65,10 @@ const MEMBERS_BUTTON_TEXT: &str = "Members";
 const INVITE_BUTTON_TEXT: &str = "Invite to channel";
 const ADD_BUTTON_CSS: &str = "add";
 const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
-const WELCOME_MESSAGE: &str = "Welcome to Lemon Pie IRC!\nOpen a new chat to start...";
+const WELCOME_MESSAGE: &str = "Open a new chat to start...";
 const WELCOME_MESSAGE_CSS: &str = "welcome_message";
+const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
+const WELCOME_TITLE_CSS: &str = "welcome_title";
 
 impl MainView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
@@ -79,7 +81,7 @@ impl MainView {
             clients_buttons: vec![],
             scrollwindow_clients: create_scrollwindow_sidebar(),
             add_client: create_add_button(ADD_BUTTON_TEXT),
-            welcome_label: create_welcome_label(),
+            welcome_box: create_welcome_box(),
             current_chat: create_current_chat(""),
             scrollwindow_chat: create_scrollwindow_chat(),
             message_box: create_message_box(),
