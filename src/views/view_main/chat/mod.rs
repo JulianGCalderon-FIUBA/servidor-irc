@@ -45,11 +45,13 @@ impl MainView {
 
         self.connect_send_button(self.input.clone(), self.sender.clone());
         message_sender_box.append(&self.send_message);
+        self.send_message.set_visible(false);
+        
 
         chat.append(&self.current_chat);
         chat.append(&self.scrollwindow_chat);
-        chat.append(&message_sender_box);
         chat.append(&self.welcome_label);
+        chat.append(&message_sender_box);
         chat
     }
 
