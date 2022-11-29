@@ -40,6 +40,11 @@ impl<C: Connection> ClientHandler<C> {
         self.send_whois_operator_response(nickname)?;
         self.send_whois_channels_response(nickname)?;
 
+        if let Some(message) = client_info.away {
+            self.stream
+                .send(&CommandResponse::away(nickname, &message))?;
+        }
+
         self.stream.send(&CommandResponse::end_of_whois(nickname))?;
 
         Ok(())
