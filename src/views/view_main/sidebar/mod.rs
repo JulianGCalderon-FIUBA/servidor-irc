@@ -73,13 +73,17 @@ impl MainView {
     pub fn add_channel(&mut self, channel: GString) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
-        self.connect_channel_client_button(channel_button.clone(), channel.clone(), self.sender.clone());
+        self.connect_channel_client_button(
+            channel_button.clone(),
+            channel.clone(),
+            self.sender.clone(),
+        );
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
 
         println!("Added to {}", channel);
 
-        self.messages.insert(channel.clone().to_string(), vec![]);
+        self.messages.insert(channel.to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
@@ -87,11 +91,15 @@ impl MainView {
     pub fn add_client(&mut self, client: GString) {
         change_conversation_request(client.clone(), self.sender.clone());
         let client_button = create_button_with_margin(&client);
-        self.connect_channel_client_button(client_button.clone(), client.clone(), self.sender.clone());
+        self.connect_channel_client_button(
+            client_button.clone(),
+            client.clone(),
+            self.sender.clone(),
+        );
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
 
-        self.messages.insert(client.clone().to_string(), vec![]);
+        self.messages.insert(client.to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
@@ -112,19 +120,19 @@ impl MainView {
         self.scrollwindow_chat.set_visible(true);
         self.send_message.set_sensitive(true);
         self.welcome_box.set_visible(false);
-        
+
         if self.messages.contains_key(&last_conv) {
             for message in self.messages.get(&last_conv).unwrap() {
                 self.message_box.remove(message);
             }
-        }        
+        }
 
         if self.messages.contains_key(&conversation_label) {
             for message in self.messages.get(&conversation_label).unwrap() {
                 self.message_box.append(message);
             }
         }
-        
+
         // self.messages = vec![];
 
         self.quit_channel_button.set_visible(true);
