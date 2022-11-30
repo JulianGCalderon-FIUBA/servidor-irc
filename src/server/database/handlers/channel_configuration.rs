@@ -33,22 +33,22 @@ impl<C: Connection> Database<C> {
         respond_to.send(key).unwrap();
     }
 
-    pub fn handle_channel_has_mode(
+    pub fn handle_channel_has_flag(
         &self,
         channel: String,
         flag: ChannelFlag,
         respond_to: Sender<bool>,
     ) {
-        let has_mode = self.channel_has_mode(channel, &flag);
+        let has_mode = self.channel_has_flag(channel, flag);
         respond_to.send(has_mode).unwrap();
     }
 
-    pub fn handle_set_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
-        self.set_channel_mode(channel_name, flag);
+    pub fn handle_set_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
+        self.set_channel_flag(channel_name, flag);
     }
 
-    pub fn handle_unset_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
-        self.unset_channel_mode(channel_name, flag);
+    pub fn handle_unset_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
+        self.unset_channel_flag(channel_name, flag);
     }
 
     pub fn handle_set_channel_limit(&mut self, channel_name: String, limit: Option<usize>) {
@@ -165,19 +165,19 @@ impl<C: Connection> Database<C> {
         channel.remove_operator(&nickname);
     }
 
-    fn set_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+    fn set_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
         let channel = some_or_return!(self.channels.get_mut(&channel_name));
         debug_print!("Setting {channel_name}'s mode {flag:?}");
 
         channel.set_mode(flag);
     }
-    fn unset_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+    fn unset_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
         let channel = some_or_return!(self.channels.get_mut(&channel_name));
         debug_print!("Unsetting {channel_name}'s mode {flag:?}");
 
-        channel.unset_mode(&flag);
+        channel.unset_mode(flag);
     }
-    fn channel_has_mode(&self, channel: String, mode: &ChannelFlag) -> bool {
+    fn channel_has_flag(&self, channel: String, mode: ChannelFlag) -> bool {
         let channel = some_or_return!(self.channels.get(&channel), false);
         channel.has_mode(mode)
     }

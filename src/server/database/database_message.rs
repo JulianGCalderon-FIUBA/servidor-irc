@@ -9,11 +9,11 @@ use super::database_error::DatabaseError;
 
 /// Possible messages or requests a Database can receive.
 pub enum DatabaseMessage<C: Connection> {
-    AddChannelBanMask {
+    AddChannelBanmask {
         channel: String,
         mask: String,
     },
-    AddChanop {
+    AddChannelOperator {
         channel: String,
         nickname: String,
     },
@@ -33,7 +33,7 @@ pub enum DatabaseMessage<C: Connection> {
     AddLocalClient {
         client: LocalClient<C>,
     },
-    AddSpeaker {
+    AddChannelSpeaker {
         channel: String,
         nickname: String,
     },
@@ -42,7 +42,7 @@ pub enum DatabaseMessage<C: Connection> {
         password: String,
         respond_to: Sender<bool>,
     },
-    ChannelHasMode {
+    ChannelHasFlag {
         channel: String,
         flag: ChannelFlag,
         respond_to: Sender<bool>,
@@ -75,7 +75,7 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
     },
-    GetChannelBanMask {
+    GetChannelBanmask {
         channel: String,
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
@@ -148,11 +148,11 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         respond_to: Sender<bool>,
     },
-    RemoveChannelBanMask {
+    RemoveChannelBanmask {
         channel: String,
         mask: String,
     },
-    RemoveChanop {
+    RemoveChannelOperator {
         channel: String,
         nickname: String,
     },
@@ -160,7 +160,7 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         channel: String,
     },
-    RemoveSpeaker {
+    RemoveChannelSpeaker {
         channel: String,
         nickname: String,
     },
@@ -172,7 +172,7 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         key: Option<String>,
     },
-    SetChannelMode {
+    SetChannelFlag {
         channel: String,
         flag: ChannelFlag,
     },
@@ -187,7 +187,7 @@ pub enum DatabaseMessage<C: Connection> {
     SetServerOperator {
         nickname: String,
     },
-    UnsetChannelMode {
+    UnsetChannelFlag {
         channel: String,
         flag: ChannelFlag,
     },
@@ -202,11 +202,11 @@ pub enum DatabaseMessage<C: Connection> {
     RemoveServer {
         servername: String,
     },
-    SetUserMode {
+    SetUserFlag {
         user: String,
         flag: UserFlag,
     },
-    UnsetUserMode {
+    UnsetUserFlag {
         user: String,
         flag: UserFlag,
     },

@@ -43,8 +43,8 @@ fn invite_fails_with_user_already_on_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nick2");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -61,7 +61,7 @@ fn invite_fails_with_sending_user_not_on_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
+    handler.database.add_client_to_channel("#hola", "nick2");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -78,7 +78,7 @@ fn can_invite_one_user() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -104,12 +104,14 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler
         .database
-        .set_channel_mode("#hola", ChannelFlag::InviteOnly);
-    handler.database.remove_channop("#hola", "nickname");
+        .set_channel_flag("#hola", ChannelFlag::InviteOnly);
+    handler
+        .database
+        .remove_channel_operator("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -135,11 +137,11 @@ fn can_invite_user_in_moderated_channel_if_channop() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler
         .database
-        .set_channel_mode("#hola", ChannelFlag::InviteOnly);
+        .set_channel_flag("#hola", ChannelFlag::InviteOnly);
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 

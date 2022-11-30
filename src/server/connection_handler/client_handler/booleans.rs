@@ -9,12 +9,10 @@ impl<C: Connection> ClientHandler<C> {
     pub fn can_name_channel(&mut self, channel: &str) -> bool {
         let exists_channel = self.database.contains_channel(channel);
 
-        let is_priv_or_secret = self
-            .database
-            .channel_has_mode(channel, &ChannelFlag::Secret)
+        let is_priv_or_secret = self.database.channel_has_flag(channel, ChannelFlag::Secret)
             || self
                 .database
-                .channel_has_mode(channel, &ChannelFlag::Private);
+                .channel_has_flag(channel, ChannelFlag::Private);
 
         let is_client_in_channel = self.is_in_channel(channel);
 
@@ -22,9 +20,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn can_list_channel(&self, channel: &str) -> bool {
-        if self
-            .database
-            .channel_has_mode(channel, &ChannelFlag::Secret)
+        if self.database.channel_has_flag(channel, ChannelFlag::Secret)
             && !self.is_in_channel(channel)
         {
             return false;
@@ -49,7 +45,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn is_in_channel(&self, channel: &str) -> bool {
-        self.database.is_client_in_channel(&self.nickname, channel)
+        self.database.is_client_in_channel(channel, &self.nickname)
     }
 
     pub fn client_matches_banmask(&self, nickname: &str, mask: &str) -> bool {

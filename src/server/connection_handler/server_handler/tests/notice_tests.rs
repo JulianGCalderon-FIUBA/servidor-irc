@@ -6,33 +6,24 @@ use crate::server::{
 use super::dummy_server_handler;
 
 #[test]
-fn privmsg_is_ignored_without_enough_parameters() {
+fn notice_is_ignored_without_enough_parameters() {
+    let mut handler = dummy_server_handler();
+
+    assert!(handler.notice_command((None, vec![], None)).is_ok());
+}
+
+#[test]
+fn notice_is_ignored_with_unknown_target() {
     let mut handler = dummy_server_handler();
 
     let prefix = Some("sender".to_string());
     let params = vec!["target".to_string()];
     let trail = Some("message".to_string());
-    handler
-        .privmsg_command((None, params.clone(), trail.clone()))
-        .unwrap();
-    handler
-        .privmsg_command((prefix.clone(), vec![], trail))
-        .unwrap();
-    handler.privmsg_command((prefix, params, None)).unwrap();
+    assert!(handler.notice_command((prefix, params, trail)).is_ok());
 }
 
 #[test]
-fn privmsg_is_ignored_with_unknown_target() {
-    let mut handler = dummy_server_handler();
-
-    let prefix = Some("sender".to_string());
-    let params = vec!["target".to_string()];
-    let trail = Some("message".to_string());
-    assert!(handler.privmsg_command((prefix, params, trail)).is_ok());
-}
-
-#[test]
-fn privmsg_is_relayed_to_client() {
+fn notice_is_relayed_to_client() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("target"));
     handler
@@ -42,10 +33,10 @@ fn privmsg_is_relayed_to_client() {
     let prefix = Some("sender".to_string());
     let params = vec!["target".to_string()];
     let trail = Some("message".to_string());
-    handler.privmsg_command((prefix, params, trail)).unwrap();
+    handler.notice_command((prefix, params, trail)).unwrap();
 
     assert_eq!(
-        ":sender PRIVMSG target :message\r\n",
+        ":sender NOTICE target :message\r\n",
         handler
             .database
             .get_local_stream("target")
@@ -55,7 +46,7 @@ fn privmsg_is_relayed_to_client() {
 }
 
 #[test]
-fn privmsg_to_client_is_relayed_to_necesary_server() {
+fn notice_to_client_is_relayed_to_necesary_server() {
     let mut handler = dummy_server_handler();
     handler
         .database
@@ -70,10 +61,10 @@ fn privmsg_to_client_is_relayed_to_necesary_server() {
     let prefix = Some("sender".to_string());
     let params = vec!["target".to_string()];
     let trail = Some("message".to_string());
-    handler.privmsg_command((prefix, params, trail)).unwrap();
+    handler.notice_command((prefix, params, trail)).unwrap();
 
     assert_eq!(
-        ":sender PRIVMSG target :message\r\n",
+        ":sender NOTICE target :message\r\n",
         handler
             .database
             .get_server_stream("servername2")
@@ -83,7 +74,7 @@ fn privmsg_to_client_is_relayed_to_necesary_server() {
 }
 
 #[test]
-fn privmsg_to_channel_is_relayed_to_all_local_clients_in_channel() {
+fn notice_to_channel_is_relayed_to_all_local_clients_in_channel() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname1"));
     handler.database.add_local_client(dummy_client("nickname2"));
@@ -102,10 +93,10 @@ fn privmsg_to_channel_is_relayed_to_all_local_clients_in_channel() {
     let prefix = Some("sender".to_string());
     let params = vec!["#channel".to_string()];
     let trail = Some("message".to_string());
-    handler.privmsg_command((prefix, params, trail)).unwrap();
+    handler.notice_command((prefix, params, trail)).unwrap();
 
     assert_eq!(
-        ":sender PRIVMSG #channel :message\r\n",
+        ":sender NOTICE #channel :message\r\n",
         handler
             .database
             .get_local_stream("nickname1")
@@ -114,7 +105,7 @@ fn privmsg_to_channel_is_relayed_to_all_local_clients_in_channel() {
     );
 
     assert_eq!(
-        ":sender PRIVMSG #channel :message\r\n",
+        ":sender NOTICE #channel :message\r\n",
         handler
             .database
             .get_local_stream("nickname2")
@@ -124,7 +115,7 @@ fn privmsg_to_channel_is_relayed_to_all_local_clients_in_channel() {
 }
 
 #[test]
-fn privmsg_to_channel_is_relayed_to_each_necesary_server_once() {
+fn notice_to_channel_is_relayed_to_each_necesary_server_once() {
     let mut handler = dummy_server_handler();
     handler
         .database
@@ -149,10 +140,10 @@ fn privmsg_to_channel_is_relayed_to_each_necesary_server_once() {
     let prefix = Some("sender".to_string());
     let params = vec!["#channel".to_string()];
     let trail = Some("message".to_string());
-    handler.privmsg_command((prefix, params, trail)).unwrap();
+    handler.notice_command((prefix, params, trail)).unwrap();
 
     assert_eq!(
-        ":sender PRIVMSG #channel :message\r\n",
+        ":sender NOTICE #channel :message\r\n",
         handler
             .database
             .get_server_stream("servername2")
@@ -162,7 +153,7 @@ fn privmsg_to_channel_is_relayed_to_each_necesary_server_once() {
 }
 
 #[test]
-fn privmsg_is_never_relayed_to_sending_server() {
+fn notice_is_never_relayed_to_sending_server() {
     let mut handler = dummy_server_handler();
     handler
         .database
@@ -172,7 +163,7 @@ fn privmsg_is_never_relayed_to_sending_server() {
     let prefix = Some("sender".to_string());
     let params = vec!["#channel".to_string()];
     let trail = Some("message".to_string());
-    handler.privmsg_command((prefix, params, trail)).unwrap();
+    handler.notice_command((prefix, params, trail)).unwrap();
 
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert_eq!(

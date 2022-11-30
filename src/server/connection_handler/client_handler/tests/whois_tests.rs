@@ -66,7 +66,7 @@ fn whois_returns_nick_info_with_channels() {
 
     let parameters = vec!["nickname".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler.whois_command((None, parameters, None)).unwrap();
 
@@ -84,7 +84,7 @@ fn whois_returns_nick_away_info() {
 
     handler
         .database
-        .set_away_message(&Some("away".to_string()), "nickname");
+        .set_away_message("nickname", Some("away".to_string()));
 
     let parameters = vec!["nickname".to_string()];
 
@@ -104,11 +104,11 @@ fn whois_returns_complete_nick_info() {
 
     let parameters = vec!["nickname".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
     handler.database.set_server_operator("nickname");
     handler
         .database
-        .set_away_message(&Some("away message".to_string()), "nickname");
+        .set_away_message("nickname", Some("away message".to_string()));
 
     handler.whois_command((None, parameters, None)).unwrap();
 

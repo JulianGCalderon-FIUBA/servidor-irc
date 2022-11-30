@@ -94,7 +94,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
             self.send_join_notification(channel);
 
-            self.database.add_client_to_channel(&self.nickname, channel);
+            self.database.add_client_to_channel(channel, &self.nickname);
 
             self.send_join_response(channel)?;
         }
@@ -115,7 +115,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_part_notification(channel);
 
             self.database
-                .remove_client_from_channel(&self.nickname, channel);
+                .remove_client_from_channel(channel, &self.nickname);
         }
 
         Ok(true)
@@ -220,7 +220,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn away_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, _, trail) = arguments;
-        self.database.set_away_message(&trail, &self.nickname);
+        self.database
+            .set_away_message(&self.nickname, trail.clone());
 
         let away_notification = Notification::away(&self.nickname, &trail);
         let reply = match trail {
@@ -351,7 +352,7 @@ impl<C: Connection> ClientHandler<C> {
         comment: &Option<String>,
     ) {
         self.send_kick_notification(channel, nickname, comment);
-        self.database.remove_client_from_channel(nickname, channel);
+        self.database.remove_client_from_channel(channel, nickname);
     }
 
     fn mode_command_for_channel(
@@ -360,7 +361,7 @@ impl<C: Connection> ClientHandler<C> {
         mut args: Vec<String>,
     ) -> Result<(), io::Error> {
         if args.is_empty() {
-            self.send_channel_mode_is_response(&channel)?; // falta soporte para usuarios
+            self.send_channel_mode_is_response(&channel)?;
             return Ok(());
         }
 
@@ -379,7 +380,7 @@ impl<C: Connection> ClientHandler<C> {
 
     fn mode_command_for_user(&mut self, user: String, mut args: Vec<String>) -> io::Result<()> {
         if args.is_empty() {
-            self.send_user_mode_is_response(&user)?; // falta soporte para usuarios
+            self.send_user_mode_is_response(&user)?;
             return Ok(());
         }
 

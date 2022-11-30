@@ -90,12 +90,12 @@ impl<C: Connection> Database<C> {
         respond_to.send(client_info.cloned()).unwrap();
     }
 
-    pub fn handle_set_user_mode(&mut self, user: String, flag: UserFlag) {
-        self.set_user_mode(user, flag);
+    pub fn handle_set_user_flag(&mut self, user: String, flag: UserFlag) {
+        self.set_user_flag(user, flag);
     }
 
-    pub fn handle_unset_user_mode(&mut self, user: String, flag: UserFlag) {
-        self.unset_user_mode(user, flag);
+    pub fn handle_unset_user_flag(&mut self, user: String, flag: UserFlag) {
+        self.unset_user_flag(user, flag);
     }
 }
 
@@ -213,12 +213,12 @@ impl<C: Connection> Database<C> {
         clients
     }
 
-    fn set_user_mode(&mut self, user: String, flag: UserFlag) {
+    fn set_user_flag(&mut self, user: String, flag: UserFlag) {
         let info = ok_or_return!(self.get_client_info(&user));
         info.add_flag(flag);
     }
 
-    fn unset_user_mode(&mut self, user: String, flag: UserFlag) {
+    fn unset_user_flag(&mut self, user: String, flag: UserFlag) {
         let info = ok_or_return!(self.get_client_info(&user));
         info.remove_flag(flag);
     }

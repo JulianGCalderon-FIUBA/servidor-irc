@@ -91,7 +91,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(channel, &ChannelFlag::InviteOnly)
+            .channel_has_flag(channel, ChannelFlag::InviteOnly)
         {
             self.assert_is_channel_operator(channel)?;
         }
@@ -134,7 +134,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(channel, &ChannelFlag::TopicByOperatorOnly)
+            .channel_has_flag(channel, ChannelFlag::TopicByOperatorOnly)
         {
             self.assert_is_channel_operator(channel)?;
         }
@@ -236,7 +236,7 @@ impl<C: Connection> ClientHandler<C> {
         client: &str,
         channel: &str,
     ) -> Result<(), ErrorReply> {
-        if self.database.is_client_in_channel(client, channel) {
+        if self.database.is_client_in_channel(channel, client) {
             return Err(ErrorReply::UserOnChannel443 {
                 nickname: client.to_string(),
                 channel: channel.to_string(),
@@ -338,7 +338,7 @@ impl<C: Connection> ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(&channel, &ChannelFlag::NoOutsideMessages)
+            .channel_has_flag(&channel, ChannelFlag::NoOutsideMessages)
             && !self.is_in_channel(&channel)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
@@ -346,7 +346,7 @@ impl<C: Connection> ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(&channel, &ChannelFlag::Moderated)
+            .channel_has_flag(&channel, ChannelFlag::Moderated)
             && !self.database.is_channel_speaker(&channel, &self.nickname)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
@@ -403,7 +403,7 @@ impl<C: Connection> ClientHandler<C> {
 
         let channel = channel.to_string();
 
-        if !self.database.is_client_in_channel(client, &channel) {
+        if !self.database.is_client_in_channel(&channel, client) {
             return Err(ErrorReply::NotOnChannel442 { channel });
         }
 

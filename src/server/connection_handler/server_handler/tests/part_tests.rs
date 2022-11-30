@@ -117,7 +117,7 @@ fn part_removes_client_from_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
 
     let prefix = Some("nickname1".to_string());
     let params = vec!["#channel".to_string()];
@@ -125,7 +125,7 @@ fn part_removes_client_from_channel() {
 
     assert!(!handler
         .database
-        .is_client_in_channel("nickname1", "#channel"));
+        .is_client_in_channel("#channel", "nickname1"));
 }
 
 #[test]
@@ -143,7 +143,7 @@ fn part_is_relayed_to_all_other_servers() {
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
 
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string()];
@@ -176,7 +176,7 @@ fn part_is_never_relayed_to_sending_server() {
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
 
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string()];
@@ -196,11 +196,11 @@ fn part_is_relayed_to_local_clients_on_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
 
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string()];
