@@ -3,7 +3,7 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerAsserts,
 };
 
-use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE, VALID_MODES};
+use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE, VALID_CHANNEL_MODES, VALID_USER_MODES};
 use crate::server::responses::ErrorReply;
 
 use super::ServerHandler;
@@ -196,7 +196,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        if !mode.starts_with([ADD_MODE, REMOVE_MODE]) || !mode.ends_with(VALID_MODES) {
+        if !mode.starts_with([ADD_MODE, REMOVE_MODE])
+            || !(mode.ends_with(VALID_CHANNEL_MODES) || mode.ends_with(VALID_USER_MODES))
+        {
             return Err(ErrorReply::NoReply);
         }
 
