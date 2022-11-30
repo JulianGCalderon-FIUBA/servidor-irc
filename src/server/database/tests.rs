@@ -231,19 +231,19 @@ fn can_set_and_get_channel_topic() {
     database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert_eq!(database.get_topic_for_channel("#channel").unwrap(), None);
+    assert_eq!(database.get_channel_topic("#channel").unwrap(), None);
 
     database.set_channel_topic("#channel", "topic");
 
     assert_eq!(
-        database.get_topic_for_channel("#channel").unwrap(),
+        database.get_channel_topic("#channel").unwrap(),
         Some("topic".to_string())
     );
 
     database.set_channel_topic("#channel", "new topic");
 
     assert_eq!(
-        database.get_topic_for_channel("#channel").unwrap(),
+        database.get_channel_topic("#channel").unwrap(),
         Some("new topic".to_string())
     );
 }
@@ -251,7 +251,7 @@ fn can_set_and_get_channel_topic() {
 #[test]
 fn cannot_get_topic_for_nonexistent_channel() {
     let database = dummy_database();
-    assert!(database.get_topic_for_channel("channel").is_err())
+    assert!(database.get_channel_topic("channel").is_err())
 }
 
 #[test]
@@ -274,7 +274,7 @@ fn can_set_away_message_for_client() {
     let client = dummy_client("nick");
     database.add_local_client(client);
 
-    database.set_away_message(&Some("away".to_string()), "nick");
+    database.set_away_message("nick", Some("away".to_string()));
     assert_eq!(
         Some("away".to_string()),
         database.get_away_message("nick").unwrap()
@@ -316,22 +316,22 @@ fn cannot_get_key_for_nonexistent_channel() {
 }
 
 #[test]
-fn can_set_and_unset_channel_mode() {
+fn can_set_and_unset_channel_flag() {
     let database = dummy_database();
 
     let client = dummy_client("nick");
     database.add_local_client(client);
     database.add_client_to_channel("nick", "#channel");
 
-    assert!(!database.channel_has_mode("#channel", &ChannelFlag::Private));
+    assert!(!database.channel_has_flag("#channel", ChannelFlag::Private));
 
-    database.set_channel_mode("#channel", ChannelFlag::Private);
+    database.set_channel_flag("#channel", ChannelFlag::Private);
 
-    assert!(database.channel_has_mode("#channel", &ChannelFlag::Private));
+    assert!(database.channel_has_flag("#channel", ChannelFlag::Private));
 
-    database.unset_channel_mode("#channel", ChannelFlag::Private);
+    database.unset_channel_flag("#channel", ChannelFlag::Private);
 
-    assert!(!database.channel_has_mode("#channel", &ChannelFlag::Private));
+    assert!(!database.channel_has_flag("#channel", ChannelFlag::Private));
 }
 
 #[test]
@@ -371,11 +371,11 @@ fn can_add_and_remove_channel_operator() {
     assert!(database.is_channel_operator("#channel", "nick"));
     assert!(!database.is_channel_operator("#channel", "nick2"));
 
-    database.add_channop("#channel", "nick2");
+    database.add_channel_operator("#channel", "nick2");
 
     assert!(database.is_channel_operator("#channel", "nick2"));
 
-    database.remove_channop("#channel", "nick2");
+    database.remove_channel_operator("#channel", "nick2");
 
     assert!(!database.is_channel_operator("#channel", "nick2"));
 }
@@ -390,11 +390,11 @@ fn can_add_and_remove_channel_speaker() {
 
     assert!(!database.is_channel_speaker("#channel", "nick"));
 
-    database.add_speaker("#channel", "nick");
+    database.add_channel_speaker("#channel", "nick");
 
     assert!(database.is_channel_speaker("#channel", "nick"));
 
-    database.remove_speaker("#channel", "nick");
+    database.remove_channel_speaker("#channel", "nick");
 
     assert!(!database.is_channel_speaker("#channel", "nick"));
 }
@@ -440,7 +440,7 @@ fn can_get_channel_configuration() {
     database.add_client_to_channel("nick", "#channel");
 
     database.set_channel_limit("#channel", Some(5));
-    database.set_channel_mode("#channel", ChannelFlag::Moderated);
+    database.set_channel_flag("#channel", ChannelFlag::Moderated);
     database.set_channel_topic("#channel", "topic");
 
     let mut expected = ChannelConfiguration::new();

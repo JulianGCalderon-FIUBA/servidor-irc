@@ -131,22 +131,26 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_channel_key(channel, respond_to),
-            SetChannelMode { channel, flag } => self.handle_set_channel_mode(channel, flag),
-            UnsetChannelMode { channel, flag } => self.handle_unset_channel_mode(channel, flag),
-            ChannelHasMode {
+            SetChannelFlag { channel, flag } => self.handle_set_channel_flag(channel, flag),
+            UnsetChannelFlag { channel, flag } => self.handle_unset_channel_flag(channel, flag),
+            ChannelHasFlag {
                 channel,
                 respond_to,
                 flag,
-            } => self.handle_channel_has_mode(channel, flag, respond_to),
+            } => self.handle_channel_has_flag(channel, flag, respond_to),
             SetChannelLimit { channel, limit } => self.handle_set_channel_limit(channel, limit),
             GetChannelLimit {
                 channel,
                 respond_to,
             } => self.handle_get_channel_limit(channel, respond_to),
-            AddChanop { channel, nickname } => self.handle_add_channop(channel, nickname),
-            RemoveChanop { channel, nickname } => self.handle_remove_channop(channel, nickname),
-            AddSpeaker { channel, nickname } => self.handle_add_channel_speaker(channel, nickname),
-            RemoveSpeaker { channel, nickname } => {
+            AddChannelOperator { channel, nickname } => self.handle_add_channop(channel, nickname),
+            RemoveChannelOperator { channel, nickname } => {
+                self.handle_remove_channop(channel, nickname)
+            }
+            AddChannelSpeaker { channel, nickname } => {
+                self.handle_add_channel_speaker(channel, nickname)
+            }
+            RemoveChannelSpeaker { channel, nickname } => {
                 self.handle_remove_channel_speaker(channel, nickname)
             }
             IsChannelSpeaker {
@@ -154,12 +158,12 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to,
             } => self.handle_is_channel_speaker(channel, nickname, respond_to),
-            AddChannelBanMask { channel, mask } => self.handle_add_channel_banmask(channel, mask),
-            GetChannelBanMask {
+            AddChannelBanmask { channel, mask } => self.handle_add_channel_banmask(channel, mask),
+            GetChannelBanmask {
                 channel,
                 respond_to,
             } => self.handle_get_channel_banmask(channel, respond_to),
-            RemoveChannelBanMask { channel, mask } => {
+            RemoveChannelBanmask { channel, mask } => {
                 self.handle_remove_channel_banmask(channel, mask)
             }
             IsChannelOperator {
@@ -201,12 +205,8 @@ impl<C: Connection> Database<C> {
                 self.handle_is_immediate_server(server, respond_to)
             }
             RemoveServer { servername } => self.handle_remove_server(servername),
-            SetUserMode { user, flag } => self.handle_set_user_mode(user, flag),
-            UnsetUserMode { user, flag } => self.handle_unset_user_mode(user, flag),
+            SetUserFlag { user, flag } => self.handle_set_user_flag(user, flag),
+            UnsetUserFlag { user, flag } => self.handle_unset_user_flag(user, flag),
         }
     }
-
-  
-
-    
 }

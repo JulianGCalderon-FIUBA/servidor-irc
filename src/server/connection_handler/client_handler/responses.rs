@@ -80,7 +80,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_topic_response(&mut self, channel: &str) -> io::Result<()> {
-        match &self.database.get_topic_for_channel(channel).unwrap() {
+        match &self.database.get_channel_topic(channel).unwrap() {
             Some(topic) => self.stream.send(&CommandResponse::topic(channel, topic)),
             None => self.stream.send(&CommandResponse::no_topic(channel)),
         }
@@ -101,13 +101,13 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_list_response(&mut self, channel: String) -> io::Result<()> {
         let topic = self
             .database
-            .get_topic_for_channel(&channel)
+            .get_channel_topic(&channel)
             .unwrap()
             .unwrap_or_else(|| "No topic set".to_string());
 
         let prv = self
             .database
-            .channel_has_mode(&channel, &ChannelFlag::Private)
+            .channel_has_flag(&channel, ChannelFlag::Private)
             && !self.is_in_channel(&channel);
 
         self.stream

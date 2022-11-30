@@ -80,8 +80,10 @@ fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
 
     handler
         .database
-        .set_channel_mode("#hola", ChannelFlag::TopicByOperatorOnly);
-    handler.database.remove_channop("#hola", "nickname");
+        .set_channel_flag("#hola", ChannelFlag::TopicByOperatorOnly);
+    handler
+        .database
+        .remove_channel_operator("#hola", "nickname");
 
     let parameters = vec!["#hola".to_string(), "topic".to_string()];
 
@@ -102,7 +104,7 @@ fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
 
     handler
         .database
-        .set_channel_mode("#hola", ChannelFlag::TopicByOperatorOnly);
+        .set_channel_flag("#hola", ChannelFlag::TopicByOperatorOnly);
 
     let mut parameters = vec!["#hola".to_string(), "topic".to_string()];
 

@@ -119,7 +119,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn away_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, _, trail) = arguments;
         self.database
-            .set_away_message(&trail, prefix.as_ref().unwrap());
+            .set_away_message(prefix.as_ref().unwrap(), trail.clone());
 
         let nickname = prefix.unwrap();
         let message = trail;

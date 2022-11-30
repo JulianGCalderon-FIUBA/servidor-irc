@@ -128,7 +128,7 @@ fn mode_removes_channop() {
 
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_channop("#channel", "nick2");
+    handler.database.add_channel_operator("#channel", "nick2");
 
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
 
@@ -309,7 +309,7 @@ fn mode_removes_speakers_from_channel() {
 
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_speaker("#channel", "nick2");
+    handler.database.add_channel_speaker("#channel", "nick2");
 
     assert!(handler.database.is_channel_speaker("#channel", "nick2"));
 
@@ -388,7 +388,7 @@ fn mode_sets_and_unsets_private_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 
     let mut parameters = vec!["#channel".to_string(), "+p".to_string()];
     let prefix = Some("sender".to_string());
@@ -397,7 +397,7 @@ fn mode_sets_and_unsets_private_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 
     parameters = vec!["#channel".to_string(), "-p".to_string()];
 
@@ -407,7 +407,7 @@ fn mode_sets_and_unsets_private_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 }
 
 #[test]
@@ -421,7 +421,7 @@ fn mode_sets_and_unsets_secret_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 
     let mut parameters = vec!["#channel".to_string(), "+s".to_string()];
     let prefix = Some("sender".to_string());
@@ -430,7 +430,7 @@ fn mode_sets_and_unsets_secret_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 
     parameters = vec!["#channel".to_string(), "-s".to_string()];
 
@@ -440,7 +440,7 @@ fn mode_sets_and_unsets_secret_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 }
 
 #[test]
@@ -454,7 +454,7 @@ fn mode_sets_and_unsets_invite_only_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 
     let mut parameters = vec!["#channel".to_string(), "+i".to_string()];
     let prefix = Some("sender".to_string());
@@ -463,7 +463,7 @@ fn mode_sets_and_unsets_invite_only_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 
     parameters = vec!["#channel".to_string(), "-i".to_string()];
 
@@ -473,7 +473,7 @@ fn mode_sets_and_unsets_invite_only_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 }
 
 #[test]
@@ -487,7 +487,7 @@ fn mode_sets_and_unsets_topic_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 
     let mut parameters = vec!["#channel".to_string(), "+t".to_string()];
     let prefix = Some("sender".to_string());
@@ -496,7 +496,7 @@ fn mode_sets_and_unsets_topic_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 
     parameters = vec!["#channel".to_string(), "-t".to_string()];
 
@@ -506,7 +506,7 @@ fn mode_sets_and_unsets_topic_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 }
 #[test]
 fn mode_sets_and_unsets_no_outside_messages_flag() {
@@ -519,7 +519,7 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 
     let mut parameters = vec!["#channel".to_string(), "+n".to_string()];
     let prefix = Some("sender".to_string());
@@ -528,7 +528,7 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 
     parameters = vec!["#channel".to_string(), "-n".to_string()];
 
@@ -538,7 +538,7 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 }
 
 #[test]
@@ -552,7 +552,7 @@ fn mode_sets_and_unsets_moderated_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
 
     let mut parameters = vec!["#channel".to_string(), "+m".to_string()];
     let prefix = Some("sender".to_string());
@@ -561,7 +561,7 @@ fn mode_sets_and_unsets_moderated_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
 
     parameters = vec!["#channel".to_string(), "-m".to_string()];
 
@@ -571,5 +571,5 @@ fn mode_sets_and_unsets_moderated_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
 }

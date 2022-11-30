@@ -26,7 +26,7 @@ impl<C: Connection> ClientHandler<C> {
                 channel.insert(0, OPERATOR_SYMBOL);
             } else if self
                 .database
-                .channel_has_mode(channel, &ChannelFlag::Moderated)
+                .channel_has_flag(channel, ChannelFlag::Moderated)
                 && self.database.is_channel_speaker(channel, nickname)
             {
                 channel.insert(0, SPEAKER_SYMBOL);

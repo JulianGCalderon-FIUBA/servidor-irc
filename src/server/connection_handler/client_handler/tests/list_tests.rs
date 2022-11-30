@@ -93,7 +93,7 @@ fn list_ignores_secret_channels() {
 
     handler
         .database
-        .set_channel_mode("#secreto", ChannelFlag::Secret);
+        .set_channel_flag("#secreto", ChannelFlag::Secret);
 
     let parameters = vec![];
     handler.list_command((None, parameters, None)).unwrap();
@@ -122,7 +122,7 @@ fn list_prints_priv_channels_as_priv() {
 
     handler
         .database
-        .set_channel_mode("#privado", ChannelFlag::Private);
+        .set_channel_flag("#privado", ChannelFlag::Private);
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
     handler.list_command((None, parameters, None)).unwrap();
@@ -148,7 +148,7 @@ fn list_prints_secret_channel_if_client_is_in_it() {
 
     handler
         .database
-        .set_channel_mode("#secreto", ChannelFlag::Secret);
+        .set_channel_flag("#secreto", ChannelFlag::Secret);
 
     let parameters = vec![];
     handler.list_command((None, parameters, None)).unwrap();
@@ -178,7 +178,7 @@ fn list_prints_private_channel_if_client_is_in_it() {
 
     handler
         .database
-        .set_channel_mode("#privado", ChannelFlag::Private);
+        .set_channel_flag("#privado", ChannelFlag::Private);
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
     handler.list_command((None, parameters, None)).unwrap();

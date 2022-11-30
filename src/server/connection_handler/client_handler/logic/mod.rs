@@ -220,7 +220,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn away_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, _, trail) = arguments;
-        self.database.set_away_message(&trail, &self.nickname);
+        self.database
+            .set_away_message(&self.nickname, trail.clone());
 
         let away_notification = Notification::away(&self.nickname, &trail);
         let reply = match trail {

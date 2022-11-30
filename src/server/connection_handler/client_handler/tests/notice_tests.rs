@@ -29,7 +29,7 @@ fn notice_with_away_client_does_not_return_away_message() {
     handler.database.add_local_client(dummy_client("nick1"));
     handler
         .database
-        .set_away_message(&Some("away message!".to_string()), "nick1");
+        .set_away_message("nick1", Some("away message!".to_string()));
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
@@ -51,7 +51,7 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::NoOutsideMessages);
+        .set_channel_flag("#channel", ChannelFlag::NoOutsideMessages);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -94,7 +94,7 @@ fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Moderated);
+        .set_channel_flag("#channel", ChannelFlag::Moderated);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -130,7 +130,7 @@ fn notice_works_on_channel_with_flag_n() {
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::NoOutsideMessages);
+        .set_channel_flag("#channel", ChannelFlag::NoOutsideMessages);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -173,8 +173,8 @@ fn notice_works_on_channel_with_flag_m() {
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Moderated);
-    handler.database.add_speaker("#channel", "nickname");
+        .set_channel_flag("#channel", ChannelFlag::Moderated);
+    handler.database.add_channel_speaker("#channel", "nickname");
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());

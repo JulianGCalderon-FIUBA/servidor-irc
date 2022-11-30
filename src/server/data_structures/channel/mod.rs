@@ -65,8 +65,8 @@ impl Channel {
         self.config.topic.clone()
     }
 
-    pub fn has_mode(&self, flag: &ChannelFlag) -> bool {
-        self.config.flags.contains(flag)
+    pub fn has_mode(&self, flag: ChannelFlag) -> bool {
+        self.config.flags.contains(&flag)
     }
 
     pub fn is_member(&self, nickname: &str) -> bool {
@@ -113,8 +113,8 @@ impl Channel {
         self.config.topic = Some(topic)
     }
 
-    pub fn unset_mode(&mut self, flag: &ChannelFlag) {
-        remove(&mut self.config.flags, flag);
+    pub fn unset_mode(&mut self, flag: ChannelFlag) {
+        remove(&mut self.config.flags, &flag);
     }
 
     pub fn update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {

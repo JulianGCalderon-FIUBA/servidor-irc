@@ -71,7 +71,7 @@ impl<C: Connection> ClientHandler<C> {
             return self.stream.send(&error);
         }
 
-        self.database.add_channop(channel, &operator);
+        self.database.add_channel_operator(channel, &operator);
 
         let request = ChannelModeRequest::AddOperator(operator);
         self.send_channel_mode_request_notification(channel, request);
@@ -83,7 +83,7 @@ impl<C: Connection> ClientHandler<C> {
         if let Err(error) = self.assert_is_client_in_channel(channel, &speaker) {
             return self.stream.send(&error);
         }
-        self.database.add_speaker(channel, &speaker);
+        self.database.add_channel_speaker(channel, &speaker);
 
         let request = ChannelModeRequest::AddSpeaker(speaker);
         self.send_channel_mode_request_notification(channel, request);
@@ -105,7 +105,7 @@ impl<C: Connection> ClientHandler<C> {
         if let Err(error) = self.assert_is_client_in_channel(channel, &operator) {
             return self.stream.send(&error);
         }
-        self.database.remove_channop(channel, &operator);
+        self.database.remove_channel_operator(channel, &operator);
 
         let request = ChannelModeRequest::RemoveOperator(operator);
         self.send_channel_mode_request_notification(channel, request);
@@ -115,14 +115,14 @@ impl<C: Connection> ClientHandler<C> {
         if let Err(error) = self.assert_is_client_in_channel(channel, &speaker) {
             return self.stream.send(&error);
         }
-        self.database.remove_speaker(channel, &speaker);
+        self.database.remove_channel_speaker(channel, &speaker);
 
         let request = ChannelModeRequest::RemoveSpeaker(speaker);
         self.send_channel_mode_request_notification(channel, request);
         Ok(())
     }
     fn set_channel_flag_request(&mut self, channel: &str, flag: ChannelFlag) -> io::Result<()> {
-        self.database.set_channel_mode(channel, flag.clone());
+        self.database.set_channel_flag(channel, flag.clone());
 
         let request = ChannelModeRequest::SetFlag(flag);
         self.send_channel_mode_request_notification(channel, request);
@@ -161,10 +161,10 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
     fn unset_channel_flag_request(&mut self, channel: &str, flag: ChannelFlag) -> io::Result<()> {
-        if !self.database.channel_has_mode(channel, &flag) {
+        if !self.database.channel_has_flag(channel, flag.clone()) {
             return Ok(());
         }
-        self.database.unset_channel_mode(channel, flag.clone());
+        self.database.unset_channel_flag(channel, flag.clone());
         let request = ChannelModeRequest::UnsetFlag(flag);
         self.send_channel_mode_request_notification(channel, request);
         Ok(())
@@ -201,7 +201,7 @@ impl<C: Connection> ClientHandler<C> {
             return Ok(());
         }
 
-        self.database.set_user_mode(user, flag.clone());
+        self.database.set_user_flag(user, flag.clone());
 
         let request = UserModeRequest::SetFlag(flag);
         self.send_user_mode_request_notification(request, user);
@@ -215,7 +215,7 @@ impl<C: Connection> ClientHandler<C> {
         if !info.flags.contains_key(&flag) {
             return Ok(());
         }
-        self.database.unset_user_mode(user, flag.clone());
+        self.database.unset_user_flag(user, flag.clone());
 
         let request = UserModeRequest::UnsetFlag(flag);
         self.send_user_mode_request_notification(request, user);

@@ -100,7 +100,7 @@ fn mode_removes_channop() {
 
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_channop("#channel", "nick2");
+    handler.database.add_channel_operator("#channel", "nick2");
 
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
 
@@ -467,7 +467,7 @@ fn mode_removes_speakers_from_channel() {
 
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_speaker("#channel", "nick2");
+    handler.database.add_channel_speaker("#channel", "nick2");
 
     assert!(handler.database.is_channel_speaker("#channel", "nick2"));
 
@@ -682,7 +682,7 @@ fn mode_sets_and_unsets_private_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 
     let mut parameters = vec!["#channel".to_string(), "+p".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -693,7 +693,7 @@ fn mode_sets_and_unsets_private_flag() {
     );
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 
     parameters = vec!["#channel".to_string(), "-p".to_string()];
 
@@ -705,7 +705,7 @@ fn mode_sets_and_unsets_private_flag() {
     );
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 }
 
 #[test]
@@ -718,7 +718,7 @@ fn mode_sets_and_unsets_secret_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 
     let mut parameters = vec!["#channel".to_string(), "+s".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -729,7 +729,7 @@ fn mode_sets_and_unsets_secret_flag() {
     );
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 
     parameters = vec!["#channel".to_string(), "-s".to_string()];
 
@@ -741,7 +741,7 @@ fn mode_sets_and_unsets_secret_flag() {
     );
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 }
 
 #[test]
@@ -754,7 +754,7 @@ fn mode_sets_and_unsets_invite_only_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 
     let mut parameters = vec!["#channel".to_string(), "+i".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -765,7 +765,7 @@ fn mode_sets_and_unsets_invite_only_flag() {
     );
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 
     parameters = vec!["#channel".to_string(), "-i".to_string()];
 
@@ -777,7 +777,7 @@ fn mode_sets_and_unsets_invite_only_flag() {
     );
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 }
 
 #[test]
@@ -790,7 +790,7 @@ fn mode_sets_and_unsets_topic_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 
     let mut parameters = vec!["#channel".to_string(), "+t".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -801,7 +801,7 @@ fn mode_sets_and_unsets_topic_flag() {
     );
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 
     parameters = vec!["#channel".to_string(), "-t".to_string()];
 
@@ -813,7 +813,7 @@ fn mode_sets_and_unsets_topic_flag() {
     );
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 }
 #[test]
 fn mode_sets_and_unsets_no_outside_messages_flag() {
@@ -825,7 +825,7 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 
     let mut parameters = vec!["#channel".to_string(), "+n".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -836,7 +836,7 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     );
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 
     parameters = vec!["#channel".to_string(), "-n".to_string()];
 
@@ -848,7 +848,7 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     );
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 }
 
 #[test]
@@ -861,7 +861,7 @@ fn mode_sets_and_unsets_moderated_flag() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
 
     let mut parameters = vec!["#channel".to_string(), "+m".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -872,7 +872,7 @@ fn mode_sets_and_unsets_moderated_flag() {
     );
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
 
     parameters = vec!["#channel".to_string(), "-m".to_string()];
 
@@ -884,7 +884,7 @@ fn mode_sets_and_unsets_moderated_flag() {
     );
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
 }
 
 #[test]
@@ -934,10 +934,10 @@ fn mode_sets_multiple_flags() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
 
     let parameters = vec![
@@ -954,10 +954,10 @@ fn mode_sets_multiple_flags() {
     assert_eq!(":nickname MODE #channel +s", responses[2]);
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
 }
 
@@ -974,11 +974,11 @@ fn mode_unsets_multiple_flags() {
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Secret);
+        .set_channel_flag("#channel", ChannelFlag::Secret);
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::InviteOnly);
-    handler.database.add_channop("#channel", "nick2");
+        .set_channel_flag("#channel", ChannelFlag::InviteOnly);
+    handler.database.add_channel_operator("#channel", "nick2");
 
     let parameters = vec![
         "#channel".to_string(),
@@ -994,10 +994,10 @@ fn mode_unsets_multiple_flags() {
     assert_eq!(":nickname MODE #channel -s", responses[2]);
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
 }
 
@@ -1014,11 +1014,11 @@ fn mode_sets_and_unsets_multiple_flags() {
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Secret);
+        .set_channel_flag("#channel", ChannelFlag::Secret);
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Moderated);
-    handler.database.add_channop("#channel", "nick2");
+        .set_channel_flag("#channel", ChannelFlag::Moderated);
+    handler.database.add_channel_operator("#channel", "nick2");
 
     let parameters = vec![
         "#channel".to_string(),
@@ -1037,17 +1037,17 @@ fn mode_sets_and_unsets_multiple_flags() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 }
 
 #[test]
@@ -1060,10 +1060,10 @@ fn mode_sets_and_unsets_multiple_valid_flags() {
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Secret);
+        .set_channel_flag("#channel", ChannelFlag::Secret);
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Moderated);
+        .set_channel_flag("#channel", ChannelFlag::Moderated);
 
     let parameters = vec![
         "#channel".to_string(),
@@ -1082,16 +1082,16 @@ fn mode_sets_and_unsets_multiple_valid_flags() {
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 }
 
 #[test]
@@ -1106,7 +1106,7 @@ fn mode_with_no_parameters_returns_channel_mode() {
         .set_channel_key("#channel", Some("key".to_string()));
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Moderated);
+        .set_channel_flag("#channel", ChannelFlag::Moderated);
 
     let parameters = vec!["#channel".to_string()];
 
@@ -1131,7 +1131,9 @@ fn mode_works_with_multiples_arguments() {
         .database
         .add_client_to_channel("nickname2", "#channel");
 
-    handler.database.add_channop("#channel", "nickname2");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname2");
 
     let parameters = vec![
         "#channel".to_string(),
@@ -1173,7 +1175,9 @@ fn mode_works_with_multiples_arguments_in_disorder() {
         .database
         .add_client_to_channel("nickname2", "#channel");
 
-    handler.database.add_channop("#channel", "nickname2");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname2");
 
     let parameters = vec![
         "#channel".to_string(),
@@ -1249,7 +1253,7 @@ fn mode_unsets_user_flag_invisible() {
 
     handler
         .database
-        .set_user_mode("nickname", UserFlag::Invisible);
+        .set_user_flag("nickname", UserFlag::Invisible);
 
     let parameters = vec!["nickname".to_string(), "-i".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -1300,7 +1304,7 @@ fn mode_unsets_user_flag_receives_server_notices() {
 
     handler
         .database
-        .set_user_mode("nickname", UserFlag::ReceiveServerNotices);
+        .set_user_flag("nickname", UserFlag::ReceiveServerNotices);
 
     let parameters = vec!["nickname".to_string(), "-s".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -1326,7 +1330,7 @@ fn mode_unsets_user_flag_receives_wallops() {
 
     handler
         .database
-        .set_user_mode("nickname", UserFlag::ReceivesWallops);
+        .set_user_flag("nickname", UserFlag::ReceivesWallops);
 
     let parameters = vec!["nickname".to_string(), "-w".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
@@ -1341,16 +1345,16 @@ fn mode_without_parameters_returns_umode_response() {
 
     handler
         .database
-        .set_user_mode("nickname", UserFlag::ReceivesWallops);
+        .set_user_flag("nickname", UserFlag::ReceivesWallops);
     handler
         .database
-        .set_user_mode("nickname", UserFlag::ReceiveServerNotices);
+        .set_user_flag("nickname", UserFlag::ReceiveServerNotices);
     handler
         .database
-        .set_user_mode("nickname", UserFlag::Invisible);
+        .set_user_flag("nickname", UserFlag::Invisible);
     handler
         .database
-        .set_user_mode("nickname", UserFlag::Operator);
+        .set_user_flag("nickname", UserFlag::Operator);
 
     let parameters = vec!["nickname".to_string()];
     handler.mode_command((None, parameters, None)).unwrap();
