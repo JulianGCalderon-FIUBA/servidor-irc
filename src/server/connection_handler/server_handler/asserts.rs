@@ -102,7 +102,10 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
         let nickname = prefix.as_ref().unwrap();
         let channel = &params[0];
-        if !self.database.contains_client(nickname) || !self.database.contains_channel(channel) {
+        if !self.database.contains_client(nickname)
+            || !self.database.contains_channel(channel)
+            || !self.database.is_client_in_channel(nickname, channel)
+        {
             return Err(ErrorReply::NoReply);
         }
         Ok(())
