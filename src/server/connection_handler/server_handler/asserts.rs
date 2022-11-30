@@ -3,7 +3,7 @@ use crate::server::connection_handler::connection_handler_trait::{
     CommandArgs, ConnectionHandlerAsserts,
 };
 
-use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE, VALID_MODES};
+use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE, VALID_CHANNEL_MODES, VALID_USER_MODES};
 use crate::server::responses::ErrorReply;
 
 use super::ServerHandler;
@@ -102,7 +102,10 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
         let nickname = prefix.as_ref().unwrap();
         let channel = &params[0];
-        if !self.database.contains_client(nickname) || !self.database.contains_channel(channel) {
+        if !self.database.contains_client(nickname)
+            || !self.database.contains_channel(channel)
+            || !self.database.is_client_in_channel(channel, nickname)
+        {
             return Err(ErrorReply::NoReply);
         }
         Ok(())
@@ -115,7 +118,8 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         }
 
         let inviting = prefix.as_ref().unwrap();
-        if !self.database.contains_client(inviting) {
+        let invited = &params[0];
+        if !self.database.contains_client(inviting) || !self.database.contains_client(invited) {
             return Err(ErrorReply::NoReply);
         }
 
@@ -159,9 +163,8 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        let nickname = prefix.as_ref().unwrap();
         let channel = &params[0];
-        if !self.database.contains_client(nickname) || !self.database.contains_channel(channel) {
+        if !self.database.contains_channel(channel) {
             return Err(ErrorReply::NoReply);
         }
 
@@ -178,7 +181,10 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         let kicked = &params[1];
         let channel = &params[0];
 
-        if !self.database.contains_client(kicked) || !self.database.contains_channel(channel) {
+        if !self.database.contains_client(kicked)
+            || !self.database.contains_channel(channel)
+            || !self.database.is_client_in_channel(channel, kicked)
+        {
             return Err(ErrorReply::NoReply);
         }
 
@@ -187,7 +193,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
     fn assert_mode_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         let (prefix, params, _) = arguments;
-        if params.len() < 2 {
+        if params.len() < 2 || prefix.is_none() {
             return Err(ErrorReply::NoReply);
         }
 
@@ -196,11 +202,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        if !mode.starts_with([ADD_MODE, REMOVE_MODE]) || !mode.ends_with(VALID_MODES) {
-            return Err(ErrorReply::NoReply);
-        }
-
-        if prefix.is_none() {
+        if !mode.starts_with([ADD_MODE, REMOVE_MODE])
+            || !(mode.ends_with(VALID_CHANNEL_MODES) || mode.ends_with(VALID_USER_MODES))
+        {
             return Err(ErrorReply::NoReply);
         }
 

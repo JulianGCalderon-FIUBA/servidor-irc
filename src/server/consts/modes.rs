@@ -13,7 +13,7 @@ pub const SET_KEY: char = 'k';
 pub const OPERATOR_SYMBOL: char = '@';
 pub const SPEAKER_SYMBOL: char = '+';
 
-pub const VALID_MODES: [char; 11] = [
+pub const VALID_CHANNEL_MODES: [char; 11] = [
     SET_OPERATOR,
     PRIVATE,
     SECRET,
@@ -25,6 +25,13 @@ pub const VALID_MODES: [char; 11] = [
     SET_BANMASK,
     SET_SPEAKER,
     SET_KEY,
+];
+
+pub const VALID_USER_MODES: [char; 4] = [
+    INVISIBLE,
+    OPERATOR,
+    RECEIVES_SERVER_NOTICES,
+    RECEIVES_WALLOPS,
 ];
 
 pub const ADD_MODE: char = '+';

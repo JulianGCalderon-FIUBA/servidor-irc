@@ -7,6 +7,53 @@ use crate::server::{
 };
 
 #[test]
+fn squit_with_invalid_arguments_is_ignored() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername3"));
+
+    let prefix = Some("oper".to_string());
+    let parameters = vec!["servername2".to_string()];
+    handler.squit_command((None, parameters, None)).unwrap();
+    handler.squit_command((prefix, vec![], None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername3")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn squit_with_unknown_server_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername3"));
+
+    let prefix = Some("oper".to_string());
+    let parameters = vec!["servername2".to_string()];
+    handler.squit_command((prefix, parameters, None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername3")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
 fn squit_removes_server_from_database() {
     let mut handler = dummy_server_handler();
     handler

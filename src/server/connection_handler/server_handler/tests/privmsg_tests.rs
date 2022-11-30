@@ -9,7 +9,16 @@ use super::dummy_server_handler;
 fn privmsg_is_ignored_without_enough_parameters() {
     let mut handler = dummy_server_handler();
 
-    assert!(handler.privmsg_command((None, vec![], None)).is_ok());
+    let prefix = Some("sender".to_string());
+    let params = vec!["target".to_string()];
+    let trail = Some("message".to_string());
+    handler
+        .privmsg_command((None, params.clone(), trail.clone()))
+        .unwrap();
+    handler
+        .privmsg_command((prefix.clone(), vec![], trail))
+        .unwrap();
+    handler.privmsg_command((prefix, params, None)).unwrap();
 }
 
 #[test]
