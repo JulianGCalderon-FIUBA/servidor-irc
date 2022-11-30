@@ -7,25 +7,6 @@ use crate::server::{
 };
 
 #[test]
-fn user_adds_client_to_database() {
-    let mut handler = dummy_server_handler();
-    handler.hopcounts.insert("nickname".to_string(), 1);
-
-    let prefix = Some("nickname".to_string());
-    let parameters = vec![
-        "nickname".to_string(),
-        "hostname".to_string(),
-        "servername".to_string(),
-    ];
-    let trailing = Some("realname".to_string());
-    handler
-        .user_command((prefix, parameters, trailing))
-        .unwrap();
-
-    assert!(handler.database.contains_client("nickname"));
-}
-
-#[test]
 fn user_is_ignored_without_enough_parameters() {
     let mut handler = dummy_server_handler();
     handler.hopcounts.insert("nickname".to_string(), 1);
@@ -52,6 +33,25 @@ fn user_is_ignored_with_no_previuos_nick() {
         .unwrap();
 
     assert!(!handler.database.contains_client("nickname"));
+}
+
+#[test]
+fn user_adds_client_to_database() {
+    let mut handler = dummy_server_handler();
+    handler.hopcounts.insert("nickname".to_string(), 1);
+
+    let prefix = Some("nickname".to_string());
+    let parameters = vec![
+        "nickname".to_string(),
+        "hostname".to_string(),
+        "servername".to_string(),
+    ];
+    let trailing = Some("realname".to_string());
+    handler
+        .user_command((prefix, parameters, trailing))
+        .unwrap();
+
+    assert!(handler.database.contains_client("nickname"));
 }
 
 #[test]
