@@ -66,7 +66,7 @@ fn whois_returns_nick_info_with_channels() {
 
     let parameters = vec!["nickname".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler.whois_command((None, parameters, None)).unwrap();
 
@@ -104,7 +104,7 @@ fn whois_returns_complete_nick_info() {
 
     let parameters = vec!["nickname".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
     handler.database.set_server_operator("nickname");
     handler
         .database

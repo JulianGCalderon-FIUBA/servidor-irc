@@ -34,7 +34,7 @@ fn quit_notifies_all_users_in_clients_channels() {
         .add_client_to_channel("nickname1", "#channel");
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     let trail = Some("message".to_string());
     handler.quit_command((None, vec![], trail)).unwrap();

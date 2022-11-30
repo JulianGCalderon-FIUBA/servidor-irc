@@ -94,7 +94,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
             self.send_join_notification(channel);
 
-            self.database.add_client_to_channel(&self.nickname, channel);
+            self.database.add_client_to_channel(channel, &self.nickname);
 
             self.send_join_response(channel)?;
         }

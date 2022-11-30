@@ -22,8 +22,8 @@ fn names_with_no_parameters_prints_all_channels() {
 
     handler.database.add_local_client(dummy_client("nick2"));
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
     handler.database.add_client_to_channel("nick2", "#canal");
 
     handler.names_command((None, parameters, None)).unwrap();
@@ -44,8 +44,8 @@ fn names_with_no_parameters_prints_all_channels() {
 fn names_with_parameters_prints_requested_channels() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
 
     let parameters = vec!["#hola,#chau".to_string()];
     handler.names_command((None, parameters, None)).unwrap();
@@ -64,8 +64,8 @@ fn names_ignores_invalid_channels() {
 
     let parameters = vec!["#hola,#invalido,#chau".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.names_command((None, parameters, None)).unwrap();
 
@@ -81,8 +81,8 @@ fn names_ignores_invalid_channels() {
 fn name_ignores_secret_channels() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#secreto");
@@ -106,8 +106,8 @@ fn name_ignores_secret_channels() {
 fn name_ignores_private_channels() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#privado");
@@ -131,8 +131,8 @@ fn name_ignores_private_channels() {
 fn name_prints_secret_channel_if_client_is_in_it() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
     handler
         .database
         .add_client_to_channel("nickname", "#secreto");
@@ -158,8 +158,8 @@ fn name_prints_secret_channel_if_client_is_in_it() {
 fn name_prints_private_channel_if_client_is_in_it() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
     handler
         .database
         .add_client_to_channel("nickname", "#privado");

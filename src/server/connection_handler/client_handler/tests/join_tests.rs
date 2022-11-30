@@ -131,7 +131,7 @@ fn can_join_existing_channel() {
 
     handler.database.add_local_client(dummy_client("nick2"));
 
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     let channels = vec!["#channel".to_string()];
 
@@ -162,7 +162,7 @@ fn can_join_channel_with_topic() {
     let parameters = vec!["#channel".to_string()];
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
     handler
         .database
         .set_channel_topic("#channel", "topic for channel");
@@ -194,7 +194,7 @@ fn join_notifies_users_in_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     let parameters = vec!["#channel".to_string()];
     handler.join_command((None, parameters, None)).unwrap();
@@ -214,7 +214,7 @@ fn join_fails_with_incorrect_key() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
+    handler.database.add_client_to_channel("#hola", "nick2");
 
     handler
         .database
@@ -236,7 +236,7 @@ fn can_join_channel_with_key() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
+    handler.database.add_client_to_channel("#hola", "nick2");
 
     handler
         .database
@@ -258,14 +258,14 @@ fn can_join_multiple_channels_with_keys() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel1");
+    handler.database.add_client_to_channel("#channel1", "nick2");
 
     handler
         .database
         .set_channel_key("#channel1", Some("key1".to_string()));
 
     handler.database.add_local_client(dummy_client("nick3"));
-    handler.database.add_client_to_channel("nick3", "#channel2");
+    handler.database.add_client_to_channel("#channel2", "nick3");
 
     handler
         .database
@@ -302,7 +302,7 @@ fn join_fails_with_user_limit_reached_on_limited_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
+    handler.database.add_client_to_channel("#hola", "nick2");
 
     handler.database.set_channel_limit("#hola", Some(1));
 
@@ -322,7 +322,7 @@ fn can_join_limited_channel_if_limit_not_reached() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
+    handler.database.add_client_to_channel("#hola", "nick2");
 
     handler.database.set_channel_limit("#hola", Some(4));
 
@@ -342,7 +342,7 @@ fn join_fails_with_banmask() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("user2"));
-    handler.database.add_client_to_channel("user2", "#channel");
+    handler.database.add_client_to_channel("#channel", "user2");
 
     handler.database.add_channel_banmask("#channel", "nickname");
 
@@ -364,7 +364,7 @@ fn can_join_channel_with_banmask() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     handler.database.add_channel_banmask("#channel", "user");
 
@@ -386,7 +386,7 @@ fn joins_notifies_user_in_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     let parameters = vec!["#channel".to_string()];
     handler.join_command((None, parameters, None)).unwrap();
