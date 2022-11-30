@@ -1,3 +1,5 @@
+use crate::server::consts::modes::UserFlag;
+
 use super::*;
 
 #[test]
@@ -1093,7 +1095,7 @@ fn mode_sets_and_unsets_multiple_valid_flags() {
 }
 
 #[test]
-fn mode_returns_channel_mode() {
+fn mode_with_no_parameters_returns_channel_mode() {
     let mut handler = dummy_client_handler();
 
     handler
@@ -1199,4 +1201,169 @@ fn mode_works_with_multiples_arguments_in_disorder() {
         Some(32),
         handler.database.get_channel_limit("#channel").unwrap()
     );
+}
+
+#[test]
+fn mode_fails_with_users_dont_match_if_target_is_not_not_own_nickname() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nickname2".to_string(), "+i".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "502 :Cant change mode for other users\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(!info.flags.contains_key(&UserFlag::Invisible));
+}
+
+#[test]
+fn mode_fails_when_setting_unknown_user_mode() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nickname".to_string(), "+a".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "501 :Unknown MODE flag\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn mode_sets_user_flag_invisible() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nickname".to_string(), "+i".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(info.flags.contains_key(&UserFlag::Invisible));
+}
+
+#[test]
+fn mode_unsets_user_flag_invisible() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .set_user_mode("nickname", UserFlag::Invisible);
+
+    let parameters = vec!["nickname".to_string(), "-i".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(!info.flags.contains_key(&UserFlag::Invisible));
+}
+
+#[test]
+fn mode_cannot_set_oper_flag_to_self() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nickname".to_string(), "+o".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(!info.flags.contains_key(&UserFlag::Operator));
+    assert!(!handler.database.is_server_operator("nickname"));
+}
+
+#[test]
+fn mode_can_unset_oper_flag() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.set_server_operator("nickname");
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(info.flags.contains_key(&UserFlag::Operator));
+    assert!(handler.database.is_server_operator("nickname"));
+
+    let parameters = vec!["nickname".to_string(), "-o".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+}
+
+#[test]
+fn mode_sets_user_flag_receives_server_notices() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nickname".to_string(), "+s".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(info.flags.contains_key(&UserFlag::ReceiveServerNotices));
+}
+
+#[test]
+fn mode_unsets_user_flag_receives_server_notices() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .set_user_mode("nickname", UserFlag::ReceiveServerNotices);
+
+    let parameters = vec!["nickname".to_string(), "-s".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(!info.flags.contains_key(&UserFlag::ReceiveServerNotices));
+}
+
+#[test]
+fn mode_sets_user_flag_receives_wallops() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nickname".to_string(), "+w".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(info.flags.contains_key(&UserFlag::ReceivesWallops));
+}
+
+#[test]
+fn mode_unsets_user_flag_receives_wallops() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .set_user_mode("nickname", UserFlag::ReceivesWallops);
+
+    let parameters = vec!["nickname".to_string(), "-w".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let info = handler.database.get_client_info("nickname").unwrap();
+    assert!(!info.flags.contains_key(&UserFlag::ReceivesWallops));
+}
+
+#[test]
+fn mode_without_parameters_returns_umode_response() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .set_user_mode("nickname", UserFlag::ReceivesWallops);
+    handler
+        .database
+        .set_user_mode("nickname", UserFlag::ReceiveServerNotices);
+    handler
+        .database
+        .set_user_mode("nickname", UserFlag::Invisible);
+    handler
+        .database
+        .set_user_mode("nickname", UserFlag::Operator);
+
+    let parameters = vec!["nickname".to_string()];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let mut response: Vec<String> = handler.stream.get_responses()[0]
+        .split(' ')
+        .map(|s| s.to_string())
+        .collect();
+    let mut mode_string: Vec<char> = response[1].chars().collect();
+    mode_string.sort();
+    response[1] = mode_string.iter().collect();
+
+    let response = [response[0].clone(), response[1].clone()].join(" ");
+
+    assert_eq!("221 iosw", response);
 }

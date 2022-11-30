@@ -360,7 +360,7 @@ impl<C: Connection> ClientHandler<C> {
         mut args: Vec<String>,
     ) -> Result<(), io::Error> {
         if args.is_empty() {
-            self.send_channel_mode_is_response(&channel)?; // falta soporte para usuarios
+            self.send_channel_mode_is_response(&channel)?;
             return Ok(());
         }
 
@@ -379,7 +379,7 @@ impl<C: Connection> ClientHandler<C> {
 
     fn mode_command_for_user(&mut self, user: String, mut args: Vec<String>) -> io::Result<()> {
         if args.is_empty() {
-            self.send_user_mode_is_response(&user)?; // falta soporte para usuarios
+            self.send_user_mode_is_response(&user)?;
             return Ok(());
         }
 
