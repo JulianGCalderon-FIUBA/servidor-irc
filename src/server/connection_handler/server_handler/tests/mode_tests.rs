@@ -8,6 +8,64 @@ use crate::server::{
 };
 
 #[test]
+fn mode_with_invalid_arguments_is_invalid() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+b".to_string(),
+        "banmask".to_string(),
+    ];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let prefix = Some("sender".to_string());
+    let parameters = vec![
+        "#channel".to_string(),
+        "&b".to_string(),
+        "banmask".to_string(),
+    ];
+    handler
+        .mode_command((prefix.clone(), parameters, None))
+        .unwrap();
+    let parameters = vec![
+        "#channel".to_string(),
+        "+y".to_string(),
+        "banmask".to_string(),
+    ];
+    handler
+        .mode_command((prefix.clone(), parameters, None))
+        .unwrap();
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+ui".to_string(),
+        "banmask".to_string(),
+    ];
+    handler
+        .mode_command((prefix.clone(), parameters, None))
+        .unwrap();
+
+    let parameters = vec!["#channel".to_string()];
+    handler
+        .mode_command((prefix.clone(), parameters, None))
+        .unwrap();
+
+    handler.mode_command((prefix, vec![], None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
 fn mode_is_relayed_to_all_other_servers() {
     let mut handler = dummy_server_handler();
     handler

@@ -191,7 +191,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
     fn assert_mode_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
         let (prefix, params, _) = arguments;
-        if params.len() < 2 {
+        if params.len() < 2 || prefix.is_none() {
             return Err(ErrorReply::NoReply);
         }
 
@@ -203,10 +203,6 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         if !mode.starts_with([ADD_MODE, REMOVE_MODE])
             || !(mode.ends_with(VALID_CHANNEL_MODES) || mode.ends_with(VALID_USER_MODES))
         {
-            return Err(ErrorReply::NoReply);
-        }
-
-        if prefix.is_none() {
             return Err(ErrorReply::NoReply);
         }
 
