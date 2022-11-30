@@ -5,6 +5,117 @@ use crate::server::{
     },
     testing::{dummy_client, dummy_external_client, dummy_server},
 };
+
+#[test]
+fn kick_with_invalid_arguments_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    handler.database.add_local_client(dummy_client("kicked"));
+    handler
+        .database
+        .add_external_client(dummy_external_client("kicked", "servername"));
+
+    handler.database.add_client_to_channel("kicked", "#channel");
+
+    let params = vec!["#channel".to_string(), "kicked".to_string()];
+    handler.kick_command((None, params, None)).unwrap();
+    let prefix = Some("kicker".to_string());
+    let params = vec!["#channel".to_string()];
+    handler
+        .kick_command((prefix.clone(), params, None))
+        .unwrap();
+    handler.kick_command((prefix, vec![], None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn kick_with_no_client_in_database_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    handler.database.add_client_to_channel("kicked", "#channel");
+
+    let prefix = Some("kicker".to_string());
+    let params = vec!["#channel".to_string(), "kicked".to_string()];
+    handler.kick_command((prefix, params, None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn kick_with_no_client_in_channel_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    handler
+        .database
+        .add_client_to_channel("nickname", "#channel");
+
+    handler.database.add_local_client(dummy_client("kicked"));
+
+    let prefix = Some("kicker".to_string());
+    let params = vec!["#channel".to_string(), "kicked".to_string()];
+    handler.kick_command((prefix, params, None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn kick_with_no_channel_in_database_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    handler.database.add_local_client(dummy_client("kicked"));
+
+    let prefix = Some("kicker".to_string());
+    let params = vec!["#channel".to_string(), "kicked".to_string()];
+    handler.kick_command((prefix, params, None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
 #[test]
 fn kick_removes_client_from_channel() {
     let mut handler = dummy_server_handler();

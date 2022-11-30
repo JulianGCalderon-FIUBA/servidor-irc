@@ -115,7 +115,8 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         }
 
         let inviting = prefix.as_ref().unwrap();
-        if !self.database.contains_client(inviting) {
+        let invited = &params[0];
+        if !self.database.contains_client(inviting) || !self.database.contains_client(invited) {
             return Err(ErrorReply::NoReply);
         }
 
@@ -178,7 +179,10 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         let kicked = &params[1];
         let channel = &params[0];
 
-        if !self.database.contains_client(kicked) || !self.database.contains_channel(channel) {
+        if !self.database.contains_client(kicked)
+            || !self.database.contains_channel(channel)
+            || !self.database.is_client_in_channel(kicked, channel)
+        {
             return Err(ErrorReply::NoReply);
         }
 
