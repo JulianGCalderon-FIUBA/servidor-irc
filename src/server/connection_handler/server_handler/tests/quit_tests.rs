@@ -20,6 +20,53 @@ use crate::server::{
 // }
 
 #[test]
+fn quit_with_invalid_arguments_is_ignored() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_external_client(dummy_external_client("nickname1", "servername1"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    let prefix = Some("nickname1".to_string());
+    let trail = Some("going to lunch!".to_string());
+    handler.quit_command((None, vec![], trail)).unwrap();
+    handler.quit_command((prefix, vec![], None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string(),
+    );
+}
+
+#[test]
+fn quit_with_unknown_client_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    let prefix = Some("nickname1".to_string());
+    let trail = Some("going to lunch!".to_string());
+    handler.quit_command((prefix, vec![], trail)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string(),
+    );
+}
+
+#[test]
 fn quit_is_sent_to_local_clients_on_shared_channels() {
     let mut handler = dummy_server_handler();
     handler
