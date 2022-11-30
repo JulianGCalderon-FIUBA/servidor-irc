@@ -46,8 +46,8 @@ fn notice_fails_with_not_on_channel_with_flag_n() {
 
     handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     handler
         .database
@@ -87,7 +87,7 @@ fn notice_fails_if_not_speaker_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick1"));
-    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
@@ -125,8 +125,8 @@ fn notice_works_on_channel_with_flag_n() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-    handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     handler
         .database
@@ -166,7 +166,7 @@ fn notice_works_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick1"));
-    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
     handler
         .database
         .add_client_to_channel("#channel", "nickname");

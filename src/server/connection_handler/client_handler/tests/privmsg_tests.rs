@@ -77,8 +77,8 @@ fn privmsg_works_with_valid_target_channel() {
 
     handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
@@ -171,8 +171,8 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
 
     handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     handler
         .database
@@ -212,7 +212,7 @@ fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick1"));
-    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
@@ -250,8 +250,8 @@ fn privmsg_works_on_channel_with_flag_n() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-    handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     handler
         .database
@@ -291,7 +291,7 @@ fn privmsg_works_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick1"));
-    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
@@ -341,10 +341,10 @@ fn privmsg_to_distributed_channel_is_only_relayed_to_each_neccesary_server_once(
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());

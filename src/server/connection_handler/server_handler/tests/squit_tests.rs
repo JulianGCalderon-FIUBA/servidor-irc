@@ -188,10 +188,10 @@ fn squit_relays_client_quit_to_local_clients_on_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     let prefix = Some("oper".to_string());
     let parameters = vec!["servername2".to_string()];

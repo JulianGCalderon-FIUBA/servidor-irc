@@ -71,7 +71,7 @@ fn mode_is_relayed_to_local_clients_on_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     let parameters = vec!["#channel".to_string(), "+s".to_string()];
     let prefix = Some("sender".to_string());
@@ -104,7 +104,7 @@ fn mode_adds_channop() {
         .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
 
@@ -127,7 +127,7 @@ fn mode_removes_channop() {
         .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
     handler.database.add_channel_operator("#channel", "nick2");
 
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
@@ -283,7 +283,7 @@ fn mode_adds_speaker_to_channel() {
         .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
 
@@ -308,7 +308,7 @@ fn mode_removes_speakers_from_channel() {
         .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
     handler.database.add_channel_speaker("#channel", "nick2");
 
     assert!(handler.database.is_channel_speaker("#channel", "nick2"));

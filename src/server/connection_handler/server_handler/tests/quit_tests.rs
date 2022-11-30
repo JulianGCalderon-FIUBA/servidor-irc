@@ -30,10 +30,10 @@ fn quit_is_sent_to_local_clients_on_shared_channels() {
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
     let prefix = Some("nickname1".to_string());
     let trail = Some("nickname1".to_string());
     handler.quit_command((prefix, vec![], trail)).unwrap();

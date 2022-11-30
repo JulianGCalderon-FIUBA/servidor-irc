@@ -236,7 +236,7 @@ impl<C: Connection> ClientHandler<C> {
         client: &str,
         channel: &str,
     ) -> Result<(), ErrorReply> {
-        if self.database.is_client_in_channel(client, channel) {
+        if self.database.is_client_in_channel(channel, client) {
             return Err(ErrorReply::UserOnChannel443 {
                 nickname: client.to_string(),
                 channel: channel.to_string(),
@@ -403,7 +403,7 @@ impl<C: Connection> ClientHandler<C> {
 
         let channel = channel.to_string();
 
-        if !self.database.is_client_in_channel(client, &channel) {
+        if !self.database.is_client_in_channel(&channel, client) {
             return Err(ErrorReply::NotOnChannel442 { channel });
         }
 

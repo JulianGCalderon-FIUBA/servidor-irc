@@ -18,7 +18,7 @@ fn join_adds_client_to_channel() {
 
     assert!(handler
         .database
-        .is_client_in_channel("nickname1", "#channel"));
+        .is_client_in_channel("#channel", "nickname1"));
 }
 
 #[test]
@@ -81,7 +81,7 @@ fn join_is_relayed_to_local_clients_on_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string()];

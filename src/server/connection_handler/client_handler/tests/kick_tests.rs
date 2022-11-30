@@ -78,7 +78,7 @@ fn can_kick_user_from_channel() {
     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
     handler.kick_command((None, parameters, None)).unwrap();
 
-    assert!(!handler.database.is_client_in_channel("nick2", "#channel"));
+    assert!(!handler.database.is_client_in_channel("#channel", "nick2"));
 
     assert_eq!(
         ":nickname KICK #channel nick2\r\n",
@@ -105,7 +105,7 @@ fn can_kick_user_from_channel() {
 //     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
 //     handler.kick_command((None, parameters, None)).unwrap();
 
-//     assert!(!handler.database.is_client_in_channel("nick3", "#channel"));
+//     assert!(!handler.database.is_client_in_channel("#channel", "nick3"));
 // }
 
 #[test]
@@ -122,7 +122,7 @@ fn can_kick_user_from_channel_with_comment() {
     let trailing = Some("no lollygagging".to_string());
     handler.kick_command((None, parameters, trailing)).unwrap();
 
-    assert!(!handler.database.is_client_in_channel("nick2", "#channel"));
+    assert!(!handler.database.is_client_in_channel("#channel", "nick2"));
 
     assert_eq!(
         ":nickname KICK #channel nick2 :no lollygagging\r\n",
@@ -150,8 +150,8 @@ fn can_kick_multiple_user() {
     let trailing = Some("no lollygagging".to_string());
     handler.kick_command((None, parameters, trailing)).unwrap();
 
-    assert!(!handler.database.is_client_in_channel("nick2", "#channel"));
-    assert!(!handler.database.is_client_in_channel("nick3", "#channel"));
+    assert!(!handler.database.is_client_in_channel("#channel", "nick2"));
+    assert!(!handler.database.is_client_in_channel("#channel", "nick3"));
 }
 
 #[test]

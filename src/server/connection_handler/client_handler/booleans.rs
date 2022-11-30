@@ -45,7 +45,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn is_in_channel(&self, channel: &str) -> bool {
-        self.database.is_client_in_channel(&self.nickname, channel)
+        self.database.is_client_in_channel(channel, &self.nickname)
     }
 
     pub fn client_matches_banmask(&self, nickname: &str, mask: &str) -> bool {

@@ -15,7 +15,7 @@ fn kick_removes_client_from_channel() {
     let params = vec!["#channel".to_string(), "kicked".to_string()];
     handler.kick_command((prefix, params, None)).unwrap();
 
-    assert!(!handler.database.is_client_in_channel("kicked", "#channel"));
+    assert!(!handler.database.is_client_in_channel("#channel", "kicked"));
 }
 
 #[test]
@@ -30,7 +30,7 @@ fn kick_is_relayed_to_all_other_servers() {
         .database
         .add_immediate_server(dummy_server("servername3"));
 
-    handler.database.add_client_to_channel("kicked", "#channel");
+    handler.database.add_client_to_channel("#channel", "kicked");
 
     let prefix = Some("kicker".to_string());
     let params = vec!["#channel".to_string(), "kicked".to_string()];
@@ -65,10 +65,10 @@ fn kick_is_never_relayed_to_sending_server() {
         .add_external_client(dummy_external_client("nickname2", "servername1"));
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string(), "nickname2".to_string()];
@@ -89,13 +89,13 @@ fn kick_is_relayed_to_local_clients_on_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
     handler
         .database
-        .add_client_to_channel("nickname3", "#channel");
+        .add_client_to_channel("#channel", "nickname3");
 
     let prefix = Some("nickname1".to_string());
     let parameters = vec!["#channel".to_string(), "nickname3".to_string()];

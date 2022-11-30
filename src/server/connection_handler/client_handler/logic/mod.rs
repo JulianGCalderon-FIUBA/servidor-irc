@@ -115,7 +115,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_part_notification(channel);
 
             self.database
-                .remove_client_from_channel(&self.nickname, channel);
+                .remove_client_from_channel(channel, &self.nickname);
         }
 
         Ok(true)
@@ -352,7 +352,7 @@ impl<C: Connection> ClientHandler<C> {
         comment: &Option<String>,
     ) {
         self.send_kick_notification(channel, nickname, comment);
-        self.database.remove_client_from_channel(nickname, channel);
+        self.database.remove_client_from_channel(channel, nickname);
     }
 
     fn mode_command_for_channel(

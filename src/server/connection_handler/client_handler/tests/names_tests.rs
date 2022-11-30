@@ -24,7 +24,7 @@ fn names_with_no_parameters_prints_all_channels() {
 
     handler.database.add_client_to_channel("#hola", "nickname");
     handler.database.add_client_to_channel("#chau", "nickname");
-    handler.database.add_client_to_channel("nick2", "#canal");
+    handler.database.add_client_to_channel("#canal", "nick2");
 
     handler.names_command((None, parameters, None)).unwrap();
 
@@ -85,7 +85,7 @@ fn name_ignores_secret_channels() {
     handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#secreto");
+    handler.database.add_client_to_channel("#secreto", "nick2");
 
     handler
         .database
@@ -110,7 +110,7 @@ fn name_ignores_private_channels() {
     handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#privado");
+    handler.database.add_client_to_channel("#privado", "nick2");
 
     handler
         .database
@@ -135,7 +135,7 @@ fn name_prints_secret_channel_if_client_is_in_it() {
     handler.database.add_client_to_channel("#chau", "nickname");
     handler
         .database
-        .add_client_to_channel("nickname", "#secreto");
+        .add_client_to_channel("#secreto", "nickname");
 
     handler
         .database
@@ -162,7 +162,7 @@ fn name_prints_private_channel_if_client_is_in_it() {
     handler.database.add_client_to_channel("#chau", "nickname");
     handler
         .database
-        .add_client_to_channel("nickname", "#privado");
+        .add_client_to_channel("#privado", "nickname");
 
     handler
         .database

@@ -89,7 +89,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
 
         let nickname = prefix.unwrap();
         let channel = params.remove(0);
-        self.database.add_client_to_channel(&nickname, &channel);
+        self.database.add_client_to_channel(&channel, &nickname);
         self.send_join_notification(&nickname, &channel);
         Ok(true)
     }
@@ -100,7 +100,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let nickname = prefix.unwrap();
         let channel = params.remove(0);
         self.database
-            .remove_client_from_channel(&nickname, &channel);
+            .remove_client_from_channel(&channel, &nickname);
         self.send_part_notification(&nickname, &channel);
         Ok(true)
     }
@@ -149,7 +149,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let message = trail;
 
         self.send_kick_notification(&kicker, &channel, &kicked, &message);
-        self.database.remove_client_from_channel(&kicked, &channel);
+        self.database.remove_client_from_channel(&channel, &kicked);
 
         Ok(true)
     }

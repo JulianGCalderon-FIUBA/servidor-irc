@@ -120,10 +120,10 @@ fn squit_to_immediate_server_notifies_quit_for_every_client() {
 
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
 
     let params = vec!["servername2".to_string()];
     handler.squit_command((None, params, None)).unwrap();

@@ -129,7 +129,7 @@ fn can_remove_client_from_channel() {
     database.add_client_to_channel("channel", "nickname2");
     database.remove_client_from_channel("channel", "nickname1");
 
-    assert!(!database.is_client_in_channel("nickname1", "channel"));
+    assert!(!database.is_client_in_channel("channel", "nickname1"));
     let value = database.get_channel_clients("channel").unwrap();
     let expected = vec!["nickname2".to_string()];
 

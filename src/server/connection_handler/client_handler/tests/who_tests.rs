@@ -10,8 +10,8 @@ fn who_with_no_parameters_returns_all_public_clients_with_no_common_channels() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-    handler.database.add_client_to_channel("nick3", "#channel");
-    handler.database.add_client_to_channel("nick1", "#channel2");
+    handler.database.add_client_to_channel("#channel", "nick3");
+    handler.database.add_client_to_channel("#channel2", "nick1");
 
     let parameters = vec![];
 

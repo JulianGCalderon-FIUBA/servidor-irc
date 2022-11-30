@@ -43,7 +43,7 @@ fn part_fails_with_user_not_on_channel() {
     let parameters = vec!["#hola".to_string()];
     handler
         .database
-        .add_client_to_channel("newnickname", "#hola");
+        .add_client_to_channel("#hola", "newnickname");
 
     handler.part_command((None, parameters, None)).unwrap();
 
@@ -99,7 +99,7 @@ fn part_notifies_users_in_channel() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     let parameters = vec!["#channel".to_string()];
     handler.part_command((None, parameters, None)).unwrap();
@@ -128,7 +128,7 @@ fn part_notifies_user_in_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
     handler
         .database
         .add_client_to_channel("#channel", "nickname");

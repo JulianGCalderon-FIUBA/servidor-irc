@@ -31,7 +31,7 @@ fn quit_notifies_all_users_in_clients_channels() {
     handler.database.add_local_client(dummy_client("nickname1"));
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
