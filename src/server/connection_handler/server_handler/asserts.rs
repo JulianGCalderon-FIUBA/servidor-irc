@@ -163,9 +163,8 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        let nickname = prefix.as_ref().unwrap();
         let channel = &params[0];
-        if !self.database.contains_client(nickname) || !self.database.contains_channel(channel) {
+        if !self.database.contains_channel(channel) {
             return Err(ErrorReply::NoReply);
         }
 
