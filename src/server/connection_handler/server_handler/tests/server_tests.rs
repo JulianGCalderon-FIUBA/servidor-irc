@@ -7,6 +7,40 @@ use crate::server::{
 };
 
 #[test]
+fn server_with_invalid_arguments_is_ignored() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    let parameters = vec!["servername4".to_string(), "2".to_string()];
+    handler.server_command((None, parameters, None)).unwrap();
+
+    let trail = Some("serverinfo".to_string());
+    let parameters = vec!["servername4".to_string()];
+    handler
+        .server_command((None, parameters, trail.clone()))
+        .unwrap();
+
+    let parameters = vec![];
+    handler
+        .server_command((None, parameters, trail.clone()))
+        .unwrap();
+
+    let parameters = vec!["servername4".to_string(), "a".to_string()];
+    handler.server_command((None, parameters, trail)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
 fn server_adds_server_to_database() {
     let mut handler = dummy_server_handler();
 
