@@ -104,7 +104,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         let channel = &params[0];
         if !self.database.contains_client(nickname)
             || !self.database.contains_channel(channel)
-            || !self.database.is_client_in_channel(nickname, channel)
+            || !self.database.is_client_in_channel(channel, nickname)
         {
             return Err(ErrorReply::NoReply);
         }
@@ -183,7 +183,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
         if !self.database.contains_client(kicked)
             || !self.database.contains_channel(channel)
-            || !self.database.is_client_in_channel(kicked, channel)
+            || !self.database.is_client_in_channel(channel, kicked)
         {
             return Err(ErrorReply::NoReply);
         }
