@@ -83,7 +83,7 @@ impl Controller {
 
         let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
 
-        let mut channel_members_window = ChannelMembersView::new().get_view(app.clone(), vec![]);
+        // let mut channel_members_window = ChannelMembersView::new().get_view(app.clone(), vec![]);
 
         let mut current_conv = "".to_string();
 
@@ -192,7 +192,7 @@ impl Controller {
                 ReceiveNamesChannels {
                     channels_and_clients,
                 } => {
-                    channel_members_window = ChannelMembersView::new().get_view(
+                    let channel_members_window = ChannelMembersView::new().get_view(
                         app_clone.clone(),
                         channels_and_clients[&current_conv].clone(),
                     );
