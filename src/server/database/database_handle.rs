@@ -1,5 +1,6 @@
 use std::sync::mpsc::Sender;
 
+use crate::macros::own;
 use crate::server::consts::modes::UserFlag;
 use crate::server::data_structures::*;
 use crate::server::{connection::Connection, consts::modes::ChannelFlag};
@@ -400,6 +401,22 @@ impl<C: Connection> DatabaseHandle<C> {
             new_nickname,
         };
         self.sender.send(request).unwrap();
+    }
+    pub fn add_channel_invite(&self, channel: &str, client: &str) {
+        own!(channel, client);
+        let request = DatabaseMessage::AddChannelInvite { channel, client };
+        self.sender.send(request).unwrap();
+    }
+    pub fn channel_has_invite(&self, channel: &str, client: &str) -> bool {
+        own!(channel, client);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::ChannelHasClientInvite {
+            channel,
+            client,
+            respond_to,
+        };
+        self.sender.send(request).unwrap();
+        receive_from.recv().unwrap()
     }
 }
 impl<C: Connection> Clone for DatabaseHandle<C> {

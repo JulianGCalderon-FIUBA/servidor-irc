@@ -27,6 +27,10 @@ impl<C: Connection> Database<C> {
     pub fn handle_remove_client_from_channel(&mut self, nickname: String, channel_name: String) {
         self.remove_client_from_channel(channel_name, nickname);
     }
+
+    pub fn handle_add_channel_invitation(&mut self, channel: String, client: String) {
+        self.add_channel_invitation(channel, client);
+    }
 }
 
 impl<C: Connection> Database<C> {
@@ -62,6 +66,11 @@ impl<C: Connection> Database<C> {
 
     fn get_channels(&self) -> Vec<String> {
         self.channels.keys().cloned().collect()
+    }
+
+    fn add_channel_invitation(&mut self, channel: String, client: String) {
+        let channel = some_or_return!(self.channels.get_mut(&channel));
+        channel.add_client_invite(client);
     }
 }
 

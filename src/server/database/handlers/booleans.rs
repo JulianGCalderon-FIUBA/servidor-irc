@@ -71,6 +71,16 @@ impl<C: Connection> Database<C> {
         let response = self.is_immediate_server(&server);
         respond_to.send(response).unwrap();
     }
+
+    pub fn handle_channel_has_client_invite(
+        &self,
+        channel: String,
+        client: String,
+        respond_to: Sender<bool>,
+    ) {
+        let response = self.channel_has_client_invite(channel, client);
+        respond_to.send(response).unwrap();
+    }
 }
 
 impl<C: Connection> Database<C> {
@@ -118,5 +128,10 @@ impl<C: Connection> Database<C> {
     fn contains_server(&self, servername: String) -> bool {
         self.immediate_servers.contains_key(&servername)
             || self.distant_servers.contains_key(&servername)
+    }
+
+    fn channel_has_client_invite(&self, channel: String, client: String) -> bool {
+        let channel = some_or_return!(self.channels.get(&channel), false);
+        channel.has_invite(&client)
     }
 }

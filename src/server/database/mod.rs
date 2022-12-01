@@ -33,17 +33,6 @@ pub struct Database<C: Connection> {
 }
 
 impl<C: Connection> Database<C> {
-    /// Returns new [`DatabaseHandle`] and starts listening for requests.
-    pub fn start(servername: String, serverinfo: String) -> (DatabaseHandle<C>, JoinHandle<()>) {
-        let (sender, receiver) = mpsc::channel();
-
-        let join_handle =
-            thread::spawn(|| Database::<C>::new(receiver, servername, serverinfo).run());
-        let database_handle = DatabaseHandle::new(sender);
-
-        (database_handle, join_handle)
-    }
-
     fn new(receiver: Receiver<DatabaseMessage<C>>, servername: String, serverinfo: String) -> Self {
         let mut database = Self {
             receiver,
@@ -63,6 +52,17 @@ impl<C: Connection> Database<C> {
         database
     }
 
+    /// Returns new [`DatabaseHandle`] and starts listening for requests.
+    pub fn start(servername: String, serverinfo: String) -> (DatabaseHandle<C>, JoinHandle<()>) {
+        let (sender, receiver) = mpsc::channel();
+
+        let join_handle =
+            thread::spawn(|| Database::<C>::new(receiver, servername, serverinfo).run());
+        let database_handle = DatabaseHandle::new(sender);
+
+        (database_handle, join_handle)
+    }
+
     fn run(mut self) {
         while let Ok(request) = self.receiver.recv() {
             self.handle_message(request);
@@ -77,7 +77,6 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to: response,
             } => self.handle_is_server_operator(nickname, response),
-            //IsOnline { nickname, response } => self.is_online_request(nickname, response),
             ContainsClient {
                 nickname,
                 respond_to: response,
@@ -207,6 +206,14 @@ impl<C: Connection> Database<C> {
             RemoveServer { servername } => self.handle_remove_server(servername),
             SetUserFlag { user, flag } => self.handle_set_user_flag(user, flag),
             UnsetUserFlag { user, flag } => self.handle_unset_user_flag(user, flag),
+            AddChannelInvite { channel, client } => {
+                self.handle_add_channel_invitation(channel, client)
+            }
+            ChannelHasClientInvite {
+                channel,
+                client,
+                respond_to,
+            } => self.handle_channel_has_client_invite(channel, client, respond_to),
         }
     }
 }

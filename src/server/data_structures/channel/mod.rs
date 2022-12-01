@@ -8,6 +8,7 @@ pub struct Channel {
     pub name: String,
     pub clients: Vec<String>,
     pub config: ChannelConfiguration,
+    pub invites: Vec<String>,
 }
 
 impl Channel {
@@ -22,6 +23,7 @@ impl Channel {
             name,
             clients,
             config,
+            invites: Default::default(),
         }
     }
 
@@ -123,6 +125,14 @@ impl Channel {
                 *client = new_nickname.to_string()
             }
         }
+    }
+
+    pub fn add_client_invite(&mut self, client: String) {
+        self.invites.push(client);
+    }
+
+    pub fn has_invite(&self, client: &str) -> bool {
+        self.invites.iter().any(|c| c == client)
     }
 }
 
