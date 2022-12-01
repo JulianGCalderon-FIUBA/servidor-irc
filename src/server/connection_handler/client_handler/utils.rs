@@ -25,18 +25,18 @@ impl<C: Connection> ClientHandler<C> {
             .collect()
     }
 
-    pub fn append_channel_role(&mut self, channels: &mut Vec<String>, nickname: &str) {
-        for channel in channels {
-            if self.database.is_channel_operator(channel, nickname) {
-                channel.insert(0, OPERATOR_SYMBOL);
-            } else if self
-                .database
-                .channel_has_flag(channel, ChannelFlag::Moderated)
-                && self.database.is_channel_speaker(channel, nickname)
-            {
-                channel.insert(0, SPEAKER_SYMBOL);
-            }
+    pub fn get_client_role_in_channel(&self, channel: &str, nickname: &str) -> Option<char> {
+        if self.database.is_channel_operator(channel, nickname) {
+            return Some(OPERATOR_SYMBOL);
         }
+        if self
+            .database
+            .channel_has_flag(channel, ChannelFlag::Moderated)
+            && self.database.is_channel_speaker(channel, nickname)
+        {
+            return Some(SPEAKER_SYMBOL);
+        }
+        None
     }
 
     pub(super) fn get_clients_for_mask(&self, mask: &str) -> Vec<ClientInfo> {

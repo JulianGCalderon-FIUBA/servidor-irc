@@ -53,7 +53,11 @@ impl<C: Connection> ClientHandler<C> {
     fn send_whois_channels_response(&mut self, nickname: &str) -> Result<(), io::Error> {
         let mut channels = self.database.get_channels_for_client(nickname).unwrap();
         if !channels.is_empty() {
-            self.append_channel_role(&mut channels, nickname);
+            for channel in &mut channels {
+                if let Some(role) = self.get_client_role_in_channel(channel, nickname) {
+                    channel.insert(0, role);
+                }
+            }
             self.stream
                 .send(&CommandResponse::whois_channel(nickname, &channels))?;
         };
@@ -131,7 +135,12 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
-        let clients = self.database.get_channel_clients(channel).unwrap();
+        let mut clients = self.database.get_channel_clients(channel).unwrap();
+        for client in &mut clients {
+            if let Some(role) = self.get_client_role_in_channel(channel, client) {
+                client.insert(0, role);
+            }
+        }
         self.stream
             .send(&CommandResponse::name_reply(channel, &clients))
     }

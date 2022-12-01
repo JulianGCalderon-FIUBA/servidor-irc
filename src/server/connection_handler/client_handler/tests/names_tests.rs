@@ -30,9 +30,9 @@ fn names_with_no_parameters_prints_all_channels() {
 
     channels.sort();
 
-    assert_eq!("353 #canal :nick2", channels[0]);
-    assert_eq!("353 #chau :nickname", channels[1]);
-    assert_eq!("353 #hola :nickname", channels[2]);
+    assert_eq!("353 #canal :@nick2", channels[0]);
+    assert_eq!("353 #chau :@nickname", channels[1]);
+    assert_eq!("353 #hola :@nickname", channels[2]);
     assert_eq!("366 :End of /NAMES list", responses[0]);
 }
 
@@ -48,9 +48,9 @@ fn names_with_parameters_prints_requested_channels() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("366 #hola :End of /NAMES list", responses[1]);
-    assert_eq!("353 #chau :nickname", responses[2]);
+    assert_eq!("353 #chau :@nickname", responses[2]);
     assert_eq!("366 #chau :End of /NAMES list", responses[3]);
 }
 
@@ -67,9 +67,9 @@ fn names_ignores_invalid_channels() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("366 #hola :End of /NAMES list", responses[1]);
-    assert_eq!("353 #chau :nickname", responses[2]);
+    assert_eq!("353 #chau :@nickname", responses[2]);
     assert_eq!("366 #chau :End of /NAMES list", responses[3]);
 }
 
@@ -92,9 +92,9 @@ fn name_ignores_secret_channels() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("366 #hola :End of /NAMES list", responses[1]);
-    assert_eq!("353 #chau :nickname", responses[2]);
+    assert_eq!("353 #chau :@nickname", responses[2]);
     assert_eq!("366 #chau :End of /NAMES list", responses[3]);
 }
 
@@ -117,9 +117,9 @@ fn name_ignores_private_channels() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("366 #hola :End of /NAMES list", responses[1]);
-    assert_eq!("353 #chau :nickname", responses[2]);
+    assert_eq!("353 #chau :@nickname", responses[2]);
     assert_eq!("366 #chau :End of /NAMES list", responses[3]);
 }
 
@@ -142,11 +142,11 @@ fn name_prints_secret_channel_if_client_is_in_it() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("366 #hola :End of /NAMES list", responses[1]);
-    assert_eq!("353 #secreto :nickname", responses[2]);
+    assert_eq!("353 #secreto :@nickname", responses[2]);
     assert_eq!("366 #secreto :End of /NAMES list", responses[3]);
-    assert_eq!("353 #chau :nickname", responses[4]);
+    assert_eq!("353 #chau :@nickname", responses[4]);
     assert_eq!("366 #chau :End of /NAMES list", responses[5]);
 }
 
@@ -169,11 +169,11 @@ fn name_prints_private_channel_if_client_is_in_it() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("366 #hola :End of /NAMES list", responses[1]);
-    assert_eq!("353 #privado :nickname", responses[2]);
+    assert_eq!("353 #privado :@nickname", responses[2]);
     assert_eq!("366 #privado :End of /NAMES list", responses[3]);
-    assert_eq!("353 #chau :nickname", responses[4]);
+    assert_eq!("353 #chau :@nickname", responses[4]);
     assert_eq!("366 #chau :End of /NAMES list", responses[5]);
 }
 
@@ -188,7 +188,7 @@ fn names_returns_clients_in_no_channels_as_being_on_wildcard_channel() {
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("353 * :nick2", responses[1]);
     assert_eq!("366 :End of /NAMES list", responses[2]);
 }
@@ -209,7 +209,7 @@ fn names_returns_clients_in_not_visible_private_channel_as_being_on_wildcard_cha
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("353 * :nick2", responses[1]);
     assert_eq!("366 :End of /NAMES list", responses[2]);
 }
@@ -230,7 +230,50 @@ fn names_returns_clients_in_not_visible_secret_channel_as_being_on_wildcard_chan
 
     let responses = handler.stream.get_responses();
 
-    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 #hola :@nickname", responses[0]);
     assert_eq!("353 * :nick2", responses[1]);
     assert_eq!("366 :End of /NAMES list", responses[2]);
+}
+
+#[test]
+fn names_returns_all_channel_clients() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#hola", "nick2");
+
+    handler
+        .names_command((None, vec!["#hola".to_string()], None))
+        .unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("353 #hola :@nickname nick2", responses[0]);
+    assert_eq!("366 #hola :End of /NAMES list", responses[1]);
+}
+
+#[test]
+fn names_returns_client_role() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick3"));
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#hola", "nick2");
+    handler.database.add_client_to_channel("#hola", "nick3");
+
+    handler
+        .database
+        .set_channel_flag("#hola", ChannelFlag::Moderated);
+    handler.database.add_channel_speaker("#hola", "nick2");
+
+    handler
+        .names_command((None, vec!["#hola".to_string()], None))
+        .unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("353 #hola :@nickname +nick2 nick3", responses[0]);
+    assert_eq!("366 #hola :End of /NAMES list", responses[1]);
 }
