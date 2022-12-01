@@ -37,14 +37,15 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn shares_channel_with(&self, client_info: &ClientInfo) -> bool {
-        let client_channels = self
-            .database
-            .get_channels_for_client(&client_info.nickname())
-            .unwrap();
+        let client_channels = ok_or_return!(
+            self.database
+                .get_channels_for_client(&client_info.nickname()),
+            false
+        );
         let own_channels = self
             .database
             .get_channels_for_client(&self.nickname)
-            .unwrap();
+            .expect("Connected client should exist");
 
         !client_channels
             .iter()
