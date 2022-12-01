@@ -64,9 +64,12 @@ impl<C: Connection> Register<C> {
         let (_, command, mut params, trail) = message.unpack();
         assert_is_valid_server_message(&command, &params, &trail)?;
 
-        let hopcount = params.remove(1).parse::<usize>().unwrap();
+        let hopcount = params
+            .remove(1)
+            .parse::<usize>()
+            .expect("Hopcount should be a number");
         let servername = params.remove(0);
-        let serverinfo = trail.unwrap();
+        let serverinfo = trail.expect("Trail should be Some");
         self.handle_server_command(servername, hopcount, serverinfo)?;
 
         Ok(())
