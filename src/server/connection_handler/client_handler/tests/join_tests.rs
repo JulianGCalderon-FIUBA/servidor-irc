@@ -453,6 +453,7 @@ fn join_fails_with_invite_only_channel() {
     );
 
     assert!(!handler.database.is_client_in_channel("#hola", "nickname"))
+    
 }
 
 #[test]
