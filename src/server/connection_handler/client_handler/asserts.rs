@@ -1,3 +1,4 @@
+use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
 use crate::server::connection_handler::connection_handler_trait::CommandArgs;
 use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
@@ -427,7 +428,12 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_can_set_key(&mut self, channel: &str) -> Result<(), ErrorReply> {
-        if self.database.get_channel_key(channel).unwrap().is_some() {
+        if self
+            .database
+            .get_channel_key(channel)
+            .expect("Channel should exist")
+            .is_some()
+        {
             return Err(ErrorReply::KeySet467 {
                 channel: channel.to_string(),
             });
@@ -463,7 +469,10 @@ impl<C: Connection> ClientHandler<C> {
         let channel = channel.to_string();
 
         if let Ok(Some(limit)) = self.database.get_channel_limit(&channel) {
-            if self.database.get_channel_clients(&channel).unwrap().len() >= limit {
+            // acá no sé si debería devolver algún error o solo seguir
+            let channel_clients =
+                ok_or_return!(self.database.get_channel_clients(&channel), Ok(()));
+            if channel_clients.len() >= limit {
                 return Err(ErrorReply::ChannelIsFull471 { channel });
             }
         }
@@ -471,7 +480,9 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_is_not_banned_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
-        for mask in self.database.get_channel_banmask(channel).unwrap() {
+        // lo mismo que el otro
+        let channel_banmasks = ok_or_return!(self.database.get_channel_banmask(channel), Ok(()));
+        for mask in channel_banmasks {
             if self.client_matches_banmask(&self.nickname, &mask) {
                 let channel = channel.to_string();
                 return Err(ErrorReply::BannedFromChannel474 { channel });
