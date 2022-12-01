@@ -42,10 +42,8 @@ impl<C: Connection> ClientHandler<C> {
                 .get_channels_for_client(&client_info.nickname()),
             false
         );
-        let own_channels = self
-            .database
-            .get_channels_for_client(&self.nickname)
-            .expect("Connected client should exist");
+        let own_channels =
+            ok_or_return!(self.database.get_channels_for_client(&self.nickname), false);
 
         !client_channels
             .iter()
