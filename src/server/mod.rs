@@ -66,7 +66,10 @@ impl Server {
     /// Listens for incoming clients and handles each request in a new thread.
     pub fn listen_to(&mut self, address: String) -> io::Result<()> {
         let online = Arc::clone(&self.online);
-        let database = self.database.clone().unwrap();
+        let database = self
+            .database
+            .clone()
+            .expect("DatabaseHandle should only be None when dropped");
 
         let connection_listener = ConnectionListener::new(address, database, online)?;
 
@@ -79,7 +82,10 @@ impl Server {
 
     fn try_connect_to(&mut self, address: &str) -> io::Result<()> {
         let stream = TcpStream::connect(address)?;
-        let database = self.database.as_ref().unwrap().clone();
+        let database = self
+            .database
+            .clone()
+            .expect("DatabaseHandle should only be None when dropped");
 
         let mut registerer = Register::new(stream.try_clone()?, database.clone());
         registerer.register_outcoming()?;
