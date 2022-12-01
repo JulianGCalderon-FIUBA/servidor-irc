@@ -9,14 +9,21 @@ impl<C: Connection> ClientHandler<C> {
     pub fn can_name_channel(&mut self, channel: &str) -> bool {
         let exists_channel = self.database.contains_channel(channel);
 
-        let is_priv_or_secret = self.database.channel_has_flag(channel, ChannelFlag::Secret)
-            || self
-                .database
-                .channel_has_flag(channel, ChannelFlag::Private);
+        exists_channel && self.is_visible_channel(channel)
+    }
 
-        let is_client_in_channel = self.is_in_channel(channel);
+    pub fn is_visible_channel(&self, channel: &str) -> bool {
+        let private = self
+            .database
+            .channel_has_flag(channel, ChannelFlag::Private);
 
-        exists_channel && (!is_priv_or_secret || is_client_in_channel)
+        let secret = self.database.channel_has_flag(channel, ChannelFlag::Secret);
+
+        if !(private || secret) {
+            return true;
+        }
+
+        self.is_in_channel(channel)
     }
 
     pub fn can_list_channel(&self, channel: &str) -> bool {

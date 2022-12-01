@@ -1,24 +1,19 @@
 use super::*;
 
 #[test]
-fn names_with_no_channels_prints_end_of_names() {
+fn names_with_no_valid_channels_does_not_return() {
     let mut handler = dummy_client_handler();
 
-    let parameters = vec![];
+    let parameters = vec!["no_channel".to_string()];
 
     handler.names_command((None, parameters, None)).unwrap();
 
-    assert_eq!(
-        "366 :End of /NAMES list\r\n",
-        handler.stream.read_wbuf_to_string()
-    )
+    assert_eq!("", handler.stream.read_wbuf_to_string())
 }
 
 #[test]
 fn names_with_no_parameters_prints_all_channels() {
     let mut handler = dummy_client_handler();
-
-    let parameters = vec![];
 
     handler.database.add_local_client(dummy_client("nick2"));
 
@@ -26,6 +21,7 @@ fn names_with_no_parameters_prints_all_channels() {
     handler.database.add_client_to_channel("#chau", "nickname");
     handler.database.add_client_to_channel("#canal", "nick2");
 
+    let parameters = vec![];
     handler.names_command((None, parameters, None)).unwrap();
 
     let mut responses = handler.stream.get_responses();
@@ -179,4 +175,62 @@ fn name_prints_private_channel_if_client_is_in_it() {
     assert_eq!("366 #privado :End of /NAMES list", responses[3]);
     assert_eq!("353 #chau :nickname", responses[4]);
     assert_eq!("366 #chau :End of /NAMES list", responses[5]);
+}
+
+#[test]
+fn names_returns_clients_in_no_channels_as_being_on_wildcard_channel() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("#hola", "nickname");
+
+    handler.names_command((None, vec![], None)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 * :nick2", responses[1]);
+    assert_eq!("366 :End of /NAMES list", responses[2]);
+}
+
+#[test]
+fn names_returns_clients_in_not_visible_private_channel_as_being_on_wildcard_channel() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("#hola", "nickname");
+
+    handler.database.add_client_to_channel("#hola2", "nick2");
+    handler
+        .database
+        .set_channel_flag("#hola2", ChannelFlag::Private);
+
+    handler.names_command((None, vec![], None)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 * :nick2", responses[1]);
+    assert_eq!("366 :End of /NAMES list", responses[2]);
+}
+
+#[test]
+fn names_returns_clients_in_not_visible_secret_channel_as_being_on_wildcard_channel() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("#hola", "nickname");
+
+    handler.database.add_client_to_channel("#hola2", "nick2");
+    handler
+        .database
+        .set_channel_flag("#hola2", ChannelFlag::Secret);
+
+    handler.names_command((None, vec![], None)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("353 #hola :nickname", responses[0]);
+    assert_eq!("353 * :nick2", responses[1]);
+    assert_eq!("366 :End of /NAMES list", responses[2]);
 }

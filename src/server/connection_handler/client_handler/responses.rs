@@ -114,6 +114,22 @@ impl<C: Connection> ClientHandler<C> {
             .send(&CommandResponse::list(channel, topic, prv))
     }
 
+    pub(super) fn send_name_response_for_remaining_clients(&mut self) -> Result<(), io::Error> {
+        let remaining_clients: Vec<String> = self
+            .clients_in_no_channel()
+            .iter()
+            .map(ClientInfo::nickname)
+            .collect();
+
+        if !remaining_clients.is_empty() {
+            self.stream
+                .send(&CommandResponse::name_reply("*", &remaining_clients))?;
+        }
+
+        self.stream.send(&CommandResponse::end_of_names(""))?;
+        Ok(())
+    }
+
     pub(super) fn send_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
         let clients = self.database.get_channel_clients(channel).unwrap();
         self.stream

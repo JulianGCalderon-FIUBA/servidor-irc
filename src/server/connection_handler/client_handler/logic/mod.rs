@@ -13,12 +13,10 @@ use crate::server::consts::channel::{DISTRIBUTED_CHANNEL, LOCAL_CHANNEL};
 use crate::server::data_structures::*;
 use crate::server::responses::{CommandResponse, Notification};
 
-use self::utils::collect_list;
-
+use super::utils::collect_list;
 use super::ClientHandler;
 
 mod mode_logic;
-mod utils;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn nick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
@@ -155,7 +153,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         }
 
         if params.is_empty() {
-            self.stream.send(&CommandResponse::end_of_names(""))?;
+            self.send_name_response_for_remaining_clients()?;
         }
 
         Ok(true)
