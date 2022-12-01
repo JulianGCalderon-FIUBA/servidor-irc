@@ -57,18 +57,16 @@ fn invite_fails_with_user_already_on_channel() {
 }
 
 #[test]
-fn invite_fails_with_sending_user_not_on_channel() {
+fn invite_fails_with_no_such_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("#hola", "nick2");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
-
     handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
-        "442 #hola :You're not on that channel\r\n",
+        "403 #hola :No such channel\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -172,6 +170,7 @@ fn invite_is_relayed_to_neccesary_server() {
     handler
         .database
         .add_external_client(dummy_external_client("nick2", "servername1"));
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
     handler.invite_command((None, parameters, None)).unwrap();
@@ -184,4 +183,20 @@ fn invite_is_relayed_to_neccesary_server() {
             .unwrap()
             .read_wbuf_to_string()
     );
+}
+
+#[test]
+fn invite_is_registered_in_channel() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .add_external_client(dummy_external_client("nick2", "servername1"));
+
+    handler.database.add_client_to_channel("#hola", "nickname");
+
+    let parameters = vec!["nick2".to_string(), "#hola".to_string()];
+    handler.invite_command((None, parameters, None)).unwrap();
+
+    assert!(handler.database.channel_has_invite("#hola", "nick2"));
 }

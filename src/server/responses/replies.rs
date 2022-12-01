@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
-use crate::server::{consts::commands::QUIT_COMMAND, data_structures::ClientInfo};
+use crate::{
+    macros::own,
+    server::{consts::commands::QUIT_COMMAND, data_structures::ClientInfo},
+};
 
 /// Possible s the commands can generate.
 pub enum CommandResponse {
@@ -300,7 +303,8 @@ impl CommandResponse {
         }
     }
 
-    pub fn inviting(inviting_client: String, channel: String) -> Self {
+    pub fn inviting(inviting_client: &str, channel: &str) -> Self {
+        own!(inviting_client, channel);
         Self::Inviting341 {
             nickname: inviting_client,
             channel,

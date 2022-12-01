@@ -83,11 +83,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         let channel = &params[1];
 
         self.assert_exists_client(invited_client)?;
-
-        if self.database.contains_channel(channel) {
-            self.assert_is_in_channel(channel)?;
-            self.assert_client_not_on_channel(invited_client, channel)?;
-        }
+        self.assert_exists_channel(channel)?;
+        self.assert_is_in_channel(channel)?;
+        self.assert_client_not_on_channel(invited_client, channel)?;
 
         if self
             .database
@@ -363,7 +361,8 @@ impl<C: Connection> ClientHandler<C> {
         let channels_for_client = self
             .database
             .get_channels_for_client(&self.nickname)
-            .unwrap();
+            .expect("Client should exist");
+
         if channels_for_client.len() == MAX_CHANNELS {
             let channel = channel.to_string();
             return Err(ErrorReply::TooManyChannels405 { channel });
@@ -376,7 +375,24 @@ impl<C: Connection> ClientHandler<C> {
 
         self.assert_channel_is_not_full(channel)?;
 
-        self.assert_is_not_banned_from_channel(channel)
+        self.assert_is_not_banned_from_channel(channel)?;
+
+        self.assert_is_invited_to_invite_only_channel(channel)
+    }
+
+    fn assert_is_invited_to_invite_only_channel(&self, channel: &str) -> Result<(), ErrorReply> {
+        let is_invite_only = self
+            .database
+            .channel_has_flag(channel, ChannelFlag::InviteOnly);
+        let is_invited = self.database.channel_has_invite(channel, &self.nickname);
+
+        if is_invite_only && !is_invited {
+            return Err(ErrorReply::InviteOnlyChannel473 {
+                channel: channel.to_string(),
+            });
+        }
+
+        Ok(())
     }
 
     pub fn assert_can_kick_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {

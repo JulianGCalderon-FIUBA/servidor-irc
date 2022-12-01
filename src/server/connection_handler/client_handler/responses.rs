@@ -149,11 +149,11 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_invite_notification(
         &mut self,
-        invited_client: String,
+        invited_client: &str,
         channel: &str,
     ) -> Result<(), io::Error> {
-        let invitation = Notification::invite(&self.nickname, &invited_client, channel);
-        self.send_message_to_client(&invitation, &invited_client)
+        let invitation = Notification::invite(&self.nickname, invited_client, channel);
+        self.send_message_to_client(&invitation, invited_client)
     }
 
     pub(super) fn send_quit_notification(&mut self, nickname: &str, message: &str) {

@@ -432,3 +432,49 @@ fn distributed_channels_joins_are_relayed_to_all_servers() {
             .read_wbuf_to_string()
     );
 }
+
+#[test]
+fn join_fails_with_invite_only_channel() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("#hola", "nick2");
+
+    handler
+        .database
+        .set_channel_flag("#hola", ChannelFlag::InviteOnly);
+
+    let parameters = vec!["#hola".to_string()];
+    handler.join_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "473 #hola :Cannot join channel (+i)\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    assert!(!handler.database.is_client_in_channel("#hola", "nickname"))
+}
+
+#[test]
+fn can_join_invite_only_channel_with_invite() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("#hola", "nick2");
+
+    handler
+        .database
+        .set_channel_flag("#hola", ChannelFlag::InviteOnly);
+
+    handler.database.add_channel_invite("#hola", "nickname");
+
+    let parameters = vec!["#hola".to_string()];
+    handler.join_command((None, parameters, None)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("331 #hola :No topic is set", responses[0]);
+    assert_eq!("353 #hola :nick2 nickname", responses[1]);
+
+    assert!(handler.database.is_client_in_channel("#hola", "nickname"))
+}

@@ -127,15 +127,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         let invited_client = params.pop().unwrap();
         let inviting_client = self.nickname.clone();
 
-        if self
-            .send_invite_notification(invited_client, &channel)
-            .is_ok()
-        {
-            self.stream
-                .send(&CommandResponse::inviting(inviting_client, channel))?;
+        self.send_invite_notification(&invited_client, &channel)
+            .ok();
 
-            // ADD TO CLIENT/CHANNEL INVITATIONS
-        }
+        self.stream
+            .send(&CommandResponse::inviting(&inviting_client, &channel))?;
+
+        self.database.add_channel_invite(&channel, &invited_client);
 
         Ok(true)
     }
