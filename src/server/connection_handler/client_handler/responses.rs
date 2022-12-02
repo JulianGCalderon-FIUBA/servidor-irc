@@ -26,6 +26,11 @@ impl<C: Connection> ClientHandler<C> {
             .send(&CommandResponse::name_reply(channel, &clients))
     }
 
+    pub fn send_oper_notification(&mut self) {
+        let notification = Notification::mode(&self.nickname, &self.nickname, "+o");
+        self.send_message_to_all_servers(&notification);
+    }
+
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
         let nickname = &client_info.nickname();
         let servername = &client_info.servername;

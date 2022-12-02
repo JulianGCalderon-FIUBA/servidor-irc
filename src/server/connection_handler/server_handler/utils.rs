@@ -11,7 +11,7 @@ use crate::{
 use super::ServerHandler;
 
 impl<C: Connection> ConnectionHandlerUtils<C> for ServerHandler<C> {
-    fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
+    fn send_message_to_channel(&self, message: &dyn Display, channel: &str) {
         let clients = ok_or_return!(self.database.get_channel_clients(channel));
 
         let mut servers = vec![];
@@ -33,7 +33,7 @@ impl<C: Connection> ConnectionHandlerUtils<C> for ServerHandler<C> {
 }
 
 impl<C: Connection> ServerHandler<C> {
-    pub fn send_message_to_all_other_servers(&mut self, message: &dyn Display) {
+    pub fn send_message_to_all_other_servers(&self, message: &dyn Display) {
         let mut servers = self.database.get_all_servers();
 
         if let Some(index) = servers.iter().position(|x| x == &self.servername) {

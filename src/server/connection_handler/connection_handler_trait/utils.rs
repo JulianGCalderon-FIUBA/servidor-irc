@@ -7,7 +7,7 @@ use crate::server::connection::Connection;
 use super::ConnectionHandlerGetters;
 
 pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
-    fn send_message_to_client(&mut self, message: &dyn Display, nickname: &str) -> io::Result<()> {
+    fn send_message_to_client(&self, message: &dyn Display, nickname: &str) -> io::Result<()> {
         if let Ok(mut stream) = self.database().get_local_stream(nickname) {
             return stream.send(&message);
         }
@@ -19,7 +19,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         Ok(())
     }
 
-    fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
+    fn send_message_to_channel(&self, message: &dyn Display, channel: &str) {
         let clients = ok_or_return!(self.database().get_channel_clients(channel));
 
         let mut servers = vec![];
@@ -39,7 +39,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         }
     }
 
-    fn send_message_to_local_clients_on_channel(&mut self, message: &dyn Display, channel: &str) {
+    fn send_message_to_local_clients_on_channel(&self, message: &dyn Display, channel: &str) {
         let clients = ok_or_return!(self.database().get_channel_clients(channel));
 
         for client in clients {
@@ -49,7 +49,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         }
     }
 
-    fn send_message_to_server(&mut self, message: &dyn Display, server: &str) -> io::Result<()> {
+    fn send_message_to_server(&self, message: &dyn Display, server: &str) -> io::Result<()> {
         if let Ok(mut stream) = self.database().get_server_stream(server) {
             stream.send(&message)?;
         }
@@ -57,7 +57,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         Ok(())
     }
 
-    fn send_message_to_all_servers(&mut self, message: &dyn Display) {
+    fn send_message_to_all_servers(&self, message: &dyn Display) {
         let servers = self.database().get_all_servers();
 
         for server in servers {
@@ -65,7 +65,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         }
     }
 
-    fn send_message_to_target(&mut self, message: &dyn Display, target: &str) -> io::Result<()> {
+    fn send_message_to_target(&self, message: &dyn Display, target: &str) -> io::Result<()> {
         if self.database().contains_client(target) {
             self.send_message_to_client(message, target)?
         } else {

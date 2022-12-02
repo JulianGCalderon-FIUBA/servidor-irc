@@ -37,7 +37,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.set_server_operator(&self.nickname);
         self.stream.send(&CommandResponse::you_are_oper())?;
 
-        // TODO: RELAY MODE TO OTHER SERVERS
+        self.send_oper_notification();
 
         Ok(true)
     }
