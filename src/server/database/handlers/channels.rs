@@ -12,12 +12,16 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     ) {
         let clients = self.get_channel_clients(channel);
-        respond_to.send(clients).unwrap();
+        respond_to
+            .send(clients)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_all_channels(&self, respond_to: Sender<Vec<String>>) {
         let channels = self.get_channels();
-        respond_to.send(channels).unwrap();
+        respond_to
+            .send(channels)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_add_client_to_channel(&mut self, nickname: String, channel: String) {

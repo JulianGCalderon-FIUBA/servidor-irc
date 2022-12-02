@@ -86,7 +86,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn channel_has_flag(&self, channel: &str, flag: ChannelFlag) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -101,7 +101,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn contains_channel(&self, channel: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -115,7 +115,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn contains_client(&self, nickname: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -129,7 +129,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn contains_server(&self, servername: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -143,7 +143,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn disconnect_client(&self, nickname: &str) {
         let nickname = nickname.to_string();
@@ -160,7 +160,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_all_clients(&self) -> Vec<ClientInfo> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -170,7 +170,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_all_servers(&self) -> Vec<String> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -180,7 +180,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_away_message(&self, nickname: &str) -> Result<Option<String>, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -194,7 +194,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_channel_banmask(&self, channel: &str) -> Result<Vec<String>, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -208,7 +208,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_channel_clients(&self, channel: &str) -> Result<Vec<String>, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -222,7 +222,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_channel_config(&self, channel: &str) -> Result<ChannelConfiguration, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -236,7 +236,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_channel_key(&self, channel: &str) -> Result<Option<String>, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -250,7 +250,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_channel_limit(&self, channel: &str) -> Result<Option<usize>, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -264,7 +264,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_channel_topic(&self, channel: &str) -> Result<Option<String>, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -278,7 +278,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_channels_for_client(&self, nickname: &str) -> Result<Vec<String>, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -292,7 +292,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_client_info(&self, client: &str) -> Result<ClientInfo, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -303,7 +303,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_immediate_server(&self, client: &str) -> Result<String, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -314,7 +314,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_local_stream(&self, nickname: &str) -> Result<C, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -328,7 +328,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_server_info(&self) -> String {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -338,7 +338,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_server_name(&self) -> String {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -348,7 +348,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn get_server_stream(&self, server: &str) -> Result<C, DatabaseError> {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -359,7 +359,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn is_channel_operator(&self, channel: &str, nickname: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -375,7 +375,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn is_channel_speaker(&self, channel: &str, nickname: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -391,7 +391,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn is_client_in_channel(&self, channel: &str, nickname: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -407,7 +407,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn is_immediate_server(&self, server: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -418,7 +418,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn is_local_client(&self, nickname: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -432,7 +432,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn is_server_operator(&self, nickname: &str) -> bool {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
@@ -446,7 +446,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
     pub fn remove_channel_banmask(&self, channel: &str, mask: &str) {
         let channel = channel.to_string();
@@ -582,7 +582,7 @@ impl<C: Connection> DatabaseHandle<C> {
             .expect("Database receiver should not be dropped");
         receive_from
             .recv()
-            .expect("Handler receiver should not be dropped")
+            .expect("Handler sender should not be dropped")
     }
 }
 impl<C: Connection> Clone for DatabaseHandle<C> {

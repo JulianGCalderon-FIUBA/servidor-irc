@@ -19,12 +19,16 @@ impl<C: Connection> Database<C> {
 
     pub fn handle_get_servername(&self, respond_to: Sender<String>) {
         let servername = self.info.servername.clone();
-        respond_to.send(servername).unwrap();
+        respond_to
+            .send(servername)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_serverinfo(&self, respond_to: Sender<String>) {
         let serverinfo = self.info.serverinfo.clone();
-        respond_to.send(serverinfo).unwrap();
+        respond_to
+            .send(serverinfo)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_server_stream(
@@ -33,12 +37,16 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<C, DatabaseError>>,
     ) {
         let stream = self.get_server_stream(&server);
-        respond_to.send(stream).unwrap();
+        respond_to
+            .send(stream)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_all_servers(&self, respond_to: Sender<Vec<String>>) {
         let servers = self.get_all_servers();
-        respond_to.send(servers).unwrap();
+        respond_to
+            .send(servers)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_remove_server(&mut self, servername: String) {

@@ -32,13 +32,17 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<String, DatabaseError>>,
     ) {
         let server = self.get_immediate_server(client);
-        respond_to.send(server).unwrap();
+        respond_to
+            .send(server)
+            .expect("Handler receiver should not be dropped");
     }
 
     /// Returns response to GetAllClients request.
     pub fn handle_get_all_clients(&self, respond_to: Sender<Vec<ClientInfo>>) {
         let clients = self.get_all_clients();
-        respond_to.send(clients).unwrap();
+        respond_to
+            .send(clients)
+            .expect("Handler receiver should not be dropped");
     }
 
     /// Returns response to UpdateNickname request.
@@ -56,7 +60,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
     ) {
         let message = self.get_away_message(nickname);
-        respond_to.send(message).unwrap();
+        respond_to
+            .send(message)
+            .expect("Handler receiver should not be dropped");
     }
 
     /// Returns response to GetChannelsForClient request.
@@ -66,7 +72,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     ) {
         let channels = self.get_channels_for_client(nickname);
-        respond_to.send(channels).unwrap();
+        respond_to
+            .send(channels)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_local_stream_request(
@@ -75,7 +83,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<C, DatabaseError>>,
     ) {
         let stream = self.get_local_stream(nickname);
-        respond_to.send(stream).unwrap();
+        respond_to
+            .send(stream)
+            .expect("Handler receiver should not be dropped");
     }
     pub fn handle_disconnect_client(&mut self, nickname: String) {
         self.disconnect_client(nickname);
@@ -87,7 +97,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<ClientInfo, DatabaseError>>,
     ) {
         let client_info = self.get_client_info(&client);
-        respond_to.send(client_info.cloned()).unwrap();
+        respond_to
+            .send(client_info.cloned())
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_set_user_flag(&mut self, user: String, flag: UserFlag) {

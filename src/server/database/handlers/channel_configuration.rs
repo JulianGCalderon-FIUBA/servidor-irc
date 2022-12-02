@@ -14,7 +14,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
     ) {
         let topic = self.get_channel_topic(&channel);
-        respond_to.send(topic).unwrap();
+        respond_to
+            .send(topic)
+            .expect("Handler receiver should not be dropped");
     }
     pub fn handle_set_channel_topic(&mut self, channel_name: String, topic: String) {
         self.set_channel_topic(channel_name, topic);
@@ -30,7 +32,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
     ) {
         let key = self.get_channel_key(channel);
-        respond_to.send(key).unwrap();
+        respond_to
+            .send(key)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_channel_has_flag(
@@ -40,7 +44,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<bool>,
     ) {
         let has_mode = self.channel_has_flag(channel, flag);
-        respond_to.send(has_mode).unwrap();
+        respond_to
+            .send(has_mode)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_set_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
@@ -61,7 +67,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Option<usize>, DatabaseError>>,
     ) {
         let limit = self.get_channel_limit(channel);
-        respond_to.send(limit).unwrap();
+        respond_to
+            .send(limit)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_add_channop(&mut self, channel_name: String, nickname: String) {
@@ -90,7 +98,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     ) {
         let banmask = self.get_channel_banmask(channel);
-        respond_to.send(Ok(banmask)).unwrap();
+        respond_to
+            .send(Ok(banmask))
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_remove_channel_banmask(&mut self, channel_name: String, mask: String) {
@@ -103,7 +113,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<ChannelConfiguration, DatabaseError>>,
     ) {
         let channel_config = self.get_channel_config(&channel);
-        respond_to.send(channel_config).unwrap();
+        respond_to
+            .send(channel_config)
+            .expect("Handler receiver should not be dropped");
     }
 }
 
