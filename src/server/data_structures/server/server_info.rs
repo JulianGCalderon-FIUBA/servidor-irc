@@ -1,3 +1,4 @@
+#[derive(Clone)]
 pub struct ServerInfo {
     pub servername: String,
     pub serverinfo: String,

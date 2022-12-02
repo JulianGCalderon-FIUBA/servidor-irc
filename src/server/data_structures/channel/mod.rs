@@ -5,10 +5,10 @@ use crate::server::consts::modes::ChannelFlag;
 
 /// A Channel has clients and a name.
 pub struct Channel {
-    pub name: String,
-    pub clients: Vec<String>,
-    pub config: ChannelConfiguration,
-    pub invites: Vec<String>,
+    name: String,
+    clients: Vec<String>,
+    config: ChannelConfiguration,
+    invites: Vec<String>,
 }
 
 impl Channel {
@@ -133,6 +133,10 @@ impl Channel {
 
     pub fn has_invite(&self, client: &str) -> bool {
         self.invites.iter().any(|c| c == client)
+    }
+
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 }
 

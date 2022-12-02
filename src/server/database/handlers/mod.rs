@@ -11,10 +11,10 @@ mod servers;
 impl<C: Connection> Database<C> {
     pub fn get_client_info(&mut self, nickname: &str) -> Result<&mut ClientInfo, DatabaseError> {
         if let Some(client) = self.local_clients.get_mut(nickname) {
-            return Ok(&mut client.info);
+            return Ok(client.info_mut());
         }
         if let Some(client) = self.external_clients.get_mut(nickname) {
-            return Ok(&mut client.info);
+            return Ok(client.info_mut());
         }
         Err(DatabaseError::NoSuchClient)
     }

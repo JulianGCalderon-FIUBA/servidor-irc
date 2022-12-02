@@ -93,11 +93,7 @@ impl<C: Connection> ClientBuilder<C> {
     pub fn build_local_client(mut self) -> Option<LocalClient<C>> {
         let info = self.build_info()?;
 
-        let client = LocalClient {
-            stream: self.stream,
-            password: self.password,
-            info,
-        };
+        let client = LocalClient::new(self.stream?, self.password, info);
 
         Some(client)
     }
@@ -105,11 +101,7 @@ impl<C: Connection> ClientBuilder<C> {
     pub fn build_external_client(mut self) -> Option<ExternalClient> {
         let info = self.build_info()?;
 
-        let client = ExternalClient {
-            immediate: self.immediate?,
-            online: true,
-            info,
-        };
+        let client = ExternalClient::new(self.immediate?, info);
 
         Some(client)
     }

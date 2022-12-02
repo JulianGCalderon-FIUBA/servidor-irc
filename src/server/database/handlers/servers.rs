@@ -81,7 +81,7 @@ impl<C: Connection> Database<C> {
     }
 
     fn add_immediate_server(&mut self, server: ImmediateServer<C>) {
-        let servername = server.info.servername.clone();
+        let servername = server.info().servername;
         debug_print!("Adding immediate server {servername}");
         self.immediate_servers.insert(servername, server);
     }

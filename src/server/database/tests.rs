@@ -38,7 +38,7 @@ fn can_get_client_stream() {
     let database = dummy_database();
 
     let client = dummy_client("nickname");
-    let stream_ref_expected = client.stream.as_ref().unwrap().try_clone().unwrap();
+    let stream_ref_expected = client.stream().as_ref().unwrap().try_clone().unwrap();
     database.add_local_client(client);
 
     let stream_ref_actual = database.get_local_stream("nickname").unwrap();
@@ -548,7 +548,7 @@ fn can_get_server_stream() {
     let database = dummy_database();
 
     let server = dummy_server("servername");
-    let stream_ref_expected = server.stream.try_clone().unwrap();
+    let stream_ref_expected = server.get_stream().unwrap();
     database.add_immediate_server(server);
 
     let stream_ref_actual = database.get_server_stream("servername").unwrap();

@@ -160,7 +160,7 @@ impl<C: Connection> Database<C> {
     }
     fn set_channel_limit(&mut self, channel: String, limit: Option<usize>) {
         let channel = some_or_return!(self.channels.get_mut(&channel));
-        debug_print!("Setting {}'s limit to {limit:?}", channel.name);
+        debug_print!("Setting {}'s limit to {limit:?}", channel.name());
         channel.set_limit(limit);
     }
 

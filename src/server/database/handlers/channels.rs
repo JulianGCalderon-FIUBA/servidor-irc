@@ -41,7 +41,7 @@ impl<C: Connection> Database<C> {
     fn add_client_to_channel(&mut self, channel: String, nickname: String) {
         match self.channels.get_mut(&channel) {
             Some(channel) => {
-                debug_print!("Adding {} to channel {}", nickname, channel.name);
+                debug_print!("Adding {} to channel {}", nickname, channel.name());
                 channel.add_member(nickname)
             }
             None => {
@@ -81,7 +81,7 @@ impl<C: Connection> Database<C> {
 impl<C: Connection> Database<C> {
     fn create_channel(&mut self, channel: String, nickname: String) {
         let channel = Channel::new(channel, nickname);
-        let name = channel.name.to_string();
+        let name = channel.name();
         self.channels.insert(name, channel);
     }
 }

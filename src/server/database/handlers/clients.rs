@@ -128,9 +128,9 @@ impl<C: Connection> Database<C> {
     }
 
     fn add_external_client(&mut self, client: ExternalClient) {
-        debug_print!("Adding external client {:?}", client.info);
+        debug_print!("Adding external client {:?}", client.get_info());
 
-        let nickname = client.info.nickname();
+        let nickname = client.nickname();
         self.external_clients.insert(nickname, client);
     }
 
@@ -141,9 +141,9 @@ impl<C: Connection> Database<C> {
         info.add_flag(UserFlag::Operator)
     }
     fn add_local_client(&mut self, client: LocalClient<C>) {
-        debug_print!("Adding local client {:?}", client.info);
+        debug_print!("Adding local client {:?}", client.get_info());
 
-        let nickname = client.info.nickname();
+        let nickname = client.nickname();
         self.local_clients.insert(nickname, client);
     }
 
@@ -189,7 +189,7 @@ impl<C: Connection> Database<C> {
             Err(DatabaseError::NoSuchClient)
         );
 
-        match &client.stream {
+        match &client.stream() {
             Some(stream) => stream
                 .try_clone()
                 .map_err(|_| DatabaseError::CannotCloneStream),
@@ -203,7 +203,7 @@ impl<C: Connection> Database<C> {
             Err(DatabaseError::NoSuchClient)
         );
 
-        Ok(client.immediate.clone())
+        Ok(client.immediate())
     }
 
     /// Returns array with ClientInfo for connected clients.

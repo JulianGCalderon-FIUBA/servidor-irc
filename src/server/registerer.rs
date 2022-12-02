@@ -88,7 +88,7 @@ impl<C: Connection> Register<C> {
             hopcount,
         );
 
-        self.assert_can_add_server(&server.info.servername)?;
+        self.assert_can_add_server(&server.info().servername)?;
         self.database.add_immediate_server(server);
         self.servername = servername;
 
