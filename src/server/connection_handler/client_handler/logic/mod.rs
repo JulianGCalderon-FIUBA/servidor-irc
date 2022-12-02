@@ -70,7 +70,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 continue;
             }
 
-            self.send_notice_to_target(target, &content)?;
+            self.send_notice_to_target(target, &content);
         }
 
         Ok(true)
@@ -326,7 +326,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
 impl<C: Connection> ClientHandler<C> {
     fn send_privmsg_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
-        self.send_privmsg_notification(target, content)?;
+        self.send_privmsg_notification(target, content);
 
         if let Ok(Some(message)) = self.database.get_away_message(target) {
             self.stream.send(&CommandResponse::away(target, &message))?;
@@ -335,10 +335,8 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    fn send_notice_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
-        self.send_notice_notification(target, content)?;
-
-        Ok(())
+    fn send_notice_to_target(&mut self, target: &str, content: &str) {
+        self.send_notice_notification(target, content);
     }
 
     fn kick_client_from_channel(

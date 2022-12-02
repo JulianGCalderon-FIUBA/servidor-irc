@@ -214,22 +214,13 @@ impl<C: Connection> ClientHandler<C> {
         }
     }
 
-    pub(super) fn send_privmsg_notification(
-        &mut self,
-        target: &str,
-        content: &str,
-    ) -> Result<(), io::Error> {
+    pub(super) fn send_privmsg_notification(&mut self, target: &str, content: &str) {
         let notification = Notification::privmsg(&self.nickname, target, content);
-        self.send_message_to_target(&notification, target)
+        self.send_message_to_target(&notification, target);
     }
 
-    pub(super) fn send_notice_notification(
-        &mut self,
-        target: &str,
-        content: &str,
-    ) -> Result<(), io::Error> {
+    pub(super) fn send_notice_notification(&mut self, target: &str, content: &str) {
         let notification = Notification::notice(&self.nickname, target, content);
-
         self.send_message_to_target(&notification, target)
     }
 

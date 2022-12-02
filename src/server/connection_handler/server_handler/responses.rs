@@ -12,12 +12,12 @@ use super::ServerHandler;
 impl<C: Connection> ServerHandler<C> {
     pub(super) fn send_privmsg_notification(&mut self, sender: &str, target: &str, content: &str) {
         let notification = Notification::privmsg(sender, target, content);
-        self.send_message_to_target(&notification, target).ok();
+        self.send_message_to_target(&notification, target)
     }
 
     pub(super) fn send_notice_notification(&mut self, sender: &str, target: &str, content: &str) {
         let notification = Notification::notice(sender, target, content);
-        self.send_message_to_target(&notification, target).ok();
+        self.send_message_to_target(&notification, target)
     }
 
     pub(super) fn send_quit_notification(&mut self, nickname: String, message: String) {
