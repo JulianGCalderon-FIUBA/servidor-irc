@@ -44,7 +44,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn privmsg_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, trail) = arguments;
-        let content = trail.expect("Trail should exist");
+        let content = trail.expect("Trail should be Some");
         let targets = params.remove(0);
 
         for target in targets.split(',') {
@@ -61,8 +61,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn notice_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, trail) = arguments;
-        let content = trail.expect("Trail should exist");
-        let targets = params.pop().expect("Parameter should exist");
+        let content = trail.expect("Trail should be Some");
+        let targets = params.pop().expect("Parameter should be Some");
 
         for target in targets.split(',') {
             if let Err(error) = self.assert_target_is_valid(target) {
@@ -102,7 +102,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn part_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
-        let channels = params.pop().expect("Parameter should exist");
+        let channels = params.pop().expect("Parameter should be Some");
 
         for channel in channels.split(',') {
             if let Err(error) = self.assert_can_part_channel(channel) {
@@ -121,8 +121,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn invite_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
-        let channel = params.pop().expect("Parameter should exist");
-        let invited_client = params.pop().expect("Parameter should exist");
+        let channel = params.pop().expect("Parameter should be Some");
+        let invited_client = params.pop().expect("Parameter should be Some");
         let inviting_client = self.nickname.clone();
 
         self.send_invite_notification(&invited_client, &channel)
@@ -196,7 +196,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn whois_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
-        let nickmasks = params.pop().expect("Parameter should exist");
+        let nickmasks = params.pop().expect("Parameter should be Some");
         let _server = params.get(0);
 
         for nickmask in nickmasks.split(',') {

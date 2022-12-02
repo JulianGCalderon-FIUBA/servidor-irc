@@ -34,7 +34,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
     fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, trail) = arguments;
 
-        let realname = trail.unwrap();
+        let realname = trail.expect("Trail should be Some");
         let username = params.remove(0);
         let servername = self.database.get_server_name();
         let hostname = self.stream.peer_address()?.ip().to_string();
@@ -44,7 +44,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         self.attributes.insert("servername", servername);
         self.attributes.insert("realname", realname);
 
-        let client = self.build_client().unwrap();
+        let client = self
+            .build_client()
+            .expect("Client's information should be complete to build");
 
         self.send_new_client_notification(&client.get_info());
         self.database.add_local_client(client);
@@ -57,9 +59,12 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
     fn server_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, mut params, trail) = arguments;
 
-        let hopcount = params.remove(1).parse::<usize>().unwrap();
+        let hopcount = params
+            .remove(1)
+            .parse::<usize>()
+            .expect("Hopcount should be a number");
         let servername = params.remove(0);
-        let serverinfo = trail.unwrap();
+        let serverinfo = trail.expect("Trail should be Some");
 
         self.send_server_notification(&servername, hopcount, &serverinfo);
 

@@ -39,7 +39,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        let nickname = prefix.as_ref().unwrap();
+        let nickname = prefix.as_ref().expect("Prefix should be Some");
 
         if self.hopcounts.get(nickname).is_none() {
             return Err(ErrorReply::NoReply);
@@ -86,7 +86,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        let nickname = prefix.as_ref().unwrap();
+        let nickname = prefix.as_ref().expect("Prefix should be Some");
         if !self.database.contains_client(nickname) {
             return Err(ErrorReply::NoReply);
         }
@@ -100,7 +100,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        let nickname = prefix.as_ref().unwrap();
+        let nickname = prefix.as_ref().expect("Prefix should be Some");
         let channel = &params[0];
         if !self.database.contains_client(nickname)
             || !self.database.contains_channel(channel)
@@ -117,7 +117,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        let inviting = prefix.as_ref().unwrap();
+        let inviting = prefix.as_ref().expect("Prefix should be Some");
         let invited = &params[0];
         if !self.database.contains_client(inviting) || !self.database.contains_client(invited) {
             return Err(ErrorReply::NoReply);
@@ -148,7 +148,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
             return Err(ErrorReply::NoReply);
         }
 
-        let nickname = prefix.as_ref().unwrap();
+        let nickname = prefix.as_ref().expect("Prefix should be Some");
         if !self.database.contains_client(nickname) {
             return Err(ErrorReply::NoReply);
         }
@@ -216,7 +216,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         if prefix.is_none() || trail.is_none() {
             return Err(ErrorReply::NoReply);
         }
-        let nickname = prefix.as_ref().unwrap();
+        let nickname = prefix.as_ref().expect("Prefix should be Some");
         if !self.database.contains_client(nickname) {
             return Err(ErrorReply::NoReply);
         }

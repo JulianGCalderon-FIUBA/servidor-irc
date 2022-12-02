@@ -71,7 +71,9 @@ impl<C: Connection> RegistrationHandler<C> {
     fn build_client_handler(&mut self) -> io::Result<ClientHandler<C>> {
         ClientHandler::from_connection(
             self.stream().try_clone()?,
-            self.attributes.remove("nickname").unwrap(),
+            self.attributes
+                .remove("nickname")
+                .expect("Client's nickname should be saved in attributes"),
             self.database().clone(),
             Arc::clone(self.online()),
         )
@@ -88,7 +90,9 @@ impl<C: Connection> RegistrationHandler<C> {
     fn build_server_handler(&mut self) -> io::Result<ServerHandler<C>> {
         ServerHandler::from_connection(
             self.stream().try_clone()?,
-            self.attributes.remove("servername").unwrap(),
+            self.attributes
+                .remove("servername")
+                .expect("Server's name should be saved in attributes"),
             self.database().clone(),
             Arc::clone(self.online()),
         )

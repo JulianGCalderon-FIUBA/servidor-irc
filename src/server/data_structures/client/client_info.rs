@@ -17,7 +17,10 @@ pub struct ClientInfo {
 
 impl ClientInfo {
     pub fn nickname(&self) -> String {
-        self.nicknames.last().unwrap().clone()
+        self.nicknames
+            .last()
+            .expect("There should always be at least one nickname")
+            .clone()
     }
 
     pub fn matches_banmask(&self, query: &str) -> bool {

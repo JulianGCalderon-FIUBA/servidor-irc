@@ -1,14 +1,18 @@
 use std::fmt::Display;
 
-use crate::server::{
-    connection::Connection, connection_handler::connection_handler_trait::ConnectionHandlerUtils,
+use crate::{
+    macros::ok_or_return,
+    server::{
+        connection::Connection,
+        connection_handler::connection_handler_trait::ConnectionHandlerUtils,
+    },
 };
 
 use super::ServerHandler;
 
 impl<C: Connection> ConnectionHandlerUtils<C> for ServerHandler<C> {
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database.get_channel_clients(channel).unwrap();
+        let clients = ok_or_return!(self.database.get_channel_clients(channel));
 
         let mut servers = vec![];
 
