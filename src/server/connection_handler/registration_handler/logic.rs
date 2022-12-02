@@ -34,7 +34,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
     fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, trail) = arguments;
 
-        let realname = trail.expect("Trail should be Some");
+        let realname = trail.expect("Verified in assert");
         let username = params.remove(0);
         let servername = self.database.get_server_name();
         let hostname = self.stream.peer_address()?.ip().to_string();
@@ -62,9 +62,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         let hopcount = params
             .remove(1)
             .parse::<usize>()
-            .expect("Hopcount should be a number");
+            .expect("Verified in assert");
         let servername = params.remove(0);
-        let serverinfo = trail.expect("Trail should be Some");
+        let serverinfo = trail.expect("Verified in assert");
 
         self.send_server_notification(&servername, hopcount, &serverinfo);
 
