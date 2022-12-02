@@ -2,7 +2,10 @@ use std::fmt::Display;
 
 use crate::{
     macros::own,
-    server::{consts::commands::QUIT_COMMAND, data_structures::ClientInfo},
+    server::{
+        consts::{commands::QUIT_COMMAND, modes::UserFlag},
+        data_structures::ClientInfo,
+    },
 };
 
 /// Possible s the commands can generate.
@@ -150,17 +153,7 @@ impl Display for CommandResponse {
             CommandResponse::WhoReply352 {
                 channel,
                 client_info,
-            } => {
-                format!(
-                    "352 {} {} {} {} {} \\MODOS :HOPCOUNT {}",
-                    channel.as_ref().unwrap_or(&"*".to_string()),
-                    client_info.username,
-                    client_info.hostname,
-                    client_info.servername,
-                    client_info.nickname(),
-                    client_info.realname,
-                )
-            }
+            } => build_whoreply_message(client_info, channel),
             CommandResponse::NameReply353 { channel, clients } => {
                 format!("353 {channel} :{}", clients.join(" "))
             }
@@ -194,6 +187,31 @@ impl Display for CommandResponse {
         };
         write!(f, "{string}")
     }
+}
+
+fn build_whoreply_message(client_info: &ClientInfo, channel: &Option<String>) -> String {
+    let basic_info = format!(
+        "{} {} {} {}",
+        client_info.username,
+        client_info.hostname,
+        client_info.servername,
+        client_info.nickname(),
+    );
+
+    let flags = client_info
+        .flags
+        .keys()
+        .map(UserFlag::to_char)
+        .collect::<String>();
+
+    format!(
+        "352 {} {} {} :{} {}",
+        channel.as_ref().unwrap_or(&"*".to_string()),
+        basic_info,
+        flags,
+        client_info.hopcount,
+        client_info.realname,
+    )
 }
 
 impl CommandResponse {

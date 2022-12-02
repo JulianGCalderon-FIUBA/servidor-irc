@@ -41,6 +41,7 @@ pub fn dummy_external_client(nickname: &str, servername: &str) -> ExternalClient
         .servername(servername)
         .realname("realname")
         .immediate(servername)
+        .hopcount(1)
         .build_external_client()
         .unwrap()
 }
