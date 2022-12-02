@@ -21,7 +21,9 @@ pub trait ConnectionHandlerStructure<C: Connection>:
 {
     fn try_handle(&mut self) -> io::Result<()> {
         let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
-        self.stream().set_read_timeout(Some(timeout)).unwrap();
+        self.stream()
+            .set_read_timeout(Some(timeout))
+            .expect("Duration should never be zero or None");
 
         loop {
             if self.server_shutdown() {

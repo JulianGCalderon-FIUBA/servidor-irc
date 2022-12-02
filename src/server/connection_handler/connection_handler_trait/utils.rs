@@ -20,7 +20,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     }
 
     fn send_message_to_channel(&mut self, message: &dyn Display, channel: &str) {
-        let clients = self.database().get_channel_clients(channel).unwrap();
+        let clients = ok_or_return!(self.database().get_channel_clients(channel));
 
         let mut servers = vec![];
 
