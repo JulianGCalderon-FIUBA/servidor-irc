@@ -18,23 +18,11 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     }
 
     fn send_message_to_channel(&self, message: &dyn Display, channel: &str) {
-        let clients = ok_or_return!(self.database().get_channel_clients(channel));
-
         self.send_message_to_local_clients_on_channel(message, channel);
 
-        let mut servers = vec![];
+        let servers = self.get_channel_immediate_servers(channel);
 
-        for client in clients {
-            if let Ok(server) = self.database().get_immediate_server(&client) {
-                if !servers.contains(&server) {
-                    servers.push(server);
-                }
-            }
-        }
-
-        for server in servers {
-            self.send_message_to_server(message, &server).ok();
-        }
+        self.send_message_to_servers(servers, message);
     }
 
     fn send_message_to_local_clients_on_channel(&self, message: &dyn Display, channel: &str) {
@@ -55,9 +43,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
     fn send_message_to_all_servers(&self, message: &dyn Display) {
         let servers = self.database().get_all_servers();
 
-        for server in servers {
-            self.send_message_to_server(message, &server).ok();
-        }
+        self.send_message_to_servers(servers, message);
     }
 
     fn send_message_to_target(&self, message: &dyn Display, target: &str) {
@@ -66,5 +52,27 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         } else {
             self.send_message_to_channel(message, target);
         }
+    }
+
+    fn send_message_to_servers(&self, servers: Vec<String>, message: &dyn Display) {
+        for server in servers {
+            self.send_message_to_server(message, &server).ok();
+        }
+    }
+
+    fn get_channel_immediate_servers(&self, channel: &str) -> Vec<String> {
+        let clients = ok_or_return!(self.database().get_channel_clients(channel), vec![]);
+
+        let mut servers = vec![];
+
+        for client in clients {
+            if let Ok(server) = self.database().get_immediate_server(&client) {
+                if !servers.contains(&server) {
+                    servers.push(server);
+                }
+            }
+        }
+
+        servers
     }
 }

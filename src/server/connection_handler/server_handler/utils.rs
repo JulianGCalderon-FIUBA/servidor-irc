@@ -1,34 +1,23 @@
 use std::fmt::Display;
 
-use crate::{
-    macros::ok_or_return,
-    server::{
-        connection::Connection,
-        connection_handler::connection_handler_trait::ConnectionHandlerUtils,
-    },
+use crate::server::{
+    connection::Connection, connection_handler::connection_handler_trait::ConnectionHandlerUtils,
 };
 
 use super::ServerHandler;
 
 impl<C: Connection> ConnectionHandlerUtils<C> for ServerHandler<C> {
     fn send_message_to_channel(&self, message: &dyn Display, channel: &str) {
-        let clients = ok_or_return!(self.database.get_channel_clients(channel));
+        self.send_message_to_local_clients_on_channel(message, channel);
 
-        let mut servers = vec![];
+        let mut servers = self.get_channel_immediate_servers(channel);
 
-        for client in clients {
-            if self.database.is_local_client(&client) {
-                self.send_message_to_client(message, &client).ok();
-            } else if let Ok(server) = self.database.get_immediate_server(&client) {
-                if !servers.contains(&server) && server != self.servername {
-                    servers.push(server);
-                }
-            }
-        }
+        servers
+            .iter()
+            .position(|s| s == &self.servername)
+            .map(|index| servers.remove(index));
 
-        for server in servers {
-            self.send_message_to_server(message, &server).ok();
-        }
+        self.send_message_to_servers(servers, message);
     }
 }
 
@@ -40,8 +29,6 @@ impl<C: Connection> ServerHandler<C> {
             servers.remove(index);
         }
 
-        for server in servers {
-            self.send_message_to_server(message, &server).ok();
-        }
+        self.send_message_to_servers(servers, message);
     }
 }
