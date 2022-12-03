@@ -15,6 +15,8 @@ use super::{
     MAX_CLIENTS,
 };
 
+/// In charge of creating handlers for each new client or server
+///  connecting to the specified address
 pub struct ConnectionListener {
     database: DatabaseHandle<TcpStream>,
     listener: TcpListener,
@@ -22,6 +24,7 @@ pub struct ConnectionListener {
 }
 
 impl ConnectionListener {
+    /// Creates new [`ConnectionListener`] from an address to listen from
     pub fn new(
         address: String,
         database: DatabaseHandle<TcpStream>,
@@ -39,6 +42,7 @@ impl ConnectionListener {
         Ok(connection_listener)
     }
 
+    /// Starts listening from configured address
     pub fn listen(self) {
         let pool = ThreadPool::create(MAX_CLIENTS);
 
@@ -58,6 +62,7 @@ impl ConnectionListener {
         }
     }
 
+    /// Creates registration handler for given stream
     fn handler(&self, client: TcpStream) -> io::Result<RegistrationHandler<TcpStream>> {
         let database = self.database.clone();
         let online = Arc::clone(&self.online);

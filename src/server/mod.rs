@@ -35,7 +35,8 @@ const MAX_CLIENTS: usize = 26;
 pub const OPER_USERNAME: &str = "admin";
 pub const OPER_PASSWORD: &str = "admin";
 
-/// Represents a Server clients can connect to it contains a Database that stores relevant information.
+/// Represents a Server clients can connect to it
+/// Contains a Database that stores relevant information.
 pub struct Server {
     database: Option<DatabaseHandle<TcpStream>>,
     online: Arc<AtomicBool>,
@@ -43,7 +44,7 @@ pub struct Server {
 }
 
 impl Server {
-    /// Starts new [`Server`].
+    /// Creates new [`Server`], with a name and a description
     pub fn start(servername: String, serverinfo: String) -> Self {
         let online = Arc::new(AtomicBool::new(true));
 
@@ -59,11 +60,12 @@ impl Server {
         }
     }
 
+    /// Marks server as offline, finishing all its threads
     pub fn quit(&self) {
         self.online.store(false, Ordering::Relaxed);
     }
 
-    /// Listens for incoming clients and handles each request in a new thread.
+    /// Listens for incoming clients from an address and handles each request in a new thread.
     pub fn listen_to(&mut self, address: String) -> io::Result<()> {
         let online = Arc::clone(&self.online);
         let database = self
@@ -78,6 +80,13 @@ impl Server {
         self.threads.push(thread);
 
         Ok(())
+    }
+
+    /// Establishes a connection with another server, listening from address
+    pub fn connect_to(&mut self, address: &str) {
+        if let Err(error) = self.try_connect_to(address) {
+            eprintln!("Could not connect to {address}, with error {error:?}");
+        }
     }
 
     fn try_connect_to(&mut self, address: &str) -> io::Result<()> {
@@ -99,12 +108,6 @@ impl Server {
         self.threads.push(handle);
 
         Ok(())
-    }
-
-    pub fn connect_to(&mut self, address: &str) {
-        if let Err(error) = self.try_connect_to(address) {
-            eprintln!("Could not connect to {address}, with error {error:?}");
-        }
     }
 }
 

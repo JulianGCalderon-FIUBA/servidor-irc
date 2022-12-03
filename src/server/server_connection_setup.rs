@@ -11,6 +11,9 @@ use super::{
 
 use crate::server::data_structures::*;
 
+/// MethodObject
+/// Manages connection between servers and registers it in the database
+/// In charge of sharing all information to the new server
 pub struct ServerConnectionSetup<C: Connection> {
     stream: C,
     database: DatabaseHandle<C>,
@@ -18,6 +21,8 @@ pub struct ServerConnectionSetup<C: Connection> {
 }
 
 impl<C: Connection> ServerConnectionSetup<C> {
+    /// Creates a [`ServerConnectionSetup`] from a connection stream
+    ///   and a database in which to register the new connection
     pub fn new(stream: C, database: DatabaseHandle<C>) -> Self {
         Self {
             stream,
@@ -26,12 +31,14 @@ impl<C: Connection> ServerConnectionSetup<C> {
         }
     }
 
+    /// Registers server from an outcoming connection
     pub fn register_outcoming(&mut self) -> io::Result<()> {
         self.send_server_notification()?;
         self.receive_server_notification()?;
         self.send_server_data()
     }
 
+    /// Registers server from an incoming connection
     pub fn register_incoming(
         &mut self,
         servername: String,
@@ -55,6 +62,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
             .send(&Notification::server(&servername, 1, &serverinfo))
     }
 
+    // Waits for server command from incomming connection and handles it
     fn receive_server_notification(&mut self) -> io::Result<()> {
         let message = match Message::read_from(&mut self.stream) {
             Ok(message) => message,
@@ -75,6 +83,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         Ok(())
     }
 
+    /// Register server from incoming connection
     fn handle_server_command(
         &mut self,
         servername: String,
@@ -108,6 +117,11 @@ impl<C: Connection> ServerConnectionSetup<C> {
         Ok(())
     }
 
+    // Sends all server data to new connected server:
+    //  - all clients (with nick and user)
+    //  - all channels (with join)
+    //  - all channel configurations (with mode)
+    //  - all server operators (with mode)
     fn send_server_data(&mut self) -> io::Result<()> {
         for mut client in self.database.get_all_clients() {
             client.hopcount += 1;
