@@ -24,7 +24,7 @@ const REALNAME_LABEL_TEXT: &str = "Your name:";
 const NICKNAME_LABEL_TEXT: &str = "Nickname:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
 const PASSWORD_LABEL_TEXT: &str = "Password:";
-const ADDRESS_LABEL_TEXT: &str = "IP Address (optional):";
+const ADDRESS_LABEL_TEXT: &str = "IP Address:";
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
