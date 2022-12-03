@@ -70,8 +70,6 @@ impl Controller {
             Err(error) => panic!("Error connecting to server: {:?}", error),
         };
 
-        // let mut client: Client;
-
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut register_view = RegisterView::new(sender.clone());
@@ -114,7 +112,13 @@ impl Controller {
                     nickname,
                     username,
                     realname,
+                    address,
                 } => {
+                    client = match Client::new(address.to_string()) {
+                        Ok(stream) => stream,
+                        Err(error) => panic!("Error connecting to server: {:?}", error),
+                    };
+
                     let pass_command = format!("{} {}", PASS_COMMAND, pass);
                     let nick_command = format!("{} {}", NICK_COMMAND, nickname);
                     let user_command = format!(
@@ -124,6 +128,7 @@ impl Controller {
                     client.send_raw(&pass_command).expect(ERROR_TEXT);
                     client.send_raw(&nick_command).expect(ERROR_TEXT);
                     client.send_raw(&user_command).expect(ERROR_TEXT);
+
                     let sender_clone = sender.clone();
                     client.start_async_read(move |message| match message {
                         Ok(message) => {

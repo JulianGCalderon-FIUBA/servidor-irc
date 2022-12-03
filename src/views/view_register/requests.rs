@@ -8,6 +8,7 @@ pub fn register_request(
     nickname: GString,
     username: GString,
     realname: GString,
+    address: GString,
     sender: Sender<ControllerMessage>,
 ) {
     let register = ControllerMessage::Register {
@@ -15,6 +16,7 @@ pub fn register_request(
         nickname,
         username,
         realname,
+        address,
     };
     sender.send(register).expect("Error: pass command");
 }

@@ -29,6 +29,7 @@ pub struct RegisterView {
     pub nick_entry: Entry,
     pub username_entry: Entry,
     pub pass_entry: Entry,
+    pub address_entry: Entry,
     pub login_button: Button,
     sender: Sender<ControllerMessage>,
 }
@@ -40,6 +41,7 @@ impl RegisterView {
             nick_entry: create_entry(""),
             username_entry: create_entry(""),
             pass_entry: create_entry(""),
+            address_entry: create_entry(""),
             login_button: create_center_button(LOGIN_BUTTON_TEXT),
             sender,
         }
@@ -75,6 +77,7 @@ impl RegisterView {
             self.pass_entry.clone(),
             self.nick_entry.clone(),
             self.username_entry.clone(),
+            self.address_entry.clone(),
             self.sender.clone(),
         );
 
@@ -89,6 +92,7 @@ impl RegisterView {
         pass_entry: Entry,
         nick_entry: Entry,
         username_entry: Entry,
+        address_entry: Entry,
         sender: Sender<ControllerMessage>,
     ) {
         self.login_button.connect_clicked(move |_| {
@@ -96,9 +100,10 @@ impl RegisterView {
             let nickname = nick_entry.text();
             let username = username_entry.text();
             let realname = realname_entry.text();
+            let address = address_entry.text();
 
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
-                register_request(pass, nickname.clone(), username, realname, sender.clone());
+                register_request(pass, nickname.clone(), username, realname, address, sender.clone());
                 change_view_to_main_request(nickname, sender.clone());
             }
         });
