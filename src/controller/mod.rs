@@ -1,6 +1,8 @@
 mod controller_handler;
 pub mod controller_message;
 
+use std::env;
+
 use crate::{
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
@@ -28,21 +30,20 @@ use controller_message::ControllerMessage::*;
 const ERROR_TEXT: &str = "ERROR";
 
 pub struct Controller {
-    app: Application,
-    address: String
+    app: Application
 }
 
-// impl Default for Controller {
-//     fn default() -> Self {
-//         Self::new()
-//     }
-// }
+impl Default for Controller {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl Controller {
-    pub fn new(address: String) -> Self {
+    pub fn new() -> Self {
         let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
-        Self { app , address}
+        Self { app }
     }
 
     fn load_css() {
@@ -63,6 +64,7 @@ impl Controller {
     }
 
     fn build_ui(app: &Application) {
+
         let mut client = match Client::new(ADDRESS.to_string()) {
             Ok(stream) => stream,
             Err(error) => panic!("Error connecting to server: {:?}", error),
@@ -217,5 +219,14 @@ impl Controller {
             }
         }
         not_my_channels
+    }
+}
+
+fn unpack_args(mut args: Vec<String>) -> String {
+    args.remove(0);
+
+    match args.pop() {
+        Some(address) => address,
+        None => ADDRESS.to_string(),
     }
 }

@@ -3,19 +3,19 @@ use std::env;
 use internet_relay_chat::{controller::Controller, ADDRESS};
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
-    let address = unpack_args(args);
+    // let args: Vec<String> = env::args().collect();
+    // let address = unpack_args(args);
     
-    let mut controller = Controller::new(address);
+    let mut controller = Controller::new();
 
     controller.start();
 }
 
-fn unpack_args(mut args: Vec<String>) -> String {
-    args.remove(0);
+// fn unpack_args(mut args: Vec<String>) -> String {
+//     args.remove(0);
 
-    match args.pop() {
-        Some(address) => address,
-        None => ADDRESS.to_string(),
-    }
-}
+//     match args.pop() {
+//         Some(address) => address,
+//         None => ADDRESS.to_string(),
+//     }
+// }
