@@ -7,7 +7,8 @@ use crate::server::{connection::Connection, consts::channel_flag::ChannelFlag};
 
 use super::{database_error::DatabaseError, database_message::DatabaseMessage};
 
-/// A DatabaseHandle handles and makes request to the main Database. Works as an intermediary so external structures cannot acces the Database directly.
+/// A DatabaseHandle handles and makes request to the main Database.
+/// Works as an intermediary so external structures cannot acces the Database directly.
 pub struct DatabaseHandle<C: Connection> {
     sender: Sender<DatabaseMessage<C>>,
 }
