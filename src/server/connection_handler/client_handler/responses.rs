@@ -3,9 +3,11 @@ use std::io;
 use crate::macros::ok_or_return;
 use crate::server::connection_handler::client_handler::booleans::is_distributed_channel;
 use crate::server::connection_handler::mode_requests::{ChannelModeRequest, UserModeRequest};
+use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::consts::modes::{
-    ChannelFlag, UserFlag, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
+    SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
 };
+use crate::server::consts::user_flag::UserFlag;
 use crate::server::responses::{CommandResponse, Notification};
 use crate::server::{
     connection::Connection,

@@ -1,4 +1,4 @@
-use crate::server::consts::modes::ChannelFlag;
+use crate::server::consts::channel_flag::ChannelFlag;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ChannelConfiguration {

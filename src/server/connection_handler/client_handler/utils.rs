@@ -1,8 +1,11 @@
 use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
 use crate::server::connection_handler::ConnectionHandlerUtils;
-use crate::server::consts::modes::{ChannelFlag, OPERATOR_SYMBOL, SPEAKER_SYMBOL};
-use crate::server::data_structures::ClientInfo;
+use crate::server::consts::channel_flag::ChannelFlag;
+use crate::server::{
+    consts::modes::{OPERATOR_SYMBOL, SPEAKER_SYMBOL},
+    data_structures::ClientInfo,
+};
 
 use super::ClientHandler;
 

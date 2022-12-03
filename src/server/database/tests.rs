@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::server::{
     connection::Connection,
-    consts::modes::ChannelFlag,
+    consts::channel_flag::ChannelFlag,
     data_structures::{ChannelConfiguration, ClientInfo},
     testing::{
         dummy_client, dummy_database, dummy_distant_server, dummy_external_client, dummy_server,

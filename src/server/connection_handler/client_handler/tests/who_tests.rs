@@ -1,4 +1,5 @@
-use crate::server::{consts::modes::UserFlag, testing::dummy_external_client};
+use crate::server::consts::user_flag::UserFlag;
+use crate::server::testing::dummy_external_client;
 
 use super::*;
 

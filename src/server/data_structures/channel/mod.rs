@@ -1,7 +1,7 @@
 mod channel_configuration;
 pub use channel_configuration::ChannelConfiguration;
 
-use crate::server::consts::modes::ChannelFlag;
+use crate::server::consts::channel_flag::ChannelFlag;
 
 /// A Channel has clients and a name.
 pub struct Channel {

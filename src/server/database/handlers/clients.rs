@@ -4,7 +4,7 @@ use crate::{
     macros::ok_or_return,
     server::{
         connection::Connection,
-        consts::modes::UserFlag,
+        consts::user_flag::UserFlag,
         data_structures::{ClientInfo, ExternalClient, LocalClient},
         database::{database_error::DatabaseError, Database},
     },

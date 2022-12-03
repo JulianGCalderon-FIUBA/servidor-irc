@@ -1,9 +1,9 @@
 use std::sync::mpsc::Sender;
 
 use crate::macros::own;
-use crate::server::consts::modes::UserFlag;
+use crate::server::consts::user_flag::UserFlag;
 use crate::server::data_structures::*;
-use crate::server::{connection::Connection, consts::modes::ChannelFlag};
+use crate::server::{connection::Connection, consts::channel_flag::ChannelFlag};
 
 use super::{database_error::DatabaseError, database_message::DatabaseMessage};
 

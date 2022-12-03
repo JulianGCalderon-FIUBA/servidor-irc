@@ -6,7 +6,7 @@ use super::{
 };
 pub use mock_stream::MockTcpStream;
 
-/// Creates dummy client used for tests.
+/// Creates dummy local client used for tests.
 pub fn dummy_client(nickname: &str) -> LocalClient<MockTcpStream> {
     ClientBuilder::new()
         .nickname(nickname)
@@ -19,6 +19,7 @@ pub fn dummy_client(nickname: &str) -> LocalClient<MockTcpStream> {
         .unwrap()
 }
 
+/// Creates dummy immediate server used for tests.
 pub fn dummy_server(servername: &str) -> ImmediateServer<MockTcpStream> {
     let stream = MockTcpStream::new();
     let servername = servername.to_string();
@@ -26,6 +27,7 @@ pub fn dummy_server(servername: &str) -> ImmediateServer<MockTcpStream> {
     ImmediateServer::new(stream, servername, serverinfo, 1)
 }
 
+/// Creates dummy database used for tests.
 pub fn dummy_database() -> DatabaseHandle<MockTcpStream> {
     let servername = "servername".to_string();
     let serverinfo = "serverinfo".to_string();
@@ -33,6 +35,7 @@ pub fn dummy_database() -> DatabaseHandle<MockTcpStream> {
     handle
 }
 
+/// Creates dummy external client used for tests.
 pub fn dummy_external_client(nickname: &str, servername: &str) -> ExternalClient {
     ClientBuilder::<MockTcpStream>::new()
         .nickname(nickname)
@@ -46,8 +49,7 @@ pub fn dummy_external_client(nickname: &str, servername: &str) -> ExternalClient
         .unwrap()
 }
 
+/// Creates dummy distant server used for tests.
 pub fn dummy_distant_server(servername: &str) -> ServerInfo {
     ServerInfo::new(servername.to_string(), "serverinfo".to_string(), 2)
 }
-
-

@@ -1,6 +1,7 @@
 use crate::server::connection_handler::mode_requests::{ChannelModeRequest, UserModeRequest};
 
-use crate::server::consts::modes::{ChannelFlag, UserFlag};
+use crate::server::consts::channel_flag::ChannelFlag;
+use crate::server::consts::user_flag::UserFlag;
 use crate::server::{connection::Connection, connection_handler::ServerHandler};
 impl<C: Connection> ServerHandler<C> {
     pub(super) fn handle_channel_mode_request(

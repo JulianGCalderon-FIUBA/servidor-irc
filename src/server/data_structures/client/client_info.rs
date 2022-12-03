@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::server::consts::modes::UserFlag;
+use crate::server::consts::user_flag::UserFlag;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
 /// ClientInfo contains public Client information.

@@ -1,5 +1,7 @@
 use std::io;
 
+use crate::server::consts::channel_flag::ChannelFlag;
+use crate::server::consts::user_flag::UserFlag;
 use crate::{
     macros::ok_or_return,
     server::{
@@ -8,10 +10,7 @@ use crate::{
             client_handler::ClientHandler,
             mode_requests::{ChannelModeRequest, UserModeRequest},
         },
-        consts::{
-            commands::MODE_COMMAND,
-            modes::{ChannelFlag, UserFlag},
-        },
+        consts::commands::MODE_COMMAND,
         responses::ErrorReply,
     },
 };

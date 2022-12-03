@@ -3,12 +3,12 @@ use std::fmt::Display;
 use crate::{
     macros::own,
     server::{
-        consts::{commands::QUIT_COMMAND, modes::UserFlag},
+        consts::{commands::QUIT_COMMAND, user_flag::UserFlag},
         data_structures::ClientInfo,
     },
 };
 
-/// Possible s the commands can generate.
+/// Possible responses the commands can generate for valid client commands
 pub enum CommandResponse {
     WhoisUser311 {
         client_info: ClientInfo,

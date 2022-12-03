@@ -1,4 +1,4 @@
-use crate::server::consts::modes::UserFlag;
+use crate::server::consts::user_flag::UserFlag;
 
 use super::*;
 

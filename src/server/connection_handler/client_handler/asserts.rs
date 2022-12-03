@@ -3,6 +3,7 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::CommandArgs;
 use crate::server::connection_handler::ConnectionHandlerAsserts;
 use crate::server::consts::channel::*;
+use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::consts::commands::*;
 use crate::server::consts::modes::*;
 use crate::server::data_structures::*;

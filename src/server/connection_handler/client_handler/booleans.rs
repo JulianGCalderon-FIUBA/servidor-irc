@@ -1,6 +1,6 @@
 use crate::macros::ok_or_return;
 use crate::server::consts::channel::DISTRIBUTED_CHANNEL;
-use crate::server::consts::modes::ChannelFlag;
+use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
 
 use crate::server::data_structures::*;

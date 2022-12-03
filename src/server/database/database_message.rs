@@ -1,6 +1,7 @@
 use std::sync::mpsc::Sender;
 
-use crate::server::consts::modes::{ChannelFlag, UserFlag};
+use crate::server::consts::channel_flag::ChannelFlag;
+use crate::server::consts::user_flag::UserFlag;
 use crate::server::data_structures::*;
 
 use crate::server::connection::Connection;

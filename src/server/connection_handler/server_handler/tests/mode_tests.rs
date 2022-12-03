@@ -1,6 +1,7 @@
+use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::{
     connection_handler::{server_handler::tests::dummy_server_handler, ConnectionHandlerCommands},
-    consts::modes::{ChannelFlag, UserFlag},
+    consts::user_flag::UserFlag,
     testing::{dummy_client, dummy_external_client, dummy_server},
 };
 

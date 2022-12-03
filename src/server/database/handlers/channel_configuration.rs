@@ -3,8 +3,8 @@ use std::sync::mpsc::Sender;
 use crate::macros::{debug_print, some_or_return};
 use crate::server::database::database_error::DatabaseError;
 use crate::server::{
-    connection::Connection, consts::modes::ChannelFlag, data_structures::ChannelConfiguration,
-    database::Database,
+    connection::Connection, consts::channel_flag::ChannelFlag,
+    data_structures::ChannelConfiguration, database::Database,
 };
 
 impl<C: Connection> Database<C> {

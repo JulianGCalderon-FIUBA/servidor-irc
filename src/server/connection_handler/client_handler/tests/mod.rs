@@ -1,5 +1,5 @@
 use super::*;
-use crate::server::consts::modes::ChannelFlag;
+use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::testing::{dummy_client, dummy_database, MockTcpStream};
 
 mod away_tests;
