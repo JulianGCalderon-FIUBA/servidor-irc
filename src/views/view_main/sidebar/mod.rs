@@ -1,7 +1,7 @@
 pub mod requests;
 mod widgets_creation;
 
-use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Button, Orientation };
+use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Button, Orientation, Label };
 use gtk4 as gtk;
 
 use crate::{
@@ -109,24 +109,36 @@ impl MainView {
 
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
-
+        let mut prev_message: Vec<Label> = vec![];
         if self.messages.contains_key(&last_conv) {
             let messages = self.messages.get(&last_conv).unwrap();
             for message in messages {
                 self.message_box.remove(&message[0]);
-                if message[1].text() != "" {
+                if
+                    message[1].text() != "" &&
+                    ((!prev_message.is_empty() && message[1].text() != prev_message[1].text()) ||
+                        prev_message.is_empty())
+                {
                     self.message_box.remove(&message[1]);
                 }
+                prev_message = message.clone();
             }
         }
+
+        prev_message = vec![];
 
         if self.messages.contains_key(&conversation_label) {
             let messages = self.messages.get(&conversation_label).unwrap();
             for message in messages {
-                if message[1].text() != "" {
+                if
+                    message[1].text() != "" &&
+                    ((!prev_message.is_empty() && message[1].text() != prev_message[1].text()) ||
+                        prev_message.is_empty())
+                {
                     self.message_box.append(&message[1]);
                 }
                 self.message_box.append(&message[0]);
+                prev_message = message.clone();
             }
         }
 

@@ -81,7 +81,15 @@ impl MainView {
             .halign(gtk::Align::Start)
             .build();
         sender_nickname_label.add_css_class("message_sender_name");
-        self.message_box.append(&sender_nickname_label);
+        if
+            (self.messages.get_mut(&channel).is_some() &&
+                self.messages.get_mut(&channel).unwrap().last().is_some() &&
+                self.messages.get_mut(&channel).unwrap().last().unwrap()[1].text() !=
+                    sender_nickname) ||
+            self.messages.get_mut(&channel).unwrap().is_empty()
+        {
+            self.message_box.append(&sender_nickname_label);
+        }
 
         let message = create_received_message(&message);
         self.message_box.append(&message);
