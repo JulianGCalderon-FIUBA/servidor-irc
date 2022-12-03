@@ -24,6 +24,7 @@ const REALNAME_LABEL_TEXT: &str = "Your name:";
 const NICKNAME_LABEL_TEXT: &str = "Nickname:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
 const PASSWORD_LABEL_TEXT: &str = "Password:";
+const ADDRESS_LABEL_TEXT: &str = "IP Address (optional):";
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
@@ -70,7 +71,7 @@ impl RegisterView {
         password_box.append(&self.pass_entry);
         main_box.append(&password_box);
 
-        let address_box = create_label_input_box("IP Adress");
+        let address_box = create_label_input_box(ADDRESS_LABEL_TEXT);
         address_box.append(&self.address_entry);
         main_box.append(&address_box);
 
