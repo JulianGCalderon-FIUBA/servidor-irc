@@ -23,6 +23,8 @@ const MAX_LENGTH: usize = 510;
 const INVALID_CHARACTERS: [char; 3] = ['\r', '\n', '\0'];
 
 impl Message {
+    /// Creates new [`Message`] from a string
+    /// Fails if message could not be parsed
     pub fn new(content: &str) -> Result<Self, ParsingError> {
         let (prefix, command, parameters, trailing) = parsing::parse(content)?;
 
@@ -34,6 +36,7 @@ impl Message {
         })
     }
 
+    /// Sends message to a stream, trailed with CRLF
     pub fn send_to(&self, stream: &mut dyn Write) -> io::Result<()> {
         let string = self.to_string();
         let bytes = string.as_bytes();
@@ -44,6 +47,8 @@ impl Message {
         Ok(())
     }
 
+    /// Reads message from a stream
+    /// Fails on an IO error or a Parsing error.
     pub fn read_from(stream: &mut dyn Read) -> Result<Self, CreationError> {
         let mut content = String::new();
 
@@ -61,6 +66,10 @@ impl Message {
         Ok(message)
     }
 
+    /// Reads message from a BufReader
+    /// This performs better than `read_from` as a buffer performs large,
+    ///  infrequent reads on the underlying Read
+    ///  and maintains an in-memory buffer of the results.
     pub fn read_from_buffer<R: Read>(buffer: &mut BufReader<R>) -> Result<Self, CreationError> {
         let mut content = String::new();
         let read = buffer.read_line(&mut content)?;
@@ -80,6 +89,7 @@ impl Message {
         Ok(message)
     }
 
+    /// Reads single line from a stream, calling a read for every byte read
     fn read_line(stream: &mut dyn Read, buffer: &mut String) -> io::Result<()> {
         let mut content = String::new();
         while !content.as_bytes().ends_with(LF) {
@@ -135,16 +145,5 @@ impl std::fmt::Display for Message {
         } else {
             Ok(())
         }
-    }
-}
-
-impl std::fmt::Debug for Message {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("Message")
-            .field("prefix", &self.prefix)
-            .field("command", &self.command)
-            .field("parameters", &self.parameters)
-            .field("trailing", &self.trailing)
-            .finish()
     }
 }
