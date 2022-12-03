@@ -8,7 +8,7 @@ pub fn register_request(
     nickname: GString,
     username: GString,
     realname: GString,
-    address: GString,
+    address: String,
     sender: Sender<ControllerMessage>,
 ) {
     let register = ControllerMessage::Register {

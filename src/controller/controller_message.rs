@@ -9,7 +9,7 @@ pub enum ControllerMessage {
         nickname: GString,
         username: GString,
         realname: GString,
-        address: GString,
+        address: String,
     },
     ChangeViewToMain {
         nickname: GString,

@@ -17,7 +17,7 @@ use gtk4 as gtk;
 use crate::{client::Client, views::view_main::MainView, ADDRESS};
 use gtk::{
     gdk::Display,
-    glib::{self, Sender},
+    glib,
     prelude::*,
     Application, CssProvider, StyleContext,
 };
@@ -25,7 +25,6 @@ use gtk::{
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
 
-use self::controller_message::ControllerMessage;
 
 const ERROR_TEXT: &str = "ERROR";
 

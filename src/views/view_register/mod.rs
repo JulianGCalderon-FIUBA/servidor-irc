@@ -17,7 +17,7 @@ use super::{
     MAIN_BOX_CSS,
 };
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{controller::controller_message::ControllerMessage, ADDRESS};
 
 const LOGIN_BUTTON_TEXT: &str = "login";
 const REALNAME_LABEL_TEXT: &str = "Your name:";
@@ -105,7 +105,7 @@ impl RegisterView {
             let nickname = nick_entry.text();
             let username = username_entry.text();
             let realname = realname_entry.text();
-            let address = address_entry.text();
+            let address = Self::unpack_entry(address_entry.text());
 
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
                 register_request(pass, nickname.clone(), username, realname, address, sender.clone());
@@ -121,5 +121,13 @@ impl RegisterView {
         realname: &GString,
     ) -> bool {
         !realname.is_empty() && !pass.is_empty() && !nickname.is_empty() && !username.is_empty()
+    }
+
+    fn unpack_entry(address: GString) -> String {
+        if address.is_empty() {
+            ADDRESS.to_string()
+        } else {
+            address.to_string()
+        }
     }
 }
