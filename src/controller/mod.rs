@@ -1,8 +1,6 @@
 mod controller_handler;
 pub mod controller_message;
 
-use std::env;
-
 use crate::{
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
@@ -19,13 +17,15 @@ use gtk4 as gtk;
 use crate::{client::Client, views::view_main::MainView, ADDRESS};
 use gtk::{
     gdk::Display,
-    glib::{self},
+    glib::{self, Sender},
     prelude::*,
     Application, CssProvider, StyleContext,
 };
 
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
+
+use self::controller_message::ControllerMessage;
 
 const ERROR_TEXT: &str = "ERROR";
 
@@ -70,6 +70,8 @@ impl Controller {
             Err(error) => panic!("Error connecting to server: {:?}", error),
         };
 
+        // let mut client: Client;
+
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut register_view = RegisterView::new(sender.clone());
@@ -102,6 +104,8 @@ impl Controller {
             }
             Err(error) => eprintln!("Failed to read message: {}", error),
         });
+
+        // Self::listen_messages(client, sender);
 
         receiver.attach(None, move |msg| {
             match msg {
@@ -220,13 +224,14 @@ impl Controller {
         }
         not_my_channels
     }
-}
 
-fn unpack_args(mut args: Vec<String>) -> String {
-    args.remove(0);
-
-    match args.pop() {
-        Some(address) => address,
-        None => ADDRESS.to_string(),
-    }
+    // fn listen_messages(mut client: Client, sender: Sender<ControllerMessage>) {
+    //     client.start_async_read(move |message| match message {
+    //         Ok(message) => {
+    //             let controller_message = to_controller_message(message);
+    //             sender.send(controller_message).unwrap();
+    //         }
+    //         Err(error) => eprintln!("Failed to read message: {}", error),
+    //     });
+    // }
 }
