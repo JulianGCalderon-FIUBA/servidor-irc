@@ -13,18 +13,18 @@ pub mod server;
 
 /// This module contains a message's functionality.
 /// A message can be sent to and read from a stream.
-/// Each message is parsed in: prefix, command, parameters, trailing
+/// Each message is parsed in: prefix, command, parameters, trailing.
 pub mod message;
 
 /// This module contains a threadPool's functionality.
 /// A threadPool creates n threads to handle n requests simultaneously.
-/// This prevents an overflow attack on the server
+/// This prevents an overflow attack on the server.
 pub mod thread_pool;
 
 pub mod controller;
 pub mod views;
 
-/// This module contains useful macros used across the project
+/// This module contains useful macros used across the project.
 mod macros;
 
 /// Default parameters for client-server connection

@@ -1,8 +1,14 @@
+/// This module contains different errors that can happen when ... a Database.
 mod database_error;
+/// This module contains different handles a Database has for each request.
+/// External parts communicate with the Database through the handles.
 mod database_handle;
+/// This module contains messages for each request a Database can handle.
 mod database_message;
+/// This module contains specific functions to handle each request.
 mod handlers;
 
+/// Unit tests for the Database's basic functionalities.
 #[cfg(test)]
 mod tests;
 
@@ -18,7 +24,7 @@ pub use database_handle::DatabaseHandle;
 use database_message::DatabaseMessage;
 
 use super::connection::Connection;
-/// Represents a Database that implements ClientTrait.
+/// Represents a Database that stores all information a server should have.
 pub struct Database<C: Connection> {
     receiver: Receiver<DatabaseMessage<C>>,
     info: ServerInfo,
@@ -33,6 +39,7 @@ pub struct Database<C: Connection> {
 }
 
 impl<C: Connection> Database<C> {
+    /// Creates [`Database`] for a specific server and stores receiver end from which to listen for requests.
     fn new(receiver: Receiver<DatabaseMessage<C>>, servername: String, serverinfo: String) -> Self {
         let mut database = Self {
             receiver,
@@ -52,7 +59,7 @@ impl<C: Connection> Database<C> {
         database
     }
 
-    /// Returns new [`DatabaseHandle`] and starts listening for requests.
+    /// Returns new [`DatabaseHandle`] and spawns thread that is listening for requests.
     pub fn start(servername: String, serverinfo: String) -> (DatabaseHandle<C>, JoinHandle<()>) {
         let (sender, receiver) = mpsc::channel();
 
@@ -69,6 +76,7 @@ impl<C: Connection> Database<C> {
         }
     }
 
+    /// Calls specific handle for received request.
     fn handle_message(&mut self, request: DatabaseMessage<C>) {
         match request {
             DisconnectClient { nickname } => self.handle_disconnect_client(nickname),

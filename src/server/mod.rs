@@ -5,17 +5,35 @@ mod testing;
 /// Definition of the trait used in the project's structures.
 mod connection;
 
-/// Contains structure for database. A Database stores and updates information regarding clients, channels and related.
+/// Contains structure for database. A Database stores and updates information regarding clients, channels and other servers.
 mod database;
 
+/// Contains structure for connection handler. A ConnectionHandler may be:
+///     - ClientHandler
+///     - ServerHandler
+///     - RegistrationHandler
+/// The three structures must implement asserts and commands that can be received.
 pub mod connection_handler;
-/// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address
+
+/// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address.
 mod listener;
+
+/// Contains structure that handles the setup when two servers are connecting with each other.
 mod server_connection_setup;
 
+/// Contains constant values used throughout the project.
 pub(crate) mod consts;
-// mod data_structures;
+
+/// Contains structures used to store information:
+///     - Client
+///     - Channel
+///     - Server
 mod data_structures;
+
+/// Contains different responses to commands that may be received:
+///     - Notifications
+///     - Errors
+///     - Responses
 mod responses;
 
 use database::Database;
@@ -35,7 +53,7 @@ const MAX_CLIENTS: usize = 26;
 pub const OPER_USERNAME: &str = "admin";
 pub const OPER_PASSWORD: &str = "admin";
 
-/// Represents a Server clients can connect to it
+/// Represents a Server clients and other servers can connect to.
 /// Contains a Database that stores relevant information.
 pub struct Server {
     database: Option<DatabaseHandle<TcpStream>>,
@@ -44,7 +62,7 @@ pub struct Server {
 }
 
 impl Server {
-    /// Creates new [`Server`], with a name and a description
+    /// Creates new [`Server`], with a name and a description.
     pub fn start(servername: String, serverinfo: String) -> Self {
         let online = Arc::new(AtomicBool::new(true));
 
@@ -60,7 +78,7 @@ impl Server {
         }
     }
 
-    /// Marks server as offline, finishing all its threads
+    /// Marks server as offline, closing all its threads.
     pub fn quit(&self) {
         self.online.store(false, Ordering::Relaxed);
     }
@@ -82,7 +100,7 @@ impl Server {
         Ok(())
     }
 
-    /// Establishes a connection with another server, listening from address
+    /// Establishes a connection with another server, listening from address.
     pub fn connect_to(&mut self, address: &str) {
         if let Err(error) = self.try_connect_to(address) {
             eprintln!("Could not connect to {address}, with error {error:?}");

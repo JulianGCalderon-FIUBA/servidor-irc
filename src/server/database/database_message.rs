@@ -8,7 +8,7 @@ use crate::server::connection::Connection;
 
 use super::database_error::DatabaseError;
 
-/// Possible messages or requests a Database can receive.
+/// Requests a Database can receive and must be able to answer.
 pub enum DatabaseMessage<C: Connection> {
     AddChannelBanmask {
         channel: String,

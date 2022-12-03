@@ -12,8 +12,8 @@ use super::{
 use crate::server::data_structures::*;
 
 /// MethodObject
-/// Manages connection between servers and registers it in the database
-/// In charge of sharing all information to the new server
+/// Manages connection between servers and information exchange.
+/// It is in charge of sharing all local information to the new server and registering incoming information in database.
 pub struct ServerConnectionSetup<C: Connection> {
     stream: C,
     database: DatabaseHandle<C>,
@@ -22,7 +22,7 @@ pub struct ServerConnectionSetup<C: Connection> {
 
 impl<C: Connection> ServerConnectionSetup<C> {
     /// Creates a [`ServerConnectionSetup`] from a connection stream
-    ///   and a database in which to register the new connection
+    ///   and a database in which to register the new connection.
     pub fn new(stream: C, database: DatabaseHandle<C>) -> Self {
         Self {
             stream,
@@ -31,14 +31,14 @@ impl<C: Connection> ServerConnectionSetup<C> {
         }
     }
 
-    /// Registers server from an outcoming connection
+    /// Registers server from an outcoming connection.
     pub fn register_outcoming(&mut self) -> io::Result<()> {
         self.send_server_notification()?;
         self.receive_server_notification()?;
         self.send_server_data()
     }
 
-    /// Registers server from an incoming connection
+    /// Registers server from an incoming connection.
     pub fn register_incoming(
         &mut self,
         servername: String,
@@ -62,7 +62,9 @@ impl<C: Connection> ServerConnectionSetup<C> {
             .send(&Notification::server(&servername, 1, &serverinfo))
     }
 
-    // Waits for server command from incomming connection and handles it
+    /// Waits for server command from incoming connection and handles it.
+    ///
+    /// Fails if server command is not valid or there was a parsing error.
     fn receive_server_notification(&mut self) -> io::Result<()> {
         let message = match Message::read_from(&mut self.stream) {
             Ok(message) => message,
@@ -83,7 +85,9 @@ impl<C: Connection> ServerConnectionSetup<C> {
         Ok(())
     }
 
-    /// Register server from incoming connection
+    /// Registers server from incoming connection.
+    ///
+    /// Fails if server is already registered.
     fn handle_server_command(
         &mut self,
         servername: String,

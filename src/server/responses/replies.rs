@@ -8,7 +8,7 @@ use crate::{
     },
 };
 
-/// Possible responses the commands can generate for valid client commands
+/// Responses the server can generate for valid client commands.
 pub enum CommandResponse {
     WhoisUser311 {
         client_info: ClientInfo,

@@ -1,5 +1,8 @@
+/// This module contains error responses the command's may generate.
 pub mod errors;
+/// This module contains notifications for specific commands.
 pub mod notifications;
+/// This module contains replies valid command's may generate.
 pub mod replies;
 
 pub use errors::ErrorReply;

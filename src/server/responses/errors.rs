@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-/// Possible errors replies the server may generate for client commands.
+/// Error replies the server may generate for client commands.
 pub enum ErrorReply {
     UnknownError400 { command: String, message: String },
     NoSuchNickname401 { nickname: String },
