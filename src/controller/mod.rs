@@ -97,13 +97,13 @@ impl Controller {
 
         let mut _current_nickname: String = String::from("");
 
-        client.start_async_read(move |message| match message {
-            Ok(message) => {
-                let controller_message = to_controller_message(message);
-                sender.send(controller_message).unwrap();
-            }
-            Err(error) => eprintln!("Failed to read message: {}", error),
-        });
+        // client.start_async_read(move |message| match message {
+        //     Ok(message) => {
+        //         let controller_message = to_controller_message(message);
+        //         sender.send(controller_message).unwrap();
+        //     }
+        //     Err(error) => eprintln!("Failed to read message: {}", error),
+        // });
 
         // Self::listen_messages(client, sender);
 
@@ -124,6 +124,14 @@ impl Controller {
                     client.send_raw(&pass_command).expect(ERROR_TEXT);
                     client.send_raw(&nick_command).expect(ERROR_TEXT);
                     client.send_raw(&user_command).expect(ERROR_TEXT);
+                    let sender_clone = sender.clone();
+                    client.start_async_read(move |message| match message {
+                        Ok(message) => {
+                            let controller_message = to_controller_message(message);
+                            sender_clone.send(controller_message).unwrap();
+                        }
+                        Err(error) => eprintln!("Failed to read message: {}", error),
+                    });
                 }
                 ChangeViewToMain { nickname } => {
                     register_window.close();
