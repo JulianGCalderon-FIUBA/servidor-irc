@@ -1,3 +1,4 @@
+/// Contains a channel's configuration.
 mod channel_configuration;
 pub use channel_configuration::ChannelConfiguration;
 
