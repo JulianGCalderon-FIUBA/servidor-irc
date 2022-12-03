@@ -1,6 +1,7 @@
 use super::ClientInfo;
 
-/// Represents a Client that is connected to the Server.
+/// Represents an external client.
+/// Must contain information about through which server they can be contacted.
 pub struct ExternalClient {
     immediate: String,
     online: bool,

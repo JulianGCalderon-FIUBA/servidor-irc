@@ -3,7 +3,7 @@ pub use channel_configuration::ChannelConfiguration;
 
 use crate::server::consts::channel_flag::ChannelFlag;
 
-/// A Channel has clients and a name.
+/// Represents a Channel that has a name, clients and specific configurations.
 pub struct Channel {
     name: String,
     clients: Vec<String>,
@@ -12,7 +12,7 @@ pub struct Channel {
 }
 
 impl Channel {
-    /// Creates a new [`Channel`].
+    /// Creates a new [`Channel`] with creator set as operator.
     pub fn new(name: String, creator: String) -> Self {
         let clients = vec![creator.clone()];
 

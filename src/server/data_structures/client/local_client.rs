@@ -2,7 +2,7 @@ use crate::server::connection::Connection;
 
 use super::ClientInfo;
 
-/// Represents a Client that is connected to the Server.
+/// Represents a local client that is directly connected to the Server.
 pub struct LocalClient<C: Connection> {
     stream: Option<C>,
     _password: Option<String>,

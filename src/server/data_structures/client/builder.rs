@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::server::connection::Connection;
 
 use super::{ClientInfo, ExternalClient, LocalClient};
-
+/// Stores Client's information until it's complete and a client can be built.
 pub struct ClientBuilder<C: Connection> {
     immediate: Option<String>,
     stream: Option<C>,

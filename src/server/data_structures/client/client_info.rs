@@ -3,15 +3,19 @@ use std::collections::HashMap;
 use crate::server::consts::user_flag::UserFlag;
 
 #[derive(PartialEq, Eq, Debug, Clone)]
-/// ClientInfo contains public Client information.
+/// ClientInfo contains public client information.
 pub struct ClientInfo {
+    /// stores history of client's nicknames
     pub nicknames: Vec<String>,
     pub username: String,
     pub hostname: String,
     pub servername: String,
     pub realname: String,
+    /// how many servers away is the client from the local server
     pub hopcount: usize,
+    /// a client may have an away message
     pub away: Option<String>,
+    /// stores the user's flags
     pub flags: HashMap<UserFlag, ()>,
 }
 
@@ -78,12 +82,13 @@ impl ClientInfo {
         self.flags.remove(&flag);
     }
 }
-
+/// Iterates through base checking if pattern matches it in some way.
+/// '?' matches any character
+/// '*' matches any sequence of characters
 pub fn matches(base: &str, pattern: &str) -> bool {
     if pattern.is_empty() {
         return base.is_empty();
     }
-
     let base = base.as_bytes();
     let pattern = pattern.as_bytes();
 
@@ -99,7 +104,6 @@ pub fn matches(base: &str, pattern: &str) -> bool {
                 pattern_index += 1;
                 continue;
             }
-
             if pattern[pattern_index] == b'*' {
                 glob_base_index = base_index as isize;
                 glob_pattern_index = pattern_index as isize;
@@ -107,14 +111,12 @@ pub fn matches(base: &str, pattern: &str) -> bool {
                 continue;
             }
         }
-
         if glob_pattern_index != -1 {
             base_index = (glob_base_index + 1) as usize;
             pattern_index = (glob_pattern_index + 1) as usize;
             glob_base_index += 1;
             continue;
         }
-
         return false;
     }
 

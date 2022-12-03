@@ -1,7 +1,7 @@
 use crate::server::connection::Connection;
 
 use super::ServerInfo;
-
+/// Represents a server connected to local server.
 pub struct ImmediateServer<C: Connection> {
     stream: C,
     info: ServerInfo,
