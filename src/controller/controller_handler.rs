@@ -38,18 +38,16 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         PRIVMSG_COMMAND => {
             let message_text = message.get_trailing().clone().unwrap();
             let sender_nickname = message.get_prefix().clone().unwrap();
-            if is_channel(message.get_parameters()[0].clone()) {
-                ControllerMessage::ReceivePrivMessage {
-                    sender_nickname,
-                    message: message_text,
-                    channel: Some(message.get_parameters()[0].clone()),
-                }
+            let channel = if is_channel(message.get_parameters()[0].clone()) {
+                Some(message.get_parameters()[0].clone())
             } else {
-                ControllerMessage::ReceivePrivMessage {
-                    sender_nickname,
-                    message: message_text,
-                    channel: None,
-                }
+                None
+            };
+
+            ControllerMessage::ReceivePrivMessage {
+                sender_nickname,
+                message: message_text,
+                channel,
             }
         }
         INVITE_COMMAND =>
@@ -83,6 +81,6 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
     }
 }
 
-fn is_channel(parameter: String) -> bool {
+pub fn is_channel(parameter: String) -> bool {
     parameter.starts_with('#')
 }

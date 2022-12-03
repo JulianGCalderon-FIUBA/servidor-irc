@@ -1,25 +1,25 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Box, Entry, Label,
-};
+use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Entry, Label };
 use gtk4 as gtk;
 
 use crate::{
-    controller::controller_message::ControllerMessage, views::view_main::utils::entry_is_valid,
+    controller::controller_message::ControllerMessage,
+    views::{ view_main::utils::entry_is_valid, widgets_creation::create_label },
 };
 
 use self::{
     requests::priv_message_request,
     widgets_creation::{
-        create_chat_box, create_message_sender_box, create_received_message, create_send_message,
+        create_chat_box,
+        create_message_sender_box,
+        create_received_message,
+        create_send_message,
     },
 };
 
-use super::{utils::adjust_scrollbar, MainView};
+use super::{ utils::adjust_scrollbar, MainView };
 
 const RECEIVED_MESSAGE_CSS: &str = "received_message";
 const SEND_MESSAGE_CSS: &str = "send_message";
@@ -69,7 +69,7 @@ impl MainView {
         message: String,
         sender_nickname: String,
         channel: String,
-        current_conv: String,
+        current_conv: String
     ) {
         if sender_nickname == self.user_info.label().unwrap() || channel != current_conv {
             return;
@@ -87,18 +87,14 @@ impl MainView {
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
 
-        self.messages.get_mut(&channel).unwrap().push(message);
-        self.messages_senders
-            .get_mut(&channel)
-            .unwrap()
-            .push(sender_nickname_label);
+        self.messages.get_mut(&channel).unwrap().push(vec![message, sender_nickname_label]);
     }
 
     pub fn receive_priv_client_message(
         &mut self,
         message: String,
         nickname: String,
-        current_conv: String,
+        current_conv: String
     ) {
         if nickname != current_conv {
             return;
@@ -107,7 +103,10 @@ impl MainView {
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
 
-        self.messages.get_mut(&nickname).unwrap().push(message);
+        self.messages
+            .get_mut(&nickname)
+            .unwrap()
+            .push(vec![message, create_label("")]);
     }
 
     pub fn send_message(&mut self, message: String, nickname: String) {
@@ -115,8 +114,9 @@ impl MainView {
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
 
-        self.messages.get_mut(&nickname).unwrap().push(message);
-
-        // self.messages.push(message);
+        self.messages
+            .get_mut(&nickname)
+            .unwrap()
+            .push(vec![message, create_label("")]);
     }
 }

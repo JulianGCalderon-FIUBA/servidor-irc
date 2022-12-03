@@ -5,7 +5,7 @@ use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Button, Orientation };
 use gtk4 as gtk;
 
 use crate::{
-    controller::controller_message::ControllerMessage,
+    controller::{ controller_message::ControllerMessage, controller_handler::is_channel },
     views::{
         views_add::widget_creations::create_title,
         widgets_creation::create_button_with_margin,
@@ -77,7 +77,6 @@ impl MainView {
         println!("Added to {}", channel);
 
         self.messages.insert(channel.to_string(), vec![]);
-        self.messages_senders.insert(channel.to_string(), vec![]);
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
@@ -110,54 +109,34 @@ impl MainView {
 
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
-        let mut cont = 0;
 
         if self.messages.contains_key(&last_conv) {
             let messages = self.messages.get(&last_conv).unwrap();
             for message in messages {
-                self.message_box.remove(message);
-                if
-                    self.messages_senders.get(&last_conv).is_some() &&
-                    !self.messages_senders.get(&last_conv).unwrap().is_empty() &&
-                    message.css_classes()[0] == "received_message"
-                {
-                    let senders = self.messages_senders.get(&last_conv).unwrap();
-                    self.message_box.remove(&senders[cont]);
-                    cont += 1;
+                self.message_box.remove(&message[0]);
+                if message[1].text() != "" {
+                    self.message_box.remove(&message[1]);
                 }
             }
         }
 
-        cont = 0;
         if self.messages.contains_key(&conversation_label) {
             let messages = self.messages.get(&conversation_label).unwrap();
-
             for message in messages {
-                if
-                    self.messages_senders.get(&conversation_label).is_some() &&
-                    !self.messages_senders.get(&conversation_label).unwrap().is_empty() &&
-                    message.css_classes()[0] == "received_message"
-                {
-                    let senders = self.messages_senders.get(&conversation_label).unwrap();
-                    self.message_box.append(&senders[cont]);
-                    cont += 1;
+                if message[1].text() != "" {
+                    self.message_box.append(&message[1]);
                 }
-                self.message_box.append(message);
+                self.message_box.append(&message[0]);
             }
         }
 
         self.quit_channel_button.set_visible(true);
-        if Self::current_conv_is_channel(conversation_label.clone()) {
+        if is_channel(conversation_label.clone()) {
             self.set_channel_chat_mode();
+        } else if conversation_label == self.user_info.label().unwrap() {
+            self.set_my_chat_mode();
         } else {
             self.set_client_chat_mode();
-            if conversation_label == self.user_info.label().unwrap() {
-                self.set_my_chat_mode();
-            }
         }
-    }
-
-    pub fn current_conv_is_channel(label: String) -> bool {
-        label.starts_with('#')
     }
 }

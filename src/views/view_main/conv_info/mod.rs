@@ -7,7 +7,7 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::controller::{controller_message::ControllerMessage, controller_handler::is_channel};
 
 use self::requests::{
     add_invite_view_request, quit_channel_request, remove_conversation_request, send_names_request,
@@ -50,7 +50,7 @@ impl MainView {
     ) {
         let my_nickname = self.user_info.label().unwrap();
         self.quit_channel_button.connect_clicked(move |_| {
-            if Self::current_conv_is_channel(current_conversation.label().to_string()) {
+            if is_channel(current_conversation.label().to_string()) {
                 quit_channel_request(sender.clone());
             }
             remove_conversation_request(sender.clone());
@@ -73,7 +73,7 @@ impl MainView {
     pub fn remove_conversation(&mut self, conversation: String) {
         let collection_of_buttons: &mut Vec<Button>;
         let conversation_box: &Box;
-        if Self::current_conv_is_channel(conversation.clone()) {
+        if is_channel(conversation.clone()) {
             collection_of_buttons = &mut self.channels_buttons;
             conversation_box = &mut self.channels_box;
         } else {
