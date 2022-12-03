@@ -70,6 +70,10 @@ impl RegisterView {
         password_box.append(&self.pass_entry);
         main_box.append(&password_box);
 
+        let address_box = create_label_input_box("IP Adress");
+        address_box.append(&self.address_entry);
+        main_box.append(&address_box);
+
         main_box.append(&self.login_button);
 
         self.connect_button(
