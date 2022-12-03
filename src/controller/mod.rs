@@ -29,19 +29,20 @@ const ERROR_TEXT: &str = "ERROR";
 
 pub struct Controller {
     app: Application,
+    address: String
 }
 
-impl Default for Controller {
-    fn default() -> Self {
-        Self::new()
-    }
-}
+// impl Default for Controller {
+//     fn default() -> Self {
+//         Self::new()
+//     }
+// }
 
 impl Controller {
-    pub fn new() -> Self {
+    pub fn new(address: String) -> Self {
         let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
-        Self { app }
+        Self { app , address}
     }
 
     fn load_css() {

@@ -6,9 +6,9 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let address = unpack_args(args);
     
-    let mut controller = Controller::new();
+    let mut controller = Controller::new(address);
 
-    controller.start(address);
+    controller.start();
 }
 
 fn unpack_args(mut args: Vec<String>) -> String {
