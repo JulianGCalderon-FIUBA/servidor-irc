@@ -5,7 +5,7 @@ use std::{
 
 use crate::server::{connection::Connection, database::DatabaseHandle};
 
-use super::connection_handler_trait::{
+use super::{
     ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
     ConnectionHandlerStructure,
 };
@@ -43,8 +43,6 @@ impl<C: Connection> ServerHandler<C> {
             hopcounts: HashMap::new(),
         })
     }
-
-  
 }
 
 impl<C: Connection> ConnectionHandlerGetters<C> for ServerHandler<C> {

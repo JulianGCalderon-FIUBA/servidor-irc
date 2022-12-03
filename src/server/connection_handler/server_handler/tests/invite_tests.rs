@@ -1,5 +1,5 @@
 use crate::server::{
-    connection_handler::connection_handler_trait::ConnectionHandlerCommands,
+    connection_handler::ConnectionHandlerCommands,
     testing::{dummy_client, dummy_external_client, dummy_server},
 };
 

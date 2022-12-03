@@ -2,9 +2,7 @@ use std::io;
 
 use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerLogic,
-};
+use crate::server::connection_handler::{CommandArgs, ConnectionHandlerLogic};
 
 use crate::server::connection_handler::mode_requests::{
     parse_channel_mode_string, parse_user_mode_string,

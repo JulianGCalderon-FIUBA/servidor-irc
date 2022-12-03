@@ -9,9 +9,7 @@ use crate::server::consts::modes::{
 use crate::server::responses::{CommandResponse, Notification};
 use crate::server::{
     connection::Connection,
-    connection_handler::{
-        client_handler::ClientHandler, connection_handler_trait::ConnectionHandlerUtils,
-    },
+    connection_handler::{client_handler::ClientHandler, ConnectionHandlerUtils},
 };
 
 use crate::server::data_structures::*;

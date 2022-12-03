@@ -1,11 +1,9 @@
 use std::io;
 
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerLogic,
-};
-use crate::server::registerer::Register;
+use crate::server::connection_handler::{CommandArgs, ConnectionHandlerLogic};
 use crate::server::responses::CommandResponse;
+use crate::server::server_connection_setup::ServerConnectionSetup;
 
 use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
@@ -68,7 +66,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
 
         self.send_server_notification(&servername, hopcount, &serverinfo);
 
-        let mut registerer = Register::new(self.stream.try_clone()?, self.database.clone());
+        let mut registerer =
+            ServerConnectionSetup::new(self.stream.try_clone()?, self.database.clone());
         registerer.register_incoming(servername, hopcount, serverinfo)?;
 
         self.connection_type = ConnectionType::Server;

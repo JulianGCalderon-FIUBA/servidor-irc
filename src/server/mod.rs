@@ -11,7 +11,7 @@ mod database;
 pub mod connection_handler;
 /// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address
 mod listener;
-mod registerer;
+mod server_connection_setup;
 
 pub(crate) mod consts;
 // mod data_structures;
@@ -28,7 +28,7 @@ use std::thread::{self, JoinHandle};
 use self::connection_handler::{ConnectionHandler, ServerHandler};
 use self::database::DatabaseHandle;
 use self::listener::ConnectionListener;
-use self::registerer::Register;
+use self::server_connection_setup::ServerConnectionSetup;
 
 const MAX_CLIENTS: usize = 26;
 
@@ -87,7 +87,7 @@ impl Server {
             .clone()
             .expect("DatabaseHandle should only be None when dropped");
 
-        let mut registerer = Register::new(stream.try_clone()?, database.clone());
+        let mut registerer = ServerConnectionSetup::new(stream.try_clone()?, database.clone());
         registerer.register_outcoming()?;
 
         let online = Arc::clone(&self.online);

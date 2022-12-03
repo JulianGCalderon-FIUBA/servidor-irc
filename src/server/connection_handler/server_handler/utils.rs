@@ -1,8 +1,6 @@
 use std::fmt::Display;
 
-use crate::server::{
-    connection::Connection, connection_handler::connection_handler_trait::ConnectionHandlerUtils,
-};
+use crate::server::{connection::Connection, connection_handler::ConnectionHandlerUtils};
 
 use super::ServerHandler;
 

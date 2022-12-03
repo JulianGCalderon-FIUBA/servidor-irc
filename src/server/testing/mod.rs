@@ -50,18 +50,4 @@ pub fn dummy_distant_server(servername: &str) -> ServerInfo {
     ServerInfo::new(servername.to_string(), "serverinfo".to_string(), 2)
 }
 
-// pub fn dummy_distant_client(
-//     nickname: &str,
-//     servername: &str,
-//     immediate_server: &str,
-// ) -> ExternalClient {
-//     ClientBuilder::<MockTcpStream>::new()
-//         .nickname(nickname)
-//         .username("username")
-//         .hostname("127.0.0.1")
-//         .servername(servername)
-//         .realname("realname")
-//         .immediate(immediate_server)
-//         .build_external_client()
-//         .unwrap()
-// }
+

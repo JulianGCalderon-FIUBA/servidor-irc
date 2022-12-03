@@ -1,7 +1,5 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerAsserts,
-};
+use crate::server::connection_handler::{CommandArgs, ConnectionHandlerAsserts};
 
 use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE, VALID_CHANNEL_MODES, VALID_USER_MODES};
 use crate::server::responses::ErrorReply;
@@ -259,7 +257,6 @@ impl<C: Connection> ServerHandler<C> {
         if self.database.contains_client(&nickname) {
             return Err(ErrorReply::NickCollision436 { nickname });
         }
-        // KILL
         Ok(())
     }
 }

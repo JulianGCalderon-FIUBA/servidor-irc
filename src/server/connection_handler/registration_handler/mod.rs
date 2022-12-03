@@ -10,12 +10,8 @@ use crate::server::{connection::Connection, database::DatabaseHandle};
 use self::connection_type::ConnectionType;
 
 use super::{
-    client_handler::ClientHandler,
-    connection_handler_trait::{
-        ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
-        ConnectionHandlerStructure,
-    },
-    ServerHandler,
+    client_handler::ClientHandler, ConnectionHandler, ConnectionHandlerCommands,
+    ConnectionHandlerGetters, ConnectionHandlerStructure, ServerHandler,
 };
 
 mod asserts;

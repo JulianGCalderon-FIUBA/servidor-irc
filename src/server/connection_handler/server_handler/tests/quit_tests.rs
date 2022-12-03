@@ -1,23 +1,9 @@
 use crate::server::{
-    connection_handler::{
-        connection_handler_trait::ConnectionHandlerCommands,
-        server_handler::tests::dummy_server_handler,
-    },
+    connection_handler::{server_handler::tests::dummy_server_handler, ConnectionHandlerCommands},
     testing::{dummy_client, dummy_external_client, dummy_server},
 };
 
-// #[test]
-// fn quit_sets_client_offline() {
-//     let mut handler = dummy_server_handler();
-//     handler
-//         .database
-//         .add_external_client(dummy_external_client("nickname1", "servername1"));
 
-//     let prefix = Some("nickname1".to_string());
-//     handler.quit_command((prefix, vec![], None)).unwrap();
-
-//     assert!(handler.database.is_disconnected("nickname1"));
-// }
 
 #[test]
 fn quit_with_invalid_arguments_is_ignored() {

@@ -2,7 +2,7 @@ use std::io;
 
 use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
+use crate::server::connection_handler::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 

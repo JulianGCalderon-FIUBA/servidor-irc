@@ -107,7 +107,5 @@ impl MockTcpStream {
         responses
     }
 
-    // pub fn write_rbuf(&self, buf: &[u8]) -> std::io::Result<usize> {
-    //     self.read_lock().write(buf)
-    // }
+   
 }

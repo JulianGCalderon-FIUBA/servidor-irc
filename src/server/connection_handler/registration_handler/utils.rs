@@ -1,5 +1,5 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerUtils;
+use crate::server::connection_handler::ConnectionHandlerUtils;
 
 use crate::server::data_structures::*;
 use crate::server::responses::Notification;

@@ -11,13 +11,13 @@ use super::{
 
 use crate::server::data_structures::*;
 
-pub struct Register<C: Connection> {
+pub struct ServerConnectionSetup<C: Connection> {
     stream: C,
     database: DatabaseHandle<C>,
     servername: String,
 }
 
-impl<C: Connection> Register<C> {
+impl<C: Connection> ServerConnectionSetup<C> {
     pub fn new(stream: C, database: DatabaseHandle<C>) -> Self {
         Self {
             stream,

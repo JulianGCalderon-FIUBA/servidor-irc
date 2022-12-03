@@ -1,8 +1,7 @@
 use crate::{
     macros::ok_or_return,
     server::{
-        connection::Connection,
-        connection_handler::connection_handler_trait::ConnectionHandlerUtils,
+        connection::Connection, connection_handler::ConnectionHandlerUtils,
         data_structures::ClientInfo, responses::Notification,
     },
 };

@@ -2,7 +2,7 @@ use std::sync::{atomic::AtomicBool, Arc};
 
 use crate::server::{connection::Connection, database::DatabaseHandle};
 
-use super::connection_handler_trait::{
+use super::{
     ConnectionHandler, ConnectionHandlerCommands, ConnectionHandlerGetters,
     ConnectionHandlerStructure,
 };
