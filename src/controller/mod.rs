@@ -9,6 +9,7 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND, KICK_COMMAND,
     },
     views::{
+        ip_view::IpView,
         view_register::RegisterView,
         views_add::{
             view_add_channel::AddChannelView, view_invite::InviteView, view_warning::WarningView,
@@ -71,7 +72,7 @@ impl Controller {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut ip_view = IpView::new(sender.clone());
-        let ip_window = ip_view.get_view();
+        let ip_window = ip_view.get_view(app.clone());
         ip_window.show();
 
         let mut register_view = RegisterView::new(sender.clone());

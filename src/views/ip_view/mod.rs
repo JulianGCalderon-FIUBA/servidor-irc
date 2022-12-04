@@ -25,7 +25,7 @@ const NICKNAME_LABEL_TEXT: &str = "Nickname:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
 const PASSWORD_LABEL_TEXT: &str = "Password:";
 const ADDRESS_LABEL_TEXT: &str = "IP Address:";
-pub struct RegisterView {
+pub struct IpView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
     pub username_entry: Entry,
@@ -35,7 +35,7 @@ pub struct RegisterView {
     sender: Sender<ControllerMessage>,
 }
 
-impl RegisterView {
+impl IpView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             realname_entry: create_entry(""),
