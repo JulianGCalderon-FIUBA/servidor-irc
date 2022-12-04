@@ -78,7 +78,7 @@ impl MainView {
         self.channels_buttons.push(channel_button);
         if self.channels_buttons.len() >= 10 {
             self.add_channel.remove_css_class("add");
-            self.add_channel.add_css_class("disabled_add_button")
+            self.add_channel.add_css_class("disabled_button")
         }
         println!("Added to {}", channel);
 
@@ -126,7 +126,7 @@ impl MainView {
         if is_channel(conversation_label.clone()) {
             self.set_channel_chat_mode();
         } else if conversation_label == self.user_info.label().unwrap() {
-            self.set_my_chat_mode();
+            self.welcome_view();
         } else {
             self.set_client_chat_mode();
         }
