@@ -48,8 +48,10 @@ impl Client {
     pub fn sync_read(&mut self) -> Result<Message, CreationError> {
         let read_stream = self
             .read_stream
-            .take()
-            .expect("There should be a read stream");
+            .as_ref()
+            .expect("There should be a read stream")
+            .try_clone()
+            .expect("Should be able to clone stream");
 
         let mut reader = BufReader::new(read_stream);
 
