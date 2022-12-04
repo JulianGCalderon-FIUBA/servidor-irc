@@ -16,7 +16,7 @@ pub enum ControllerMessage {
         nickname: String,
     },
     ChangeViewToMain {
-        nickname: GString,
+        nickname: String,
     },
     JoinChannel {
         channel: String,

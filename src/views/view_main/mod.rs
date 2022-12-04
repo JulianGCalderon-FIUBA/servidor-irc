@@ -8,7 +8,7 @@ pub mod widgets_creation;
 use std::collections::HashMap;
 
 use gtk::{
-    glib::{GString, Sender},
+    glib::Sender,
     prelude::*,
     Application, ApplicationWindow, Box, Button, Entry, Label,
     Orientation::{Horizontal, Vertical},
@@ -97,7 +97,7 @@ impl MainView {
         }
     }
 
-    pub fn get_view(&mut self, app: Application, nickname: GString) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application, nickname: String) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 

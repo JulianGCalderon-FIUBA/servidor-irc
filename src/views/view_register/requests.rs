@@ -23,6 +23,6 @@ pub fn register_request(
 
 pub fn change_view_to_main_request(nickname: GString, sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::ChangeViewToMain { nickname })
+        .send(ControllerMessage::ChangeViewToMain { nickname: nickname.to_string() })
         .expect("Error: pass command");
 }

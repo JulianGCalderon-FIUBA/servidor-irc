@@ -7,7 +7,7 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use self::requests::{change_view_to_main_request, register_request};
+use self::requests::register_request;
 
 use super::{
     widgets_creation::{
@@ -116,7 +116,7 @@ impl RegisterView {
                     address,
                     sender.clone(),
                 );
-                change_view_to_main_request(nickname, sender.clone());
+                // change_view_to_main_request(nickname, sender.clone());
             }
         });
     }
