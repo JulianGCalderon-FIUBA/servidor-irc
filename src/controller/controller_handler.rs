@@ -12,20 +12,21 @@ pub const END_LIST_RPL_COMMAND: &str = "323";
 pub const NAMES_RPL_COMMAND: &str = "353";
 pub const END_NAMES_RPL_COMMAND: &str = "366";
 
-static mut CHANNELS: Vec<String> = vec![];
-static mut CLIENTS: Vec<Vec<String>> = vec![];
+static mut CHANNELS_LIST_COMMAND: Vec<String> = vec![];
+static mut CHANNELS_NAMES_COMMAND: Vec<String> = vec![];
+static mut CLIENTS_NAMES_COMMAND: Vec<Vec<String>> = vec![];
 
 pub fn to_controller_message(message: Message) -> ControllerMessage {
     // commands with no ControllerMessage
     match &message.get_command()[..] {
         LIST_RPL_COMMAND => unsafe {
-            CHANNELS.push(message.get_parameters()[0].clone());
+            CHANNELS_LIST_COMMAND.push(message.get_parameters()[0].clone());
         },
         NAMES_RPL_COMMAND => unsafe {
-            CHANNELS.push(message.get_parameters()[0].clone());
+            CHANNELS_NAMES_COMMAND.push(message.get_parameters()[0].clone());
             let trailing: String = message.get_trailing().clone().unwrap();
             let current_clients: Vec<String> = trailing.split(' ').map(|s| s.to_string()).collect();
-            CLIENTS.push(current_clients);
+            CLIENTS_NAMES_COMMAND.push(current_clients);
         },
         _ => (),
     }
@@ -52,20 +53,22 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
             channel: message.get_parameters()[1].clone(),
         },
         END_LIST_RPL_COMMAND => unsafe {
-            CHANNELS.dedup();
-            let channels_clone: Vec<String> = CHANNELS.clone();
-            CHANNELS = vec![];
+            let channels_clone: Vec<String> = CHANNELS_LIST_COMMAND.clone();
+            CHANNELS_LIST_COMMAND = vec![];
             ControllerMessage::ReceiveListChannels {
                 channels: channels_clone,
             }
         },
         END_NAMES_RPL_COMMAND => unsafe {
             let mut hashmap: HashMap<String, Vec<String>> = HashMap::new();
-            for i in 0..CHANNELS.len() {
-                hashmap.insert(CHANNELS[i].clone(), CLIENTS[i].clone());
+            for i in 0..CHANNELS_NAMES_COMMAND.len() {
+                hashmap.insert(
+                    CHANNELS_NAMES_COMMAND[i].clone(),
+                    CLIENTS_NAMES_COMMAND[i].clone(),
+                );
             }
-            CHANNELS = vec![];
-            CLIENTS = vec![];
+            CHANNELS_NAMES_COMMAND = vec![];
+            CLIENTS_NAMES_COMMAND = vec![];
             ControllerMessage::ReceiveNamesChannels {
                 channels_and_clients: hashmap,
             }
