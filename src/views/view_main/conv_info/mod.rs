@@ -69,6 +69,10 @@ impl MainView {
     }
 
     pub fn remove_conversation(&mut self, conversation: String) {
+        if self.channels_buttons.len() == 10 {
+            self.add_channel.remove_css_class("disabled_add_button");
+            self.add_channel.add_css_class("add");
+        }
         let collection_of_buttons: &mut Vec<Button>;
         let conversation_box: &Box;
         if is_channel(conversation.clone()) {

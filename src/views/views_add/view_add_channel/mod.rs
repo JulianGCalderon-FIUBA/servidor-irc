@@ -22,7 +22,7 @@ use super::{
 
 use crate::controller::controller_message::ControllerMessage;
 use crate::views::widgets_creation::{
-    build_application_window, create_center_button, create_label_input_box,
+    build_application_window, create_center_button, create_label, create_label_input_box,
 };
 
 const TITLE: &str = "Add channel";
@@ -120,6 +120,9 @@ impl AddChannelView {
     fn append_create_channel_box(&mut self, main_box: Box) {
         let entry_box = create_label_input_box(CHANNEL_LABEL_TEXT);
         self.channel_entry.add_css_class(ADD_CHANNEL_ENTRY_CSS);
+        let channel_first_character = create_label("#");
+        channel_first_character.add_css_class("channel_first_character");
+        entry_box.append(&channel_first_character);
         entry_box.append(&self.channel_entry);
         self.create_channel_box.append(&entry_box);
         self.create_channel_box.set_visible(false);
@@ -168,17 +171,21 @@ impl AddChannelView {
                 return;
             }
 
-            join_channel_request(combobox.active_text().unwrap(), sender.clone());
+            join_channel_request(combobox.active_text().unwrap().to_string(), sender.clone());
         });
     }
 
     fn connect_add_new_channel_button(&self, input: Entry, sender: Sender<ControllerMessage>) {
         self.add_new_channel_button.connect_clicked(move |_| {
-            if !entry_is_valid(&input.text()) {
+            let mut text = input.text().to_string();
+            if !entry_is_valid(&text) {
                 return;
             }
+            if !text.starts_with('#') {
+                text = format!("#{}", text);
+            }
 
-            join_channel_request(input.text(), sender.clone());
+            join_channel_request(text, sender.clone());
         });
     }
 }

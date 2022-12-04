@@ -19,7 +19,7 @@ pub enum ControllerMessage {
         nickname: GString,
     },
     JoinChannel {
-        channel: GString,
+        channel: String,
     },
     QuitChannel {},
     RecieveInvite {

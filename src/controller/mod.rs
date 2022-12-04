@@ -153,7 +153,7 @@ impl Controller {
                     add_channel_window.close();
                     let join_message = format!("{} {}", JOIN_COMMAND, channel);
                     client.send_raw(&join_message).expect(ERROR_TEXT);
-                    main_view.add_channel(channel.to_string());
+                    main_view.add_channel(channel);
                 }
                 AddNewClient { new_client } => {
                     add_client_window.close();
