@@ -5,7 +5,7 @@ use crate::views::widgets_creation::{
     build_application_window, create_center_button, create_label,
 };
 
-use super::widget_creations::{create_main_box_add_view, create_title};
+use super::widgets_creation::{create_main_box_add_view, create_title};
 
 pub struct WarningView {
     button: Button,

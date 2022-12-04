@@ -1,6 +1,6 @@
 pub mod requests;
 pub mod utils;
-pub mod widget_creations;
+pub mod widgets_creation;
 
 use gtk::{
     glib::Sender, prelude::*, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
@@ -10,14 +10,14 @@ use gtk4 as gtk;
 
 use self::requests::join_channel_request;
 use self::utils::{active_button, disable_button, disactive_button, switch_visibility};
-use self::widget_creations::{
+use self::widgets_creation::{
     create_active_button, create_box, create_combobox, create_inactive_button,
 };
 
-use super::widget_creations::create_main_box_add_view;
+use super::widgets_creation::create_main_box_add_view;
 use super::{
     super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
-    widget_creations::create_title,
+    widgets_creation::create_title,
 };
 
 use crate::controller::controller_message::ControllerMessage;

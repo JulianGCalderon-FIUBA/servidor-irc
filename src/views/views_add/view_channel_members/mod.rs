@@ -1,4 +1,4 @@
-pub mod widget_creation;
+pub mod widgets_creation;
 pub mod requests;
 
 use gtk::{prelude::*, Align::Start, Application, ApplicationWindow, Button, Label, glib::Sender};
@@ -6,11 +6,11 @@ use gtk4 as gtk;
 
 use crate::{views::{widgets_creation::{
     build_application_window, create_center_button, create_label,
-}, views_add::view_channel_members::widget_creation::create_kick_label_box}, controller::controller_message::ControllerMessage};
+}, views_add::view_channel_members::widgets_creation::create_kick_label_box}, controller::controller_message::ControllerMessage};
 
-use self::{widget_creation::{create_kick_button, create_kick_label}, requests::kick_request};
+use self::{widgets_creation::{create_kick_button, create_kick_label}, requests::kick_request};
 
-use super::widget_creations::{create_main_box_add_view, create_title};
+use super::widgets_creation::{create_main_box_add_view, create_title};
 
 pub struct ChannelMembersView {
     button: Button,
