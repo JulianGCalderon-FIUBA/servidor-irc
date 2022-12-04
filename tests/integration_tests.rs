@@ -32,9 +32,6 @@ fn server_fails_when_listening_to_occupied_address() {
     let mut new_server = Server::start(servername, serverinfo);
 
     assert!(new_server.listen_to(address).is_err());
-
-    drop(server);
-    drop(new_server);
 }
 
 #[test]
@@ -171,47 +168,34 @@ fn client_can_register_in_server() {
 //     client_thread.join().unwrap();
 // }
 
+#[test]
+fn can_shutdown_server() {
+    let servername = "lemonpie".to_string();
+    let serverinfo = "IRC server".to_string();
+    let address = "127.0.0.1:9008".to_string();
+
+    let mut server = Server::start(servername, serverinfo);
+    server.listen_to(address.clone()).unwrap();
+
+    server.quit();
+    assert!(server.listen_to(address).is_err());
+}
+
 // #[test]
-// fn can_send_messages_between_clients_through_server() {
-//     let servername = "lemonpie".to_string();
-//     let serverinfo = "IRC server".to_string();
-//     let address = "127.0.0.1:9009".to_string();
+// fn can_connect_two_servers() {
+//     let servername1 = "lemonpie".to_string();
+//     let serverinfo1 = "IRC server".to_string();
+//     let address1 = "127.0.0.1:9009".to_string();
 
-//     let mut server = Server::start(servername, serverinfo);
+//     let mut server1 = Server::start(servername1, serverinfo1);
+//     server1.listen_to(address1).unwrap();
 
-//     server.listen_to(address.clone()).unwrap();
+//     let servername2 = "chocotorta".to_string();
+//     let serverinfo2 = "New IRC server".to_string();
+//     let address2 = "127.0.0.1:9010".to_string();
 
-//     let mut client1 = Client::new(address.clone()).unwrap();
-//     let mut client2 = Client::new(address).unwrap();
+//     let mut server2 = Server::start(servername2, serverinfo2);
+//     server2.listen_to(address2.clone()).unwrap();
 
-//     let nick1 = "NICK nickname1";
-//     let user1 = "USER username1 :realname1";
-//     let nick2 = "NICK nickname2";
-//     let user2 = "USER username2 :realname2";
-
-//     client1.send_raw(nick1).unwrap();
-//     client1.send_raw(user1).unwrap();
-//     client2.send_raw(nick2).unwrap();
-//     client2.send_raw(user2).unwrap();
-
-//     let response1 = client1.sync_read().unwrap();
-//     assert_eq!(
-//         "001 nickname1 :Welcome to server lemonpie, username1",
-//         response1.to_string()
-//     );
-
-//     let response2 = client2.sync_read().unwrap();
-//     assert_eq!(
-//         "001 nickname2 :Welcome to server lemonpie, username2",
-//         response2.to_string()
-//     );
-
-//     // let privmsg = "PRIVMSG nickname2 :holaaa";
-//     // client1.send_raw(privmsg).unwrap();
-
-//     // let response1 = client1.sync_read().unwrap();
-//     // assert_eq!("", response1.to_string());
-
-//     // let response2 = client2.sync_read().unwrap();
-//     // assert_eq!("", response2.to_string());
+//     server1.connect_to(&address2);
 // }
