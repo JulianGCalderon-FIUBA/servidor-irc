@@ -1,21 +1,19 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{
-    glib::Sender,
-    prelude::*,
-    Box, Entry,
-};
+use gtk::{glib::Sender, prelude::*, Box, Entry};
 use gtk4 as gtk;
 
 use crate::{
-    controller::controller_message::ControllerMessage, views::view_main::utils::entry_is_valid,
+    controller::controller_message::ControllerMessage,
+    views::{view_main::utils::entry_is_valid, widgets_creation::create_label},
 };
 
 use self::{
     requests::priv_message_request,
     widgets_creation::{
         create_chat_box, create_message_sender_box, create_received_message, create_send_message,
+        create_sender_nickname_label,
     },
 };
 
@@ -46,7 +44,6 @@ impl MainView {
         self.connect_send_button(self.input.clone(), self.sender.clone());
         message_sender_box.append(&self.send_message);
         self.send_message.set_sensitive(false);
-        
 
         chat.append(&self.current_chat);
         chat.append(&self.scrollwindow_chat);
@@ -68,21 +65,52 @@ impl MainView {
         });
     }
 
-    pub fn receive_priv_message(&mut self, message: String, nickname: String, current_conv: String) {
-        if nickname == self.user_info.label().unwrap() {
+    pub fn receive_priv_channel_message(
+        &mut self,
+        message_text: String,
+        sender_nickname: String,
+        channel: String,
+        current_conv: String,
+    ) {
+        if sender_nickname == self.user_info.label().unwrap() {
             return;
         }
-        let message = create_received_message(&message);
-        if nickname == current_conv {
+
+        let sender_nickname_label = create_sender_nickname_label(&sender_nickname);
+        if channel == current_conv
+            && Self::should_show_nickname(self.messages.get(&channel), sender_nickname)
+        {
+            self.message_box.append(&sender_nickname_label);
+        }
+
+        let message = create_received_message(&message_text);
+        if channel == current_conv {
             self.message_box.append(&message);
             adjust_scrollbar(self.scrollwindow_chat.clone());
-        }     
-        
-        println!("Recieve {} from {}", message, nickname);
-        
-        self.messages.get_mut(&nickname).unwrap().push(message);
-        
-        // self.messages.push(message);
+        }
+
+        self.messages
+            .get_mut(&channel)
+            .unwrap()
+            .push(vec![message, sender_nickname_label]);
+    }
+
+    pub fn receive_priv_client_message(
+        &mut self,
+        message_text: String,
+        nickname: String,
+        current_conv: String,
+    ) {
+        let message_label = create_received_message(&message_text);
+        self.messages.get_mut(&nickname).unwrap().push(vec![
+            message_label.clone(),
+            create_sender_nickname_label(""),
+        ]);
+
+        if nickname == current_conv {
+            self.message_box.append(&message_label);
+            adjust_scrollbar(self.scrollwindow_chat.clone());
+        }
     }
 
     pub fn send_message(&mut self, message: String, nickname: String) {
@@ -90,8 +118,26 @@ impl MainView {
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
 
-        self.messages.get_mut(&nickname).unwrap().push(message);
-        
-        // self.messages.push(message);
+        self.messages
+            .get_mut(&nickname)
+            .unwrap()
+            .push(vec![message, create_label("")]);
+    }
+
+    pub fn should_show_nickname(
+        messages: Option<&Vec<Vec<gtk4::Label>>>,
+        sender_nickname: String,
+    ) -> bool {
+        Self::prev_message_has_different_sender(messages, sender_nickname)
+            || messages.unwrap().is_empty()
+    }
+
+    pub fn prev_message_has_different_sender(
+        messages: Option<&Vec<Vec<gtk4::Label>>>,
+        sender_nickname: String,
+    ) -> bool {
+        messages.is_some()
+            && messages.unwrap().last().is_some()
+            && messages.unwrap().last().unwrap()[1].text() != sender_nickname
     }
 }

@@ -1,4 +1,4 @@
-mod controller_handler;
+pub mod controller_handler;
 pub mod controller_message;
 
 use crate::{
@@ -83,8 +83,6 @@ impl Controller {
 
         let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
 
-        // let mut channel_members_window = ChannelMembersView::new().get_view(app.clone(), vec![]);
-
         let mut current_conv = "".to_string();
 
         let app_clone = app.clone();
@@ -143,8 +141,25 @@ impl Controller {
                     add_client_window.close();
                     main_view.add_client(client);
                 }
-                ReceivePrivMessage { nickname, message } => {
-                    main_view.receive_priv_message(message, nickname, current_conv.clone());
+                ReceivePrivMessage {
+                    sender_nickname,
+                    message,
+                    channel,
+                } => {
+                    if let Some(..) = channel {
+                        main_view.receive_priv_channel_message(
+                            message,
+                            sender_nickname,
+                            channel.unwrap(),
+                            current_conv.clone(),
+                        );
+                    } else {
+                        main_view.receive_priv_client_message(
+                            message,
+                            sender_nickname,
+                            current_conv.clone(),
+                        );
+                    }
                 }
                 ChangeConversation { nickname } => {
                     let last_conv = current_conv.clone();
@@ -173,8 +188,7 @@ impl Controller {
                 }
                 RecieveInvite { nickname, channel } => {
                     let message = format!("{} has invited you to join {}", nickname, channel);
-                    println!("{}", message);
-                    main_view.receive_priv_message(message, nickname, current_conv.clone());
+                    main_view.receive_priv_client_message(message, channel, current_conv.clone());
                 }
                 SendListMessage {} => {
                     client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
@@ -192,11 +206,12 @@ impl Controller {
                 ReceiveNamesChannels {
                     channels_and_clients,
                 } => {
-                    let channel_members_window = ChannelMembersView::new().get_view(
-                        app_clone.clone(),
-                        channels_and_clients[&current_conv].clone(),
-                    );
-                    channel_members_window.show();
+                    ChannelMembersView::new()
+                        .get_view(
+                            app_clone.clone(),
+                            channels_and_clients[&current_conv].clone(),
+                        )
+                        .show();
                 }
                 RegularMessage { message } => {
                     println!("{}", message);

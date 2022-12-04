@@ -47,7 +47,7 @@ pub struct MainView {
     pub current_chat: Label,
     scrollwindow_chat: ScrolledWindow,
     pub message_box: Box,
-    pub messages: HashMap<String,Vec<Label>>,
+    pub messages: HashMap<String, Vec<Vec<Label>>>,
     pub user_info: Button,
     pub send_message: Button,
     pub input: Entry,
