@@ -93,6 +93,7 @@ pub enum CommandResponse {
         nickname: String,
         servername: String,
         username: String,
+        realname: String,
     },
 }
 
@@ -195,8 +196,9 @@ impl Display for CommandResponse {
                 nickname,
                 servername,
                 username,
+                realname,
             } => {
-                format!("001 {nickname} :Welcome to server {servername}, {username}")
+                format!("001 {realname} :Welcome to server {servername}, nickname: {nickname}, username: {username}")
             }
         };
         write!(f, "{string}")
@@ -229,13 +231,14 @@ fn build_whoreply_message(client_info: &ClientInfo, channel: &Option<String>) ->
 }
 
 impl CommandResponse {
-    pub fn welcome(nickname: &str, servername: &str, username: &str) -> Self {
-        own!(nickname, servername, username);
+    pub fn welcome(nickname: &str, servername: &str, username: &str, realname: &str) -> Self {
+        own!(nickname, servername, username, realname);
 
         CommandResponse::Welcome001 {
             nickname,
             servername,
             username,
+            realname,
         }
     }
     pub fn channel_mode_is(channel: &str, mode: char, mode_params: Option<Vec<String>>) -> Self {
