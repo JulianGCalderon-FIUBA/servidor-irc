@@ -23,6 +23,6 @@ pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
 
 pub fn send_names_request(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::SendNamesMessage {})
+        .send(ControllerMessage::SendNamesMessageToKnowMembers {})
         .expect(ERROR_TEXT);
 }

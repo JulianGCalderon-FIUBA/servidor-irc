@@ -108,7 +108,14 @@ impl RegisterView {
             let address = Self::unpack_entry(address_entry.text());
 
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
-                register_request(pass, nickname.clone(), username, realname, address, sender.clone());
+                register_request(
+                    pass,
+                    nickname.clone(),
+                    username,
+                    realname,
+                    address,
+                    sender.clone(),
+                );
                 change_view_to_main_request(nickname, sender.clone());
             }
         });

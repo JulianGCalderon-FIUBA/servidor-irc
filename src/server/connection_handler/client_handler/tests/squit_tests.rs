@@ -85,7 +85,6 @@ fn squit_to_immediate_server_removes_it_from_database() {
     assert!(!handler.database.contains_server("servername2"));
 }
 
-
 #[test]
 fn squit_to_immediate_server_notifies_quit_for_every_client() {
     let mut handler = dummy_client_handler();

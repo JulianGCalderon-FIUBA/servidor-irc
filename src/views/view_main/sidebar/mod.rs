@@ -1,11 +1,7 @@
 pub mod requests;
 mod widgets_creation;
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Box, Button, Label, Orientation,
-};
+use gtk::{glib::Sender, prelude::*, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
 use crate::{
@@ -70,7 +66,7 @@ impl MainView {
         });
     }
 
-    pub fn add_channel(&mut self, channel: GString) {
+    pub fn add_channel(&mut self, channel: String) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
         self.connect_channel_client_button(
@@ -83,11 +79,11 @@ impl MainView {
 
         println!("Added to {}", channel);
 
-        self.messages.insert(channel.to_string(), vec![]);
+        self.messages.insert(channel, vec![]);
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
-    pub fn add_client(&mut self, client: GString) {
+    pub fn add_client(&mut self, client: String) {
         change_conversation_request(client.clone(), self.sender.clone());
         let client_button = create_button_with_margin(&client);
         self.connect_channel_client_button(
@@ -98,7 +94,7 @@ impl MainView {
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
 
-        self.messages.insert(client.to_string(), vec![]);
+        self.messages.insert(client, vec![]);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
@@ -106,7 +102,7 @@ impl MainView {
     pub fn connect_channel_client_button(
         &self,
         button: Button,
-        channel_or_client: GString,
+        channel_or_client: String,
         sender: Sender<ControllerMessage>,
     ) {
         button.connect_clicked(move |_| {

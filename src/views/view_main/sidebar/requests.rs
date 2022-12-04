@@ -5,7 +5,7 @@ use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT
 
 pub fn add_view_to_add_client_request(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::AddViewToAddClient {})
+        .send(ControllerMessage::SendNamesMessageToAddClient {})
         .expect(ERROR_TEXT);
 }
 

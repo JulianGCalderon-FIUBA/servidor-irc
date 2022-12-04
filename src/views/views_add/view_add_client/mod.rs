@@ -1,12 +1,12 @@
 pub mod requests;
 
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry};
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, ComboBoxText};
 use gtk4 as gtk;
 
 use self::requests::add_client_button_request;
 
 use super::{
-    super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
+    view_add_channel::widget_creations::create_combobox,
     widget_creations::{create_main_box_add_view, create_title},
 };
 
@@ -22,7 +22,7 @@ const ADD_CLIENT_BUTTON_TEXT: &str = "Add client";
 const CLIENT_LABEL_TEXT: &str = "Client:";
 
 pub struct AddClientView {
-    pub client_entry: Entry,
+    pub client_combobox: ComboBoxText,
     pub add_client_button: Button,
     sender: Sender<ControllerMessage>,
 }
@@ -30,13 +30,13 @@ pub struct AddClientView {
 impl AddClientView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
-            client_entry: create_entry(""),
+            client_combobox: create_combobox(),
             add_client_button: create_center_button(ADD_CLIENT_BUTTON_TEXT),
             sender,
         }
     }
 
-    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application, clients: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -45,25 +45,32 @@ impl AddClientView {
         main_box.append(&create_title(TITLE));
 
         let client_box = create_label_input_box(CLIENT_LABEL_TEXT);
-        client_box.append(&self.client_entry);
+        self.refill_combobox(clients);
+        client_box.append(&self.client_combobox);
         main_box.append(&client_box);
 
         main_box.append(&self.add_client_button);
 
-        self.connect_add_client_button(self.client_entry.clone(), self.sender.clone());
+        self.connect_add_client_button(self.client_combobox.clone(), self.sender.clone());
 
         window.set_child(Some(&main_box));
 
         window
     }
 
-    fn connect_add_client_button(&self, input: Entry, sender: Sender<ControllerMessage>) {
+    fn connect_add_client_button(&self, combobox: ComboBoxText, sender: Sender<ControllerMessage>) {
         self.add_client_button.connect_clicked(move |_| {
-            if !entry_is_valid(&input.text()) {
+            if combobox.active_text().is_none() {
                 return;
             }
 
-            add_client_button_request(input.text(), sender.clone());
+            add_client_button_request(combobox.active_text().unwrap(), sender.clone());
         });
+    }
+
+    fn refill_combobox(&mut self, clients: Vec<String>) {
+        for client in clients {
+            self.client_combobox.append_text(&client.clone());
+        }
     }
 }

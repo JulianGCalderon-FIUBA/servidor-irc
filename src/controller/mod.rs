@@ -1,6 +1,8 @@
 pub mod controller_handler;
 pub mod controller_message;
 
+use std::collections::HashMap;
+
 use crate::{
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
@@ -8,28 +10,26 @@ use crate::{
     },
     views::{
         view_register::RegisterView,
-        views_add::{view_add_channel::AddChannelView, view_invite::InviteView},
+        views_add::{
+            view_add_channel::AddChannelView, view_invite::InviteView, view_warning::WarningView,
+        },
         views_add::{view_add_client::AddClientView, view_channel_members::ChannelMembersView},
     },
 };
 use gtk4 as gtk;
 
 use crate::{client::Client, views::view_main::MainView, ADDRESS};
-use gtk::{
-    gdk::Display,
-    glib,
-    prelude::*,
-    Application, CssProvider, StyleContext,
-};
+use gtk::{gdk::Display, glib, prelude::*, Application, CssProvider, StyleContext};
 
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
 
+use self::controller_message::ControllerMessage;
 
 const ERROR_TEXT: &str = "ERROR";
-
+const NO_CHANNELS_WARNING_TEXT: &str = "There are no clients to chat with.";
 pub struct Controller {
-    app: Application
+    app: Application,
 }
 
 impl Default for Controller {
@@ -63,7 +63,6 @@ impl Controller {
     }
 
     fn build_ui(app: &Application) {
-
         let mut client = match Client::new(ADDRESS.to_string()) {
             Ok(stream) => stream,
             Err(error) => panic!("Error connecting to server: {:?}", error),
@@ -81,7 +80,7 @@ impl Controller {
         let mut add_channel_window = add_channel_view.get_view(app.clone(), vec![]);
 
         let mut add_client_view = AddClientView::new(sender.clone());
-        let mut add_client_window = add_client_view.get_view(app.clone());
+        let mut add_client_window = add_client_view.get_view(app.clone(), vec![]);
 
         let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
 
@@ -91,6 +90,7 @@ impl Controller {
         let sender_clone = sender.clone();
 
         let mut _current_nickname: String = String::from("");
+        let mut trying_to_add_client: bool = false;
 
         // client.start_async_read(move |message| match message {
         //     Ok(message) => {
@@ -111,7 +111,7 @@ impl Controller {
                     realname,
                     address,
                 } => {
-                    client = match Client::new(address.to_string()) {
+                    client = match Client::new(address) {
                         Ok(stream) => stream,
                         Err(error) => panic!("Error connecting to server: {:?}", error),
                     };
@@ -145,20 +145,37 @@ impl Controller {
                     client.send_raw(&priv_message).expect(ERROR_TEXT);
                     main_view.send_message(message.to_string(), current_conv.clone());
                 }
-                AddViewToAddClient {} => {
-                    add_client_window =
-                        AddClientView::new(sender_clone.clone()).get_view(app_clone.clone());
-                    add_client_window.show();
+                SendNamesMessageToAddClient {} => {
+                    trying_to_add_client = true;
+                    client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
                 }
                 JoinChannel { channel } => {
                     add_channel_window.close();
                     let join_message = format!("{} {}", JOIN_COMMAND, channel);
                     client.send_raw(&join_message).expect(ERROR_TEXT);
-                    main_view.add_channel(channel);
+                    main_view.add_channel(channel.to_string());
                 }
-                AddNewClient { client } => {
+                AddNewClient { new_client } => {
                     add_client_window.close();
-                    main_view.add_client(client);
+                    main_view.add_client(new_client.to_string());
+                }
+                AddViewToAddClient {
+                    channels_and_clients,
+                } => {
+                    let clients_to_add: Vec<String> = Self::not_mine(
+                        Self::clients_to_add(channels_and_clients, _current_nickname.clone()),
+                        main_view.get_my_clients(),
+                    );
+
+                    if !clients_to_add.is_empty() {
+                        add_client_window = AddClientView::new(sender_clone.clone())
+                            .get_view(app_clone.clone(), clients_to_add);
+                        add_client_window.show();
+                    } else {
+                        WarningView::new()
+                            .get_view(app_clone.clone(), NO_CHANNELS_WARNING_TEXT.to_string())
+                            .show();
+                    }
                 }
                 ReceivePrivMessage {
                     sender_nickname,
@@ -215,22 +232,33 @@ impl Controller {
                 ReceiveListChannels { channels } => {
                     add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
                         app_clone.clone(),
-                        Self::not_my_channels(channels, main_view.get_my_channels()),
+                        Self::not_mine(channels, main_view.get_my_channels()),
                     );
                     add_channel_window.show();
                 }
-                SendNamesMessage {} => {
-                    client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
+                SendNamesMessageToKnowMembers {} => {
+                    trying_to_add_client = false;
+                    client
+                        .send_raw(&format!("{NAMES_COMMAND} {current_conv}"))
+                        .expect(ERROR_TEXT);
                 }
                 ReceiveNamesChannels {
                     channels_and_clients,
                 } => {
-                    ChannelMembersView::new()
-                        .get_view(
-                            app_clone.clone(),
-                            channels_and_clients[&current_conv].clone(),
-                        )
-                        .show();
+                    if trying_to_add_client {
+                        sender_clone
+                            .send(ControllerMessage::AddViewToAddClient {
+                                channels_and_clients,
+                            })
+                            .expect(ERROR_TEXT);
+                    } else {
+                        ChannelMembersView::new()
+                            .get_view(
+                                app_clone.clone(),
+                                channels_and_clients[&current_conv].clone(),
+                            )
+                            .show();
+                    }
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
@@ -242,14 +270,42 @@ impl Controller {
         });
     }
 
-    fn not_my_channels(all_channels: Vec<String>, my_channels: Vec<String>) -> Vec<String> {
-        let mut not_my_channels: Vec<String> = vec![];
-        for channel in &all_channels {
-            if !my_channels.contains(channel) {
-                not_my_channels.push(channel.clone());
+    fn not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
+        let mut not_mine: Vec<String> = vec![];
+        for element in &all {
+            if !mine.contains(element) {
+                not_mine.push(element.clone());
             }
         }
-        not_my_channels
+        not_mine
+    }
+
+    fn server_clients(channels_and_clients: HashMap<String, Vec<String>>) -> Vec<String> {
+        let mut clients_set: Vec<String> = vec![];
+        for clients_of_channel in channels_and_clients.values() {
+            for client in clients_of_channel {
+                if !clients_set.contains(client) {
+                    clients_set.push(client.to_string());
+                }
+            }
+        }
+        clients_set
+    }
+
+    fn clients_to_add(
+        channels_and_clients: HashMap<String, Vec<String>>,
+        current_nickname: String,
+    ) -> Vec<String> {
+        let mut all_clients = Self::server_clients(channels_and_clients);
+        if all_clients.contains(&current_nickname) {
+            all_clients.remove(
+                all_clients
+                    .iter()
+                    .position(|x| *x == current_nickname)
+                    .unwrap(),
+            );
+        }
+        all_clients
     }
 
     // fn listen_messages(mut client: Client, sender: Sender<ControllerMessage>) {

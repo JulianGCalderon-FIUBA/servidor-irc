@@ -4,6 +4,34 @@ use gtk4::glib::GString;
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
+    AddInviteView {},
+    AddNewClient {
+        new_client: GString,
+    },
+    SendNamesMessageToAddClient {},
+    AddViewToAddClient {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
+    ChangeConversation {
+        nickname: String,
+    },
+    ChangeViewToMain {
+        nickname: GString,
+    },
+    JoinChannel {
+        channel: GString,
+    },
+    QuitChannel {},
+    RecieveInvite {
+        nickname: String,
+        channel: String,
+    },
+    ReceivePrivMessage {
+        sender_nickname: String,
+        message: String,
+        channel: Option<String>,
+    },
+    RemoveConversation {},
     Register {
         pass: GString,
         nickname: GString,
@@ -11,46 +39,21 @@ pub enum ControllerMessage {
         realname: GString,
         address: String,
     },
-    ChangeViewToMain {
-        nickname: GString,
-    },
-    SendPrivMessage {
-        message: GString,
-    },
-    ReceivePrivMessage {
-        sender_nickname: String,
+    RegularMessage {
         message: String,
-        channel: Option<String>,
     },
-    JoinChannel {
-        channel: GString,
-    },
-    AddViewToAddClient {},
-    AddNewClient {
-        client: GString,
-    },
-    QuitChannel {},
-    RemoveConversation {},
-    ChangeConversation {
-        nickname: String,
-    },
-    AddInviteView {},
     SendInviteMessage {
         channel: GString,
     },
-    RecieveInvite {
-        nickname: String,
-        channel: String,
-    },
-    SendListMessage {},
     ReceiveListChannels {
         channels: Vec<String>,
     },
-    SendNamesMessage {},
     ReceiveNamesChannels {
         channels_and_clients: HashMap<String, Vec<String>>,
     },
-    RegularMessage {
-        message: String,
+    SendListMessage {},
+    SendNamesMessageToKnowMembers {},
+    SendPrivMessage {
+        message: GString,
     },
 }
