@@ -38,7 +38,7 @@ impl ChannelMembersView {
         main_box.append(&create_title("Members"));
 
         if nickname == Self::get_operator(clients.clone()) {
-            Self::list_members_operators(clients, channel, main_box.clone(), sender.clone())
+            Self::list_members_operators(clients, channel, main_box.clone(), sender.clone(), window.clone())
         } else {
             Self::list_members(clients, main_box.clone());
         }        
@@ -72,7 +72,7 @@ impl ChannelMembersView {
         }
     }
 
-    fn list_members_operators(clients: Vec<String>, channel: String, main_box: gtk::Box, sender: Sender<ControllerMessage>) {
+    fn list_members_operators(clients: Vec<String>, channel: String, main_box: gtk::Box, sender: Sender<ControllerMessage>, window: ApplicationWindow) {
         for client in clients {
             let client_label_box = create_kick_label_box();
             
@@ -82,7 +82,7 @@ impl ChannelMembersView {
             } else {
                 let label = create_kick_label(&format!("\t •\t{}", client));
                 let kick_button = create_kick_button();
-                Self::connect_kick_button(kick_button.clone(), channel.clone(), client, sender.clone());
+                Self::connect_kick_button(kick_button.clone(), channel.clone(), client, sender.clone(), window.clone());
             
                 client_label_box.append(&label);
                 client_label_box.append(&kick_button);
@@ -94,9 +94,10 @@ impl ChannelMembersView {
         }
     }
 
-    fn connect_kick_button(kick_button: Button, channel: String, member: String, sender: Sender<ControllerMessage>) {
+    fn connect_kick_button(kick_button: Button, channel: String, member: String, sender: Sender<ControllerMessage>, window: ApplicationWindow) {
         kick_button.connect_clicked(move |_| {
             kick_request(channel.clone(), member.clone(), sender.clone());
+            window.close();
         });
     }
 
