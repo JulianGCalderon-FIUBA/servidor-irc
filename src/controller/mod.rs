@@ -258,7 +258,10 @@ impl Controller {
                     client.send_raw(&kick).expect(ERROR_TEXT);
                 }
                 ReceiveKick { kicked, channel } => {
-                    
+                    println!("kick {} from {}", kicked, channel);
+                    if kicked == current_nickname {
+                        main_view.remove_conversation(channel);
+                    }
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
