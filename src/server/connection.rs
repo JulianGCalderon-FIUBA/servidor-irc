@@ -7,6 +7,7 @@ use std::time::Duration;
 use crate::message::Message;
 
 /// An implementor of Connection must behave as a TCPStream for testing purposes
+/// For convenience, it also implements `send`
 pub trait Connection: Read + Write + Sized + Send + 'static {
     fn try_clone(&self) -> io::Result<Self>;
     fn peer_address(&self) -> io::Result<SocketAddr>;

@@ -31,14 +31,14 @@ impl<C: Connection> ServerConnectionSetup<C> {
         }
     }
 
-    /// Registers server from an outcoming connection.
+    /// Register as server to an outcoming connection
     pub fn register_outcoming(&mut self) -> io::Result<()> {
         self.send_server_notification()?;
         self.receive_server_notification()?;
         self.send_server_data()
     }
 
-    /// Registers server from an incoming connection.
+    /// Register external server from an incoming connection.
     pub fn register_incoming(
         &mut self,
         servername: String,
@@ -77,9 +77,10 @@ impl<C: Connection> ServerConnectionSetup<C> {
         let hopcount = params
             .remove(1)
             .parse::<usize>()
-            .expect("Hopcount should be a number");
+            .expect("Verified in assert");
+
         let servername = params.remove(0);
-        let serverinfo = trail.expect("Trail should be Some");
+        let serverinfo = trail.expect("Verified in assert");
         self.handle_server_command(servername, hopcount, serverinfo)?;
 
         Ok(())

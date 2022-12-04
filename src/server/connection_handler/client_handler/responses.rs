@@ -34,7 +34,7 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
         let nickname = &client_info.nickname();
         let servername = &client_info.servername;
-        let serverinfo = "serverinfo"; // todo
+        let serverinfo = "serverinfo";
 
         self.stream
             .send(&CommandResponse::whois_user(&client_info))?;
