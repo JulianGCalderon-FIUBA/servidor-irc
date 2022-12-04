@@ -4,6 +4,6 @@ pub mod view_channel_members;
 pub mod view_invite;
 pub mod view_notifications;
 pub mod view_warning;
-pub mod widget_creations;
+pub mod widgets_creation;
 
 const ADD_VIEW_TITLE_CSS: &str = "add_view_title";

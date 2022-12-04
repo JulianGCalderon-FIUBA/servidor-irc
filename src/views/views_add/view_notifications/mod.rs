@@ -12,7 +12,7 @@ use crate::views::{
     },
 };
 
-use super::widget_creations::{create_main_box_add_view, create_title};
+use super::widgets_creation::{create_main_box_add_view, create_title};
 
 pub struct NotificationsView {
     button: Button,
