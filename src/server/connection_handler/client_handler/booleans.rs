@@ -1,5 +1,5 @@
 use crate::macros::ok_or_return;
-use crate::server::consts::channel::DISTRIBUTED_CHANNEL;
+use crate::server::consts::channel::{DISTRIBUTED_CHANNEL, LOCAL_CHANNEL};
 use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::{connection::Connection, connection_handler::client_handler::ClientHandler};
 
@@ -58,6 +58,10 @@ impl<C: Connection> ClientHandler<C> {
         let client = ok_or_return!(self.database.get_client_info(nickname), false);
 
         client.matches_banmask(mask)
+    }
+
+    pub fn is_channel(&self, target: &str) -> bool {
+        target.starts_with([DISTRIBUTED_CHANNEL, LOCAL_CHANNEL])
     }
 }
 

@@ -90,24 +90,6 @@ fn can_kick_user_from_channel() {
     );
 }
 
-// #[test]
-// fn can_kick_user_with_old_nickname() {
-//     let mut handler = dummy_client_handler();
-
-//     handler.database.add_local_client(dummy_client("nick2"));
-//     handler
-//         .database
-//         .add_client_to_channel("#channel", "nickname");
-//     handler.database.add_client_to_channel("#channel", "nick2");
-
-//     handler.database.update_nickname("nick2", "nick3");
-
-//     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
-//     handler.kick_command((None, parameters, None)).unwrap();
-
-//     assert!(!handler.database.is_client_in_channel("#channel", "nick3"));
-// }
-
 #[test]
 fn can_kick_user_from_channel_with_comment() {
     let mut handler = dummy_client_handler();

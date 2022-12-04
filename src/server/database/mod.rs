@@ -184,7 +184,7 @@ impl<C: Connection> Database<C> {
             } => self.handle_contains_server(servername, respond_to),
             AddExternalClient { client } => self.handle_add_external_client(client),
             GetServerName { respond_to } => self.handle_get_servername(respond_to),
-            GetServerInfo { respond_to } => self.handle_get_serverinfo(respond_to),
+            GetOwnServerInfo { respond_to } => self.handle_get_own_server_info(respond_to),
             GetChannelConfig {
                 channel,
                 respond_to,
@@ -222,6 +222,7 @@ impl<C: Connection> Database<C> {
                 client,
                 respond_to,
             } => self.handle_channel_has_client_invite(channel, client, respond_to),
+            GetServerInfo { server, respond_to } => self.handle_get_server_info(server, respond_to),
         }
     }
 }

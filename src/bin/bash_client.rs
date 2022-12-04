@@ -50,8 +50,8 @@ fn unpack_args(mut args: Vec<String>) -> String {
     }
 }
 
-// Spawns a thread that reads from stdin, sending each line read through a channel.
-// This allows async read from stdin
+/// Spawns a thread that reads from stdin, sending each line read through a channel.
+/// This allows async read from stdin
 fn spawn_stdin_channel() -> (Receiver<String>, JoinHandle<()>) {
     let (tx, rx) = mpsc::channel::<String>();
 

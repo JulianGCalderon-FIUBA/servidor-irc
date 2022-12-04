@@ -155,16 +155,17 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 
         let target = &params[0];
 
-        if target.starts_with([DISTRIBUTED_CHANNEL, LOCAL_CHANNEL]) {
+        if self.is_channel(target) {
             self.assert_exists_channel(target)?;
             self.assert_is_in_channel(target)?;
-            self.assert_is_channel_operator(target)?;
         } else if target != &self.nickname {
             return Err(ErrorReply::UsersDontMatch502);
         }
-
         if params.len() > 1 {
             self.assert_modes_starts_correctly(&params[1])?;
+        }
+        if params.len() > 1 && self.is_channel(target) {
+            self.assert_is_channel_operator(target)?;
         }
 
         Ok(())

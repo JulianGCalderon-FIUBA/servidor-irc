@@ -237,8 +237,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
 
                 self.send_quit_notification(client.nickname(), "Net split".to_string());
             }
-
-            // preguntar si hay que desconectarlos o eliminarlos
         }
 
         Ok(true)
