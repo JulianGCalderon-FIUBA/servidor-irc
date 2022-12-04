@@ -18,7 +18,7 @@ use super::{
 
 use crate::server::data_structures::*;
 
-/// MethodObject
+/// MethodObject:
 /// Manages connection between servers and information exchange.
 /// It is in charge of sharing all local information to the new server and registering incoming information in database.
 pub struct ServerConnectionSetup<C: Connection> {
@@ -38,14 +38,14 @@ impl<C: Connection> ServerConnectionSetup<C> {
         }
     }
 
-    /// Registers server from an outcoming connection.
+    /// Register as server to an outcoming connection
     pub fn register_outcoming(&mut self) -> io::Result<()> {
         self.send_server_notification()?;
         self.receive_server_notification()?;
         self.send_server_data()
     }
 
-    /// Registers server from an incoming connection.
+    /// Register external server from an incoming connection.
     pub fn register_incoming(
         &mut self,
         servername: String,
@@ -63,7 +63,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
 
     fn send_server_notification(&mut self) -> io::Result<()> {
         let servername = self.database.get_server_name();
-        let serverinfo = self.database.get_server_info();
+        let serverinfo = self.database.get_own_server_info();
 
         self.stream
             .send(&Notification::server(&servername, 1, &serverinfo))
@@ -84,9 +84,10 @@ impl<C: Connection> ServerConnectionSetup<C> {
         let hopcount = params
             .remove(1)
             .parse::<usize>()
-            .expect("Hopcount should be a number");
+            .expect("Verified in assert");
+
         let servername = params.remove(0);
-        let serverinfo = trail.expect("Trail should be Some");
+        let serverinfo = trail.expect("Verified in assert");
         self.handle_server_command(servername, hopcount, serverinfo)?;
 
         Ok(())
@@ -128,11 +129,11 @@ impl<C: Connection> ServerConnectionSetup<C> {
         Ok(())
     }
 
-    // Sends all server data to new connected server:
-    //  - all clients (with nick and user)
-    //  - all channels (with join)
-    //  - all channel configurations (with mode)
-    //  - all server operators (with mode)
+    /// Sends all server data to new connected server:
+    ///  - all clients (with nick and user)
+    ///  - all channels (with join)
+    ///  - all channel configurations (with mode)
+    ///  - all server operators (with mode)
     fn send_server_data(&mut self) -> io::Result<()> {
         for mut client in self.database.get_all_clients() {
             client.hopcount += 1;

@@ -8,7 +8,7 @@ use crate::server::{
         dummy_client, dummy_database, dummy_distant_server, dummy_external_client, dummy_server,
     },
 };
-
+//holaaaa
 #[test]
 fn can_add_client() {
     let database = dummy_database();
@@ -534,7 +534,7 @@ fn cannot_get_immediate_server_for_local_client() {
 #[test]
 fn can_get_server_info() {
     let database = dummy_database();
-    assert_eq!("serverinfo".to_string(), database.get_server_info())
+    assert_eq!("serverinfo".to_string(), database.get_own_server_info())
 }
 
 #[test]
