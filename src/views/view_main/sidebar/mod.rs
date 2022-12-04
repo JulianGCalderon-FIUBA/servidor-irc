@@ -118,7 +118,7 @@ impl MainView {
         self.current_chat.set_label(&conversation_label);
         self.scrollwindow_chat.set_visible(true);
         self.send_message.set_sensitive(true);
-        self.welcome_box.set_visible(false); 
+        self.welcome_box.set_visible(false);
 
         self.clean_screen(last_conv);
         self.load_messages_on_chat(conversation_label.clone());
