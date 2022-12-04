@@ -246,7 +246,8 @@ impl Controller {
                             .get_view(
                                 app_clone.clone(),
                                 channels_and_clients[&current_conv].clone(),
-                                current_nickname.clone()
+                                current_nickname.clone(),
+                                sender.clone()
                             )
                             .show();
                     }
