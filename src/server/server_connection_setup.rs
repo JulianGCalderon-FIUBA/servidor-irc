@@ -191,15 +191,10 @@ impl<C: Connection> ServerConnectionSetup<C> {
         let sender = &operators[0].clone();
 
         self.send_flags_notification(flags, sender, channel)?;
-
         self.send_limit_notification(limit, sender, channel)?;
-
         self.send_key_notification(key, sender, channel)?;
-
         self.send_operators_notification(operators, sender, channel)?;
-
         self.send_banmasks_notification(banmasks, sender, channel)?;
-
         self.send_speakers_notification(speakers, sender, channel)?;
 
         Ok(())
