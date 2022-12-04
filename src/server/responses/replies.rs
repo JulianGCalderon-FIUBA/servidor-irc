@@ -89,6 +89,11 @@ pub enum CommandResponse {
     UserModeIs221 {
         user_modes: String,
     },
+    Welcome001 {
+        nickname: String,
+        servername: String,
+        username: String,
+    },
 }
 
 impl Display for CommandResponse {
@@ -183,7 +188,16 @@ impl Display for CommandResponse {
             CommandResponse::Quit { message } => {
                 format!("{QUIT_COMMAND} :{message}")
             }
-            CommandResponse::UserModeIs221 { user_modes } => format!("221 {user_modes}"),
+            CommandResponse::UserModeIs221 { user_modes } => {
+                format!("221 {user_modes}")
+            }
+            CommandResponse::Welcome001 {
+                nickname,
+                servername,
+                username,
+            } => {
+                format!("001 {nickname} :Welcome to server {servername}, {username}")
+            }
         };
         write!(f, "{string}")
     }
@@ -215,6 +229,15 @@ fn build_whoreply_message(client_info: &ClientInfo, channel: &Option<String>) ->
 }
 
 impl CommandResponse {
+    pub fn welcome(nickname: &str, servername: &str, username: &str) -> Self {
+        own!(nickname, servername, username);
+
+        CommandResponse::Welcome001 {
+            nickname,
+            servername,
+            username,
+        }
+    }
     pub fn channel_mode_is(channel: &str, mode: char, mode_params: Option<Vec<String>>) -> Self {
         let channel = channel.to_string();
 

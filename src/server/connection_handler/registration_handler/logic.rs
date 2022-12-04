@@ -45,11 +45,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         let client = self
             .build_client()
             .expect("Client's information should be complete to build");
-
-        self.send_new_client_notification(&client.get_info());
+        let client_info = client.get_info();
+        self.send_new_client_notification(&client_info);
         self.database.add_local_client(client);
 
         self.connection_type = ConnectionType::Client;
+
+        self.send_welcome_response(client_info)?;
 
         Ok(false)
     }

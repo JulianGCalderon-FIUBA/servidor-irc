@@ -2,7 +2,7 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::ConnectionHandlerUtils;
 
 use crate::server::data_structures::*;
-use crate::server::responses::Notification;
+use crate::server::responses::{CommandResponse, Notification};
 
 use super::RegistrationHandler;
 
@@ -38,5 +38,14 @@ impl<C: Connection> RegistrationHandler<C> {
 
         let user_notification = Notification::user(info);
         self.send_message_to_all_servers(&user_notification);
+    }
+
+    pub fn send_welcome_response(&mut self, client_info: ClientInfo) -> std::io::Result<()> {
+        let nickname = &client_info.nickname();
+        let username = &client_info.username;
+        let servername = &client_info.servername;
+
+        let response = CommandResponse::welcome(nickname, servername, username);
+        self.stream.send(&response)
     }
 }
