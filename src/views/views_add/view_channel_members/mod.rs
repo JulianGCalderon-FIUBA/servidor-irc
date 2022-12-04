@@ -1,8 +1,14 @@
+pub mod widget_creation;
+
 use gtk::{prelude::*, Align::Start, Application, ApplicationWindow, Button, Label};
 use gtk4 as gtk;
 
 use crate::views::widgets_creation::{
     build_application_window, create_center_button, create_label,
+};
+
+use self::widget_creation::{
+    create_kick_label
 };
 
 use super::widget_creations::{create_main_box_add_view, create_title};
@@ -24,7 +30,7 @@ impl ChannelMembersView {
         }
     }
 
-    pub fn get_view(&mut self, app: Application, clients: Vec<String>, _nickname: String) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application, clients: Vec<String>, nickname: String) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -32,11 +38,11 @@ impl ChannelMembersView {
 
         main_box.append(&create_title("Miembros"));
 
-        let operator = Self::get_operator(clients.clone());
-
-        println!("{}", operator);
-
-        Self::list_members(clients, main_box.clone());
+        if nickname == Self::get_operator(clients.clone()) {
+            Self::list_members_operators(clients, main_box.clone())
+        } else {
+            Self::list_members(clients, main_box.clone());
+        }        
 
         main_box.append(&self.button);
 
@@ -61,10 +67,20 @@ impl ChannelMembersView {
             } else {
                 label = create_label(&format!("\t •\t{}", client));
             }
-            // let label = create_label(&format!("\t •\t{}", client));
             label.set_halign(Start);
             label.set_margin_start(20);
             main_box.append(&label);
+        }
+    }
+
+    fn list_members_operators(clients: Vec<String>, main_box: gtk::Box) {
+        for client in clients {
+            //mejorar
+            println!("VISTA OPERADOR");
+            let client_label = create_kick_label(client);
+            // label.set_halign(Start);
+            // label.set_margin_start(20);
+            main_box.append(&client_label);
         }
     }
 
