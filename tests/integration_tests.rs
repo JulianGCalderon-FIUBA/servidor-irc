@@ -1,24 +1,13 @@
-use std::{io::Write, net::TcpStream, thread};
-
 use internet_relay_chat::{client::Client, server::Server};
 
 #[test]
-fn can_create_server_that_listens_to_address() -> std::io::Result<()> {
+fn can_create_server_that_listens_to_address() {
     let servername = "lemonpie".to_string();
     let serverinfo = "IRC server".to_string();
     let address = "127.0.0.1:9000".to_string();
 
-    let server_thread = thread::spawn(|| {
-        let mut server = Server::start(servername, serverinfo);
-        server.listen_to(address).unwrap();
-    });
-
-    let mut stream = TcpStream::connect("127.0.0.1:9000")?;
-    let quit = "QUIT\n".as_bytes();
-    let bytes_written = stream.write(quit)?;
-    assert_eq!(quit.len(), bytes_written);
-    server_thread.join().unwrap();
-    Ok(())
+    let mut server = Server::start(servername, serverinfo);
+    assert!(server.listen_to(address).is_ok());
 }
 
 #[test]
@@ -65,7 +54,7 @@ fn can_connect_client_to_server() {
 }
 
 #[test]
-fn client_can_send_and_receive_messages_from_server() {
+fn client_can_send_and_receive_message_from_server() {
     let servername = "lemonpie".to_string();
     let serverinfo = "IRC server".to_string();
     let address = "127.0.0.1:9005".to_string();
@@ -74,10 +63,37 @@ fn client_can_send_and_receive_messages_from_server() {
 
     server.listen_to(address.clone()).unwrap();
 
-    let client = Client::new(address);
+    let mut client = Client::new(address).unwrap();
 
-    assert!(client.is_ok());
+    let message = "HOLA";
+    assert!(client.send_raw(message).is_ok());
+
+    let response = client.sync_read().unwrap();
+    assert_eq!("421 HOLA :Unknown command", response.to_string());
 }
+
+// #[test]
+// fn client_can_send_and_receive_multiple_messages_from_server() {
+//     let servername = "lemonpie".to_string();
+//     let serverinfo = "IRC server".to_string();
+//     let address = "127.0.0.1:9006".to_string();
+
+//     let mut server = Server::start(servername, serverinfo);
+
+//     server.listen_to(address.clone()).unwrap();
+
+//     let mut client = Client::new(address).unwrap();
+
+//     let message1 = "HOLA";
+//     client.send_raw(message1).unwrap();
+//     let message2 = "PROBANDO";
+//     client.send_raw(message2).unwrap();
+
+//     // let response1 = client.sync_read().unwrap();
+//     // assert_eq!("421 HOLA :Unknown command", response1.to_string());
+//     let response2 = client.sync_read().unwrap();
+//     assert_eq!("421 PROBANDO :Unknown command", response2.to_string());
+// }
 
 #[test]
 fn can_connect_multiple_clients_to_server() {
