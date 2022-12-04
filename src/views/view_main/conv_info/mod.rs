@@ -7,7 +7,7 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use crate::controller::{controller_message::ControllerMessage, controller_handler::is_channel};
+use crate::controller::{controller_handler::is_channel, controller_message::ControllerMessage};
 
 use self::requests::{
     add_invite_view_request, quit_channel_request, remove_conversation_request, send_names_request,
