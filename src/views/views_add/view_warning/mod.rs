@@ -31,16 +31,13 @@ impl WarningView {
         let main_box = create_main_box_add_view();
 
         let title = create_title("We are sorry :(");
-        title.add_css_class("warning_text");
         main_box.append(&title);
-
 
         let label = create_label(&warning_text);
         label.set_halign(Start);
         label.set_margin_start(20);
-        label.add_css_class("warning_text");
         main_box.append(&label);
-        
+
         main_box.append(&self.button);
 
         self.connect_button(window.clone());

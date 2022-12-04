@@ -1,28 +1,19 @@
 pub mod requests;
 
-use gtk::{
-    glib::Sender,
-    prelude::*,
-    Application,
-    ApplicationWindow,
-    Button,
-    ComboBoxText,
-};
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, ComboBoxText};
 use gtk4 as gtk;
 
 use self::requests::add_client_button_request;
 
 use super::{
-    widget_creations::{ create_main_box_add_view, create_title },
     view_add_channel::widget_creations::create_combobox,
+    widget_creations::{create_main_box_add_view, create_title},
 };
 
 use crate::{
     controller::controller_message::ControllerMessage,
     views::widgets_creation::{
-        build_application_window,
-        create_center_button,
-        create_label_input_box,
+        build_application_window, create_center_button, create_label_input_box,
     },
 };
 
@@ -68,15 +59,13 @@ impl AddClientView {
     }
 
     fn connect_add_client_button(&self, combobox: ComboBoxText, sender: Sender<ControllerMessage>) {
-        self.add_client_button.connect_clicked(
-            move |_| {
-                if combobox.active_text().is_none() {
-                    return;
-                }
-
-                add_client_button_request(combobox.active_text().unwrap(), sender.clone());
+        self.add_client_button.connect_clicked(move |_| {
+            if combobox.active_text().is_none() {
+                return;
             }
-        );
+
+            add_client_button_request(combobox.active_text().unwrap(), sender.clone());
+        });
     }
 
     fn refill_combobox(&mut self, clients: Vec<String>) {

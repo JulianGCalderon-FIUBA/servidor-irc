@@ -9,7 +9,9 @@ pub enum ControllerMessage {
         new_client: GString,
     },
     SendNamesMessageToAddClient {},
-    AddViewToAddClient{ channels_and_clients: HashMap<String, Vec<String>> },
+    AddViewToAddClient {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
     ChangeConversation {
         nickname: String,
     },
@@ -52,5 +54,5 @@ pub enum ControllerMessage {
     SendNamesMessageToKnowMembers {},
     SendPrivMessage {
         message: GString,
-    }
+    },
 }

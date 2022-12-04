@@ -1,11 +1,7 @@
 pub mod requests;
 mod widgets_creation;
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Box, Button, Label, Orientation,
-};
+use gtk::{glib::Sender, prelude::*, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
 use crate::{
@@ -83,7 +79,7 @@ impl MainView {
 
         println!("Added to {}", channel);
 
-        self.messages.insert(channel.to_string(), vec![]);
+        self.messages.insert(channel, vec![]);
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
@@ -98,7 +94,7 @@ impl MainView {
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
 
-        self.messages.insert(client.to_string(), vec![]);
+        self.messages.insert(client, vec![]);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
