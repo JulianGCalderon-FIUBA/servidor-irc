@@ -1,11 +1,9 @@
 use std::io;
 
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerLogic,
-};
-use crate::server::registerer::Register;
+use crate::server::connection_handler::{CommandArgs, ConnectionHandlerLogic};
 use crate::server::responses::CommandResponse;
+use crate::server::server_connection_setup::ServerConnectionSetup;
 
 use super::connection_type::ConnectionType;
 use super::RegistrationHandler;
@@ -34,7 +32,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
     fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, trail) = arguments;
 
-        let realname = trail.unwrap();
+        let realname = trail.expect("Verified in assert");
         let username = params.remove(0);
         let servername = self.database.get_server_name();
         let hostname = self.stream.peer_address()?.ip().to_string();
@@ -44,12 +42,16 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
         self.attributes.insert("servername", servername);
         self.attributes.insert("realname", realname);
 
-        let client = self.build_client().unwrap();
-
-        self.send_new_client_notification(&client.get_info());
+        let client = self
+            .build_client()
+            .expect("Client's information should be complete to build");
+        let client_info = client.get_info();
+        self.send_new_client_notification(&client_info);
         self.database.add_local_client(client);
 
         self.connection_type = ConnectionType::Client;
+
+        self.send_welcome_response(client_info)?;
 
         Ok(false)
     }
@@ -57,13 +59,17 @@ impl<C: Connection> ConnectionHandlerLogic<C> for RegistrationHandler<C> {
     fn server_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, mut params, trail) = arguments;
 
-        let hopcount = params.remove(1).parse::<usize>().unwrap();
+        let hopcount = params
+            .remove(1)
+            .parse::<usize>()
+            .expect("Verified in assert");
         let servername = params.remove(0);
-        let serverinfo = trail.unwrap();
+        let serverinfo = trail.expect("Verified in assert");
 
         self.send_server_notification(&servername, hopcount, &serverinfo);
 
-        let mut registerer = Register::new(self.stream.try_clone()?, self.database.clone());
+        let mut registerer =
+            ServerConnectionSetup::new(self.stream.try_clone()?, self.database.clone());
         registerer.register_incoming(servername, hopcount, serverinfo)?;
 
         self.connection_type = ConnectionType::Server;

@@ -61,7 +61,7 @@ fn after_nick_update_channel_info_is_updated() {
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     let parameters = vec!["nick2".to_string()];
     handler.nick_command((None, parameters, None)).unwrap();

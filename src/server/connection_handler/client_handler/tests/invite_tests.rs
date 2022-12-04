@@ -43,8 +43,8 @@ fn invite_fails_with_user_already_on_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nick2");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -57,18 +57,16 @@ fn invite_fails_with_user_already_on_channel() {
 }
 
 #[test]
-fn invite_fails_with_sending_user_not_on_channel() {
+fn invite_fails_with_no_such_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#hola");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
-
     handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
-        "442 #hola :You're not on that channel\r\n",
+        "403 #hola :No such channel\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }
@@ -78,7 +76,7 @@ fn can_invite_one_user() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -104,12 +102,14 @@ fn invite_fails_with_not_channop_on_moderated_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler
         .database
-        .set_channel_mode("#hola", ChannelFlag::InviteOnly);
-    handler.database.remove_channop("#hola", "nickname");
+        .set_channel_flag("#hola", ChannelFlag::InviteOnly);
+    handler
+        .database
+        .remove_channel_operator("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -135,11 +135,11 @@ fn can_invite_user_in_moderated_channel_if_channop() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler
         .database
-        .set_channel_mode("#hola", ChannelFlag::InviteOnly);
+        .set_channel_flag("#hola", ChannelFlag::InviteOnly);
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
 
@@ -170,6 +170,7 @@ fn invite_is_relayed_to_neccesary_server() {
     handler
         .database
         .add_external_client(dummy_external_client("nick2", "servername1"));
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     let parameters = vec!["nick2".to_string(), "#hola".to_string()];
     handler.invite_command((None, parameters, None)).unwrap();
@@ -182,4 +183,20 @@ fn invite_is_relayed_to_neccesary_server() {
             .unwrap()
             .read_wbuf_to_string()
     );
+}
+
+#[test]
+fn invite_is_registered_in_channel() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .add_external_client(dummy_external_client("nick2", "servername1"));
+
+    handler.database.add_client_to_channel("#hola", "nickname");
+
+    let parameters = vec!["nick2".to_string(), "#hola".to_string()];
+    handler.invite_command((None, parameters, None)).unwrap();
+
+    assert!(handler.database.channel_has_invite("#hola", "nick2"));
 }

@@ -6,22 +6,30 @@ use crate::server::{connection::Connection, database::Database};
 impl<C: Connection> Database<C> {
     pub fn handle_is_server_operator(&mut self, nickname: String, respond_to: Sender<bool>) {
         let is_server_operator = self.is_server_operator(nickname);
-        respond_to.send(is_server_operator).unwrap();
+        respond_to
+            .send(is_server_operator)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_contains_client(&self, nickname: String, respond_to: Sender<bool>) {
         let contains_client = self.contains_client(nickname);
-        respond_to.send(contains_client).unwrap();
+        respond_to
+            .send(contains_client)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_is_local_client(&self, nickname: String, respond_to: Sender<bool>) {
         let is_local = self.is_local_client(nickname);
-        respond_to.send(is_local).unwrap();
+        respond_to
+            .send(is_local)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_contains_channel(&self, channel: String, respond_to: Sender<bool>) {
         let contains_channel = self.contains_channel(channel);
-        respond_to.send(contains_channel).unwrap();
+        respond_to
+            .send(contains_channel)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_is_client_in_channel(
@@ -31,7 +39,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<bool>,
     ) {
         let is_client_in_channel = self.is_client_in_channel(nickname, channel);
-        respond_to.send(is_client_in_channel).unwrap();
+        respond_to
+            .send(is_client_in_channel)
+            .expect("Handler receiver should not be dropped");
     }
     pub fn handle_is_channel_speaker(
         &self,
@@ -40,7 +50,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<bool>,
     ) {
         let is_speaker = self.is_channel_speaker(channel, nickname);
-        respond_to.send(is_speaker).unwrap();
+        respond_to
+            .send(is_speaker)
+            .expect("Handler receiver should not be dropped");
     }
     pub fn handle_is_channel_operator(
         &self,
@@ -49,7 +61,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<bool>,
     ) {
         let is_channel_operator = self.is_channel_operator(channel, nickname);
-        respond_to.send(is_channel_operator).unwrap();
+        respond_to
+            .send(is_channel_operator)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_are_credentials_valid(
@@ -59,17 +73,35 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<bool>,
     ) {
         let are_credentials_valid = self.are_credentials_valid(username, password);
-        respond_to.send(are_credentials_valid).unwrap();
+        respond_to
+            .send(are_credentials_valid)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_contains_server(&self, servername: String, respond_to: Sender<bool>) {
         let contains_server = self.contains_server(servername);
-        respond_to.send(contains_server).unwrap();
+        respond_to
+            .send(contains_server)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_is_immediate_server(&self, server: String, respond_to: Sender<bool>) {
         let response = self.is_immediate_server(&server);
-        respond_to.send(response).unwrap();
+        respond_to
+            .send(response)
+            .expect("Handler receiver should not be dropped");
+    }
+
+    pub fn handle_channel_has_client_invite(
+        &self,
+        channel: String,
+        client: String,
+        respond_to: Sender<bool>,
+    ) {
+        let response = self.channel_has_client_invite(channel, client);
+        respond_to
+            .send(response)
+            .expect("Handler receiver should not be dropped");
     }
 }
 
@@ -118,5 +150,10 @@ impl<C: Connection> Database<C> {
     fn contains_server(&self, servername: String) -> bool {
         self.immediate_servers.contains_key(&servername)
             || self.distant_servers.contains_key(&servername)
+    }
+
+    fn channel_has_client_invite(&self, channel: String, client: String) -> bool {
+        let channel = some_or_return!(self.channels.get(&channel), false);
+        channel.has_invite(&client)
     }
 }

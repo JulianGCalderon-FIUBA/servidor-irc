@@ -6,7 +6,7 @@ use crate::server::data_structures::*;
 
 use super::to_trail;
 
-/// Possible notifications that can be sent for different commands.
+/// Notifications that can be sent for different commands.
 pub enum Notification {
     Quit {
         nickname: String,

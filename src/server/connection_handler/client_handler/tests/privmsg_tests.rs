@@ -77,11 +77,11 @@ fn privmsg_works_with_valid_target_channel() {
 
     handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -151,7 +151,7 @@ fn privmsg_with_away_client_returns_away_message() {
     handler.database.add_local_client(dummy_client("nick1"));
     handler
         .database
-        .set_away_message(&Some("away message!".to_string()), "nick1");
+        .set_away_message("nick1", Some("away message!".to_string()));
 
     let parameters = vec!["nick1".to_string()];
     let trailing = Some("message!".to_string());
@@ -171,12 +171,12 @@ fn privmsg_fails_with_not_on_channel_with_flag_n() {
 
     handler.database.add_local_client(dummy_client("nick1"));
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::NoOutsideMessages);
+        .set_channel_flag("#channel", ChannelFlag::NoOutsideMessages);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -212,14 +212,14 @@ fn privmsg_fails_if_not_speaker_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick1"));
-    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Moderated);
+        .set_channel_flag("#channel", ChannelFlag::Moderated);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -249,13 +249,13 @@ fn privmsg_works_on_channel_with_flag_n() {
     handler.database.add_local_client(dummy_client("nick2"));
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
-    handler.database.add_client_to_channel("nick1", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+        .add_client_to_channel("#channel", "nickname");
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::NoOutsideMessages);
+        .set_channel_flag("#channel", ChannelFlag::NoOutsideMessages);
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -291,15 +291,15 @@ fn privmsg_works_on_channel_with_flag_m() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick1"));
-    handler.database.add_client_to_channel("nick1", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick1");
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     handler
         .database
-        .set_channel_mode("#channel", ChannelFlag::Moderated);
-    handler.database.add_speaker("#channel", "nickname");
+        .set_channel_flag("#channel", ChannelFlag::Moderated);
+    handler.database.add_channel_speaker("#channel", "nickname");
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());
@@ -341,10 +341,10 @@ fn privmsg_to_distributed_channel_is_only_relayed_to_each_neccesary_server_once(
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     let parameters = vec!["#channel".to_string()];
     let trailing = Some("message!".to_string());

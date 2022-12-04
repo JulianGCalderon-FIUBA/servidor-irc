@@ -11,13 +11,18 @@ use super::{
 
 use crate::server::data_structures::*;
 
-pub struct Register<C: Connection> {
+/// MethodObject
+/// Manages connection between servers and information exchange.
+/// It is in charge of sharing all local information to the new server and registering incoming information in database.
+pub struct ServerConnectionSetup<C: Connection> {
     stream: C,
     database: DatabaseHandle<C>,
     servername: String,
 }
 
-impl<C: Connection> Register<C> {
+impl<C: Connection> ServerConnectionSetup<C> {
+    /// Creates a [`ServerConnectionSetup`] from a connection stream
+    ///   and a database in which to register the new connection.
     pub fn new(stream: C, database: DatabaseHandle<C>) -> Self {
         Self {
             stream,
@@ -26,12 +31,14 @@ impl<C: Connection> Register<C> {
         }
     }
 
+    /// Registers server from an outcoming connection.
     pub fn register_outcoming(&mut self) -> io::Result<()> {
         self.send_server_notification()?;
         self.receive_server_notification()?;
         self.send_server_data()
     }
 
+    /// Registers server from an incoming connection.
     pub fn register_incoming(
         &mut self,
         servername: String,
@@ -55,6 +62,9 @@ impl<C: Connection> Register<C> {
             .send(&Notification::server(&servername, 1, &serverinfo))
     }
 
+    /// Waits for server command from incoming connection and handles it.
+    ///
+    /// Fails if server command is not valid or there was a parsing error.
     fn receive_server_notification(&mut self) -> io::Result<()> {
         let message = match Message::read_from(&mut self.stream) {
             Ok(message) => message,
@@ -64,14 +74,20 @@ impl<C: Connection> Register<C> {
         let (_, command, mut params, trail) = message.unpack();
         assert_is_valid_server_message(&command, &params, &trail)?;
 
-        let hopcount = params.remove(1).parse::<usize>().unwrap();
+        let hopcount = params
+            .remove(1)
+            .parse::<usize>()
+            .expect("Hopcount should be a number");
         let servername = params.remove(0);
-        let serverinfo = trail.unwrap();
+        let serverinfo = trail.expect("Trail should be Some");
         self.handle_server_command(servername, hopcount, serverinfo)?;
 
         Ok(())
     }
 
+    /// Registers server from incoming connection.
+    ///
+    /// Fails if server is already registered.
     fn handle_server_command(
         &mut self,
         servername: String,
@@ -85,7 +101,7 @@ impl<C: Connection> Register<C> {
             hopcount,
         );
 
-        self.assert_can_add_server(&server.info.servername)?;
+        self.assert_can_add_server(&server.info().servername)?;
         self.database.add_immediate_server(server);
         self.servername = servername;
 
@@ -105,6 +121,11 @@ impl<C: Connection> Register<C> {
         Ok(())
     }
 
+    // Sends all server data to new connected server:
+    //  - all clients (with nick and user)
+    //  - all channels (with join)
+    //  - all channel configurations (with mode)
+    //  - all server operators (with mode)
     fn send_server_data(&mut self) -> io::Result<()> {
         for mut client in self.database.get_all_clients() {
             client.hopcount += 1;

@@ -3,8 +3,8 @@ use std::sync::mpsc::Sender;
 use crate::macros::{debug_print, some_or_return};
 use crate::server::database::database_error::DatabaseError;
 use crate::server::{
-    connection::Connection, consts::modes::ChannelFlag, data_structures::ChannelConfiguration,
-    database::Database,
+    connection::Connection, consts::channel_flag::ChannelFlag,
+    data_structures::ChannelConfiguration, database::Database,
 };
 
 impl<C: Connection> Database<C> {
@@ -14,7 +14,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
     ) {
         let topic = self.get_channel_topic(&channel);
-        respond_to.send(topic).unwrap();
+        respond_to
+            .send(topic)
+            .expect("Handler receiver should not be dropped");
     }
     pub fn handle_set_channel_topic(&mut self, channel_name: String, topic: String) {
         self.set_channel_topic(channel_name, topic);
@@ -30,25 +32,29 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
     ) {
         let key = self.get_channel_key(channel);
-        respond_to.send(key).unwrap();
+        respond_to
+            .send(key)
+            .expect("Handler receiver should not be dropped");
     }
 
-    pub fn handle_channel_has_mode(
+    pub fn handle_channel_has_flag(
         &self,
         channel: String,
         flag: ChannelFlag,
         respond_to: Sender<bool>,
     ) {
-        let has_mode = self.channel_has_mode(channel, &flag);
-        respond_to.send(has_mode).unwrap();
+        let has_mode = self.channel_has_flag(channel, flag);
+        respond_to
+            .send(has_mode)
+            .expect("Handler receiver should not be dropped");
     }
 
-    pub fn handle_set_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
-        self.set_channel_mode(channel_name, flag);
+    pub fn handle_set_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
+        self.set_channel_flag(channel_name, flag);
     }
 
-    pub fn handle_unset_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
-        self.unset_channel_mode(channel_name, flag);
+    pub fn handle_unset_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
+        self.unset_channel_flag(channel_name, flag);
     }
 
     pub fn handle_set_channel_limit(&mut self, channel_name: String, limit: Option<usize>) {
@@ -61,7 +67,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Option<usize>, DatabaseError>>,
     ) {
         let limit = self.get_channel_limit(channel);
-        respond_to.send(limit).unwrap();
+        respond_to
+            .send(limit)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_add_channop(&mut self, channel_name: String, nickname: String) {
@@ -90,7 +98,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     ) {
         let banmask = self.get_channel_banmask(channel);
-        respond_to.send(Ok(banmask)).unwrap();
+        respond_to
+            .send(Ok(banmask))
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_remove_channel_banmask(&mut self, channel_name: String, mask: String) {
@@ -103,7 +113,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<ChannelConfiguration, DatabaseError>>,
     ) {
         let channel_config = self.get_channel_config(&channel);
-        respond_to.send(channel_config).unwrap();
+        respond_to
+            .send(channel_config)
+            .expect("Handler receiver should not be dropped");
     }
 }
 
@@ -148,7 +160,7 @@ impl<C: Connection> Database<C> {
     }
     fn set_channel_limit(&mut self, channel: String, limit: Option<usize>) {
         let channel = some_or_return!(self.channels.get_mut(&channel));
-        debug_print!("Setting {}'s limit to {limit:?}", channel.name);
+        debug_print!("Setting {}'s limit to {limit:?}", channel.name());
         channel.set_limit(limit);
     }
 
@@ -165,19 +177,19 @@ impl<C: Connection> Database<C> {
         channel.remove_operator(&nickname);
     }
 
-    fn set_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+    fn set_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
         let channel = some_or_return!(self.channels.get_mut(&channel_name));
         debug_print!("Setting {channel_name}'s mode {flag:?}");
 
         channel.set_mode(flag);
     }
-    fn unset_channel_mode(&mut self, channel_name: String, flag: ChannelFlag) {
+    fn unset_channel_flag(&mut self, channel_name: String, flag: ChannelFlag) {
         let channel = some_or_return!(self.channels.get_mut(&channel_name));
         debug_print!("Unsetting {channel_name}'s mode {flag:?}");
 
-        channel.unset_mode(&flag);
+        channel.unset_mode(flag);
     }
-    fn channel_has_mode(&self, channel: String, mode: &ChannelFlag) -> bool {
+    fn channel_has_flag(&self, channel: String, mode: ChannelFlag) -> bool {
         let channel = some_or_return!(self.channels.get(&channel), false);
         channel.has_mode(mode)
     }
