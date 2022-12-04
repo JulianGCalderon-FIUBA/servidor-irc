@@ -1,7 +1,7 @@
 use gtk4 as gtk;
 
 use gtk::{
-    Align::Center, Box, Orientation::Horizontal, Button,
+    Box, Orientation::Horizontal, Button,
 };
 
 const KICK_LABEL: &str = "Kick";
@@ -9,7 +9,6 @@ const KICK_LABEL: &str = "Kick";
 pub fn create_kick_label_box() -> Box {
     Box::builder()
         .orientation(Horizontal)
-        .halign(Center)
         .margin_top(20)
         .margin_bottom(20)
         .build()

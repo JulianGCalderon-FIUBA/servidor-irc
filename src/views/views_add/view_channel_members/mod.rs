@@ -80,9 +80,12 @@ impl ChannelMembersView {
             
             if client.starts_with("@") {
                 let label = create_label(&format!("\t •\tOP: {}", &client[1..]));
+                label.set_halign(Start);
                 client_label_box.append(&label);
             } else {
                 let label = create_label(&format!("\t •\t{}", client));
+                label.set_halign(Start);
+                label.set_width_request(200);
                 let kick_button = create_kick_button();
                 Self::connect_kick_button(kick_button.clone(), channel.clone(), client, sender.clone());
             
