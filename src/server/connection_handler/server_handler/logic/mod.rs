@@ -12,6 +12,7 @@ use crate::server::data_structures::*;
 
 use super::ServerHandler;
 
+/// Contains the extended logic of the MODE command.
 mod mode_logic;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {

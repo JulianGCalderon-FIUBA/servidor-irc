@@ -16,6 +16,7 @@ use crate::server::responses::{CommandResponse, Notification};
 use super::utils::collect_list;
 use super::ClientHandler;
 
+/// Contains the extended logic of the MODE command.
 mod mode_logic;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {

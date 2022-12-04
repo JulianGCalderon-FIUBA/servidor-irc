@@ -12,8 +12,6 @@ use super::{
     READ_FROM_STREAM_TIMEOUT_MS,
 };
 
-// const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
-
 pub type CommandArgs = (Option<String>, Vec<String>, Option<String>);
 
 pub trait ConnectionHandlerStructure<C: Connection>:

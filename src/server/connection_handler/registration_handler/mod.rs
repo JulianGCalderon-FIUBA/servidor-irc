@@ -13,17 +13,23 @@ use super::{
     client_handler::ClientHandler, ConnectionHandler, ConnectionHandlerCommands,
     ConnectionHandlerGetters, ConnectionHandlerStructure, ServerHandler,
 };
-
+/// Asserts to ensure the commands received are valid.
 mod asserts;
+/// Contains enum with different connection types.
 mod connection_type;
+/// Logic for the commands a connection may send.
 mod logic;
+/// Extra functions that help with the command's logic.
+mod utils;
 
+/// Unit tests for each command.
 #[cfg(test)]
 mod tests;
-mod utils;
 
 const REGISTRATION_TIMELIMIT_SECS: u64 = 60;
 
+/// A Registration Handler handles a new connection.
+/// It must save all new information in order to start corresponding handler later.
 pub struct RegistrationHandler<C: Connection> {
     stream: C,
     stream_for_database: Option<C>,
@@ -37,6 +43,7 @@ pub struct RegistrationHandler<C: Connection> {
 impl<C: Connection> ConnectionHandler<C> for RegistrationHandler<C> {}
 
 impl<C: Connection> RegistrationHandler<C> {
+    /// Starts a [`RegistrationHandler`] with the received information.
     pub fn from_connection(
         stream: C,
         database: DatabaseHandle<C>,
@@ -113,6 +120,7 @@ impl<C: Connection> ConnectionHandlerStructure<C> for RegistrationHandler<C> {
     fn on_try_handle_error(&mut self) {
         println!("Connection with unregistered client ended unexpectedly")
     }
+    /// Spawns corresponding handler according to Connection Type.
     fn on_try_handle_success(&mut self) {
         match self.connection_type {
             ConnectionType::Undefined => println!("Closing connection with unregistered client"),
