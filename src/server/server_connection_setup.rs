@@ -9,6 +9,7 @@ use super::{
     connection::Connection,
     consts::{
         channel::DISTRIBUTED_CHANNEL,
+        channel_flag::ChannelFlag,
         commands::SERVER_COMMAND,
         modes::{SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT},
     },
@@ -189,48 +190,108 @@ impl<C: Connection> ServerConnectionSetup<C> {
         let key = config.key;
         let sender = &operators[0].clone();
 
-        for flag in flags {
-            let request = format!("+{}", flag.to_char());
-            let notification = Notification::mode(sender, channel, &request);
+        self.send_flags_notification(flags, sender, channel)?;
 
-            self.stream.send(&notification)?;
-        }
+        self.send_limit_notification(limit, sender, channel)?;
 
-        if let Some(limit) = limit {
-            let request = format!("+{SET_USER_LIMIT} {limit}");
-            let notification = Notification::mode(sender, channel, &request);
+        self.send_key_notification(key, sender, channel)?;
 
-            self.stream.send(&notification)?;
-        }
+        self.send_operators_notification(operators, sender, channel)?;
 
-        if let Some(key) = key {
-            let request = format!("+{SET_KEY} {:?}", key);
-            let notification = Notification::mode(sender, channel, &request);
+        self.send_banmasks_notification(banmasks, sender, channel)?;
 
-            self.stream.send(&notification)?;
-        }
+        self.send_speakers_notification(speakers, sender, channel)?;
 
-        for operator in operators {
-            let request = format!("+{SET_OPERATOR} {operator}");
-            let notification = Notification::mode(sender, channel, &request);
+        Ok(())
+    }
 
-            self.stream.send(&notification)?;
-        }
-
-        for banmask in banmasks {
-            let request = format!("+{SET_BANMASK} {:?}", banmask);
-            let notification = Notification::mode(sender, channel, &request);
-
-            self.stream.send(&notification)?;
-        }
-
+    fn send_speakers_notification(
+        &mut self,
+        speakers: Vec<String>,
+        sender: &str,
+        channel: &str,
+    ) -> Result<(), io::Error> {
         for speaker in speakers {
             let request = format!("+{SET_SPEAKER} {:?}", speaker);
             let notification = Notification::mode(sender, channel, &request);
 
             self.stream.send(&notification)?;
         }
+        Ok(())
+    }
 
+    fn send_banmasks_notification(
+        &mut self,
+        banmasks: Vec<String>,
+        sender: &str,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        for banmask in banmasks {
+            let request = format!("+{SET_BANMASK} {:?}", banmask);
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
+        Ok(())
+    }
+
+    fn send_operators_notification(
+        &mut self,
+        operators: Vec<String>,
+        sender: &str,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        for operator in operators {
+            let request = format!("+{SET_OPERATOR} {operator}");
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
+        Ok(())
+    }
+
+    fn send_key_notification(
+        &mut self,
+        key: Option<String>,
+        sender: &str,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        if let Some(key) = key {
+            let request = format!("+{SET_KEY} {:?}", key);
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        };
+        Ok(())
+    }
+
+    fn send_limit_notification(
+        &mut self,
+        limit: Option<usize>,
+        sender: &str,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        if let Some(limit) = limit {
+            let request = format!("+{SET_USER_LIMIT} {limit}");
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        };
+        Ok(())
+    }
+
+    fn send_flags_notification(
+        &mut self,
+        flags: Vec<ChannelFlag>,
+        sender: &str,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        for flag in flags {
+            let request = format!("+{}", flag.to_char());
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
         Ok(())
     }
 }
