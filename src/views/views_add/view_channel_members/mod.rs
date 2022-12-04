@@ -29,7 +29,7 @@ impl ChannelMembersView {
         }
     }
 
-    pub fn get_view(&mut self, app: Application, clients: Vec<String>, nickname: String, sender: Sender<ControllerMessage>) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application, clients: Vec<String>, nickname: String, channel: String, sender: Sender<ControllerMessage>) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -38,7 +38,7 @@ impl ChannelMembersView {
         main_box.append(&create_title("Miembros"));
 
         if nickname == Self::get_operator(clients.clone()) {
-            Self::list_members_operators(clients, main_box.clone(), sender.clone())
+            Self::list_members_operators(clients, channel, main_box.clone(), sender.clone())
         } else {
             Self::list_members(clients, main_box.clone());
         }        
@@ -72,7 +72,7 @@ impl ChannelMembersView {
         }
     }
 
-    fn list_members_operators(clients: Vec<String>, main_box: gtk::Box, sender: Sender<ControllerMessage>) {
+    fn list_members_operators(clients: Vec<String>, channel: String, main_box: gtk::Box, sender: Sender<ControllerMessage>) {
         for client in clients {
             //mejorar
             println!("VISTA OPERADOR");
@@ -84,7 +84,7 @@ impl ChannelMembersView {
             } else {
                 let label = create_label(&format!("\t •\t{}", client));
                 let kick_button = create_kick_button();
-                Self::connect_kick_button(kick_button.clone(), client, sender.clone());
+                Self::connect_kick_button(kick_button.clone(), channel.clone(), client, sender.clone());
             
                 client_label_box.append(&label);
                 client_label_box.append(&kick_button);
@@ -96,9 +96,9 @@ impl ChannelMembersView {
         }
     }
 
-    fn connect_kick_button(kick_button: Button, member: String, sender: Sender<ControllerMessage>) {
+    fn connect_kick_button(kick_button: Button, channel: String, member: String, sender: Sender<ControllerMessage>) {
         kick_button.connect_clicked(move |_| {
-            kick_request(member.clone(), sender.clone());
+            kick_request(channel.clone(), member.clone(), sender.clone());
         });
     }
 
