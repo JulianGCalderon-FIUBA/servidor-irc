@@ -47,6 +47,11 @@ pub enum DatabaseMessage<C: Connection> {
         password: String,
         respond_to: Sender<bool>,
     },
+    ChannelHasClientInvite {
+        channel: String,
+        client: String,
+        respond_to: Sender<bool>,
+    },
     ChannelHasFlag {
         channel: String,
         flag: ChannelFlag,
@@ -120,8 +125,12 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         respond_to: Sender<Result<C, DatabaseError>>,
     },
-    GetServerInfo {
+    GetOwnServerInfo {
         respond_to: Sender<String>,
+    },
+    GetServerInfo {
+        server: String,
+        respond_to: Sender<Result<ServerInfo, DatabaseError>>,
     },
     GetServerName {
         respond_to: Sender<String>,
@@ -214,11 +223,6 @@ pub enum DatabaseMessage<C: Connection> {
     UpdateNickname {
         old_nickname: String,
         new_nickname: String,
-    },
-    ChannelHasClientInvite {
-        channel: String,
-        client: String,
-        respond_to: Sender<bool>,
     },
 }
 

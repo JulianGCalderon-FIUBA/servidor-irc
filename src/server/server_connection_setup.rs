@@ -56,7 +56,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
 
     fn send_server_notification(&mut self) -> io::Result<()> {
         let servername = self.database.get_server_name();
-        let serverinfo = self.database.get_server_info();
+        let serverinfo = self.database.get_own_server_info();
 
         self.stream
             .send(&Notification::server(&servername, 1, &serverinfo))

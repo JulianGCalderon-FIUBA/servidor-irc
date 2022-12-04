@@ -348,9 +348,20 @@ impl<C: Connection> DatabaseHandle<C> {
             .recv()
             .expect("Handle sender should not be dropped")
     }
-    pub fn get_server_info(&self) -> String {
+    pub fn get_own_server_info(&self) -> String {
         let (respond_to, receive_from) = std::sync::mpsc::channel();
-        let request = DatabaseMessage::GetServerInfo { respond_to };
+        let request = DatabaseMessage::GetOwnServerInfo { respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_server_info(&self, server: &str) -> Result<ServerInfo, DatabaseError> {
+        own!(server);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetServerInfo { server, respond_to };
         self.sender
             .send(request)
             .expect("Database receiver should not be dropped");

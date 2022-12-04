@@ -534,7 +534,7 @@ fn cannot_get_immediate_server_for_local_client() {
 #[test]
 fn can_get_server_info() {
     let database = dummy_database();
-    assert_eq!("serverinfo".to_string(), database.get_server_info())
+    assert_eq!("serverinfo".to_string(), database.get_own_server_info())
 }
 
 #[test]

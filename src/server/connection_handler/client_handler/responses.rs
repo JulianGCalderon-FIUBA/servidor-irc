@@ -32,15 +32,18 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
-        let nickname = &client_info.nickname();
-        let servername = &client_info.servername;
-        let serverinfo = "serverinfo";
-
         self.stream
             .send(&CommandResponse::whois_user(&client_info))?;
 
+        let nickname = &client_info.nickname();
+        let servername = &client_info.servername;
+        let serverinfo =
+            ok_or_return!(self.database.get_server_info(servername), Ok(())).serverinfo;
+
         self.stream.send(&CommandResponse::whois_server(
-            nickname, servername, serverinfo,
+            nickname,
+            servername,
+            &serverinfo,
         ))?;
 
         self.send_whois_operator_response(nickname)?;
