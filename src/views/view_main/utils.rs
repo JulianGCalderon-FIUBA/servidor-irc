@@ -8,5 +8,5 @@ pub fn adjust_scrollbar(scrolled_window: ScrolledWindow) {
 }
 
 pub fn entry_is_valid(entry_text: &str) -> bool {
-    !entry_text.is_empty()
+    !entry_text.is_empty() && entry_text.len() < 70
 }

@@ -89,3 +89,13 @@ pub fn create_welcome_box() -> Box {
     welcome_box.append(&message);
     welcome_box
 }
+
+pub fn create_error_label() -> Label {
+    let error_label = Label::builder()
+        .label("")
+        .halign(gtk::Align::Center)
+        .valign(gtk::Align::Center)
+        .build();
+    error_label.add_css_class("warning_text");
+    error_label
+}
