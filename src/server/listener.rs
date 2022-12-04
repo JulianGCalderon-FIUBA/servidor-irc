@@ -41,7 +41,7 @@ impl ConnectionListener {
 
         Ok(connection_listener)
     }
-    //holaaaaaca
+
     /// Starts listening from configured address.
     pub fn listen(self) {
         let pool = ThreadPool::create(MAX_CLIENTS);
