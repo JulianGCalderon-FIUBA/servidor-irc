@@ -70,7 +70,7 @@ impl MainView {
         });
     }
 
-    pub fn add_channel(&mut self, channel: GString) {
+    pub fn add_channel(&mut self, channel: String) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
         self.connect_channel_client_button(
@@ -87,7 +87,7 @@ impl MainView {
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
-    pub fn add_client(&mut self, client: GString) {
+    pub fn add_client(&mut self, client: String) {
         change_conversation_request(client.clone(), self.sender.clone());
         let client_button = create_button_with_margin(&client);
         self.connect_channel_client_button(
@@ -106,7 +106,7 @@ impl MainView {
     pub fn connect_channel_client_button(
         &self,
         button: Button,
-        channel_or_client: GString,
+        channel_or_client: String,
         sender: Sender<ControllerMessage>,
     ) {
         button.connect_clicked(move |_| {

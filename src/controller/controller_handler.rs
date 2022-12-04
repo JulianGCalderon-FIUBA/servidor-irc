@@ -17,6 +17,8 @@ static mut CHANNELS_NAMES_COMMAND: Vec<String> = vec![];
 static mut CLIENTS_NAMES_COMMAND: Vec<Vec<String>> = vec![];
 
 pub fn to_controller_message(message: Message) -> ControllerMessage {
+    println!("el mensaje es: {}", message);
+
     // commands with no ControllerMessage
     match &message.get_command()[..] {
         LIST_RPL_COMMAND => unsafe {
