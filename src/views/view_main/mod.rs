@@ -21,15 +21,14 @@ use crate::controller::controller_message::ControllerMessage;
 use self::{
     chat::widgets_creation::create_scrollwindow_chat,
     widgets_creation::{
-        create_add_button, create_channels_and_client_box, create_current_chat, create_message_box,
-        create_scrollwindow_sidebar, create_welcome_box,
+        create_add_button, create_channels_and_client_box, create_current_chat, create_error_label,
+        create_message_box, create_scrollwindow_sidebar, create_welcome_box,
     },
 };
 
 use super::{
     widgets_creation::{
-        build_application_window, create_button_with_margin, create_entry, create_main_box,
-        create_separator,
+        build_application_window, create_button_with_margin, create_entry, create_separator,
     },
     MAIN_BOX_CSS,
 };
@@ -51,6 +50,7 @@ pub struct MainView {
     pub user_info: Button,
     pub send_message: Button,
     pub input: Entry,
+    pub error_label: Label,
     pub channel_members_button: Button,
     pub quit_channel_button: Button,
     pub invite_button: Button,
@@ -89,6 +89,7 @@ impl MainView {
             user_info: create_button_with_margin(""),
             input: create_entry(ENTRY_PLACEHOLDER),
             send_message: create_button_with_margin(SEND_BUTTON_TEXT),
+            error_label: create_error_label(),
             quit_channel_button: create_button_with_margin(QUIT_BUTTON_TEXT),
             channel_members_button: create_button_with_margin(MEMBERS_BUTTON_TEXT),
             invite_button: create_button_with_margin(INVITE_BUTTON_TEXT),
@@ -100,7 +101,11 @@ impl MainView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Horizontal, 800, 600);
+        let main_box = Box::builder()
+            .orientation(Horizontal)
+            .halign(gtk::Align::Center)
+            .width_request(600)
+            .build();
         main_box.add_css_class(MAIN_BOX_CSS);
 
         let sidebar = self.create_sidebar();

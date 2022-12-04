@@ -117,16 +117,18 @@ impl MainView {
         self.current_chat.set_label(&conversation_label);
         self.scrollwindow_chat.set_visible(true);
         self.send_message.set_sensitive(true);
+        self.input.set_sensitive(true);
+        self.error_label.set_text("");
+        self.input.set_text("");
+
         self.welcome_box.set_visible(false);
 
         self.clean_screen(last_conv);
         self.load_messages_on_chat(conversation_label.clone());
 
         self.quit_channel_button.set_visible(true);
-        if is_channel(conversation_label.clone()) {
+        if is_channel(conversation_label) {
             self.set_channel_chat_mode();
-        } else if conversation_label == self.user_info.label().unwrap() {
-            self.welcome_view();
         } else {
             self.set_client_chat_mode();
         }

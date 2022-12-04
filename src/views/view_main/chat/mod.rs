@@ -1,7 +1,7 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry};
+use gtk::{glib::Sender, prelude::*, Box, Entry, Label};
 use gtk4 as gtk;
 
 use crate::{
@@ -41,21 +41,34 @@ impl MainView {
         self.scrollwindow_chat.set_child(Some(&self.message_box));
         self.scrollwindow_chat.set_visible(false);
 
-        self.connect_send_button(self.input.clone(), self.sender.clone());
+        self.connect_send_button(
+            self.input.clone(),
+            self.sender.clone(),
+            self.error_label.clone(),
+        );
         message_sender_box.append(&self.send_message);
-        self.send_message.set_sensitive(false);
 
         chat.append(&self.current_chat);
         chat.append(&self.scrollwindow_chat);
         chat.append(&self.welcome_box);
+        chat.append(&self.error_label);
         chat.append(&message_sender_box);
         chat
     }
 
-    fn connect_send_button(&self, input: Entry, sender: Sender<ControllerMessage>) {
+    fn connect_send_button(
+        &self,
+        input: Entry,
+        sender: Sender<ControllerMessage>,
+        error_label: Label,
+    ) {
         self.send_message.connect_clicked(move |_| {
+            error_label.set_text("");
             let input_text = input.text();
             if !entry_is_valid(&input_text) {
+                if input_text.len() > 0 {
+                    error_label.set_text("¡Message too long! Max: 70 characters");
+                }
                 return;
             }
 
