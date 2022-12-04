@@ -4,12 +4,12 @@ mod widgets_creation;
 use gtk::{
     glib::{GString, Sender},
     prelude::*,
-    Box, Button, Orientation,
+    Box, Button, Label, Orientation,
 };
 use gtk4 as gtk;
 
 use crate::{
-    controller::controller_message::ControllerMessage,
+    controller::{controller_handler::is_channel, controller_message::ControllerMessage},
     views::{
         views_add::widget_creations::create_title, widgets_creation::create_button_with_margin,
     },
@@ -73,25 +73,32 @@ impl MainView {
     pub fn add_channel(&mut self, channel: GString) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
-        self.connect_channel_client_button(channel_button.clone(), channel.clone(), self.sender.clone());
+        self.connect_channel_client_button(
+            channel_button.clone(),
+            channel.clone(),
+            self.sender.clone(),
+        );
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
 
         println!("Added to {}", channel);
 
-        self.messages.insert(channel.clone().to_string(), vec![]);
-
+        self.messages.insert(channel.to_string(), vec![]);
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
     pub fn add_client(&mut self, client: GString) {
         change_conversation_request(client.clone(), self.sender.clone());
         let client_button = create_button_with_margin(&client);
-        self.connect_channel_client_button(client_button.clone(), client.clone(), self.sender.clone());
+        self.connect_channel_client_button(
+            client_button.clone(),
+            client.clone(),
+            self.sender.clone(),
+        );
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
 
-        self.messages.insert(client.clone().to_string(), vec![]);
+        self.messages.insert(client.to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
@@ -112,33 +119,54 @@ impl MainView {
         self.scrollwindow_chat.set_visible(true);
         self.send_message.set_sensitive(true);
         self.welcome_box.set_visible(false);
-        
-        if self.messages.contains_key(&last_conv) {
-            for message in self.messages.get(&last_conv).unwrap() {
-                self.message_box.remove(message);
-            }
-        }        
 
-        if self.messages.contains_key(&conversation_label) {
-            for message in self.messages.get(&conversation_label).unwrap() {
-                self.message_box.append(message);
-            }
-        }
-        
-        // self.messages = vec![];
+        self.clean_screen(last_conv);
+        self.load_messages_on_chat(conversation_label.clone());
 
         self.quit_channel_button.set_visible(true);
-        if Self::current_conv_is_channel(conversation_label.clone()) {
+        if is_channel(conversation_label.clone()) {
             self.set_channel_chat_mode();
+        } else if conversation_label == self.user_info.label().unwrap() {
+            self.set_my_chat_mode();
         } else {
             self.set_client_chat_mode();
-            if conversation_label == self.user_info.label().unwrap() {
-                self.set_my_chat_mode();
+        }
+    }
+
+    fn clean_screen(&mut self, key: String) {
+        self.update_screen(key, true);
+    }
+
+    fn load_messages_on_chat(&mut self, key: String) {
+        self.update_screen(key, false);
+    }
+
+    fn update_screen(&mut self, key: String, should_remove: bool) {
+        let mut prev_message: Vec<Label> = vec![];
+
+        if self.messages.contains_key(&key) {
+            let messages = self.messages.get(&key).unwrap();
+            for message in messages {
+                if Self::there_is_sender(message[1].clone(), prev_message) {
+                    if should_remove {
+                        self.message_box.remove(&message[1]);
+                    } else {
+                        self.message_box.append(&message[1]);
+                    }
+                }
+                if should_remove {
+                    self.message_box.remove(&message[0]);
+                } else {
+                    self.message_box.append(&message[0]);
+                }
+
+                prev_message = message.clone();
             }
         }
     }
 
-    pub fn current_conv_is_channel(label: String) -> bool {
-        label.starts_with('#')
+    fn there_is_sender(message: Label, prev_message: Vec<Label>) -> bool {
+        message.text() != ""
+            && (prev_message.is_empty() || message.text() != prev_message[1].text())
     }
 }

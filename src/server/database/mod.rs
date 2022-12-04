@@ -205,8 +205,4 @@ impl<C: Connection> Database<C> {
             UnsetUserMode { user, flag } => self.handle_unset_user_mode(user, flag),
         }
     }
-
-  
-
-    
 }
