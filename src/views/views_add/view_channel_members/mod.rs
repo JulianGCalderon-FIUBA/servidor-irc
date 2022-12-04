@@ -32,13 +32,15 @@ impl ChannelMembersView {
 
         main_box.append(&create_title("Miembros"));
 
-        for client in &clients {
-            //mejorar
-            let label = create_label(&format!("\t •\t{}", client));
-            label.set_halign(Start);
-            label.set_margin_start(20);
-            main_box.append(&label);
-        }
+        // for client in &clients {
+        //     //mejorar
+        //     let label = create_label(&format!("\t •\t{}", client));
+        //     label.set_halign(Start);
+        //     label.set_margin_start(20);
+        //     main_box.append(&label);
+        // }
+
+        Self::list_members(clients, main_box.clone());
 
         main_box.append(&self.button);
 
@@ -52,5 +54,15 @@ impl ChannelMembersView {
         self.button.connect_clicked(move |_| {
             window.close();
         });
+    }
+
+    fn list_members(clients: Vec<String>, main_box: gtk::Box) {
+        for client in &clients {
+            //mejorar
+            let label = create_label(&format!("\t •\t{}", client));
+            label.set_halign(Start);
+            label.set_margin_start(20);
+            main_box.append(&label);
+        }
     }
 }
