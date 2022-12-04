@@ -8,7 +8,7 @@ use crate::{views::{widgets_creation::{
     build_application_window, create_center_button, create_label,
 }, views_add::view_channel_members::widget_creation::create_kick_label_box}, controller::controller_message::ControllerMessage};
 
-use self::{widget_creation::create_kick_button, requests::kick_request};
+use self::{widget_creation::{create_kick_button, create_kick_label}, requests::kick_request};
 
 use super::widget_creations::{create_main_box_add_view, create_title};
 
@@ -35,7 +35,7 @@ impl ChannelMembersView {
 
         let main_box = create_main_box_add_view();
 
-        main_box.append(&create_title("Miembros"));
+        main_box.append(&create_title("Members"));
 
         if nickname == Self::get_operator(clients.clone()) {
             Self::list_members_operators(clients, channel, main_box.clone(), sender.clone())
@@ -74,18 +74,13 @@ impl ChannelMembersView {
 
     fn list_members_operators(clients: Vec<String>, channel: String, main_box: gtk::Box, sender: Sender<ControllerMessage>) {
         for client in clients {
-            //mejorar
-            println!("VISTA OPERADOR");
             let client_label_box = create_kick_label_box();
             
             if client.starts_with("@") {
-                let label = create_label(&format!("\t •\tOP: {}", &client[1..]));
-                label.set_halign(Start);
+                let label = create_kick_label(&format!("\t •\tOP: {}", &client[1..]));
                 client_label_box.append(&label);
             } else {
-                let label = create_label(&format!("\t •\t{}", client));
-                label.set_halign(Start);
-                label.set_width_request(200);
+                let label = create_kick_label(&format!("\t •\t{}", client));
                 let kick_button = create_kick_button();
                 Self::connect_kick_button(kick_button.clone(), channel.clone(), client, sender.clone());
             
