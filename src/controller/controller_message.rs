@@ -45,6 +45,9 @@ pub enum ControllerMessage {
     SendInviteMessage {
         channel: GString,
     },
+    ToRegister {
+        address: String,
+    },
     ReceiveListChannels {
         channels: Vec<String>,
     },

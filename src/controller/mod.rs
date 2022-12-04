@@ -99,6 +99,14 @@ impl Controller {
 
         receiver.attach(None, move |msg| {
             match msg {
+                ToRegister { address } => {
+                    client = match Client::new(address) {
+                        Ok(stream) => stream,
+                        Err(error) => panic!("Error connecting to server: {:?}", error),
+                    };
+                    ip_window.close();
+                    register_window.show();
+                }
                 Register {
                     pass,
                     nickname,
@@ -106,11 +114,6 @@ impl Controller {
                     realname,
                     address,
                 } => {
-                    client = match Client::new(address) {
-                        Ok(stream) => stream,
-                        Err(error) => panic!("Error connecting to server: {:?}", error),
-                    };
-
                     let pass_command = format!("{} {}", PASS_COMMAND, pass);
                     let nick_command = format!("{} {}", NICK_COMMAND, nickname);
                     let user_command = format!(
