@@ -1,19 +1,28 @@
 use std::sync::mpsc::Sender;
 
-use crate::server::consts::modes::{ChannelFlag, UserFlag};
+use crate::server::consts::channel_flag::ChannelFlag;
+use crate::server::consts::user_flag::UserFlag;
 use crate::server::data_structures::*;
 
 use crate::server::connection::Connection;
 
 use super::database_error::DatabaseError;
 
-/// Possible messages or requests a Database can receive.
+/// Requests a Database can receive and must be able to answer.
 pub enum DatabaseMessage<C: Connection> {
-    AddChannelBanMask {
+    AddChannelBanmask {
         channel: String,
         mask: String,
     },
-    AddChanop {
+    AddChannelInvite {
+        channel: String,
+        client: String,
+    },
+    AddChannelOperator {
+        channel: String,
+        nickname: String,
+    },
+    AddChannelSpeaker {
         channel: String,
         nickname: String,
     },
@@ -33,16 +42,12 @@ pub enum DatabaseMessage<C: Connection> {
     AddLocalClient {
         client: LocalClient<C>,
     },
-    AddSpeaker {
-        channel: String,
-        nickname: String,
-    },
     AreCredentialsValid {
         username: String,
         password: String,
         respond_to: Sender<bool>,
     },
-    ChannelHasMode {
+    ChannelHasFlag {
         channel: String,
         flag: ChannelFlag,
         respond_to: Sender<bool>,
@@ -75,7 +80,7 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
     },
-    GetChannelBanMask {
+    GetChannelBanmask {
         channel: String,
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     },
@@ -90,6 +95,10 @@ pub enum DatabaseMessage<C: Connection> {
     GetChannelKey {
         channel: String,
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
+    },
+    GetChannelLimit {
+        channel: String,
+        respond_to: Sender<Result<Option<usize>, DatabaseError>>,
     },
     GetChannelTopic {
         channel: String,
@@ -106,10 +115,6 @@ pub enum DatabaseMessage<C: Connection> {
     GetImmediateServer {
         client: String,
         respond_to: Sender<Result<String, DatabaseError>>,
-    },
-    GetChannelLimit {
-        channel: String,
-        respond_to: Sender<Result<Option<usize>, DatabaseError>>,
     },
     GetLocalStream {
         nickname: String,
@@ -140,6 +145,10 @@ pub enum DatabaseMessage<C: Connection> {
         channel: String,
         respond_to: Sender<bool>,
     },
+    IsImmediateServer {
+        server: String,
+        respond_to: Sender<bool>,
+    },
     IsLocalClient {
         nickname: String,
         respond_to: Sender<bool>,
@@ -148,11 +157,15 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         respond_to: Sender<bool>,
     },
-    RemoveChannelBanMask {
+    RemoveChannelBanmask {
         channel: String,
         mask: String,
     },
-    RemoveChanop {
+    RemoveChannelOperator {
+        channel: String,
+        nickname: String,
+    },
+    RemoveChannelSpeaker {
         channel: String,
         nickname: String,
     },
@@ -160,54 +173,53 @@ pub enum DatabaseMessage<C: Connection> {
         nickname: String,
         channel: String,
     },
-    RemoveSpeaker {
-        channel: String,
-        nickname: String,
+    RemoveServer {
+        servername: String,
     },
     SetAwayMessage {
         message: Option<String>,
         nickname: String,
     },
-    SetChannelKey {
-        channel: String,
-        key: Option<String>,
-    },
-    SetChannelMode {
+    SetChannelFlag {
         channel: String,
         flag: ChannelFlag,
     },
-    SetChannelTopic {
+    SetChannelKey {
         channel: String,
-        topic: String,
+        key: Option<String>,
     },
     SetChannelLimit {
         channel: String,
         limit: Option<usize>,
     },
+    SetChannelTopic {
+        channel: String,
+        topic: String,
+    },
     SetServerOperator {
         nickname: String,
     },
-    UnsetChannelMode {
+    SetUserFlag {
+        user: String,
+        flag: UserFlag,
+    },
+    UnsetChannelFlag {
         channel: String,
         flag: ChannelFlag,
+    },
+    UnsetUserFlag {
+        user: String,
+        flag: UserFlag,
     },
     UpdateNickname {
         old_nickname: String,
         new_nickname: String,
     },
-    IsImmediateServer {
-        server: String,
+    ChannelHasClientInvite {
+        channel: String,
+        client: String,
         respond_to: Sender<bool>,
     },
-    RemoveServer {
-        servername: String,
-    },
-    SetUserMode {
-        user: String,
-        flag: UserFlag,
-    },
-    UnsetUserMode {
-        user: String,
-        flag: UserFlag,
-    },
 }
+
+impl<C: Connection> DatabaseMessage<C> {}

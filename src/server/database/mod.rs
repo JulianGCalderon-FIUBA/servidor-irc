@@ -1,8 +1,14 @@
+/// This module contains different errors that can happen when ... a Database.
 mod database_error;
+/// This module contains different handles a Database has for each request.
+/// External parts communicate with the Database through the handles.
 mod database_handle;
+/// This module contains messages for each request a Database can handle.
 mod database_message;
+/// This module contains specific functions to handle each request.
 mod handlers;
 
+/// Unit tests for the Database's basic functionalities.
 #[cfg(test)]
 mod tests;
 
@@ -18,7 +24,7 @@ pub use database_handle::DatabaseHandle;
 use database_message::DatabaseMessage;
 
 use super::connection::Connection;
-/// Represents a Database that implements ClientTrait.
+/// Represents a Database that stores all information a server should have.
 pub struct Database<C: Connection> {
     receiver: Receiver<DatabaseMessage<C>>,
     info: ServerInfo,
@@ -33,17 +39,7 @@ pub struct Database<C: Connection> {
 }
 
 impl<C: Connection> Database<C> {
-    /// Returns new [`DatabaseHandle`] and starts listening for requests.
-    pub fn start(servername: String, serverinfo: String) -> (DatabaseHandle<C>, JoinHandle<()>) {
-        let (sender, receiver) = mpsc::channel();
-
-        let join_handle =
-            thread::spawn(|| Database::<C>::new(receiver, servername, serverinfo).run());
-        let database_handle = DatabaseHandle::new(sender);
-
-        (database_handle, join_handle)
-    }
-
+    /// Creates [`Database`] for a specific server and stores receiver end from which to listen for requests.
     fn new(receiver: Receiver<DatabaseMessage<C>>, servername: String, serverinfo: String) -> Self {
         let mut database = Self {
             receiver,
@@ -63,12 +59,24 @@ impl<C: Connection> Database<C> {
         database
     }
 
+    /// Returns new [`DatabaseHandle`] and spawns thread that is listening for requests.
+    pub fn start(servername: String, serverinfo: String) -> (DatabaseHandle<C>, JoinHandle<()>) {
+        let (sender, receiver) = mpsc::channel();
+
+        let join_handle =
+            thread::spawn(|| Database::<C>::new(receiver, servername, serverinfo).run());
+        let database_handle = DatabaseHandle::new(sender);
+
+        (database_handle, join_handle)
+    }
+
     fn run(mut self) {
         while let Ok(request) = self.receiver.recv() {
             self.handle_message(request);
         }
     }
 
+    /// Calls specific handle for received request.
     fn handle_message(&mut self, request: DatabaseMessage<C>) {
         match request {
             DisconnectClient { nickname } => self.handle_disconnect_client(nickname),
@@ -77,7 +85,6 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to: response,
             } => self.handle_is_server_operator(nickname, response),
-            //IsOnline { nickname, response } => self.is_online_request(nickname, response),
             ContainsClient {
                 nickname,
                 respond_to: response,
@@ -131,22 +138,26 @@ impl<C: Connection> Database<C> {
                 channel,
                 respond_to,
             } => self.handle_get_channel_key(channel, respond_to),
-            SetChannelMode { channel, flag } => self.handle_set_channel_mode(channel, flag),
-            UnsetChannelMode { channel, flag } => self.handle_unset_channel_mode(channel, flag),
-            ChannelHasMode {
+            SetChannelFlag { channel, flag } => self.handle_set_channel_flag(channel, flag),
+            UnsetChannelFlag { channel, flag } => self.handle_unset_channel_flag(channel, flag),
+            ChannelHasFlag {
                 channel,
                 respond_to,
                 flag,
-            } => self.handle_channel_has_mode(channel, flag, respond_to),
+            } => self.handle_channel_has_flag(channel, flag, respond_to),
             SetChannelLimit { channel, limit } => self.handle_set_channel_limit(channel, limit),
             GetChannelLimit {
                 channel,
                 respond_to,
             } => self.handle_get_channel_limit(channel, respond_to),
-            AddChanop { channel, nickname } => self.handle_add_channop(channel, nickname),
-            RemoveChanop { channel, nickname } => self.handle_remove_channop(channel, nickname),
-            AddSpeaker { channel, nickname } => self.handle_add_channel_speaker(channel, nickname),
-            RemoveSpeaker { channel, nickname } => {
+            AddChannelOperator { channel, nickname } => self.handle_add_channop(channel, nickname),
+            RemoveChannelOperator { channel, nickname } => {
+                self.handle_remove_channop(channel, nickname)
+            }
+            AddChannelSpeaker { channel, nickname } => {
+                self.handle_add_channel_speaker(channel, nickname)
+            }
+            RemoveChannelSpeaker { channel, nickname } => {
                 self.handle_remove_channel_speaker(channel, nickname)
             }
             IsChannelSpeaker {
@@ -154,12 +165,12 @@ impl<C: Connection> Database<C> {
                 nickname,
                 respond_to,
             } => self.handle_is_channel_speaker(channel, nickname, respond_to),
-            AddChannelBanMask { channel, mask } => self.handle_add_channel_banmask(channel, mask),
-            GetChannelBanMask {
+            AddChannelBanmask { channel, mask } => self.handle_add_channel_banmask(channel, mask),
+            GetChannelBanmask {
                 channel,
                 respond_to,
             } => self.handle_get_channel_banmask(channel, respond_to),
-            RemoveChannelBanMask { channel, mask } => {
+            RemoveChannelBanmask { channel, mask } => {
                 self.handle_remove_channel_banmask(channel, mask)
             }
             IsChannelOperator {
@@ -201,8 +212,16 @@ impl<C: Connection> Database<C> {
                 self.handle_is_immediate_server(server, respond_to)
             }
             RemoveServer { servername } => self.handle_remove_server(servername),
-            SetUserMode { user, flag } => self.handle_set_user_mode(user, flag),
-            UnsetUserMode { user, flag } => self.handle_unset_user_mode(user, flag),
+            SetUserFlag { user, flag } => self.handle_set_user_flag(user, flag),
+            UnsetUserFlag { user, flag } => self.handle_unset_user_flag(user, flag),
+            AddChannelInvite { channel, client } => {
+                self.handle_add_channel_invitation(channel, client)
+            }
+            ChannelHasClientInvite {
+                channel,
+                client,
+                respond_to,
+            } => self.handle_channel_has_client_invite(channel, client, respond_to),
         }
     }
 }

@@ -1,5 +1,6 @@
 use std::fmt::Display;
-/// Possible errors the commands may have.
+
+/// Error replies the server may generate for client commands.
 pub enum ErrorReply {
     UnknownError400 { command: String, message: String },
     NoSuchNickname401 { nickname: String },
@@ -31,6 +32,7 @@ pub enum ErrorReply {
     NoPrivileges481,
     UsersDontMatch502,
     UserModeUnknownFlag501,
+    InviteOnlyChannel473 { channel: String },
 }
 
 impl Display for ErrorReply {
@@ -104,6 +106,9 @@ impl Display for ErrorReply {
             ErrorReply::NoSuchServer402 { server } => format!("402 {server} :No such server"),
             ErrorReply::UsersDontMatch502 => "502 :Cant change mode for other users".to_string(),
             ErrorReply::UserModeUnknownFlag501 => "501 :Unknown MODE flag".to_string(),
+            ErrorReply::InviteOnlyChannel473 { channel } => {
+                format!("473 {channel} :Cannot join channel (+i)")
+            }
         };
         write!(f, "{string}")
     }

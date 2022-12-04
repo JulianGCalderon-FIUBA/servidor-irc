@@ -1,6 +1,9 @@
-use crate::server::{
-    connection::Connection, connection_handler::connection_handler_trait::ConnectionHandlerUtils,
-    data_structures::ClientInfo, responses::Notification,
+use crate::{
+    macros::ok_or_return,
+    server::{
+        connection::Connection, connection_handler::ConnectionHandlerUtils,
+        data_structures::ClientInfo, responses::Notification,
+    },
 };
 
 use super::ServerHandler;
@@ -8,17 +11,17 @@ use super::ServerHandler;
 impl<C: Connection> ServerHandler<C> {
     pub(super) fn send_privmsg_notification(&mut self, sender: &str, target: &str, content: &str) {
         let notification = Notification::privmsg(sender, target, content);
-        self.send_message_to_target(&notification, target).ok();
+        self.send_message_to_target(&notification, target)
     }
 
     pub(super) fn send_notice_notification(&mut self, sender: &str, target: &str, content: &str) {
         let notification = Notification::notice(sender, target, content);
-        self.send_message_to_target(&notification, target).ok();
+        self.send_message_to_target(&notification, target)
     }
 
     pub(super) fn send_quit_notification(&mut self, nickname: String, message: String) {
         let quit_notification = Notification::quit(&nickname, &message);
-        let channels = self.database.get_channels_for_client(&nickname).unwrap();
+        let channels = ok_or_return!(self.database.get_channels_for_client(&nickname));
         for channel in channels {
             self.send_message_to_local_clients_on_channel(&quit_notification, &channel);
         }

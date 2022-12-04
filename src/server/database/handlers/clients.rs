@@ -4,7 +4,7 @@ use crate::{
     macros::ok_or_return,
     server::{
         connection::Connection,
-        consts::modes::UserFlag,
+        consts::user_flag::UserFlag,
         data_structures::{ClientInfo, ExternalClient, LocalClient},
         database::{database_error::DatabaseError, Database},
     },
@@ -32,13 +32,17 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<String, DatabaseError>>,
     ) {
         let server = self.get_immediate_server(client);
-        respond_to.send(server).unwrap();
+        respond_to
+            .send(server)
+            .expect("Handler receiver should not be dropped");
     }
 
     /// Returns response to GetAllClients request.
     pub fn handle_get_all_clients(&self, respond_to: Sender<Vec<ClientInfo>>) {
         let clients = self.get_all_clients();
-        respond_to.send(clients).unwrap();
+        respond_to
+            .send(clients)
+            .expect("Handler receiver should not be dropped");
     }
 
     /// Returns response to UpdateNickname request.
@@ -56,7 +60,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Option<String>, DatabaseError>>,
     ) {
         let message = self.get_away_message(nickname);
-        respond_to.send(message).unwrap();
+        respond_to
+            .send(message)
+            .expect("Handler receiver should not be dropped");
     }
 
     /// Returns response to GetChannelsForClient request.
@@ -66,7 +72,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     ) {
         let channels = self.get_channels_for_client(nickname);
-        respond_to.send(channels).unwrap();
+        respond_to
+            .send(channels)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_local_stream_request(
@@ -75,7 +83,9 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<C, DatabaseError>>,
     ) {
         let stream = self.get_local_stream(nickname);
-        respond_to.send(stream).unwrap();
+        respond_to
+            .send(stream)
+            .expect("Handler receiver should not be dropped");
     }
     pub fn handle_disconnect_client(&mut self, nickname: String) {
         self.disconnect_client(nickname);
@@ -87,15 +97,17 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<ClientInfo, DatabaseError>>,
     ) {
         let client_info = self.get_client_info(&client);
-        respond_to.send(client_info.cloned()).unwrap();
+        respond_to
+            .send(client_info.cloned())
+            .expect("Handler receiver should not be dropped");
     }
 
-    pub fn handle_set_user_mode(&mut self, user: String, flag: UserFlag) {
-        self.set_user_mode(user, flag);
+    pub fn handle_set_user_flag(&mut self, user: String, flag: UserFlag) {
+        self.set_user_flag(user, flag);
     }
 
-    pub fn handle_unset_user_mode(&mut self, user: String, flag: UserFlag) {
-        self.unset_user_mode(user, flag);
+    pub fn handle_unset_user_flag(&mut self, user: String, flag: UserFlag) {
+        self.unset_user_flag(user, flag);
     }
 }
 
@@ -116,9 +128,9 @@ impl<C: Connection> Database<C> {
     }
 
     fn add_external_client(&mut self, client: ExternalClient) {
-        debug_print!("Adding external client {:?}", client.info);
+        debug_print!("Adding external client {:?}", client.get_info());
 
-        let nickname = client.info.nickname();
+        let nickname = client.nickname();
         self.external_clients.insert(nickname, client);
     }
 
@@ -129,9 +141,9 @@ impl<C: Connection> Database<C> {
         info.add_flag(UserFlag::Operator)
     }
     fn add_local_client(&mut self, client: LocalClient<C>) {
-        debug_print!("Adding local client {:?}", client.info);
+        debug_print!("Adding local client {:?}", client.get_info());
 
-        let nickname = client.info.nickname();
+        let nickname = client.nickname();
         self.local_clients.insert(nickname, client);
     }
 
@@ -177,7 +189,7 @@ impl<C: Connection> Database<C> {
             Err(DatabaseError::NoSuchClient)
         );
 
-        match &client.stream {
+        match &client.stream() {
             Some(stream) => stream
                 .try_clone()
                 .map_err(|_| DatabaseError::CannotCloneStream),
@@ -191,7 +203,7 @@ impl<C: Connection> Database<C> {
             Err(DatabaseError::NoSuchClient)
         );
 
-        Ok(client.immediate.clone())
+        Ok(client.immediate())
     }
 
     /// Returns array with ClientInfo for connected clients.
@@ -213,12 +225,12 @@ impl<C: Connection> Database<C> {
         clients
     }
 
-    fn set_user_mode(&mut self, user: String, flag: UserFlag) {
+    fn set_user_flag(&mut self, user: String, flag: UserFlag) {
         let info = ok_or_return!(self.get_client_info(&user));
         info.add_flag(flag);
     }
 
-    fn unset_user_mode(&mut self, user: String, flag: UserFlag) {
+    fn unset_user_flag(&mut self, user: String, flag: UserFlag) {
         let info = ok_or_return!(self.get_client_info(&user));
         info.remove_flag(flag);
     }

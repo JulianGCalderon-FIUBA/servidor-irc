@@ -3,15 +3,15 @@ use std::io;
 use crate::macros::ok_or_return;
 use crate::server::connection_handler::client_handler::booleans::is_distributed_channel;
 use crate::server::connection_handler::mode_requests::{ChannelModeRequest, UserModeRequest};
+use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::consts::modes::{
-    ChannelFlag, UserFlag, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
+    SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
 };
+use crate::server::consts::user_flag::UserFlag;
 use crate::server::responses::{CommandResponse, Notification};
 use crate::server::{
     connection::Connection,
-    connection_handler::{
-        client_handler::ClientHandler, connection_handler_trait::ConnectionHandlerUtils,
-    },
+    connection_handler::{client_handler::ClientHandler, ConnectionHandlerUtils},
 };
 
 use crate::server::data_structures::*;
@@ -20,9 +20,15 @@ impl<C: Connection> ClientHandler<C> {
     pub(super) fn send_join_response(&mut self, channel: &str) -> io::Result<()> {
         self.send_topic_response(channel)?;
 
-        let clients = self.database.get_channel_clients(channel).unwrap();
+        let clients = ok_or_return!(self.database.get_channel_clients(channel), Ok(()));
+
         self.stream
             .send(&CommandResponse::name_reply(channel, &clients))
+    }
+
+    pub fn send_oper_notification(&mut self) {
+        let notification = Notification::mode(&self.nickname, &self.nickname, "+o");
+        self.send_message_to_all_servers(&notification);
     }
 
     pub(super) fn send_whois_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
@@ -40,15 +46,24 @@ impl<C: Connection> ClientHandler<C> {
         self.send_whois_operator_response(nickname)?;
         self.send_whois_channels_response(nickname)?;
 
+        if let Some(message) = client_info.away {
+            self.stream
+                .send(&CommandResponse::away(nickname, &message))?;
+        }
+
         self.stream.send(&CommandResponse::end_of_whois(nickname))?;
 
         Ok(())
     }
 
     fn send_whois_channels_response(&mut self, nickname: &str) -> Result<(), io::Error> {
-        let mut channels = self.database.get_channels_for_client(nickname).unwrap();
+        let mut channels = ok_or_return!(self.database.get_channels_for_client(nickname), Ok(()));
         if !channels.is_empty() {
-            self.append_channel_role(&mut channels, nickname);
+            for channel in &mut channels {
+                if let Some(role) = self.get_client_role_in_channel(channel, nickname) {
+                    channel.insert(0, role);
+                }
+            }
             self.stream
                 .send(&CommandResponse::whois_channel(nickname, &channels))?;
         };
@@ -65,7 +80,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_banlist_response(&mut self, channel: &str) -> io::Result<()> {
-        let banmasks = self.database.get_channel_banmask(channel).unwrap();
+        let banmasks = ok_or_return!(self.database.get_channel_banmask(channel), Ok(()));
         for banmask in banmasks {
             self.stream
                 .send(&CommandResponse::banlist(channel, &banmask))?;
@@ -75,42 +90,62 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub(super) fn send_topic_response(&mut self, channel: &str) -> io::Result<()> {
-        match &self.database.get_topic_for_channel(channel).unwrap() {
+        let topic = ok_or_return!(self.database.get_channel_topic(channel), Ok(()));
+        match &topic {
             Some(topic) => self.stream.send(&CommandResponse::topic(channel, topic)),
             None => self.stream.send(&CommandResponse::no_topic(channel)),
         }
     }
 
     pub(super) fn send_whoreply_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
-        let channel = self
-            .database
-            .get_channels_for_client(&client_info.nickname())
-            .unwrap()
-            .get(0)
-            .map(|string| string.to_owned());
+        let channel = ok_or_return!(
+            self.database
+                .get_channels_for_client(&client_info.nickname()),
+            Ok(())
+        )
+        .get(0)
+        .map(|string| string.to_owned());
 
         self.stream
             .send(&CommandResponse::whoreply(&channel, &client_info))
     }
 
     pub(super) fn send_list_response(&mut self, channel: String) -> io::Result<()> {
-        let topic = self
-            .database
-            .get_topic_for_channel(&channel)
-            .unwrap()
+        let topic = ok_or_return!(self.database.get_channel_topic(&channel), Ok(()))
             .unwrap_or_else(|| "No topic set".to_string());
 
         let prv = self
             .database
-            .channel_has_mode(&channel, &ChannelFlag::Private)
+            .channel_has_flag(&channel, ChannelFlag::Private)
             && !self.is_in_channel(&channel);
 
         self.stream
             .send(&CommandResponse::list(channel, topic, prv))
     }
 
+    pub(super) fn send_name_response_for_remaining_clients(&mut self) -> Result<(), io::Error> {
+        let remaining_clients: Vec<String> = self
+            .clients_in_no_channel()
+            .iter()
+            .map(ClientInfo::nickname)
+            .collect();
+
+        if !remaining_clients.is_empty() {
+            self.stream
+                .send(&CommandResponse::name_reply("*", &remaining_clients))?;
+        }
+
+        self.stream.send(&CommandResponse::end_of_names(""))?;
+        Ok(())
+    }
+
     pub(super) fn send_names_response(&mut self, channel: &str) -> Result<(), io::Error> {
-        let clients = self.database.get_channel_clients(channel).unwrap();
+        let mut clients = ok_or_return!(self.database.get_channel_clients(channel), Ok(()));
+        for client in &mut clients {
+            if let Some(role) = self.get_client_role_in_channel(channel, client) {
+                client.insert(0, role);
+            }
+        }
         self.stream
             .send(&CommandResponse::name_reply(channel, &clients))
     }
@@ -144,16 +179,16 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_invite_notification(
         &mut self,
-        invited_client: String,
+        invited_client: &str,
         channel: &str,
     ) -> Result<(), io::Error> {
-        let invitation = Notification::invite(&self.nickname, &invited_client, channel);
-        self.send_message_to_client(&invitation, &invited_client)
+        let invitation = Notification::invite(&self.nickname, invited_client, channel);
+        self.send_message_to_client(&invitation, invited_client)
     }
 
     pub(super) fn send_quit_notification(&mut self, nickname: &str, message: &str) {
         let quit_notification = Notification::quit(nickname, message);
-        let channels = self.database.get_channels_for_client(nickname).unwrap();
+        let channels = ok_or_return!(self.database.get_channels_for_client(nickname));
         for channel in channels {
             self.send_message_to_local_clients_on_channel(&quit_notification, &channel);
         }
@@ -179,22 +214,13 @@ impl<C: Connection> ClientHandler<C> {
         }
     }
 
-    pub(super) fn send_privmsg_notification(
-        &mut self,
-        target: &str,
-        content: &str,
-    ) -> Result<(), io::Error> {
+    pub(super) fn send_privmsg_notification(&mut self, target: &str, content: &str) {
         let notification = Notification::privmsg(&self.nickname, target, content);
-        self.send_message_to_target(&notification, target)
+        self.send_message_to_target(&notification, target);
     }
 
-    pub(super) fn send_notice_notification(
-        &mut self,
-        target: &str,
-        content: &str,
-    ) -> Result<(), io::Error> {
+    pub(super) fn send_notice_notification(&mut self, target: &str, content: &str) {
         let notification = Notification::notice(&self.nickname, target, content);
-
         self.send_message_to_target(&notification, target)
     }
 
@@ -215,13 +241,13 @@ impl<C: Connection> ClientHandler<C> {
         }
 
         if limit.is_some() {
-            let params = vec![limit.unwrap().to_string()];
+            let params = vec![limit.expect("Verified in if condition").to_string()];
             let reply = CommandResponse::channel_mode_is(channel, SET_USER_LIMIT, Some(params));
             self.stream.send(&reply)?;
         }
 
         if key.is_some() {
-            let params = vec![key.unwrap()];
+            let params = vec![key.expect("Verified in if condition")];
             let reply = CommandResponse::channel_mode_is(channel, SET_KEY, Some(params));
             self.stream.send(&reply)?;
         }

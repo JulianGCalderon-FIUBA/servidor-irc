@@ -20,13 +20,13 @@ fn list_with_no_parameters_prints_all_channels() {
 
     let parameters = vec![];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
     handler
         .database
         .set_channel_topic("#hola", "topic for #hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#chau", "nickname");
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#canal");
+    handler.database.add_client_to_channel("#canal", "nick2");
 
     handler.list_command((None, parameters, None)).unwrap();
 
@@ -49,8 +49,8 @@ fn list_with_parameters_prints_requested_channels() {
 
     let parameters = vec!["#hola,#chau".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.list_command((None, parameters, None)).unwrap();
 
@@ -68,8 +68,8 @@ fn list_ignores_invalid_channels() {
 
     let parameters = vec!["#hola,#invalido,#chau".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.list_command((None, parameters, None)).unwrap();
 
@@ -85,15 +85,15 @@ fn list_ignores_invalid_channels() {
 fn list_ignores_secret_channels() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#secreto");
+    handler.database.add_client_to_channel("#secreto", "nick2");
 
     handler
         .database
-        .set_channel_mode("#secreto", ChannelFlag::Secret);
+        .set_channel_flag("#secreto", ChannelFlag::Secret);
 
     let parameters = vec![];
     handler.list_command((None, parameters, None)).unwrap();
@@ -114,15 +114,15 @@ fn list_ignores_secret_channels() {
 fn list_prints_priv_channels_as_priv() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#privado");
+    handler.database.add_client_to_channel("#privado", "nick2");
 
     handler
         .database
-        .set_channel_mode("#privado", ChannelFlag::Private);
+        .set_channel_flag("#privado", ChannelFlag::Private);
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
     handler.list_command((None, parameters, None)).unwrap();
@@ -140,15 +140,15 @@ fn list_prints_priv_channels_as_priv() {
 fn list_prints_secret_channel_if_client_is_in_it() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
     handler
         .database
-        .add_client_to_channel("nickname", "#secreto");
+        .add_client_to_channel("#secreto", "nickname");
 
     handler
         .database
-        .set_channel_mode("#secreto", ChannelFlag::Secret);
+        .set_channel_flag("#secreto", ChannelFlag::Secret);
 
     let parameters = vec![];
     handler.list_command((None, parameters, None)).unwrap();
@@ -170,15 +170,15 @@ fn list_prints_secret_channel_if_client_is_in_it() {
 fn list_prints_private_channel_if_client_is_in_it() {
     let mut handler = dummy_client_handler();
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-    handler.database.add_client_to_channel("nickname", "#chau");
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_client_to_channel("#chau", "nickname");
     handler
         .database
-        .add_client_to_channel("nickname", "#privado");
+        .add_client_to_channel("#privado", "nickname");
 
     handler
         .database
-        .set_channel_mode("#privado", ChannelFlag::Private);
+        .set_channel_flag("#privado", ChannelFlag::Private);
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
     handler.list_command((None, parameters, None)).unwrap();

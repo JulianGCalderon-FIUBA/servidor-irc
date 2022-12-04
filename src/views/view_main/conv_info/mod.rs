@@ -107,6 +107,14 @@ impl MainView {
         my_channels
     }
 
+    pub fn get_my_clients(&mut self) -> Vec<String> {
+        let mut my_clients: Vec<String> = vec![];
+        for client_button in &self.clients_buttons {
+            my_clients.push(client_button.label().unwrap().to_string());
+        }
+        my_clients
+    }
+
     pub fn set_client_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
         self.invite_button.set_visible(true);

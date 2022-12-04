@@ -17,18 +17,20 @@ use super::{
     MAIN_BOX_CSS,
 };
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{controller::controller_message::ControllerMessage, ADDRESS};
 
 const LOGIN_BUTTON_TEXT: &str = "login";
 const REALNAME_LABEL_TEXT: &str = "Your name:";
 const NICKNAME_LABEL_TEXT: &str = "Nickname:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
 const PASSWORD_LABEL_TEXT: &str = "Password:";
+const ADDRESS_LABEL_TEXT: &str = "IP Address:";
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
     pub username_entry: Entry,
     pub pass_entry: Entry,
+    pub address_entry: Entry,
     pub login_button: Button,
     sender: Sender<ControllerMessage>,
 }
@@ -40,6 +42,7 @@ impl RegisterView {
             nick_entry: create_entry(""),
             username_entry: create_entry(""),
             pass_entry: create_entry(""),
+            address_entry: create_entry(""),
             login_button: create_center_button(LOGIN_BUTTON_TEXT),
             sender,
         }
@@ -68,6 +71,10 @@ impl RegisterView {
         password_box.append(&self.pass_entry);
         main_box.append(&password_box);
 
+        let address_box = create_label_input_box(ADDRESS_LABEL_TEXT);
+        address_box.append(&self.address_entry);
+        main_box.append(&address_box);
+
         main_box.append(&self.login_button);
 
         self.connect_button(
@@ -75,6 +82,7 @@ impl RegisterView {
             self.pass_entry.clone(),
             self.nick_entry.clone(),
             self.username_entry.clone(),
+            self.address_entry.clone(),
             self.sender.clone(),
         );
 
@@ -89,6 +97,7 @@ impl RegisterView {
         pass_entry: Entry,
         nick_entry: Entry,
         username_entry: Entry,
+        address_entry: Entry,
         sender: Sender<ControllerMessage>,
     ) {
         self.login_button.connect_clicked(move |_| {
@@ -96,9 +105,10 @@ impl RegisterView {
             let nickname = nick_entry.text();
             let username = username_entry.text();
             let realname = realname_entry.text();
+            let address = Self::unpack_entry(address_entry.text());
 
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
-                register_request(pass, nickname.clone(), username, realname, sender.clone());
+                register_request(pass, nickname.clone(), username, realname, address, sender.clone());
                 change_view_to_main_request(nickname, sender.clone());
             }
         });
@@ -111,5 +121,13 @@ impl RegisterView {
         realname: &GString,
     ) -> bool {
         !realname.is_empty() && !pass.is_empty() && !nickname.is_empty() && !username.is_empty()
+    }
+
+    fn unpack_entry(address: GString) -> String {
+        if address.is_empty() {
+            ADDRESS.to_string()
+        } else {
+            address.to_string()
+        }
     }
 }

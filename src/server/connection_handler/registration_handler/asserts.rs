@@ -1,7 +1,5 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerAsserts,
-};
+use crate::server::connection_handler::{CommandArgs, ConnectionHandlerAsserts};
 use crate::server::consts::commands::*;
 use crate::server::responses::ErrorReply;
 
