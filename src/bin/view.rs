@@ -1,6 +1,6 @@
-use internet_relay_chat::controller::Controller;
+use internet_relay_chat::{controller::Controller};
 
-fn main() {
+fn main() {    
     let mut controller = Controller::new();
 
     controller.start();

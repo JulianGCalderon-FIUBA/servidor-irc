@@ -17,7 +17,7 @@ use gtk4 as gtk;
 use crate::{client::Client, views::view_main::MainView, ADDRESS};
 use gtk::{
     gdk::Display,
-    glib::{self},
+    glib,
     prelude::*,
     Application, CssProvider, StyleContext,
 };
@@ -25,10 +25,11 @@ use gtk::{
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
 
+
 const ERROR_TEXT: &str = "ERROR";
 
 pub struct Controller {
-    app: Application,
+    app: Application
 }
 
 impl Default for Controller {
@@ -62,6 +63,7 @@ impl Controller {
     }
 
     fn build_ui(app: &Application) {
+
         let mut client = match Client::new(ADDRESS.to_string()) {
             Ok(stream) => stream,
             Err(error) => panic!("Error connecting to server: {:?}", error),
@@ -90,13 +92,15 @@ impl Controller {
 
         let mut _current_nickname: String = String::from("");
 
-        client.start_async_read(move |message| match message {
-            Ok(message) => {
-                let controller_message = to_controller_message(message);
-                sender.send(controller_message).unwrap();
-            }
-            Err(error) => eprintln!("Failed to read message: {}", error),
-        });
+        // client.start_async_read(move |message| match message {
+        //     Ok(message) => {
+        //         let controller_message = to_controller_message(message);
+        //         sender.send(controller_message).unwrap();
+        //     }
+        //     Err(error) => eprintln!("Failed to read message: {}", error),
+        // });
+
+        // Self::listen_messages(client, sender);
 
         receiver.attach(None, move |msg| {
             match msg {
@@ -105,7 +109,13 @@ impl Controller {
                     nickname,
                     username,
                     realname,
+                    address,
                 } => {
+                    client = match Client::new(address.to_string()) {
+                        Ok(stream) => stream,
+                        Err(error) => panic!("Error connecting to server: {:?}", error),
+                    };
+
                     let pass_command = format!("{} {}", PASS_COMMAND, pass);
                     let nick_command = format!("{} {}", NICK_COMMAND, nickname);
                     let user_command = format!(
@@ -115,6 +125,15 @@ impl Controller {
                     client.send_raw(&pass_command).expect(ERROR_TEXT);
                     client.send_raw(&nick_command).expect(ERROR_TEXT);
                     client.send_raw(&user_command).expect(ERROR_TEXT);
+
+                    let sender_clone = sender.clone();
+                    client.start_async_read(move |message| match message {
+                        Ok(message) => {
+                            let controller_message = to_controller_message(message);
+                            sender_clone.send(controller_message).unwrap();
+                        }
+                        Err(error) => eprintln!("Failed to read message: {}", error),
+                    });
                 }
                 ChangeViewToMain { nickname } => {
                     register_window.close();
@@ -232,4 +251,14 @@ impl Controller {
         }
         not_my_channels
     }
+
+    // fn listen_messages(mut client: Client, sender: Sender<ControllerMessage>) {
+    //     client.start_async_read(move |message| match message {
+    //         Ok(message) => {
+    //             let controller_message = to_controller_message(message);
+    //             sender.send(controller_message).unwrap();
+    //         }
+    //         Err(error) => eprintln!("Failed to read message: {}", error),
+    //     });
+    // }
 }
