@@ -67,8 +67,8 @@ impl Message {
     }
 
     /// Reads message from a BufReader
-    /// This performs better than `read_from` as a buffer performs large,
-    ///  infrequent reads on the underlying Read
+    /// This performs better than `read_from` as a buffer performs
+    ///  large, infrequent reads on the underlying Read
     ///  and maintains an in-memory buffer of the results.
     pub fn read_from_buffer<R: Read>(buffer: &mut BufReader<R>) -> Result<Self, CreationError> {
         let mut content = String::new();

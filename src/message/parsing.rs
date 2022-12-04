@@ -12,7 +12,7 @@ type Parameters = Vec<String>;
 type Trailing = Option<String>;
 type MessageParse = (Prefix, Command, Parameters, Trailing);
 
-// Parses string into prefix, command, parameters and trailing
+/// Parses string into prefix, command, parameters and trailing
 pub fn parse(content: &str) -> Result<MessageParse, ParsingError> {
     if content.is_empty() {
         return Err(ParsingError::EmptyMessage);
@@ -34,7 +34,7 @@ pub fn parse(content: &str) -> Result<MessageParse, ParsingError> {
     Ok((prefix, command, parameters, trailing))
 }
 
-// If next iter item is a prefix, it consumes it and returns its value
+/// If next iter item is a prefix, it consumes it and returns its value
 fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParsingError> {
     let possible_prefix = match split.peek() {
         None => return Err(ParsingError::EmptyMessage),
@@ -61,7 +61,7 @@ fn get_prefix(split: &mut Peekable<SplitWhitespace>) -> Result<Prefix, ParsingEr
     Ok(None)
 }
 
-// If next iter item is a command, it consumes it and returns its value
+/// If next iter item is a command, it consumes it and returns its value
 fn get_command(split: &mut Peekable<SplitWhitespace>) -> Result<Command, ParsingError> {
     let possible_command = match split.next() {
         None => return Err(ParsingError::NoCommand),
@@ -71,7 +71,7 @@ fn get_command(split: &mut Peekable<SplitWhitespace>) -> Result<Command, Parsing
     Ok(possible_command.to_string())
 }
 
-// Consumes parameters from iterator and returns them
+/// Consumes parameters from iterator and returns them
 fn get_parameters(split: &mut Peekable<SplitWhitespace>) -> Result<Parameters, ParsingError> {
     let mut parameters = Vec::new();
 
@@ -96,7 +96,7 @@ fn get_parameters(split: &mut Peekable<SplitWhitespace>) -> Result<Parameters, P
     Ok(parameters)
 }
 
-// If next iter item is a trailing parameter, it consumes it and returns its value
+/// If next iter item is a trailing parameter, it consumes it and returns its value
 fn get_trailing(split: &mut Peekable<SplitWhitespace>) -> Result<Trailing, ParsingError> {
     if split.peek().is_none() {
         return Ok(None);

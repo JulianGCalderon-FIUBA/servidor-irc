@@ -11,7 +11,7 @@ use super::{
 
 use crate::server::data_structures::*;
 
-/// MethodObject
+/// MethodObject:
 /// Manages connection between servers and information exchange.
 /// It is in charge of sharing all local information to the new server and registering incoming information in database.
 pub struct ServerConnectionSetup<C: Connection> {
@@ -121,11 +121,11 @@ impl<C: Connection> ServerConnectionSetup<C> {
         Ok(())
     }
 
-    // Sends all server data to new connected server:
-    //  - all clients (with nick and user)
-    //  - all channels (with join)
-    //  - all channel configurations (with mode)
-    //  - all server operators (with mode)
+    /// Sends all server data to new connected server:
+    ///  - all clients (with nick and user)
+    ///  - all channels (with join)
+    ///  - all channel configurations (with mode)
+    ///  - all server operators (with mode)
     fn send_server_data(&mut self) -> io::Result<()> {
         for mut client in self.database.get_all_clients() {
             client.hopcount += 1;
