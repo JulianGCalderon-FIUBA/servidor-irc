@@ -37,8 +37,12 @@ impl<C: Connection> ClientHandler<C> {
 
         let nickname = &client_info.nickname();
         let servername = &client_info.servername;
-        let serverinfo =
-            ok_or_return!(self.database.get_server_info(servername), Ok(())).serverinfo;
+
+        let serverinfo = if servername != &self.database.get_server_name() {
+            ok_or_return!(self.database.get_server_info(servername), Ok(())).serverinfo
+        } else {
+            self.database.get_own_server_info()
+        };
 
         self.stream.send(&CommandResponse::whois_server(
             nickname,
