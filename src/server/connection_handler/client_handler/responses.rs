@@ -241,39 +241,88 @@ impl<C: Connection> ClientHandler<C> {
         let speakers = config.speakers;
         let key = config.key;
 
+        self.send_channel_flags_response(flags, channel)?;
+        self.send_channel_limit_response(limit, channel)?;
+        self.send_channel_key_response(key, channel)?;
+        self.send_channel_operators_response(operators, channel)?;
+        self.send_channel_banmasks_response(banmasks, channel)?;
+        self.send_channel_speakers_response(speakers, channel)?;
+
+        Ok(())
+    }
+
+    fn send_channel_speakers_response(
+        &mut self,
+        speakers: Vec<String>,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        if !speakers.is_empty() {
+            let reply = CommandResponse::channel_mode_is(channel, SET_SPEAKER, Some(speakers));
+            self.stream.send(&reply)?;
+        };
+        Ok(())
+    }
+
+    fn send_channel_banmasks_response(
+        &mut self,
+        banmasks: Vec<String>,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        if !banmasks.is_empty() {
+            let reply = CommandResponse::channel_mode_is(channel, SET_BANMASK, Some(banmasks));
+            self.stream.send(&reply)?;
+        };
+        Ok(())
+    }
+
+    fn send_channel_operators_response(
+        &mut self,
+        operators: Vec<String>,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        if !operators.is_empty() {
+            let reply = CommandResponse::channel_mode_is(channel, SET_OPERATOR, Some(operators));
+            self.stream.send(&reply)?;
+        };
+        Ok(())
+    }
+
+    fn send_channel_key_response(
+        &mut self,
+        key: Option<String>,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        if key.is_some() {
+            let params = vec![key.expect("Verified in if condition")];
+            let reply = CommandResponse::channel_mode_is(channel, SET_KEY, Some(params));
+            self.stream.send(&reply)?;
+        };
+        Ok(())
+    }
+
+    fn send_channel_limit_response(
+        &mut self,
+        limit: Option<usize>,
+        channel: &str,
+    ) -> Result<(), io::Error> {
+        if limit.is_some() {
+            let params = vec![limit.expect("Verified in if condition").to_string()];
+            let reply = CommandResponse::channel_mode_is(channel, SET_USER_LIMIT, Some(params));
+            self.stream.send(&reply)?;
+        };
+        Ok(())
+    }
+
+    fn send_channel_flags_response(
+        &mut self,
+        flags: Vec<ChannelFlag>,
+        channel: &str,
+    ) -> Result<(), io::Error> {
         for flag in flags {
             let mode = flag.to_char();
             let reply = CommandResponse::channel_mode_is(channel, mode, None);
             self.stream.send(&reply)?;
         }
-
-        if limit.is_some() {
-            let params = vec![limit.expect("Verified in if condition").to_string()];
-            let reply = CommandResponse::channel_mode_is(channel, SET_USER_LIMIT, Some(params));
-            self.stream.send(&reply)?;
-        }
-
-        if key.is_some() {
-            let params = vec![key.expect("Verified in if condition")];
-            let reply = CommandResponse::channel_mode_is(channel, SET_KEY, Some(params));
-            self.stream.send(&reply)?;
-        }
-
-        if !operators.is_empty() {
-            let reply = CommandResponse::channel_mode_is(channel, SET_OPERATOR, Some(operators));
-            self.stream.send(&reply)?;
-        }
-
-        if !banmasks.is_empty() {
-            let reply = CommandResponse::channel_mode_is(channel, SET_BANMASK, Some(banmasks));
-            self.stream.send(&reply)?;
-        }
-
-        if !speakers.is_empty() {
-            let reply = CommandResponse::channel_mode_is(channel, SET_SPEAKER, Some(speakers));
-            self.stream.send(&reply)?;
-        }
-
         Ok(())
     }
 
