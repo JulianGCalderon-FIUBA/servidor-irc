@@ -257,6 +257,9 @@ impl Controller {
                     let kick = format!("{} {} {}", KICK_COMMAND, channel, member);
                     client.send_raw(&kick).expect(ERROR_TEXT);
                 }
+                ReceiveKick { kicked, channel } => {
+                    
+                }
                 RegularMessage { message } => {
                     println!("{}", message);
                 }

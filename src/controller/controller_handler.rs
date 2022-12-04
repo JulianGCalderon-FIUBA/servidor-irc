@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     message::Message,
-    server::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
+    server::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND, KICK_COMMAND},
 };
 
 use super::controller_message::ControllerMessage;
@@ -51,6 +51,10 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         INVITE_COMMAND => ControllerMessage::RecieveInvite {
             nickname: message.get_prefix().clone().unwrap(),
             channel: message.get_parameters()[1].clone(),
+        },
+        KICK_COMMAND => ControllerMessage::ReceiveKick { 
+            kicked: message.get_parameters()[1].clone(), 
+            channel: message.get_parameters()[0].clone() 
         },
         END_LIST_RPL_COMMAND => unsafe {
             let channels_clone: Vec<String> = CHANNELS_LIST_COMMAND.clone();
