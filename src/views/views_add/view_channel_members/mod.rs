@@ -40,6 +40,10 @@ impl ChannelMembersView {
         //     main_box.append(&label);
         // }
 
+        let operator = Self::get_operator(clients.clone());
+
+        println!("{}", operator);
+
         Self::list_members(clients, main_box.clone());
 
         main_box.append(&self.button);
@@ -64,5 +68,14 @@ impl ChannelMembersView {
             label.set_margin_start(20);
             main_box.append(&label);
         }
+    }
+
+    fn get_operator(clients: Vec<String>) -> String {
+        for client in clients {
+            if client.starts_with("@") {
+                return (&client[1..]).to_string()
+            }
+        }
+        return "".to_string()
     }
 }
