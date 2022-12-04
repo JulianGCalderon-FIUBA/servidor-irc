@@ -70,9 +70,13 @@ impl Controller {
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
+        let mut ip_view = IpView::new(sender.clone());
+        let ip_window = ip_view.get_view();
+        ip_window.show();
+
         let mut register_view = RegisterView::new(sender.clone());
         let register_window = register_view.get_view(app.clone());
-        register_window.show();
+        // register_window.show();
 
         let mut main_view = MainView::new(sender.clone());
 
