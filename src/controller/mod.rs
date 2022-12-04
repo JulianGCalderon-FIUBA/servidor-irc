@@ -198,6 +198,7 @@ impl Controller {
                 }
                 RemoveConversation {} => {
                     main_view.remove_conversation(current_conv.clone());
+                    main_view.welcome_view();
                 }
                 AddInviteView {} => {
                     let my_channels = main_view.get_my_channels();
@@ -260,7 +261,10 @@ impl Controller {
                 ReceiveKick { kicked, channel } => {
                     println!("kick {} from {}", kicked, channel);
                     if kicked == current_nickname {
-                        main_view.remove_conversation(channel);
+                        main_view.remove_conversation(channel.clone());
+                    }
+                    if channel == current_conv {
+                        main_view.welcome_view();
                     }
                 }
                 RegularMessage { message } => {

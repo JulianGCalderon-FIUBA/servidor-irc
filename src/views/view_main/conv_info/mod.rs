@@ -89,10 +89,10 @@ impl MainView {
         if !collection_of_buttons.is_empty() {
             collection_of_buttons.remove(counter);
         }
-        self.welcome_view();
+        // self.welcome_view();
     }
 
-    fn welcome_view(&mut self) {
+    pub fn welcome_view(&mut self) {
         self.current_chat.set_label("");
         self.scrollwindow_chat.set_visible(false);
         self.send_message.set_sensitive(false);
