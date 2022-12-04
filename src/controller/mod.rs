@@ -262,9 +262,9 @@ impl Controller {
                     println!("kick {} from {}", kicked, channel);
                     if kicked == current_nickname {
                         main_view.remove_conversation(channel.clone());
-                    }
-                    if channel == current_conv {
-                        main_view.welcome_view();
+                        if channel == current_conv {
+                            main_view.welcome_view();
+                        }
                     }
                 }
                 RegularMessage { message } => {
