@@ -3,8 +3,6 @@ use crate::server::{
     testing::{dummy_client, dummy_external_client, dummy_server},
 };
 
-
-
 #[test]
 fn quit_with_invalid_arguments_is_ignored() {
     let mut handler = dummy_server_handler();
