@@ -93,7 +93,7 @@ impl MainView {
         if !collection_of_buttons.is_empty() {
             collection_of_buttons.remove(counter);
         }
-        self.welcome_view();
+        // self.welcome_view();
     }
 
     pub fn welcome_view(&mut self) {

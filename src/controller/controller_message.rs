@@ -56,4 +56,12 @@ pub enum ControllerMessage {
     SendPrivMessage {
         message: GString,
     },
+    KickMember {
+        channel: String,
+        member: String,
+    },
+    ReceiveKick {
+        kicked: String,
+        channel: String,
+    }
 }
