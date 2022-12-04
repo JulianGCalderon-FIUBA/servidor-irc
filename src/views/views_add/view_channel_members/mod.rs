@@ -1,4 +1,4 @@
-use gtk::{prelude::*, Align::Start, Application, ApplicationWindow, Button};
+use gtk::{prelude::*, Align::Start, Application, ApplicationWindow, Button, Label};
 use gtk4 as gtk;
 
 use crate::views::widgets_creation::{
@@ -63,7 +63,13 @@ impl ChannelMembersView {
     fn list_members(clients: Vec<String>, main_box: gtk::Box) {
         for client in &clients {
             //mejorar
-            let label = create_label(&format!("\t •\t{}", client));
+            let label: Label;
+            if client.starts_with("@") {
+                label = create_label(&format!("\t •\t{} (OP)", &client[1..]));
+            } else {
+                label = create_label(&format!("\t •\t{}", client));
+            }
+            // let label = create_label(&format!("\t •\t{}", client));
             label.set_halign(Start);
             label.set_margin_start(20);
             main_box.append(&label);
