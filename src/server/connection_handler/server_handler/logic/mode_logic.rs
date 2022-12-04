@@ -1,6 +1,7 @@
 use crate::server::connection_handler::mode_requests::{ChannelModeRequest, UserModeRequest};
 
-use crate::server::consts::modes::{ChannelFlag, UserFlag};
+use crate::server::consts::channel_flag::ChannelFlag;
+use crate::server::consts::user_flag::UserFlag;
 use crate::server::{connection::Connection, connection_handler::ServerHandler};
 impl<C: Connection> ServerHandler<C> {
     pub(super) fn handle_channel_mode_request(
@@ -42,11 +43,11 @@ impl<C: Connection> ServerHandler<C> {
     }
 
     fn set_channel_flag_request(&self, channel: &str, flag: ChannelFlag) {
-        self.database.set_channel_mode(channel, flag)
+        self.database.set_channel_flag(channel, flag)
     }
 
     fn unset_channel_flag_request(&self, channel: &str, flag: ChannelFlag) {
-        self.database.unset_channel_mode(channel, flag)
+        self.database.unset_channel_flag(channel, flag)
     }
 
     fn remove_banmask_request(&self, channel: &str, banmask: String) {
@@ -54,7 +55,7 @@ impl<C: Connection> ServerHandler<C> {
     }
 
     fn add_speaker_request(&self, channel: &str, speaker: String) {
-        self.database.add_speaker(channel, &speaker);
+        self.database.add_channel_speaker(channel, &speaker);
     }
 
     fn set_key_request(&self, channel: &str, key: String) {
@@ -62,7 +63,7 @@ impl<C: Connection> ServerHandler<C> {
     }
 
     fn add_operator_request(&self, channel: &str, operator: String) {
-        self.database.add_channop(channel, &operator);
+        self.database.add_channel_operator(channel, &operator);
     }
 
     fn unset_limit_request(&self, channel: &str) {
@@ -70,7 +71,7 @@ impl<C: Connection> ServerHandler<C> {
     }
 
     fn remove_speaker_request(&self, channel: &str, speaker: String) {
-        self.database.remove_speaker(channel, &speaker);
+        self.database.remove_channel_speaker(channel, &speaker);
     }
 
     fn unset_key_request(&self, channel: &str) {
@@ -78,7 +79,7 @@ impl<C: Connection> ServerHandler<C> {
     }
 
     fn remove_operator_request(&self, channel: &str, operator: String) {
-        self.database.remove_channop(channel, &operator)
+        self.database.remove_channel_operator(channel, &operator)
     }
 }
 
@@ -92,10 +93,10 @@ impl<C: Connection> ServerHandler<C> {
     }
 
     fn set_user_flag_request(&self, user: &str, flag: UserFlag) {
-        self.database.set_user_mode(user, flag);
+        self.database.set_user_flag(user, flag);
     }
 
     fn unset_user_flag_request(&self, user: &str, flag: UserFlag) {
-        self.database.unset_user_mode(user, flag);
+        self.database.unset_user_flag(user, flag);
     }
 }

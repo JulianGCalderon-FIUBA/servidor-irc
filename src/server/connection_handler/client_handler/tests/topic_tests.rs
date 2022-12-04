@@ -52,7 +52,7 @@ fn topic_sets_and_gets_channel_topic() {
 
     handler.database.add_local_client(dummy_client("dummy"));
     handler.database.add_client_to_channel("dummy", "#canal");
-    handler.database.add_client_to_channel("nickname", "#canal");
+    handler.database.add_client_to_channel("#canal", "nickname");
 
     let parameters1 = vec!["#canal".to_string()];
 
@@ -76,12 +76,14 @@ fn topic_fails_with_not_channop_on_channel_with_topic_flag() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler
         .database
-        .set_channel_mode("#hola", ChannelFlag::TopicByOperatorOnly);
-    handler.database.remove_channop("#hola", "nickname");
+        .set_channel_flag("#hola", ChannelFlag::TopicByOperatorOnly);
+    handler
+        .database
+        .remove_channel_operator("#hola", "nickname");
 
     let parameters = vec!["#hola".to_string(), "topic".to_string()];
 
@@ -98,11 +100,11 @@ fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler
         .database
-        .set_channel_mode("#hola", ChannelFlag::TopicByOperatorOnly);
+        .set_channel_flag("#hola", ChannelFlag::TopicByOperatorOnly);
 
     let mut parameters = vec!["#hola".to_string(), "topic".to_string()];
 
@@ -133,7 +135,7 @@ fn distributed_channel_topics_are_relayed_to_all_servers() {
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     let params = vec!["#channel".to_string(), "topic".to_string()];
     handler.topic_command((None, params, None)).unwrap();

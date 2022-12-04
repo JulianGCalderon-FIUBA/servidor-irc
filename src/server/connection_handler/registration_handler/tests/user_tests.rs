@@ -82,3 +82,22 @@ fn user_notifies_all_servers() {
             .read_wbuf_to_string()
     );
 }
+
+#[test]
+fn user_sends_welcome_after_registering() {
+    let mut handler = dummy_registration_handler();
+
+    let parameters = vec!["nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    let parameters = vec!["username".to_string()];
+    let trailing = Some("realname".to_string());
+    handler.user_command((None, parameters, trailing)).unwrap();
+
+    assert!(handler.database.contains_client("nickname"));
+
+    assert_eq!(
+        "001 nickname :Welcome to server servername, username\r\n",
+        handler.stream.read_wbuf_to_string()
+    )
+}

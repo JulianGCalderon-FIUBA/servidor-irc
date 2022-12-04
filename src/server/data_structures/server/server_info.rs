@@ -1,3 +1,5 @@
+#[derive(Clone)]
+/// ServerInfo contains public server information.
 pub struct ServerInfo {
     pub servername: String,
     pub serverinfo: String,

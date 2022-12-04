@@ -1,9 +1,50 @@
 use crate::server::{
-    connection_handler::connection_handler_trait::ConnectionHandlerCommands,
+    connection_handler::ConnectionHandlerCommands,
     testing::{dummy_external_client, dummy_server},
 };
 
 use super::dummy_server_handler;
+
+#[test]
+fn away_with_no_prefix_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    handler.away_command((None, vec![], None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn away_with_no_client_in_database_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    let prefix = Some("nickname".to_string());
+    handler.away_command((prefix, vec![], None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
 
 #[test]
 fn away_sets_away_message_for_client() {

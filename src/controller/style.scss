@@ -3,7 +3,7 @@
 }
 
 .sidebar {
-    background-color: #020311; 
+    background-color: #020311;
 }
 
 button {
@@ -53,7 +53,7 @@ label {
     font-family: monospace;
 }
 
-.add_view_title{
+.add_view_title {
     font-size: 20px;
     font-family: monospace;
 }
@@ -76,20 +76,25 @@ label {
     background-color: rgb(222, 117, 52);
 }
 
-.inactive_select_button{
+.inactive_select_button {
     border-color: transparent;
     border-radius: 0px;
     color: rgb(22, 21, 21);
     background-color: rgb(72, 68, 68);
 }
 
-.disable_select_button{
+.disable_select_button {
     border-color: transparent;
     border-radius: 0px;
     color: rgb(0, 0, 0);
     background-color: rgb(43, 40, 40);
 }
 
-.add_channel_entry{
-    border: solid 2px white; 
+.add_channel_entry {
+    border: solid 2px white;
+}
+
+.message_sender_name {
+    color: white;
+    font-size: 10px;
 }

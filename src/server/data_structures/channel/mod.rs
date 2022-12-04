@@ -1,17 +1,19 @@
+/// Contains a channel's configuration.
 mod channel_configuration;
 pub use channel_configuration::ChannelConfiguration;
 
-use crate::server::consts::modes::ChannelFlag;
+use crate::server::consts::channel_flag::ChannelFlag;
 
-/// A Channel has clients and a name.
+/// Represents a Channel that has a name, clients and specific configurations.
 pub struct Channel {
-    pub name: String,
-    pub clients: Vec<String>,
-    pub config: ChannelConfiguration,
+    name: String,
+    clients: Vec<String>,
+    config: ChannelConfiguration,
+    invites: Vec<String>,
 }
 
 impl Channel {
-    /// Creates a new [`Channel`].
+    /// Creates a new [`Channel`] with creator set as operator.
     pub fn new(name: String, creator: String) -> Self {
         let clients = vec![creator.clone()];
 
@@ -22,6 +24,7 @@ impl Channel {
             name,
             clients,
             config,
+            invites: Default::default(),
         }
     }
 
@@ -65,8 +68,8 @@ impl Channel {
         self.config.topic.clone()
     }
 
-    pub fn has_mode(&self, flag: &ChannelFlag) -> bool {
-        self.config.flags.contains(flag)
+    pub fn has_mode(&self, flag: ChannelFlag) -> bool {
+        self.config.flags.contains(&flag)
     }
 
     pub fn is_member(&self, nickname: &str) -> bool {
@@ -113,8 +116,8 @@ impl Channel {
         self.config.topic = Some(topic)
     }
 
-    pub fn unset_mode(&mut self, flag: &ChannelFlag) {
-        remove(&mut self.config.flags, flag);
+    pub fn unset_mode(&mut self, flag: ChannelFlag) {
+        remove(&mut self.config.flags, &flag);
     }
 
     pub fn update_nickname(&mut self, old_nickname: &str, new_nickname: &str) {
@@ -123,6 +126,18 @@ impl Channel {
                 *client = new_nickname.to_string()
             }
         }
+    }
+
+    pub fn add_client_invite(&mut self, client: String) {
+        self.invites.push(client);
+    }
+
+    pub fn has_invite(&self, client: &str) -> bool {
+        self.invites.iter().any(|c| c == client)
+    }
+
+    pub fn name(&self) -> String {
+        self.name.clone()
     }
 }
 

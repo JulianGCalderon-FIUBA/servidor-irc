@@ -46,13 +46,9 @@ fn whois_returns_nick_info() {
 fn whois_returns_nick_info_if_oper() {
     let mut handler = dummy_client_handler();
 
+    handler.database.set_server_operator("nickname");
+
     let parameters = vec!["nickname".to_string()];
-
-    let parameters_oper = vec!["admin".to_string(), "admin".to_string()];
-
-    handler.oper_command((None, parameters_oper, None)).unwrap();
-
-    handler.stream.clear();
 
     handler.whois_command((None, parameters, None)).unwrap();
 
@@ -70,7 +66,7 @@ fn whois_returns_nick_info_with_channels() {
 
     let parameters = vec!["nickname".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
+    handler.database.add_client_to_channel("#hola", "nickname");
 
     handler.whois_command((None, parameters, None)).unwrap();
 
@@ -83,18 +79,36 @@ fn whois_returns_nick_info_with_channels() {
 }
 
 #[test]
+fn whois_returns_nick_away_info() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .set_away_message("nickname", Some("away".to_string()));
+
+    let parameters = vec!["nickname".to_string()];
+
+    handler.whois_command((None, parameters, None)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("311 nickname username 127.0.0.1 *: realname", responses[0]);
+    assert_eq!("312 nickname servername :serverinfo", responses[1]);
+    assert_eq!("301 nickname :away", responses[2]);
+    assert_eq!("318 nickname :End of /WHOIS list", responses[3]);
+}
+
+#[test]
 fn whois_returns_complete_nick_info() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec!["nickname".to_string()];
 
-    handler.database.add_client_to_channel("nickname", "#hola");
-
-    let parameters_oper = vec!["admin".to_string(), "admin".to_string()];
-
-    handler.oper_command((None, parameters_oper, None)).unwrap();
-
-    handler.stream.clear();
+    handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.set_server_operator("nickname");
+    handler
+        .database
+        .set_away_message("nickname", Some("away message".to_string()));
 
     handler.whois_command((None, parameters, None)).unwrap();
 
@@ -104,7 +118,8 @@ fn whois_returns_complete_nick_info() {
     assert_eq!("312 nickname servername :serverinfo", responses[1]);
     assert_eq!("313 nickname :Is an IRC operator", responses[2]);
     assert_eq!("319 nickname : @#hola", responses[3]);
-    assert_eq!("318 nickname :End of /WHOIS list", responses[4]);
+    assert_eq!("301 nickname :away message", responses[4]);
+    assert_eq!("318 nickname :End of /WHOIS list", responses[5]);
 }
 
 #[test]

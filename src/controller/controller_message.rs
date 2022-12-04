@@ -18,8 +18,9 @@ pub enum ControllerMessage {
         message: GString,
     },
     ReceivePrivMessage {
-        nickname: String,
+        sender_nickname: String,
         message: String,
+        channel: Option<String>,
     },
     JoinChannel {
         channel: GString,

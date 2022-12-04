@@ -12,12 +12,16 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<Vec<String>, DatabaseError>>,
     ) {
         let clients = self.get_channel_clients(channel);
-        respond_to.send(clients).unwrap();
+        respond_to
+            .send(clients)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_all_channels(&self, respond_to: Sender<Vec<String>>) {
         let channels = self.get_channels();
-        respond_to.send(channels).unwrap();
+        respond_to
+            .send(channels)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_add_client_to_channel(&mut self, nickname: String, channel: String) {
@@ -27,13 +31,17 @@ impl<C: Connection> Database<C> {
     pub fn handle_remove_client_from_channel(&mut self, nickname: String, channel_name: String) {
         self.remove_client_from_channel(channel_name, nickname);
     }
+
+    pub fn handle_add_channel_invitation(&mut self, channel: String, client: String) {
+        self.add_channel_invitation(channel, client);
+    }
 }
 
 impl<C: Connection> Database<C> {
     fn add_client_to_channel(&mut self, channel: String, nickname: String) {
         match self.channels.get_mut(&channel) {
             Some(channel) => {
-                debug_print!("Adding {} to channel {}", nickname, channel.name);
+                debug_print!("Adding {} to channel {}", nickname, channel.name());
                 channel.add_member(nickname)
             }
             None => {
@@ -63,12 +71,17 @@ impl<C: Connection> Database<C> {
     fn get_channels(&self) -> Vec<String> {
         self.channels.keys().cloned().collect()
     }
+
+    fn add_channel_invitation(&mut self, channel: String, client: String) {
+        let channel = some_or_return!(self.channels.get_mut(&channel));
+        channel.add_client_invite(client);
+    }
 }
 
 impl<C: Connection> Database<C> {
     fn create_channel(&mut self, channel: String, nickname: String) {
         let channel = Channel::new(channel, nickname);
-        let name = channel.name.to_string();
+        let name = channel.name();
         self.channels.insert(name, channel);
     }
 }
