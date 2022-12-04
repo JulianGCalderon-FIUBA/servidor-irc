@@ -1,7 +1,7 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Entry, Label };
+use gtk::{ glib::{ GString, Sender }, prelude::*, Box, Entry };
 use gtk4 as gtk;
 
 use crate::{
@@ -16,6 +16,7 @@ use self::{
         create_message_sender_box,
         create_received_message,
         create_send_message,
+        create_sender_nickname_label,
     },
 };
 
@@ -74,20 +75,9 @@ impl MainView {
         if sender_nickname == self.user_info.label().unwrap() || channel != current_conv {
             return;
         }
-        let sender_nickname_label = Label::builder()
-            .label(&sender_nickname)
-            .margin_start(12)
-            .margin_end(12)
-            .halign(gtk::Align::Start)
-            .build();
-        sender_nickname_label.add_css_class("message_sender_name");
-        if
-            (self.messages.get_mut(&channel).is_some() &&
-                self.messages.get_mut(&channel).unwrap().last().is_some() &&
-                self.messages.get_mut(&channel).unwrap().last().unwrap()[1].text() !=
-                    sender_nickname) ||
-            self.messages.get_mut(&channel).unwrap().is_empty()
-        {
+
+        let sender_nickname_label = create_sender_nickname_label(&sender_nickname);
+        if Self::should_show_nickname(self.messages.get(&channel).clone(), sender_nickname) {
             self.message_box.append(&sender_nickname_label);
         }
 
@@ -114,7 +104,7 @@ impl MainView {
         self.messages
             .get_mut(&nickname)
             .unwrap()
-            .push(vec![message, create_label("")]);
+            .push(vec![message, create_sender_nickname_label("")]);
     }
 
     pub fn send_message(&mut self, message: String, nickname: String) {
@@ -126,5 +116,22 @@ impl MainView {
             .get_mut(&nickname)
             .unwrap()
             .push(vec![message, create_label("")]);
+    }
+
+    pub fn should_show_nickname(
+        messages: Option<&Vec<Vec<gtk4::Label>>>,
+        sender_nickname: String
+    ) -> bool {
+        Self::prev_message_has_different_sender(messages, sender_nickname) ||
+            messages.unwrap().is_empty()
+    }
+
+    pub fn prev_message_has_different_sender(
+        messages: Option<&Vec<Vec<gtk4::Label>>>,
+        sender_nickname: String
+    ) -> bool {
+        messages.is_some() &&
+            messages.unwrap().last().is_some() &&
+            messages.unwrap().last().unwrap()[1].text() != sender_nickname
     }
 }

@@ -109,38 +109,9 @@ impl MainView {
 
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
-        let mut prev_message: Vec<Label> = vec![];
-        if self.messages.contains_key(&last_conv) {
-            let messages = self.messages.get(&last_conv).unwrap();
-            for message in messages {
-                self.message_box.remove(&message[0]);
-                if
-                    message[1].text() != "" &&
-                    ((!prev_message.is_empty() && message[1].text() != prev_message[1].text()) ||
-                        prev_message.is_empty())
-                {
-                    self.message_box.remove(&message[1]);
-                }
-                prev_message = message.clone();
-            }
-        }
 
-        prev_message = vec![];
-
-        if self.messages.contains_key(&conversation_label) {
-            let messages = self.messages.get(&conversation_label).unwrap();
-            for message in messages {
-                if
-                    message[1].text() != "" &&
-                    ((!prev_message.is_empty() && message[1].text() != prev_message[1].text()) ||
-                        prev_message.is_empty())
-                {
-                    self.message_box.append(&message[1]);
-                }
-                self.message_box.append(&message[0]);
-                prev_message = message.clone();
-            }
-        }
+        self.clean_screen(last_conv);
+        self.load_messages_on_chat(conversation_label.clone());
 
         self.quit_channel_button.set_visible(true);
         if is_channel(conversation_label.clone()) {
@@ -150,5 +121,42 @@ impl MainView {
         } else {
             self.set_client_chat_mode();
         }
+    }
+
+    fn clean_screen(&mut self, key: String) {
+        self.update_screen(key, true);
+    }
+
+    fn load_messages_on_chat(&mut self, key: String) {
+        self.update_screen(key, false);
+    }
+
+    fn update_screen(&mut self, key: String, should_remove: bool) {
+        let mut prev_message: Vec<Label> = vec![];
+
+        if self.messages.contains_key(&key) {
+            let messages = self.messages.get(&key).unwrap();
+            for message in messages {
+                if Self::there_is_sender(message[1].clone(), prev_message) {
+                    if should_remove {
+                        self.message_box.remove(&message[1]);
+                    } else {
+                        self.message_box.append(&message[1]);
+                    }
+                }
+                if should_remove {
+                    self.message_box.remove(&message[0]);
+                } else {
+                    self.message_box.append(&message[0]);
+                }
+
+                prev_message = message.clone();
+            }
+        }
+    }
+    
+    fn there_is_sender(message: Label, prev_message: Vec<Label>) -> bool {
+        message.text() != "" &&
+            (prev_message.is_empty() || message.text() != prev_message[1].text())
     }
 }

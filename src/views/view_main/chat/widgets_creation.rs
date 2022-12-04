@@ -1,13 +1,14 @@
 use gtk::{
     prelude::*,
-    Align::{Center, End, Start},
-    Box, Label,
-    Orientation::{Horizontal, Vertical},
+    Align::{ Center, End, Start },
+    Box,
+    Label,
+    Orientation::{ Horizontal, Vertical },
     ScrolledWindow,
 };
 use gtk4 as gtk;
 
-use super::{CHAT_CSS, MESSAGE_BOX_CSS, RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS};
+use super::{ CHAT_CSS, MESSAGE_BOX_CSS, RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS };
 
 pub fn create_message(label: &str) -> Label {
     Label::builder()
@@ -31,6 +32,17 @@ pub fn create_received_message(label: &str) -> Label {
     message.set_halign(Start);
     message.add_css_class(RECEIVED_MESSAGE_CSS);
     message
+}
+
+pub fn create_sender_nickname_label(label: &str) -> Label {
+    let sender_nickname_label = Label::builder()
+        .label(&label)
+        .margin_start(12)
+        .margin_end(5)
+        .halign(gtk::Align::Start)
+        .build();
+    sender_nickname_label.add_css_class("message_sender_name");
+    sender_nickname_label
 }
 
 pub fn create_chat_box() -> Box {
