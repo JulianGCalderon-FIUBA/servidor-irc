@@ -128,19 +128,8 @@ impl MainView {
     }
 
     pub fn set_client_chat_mode(&mut self) {
-        println!("voy a setear modo cliente");
-        println!(
-            "esta en disable: {}",
-            self.quit_channel_button.has_css_class("disabled_button")
-        );
-        println!(
-            "las clases son : {:?}",
-            self.quit_channel_button.css_classes()
-        );
-
         self.quit_channel_button.set_visible(true);
         if self.quit_channel_button.has_css_class("disabled_button") {
-            println!("entro al if");
             self.quit_channel_button.remove_css_class("disabled_button");
             self.quit_channel_button.add_css_class("exit_channel");
         }
@@ -150,18 +139,8 @@ impl MainView {
     }
 
     pub fn set_channel_chat_mode(&mut self) {
-        println!("voy a setear modo cliente");
-        println!(
-            "esta en disable: {}",
-            self.quit_channel_button.has_css_class("disabled_button")
-        );
-        println!(
-            "las clases son : {:?}",
-            self.quit_channel_button.css_classes()
-        );
         self.quit_channel_button.set_visible(true);
         if self.quit_channel_button.has_css_class("disabled_button") {
-            println!("entro al if");
             self.quit_channel_button.remove_css_class("disabled_button");
             self.quit_channel_button.add_css_class("exit_channel");
         }

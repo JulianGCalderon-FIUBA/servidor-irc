@@ -1,8 +1,6 @@
 use gtk4 as gtk;
 
-use gtk::{
-    Box, Orientation::Horizontal, Button, Label, Align::Start,
-};
+use gtk::{Align::Start, Box, Button, Label, Orientation::Horizontal};
 
 const KICK_LABEL: &str = "Kick";
 
@@ -30,4 +28,3 @@ pub fn create_kick_label(label: &str) -> Label {
         .valign(Start)
         .build()
 }
-

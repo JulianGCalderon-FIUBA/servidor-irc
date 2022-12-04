@@ -12,7 +12,7 @@ use crate::{
 };
 
 use self::{
-    requests::{add_view_to_add_client_request, send_list_request},
+    requests::{add_notifications_view_request, add_view_to_add_client_request, send_list_request},
     widgets_creation::create_separator_sidebar,
 };
 
@@ -30,18 +30,16 @@ impl MainView {
 
         //Channels box
         let channels_title = create_title(CHANNELS_TITLE);
-
         self.scrollwindow_channels
             .set_child(Some(&self.channels_box));
-
         self.connect_add_channel_button(self.add_channel.clone(), self.sender.clone());
 
         //Clients box
         let clients_title = create_title(CLIENTS_TITLE);
-
         self.scrollwindow_clients.set_child(Some(&self.clients_box));
-
         self.connect_add_client_button(self.add_client.clone(), self.sender.clone());
+
+        self.connect_notifications_button(self.notifications_button.clone(), self.sender.clone());
 
         sidebar.append(&channels_title);
         sidebar.append(&self.scrollwindow_channels);
@@ -50,6 +48,8 @@ impl MainView {
         sidebar.append(&clients_title);
         sidebar.append(&self.scrollwindow_clients);
         sidebar.append(&self.add_client);
+        sidebar.append(&create_separator_sidebar());
+        sidebar.append(&self.notifications_button);
 
         sidebar
     }
@@ -66,6 +66,14 @@ impl MainView {
         });
     }
 
+    pub fn connect_notifications_button(&self, button: Button, sender: Sender<ControllerMessage>) {
+        let button_clone = button.clone();
+        button.connect_clicked(move |_| {
+            add_notifications_view_request(sender.clone());
+            Self::remove_unread_notifications(button_clone.clone());
+        });
+    }
+
     pub fn add_channel(&mut self, channel: String) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
@@ -78,7 +86,7 @@ impl MainView {
         self.channels_buttons.push(channel_button);
         if self.channels_buttons.len() >= 10 {
             self.add_channel.remove_css_class("add");
-            self.add_channel.add_css_class("disabled_button")
+            self.add_channel.add_css_class("disabled_button");
         }
         println!("Added to {}", channel);
 
@@ -169,5 +177,43 @@ impl MainView {
     fn there_is_sender(message: Label, prev_message: Vec<Label>) -> bool {
         message.text() != ""
             && (prev_message.is_empty() || message.text() != prev_message[1].text())
+    }
+
+    pub fn add_notification(&mut self, message: String) {
+        self.notifications.push(message);
+        let current_notifications_number =
+            Self::get_notifications_number(self.notifications_button.clone());
+        self.notifications_button.set_label(&format!(
+            "🔔 notifications ({})",
+            current_notifications_number + 1
+        ));
+        self.notifications_button
+            .add_css_class("notifications_button_on")
+    }
+
+    pub fn get_notifications_number(button: Button) -> u32 {
+        const RADIX: u32 = 10;
+        let notifications_text = button.label().unwrap().to_string();
+        let number_text = *notifications_text
+            .split('(')
+            .collect::<Vec<&str>>()
+            .last()
+            .unwrap()
+            .chars()
+            .collect::<Vec<char>>()
+            .first()
+            .unwrap();
+        number_text.to_digit(RADIX).unwrap()
+    }
+
+    pub fn remove_unread_notifications(button: Button) {
+        button.set_label("🔔 notifications (0)");
+        if button.has_css_class("notifications_button_on") {
+            button.remove_css_class("notifications_button_on")
+        }
+    }
+
+    pub fn get_notifications(&mut self) -> Vec<String> {
+        self.notifications.clone()
     }
 }

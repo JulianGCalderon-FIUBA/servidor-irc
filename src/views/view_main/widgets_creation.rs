@@ -7,7 +7,7 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use crate::views::widgets_creation::create_button_with_margin;
+use crate::views::widgets_creation::{create_button, create_button_with_margin};
 
 use super::{
     ADD_BUTTON_CSS, CURRENT_CHAT_TITLE_CSS, WELCOME_MESSAGE, WELCOME_MESSAGE_CSS, WELCOME_TITLE,
@@ -51,7 +51,7 @@ pub fn create_current_chat(label: &str) -> Label {
     message
 }
 
-pub fn create_scrollwindow_sidebar(/*child: &Box*/) -> ScrolledWindow {
+pub fn create_scrollwindow(/*child: &Box*/) -> ScrolledWindow {
     ScrolledWindow::builder().min_content_height(280).build()
 }
 
@@ -98,4 +98,10 @@ pub fn create_error_label() -> Label {
         .build();
     error_label.add_css_class("warning_text");
     error_label
+}
+
+pub fn create_notifications_button() -> Button {
+    let notifications_button = create_button("🔔 notifications (0)");
+    notifications_button.add_css_class("notifications_button");
+    notifications_button
 }
