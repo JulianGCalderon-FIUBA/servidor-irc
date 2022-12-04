@@ -67,23 +67,27 @@ impl MainView {
 
     pub fn receive_priv_channel_message(
         &mut self,
-        message: String,
+        message_text: String,
         sender_nickname: String,
         channel: String,
         current_conv: String,
     ) {
-        if sender_nickname == self.user_info.label().unwrap() || channel != current_conv {
+        if sender_nickname == self.user_info.label().unwrap() {
             return;
         }
 
         let sender_nickname_label = create_sender_nickname_label(&sender_nickname);
-        if Self::should_show_nickname(self.messages.get(&channel), sender_nickname) {
+        if channel == current_conv
+            && Self::should_show_nickname(self.messages.get(&channel), sender_nickname)
+        {
             self.message_box.append(&sender_nickname_label);
         }
 
-        let message = create_received_message(&message);
-        self.message_box.append(&message);
-        adjust_scrollbar(self.scrollwindow_chat.clone());
+        let message = create_received_message(&message_text);
+        if channel == current_conv {
+            self.message_box.append(&message);
+            adjust_scrollbar(self.scrollwindow_chat.clone());
+        }
 
         self.messages
             .get_mut(&channel)
@@ -93,21 +97,20 @@ impl MainView {
 
     pub fn receive_priv_client_message(
         &mut self,
-        message: String,
+        message_text: String,
         nickname: String,
         current_conv: String,
     ) {
-        if nickname != current_conv {
-            return;
-        }
-        let message = create_received_message(&message);
-        self.message_box.append(&message);
-        adjust_scrollbar(self.scrollwindow_chat.clone());
+        let message_label = create_received_message(&message_text);
+        self.messages.get_mut(&nickname).unwrap().push(vec![
+            message_label.clone(),
+            create_sender_nickname_label(""),
+        ]);
 
-        self.messages
-            .get_mut(&nickname)
-            .unwrap()
-            .push(vec![message, create_sender_nickname_label("")]);
+        if nickname == current_conv {
+            self.message_box.append(&message_label);
+            adjust_scrollbar(self.scrollwindow_chat.clone());
+        }
     }
 
     pub fn send_message(&mut self, message: String, nickname: String) {
