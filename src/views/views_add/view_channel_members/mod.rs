@@ -24,21 +24,13 @@ impl ChannelMembersView {
         }
     }
 
-    pub fn get_view(&mut self, app: Application, clients: Vec<String>) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application, clients: Vec<String>, _nickname: String) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
         let main_box = create_main_box_add_view();
 
         main_box.append(&create_title("Miembros"));
-
-        // for client in &clients {
-        //     //mejorar
-        //     let label = create_label(&format!("\t •\t{}", client));
-        //     label.set_halign(Start);
-        //     label.set_margin_start(20);
-        //     main_box.append(&label);
-        // }
 
         let operator = Self::get_operator(clients.clone());
 
@@ -65,7 +57,7 @@ impl ChannelMembersView {
             //mejorar
             let label: Label;
             if client.starts_with("@") {
-                label = create_label(&format!("\t •\t{} (OP)", &client[1..]));
+                label = create_label(&format!("\t •\tOP: {}", &client[1..]));
             } else {
                 label = create_label(&format!("\t •\t{}", client));
             }

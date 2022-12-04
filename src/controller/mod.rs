@@ -89,18 +89,8 @@ impl Controller {
         let app_clone = app.clone();
         let sender_clone = sender.clone();
 
-        let mut _current_nickname: String = String::from("");
+        let mut current_nickname: String = String::from("");
         let mut trying_to_add_client: bool = false;
-
-        // client.start_async_read(move |message| match message {
-        //     Ok(message) => {
-        //         let controller_message = to_controller_message(message);
-        //         sender.send(controller_message).unwrap();
-        //     }
-        //     Err(error) => eprintln!("Failed to read message: {}", error),
-        // });
-
-        // Self::listen_messages(client, sender);
 
         receiver.attach(None, move |msg| {
             match msg {
@@ -137,7 +127,7 @@ impl Controller {
                 }
                 ChangeViewToMain { nickname } => {
                     register_window.close();
-                    _current_nickname = String::from(&nickname.to_string()[..]);
+                    current_nickname = String::from(&nickname.to_string()[..]);
                     main_view.get_view(app_clone.clone(), nickname).show();
                 }
                 SendPrivMessage { message } => {
@@ -163,7 +153,7 @@ impl Controller {
                     channels_and_clients,
                 } => {
                     let clients_to_add: Vec<String> = Self::not_mine(
-                        Self::clients_to_add(channels_and_clients, _current_nickname.clone()),
+                        Self::clients_to_add(channels_and_clients, current_nickname.clone()),
                         main_view.get_my_clients(),
                     );
 
@@ -256,6 +246,7 @@ impl Controller {
                             .get_view(
                                 app_clone.clone(),
                                 channels_and_clients[&current_conv].clone(),
+                                current_nickname.clone()
                             )
                             .show();
                     }
