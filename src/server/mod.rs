@@ -11,6 +11,12 @@ mod database;
 pub mod connection_handler;
 /// Contains structure for connection listener, this structure listens to an address and handles all clients connecting to that address
 mod listener;
+mod registerer;
+
+pub(crate) mod consts;
+// mod data_structures;
+mod data_structures;
+mod responses;
 
 use database::Database;
 use std::io;
@@ -19,8 +25,10 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 
+use self::connection_handler::{ConnectionHandler, ServerHandler};
 use self::database::DatabaseHandle;
 use self::listener::ConnectionListener;
+use self::registerer::Register;
 
 const MAX_CLIENTS: usize = 26;
 
@@ -29,7 +37,6 @@ pub const OPER_PASSWORD: &str = "admin";
 
 /// Represents a Server clients can connect to it contains a Database that stores relevant information.
 pub struct Server {
-    servername: String,
     database: Option<DatabaseHandle<TcpStream>>,
     online: Arc<AtomicBool>,
     threads: Vec<JoinHandle<()>>,
@@ -37,17 +44,15 @@ pub struct Server {
 
 impl Server {
     /// Starts new [`Server`].
-    pub fn start(servername: &str) -> Self {
-        let servername = servername.to_string();
+    pub fn start(servername: String, serverinfo: String) -> Self {
         let online = Arc::new(AtomicBool::new(true));
 
-        let (database, database_thread) = Database::start();
+        let (database, database_thread) = Database::start(servername, serverinfo);
 
         let threads = vec![database_thread];
         let database = Some(database);
 
         Self {
-            servername,
             online,
             database,
             threads,
@@ -60,26 +65,40 @@ impl Server {
 
     /// Listens for incoming clients and handles each request in a new thread.
     pub fn listen_to(&mut self, address: String) -> io::Result<()> {
-        let database = match &self.database {
-            Some(database) => database.clone(),
-            None => {
-                eprintln!("Already listening");
-                return Ok(());
-            }
-        };
-
         let online = Arc::clone(&self.online);
-        let servername = self.servername.clone();
+        let database = self.database.clone().unwrap();
 
-        let connection_listener = ConnectionListener::new(servername, address, database, online)?;
+        let connection_listener = ConnectionListener::new(address, database, online)?;
 
         let thread = thread::spawn(|| connection_listener.listen());
 
         self.threads.push(thread);
 
-        self.database.take();
+        Ok(())
+    }
+
+    fn try_connect_to(&mut self, address: &str) -> io::Result<()> {
+        let stream = TcpStream::connect(address)?;
+        let database = self.database.as_ref().unwrap().clone();
+
+        let mut registerer = Register::new(stream.try_clone()?, database.clone());
+        registerer.register_outcoming()?;
+
+        let online = Arc::clone(&self.online);
+        let servername = registerer.servername();
+        let server_handle =
+            ServerHandler::from_connection(stream.try_clone()?, servername, database, online)?;
+
+        let handle = thread::spawn(|| server_handle.handle());
+        self.threads.push(handle);
 
         Ok(())
+    }
+
+    pub fn connect_to(&mut self, address: &str) {
+        if let Err(error) = self.try_connect_to(address) {
+            eprintln!("Could not connect to {address}, with error {error:?}");
+        }
     }
 }
 

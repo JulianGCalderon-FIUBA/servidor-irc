@@ -1,4 +1,7 @@
-use std::sync::{atomic::AtomicBool, Arc};
+use std::{
+    collections::HashMap,
+    sync::{atomic::AtomicBool, Arc},
+};
 
 use crate::server::{connection::Connection, database::DatabaseHandle};
 
@@ -9,14 +12,18 @@ use super::connection_handler_trait::{
 
 mod asserts;
 mod logic;
+mod responses;
+#[cfg(test)]
+mod tests;
 mod utils;
 
 pub struct ServerHandler<C: Connection> {
-    stream: C,                   // stream del servidor propio
-    _servername: String,         // server al que está conectado (original)
-    database: DatabaseHandle<C>, // handler para el servidor original
-    online: Arc<AtomicBool>,     // sobre el server original
-                                 // falta info del server propio
+    stream: C,
+    servername: String,
+    database: DatabaseHandle<C>,
+    online: Arc<AtomicBool>,
+    hopcounts: HashMap<String, usize>,
+    // falta info del server propio
 }
 
 impl<C: Connection> ConnectionHandler<C> for ServerHandler<C> {}
@@ -30,11 +37,14 @@ impl<C: Connection> ServerHandler<C> {
     ) -> std::io::Result<Self> {
         Ok(Self {
             stream,
-            _servername: servername,
+            servername,
             database,
             online,
+            hopcounts: HashMap::new(),
         })
     }
+
+  
 }
 
 impl<C: Connection> ConnectionHandlerGetters<C> for ServerHandler<C> {
@@ -53,10 +63,10 @@ impl<C: Connection> ConnectionHandlerGetters<C> for ServerHandler<C> {
 
 impl<C: Connection> ConnectionHandlerStructure<C> for ServerHandler<C> {
     fn on_try_handle_error(&mut self) {
-        todo!()
+        eprintln!("Connection with [{}] ended unexpectedly", self.servername)
     }
     fn on_try_handle_success(&mut self) {
-        todo!()
+        eprintln!("Closing conection with [{}]", self.servername)
     }
 }
 

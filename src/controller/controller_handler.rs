@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{
     message::Message,
-    server::connection_handler::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
+    server::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
 };
 
 use super::controller_message::ControllerMessage;

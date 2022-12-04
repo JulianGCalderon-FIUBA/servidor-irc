@@ -6,7 +6,7 @@ fn names_with_no_channels_prints_end_of_names() {
 
     let parameters = vec![];
 
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "366 :End of /NAMES list\r\n",
@@ -20,13 +20,13 @@ fn names_with_no_parameters_prints_all_channels() {
 
     let parameters = vec![];
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
 
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
     handler.database.add_client_to_channel("nick2", "#canal");
 
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     let mut responses = handler.stream.get_responses();
 
@@ -48,7 +48,7 @@ fn names_with_parameters_prints_requested_channels() {
     handler.database.add_client_to_channel("nickname", "#chau");
 
     let parameters = vec!["#hola,#chau".to_string()];
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -67,7 +67,7 @@ fn names_ignores_invalid_channels() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -84,13 +84,15 @@ fn name_ignores_secret_channels() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#secreto");
 
-    handler.database.set_channel_mode("#secreto", 's');
+    handler
+        .database
+        .set_channel_mode("#secreto", ChannelFlag::Secret);
 
     let parameters = vec!["#hola,#secreto,#chau".to_string()];
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -107,13 +109,15 @@ fn name_ignores_private_channels() {
     handler.database.add_client_to_channel("nickname", "#hola");
     handler.database.add_client_to_channel("nickname", "#chau");
 
-    handler.database.add_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("nick2", "#privado");
 
-    handler.database.set_channel_mode("#privado", 'p');
+    handler
+        .database
+        .set_channel_mode("#privado", ChannelFlag::Private);
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -133,10 +137,12 @@ fn name_prints_secret_channel_if_client_is_in_it() {
         .database
         .add_client_to_channel("nickname", "#secreto");
 
-    handler.database.set_channel_mode("#secreto", 's');
+    handler
+        .database
+        .set_channel_mode("#secreto", ChannelFlag::Secret);
 
     let parameters = vec!["#hola,#secreto,#chau".to_string()];
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 
@@ -158,10 +164,12 @@ fn name_prints_private_channel_if_client_is_in_it() {
         .database
         .add_client_to_channel("nickname", "#privado");
 
-    handler.database.set_channel_mode("#privado", 'p');
+    handler
+        .database
+        .set_channel_mode("#privado", ChannelFlag::Private);
 
     let parameters = vec!["#hola,#privado,#chau".to_string()];
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     let responses = handler.stream.get_responses();
 

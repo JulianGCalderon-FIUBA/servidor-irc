@@ -13,7 +13,7 @@ use self::requests::{
     add_invite_view_request, quit_channel_request, remove_conversation_request, send_names_request,
 };
 
-use super::{requests::change_conversation_request, MainView};
+use super::MainView;
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
@@ -48,13 +48,11 @@ impl MainView {
         current_conversation: Label,
         sender: Sender<ControllerMessage>,
     ) {
-        let my_nickname = self.user_info.label().unwrap();
         self.quit_channel_button.connect_clicked(move |_| {
             if is_channel(current_conversation.label().to_string()) {
                 quit_channel_request(sender.clone());
             }
             remove_conversation_request(sender.clone());
-            change_conversation_request(my_nickname.clone(), sender.clone());
         });
     }
 
@@ -91,6 +89,14 @@ impl MainView {
         if !collection_of_buttons.is_empty() {
             collection_of_buttons.remove(counter);
         }
+        self.welcome_view();
+    }
+
+    fn welcome_view(&mut self) {
+        self.current_chat.set_label("");
+        self.scrollwindow_chat.set_visible(false);
+        self.send_message.set_sensitive(false);
+        self.welcome_box.set_visible(true);
     }
 
     pub fn get_my_channels(&mut self) -> Vec<String> {

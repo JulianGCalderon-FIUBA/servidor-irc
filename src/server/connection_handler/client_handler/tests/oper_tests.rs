@@ -5,7 +5,7 @@ fn oper_fails_with_less_than_two_parameters() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec![];
-    handler.oper_command(parameters).unwrap();
+    handler.oper_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "461 OPER :Not enough parameters\r\n",
@@ -18,7 +18,7 @@ fn oper_fails_with_incorrect_credentials() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec!["user".to_string(), "user".to_string()];
-    handler.oper_command(parameters).unwrap();
+    handler.oper_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "464 :Password incorrect\r\n",
@@ -32,7 +32,7 @@ fn can_register_as_operator() {
     let mut handler = dummy_client_handler();
 
     let parameters = vec!["admin".to_string(), "admin".to_string()];
-    handler.oper_command(parameters).unwrap();
+    handler.oper_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "381 :You are now an IRC operator\r\n",

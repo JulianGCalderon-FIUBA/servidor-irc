@@ -1,12 +1,16 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
-use crate::server::connection_handler::consts::commands::{PASS_COMMAND, USER_COMMAND};
-use crate::server::connection_handler::responses::ErrorReply;
+use crate::server::connection_handler::connection_handler_trait::{
+    CommandArgs, ConnectionHandlerAsserts,
+};
+use crate::server::consts::commands::*;
+use crate::server::responses::ErrorReply;
 
 use super::RegistrationHandler;
 
 impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
-    fn assert_pass_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_pass_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
+
         if params.is_empty() {
             let command = PASS_COMMAND.to_string();
             return Err(ErrorReply::NeedMoreParameters461 { command });
@@ -19,7 +23,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         Ok(())
     }
 
-    fn assert_nick_command_is_valid(&self, params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_nick_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, _) = arguments;
+
         if params.is_empty() {
             return Err(ErrorReply::NoNicknameGiven431);
         }
@@ -29,11 +35,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         self.assert_nickname_collision(nickname)
     }
 
-    fn assert_user_command_is_valid(
-        &self,
-        params: &[String],
-        trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_user_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, trail) = arguments;
+
         if params.is_empty() || trail.is_none() {
             let command = USER_COMMAND.to_string();
             return Err(ErrorReply::NeedMoreParameters461 { command });
@@ -46,76 +50,85 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         Ok(())
     }
 
-    fn assert_oper_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_oper_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_privmsg_command_is_valid(
-        &self,
-        _params: &[String],
-        _trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_privmsg_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_notice_command_is_valid(
-        &self,
-        _params: &[String],
-        _trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_notice_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_join_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_join_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_part_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_part_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_invite_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_invite_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_names_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_names_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_list_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_list_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_who_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_who_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_whois_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_whois_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_away_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+    fn assert_away_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_topic_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_topic_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_kick_command_is_valid(
-        &self,
-        _params: &[String],
-        _trail: &Option<String>,
-    ) -> Result<(), ErrorReply> {
+    fn assert_kick_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_mode_command_is_valid(&self, _params: &[String]) -> Result<(), ErrorReply> {
+    fn assert_mode_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
 
-    fn assert_quit_command_is_valid(&self, _trail: &Option<String>) -> Result<(), ErrorReply> {
+    fn assert_quit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Ok(())
+    }
+
+    fn assert_server_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, trail) = arguments;
+
+        if params.len() < 2 || trail.is_none() {
+            let command = SERVER_COMMAND.to_string();
+            return Err(ErrorReply::NeedMoreParameters461 { command });
+        }
+
+        if params[1].parse::<usize>().is_err() {
+            let command = SERVER_COMMAND.to_string();
+            let message = "Hopcount is not numeric".to_string();
+            return Err(ErrorReply::UnknownError400 { command, message });
+        }
+
+        Ok(())
+    }
+
+    fn assert_squit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        Err(ErrorReply::NotRegistered451)
     }
 }
 

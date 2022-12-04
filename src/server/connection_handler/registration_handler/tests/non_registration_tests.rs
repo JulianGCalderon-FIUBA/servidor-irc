@@ -5,7 +5,7 @@ fn away_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let trailing = None;
-    handler.away_command(trailing).unwrap();
+    handler.away_command((None, vec![], trailing)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -18,7 +18,7 @@ fn invite_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.invite_command(parameters).unwrap();
+    handler.invite_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -31,7 +31,7 @@ fn join_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.join_command(parameters).unwrap();
+    handler.join_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -45,7 +45,7 @@ fn kick_fails_with_unregistered_client() {
 
     let parameters = vec![];
     let trailing = None;
-    handler.kick_command(parameters, trailing).unwrap();
+    handler.kick_command((None, parameters, trailing)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -58,7 +58,7 @@ fn list_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.list_command(parameters).unwrap();
+    handler.list_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -71,7 +71,7 @@ fn mode_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.mode_command(parameters).unwrap();
+    handler.mode_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -84,7 +84,7 @@ fn names_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.names_command(parameters).unwrap();
+    handler.names_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -98,7 +98,9 @@ fn notice_fails_with_unregistered_client() {
 
     let parameters = vec![];
     let trailing = None;
-    handler.notice_command(parameters, trailing).unwrap();
+    handler
+        .notice_command((None, parameters, trailing))
+        .unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -111,7 +113,7 @@ fn oper_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.oper_command(parameters).unwrap();
+    handler.oper_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -124,7 +126,7 @@ fn part_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.part_command(parameters).unwrap();
+    handler.part_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -138,7 +140,9 @@ fn privmsg_fails_with_unregistered_client() {
 
     let parameters = vec![];
     let trailing = None;
-    handler.privmsg_command(parameters, trailing).unwrap();
+    handler
+        .privmsg_command((None, parameters, trailing))
+        .unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -151,7 +155,7 @@ fn topic_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.topic_command(parameters).unwrap();
+    handler.topic_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -164,7 +168,7 @@ fn who_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.who_command(parameters).unwrap();
+    handler.who_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",
@@ -177,7 +181,7 @@ fn who_is_fails_with_unregistered_client() {
     let mut handler = dummy_registration_handler();
 
     let parameters = vec![];
-    handler.whois_command(parameters).unwrap();
+    handler.whois_command((None, parameters, None)).unwrap();
 
     assert_eq!(
         "451 :You have not registered\r\n",

@@ -4,8 +4,8 @@ use std::time::Duration;
 
 use crate::message::{CreationError, Message};
 use crate::server::connection::Connection;
-use crate::server::connection_handler::consts::commands::*;
-use crate::server::connection_handler::responses::ErrorReply;
+use crate::server::consts::commands::*;
+use crate::server::responses::ErrorReply;
 
 use super::{
     ConnectionHandlerCommands, ConnectionHandlerGetters, ConnectionHandlerUtils,
@@ -13,6 +13,8 @@ use super::{
 };
 
 // const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
+
+pub type CommandArgs = (Option<String>, Vec<String>, Option<String>);
 
 pub trait ConnectionHandlerStructure<C: Connection>:
     ConnectionHandlerCommands<C> + ConnectionHandlerGetters<C> + ConnectionHandlerUtils<C>
@@ -51,27 +53,30 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn handle_message(&mut self, message: Message) -> io::Result<bool> {
-        let (_prefix, command, parameters, trailing) = message.unpack();
+        let (prefix, command, parameters, trailing) = message.unpack();
+        let arguments = (prefix, parameters, trailing);
 
         match &command[..] {
-            PASS_COMMAND => self.pass_command(parameters),
-            NICK_COMMAND => self.nick_command(parameters),
-            USER_COMMAND => self.user_command(parameters, trailing),
-            OPER_COMMAND => self.oper_command(parameters),
-            PRIVMSG_COMMAND => self.privmsg_command(parameters, trailing),
-            NOTICE_COMMAND => self.notice_command(parameters, trailing),
-            JOIN_COMMAND => self.join_command(parameters),
-            PART_COMMAND => self.part_command(parameters),
-            INVITE_COMMAND => self.invite_command(parameters),
-            NAMES_COMMAND => self.names_command(parameters),
-            LIST_COMMAND => self.list_command(parameters),
-            WHO_COMMAND => self.who_command(parameters),
-            WHOIS_COMMAND => self.whois_command(parameters),
-            AWAY_COMMAND => self.away_command(trailing),
-            TOPIC_COMMAND => self.topic_command(parameters),
-            KICK_COMMAND => self.kick_command(parameters, trailing),
-            MODE_COMMAND => self.mode_command(parameters),
-            QUIT_COMMAND => self.quit_command(trailing),
+            PASS_COMMAND => self.pass_command(arguments),
+            NICK_COMMAND => self.nick_command(arguments),
+            USER_COMMAND => self.user_command(arguments),
+            OPER_COMMAND => self.oper_command(arguments),
+            PRIVMSG_COMMAND => self.privmsg_command(arguments),
+            NOTICE_COMMAND => self.notice_command(arguments),
+            JOIN_COMMAND => self.join_command(arguments),
+            PART_COMMAND => self.part_command(arguments),
+            INVITE_COMMAND => self.invite_command(arguments),
+            NAMES_COMMAND => self.names_command(arguments),
+            LIST_COMMAND => self.list_command(arguments),
+            WHO_COMMAND => self.who_command(arguments),
+            WHOIS_COMMAND => self.whois_command(arguments),
+            AWAY_COMMAND => self.away_command(arguments),
+            TOPIC_COMMAND => self.topic_command(arguments),
+            KICK_COMMAND => self.kick_command(arguments),
+            MODE_COMMAND => self.mode_command(arguments),
+            QUIT_COMMAND => self.quit_command(arguments),
+            SERVER_COMMAND => self.server_command(arguments),
+            SQUIT_COMMAND => self.squit_command(arguments),
             _ => self.on_unknown_command(command),
         }
     }
@@ -88,7 +93,7 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn on_server_shutdown(&mut self) -> io::Result<()> {
-        self.send_response(&"Server has shutdown")
+        self.stream().send(&"Server has shutdown")
     }
 
     fn on_timeout(&mut self) -> io::Result<()> {
@@ -96,6 +101,6 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn on_parsing_error(&mut self) -> io::Result<()> {
-        self.send_response(&ErrorReply::ParsingError)
+        self.stream().send(&ErrorReply::ParsingError)
     }
 }

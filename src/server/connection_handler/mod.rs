@@ -1,8 +1,7 @@
 mod client_handler;
 mod connection_handler_trait;
-pub mod consts;
+mod mode_requests;
 mod registration_handler;
-mod responses;
 mod server_handler;
 
 pub use connection_handler_trait::ConnectionHandler;
