@@ -44,8 +44,9 @@ impl<C: Connection> RegistrationHandler<C> {
         let nickname = &client_info.nickname();
         let username = &client_info.username;
         let servername = &client_info.servername;
+        let realname = &client_info.realname;
 
-        let response = CommandResponse::welcome(nickname, servername, username);
+        let response = CommandResponse::welcome(nickname, servername, username, realname);
         self.stream.send(&response)
     }
 }
