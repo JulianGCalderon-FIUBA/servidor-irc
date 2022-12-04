@@ -14,3 +14,9 @@ pub fn send_list_request(sender: Sender<ControllerMessage>) {
         .send(ControllerMessage::SendListMessage {})
         .expect(ERROR_TEXT);
 }
+
+pub fn add_notifications_view_request(sender: Sender<ControllerMessage>) {
+    sender
+        .send(ControllerMessage::AddNotificationsView {})
+        .expect(ERROR_TEXT);
+}

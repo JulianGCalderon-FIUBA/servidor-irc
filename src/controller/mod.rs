@@ -5,13 +5,14 @@ use std::collections::HashMap;
 
 use crate::{
     server::consts::commands::{
-        INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
-        PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND, KICK_COMMAND,
+        INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND,
+        PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND,
     },
     views::{
         view_register::RegisterView,
         views_add::{
-            view_add_channel::AddChannelView, view_invite::InviteView, view_warning::WarningView,
+            view_add_channel::AddChannelView, view_invite::InviteView,
+            view_notifications::NotificationsView, view_warning::WarningView,
         },
         views_add::{view_add_client::AddClientView, view_channel_members::ChannelMembersView},
     },
@@ -215,7 +216,7 @@ impl Controller {
                 }
                 RecieveInvite { nickname, channel } => {
                     let message = format!("{} has invited you to join {}", nickname, channel);
-                    main_view.receive_priv_client_message(message, channel, current_conv.clone());
+                    main_view.add_notification(message);
                 }
                 SendListMessage {} => {
                     client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
@@ -249,7 +250,7 @@ impl Controller {
                                 channels_and_clients[&current_conv].clone(),
                                 current_nickname.clone(),
                                 current_conv.clone(),
-                                sender.clone()
+                                sender.clone(),
                             )
                             .show();
                     }
@@ -266,6 +267,11 @@ impl Controller {
                             main_view.welcome_view();
                         }
                     }
+                }
+                AddNotificationsView {} => {
+                    NotificationsView::new()
+                        .get_view(app_clone.clone(), main_view.get_notifications())
+                        .show();
                 }
                 RegularMessage { message } => {
                     println!("{}", message);

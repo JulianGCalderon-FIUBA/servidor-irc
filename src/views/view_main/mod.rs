@@ -22,7 +22,7 @@ use self::{
     chat::widgets_creation::create_scrollwindow_chat,
     widgets_creation::{
         create_add_button, create_channels_and_client_box, create_current_chat, create_error_label,
-        create_message_box, create_scrollwindow_sidebar, create_welcome_box,
+        create_message_box, create_notifications_button, create_scrollwindow, create_welcome_box,
     },
 };
 
@@ -42,6 +42,8 @@ pub struct MainView {
     pub clients_buttons: Vec<Button>,
     pub scrollwindow_clients: ScrolledWindow,
     pub add_client: Button,
+    pub notifications_button: Button,
+    pub notifications: Vec<String>,
     pub welcome_box: Box,
     pub current_chat: Label,
     scrollwindow_chat: ScrolledWindow,
@@ -75,12 +77,14 @@ impl MainView {
         Self {
             channels_box: create_channels_and_client_box(),
             channels_buttons: vec![],
-            scrollwindow_channels: create_scrollwindow_sidebar(),
+            scrollwindow_channels: create_scrollwindow(),
             add_channel: create_add_button(ADD_BUTTON_TEXT),
             clients_box: create_channels_and_client_box(),
             clients_buttons: vec![],
-            scrollwindow_clients: create_scrollwindow_sidebar(),
+            scrollwindow_clients: create_scrollwindow(),
             add_client: create_add_button(ADD_BUTTON_TEXT),
+            notifications_button: create_notifications_button(),
+            notifications: vec![],
             welcome_box: create_welcome_box(),
             current_chat: create_current_chat(""),
             scrollwindow_chat: create_scrollwindow_chat(),
