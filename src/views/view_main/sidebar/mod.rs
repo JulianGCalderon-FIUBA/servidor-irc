@@ -76,7 +76,10 @@ impl MainView {
         );
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
-
+        if self.channels_buttons.len() >= 10 {
+            self.add_channel.remove_css_class("add");
+            self.add_channel.add_css_class("disabled_add_button")
+        }
         println!("Added to {}", channel);
 
         self.messages.insert(channel, vec![]);
