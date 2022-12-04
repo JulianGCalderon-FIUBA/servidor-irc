@@ -4,8 +4,8 @@ use gtk::glib::Sender;
 
 use gtk4 as gtk;
 
-pub fn kick_request(client: String, sender: Sender<ControllerMessage>) {
-    // sender
-    //     .send(ControllerMessage::KickMember { client: client })
-    //     .expect(ERROR_TEXT);
+pub fn kick_request(member: String, sender: Sender<ControllerMessage>) {
+    sender
+        .send(ControllerMessage::KickMember { channel: todo!(), member })
+        .expect(ERROR_TEXT);
 }

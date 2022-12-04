@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use crate::{
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
-        PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND,
+        PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND, KICK_COMMAND,
     },
     views::{
         view_register::RegisterView,
@@ -251,6 +251,10 @@ impl Controller {
                             )
                             .show();
                     }
+                }
+                KickMember { channel, member } => {
+                    let kick = format!("{} {} {}", KICK_COMMAND, channel, member);
+                    client.send_raw(&kick).expect(ERROR_TEXT);
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
