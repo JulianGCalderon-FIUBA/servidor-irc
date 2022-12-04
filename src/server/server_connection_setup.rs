@@ -1,10 +1,17 @@
 use std::io;
 
-use crate::message::{CreationError, Message};
+use crate::{
+    macros::ok_or_return,
+    message::{CreationError, Message},
+};
 
 use super::{
     connection::Connection,
-    consts::commands::SERVER_COMMAND,
+    consts::{
+        channel::DISTRIBUTED_CHANNEL,
+        commands::SERVER_COMMAND,
+        modes::{SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT},
+    },
     database::DatabaseHandle,
     responses::{ErrorReply, Notification},
 };
@@ -131,6 +138,19 @@ impl<C: Connection> ServerConnectionSetup<C> {
             client.hopcount += 1;
             self.send_nick_notification(&client)?;
             self.send_user_notification(&client)?;
+            if client.is_operator() {
+                self.send_oper_notification(&client)?;
+            }
+        }
+        for channel in self.database.get_all_channels() {
+            if !channel.starts_with(DISTRIBUTED_CHANNEL) {
+                continue;
+            }
+            let clients = ok_or_return!(self.database.get_channel_clients(&channel), Ok(()));
+            clients.iter().for_each(|client| {
+                self.send_join_notification(client, &channel).ok();
+            });
+            self.send_channel_mode_is_notification(&channel)?;
         }
 
         Ok(())
@@ -143,6 +163,74 @@ impl<C: Connection> ServerConnectionSetup<C> {
     fn send_nick_notification(&mut self, client: &ClientInfo) -> io::Result<()> {
         self.stream
             .send(&Notification::nick(&client.nickname(), client.hopcount))
+    }
+
+    fn send_oper_notification(&mut self, client: &ClientInfo) -> io::Result<()> {
+        self.stream.send(&Notification::mode(
+            &client.nickname(),
+            &client.nickname(),
+            "+o",
+        ))
+    }
+
+    fn send_join_notification(&mut self, nickname: &str, channel: &str) -> io::Result<()> {
+        self.stream.send(&Notification::join(nickname, channel))
+    }
+
+    pub(super) fn send_channel_mode_is_notification(&mut self, channel: &str) -> io::Result<()> {
+        let config = ok_or_return!(self.database.get_channel_config(channel), Ok(()));
+
+        let flags = config.flags;
+        let limit = config.user_limit;
+        let operators = config.operators;
+        let banmasks = config.banmasks;
+        let speakers = config.speakers;
+        let key = config.key;
+        let sender = &operators[0].clone();
+
+        for flag in flags {
+            let request = format!("+{}", flag.to_char());
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
+
+        if let Some(limit) = limit {
+            let request = format!("+{SET_USER_LIMIT} {limit}");
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
+
+        if let Some(key) = key {
+            let request = format!("+{SET_KEY} {:?}", key);
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
+
+        for operator in operators {
+            let request = format!("+{SET_OPERATOR} {operator}");
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
+
+        for banmask in banmasks {
+            let request = format!("+{SET_BANMASK} {:?}", banmask);
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
+
+        for speaker in speakers {
+            let request = format!("+{SET_SPEAKER} {:?}", speaker);
+            let notification = Notification::mode(sender, channel, &request);
+
+            self.stream.send(&notification)?;
+        }
+
+        Ok(())
     }
 }
 
