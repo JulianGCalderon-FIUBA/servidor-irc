@@ -31,9 +31,6 @@ impl MainView {
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
 
-        // self.user_info.connect_clicked(|_| println!("Hi"));
-        // message_sender_box.append(&self.user_info);
-
         self.input.set_width_request(600);
         self.input.set_margin_start(15);
         message_sender_box.append(&self.input);

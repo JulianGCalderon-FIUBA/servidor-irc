@@ -20,3 +20,9 @@ pub fn add_notifications_view_request(sender: Sender<ControllerMessage>) {
         .send(ControllerMessage::AddNotificationsView {})
         .expect(ERROR_TEXT);
 }
+
+pub fn add_user_info_view(sender: Sender<ControllerMessage>) {
+    sender
+        .send(ControllerMessage::AddUserInfoView {})
+        .expect(ERROR_TEXT);
+}

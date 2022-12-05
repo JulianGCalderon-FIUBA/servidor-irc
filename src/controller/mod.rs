@@ -13,7 +13,8 @@ use crate::{
         view_register::RegisterView,
         views_add::{
             view_add_channel::AddChannelView, view_invite::InviteView,
-            view_notifications::NotificationsView, view_warning::WarningView,
+            view_notifications::NotificationsView, view_user_info::UserInfoView,
+            view_warning::WarningView,
         },
         views_add::{view_add_client::AddClientView, view_channel_members::ChannelMembersView},
     },
@@ -98,7 +99,10 @@ impl Controller {
         let app_clone = app.clone();
         let sender_clone = sender.clone();
 
+        let mut current_realname: String = String::from("");
+        let mut current_servername: String = String::from("");
         let mut current_nickname: String = String::from("");
+        let mut current_username: String = String::from("");
         let mut trying_to_add_client: bool = false;
         let mut trying_to_invite_client: bool = false;
 
@@ -137,9 +141,17 @@ impl Controller {
                         Err(error) => eprintln!("Failed to read message: {}", error),
                     });
                 }
-                ChangeViewToMain { nickname } => {
+                ChangeViewToMain {
+                    realname,
+                    servername,
+                    nickname,
+                    username,
+                } => {
                     register_window.close();
+                    current_realname = String::from(&realname[..]);
+                    current_servername = String::from(&servername[..]);
                     current_nickname = String::from(&nickname[..]);
+                    current_username = String::from(&username[..]);
                     main_view.get_view(app_clone.clone(), nickname).show();
                 }
                 SendPrivMessage { message } => {
@@ -317,6 +329,17 @@ impl Controller {
                 AddNotificationsView {} => {
                     NotificationsView::new()
                         .get_view(app_clone.clone(), main_view.get_notifications())
+                        .show();
+                }
+                AddUserInfoView {} => {
+                    UserInfoView::new()
+                        .get_view(
+                            app_clone.clone(),
+                            current_realname.clone(),
+                            current_servername.clone(),
+                            current_nickname.clone(),
+                            current_username.clone(),
+                        )
                         .show();
                 }
                 AddWarningView { message } => {

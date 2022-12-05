@@ -97,7 +97,7 @@ fn user_sends_welcome_after_registering() {
     assert!(handler.database.contains_client("nickname"));
 
     assert_eq!(
-        "001 realname :Welcome to server servername, nickname: nickname, username: username\r\n",
+        "001 realname servername nickname username :Welcome to server servername, nickname: nickname, username: username\r\n",
         handler.stream.read_wbuf_to_string()
     )
 }

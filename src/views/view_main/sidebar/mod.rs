@@ -12,7 +12,10 @@ use crate::{
 };
 
 use self::{
-    requests::{add_notifications_view_request, add_view_to_add_client_request, send_list_request},
+    requests::{
+        add_notifications_view_request, add_user_info_view, add_view_to_add_client_request,
+        send_list_request,
+    },
     widgets_creation::create_separator_sidebar,
 };
 
@@ -40,6 +43,7 @@ impl MainView {
         self.connect_add_client_button(self.add_client.clone(), self.sender.clone());
 
         self.connect_notifications_button(self.notifications_button.clone(), self.sender.clone());
+        self.connect_user_info_button(self.user_info.clone(), self.sender.clone());
 
         sidebar.append(&channels_title);
         sidebar.append(&self.scrollwindow_channels);
@@ -50,9 +54,7 @@ impl MainView {
         sidebar.append(&self.add_client);
         sidebar.append(&create_separator_sidebar());
         sidebar.append(&self.notifications_button);
-        self.user_info.connect_clicked(|_| println!("Hi"));
         sidebar.append(&self.user_info);
-
 
         sidebar
     }
@@ -60,6 +62,12 @@ impl MainView {
     fn connect_add_client_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
             add_view_to_add_client_request(sender.clone());
+        });
+    }
+
+    fn connect_user_info_button(&self, button: Button, sender: Sender<ControllerMessage>) {
+        button.connect_clicked(move |_| {
+            add_user_info_view(sender.clone());
         });
     }
 
