@@ -165,10 +165,10 @@ impl Controller {
                         add_client_window.show();
                     } else {
                         sender_clone
-                        .send(ControllerMessage::AddWarningView {
-                            message: NO_CLIENTS_WARNING_TEXT.to_string(),
-                        })
-                        .expect(ERROR_TEXT);
+                            .send(ControllerMessage::AddWarningView {
+                                message: NO_CLIENTS_WARNING_TEXT.to_string(),
+                            })
+                            .expect(ERROR_TEXT);
                     }
                 }
                 ReceivePrivMessage {
@@ -210,8 +210,7 @@ impl Controller {
                         invite_window = InviteView::new(sender_clone.clone())
                             .get_view(app_clone.clone(), my_channels);
                         invite_window.show();
-                    }
-                    else{
+                    } else {
                         sender_clone
                             .send(ControllerMessage::AddWarningView {
                                 message: NO_CHANNELS_WARNING_TEXT.to_string(),
@@ -283,10 +282,10 @@ impl Controller {
                         .get_view(app_clone.clone(), main_view.get_notifications())
                         .show();
                 }
-                AddWarningView{message}=>{
+                AddWarningView { message } => {
                     WarningView::new()
-                            .get_view(app_clone.clone(), message)
-                            .show();
+                        .get_view(app_clone.clone(), message)
+                        .show();
                 }
                 RegularMessage { message } => {
                     println!("{}", message);

@@ -90,16 +90,6 @@ pub fn create_welcome_box() -> Box {
     welcome_box
 }
 
-pub fn create_error_label() -> Label {
-    let error_label = Label::builder()
-        .label("")
-        .halign(gtk::Align::Center)
-        .valign(gtk::Align::Center)
-        .build();
-    error_label.add_css_class("warning_text");
-    error_label
-}
-
 pub fn create_notifications_button() -> Button {
     let notifications_button = create_button("🔔 notifications (0)");
     notifications_button.add_css_class("notifications_button");
