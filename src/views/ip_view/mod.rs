@@ -16,7 +16,7 @@ use super::{
         build_application_window, create_center_button, create_entry, create_label,
         create_label_input_box, create_main_box,
     },
-    MAIN_BOX_CSS, view_main::requests::quit_request,
+    MAIN_BOX_CSS,
 };
 
 use crate::{controller::controller_message::ControllerMessage, ADDRESS};
@@ -59,17 +59,6 @@ impl IpView {
 
         window.set_child(Some(&main_box));
 
-        let sender_clone = self.sender.clone();
-        let app_clone = app.clone();
-
-        window.connect_destroy(move |_| {
-            println!("quity");
-            quit_request(sender_clone.clone());
-            app_clone.quit();
-        });
-
-        Self::close_view(window.clone(), app, self.sender.clone());
-
         window
     }
 
@@ -101,12 +90,5 @@ impl IpView {
         } else {
             address.to_string()
         }
-    }
-
-    fn close_view(window: ApplicationWindow, app: Application, sender: Sender<ControllerMessage>) {
-        window.connect_destroy(move |_| {
-            quit_request(sender.clone());
-            app.quit();
-        });
     }
 }
