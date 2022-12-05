@@ -12,6 +12,7 @@ pub enum ControllerMessage {
         new_client: GString,
     },
     AddNotificationsView {},
+    AddUserInfoView {},
     AddWarningView {
         message: String,
     },
@@ -23,7 +24,10 @@ pub enum ControllerMessage {
         nickname: String,
     },
     ChangeViewToMain {
+        realname: String,
+        servername: String,
         nickname: String,
+        username: String,
     },
     JoinChannel {
         channel: String,

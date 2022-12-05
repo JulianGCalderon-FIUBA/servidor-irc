@@ -198,7 +198,7 @@ impl Display for CommandResponse {
                 username,
                 realname,
             } => {
-                format!("001 {realname} :Welcome to server {servername}, nickname: {nickname}, username: {username}")
+                format!("001 {realname} {servername} {nickname} {username} :Welcome to server {servername}, nickname: {nickname}, username: {username}")
             }
         };
         write!(f, "{string}")

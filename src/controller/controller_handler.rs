@@ -58,7 +58,10 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
             channel: message.get_parameters()[0].clone(),
         },
         LOGIN_OK => ControllerMessage::ChangeViewToMain {
-            nickname: message.get_parameters()[0].clone(),
+            realname: message.get_parameters()[0].clone(),
+            servername: message.get_parameters()[1].clone(),
+            nickname: message.get_parameters()[2].clone(),
+            username: message.get_parameters()[3].clone(),
         },
         END_LIST_RPL_COMMAND => unsafe {
             let channels_clone: Vec<String> = CHANNELS_LIST_COMMAND.clone();

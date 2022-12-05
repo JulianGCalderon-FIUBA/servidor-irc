@@ -68,7 +68,6 @@ impl IpView {
 
             if Self::register_fiels_are_valid(&address) {
                 to_register_request(address, sender.clone());
-                // change_view_to_main_request(nickname, sender.clone());
             }
         });
     }

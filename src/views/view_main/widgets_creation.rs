@@ -27,7 +27,7 @@ pub fn create_message_box() -> Box {
         .margin_bottom(10)
         .margin_start(10)
         .margin_bottom(10)
-        .width_request(620)
+        .width_request(645)
         .halign(Start)
         .build()
 }
@@ -92,6 +92,7 @@ pub fn create_welcome_box() -> Box {
 
 pub fn create_notifications_button() -> Button {
     let notifications_button = create_button("🔔 notifications (0)");
+    notifications_button.set_margin_top(5);
     notifications_button.add_css_class("notifications_button");
     notifications_button
 }

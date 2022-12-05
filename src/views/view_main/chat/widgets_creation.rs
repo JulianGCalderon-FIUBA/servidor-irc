@@ -67,7 +67,7 @@ pub fn create_message_sender_box() -> Box {
 
 pub fn create_scrollwindow_chat() -> ScrolledWindow {
     let scrolled_window = ScrolledWindow::builder()
-        .min_content_height(600)
+        .min_content_height(720)
         .max_content_width(500)
         .margin_top(20)
         .margin_start(20)
