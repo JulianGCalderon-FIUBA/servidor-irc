@@ -17,7 +17,7 @@ pub enum ControllerMessage {
         nickname: String,
     },
     ChangeViewToMain {
-        nickname: GString,
+        nickname: String,
     },
     JoinChannel {
         channel: String,
@@ -38,13 +38,15 @@ pub enum ControllerMessage {
         nickname: GString,
         username: GString,
         realname: GString,
-        address: String,
     },
     RegularMessage {
         message: String,
     },
     SendInviteMessage {
         channel: GString,
+    },
+    ToRegister {
+        address: String,
     },
     ReceiveListChannels {
         channels: Vec<String>,

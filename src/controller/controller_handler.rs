@@ -7,6 +7,7 @@ use crate::{
 
 use super::controller_message::ControllerMessage;
 
+pub const LOGIN_OK: &str = "001";
 pub const LIST_RPL_COMMAND: &str = "322";
 pub const END_LIST_RPL_COMMAND: &str = "323";
 pub const NAMES_RPL_COMMAND: &str = "353";
@@ -55,6 +56,9 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         KICK_COMMAND => ControllerMessage::ReceiveKick {
             kicked: message.get_parameters()[1].clone(),
             channel: message.get_parameters()[0].clone(),
+        },
+        LOGIN_OK => ControllerMessage::ChangeViewToMain {
+            nickname: message.get_parameters()[0].clone(),
         },
         END_LIST_RPL_COMMAND => unsafe {
             let channels_clone: Vec<String> = CHANNELS_LIST_COMMAND.clone();

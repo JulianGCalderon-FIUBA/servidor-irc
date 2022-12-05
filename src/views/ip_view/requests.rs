@@ -3,20 +3,9 @@ use gtk4 as gtk;
 
 use crate::controller::controller_message::ControllerMessage;
 
-pub fn register_request(
-    pass: GString,
-    nickname: GString,
-    username: GString,
-    realname: GString,
-    sender: Sender<ControllerMessage>,
-) {
-    let register = ControllerMessage::Register {
-        pass,
-        nickname,
-        username,
-        realname,
-    };
-    sender.send(register).expect("Error: pass command");
+pub fn to_register_request(address: String, sender: Sender<ControllerMessage>) {
+    let to_register = ControllerMessage::ToRegister { address };
+    sender.send(to_register).expect("Error: pass command");
 }
 
 pub fn change_view_to_main_request(nickname: GString, sender: Sender<ControllerMessage>) {

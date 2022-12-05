@@ -1,10 +1,6 @@
 pub mod requests;
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Align, Box, Button, Label, Orientation,
-};
+use gtk::{glib::Sender, prelude::*, Align, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
 use crate::controller::{controller_handler::is_channel, controller_message::ControllerMessage};
@@ -18,7 +14,7 @@ use super::MainView;
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
 impl MainView {
-    pub fn create_conv_info(&mut self, nickname: &GString) -> Box {
+    pub fn create_conv_info(&mut self, nickname: &String) -> Box {
         let conv_info = Box::builder()
             .orientation(Orientation::Vertical)
             .width_request(177)

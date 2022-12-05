@@ -1,3 +1,4 @@
+pub mod ip_view;
 pub mod view_main;
 pub mod view_register;
 pub mod views_add;

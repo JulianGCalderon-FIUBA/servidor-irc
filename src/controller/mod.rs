@@ -9,6 +9,7 @@ use crate::{
         PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND,
     },
     views::{
+        ip_view::IpView,
         view_register::RegisterView,
         views_add::{
             view_add_channel::AddChannelView, view_invite::InviteView,
@@ -71,9 +72,13 @@ impl Controller {
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
+        let mut ip_view = IpView::new(sender.clone());
+        let ip_window = ip_view.get_view(app.clone());
+        ip_window.show();
+
         let mut register_view = RegisterView::new(sender.clone());
         let register_window = register_view.get_view(app.clone());
-        register_window.show();
+        // register_window.show();
 
         let mut main_view = MainView::new(sender.clone());
 
@@ -95,18 +100,20 @@ impl Controller {
 
         receiver.attach(None, move |msg| {
             match msg {
+                ToRegister { address } => {
+                    client = match Client::new(address) {
+                        Ok(stream) => stream,
+                        Err(error) => panic!("Error connecting to server: {:?}", error),
+                    };
+                    ip_window.close();
+                    register_window.show();
+                }
                 Register {
                     pass,
                     nickname,
                     username,
                     realname,
-                    address,
                 } => {
-                    client = match Client::new(address) {
-                        Ok(stream) => stream,
-                        Err(error) => panic!("Error connecting to server: {:?}", error),
-                    };
-
                     let pass_command = format!("{} {}", PASS_COMMAND, pass);
                     let nick_command = format!("{} {}", NICK_COMMAND, nickname);
                     let user_command = format!(
