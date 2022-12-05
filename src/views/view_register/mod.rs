@@ -20,8 +20,10 @@ use super::{
 
 use crate::controller::controller_message::ControllerMessage;
 
-const LOGIN_BUTTON_TEXT: &str = "login";
-const ERR_FIELDS_REQUIRED: &str = "All fields are required";
+const LOGIN_BUTTON_TEXT: &str = "Login";
+const ERR_FIELDS_REQUIRED: &str = "¡All fields are required!";
+const FIELD_MAX_CHARACTERS: usize = 9;
+const FIELD_MAX_CHARACTERS_ERROR: &str = "¡Fields are too long!";
 
 pub struct RegisterView {
     pub realname_entry: Entry,
@@ -107,7 +109,17 @@ impl RegisterView {
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
                 register_request(pass, nickname, username, realname, sender.clone());
             } else {
-                error_label.set_text(ERR_FIELDS_REQUIRED);
+                if nickname.len() > FIELD_MAX_CHARACTERS
+                    || realname.len() > FIELD_MAX_CHARACTERS
+                    || username.len() > FIELD_MAX_CHARACTERS
+                    || pass.len() > FIELD_MAX_CHARACTERS
+                {
+                    error_label.set_text(&format!(
+                        "{FIELD_MAX_CHARACTERS_ERROR} Max: {FIELD_MAX_CHARACTERS} characters"
+                    ));
+                } else {
+                    error_label.set_text(ERR_FIELDS_REQUIRED);
+                }
             }
         });
     }
@@ -118,6 +130,13 @@ impl RegisterView {
         username: &GString,
         realname: &GString,
     ) -> bool {
-        !realname.is_empty() && !pass.is_empty() && !nickname.is_empty() && !username.is_empty()
+        !realname.is_empty()
+            && !pass.is_empty()
+            && !nickname.is_empty()
+            && !username.is_empty()
+            && pass.len() < FIELD_MAX_CHARACTERS
+            && nickname.len() < FIELD_MAX_CHARACTERS
+            && nickname.len() < FIELD_MAX_CHARACTERS
+            && realname.len() < FIELD_MAX_CHARACTERS
     }
 }
