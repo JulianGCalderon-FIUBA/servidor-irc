@@ -65,9 +65,11 @@ impl MainView {
         self.send_message.connect_clicked(move |_| {
             error_label.set_text("");
             let input_text = input.text();
-            if !entry_is_valid(&input_text) {
-                if input_text.len() > 0 {
+            if !entry_is_valid(&input_text, 70) {
+                if !input_text.is_empty() {
                     error_label.set_text("¡Message too long! Max: 70 characters");
+                } else {
+                    error_label.set_text("¡Message is empty!");
                 }
                 return;
             }

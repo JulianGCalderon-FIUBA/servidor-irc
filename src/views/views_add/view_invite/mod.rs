@@ -69,5 +69,6 @@ impl InviteView {
         for channel in &channels {
             self.channel_combobox.append_text(&channel.clone());
         }
+        self.channel_combobox.set_active(Some(0));
     }
 }

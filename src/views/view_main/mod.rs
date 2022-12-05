@@ -21,17 +21,31 @@ use crate::controller::controller_message::ControllerMessage;
 use self::{
     chat::widgets_creation::create_scrollwindow_chat,
     widgets_creation::{
-        create_add_button, create_channels_and_client_box, create_current_chat, create_error_label,
-        create_message_box, create_notifications_button, create_scrollwindow, create_welcome_box,
+        create_add_button, create_channels_and_client_box, create_current_chat, create_message_box,
+        create_notifications_button, create_scrollwindow, create_welcome_box,
     },
 };
 
 use super::{
     widgets_creation::{
-        build_application_window, create_button_with_margin, create_entry, create_separator,
+        build_application_window, create_button_with_margin, create_entry, create_error_label,
+        create_separator,
     },
     MAIN_BOX_CSS,
 };
+
+const ADD_BUTTON_TEXT: &str = "+";
+const ENTRY_PLACEHOLDER: &str = "Message...";
+const SEND_BUTTON_TEXT: &str = "Send";
+const QUIT_BUTTON_TEXT: &str = "x";
+const MEMBERS_BUTTON_TEXT: &str = "Members";
+const INVITE_BUTTON_TEXT: &str = "Invite to channel";
+const ADD_BUTTON_CSS: &str = "add";
+const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
+const WELCOME_MESSAGE: &str = "Open a new chat to start...";
+const WELCOME_MESSAGE_CSS: &str = "welcome_message";
+const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
+const WELCOME_TITLE_CSS: &str = "welcome_title";
 
 pub struct MainView {
     pub channels_box: Box,
@@ -58,19 +72,6 @@ pub struct MainView {
     pub invite_button: Button,
     sender: Sender<ControllerMessage>,
 }
-
-const ADD_BUTTON_TEXT: &str = "+";
-const ENTRY_PLACEHOLDER: &str = "Message...";
-const SEND_BUTTON_TEXT: &str = "Send";
-const QUIT_BUTTON_TEXT: &str = "x";
-const MEMBERS_BUTTON_TEXT: &str = "Members";
-const INVITE_BUTTON_TEXT: &str = "Invite to channel";
-const ADD_BUTTON_CSS: &str = "add";
-const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
-const WELCOME_MESSAGE: &str = "Open a new chat to start...";
-const WELCOME_MESSAGE_CSS: &str = "welcome_message";
-const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
-const WELCOME_TITLE_CSS: &str = "welcome_title";
 
 impl MainView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {

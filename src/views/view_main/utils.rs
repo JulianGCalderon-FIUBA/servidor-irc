@@ -7,6 +7,6 @@ pub fn adjust_scrollbar(scrolled_window: ScrolledWindow) {
     scrolled_window.set_vadjustment(Some(&adj));
 }
 
-pub fn entry_is_valid(entry_text: &str) -> bool {
-    !entry_text.is_empty() && entry_text.len() < 70
+pub fn entry_is_valid(entry_text: &str, max_characters: usize) -> bool {
+    !entry_text.is_empty() && entry_text.len() < max_characters
 }
