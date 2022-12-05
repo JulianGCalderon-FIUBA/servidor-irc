@@ -79,7 +79,7 @@ impl AddClientView {
         });
     }
 
-    /// Fills combobox options with existing clients
+    /// Fills combobox options with existing clients.
     fn refill_combobox(&mut self, clients: Vec<String>) {
         for client in clients {
             self.client_combobox.append_text(&client.clone());
