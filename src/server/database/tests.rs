@@ -204,7 +204,7 @@ fn can_get_all_clients() {
 
     let expected = vec![clientinfo1, clientinfo2];
     let mut real = database.get_all_clients();
-    real.sort_by_key(|client| client.nickname());
+    real.sort_by_key(|client| client.nickname.clone());
 
     assert_eq!(real, expected);
 }
@@ -466,7 +466,7 @@ fn can_get_client_info() {
     database.add_local_client(client);
 
     let expected_info = ClientInfo {
-        nicknames: vec!["nickname".to_string()],
+        nickname: "nickname".to_string(),
         username: "username".to_string(),
         hostname: "127.0.0.1".to_string(),
         servername: "servername".to_string(),

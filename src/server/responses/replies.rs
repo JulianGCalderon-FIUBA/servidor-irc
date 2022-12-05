@@ -103,7 +103,7 @@ impl Display for CommandResponse {
             CommandResponse::WhoisUser311 { client_info } => {
                 format!(
                     "311 {} {} {} *: {}",
-                    client_info.nickname(),
+                    client_info.nickname,
                     client_info.username,
                     client_info.hostname,
                     client_info.realname,
@@ -208,10 +208,7 @@ impl Display for CommandResponse {
 fn build_whoreply_message(client_info: &ClientInfo, channel: &Option<String>) -> String {
     let basic_info = format!(
         "{} {} {} {}",
-        client_info.username,
-        client_info.hostname,
-        client_info.servername,
-        client_info.nickname(),
+        client_info.username, client_info.hostname, client_info.servername, client_info.nickname,
     );
 
     let flags = client_info

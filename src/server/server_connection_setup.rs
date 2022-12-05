@@ -164,13 +164,13 @@ impl<C: Connection> ServerConnectionSetup<C> {
 
     fn send_nick_notification(&mut self, client: &ClientInfo) -> io::Result<()> {
         self.stream
-            .send(&Notification::nick(&client.nickname(), client.hopcount))
+            .send(&Notification::nick(&client.nickname, client.hopcount))
     }
 
     fn send_oper_notification(&mut self, client: &ClientInfo) -> io::Result<()> {
         self.stream.send(&Notification::mode(
-            &client.nickname(),
-            &client.nickname(),
+            &client.nickname,
+            &client.nickname,
             "+o",
         ))
     }

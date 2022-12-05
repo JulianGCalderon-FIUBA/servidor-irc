@@ -32,8 +32,8 @@ impl<C: Connection> RegistrationHandler<C> {
     }
 
     pub fn send_new_client_notification(&mut self, info: &ClientInfo) {
-        let nickname = info.nickname();
-        let nick_notification = Notification::nick(&nickname, 1);
+        let nickname = &info.nickname;
+        let nick_notification = Notification::nick(nickname, 1);
         self.send_message_to_all_servers(&nick_notification);
 
         let user_notification = Notification::user(info);
@@ -41,7 +41,7 @@ impl<C: Connection> RegistrationHandler<C> {
     }
 
     pub fn send_welcome_response(&mut self, client_info: ClientInfo) -> std::io::Result<()> {
-        let nickname = &client_info.nickname();
+        let nickname = &client_info.nickname;
         let username = &client_info.username;
         let servername = &client_info.servername;
         let realname = &client_info.realname;

@@ -30,7 +30,7 @@ impl ExternalClient {
     }
 
     pub fn nickname(&self) -> String {
-        self.info.nickname()
+        self.info.nickname.clone()
     }
 
     pub fn immediate(&self) -> String {

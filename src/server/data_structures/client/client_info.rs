@@ -5,8 +5,7 @@ use crate::server::consts::user_flag::UserFlag;
 #[derive(PartialEq, Eq, Debug, Clone)]
 /// ClientInfo contains public client information.
 pub struct ClientInfo {
-    /// stores history of client's nicknames
-    pub nicknames: Vec<String>,
+    pub nickname: String,
     pub username: String,
     pub hostname: String,
     pub servername: String,
@@ -20,15 +19,8 @@ pub struct ClientInfo {
 }
 
 impl ClientInfo {
-    pub fn nickname(&self) -> String {
-        self.nicknames
-            .last()
-            .expect("There should always be at least one nickname")
-            .clone()
-    }
-
     pub fn matches_banmask(&self, query: &str) -> bool {
-        if matches(&self.nickname(), query) {
+        if matches(&self.nickname, query) {
             return true;
         }
 
@@ -47,7 +39,7 @@ impl ClientInfo {
     }
 
     pub fn matches_mask(&self, query: &str) -> bool {
-        if matches(&self.nickname(), query) {
+        if matches(&self.nickname, query) {
             return true;
         }
         if matches(&self.username, query) {
@@ -67,11 +59,11 @@ impl ClientInfo {
     }
 
     pub fn matches_nickmask(&self, query: &str) -> bool {
-        matches(&self.nickname(), query)
+        matches(&self.nickname, query)
     }
 
     pub fn update_nickname(&mut self, nickname: String) {
-        self.nicknames.push(nickname)
+        self.nickname = nickname
     }
 
     pub fn add_flag(&mut self, flag: UserFlag) {

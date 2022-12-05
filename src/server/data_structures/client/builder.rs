@@ -78,7 +78,7 @@ impl<C: Connection> ClientBuilder<C> {
 
     fn build_info(&mut self) -> Option<ClientInfo> {
         let info = ClientInfo {
-            nicknames: vec![self.nickname.take()?],
+            nickname: self.nickname.take()?,
             username: self.username.take()?,
             hostname: self.hostname.take()?,
             servername: self.servername.take()?,

@@ -310,17 +310,15 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             let server_clients: Vec<ClientInfo> = all_clients
                 .into_iter()
                 .filter(|client| {
-                    let server = ok_or_return!(
-                        self.database.get_immediate_server(&client.nickname()),
-                        false
-                    );
+                    let server =
+                        ok_or_return!(self.database.get_immediate_server(&client.nickname), false);
                     server == *servername
                 })
                 .collect();
 
             for client in server_clients {
-                self.database.disconnect_client(&client.nickname());
-                self.send_quit_notification(&client.nickname(), "Net split");
+                self.database.disconnect_client(&client.nickname);
+                self.send_quit_notification(&client.nickname, "Net split");
             }
         }
 

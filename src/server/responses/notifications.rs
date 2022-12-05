@@ -128,7 +128,7 @@ impl Display for Notification {
             Notification::User { client } => {
                 format!(
                     ":{} {USER_COMMAND} {} {} {} :{}",
-                    client.nickname(),
+                    client.nickname,
                     client.username,
                     client.hostname,
                     client.servername,

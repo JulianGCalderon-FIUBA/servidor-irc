@@ -65,7 +65,7 @@ impl<C: Connection> ClientHandler<C> {
 
         all_clients.retain(|client| {
             let channels = ok_or_return!(
-                self.database.get_channels_for_client(&client.nickname()),
+                self.database.get_channels_for_client(&client.nickname),
                 false
             );
 
