@@ -1,7 +1,7 @@
 use std::io;
 
 use crate::{
-    macros::ok_or_return,
+    macros::{ok_or_return, some_or_return},
     message::{CreationError, Message},
 };
 
@@ -11,7 +11,10 @@ use super::{
         channel::DISTRIBUTED_CHANNEL,
         channel_flag::ChannelFlag,
         commands::SERVER_COMMAND,
-        modes::{ADD_OPERATOR, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT},
+        modes::{
+            ADD_OPERATOR, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
+            TOPIC_SETTABLE,
+        },
     },
     database::DatabaseHandle,
     responses::{ErrorReply, Notification},
@@ -184,6 +187,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
 
         let flags = config.flags;
         let limit = config.user_limit;
+        let topic = config.topic;
         let operators = config.operators;
         let banmasks = config.banmasks;
         let speakers = config.speakers;
@@ -196,6 +200,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         self.send_operators_notification(operators, sender, channel)?;
         self.send_banmasks_notification(banmasks, sender, channel)?;
         self.send_speakers_notification(speakers, sender, channel)?;
+        self.send_topic_notification(topic, sender, channel)?;
 
         Ok(())
     }
@@ -288,6 +293,20 @@ impl<C: Connection> ServerConnectionSetup<C> {
             self.stream.send(&notification)?;
         }
         Ok(())
+    }
+
+    fn send_topic_notification(
+        &mut self,
+        topic: Option<String>,
+        sender: &str,
+        channel: &str,
+    ) -> io::Result<()> {
+        let topic = some_or_return!(topic, Ok(()));
+
+        let request = format!("+{} {}", TOPIC_SETTABLE, topic);
+        let notification = Notification::mode(sender, channel, &request);
+
+        self.stream.send(&notification)
     }
 }
 

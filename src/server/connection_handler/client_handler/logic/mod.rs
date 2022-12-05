@@ -95,7 +95,12 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
             self.send_join_notification(channel);
 
+            let creating_channel = !self.database.contains_channel(channel);
+
             self.database.add_client_to_channel(channel, &self.nickname);
+            if creating_channel {
+                self.database.add_channel_operator(channel, &self.nickname);
+            }
 
             self.send_join_response(channel)?;
         }
