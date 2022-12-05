@@ -98,8 +98,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             let creating_channel = !self.database.contains_channel(channel);
 
             self.database.add_client_to_channel(channel, &self.nickname);
+
             if creating_channel {
                 self.database.add_channel_operator(channel, &self.nickname);
+                self.send_channel_operator_notification(channel, &self.nickname);
             }
 
             self.send_join_response(channel)?;

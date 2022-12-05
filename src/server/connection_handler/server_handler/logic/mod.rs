@@ -91,12 +91,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         let nickname = prefix.expect("Verified in assert");
         let channel = params.remove(0);
 
-        let creating_channel = !self.database.contains_channel(&channel);
-
         self.database.add_client_to_channel(&channel, &nickname);
-        if creating_channel {
-            self.database.add_channel_operator(&channel, &nickname);
-        }
 
         self.send_join_notification(&nickname, &channel);
         Ok(true)

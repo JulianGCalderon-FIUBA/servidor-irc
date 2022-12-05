@@ -11,10 +11,7 @@ use super::{
         channel::DISTRIBUTED_CHANNEL,
         channel_flag::ChannelFlag,
         commands::SERVER_COMMAND,
-        modes::{
-            ADD_OPERATOR, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
-            TOPIC_SETTABLE,
-        },
+        modes::{ADD_OPERATOR, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT},
     },
     database::DatabaseHandle,
     responses::{ErrorReply, Notification},
@@ -44,7 +41,9 @@ impl<C: Connection> ServerConnectionSetup<C> {
 
     /// Register as server to an outcoming connection
     pub fn register_outcoming(&mut self) -> io::Result<()> {
-        self.send_server_notification()?;
+        let own_serverinfo = self.database.get_own_server_info();
+        let own_servername = self.database.get_server_name();
+        self.send_server_notification(own_servername, own_serverinfo)?;
         self.receive_server_notification()?;
         self.send_server_data()
     }
@@ -57,7 +56,10 @@ impl<C: Connection> ServerConnectionSetup<C> {
         serverinfo: String,
     ) -> io::Result<()> {
         self.handle_server_command(servername, hopcount, serverinfo)?;
-        self.send_server_notification()?;
+
+        let own_servername = self.database.get_server_name();
+        let own_serverinfo = self.database.get_own_server_info();
+        self.send_server_notification(own_servername, own_serverinfo)?;
         self.send_server_data()
     }
 
@@ -65,10 +67,11 @@ impl<C: Connection> ServerConnectionSetup<C> {
         self.servername.clone()
     }
 
-    fn send_server_notification(&mut self) -> io::Result<()> {
-        let servername = self.database.get_server_name();
-        let serverinfo = self.database.get_own_server_info();
-
+    fn send_server_notification(
+        &mut self,
+        servername: String,
+        serverinfo: String,
+    ) -> io::Result<()> {
         self.stream
             .send(&Notification::server(&servername, 1, &serverinfo))
     }
@@ -143,8 +146,13 @@ impl<C: Connection> ServerConnectionSetup<C> {
             client.hopcount += 1;
             self.send_nick_notification(&client)?;
             self.send_user_notification(&client)?;
+
             if client.is_operator() {
                 self.send_oper_notification(&client)?;
+            }
+
+            if let Some(away) = client.away {
+                self.send_away_notification(&client.nickname, away)?;
             }
         }
         for channel in self.database.get_all_channels() {
@@ -156,6 +164,16 @@ impl<C: Connection> ServerConnectionSetup<C> {
                 self.send_join_notification(client, &channel).ok();
             });
             self.send_channel_mode_is_notification(&channel)?;
+        }
+        for server in self.database.get_all_servers() {
+            if server == self.servername {
+                continue;
+            }
+
+            if let Ok(info) = self.database.get_server_info(&server) {
+                let serverinfo = info.serverinfo;
+                self.send_server_notification(server, serverinfo)?;
+            }
         }
 
         Ok(())
@@ -302,10 +320,12 @@ impl<C: Connection> ServerConnectionSetup<C> {
         channel: &str,
     ) -> io::Result<()> {
         let topic = some_or_return!(topic, Ok(()));
+        let notification = Notification::topic(sender, channel, &topic);
+        self.stream.send(&notification)
+    }
 
-        let request = format!("+{} {}", TOPIC_SETTABLE, topic);
-        let notification = Notification::mode(sender, channel, &request);
-
+    fn send_away_notification(&mut self, nickname: &str, away: String) -> io::Result<()> {
+        let notification = Notification::away(nickname, &Some(away));
         self.stream.send(&notification)
     }
 }
