@@ -13,8 +13,8 @@ use self::requests::to_register_request;
 
 use super::{
     widgets_creation::{
-        build_application_window, create_center_button, create_entry, create_label_input_box,
-        create_main_box, create_label,
+        build_application_window, create_center_button, create_entry, create_label,
+        create_label_input_box, create_main_box,
     },
     MAIN_BOX_CSS,
 };
@@ -55,44 +55,32 @@ impl IpView {
 
         main_box.append(&self.ok_button);
 
-        self.connect_button(
-            self.address_entry.clone(),
-            self.sender.clone(),
-        );
+        self.connect_button(self.address_entry.clone(), self.sender.clone());
 
         window.set_child(Some(&main_box));
 
         window
     }
 
-    fn connect_button(
-        &self,
-        address_entry: Entry,
-        sender: Sender<ControllerMessage>,
-    ) {
+    fn connect_button(&self, address_entry: Entry, sender: Sender<ControllerMessage>) {
         self.ok_button.connect_clicked(move |_| {
             let address = Self::unpack_entry(address_entry.text());
 
             if Self::register_fiels_are_valid(&address) {
-                to_register_request(
-                    address,
-                    sender.clone(),
-                );
+                to_register_request(address, sender.clone());
                 // change_view_to_main_request(nickname, sender.clone());
             }
         });
     }
 
-    fn register_fiels_are_valid(
-        address: &String,
-    ) -> bool {
+    fn register_fiels_are_valid(address: &String) -> bool {
         let ip: Vec<&str> = address.split(":").collect();
         if ip.len() != 2 {
-            return false
+            return false;
         }
         match IpAddr::from_str(ip[0]) {
             Ok(_) => ip[1].parse::<i32>().expect("Not a number") < 10000,
-            Err(_) => false
+            Err(_) => false,
         }
     }
 

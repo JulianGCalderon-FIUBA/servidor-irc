@@ -65,5 +65,5 @@ pub enum ControllerMessage {
     ReceiveKick {
         kicked: String,
         channel: String,
-    }
+    },
 }

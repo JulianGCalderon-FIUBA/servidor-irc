@@ -5,8 +5,8 @@ use std::collections::HashMap;
 
 use crate::{
     server::consts::commands::{
-        INVITE_COMMAND, JOIN_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND, PART_COMMAND,
-        PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND, KICK_COMMAND,
+        INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND,
+        PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND,
     },
     views::{
         ip_view::IpView,
@@ -256,7 +256,7 @@ impl Controller {
                                 channels_and_clients[&current_conv].clone(),
                                 current_nickname.clone(),
                                 current_conv.clone(),
-                                sender.clone()
+                                sender.clone(),
                             )
                             .show();
                     }
