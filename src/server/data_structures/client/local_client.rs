@@ -31,7 +31,7 @@ impl<C: Connection> LocalClient<C> {
     }
 
     pub fn nickname(&self) -> String {
-        self.info.nickname()
+        self.info.nickname.clone()
     }
 
     pub fn info_mut(&mut self) -> &mut ClientInfo {

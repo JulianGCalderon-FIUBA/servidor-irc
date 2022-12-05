@@ -1,3 +1,5 @@
+use crate::server::testing::{dummy_external_client, dummy_server};
+
 use super::*;
 
 #[test]
@@ -172,4 +174,38 @@ fn whois_works_with_nickmask() {
         sorted_responses[2][1]
     );
     assert_eq!("318 nickname3 :End of /WHOIS list", sorted_responses[2][2]);
+}
+
+#[test]
+fn whois_fails_with_unknown_server() {
+    let mut handler = dummy_client_handler();
+    let parameters = vec!["server1".to_string(), "nickname".to_string()];
+
+    handler.whois_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "402 server1 :No such server\r\n",
+        handler.stream.read_wbuf_to_string()
+    )
+}
+
+#[test]
+fn whois_with_server_param_only_sends_response_for_clients_in_server() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database()
+        .add_immediate_server(dummy_server("servername2"));
+    let client = dummy_external_client("nickname2", "servername2");
+    handler.database.add_external_client(client);
+
+    let parameters = vec!["servername2".to_string(), "nickna*".to_string()];
+
+    handler.whois_command((None, parameters, None)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("311 nickname2 username 127.0.0.1 *: realname", responses[0]);
+    assert_eq!("312 nickname2 servername2 :serverinfo", responses[1]);
+    assert_eq!("318 nickname2 :End of /WHOIS list", responses[2]);
 }

@@ -35,7 +35,7 @@ impl<C: Connection> ClientHandler<C> {
         self.stream
             .send(&CommandResponse::whois_user(&client_info))?;
 
-        let nickname = &client_info.nickname();
+        let nickname = &client_info.nickname;
         let servername = &client_info.servername;
 
         let serverinfo = if servername != &self.database.get_server_name() {
@@ -106,8 +106,7 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_whoreply_response(&mut self, client_info: ClientInfo) -> io::Result<()> {
         let channel = ok_or_return!(
-            self.database
-                .get_channels_for_client(&client_info.nickname()),
+            self.database.get_channels_for_client(&client_info.nickname),
             Ok(())
         )
         .get(0)
@@ -134,7 +133,7 @@ impl<C: Connection> ClientHandler<C> {
         let remaining_clients: Vec<String> = self
             .clients_in_no_channel()
             .iter()
-            .map(ClientInfo::nickname)
+            .map(|client| client.nickname.clone())
             .collect();
 
         if !remaining_clients.is_empty() {
