@@ -75,21 +75,18 @@ impl Controller {
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let mut ip_view = IpView::new(sender.clone());
-        let ip_window = ip_view.get_view(app.clone());
+        let ip_window = IpView::new(sender.clone()).get_view(app.clone());
         ip_window.show();
 
-        let mut register_view = RegisterView::new(sender.clone());
-        let register_window = register_view.get_view(app.clone());
-        // register_window.show();
+        let register_window = RegisterView::new(sender.clone()).get_view(app.clone());
 
         let mut main_view = MainView::new(sender.clone());
 
-        let mut add_channel_view = AddChannelView::new(sender.clone());
-        let mut add_channel_window = add_channel_view.get_view(app.clone(), vec![]);
+        let mut add_channel_window =
+            AddChannelView::new(sender.clone()).get_view(app.clone(), vec![]);
 
-        let mut add_client_view = AddClientView::new(sender.clone());
-        let mut add_client_window = add_client_view.get_view(app.clone(), vec![]);
+        let mut add_client_window =
+            AddClientView::new(sender.clone()).get_view(app.clone(), vec![]);
 
         let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
 
@@ -206,6 +203,11 @@ impl Controller {
                     let last_conv = current_conv.clone();
                     current_conv = nickname;
                     main_view.change_conversation(last_conv, current_conv.clone());
+                }
+                Quit {} => {
+                    println!("Estoy haciendo quit");
+                    let quit_message = format!("QUIT");
+                    client.send_raw(&quit_message).expect("ERROR: Quit message");
                 }
                 QuitChannel {} => {
                     let part_message = format!("{} {}", PART_COMMAND, current_conv);

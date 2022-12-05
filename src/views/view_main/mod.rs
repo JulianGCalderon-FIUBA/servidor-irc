@@ -20,6 +20,7 @@ use crate::controller::controller_message::ControllerMessage;
 
 use self::{
     chat::widgets_creation::create_scrollwindow_chat,
+    requests::quit_request,
     widgets_creation::{
         create_add_button, create_channels_and_client_box, create_current_chat, create_message_box,
         create_notifications_button, create_scrollwindow, create_welcome_box,
@@ -127,6 +128,15 @@ impl MainView {
 
         window.set_child(Some(&main_box));
 
+        Self::close_view(window.clone(), app, self.sender.clone());
+
         window
+    }
+
+    fn close_view(window: ApplicationWindow, app: Application, sender: Sender<ControllerMessage>) {
+        window.connect_destroy(move |_| {
+            quit_request(sender.clone());
+            app.quit();
+        });
     }
 }
