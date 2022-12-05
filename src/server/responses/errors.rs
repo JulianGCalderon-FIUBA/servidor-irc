@@ -33,6 +33,7 @@ pub enum ErrorReply {
     UsersDontMatch502,
     UserModeUnknownFlag501,
     InviteOnlyChannel473 { channel: String },
+    ErroneousNickname432 { nickname: String },
 }
 
 impl Display for ErrorReply {
@@ -108,6 +109,9 @@ impl Display for ErrorReply {
             ErrorReply::UserModeUnknownFlag501 => "501 :Unknown MODE flag".to_string(),
             ErrorReply::InviteOnlyChannel473 { channel } => {
                 format!("473 {channel} :Cannot join channel (+i)")
+            }
+            ErrorReply::ErroneousNickname432 { nickname } => {
+                format!("432 {nickname} :Erroneous nickname")
             }
         };
         write!(f, "{string}")
