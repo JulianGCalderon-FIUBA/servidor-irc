@@ -73,8 +73,8 @@ impl IpView {
         });
     }
 
-    fn register_fiels_are_valid(address: &String) -> bool {
-        let ip: Vec<&str> = address.split(":").collect();
+    fn register_fiels_are_valid(address: &str) -> bool {
+        let ip: Vec<&str> = address.split(':').collect();
         if ip.len() != 2 {
             return false;
         }

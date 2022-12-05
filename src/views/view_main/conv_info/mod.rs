@@ -14,7 +14,7 @@ use super::MainView;
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
 impl MainView {
-    pub fn create_conv_info(&mut self, nickname: &String) -> Box {
+    pub fn create_conv_info(&mut self, nickname: &str) -> Box {
         let conv_info = Box::builder()
             .orientation(Orientation::Vertical)
             .width_request(177)
