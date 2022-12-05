@@ -4,7 +4,10 @@ use gtk4::glib::GString;
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
-    AddInviteView {},
+    SendNamesMessageToInviteClient {},
+    AddViewToInviteClient {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
     AddNewClient {
         new_client: GString,
     },

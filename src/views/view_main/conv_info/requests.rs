@@ -17,7 +17,7 @@ pub fn remove_conversation_request(sender: Sender<ControllerMessage>) {
 
 pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::AddInviteView {})
+        .send(ControllerMessage::SendNamesMessageToInviteClient {})
         .expect(ERROR_TEXT);
 }
 
