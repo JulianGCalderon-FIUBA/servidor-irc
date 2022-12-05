@@ -143,3 +143,62 @@ fn nick_update_is_relayed_to_all_other_servers() {
             .read_wbuf_to_string()
     );
 }
+
+#[test]
+fn nick_fails_with_invalid_prefix() {
+    let mut handler = dummy_server_handler();
+
+    let parameters = vec!["#nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key("#nickname"));
+
+    let parameters = vec!["&nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key("&nickname"));
+
+    let parameters = vec!["$nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key("$nickname"));
+
+    let parameters = vec![":nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key(":nickname"));
+}
+
+#[test]
+fn nick_fails_with_invalid_character() {
+    let mut handler = dummy_server_handler();
+
+    let parameters = vec!["nick.name".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key("nick.name"));
+
+    let parameters = vec!["nickname!".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key("nickname!"));
+
+    let parameters = vec!["ni,ckname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key("ni,ckname"));
+
+    let parameters = vec!["nick*name".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key("nick*name"));
+
+    let parameters = vec!["ni?ckname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert!(!handler.hopcounts.contains_key("ni?ckname"));
+
+    let parameters = vec!["nickname@".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+    assert!(!handler.hopcounts.contains_key("nickname@"));
+}
