@@ -1,7 +1,7 @@
 use gtk::glib::{GString, Sender};
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
 
 pub fn register_request(
     pass: GString,
@@ -16,5 +16,5 @@ pub fn register_request(
         username,
         realname,
     };
-    sender.send(register).expect("Error: pass command");
+    sender.send(register).expect(ERROR_TEXT);
 }

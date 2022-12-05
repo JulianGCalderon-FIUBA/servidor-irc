@@ -51,7 +51,7 @@ pub fn create_current_chat(label: &str) -> Label {
     message
 }
 
-pub fn create_scrollwindow(/*child: &Box*/) -> ScrolledWindow {
+pub fn create_scrollwindow() -> ScrolledWindow {
     ScrolledWindow::builder().min_content_height(280).build()
 }
 
