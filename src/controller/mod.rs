@@ -15,7 +15,7 @@ use crate::{
             view_add_channel::AddChannelView, view_invite::InviteView,
             view_notifications::NotificationsView, view_warning::WarningView,
         },
-        views_add::{view_add_client::AddClientView, view_channel_members::ChannelMembersView}
+        views_add::{view_add_client::AddClientView, view_channel_members::ChannelMembersView},
     },
 };
 use gtk4 as gtk;
@@ -79,9 +79,11 @@ impl Controller {
 
         let mut main_view = MainView::new(sender.clone());
 
-        let mut add_channel_window = AddChannelView::new(sender.clone()).get_view(app.clone(), vec![]);
+        let mut add_channel_window =
+            AddChannelView::new(sender.clone()).get_view(app.clone(), vec![]);
 
-        let mut add_client_window = AddClientView::new(sender.clone()).get_view(app.clone(), vec![]);
+        let mut add_client_window =
+            AddClientView::new(sender.clone()).get_view(app.clone(), vec![]);
 
         let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
 

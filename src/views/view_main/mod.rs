@@ -20,10 +20,11 @@ use crate::controller::controller_message::ControllerMessage;
 
 use self::{
     chat::widgets_creation::create_scrollwindow_chat,
+    requests::quit_request,
     widgets_creation::{
         create_add_button, create_channels_and_client_box, create_current_chat, create_error_label,
         create_message_box, create_notifications_button, create_scrollwindow, create_welcome_box,
-    }, requests::quit_request,
+    },
 };
 
 use super::{
