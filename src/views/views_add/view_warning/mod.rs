@@ -5,7 +5,12 @@ use crate::views::widgets_creation::{
     build_application_window, create_center_button, create_label,
 };
 
-use super::widgets_creation::{create_main_box_add_view, create_title};
+use super::{
+    widgets_creation::{create_main_box_add_view, create_title},
+    CONTINUE_BUTTON_TEXT,
+};
+
+const TITLE: &str = "We are sorry :(";
 
 pub struct WarningView {
     button: Button,
@@ -20,7 +25,7 @@ impl Default for WarningView {
 impl WarningView {
     pub fn new() -> Self {
         Self {
-            button: create_center_button("ok"),
+            button: create_center_button(CONTINUE_BUTTON_TEXT),
         }
     }
 
@@ -30,7 +35,7 @@ impl WarningView {
 
         let main_box = create_main_box_add_view();
 
-        let title = create_title("We are sorry :(");
+        let title = create_title(TITLE);
         main_box.append(&title);
 
         let label = create_label(&warning_text);

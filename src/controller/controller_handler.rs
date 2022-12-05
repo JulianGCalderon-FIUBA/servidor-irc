@@ -7,6 +7,8 @@ use crate::{
 
 use super::{controller_message::ControllerMessage, ERR_NICK_COLLISION_WARNING_TEXT};
 
+const CHANNEL_FIRST_CHARACTER: &str = "#";
+
 pub const LOGIN_OK: &str = "001";
 pub const LIST_RPL_COMMAND: &str = "322";
 pub const END_LIST_RPL_COMMAND: &str = "323";
@@ -35,38 +37,6 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
 
     // commands that return ControllerMessage
     match &message.get_command()[..] {
-        PRIVMSG_COMMAND => {
-            let message_text = message.get_trailing().clone().unwrap();
-            let sender_nickname = message.get_prefix().clone().unwrap();
-            let channel = if is_channel(message.get_parameters()[0].clone()) {
-                Some(message.get_parameters()[0].clone())
-            } else {
-                None
-            };
-
-            ControllerMessage::ReceivePrivMessage {
-                sender_nickname,
-                message: message_text,
-                channel,
-            }
-        }
-        INVITE_COMMAND => ControllerMessage::RecieveInvite {
-            nickname: message.get_prefix().clone().unwrap(),
-            channel: message.get_parameters()[1].clone(),
-        },
-        KICK_COMMAND => ControllerMessage::ReceiveKick {
-            kicked: message.get_parameters()[1].clone(),
-            channel: message.get_parameters()[0].clone(),
-        },
-        LOGIN_OK => ControllerMessage::ChangeViewToMain {
-            realname: message.get_parameters()[0].clone(),
-            servername: message.get_parameters()[1].clone(),
-            nickname: message.get_parameters()[2].clone(),
-            username: message.get_parameters()[3].clone(),
-        },
-        ERR_NICK_COLLISION => ControllerMessage::AddWarningView {
-            message: ERR_NICK_COLLISION_WARNING_TEXT.to_string(),
-        },
         END_LIST_RPL_COMMAND => unsafe {
             let channels_clone: Vec<String> = CHANNELS_LIST_COMMAND.clone();
             CHANNELS_LIST_COMMAND = vec![];
@@ -88,6 +58,46 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
                 channels_and_clients: hashmap,
             }
         },
+        ERR_NICK_COLLISION => ControllerMessage::AddWarningView {
+            message: ERR_NICK_COLLISION_WARNING_TEXT.to_string(),
+        },
+        INVITE_COMMAND => ControllerMessage::RecieveInvite {
+            nickname: message.get_prefix().clone().unwrap(),
+            channel: message.get_parameters()[1].clone(),
+        },
+        KICK_COMMAND => ControllerMessage::ReceiveKick {
+            kicked: message.get_parameters()[1].clone(),
+            channel: message.get_parameters()[0].clone(),
+        },
+        LOGIN_OK => {
+            let trailing_text: String = message.get_trailing().clone().unwrap();
+            let trailing_strings = trailing_text.split(' ').collect::<Vec<&str>>();
+            println!("{:?}", trailing_strings);
+
+            let mut username = trailing_strings[5].to_string();
+            username.remove(0);
+            ControllerMessage::ChangeViewToMain {
+                realname: message.get_parameters()[0].clone(),
+                servername: trailing_strings[2].to_string(),
+                nickname: trailing_strings[4].to_string(),
+                username,
+            }
+        }
+        PRIVMSG_COMMAND => {
+            let message_text = message.get_trailing().clone().unwrap();
+            let sender_nickname = message.get_prefix().clone().unwrap();
+            let channel = if is_channel(message.get_parameters()[0].clone()) {
+                Some(message.get_parameters()[0].clone())
+            } else {
+                None
+            };
+
+            ControllerMessage::ReceivePrivMessage {
+                sender_nickname,
+                message: message_text,
+                channel,
+            }
+        }
         _ => ControllerMessage::RegularMessage {
             message: message.to_string(),
         },
@@ -95,5 +105,5 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
 }
 
 pub fn is_channel(parameter: String) -> bool {
-    parameter.starts_with('#')
+    parameter.starts_with(CHANNEL_FIRST_CHARACTER)
 }
