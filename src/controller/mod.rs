@@ -154,7 +154,7 @@ impl Controller {
                 AddViewToAddClient {
                     channels_and_clients,
                 } => {
-                    let clients_to_add: Vec<String> = Self::not_mine(
+                    let clients_to_add: Vec<String> = Self::clients_not_mine(
                         Self::clients_to_add(channels_and_clients, current_nickname.clone()),
                         main_view.get_my_clients(),
                     );
@@ -233,7 +233,7 @@ impl Controller {
                 ReceiveListChannels { channels } => {
                     add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
                         app_clone.clone(),
-                        Self::not_mine(channels, main_view.get_my_channels()),
+                        Self::channels_not_mine(channels, main_view.get_my_channels()),
                     );
                     add_channel_window.show();
                 }
@@ -297,7 +297,22 @@ impl Controller {
         });
     }
 
-    fn not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
+    fn clients_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
+        let mut not_mine: Vec<String> = vec![];
+        for element in &all {
+            let no_operator_indicator = if let Some(stripped) = element.strip_prefix('@') {
+                stripped.to_string()
+            } else {
+                element.to_string()
+            };
+            if !mine.contains(&no_operator_indicator) {
+                not_mine.push(no_operator_indicator.clone());
+            }
+        }
+        not_mine
+    }
+
+    fn channels_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
         for element in &all {
             if !mine.contains(element) {
