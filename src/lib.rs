@@ -30,3 +30,4 @@ mod macros;
 /// Default parameters for client-server connection
 pub const ADDRESS: &str = "127.0.0.1:9000";
 pub const SERVERNAME: &str = "lemonpie";
+pub const SERVERINFO: &str = "serverinfo";

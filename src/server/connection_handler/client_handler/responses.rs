@@ -3,9 +3,10 @@ use std::io;
 use crate::macros::ok_or_return;
 use crate::server::connection_handler::client_handler::booleans::is_distributed_channel;
 use crate::server::connection_handler::mode_requests::{ChannelModeRequest, UserModeRequest};
+use crate::server::consts::channel::{NO_CHANNEL_NAME, WILDCARD_CHANNEL};
 use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::consts::modes::{
-    SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
+    ADD_OPERATOR, NO_TOPIC, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
 };
 use crate::server::consts::user_flag::UserFlag;
 use crate::server::responses::{CommandResponse, Notification};
@@ -27,7 +28,7 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn send_oper_notification(&mut self) {
-        let notification = Notification::mode(&self.nickname, &self.nickname, "+o");
+        let notification = Notification::mode(&self.nickname, &self.nickname, ADD_OPERATOR);
         self.send_message_to_all_servers(&notification);
     }
 
@@ -118,7 +119,7 @@ impl<C: Connection> ClientHandler<C> {
 
     pub(super) fn send_list_response(&mut self, channel: String) -> io::Result<()> {
         let topic = ok_or_return!(self.database.get_channel_topic(&channel), Ok(()))
-            .unwrap_or_else(|| "No topic set".to_string());
+            .unwrap_or_else(|| NO_TOPIC.to_string());
 
         let prv = self
             .database
@@ -137,11 +138,14 @@ impl<C: Connection> ClientHandler<C> {
             .collect();
 
         if !remaining_clients.is_empty() {
-            self.stream
-                .send(&CommandResponse::name_reply("*", &remaining_clients))?;
+            self.stream.send(&CommandResponse::name_reply(
+                WILDCARD_CHANNEL,
+                &remaining_clients,
+            ))?;
         }
 
-        self.stream.send(&CommandResponse::end_of_names(""))?;
+        self.stream
+            .send(&CommandResponse::end_of_names(NO_CHANNEL_NAME))?;
         Ok(())
     }
 
