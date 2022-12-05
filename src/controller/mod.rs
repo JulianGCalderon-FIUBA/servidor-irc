@@ -205,7 +205,6 @@ impl Controller {
                     main_view.change_conversation(last_conv, current_conv.clone());
                 }
                 Quit {} => {
-                    println!("Estoy haciendo quit");
                     let quit_message = format!("QUIT");
                     client.send_raw(&quit_message).expect("ERROR: Quit message");
                 }
@@ -308,7 +307,6 @@ impl Controller {
                     client.send_raw(&kick).expect(ERROR_TEXT);
                 }
                 ReceiveKick { kicked, channel } => {
-                    println!("kick {} from {}", kicked, channel);
                     if kicked == current_nickname {
                         main_view.remove_conversation(channel.clone());
                         if channel == current_conv {

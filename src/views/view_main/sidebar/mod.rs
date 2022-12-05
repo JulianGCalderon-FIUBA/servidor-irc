@@ -88,7 +88,6 @@ impl MainView {
             self.add_channel.remove_css_class("add");
             self.add_channel.add_css_class("disabled_button");
         }
-        println!("Added to {}", channel);
 
         self.messages.insert(channel, vec![]);
         adjust_scrollbar(self.scrollwindow_channels.clone());

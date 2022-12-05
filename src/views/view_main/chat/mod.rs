@@ -31,7 +31,6 @@ impl MainView {
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
 
-        self.user_info.connect_clicked(|_| println!("Hi"));
         message_sender_box.append(&self.user_info);
 
         self.input.set_hexpand(true);
