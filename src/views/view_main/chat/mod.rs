@@ -25,6 +25,7 @@ const CHAT_CSS: &str = "chat";
 const MESSAGE_BOX_CSS: &str = "message_box";
 
 impl MainView {
+    /// Creates chat widgets.
     pub fn create_chat(&mut self) -> Box {
         // self.current_chat.set_label(nickname);
 
@@ -55,6 +56,9 @@ impl MainView {
         chat
     }
 
+    /// Connects send button.
+    /// 
+    /// Sends a private message request to the controller. 
     fn connect_send_button(
         &self,
         input: Entry,
@@ -79,6 +83,9 @@ impl MainView {
         });
     }
 
+    /// Creates a new message in a channel chat.  
+    /// 
+    /// Function is used when a channel message is received.
     pub fn receive_priv_channel_message(
         &mut self,
         message_text: String,
@@ -109,6 +116,9 @@ impl MainView {
             .push(vec![message, sender_nickname_label]);
     }
 
+    /// Creates a new message in a client chat.  
+    /// 
+    /// Function is used when a client message is received.
     pub fn receive_priv_client_message(
         &mut self,
         message_text: String,
@@ -127,6 +137,7 @@ impl MainView {
         }
     }
 
+    /// Creates sent message label in the chat.
     pub fn send_message(&mut self, message: String, nickname: String) {
         let message = create_send_message(&message);
         self.message_box.append(&message);
@@ -138,6 +149,9 @@ impl MainView {
             .push(vec![message, create_label("")]);
     }
 
+    /// Returns bool if the messages should be shown.  
+    /// 
+    /// If it is received by the sender, returns false. 
     pub fn should_show_nickname(
         messages: Option<&Vec<Vec<gtk4::Label>>>,
         sender_nickname: String,
@@ -146,6 +160,7 @@ impl MainView {
             || messages.unwrap().is_empty()
     }
 
+    /// Returns bool, whether the previous message was sent by a different sender.
     pub fn prev_message_has_different_sender(
         messages: Option<&Vec<Vec<gtk4::Label>>>,
         sender_nickname: String,
