@@ -47,7 +47,9 @@ const WELCOME_MESSAGE: &str = "Open a new chat to start...";
 const WELCOME_MESSAGE_CSS: &str = "welcome_message";
 const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
 const WELCOME_TITLE_CSS: &str = "welcome_title";
-
+const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
+const NO_NOTIFICATIONS_CSS: &str = "notifications_button";
+const DISABLE_BUTTON_CSS: &str = "disabled_button";
 pub struct MainView {
     pub channels_box: Box,
     pub channels_buttons: Vec<Button>,

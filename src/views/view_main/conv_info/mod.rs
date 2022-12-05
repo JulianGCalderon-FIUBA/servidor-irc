@@ -9,7 +9,7 @@ use self::requests::{
     add_invite_view_request, quit_channel_request, remove_conversation_request, send_names_request,
 };
 
-use super::MainView;
+use super::{MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS};
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
@@ -66,8 +66,8 @@ impl MainView {
 
     pub fn remove_conversation(&mut self, conversation: String) {
         if self.channels_buttons.len() == 10 {
-            self.add_channel.remove_css_class("disabled_button");
-            self.add_channel.add_css_class("add");
+            self.add_channel.remove_css_class(DISABLE_BUTTON_CSS);
+            self.add_channel.add_css_class(ADD_BUTTON_CSS);
         }
         let collection_of_buttons: &mut Vec<Button>;
         let conversation_box: &Box;
@@ -100,8 +100,8 @@ impl MainView {
         self.send_message.set_sensitive(false);
         self.welcome_box.set_visible(true);
         self.quit_channel_button.set_visible(true);
-        self.quit_channel_button.remove_css_class("exit_channel");
-        self.quit_channel_button.add_css_class("disabled_button");
+        self.quit_channel_button.remove_css_class(EXIT_CHANNEL_BUTTON_CSS);
+        self.quit_channel_button.add_css_class(DISABLE_BUTTON_CSS);
         self.invite_button.set_visible(false);
         self.channel_members_button.set_visible(false);
     }
@@ -124,9 +124,9 @@ impl MainView {
 
     pub fn set_client_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
-        if self.quit_channel_button.has_css_class("disabled_button") {
-            self.quit_channel_button.remove_css_class("disabled_button");
-            self.quit_channel_button.add_css_class("exit_channel");
+        if self.quit_channel_button.has_css_class(DISABLE_BUTTON_CSS) {
+            self.quit_channel_button.remove_css_class(DISABLE_BUTTON_CSS);
+            self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         }
 
         self.invite_button.set_visible(true);
@@ -135,9 +135,9 @@ impl MainView {
 
     pub fn set_channel_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
-        if self.quit_channel_button.has_css_class("disabled_button") {
-            self.quit_channel_button.remove_css_class("disabled_button");
-            self.quit_channel_button.add_css_class("exit_channel");
+        if self.quit_channel_button.has_css_class(DISABLE_BUTTON_CSS) {
+            self.quit_channel_button.remove_css_class(DISABLE_BUTTON_CSS);
+            self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         }
 
         self.invite_button.set_visible(false);

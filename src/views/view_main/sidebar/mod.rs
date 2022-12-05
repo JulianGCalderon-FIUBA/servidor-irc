@@ -7,7 +7,7 @@ use gtk4 as gtk;
 use crate::{
     controller::{controller_handler::is_channel, controller_message::ControllerMessage},
     views::{
-        views_add::widgets_creation::create_title, widgets_creation::create_button_with_margin,
+        views_add::widgets_creation::create_title, widgets_creation::create_button_with_margin, view_main::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
     },
 };
 
@@ -19,10 +19,11 @@ use self::{
     widgets_creation::create_separator_sidebar,
 };
 
-use super::{requests::change_conversation_request, utils::adjust_scrollbar, MainView};
+use super::{requests::change_conversation_request, utils::adjust_scrollbar, MainView, NO_NOTIFICATIONS_TEXT};
 
 const CHANNELS_TITLE: &str = "Channels";
 const CLIENTS_TITLE: &str = "Clients";
+const NOTIFICATIONS_CSS: &str = "notifications_button_on";
 
 impl MainView {
     pub fn create_sidebar(&mut self) -> Box {
@@ -96,8 +97,8 @@ impl MainView {
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
         if self.channels_buttons.len() >= 10 {
-            self.add_channel.remove_css_class("add");
-            self.add_channel.add_css_class("disabled_button");
+            self.add_channel.remove_css_class(ADD_BUTTON_CSS);
+            self.add_channel.add_css_class(DISABLE_BUTTON_CSS);
         }
         println!("Added to {}", channel);
 
@@ -199,7 +200,7 @@ impl MainView {
             current_notifications_number + 1
         ));
         self.notifications_button
-            .add_css_class("notifications_button_on")
+            .add_css_class(NOTIFICATIONS_CSS)
     }
 
     pub fn get_notifications_number(button: Button) -> u32 {
@@ -218,9 +219,9 @@ impl MainView {
     }
 
     pub fn remove_unread_notifications(button: Button) {
-        button.set_label("🔔 notifications (0)");
-        if button.has_css_class("notifications_button_on") {
-            button.remove_css_class("notifications_button_on")
+        button.set_label(NO_NOTIFICATIONS_TEXT);
+        if button.has_css_class(NOTIFICATIONS_CSS) {
+            button.remove_css_class(NOTIFICATIONS_CSS)
         }
     }
 

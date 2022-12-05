@@ -13,3 +13,4 @@ const SERVERNAME_LABEL_TEXT: &str = "Servername:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
 
 const MAIN_BOX_CSS: &str = "main_box";
+const WARNING_TEXT_CSS: &str ="warning_text";

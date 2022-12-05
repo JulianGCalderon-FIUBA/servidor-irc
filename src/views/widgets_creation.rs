@@ -4,7 +4,7 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use super::APP_TITLE;
+use super::{APP_TITLE, WARNING_TEXT_CSS};
 
 pub fn create_entry(placeholder: &str) -> Entry {
     Entry::builder().placeholder_text(placeholder).build()
@@ -83,6 +83,6 @@ pub fn create_error_label() -> Label {
         .halign(gtk::Align::Center)
         .valign(gtk::Align::Center)
         .build();
-    error_label.add_css_class("warning_text");
+    error_label.add_css_class(WARNING_TEXT_CSS);
     error_label
 }
