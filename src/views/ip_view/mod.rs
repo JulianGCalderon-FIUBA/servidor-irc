@@ -1,3 +1,4 @@
+/// Contains definition of used requests. 
 pub mod requests;
 
 use std::{net::IpAddr, str::FromStr};
