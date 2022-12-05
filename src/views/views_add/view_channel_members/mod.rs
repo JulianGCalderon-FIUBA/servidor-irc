@@ -52,13 +52,7 @@ impl ChannelMembersView {
         main_box.append(&create_title("Members"));
 
         if nickname == Self::get_operator(clients.clone()) {
-            Self::list_members_operators(
-                clients,
-                channel,
-                main_box.clone(),
-                sender.clone(),
-                window.clone(),
-            )
+            Self::list_members_operators(clients, channel, main_box.clone(), sender, window.clone())
         } else {
             Self::list_members(clients, main_box.clone());
         }
@@ -101,8 +95,8 @@ impl ChannelMembersView {
         for client in clients {
             let client_label_box = create_kick_label_box();
 
-            if client.starts_with("@") {
-                let label = create_kick_label(&format!("\t •\tOP: {}", &client[1..]));
+            if let Some(stripped) = client.strip_prefix('@') {
+                let label = create_kick_label(&format!("\t •\tOP: {}", stripped));
                 client_label_box.append(&label);
             } else {
                 let label = create_kick_label(&format!("\t •\t{}", client));
@@ -140,10 +134,10 @@ impl ChannelMembersView {
 
     fn get_operator(clients: Vec<String>) -> String {
         for client in clients {
-            if client.starts_with("@") {
-                return (&client[1..]).to_string();
+            if let Some(stripped) = client.strip_prefix('@') {
+                return stripped.to_string();
             }
         }
-        return "".to_string();
+        "".to_string()
     }
 }

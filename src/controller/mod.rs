@@ -31,6 +31,8 @@ use self::controller_message::ControllerMessage;
 const ERROR_TEXT: &str = "ERROR";
 const NO_CLIENTS_WARNING_TEXT: &str = "There are no clients to chat with.";
 const NO_CHANNELS_WARNING_TEXT: &str = "You are not in any channel.";
+const CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT: &str =
+    "Can't invite because the invited person is in the same channels as you.";
 pub struct Controller {
     app: Application,
 }
@@ -98,6 +100,7 @@ impl Controller {
 
         let mut current_nickname: String = String::from("");
         let mut trying_to_add_client: bool = false;
+        let mut trying_to_invite_client: bool = false;
 
         receiver.attach(None, move |msg| {
             match msg {
@@ -136,7 +139,7 @@ impl Controller {
                 }
                 ChangeViewToMain { nickname } => {
                     register_window.close();
-                    current_nickname = String::from(&nickname.to_string()[..]);
+                    current_nickname = String::from(&nickname[..]);
                     main_view.get_view(app_clone.clone(), nickname).show();
                 }
                 SendPrivMessage { message } => {
@@ -146,6 +149,7 @@ impl Controller {
                 }
                 SendNamesMessageToAddClient {} => {
                     trying_to_add_client = true;
+                    trying_to_invite_client = false;
                     client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
                 }
                 JoinChannel { channel } => {
@@ -211,12 +215,12 @@ impl Controller {
                     main_view.remove_conversation(current_conv.clone());
                     main_view.welcome_view();
                 }
-                AddInviteView {} => {
+                SendNamesMessageToInviteClient {} => {
                     let my_channels = main_view.get_my_channels();
                     if !my_channels.is_empty() {
-                        invite_window = InviteView::new(sender_clone.clone())
-                            .get_view(app_clone.clone(), my_channels);
-                        invite_window.show();
+                        trying_to_add_client = false;
+                        trying_to_invite_client = true;
+                        client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
                     } else {
                         sender_clone
                             .send(ControllerMessage::AddWarningView {
@@ -246,9 +250,29 @@ impl Controller {
                 }
                 SendNamesMessageToKnowMembers {} => {
                     trying_to_add_client = false;
+                    trying_to_invite_client = false;
                     client
                         .send_raw(&format!("{NAMES_COMMAND} {current_conv}"))
                         .expect(ERROR_TEXT);
+                }
+                AddViewToInviteClient {
+                    channels_and_clients,
+                } => {
+                    let channels_to_invite = Self::channels_not_mine(
+                        main_view.get_my_channels(),
+                        Self::client_channels(channels_and_clients, current_conv.clone()),
+                    );
+                    if !channels_to_invite.is_empty() {
+                        invite_window = InviteView::new(sender_clone.clone())
+                            .get_view(app_clone.clone(), channels_to_invite);
+                        invite_window.show();
+                    } else {
+                        sender_clone
+                            .send(ControllerMessage::AddWarningView {
+                                message: CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT.to_string(),
+                            })
+                            .expect(ERROR_TEXT);
+                    }
                 }
                 ReceiveNamesChannels {
                     channels_and_clients,
@@ -256,6 +280,12 @@ impl Controller {
                     if trying_to_add_client {
                         sender_clone
                             .send(ControllerMessage::AddViewToAddClient {
+                                channels_and_clients,
+                            })
+                            .expect(ERROR_TEXT);
+                    } else if trying_to_invite_client {
+                        sender_clone
+                            .send(ControllerMessage::AddViewToInviteClient {
                                 channels_and_clients,
                             })
                             .expect(ERROR_TEXT);
@@ -355,6 +385,29 @@ impl Controller {
             );
         }
         all_clients
+    }
+
+    fn client_channels(
+        channels_and_clients: HashMap<String, Vec<String>>,
+        client: String,
+    ) -> Vec<String> {
+        let mut client_channels_set: Vec<String> = vec![];
+        for channel in channels_and_clients.keys() {
+            let mut clients: Vec<String> = vec![];
+            for element in channels_and_clients.get(channel).unwrap() {
+                let no_operator_indicator: String =
+                    if let Some(stripped) = element.strip_prefix('@') {
+                        stripped.to_string()
+                    } else {
+                        element.to_string()
+                    };
+                clients.push(no_operator_indicator);
+            }
+            if clients.contains(&client) {
+                client_channels_set.push((&channel).to_string());
+            }
+        }
+        client_channels_set
     }
 
     // fn listen_messages(mut client: Client, sender: Sender<ControllerMessage>) {
