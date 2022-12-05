@@ -34,7 +34,9 @@ const NO_CLIENTS_WARNING_TEXT: &str = "There are no clients to chat with.";
 const NO_CHANNELS_WARNING_TEXT: &str = "You are not in any channel.";
 const CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT: &str =
     "Can't invite because the invited person is in the same channels as you.";
-pub struct Controller {
+const ERR_NICK_COLLISION_WARNING_TEXT: &str = "The nickname is in use, please pick another one.";
+
+    pub struct Controller {
     app: Application,
 }
 
