@@ -14,12 +14,18 @@ use super::{
     WELCOME_TITLE_CSS,
 };
 
+/// Creates gtk button with a label.
+/// 
+/// Receives a &str, returns a Button.
 pub fn create_add_button(label: &str) -> Button {
     let add_button = create_button_with_margin(label);
     add_button.add_css_class(ADD_BUTTON_CSS);
     add_button
 }
 
+/// Creates gtk box.
+/// 
+/// Receives nothing, returns a Box.
 pub fn create_message_box() -> Box {
     Box::builder()
         .orientation(Vertical)
@@ -32,6 +38,9 @@ pub fn create_message_box() -> Box {
         .build()
 }
 
+/// Creates gtk box.
+/// 
+/// Receives nothing, returns a Box.
 pub fn create_channels_and_client_box() -> Box {
     Box::builder()
         .orientation(Vertical)
@@ -39,6 +48,9 @@ pub fn create_channels_and_client_box() -> Box {
         .build()
 }
 
+/// Creates gtk label with a label.
+/// 
+/// Receives a &str, returns a Label.
 pub fn create_current_chat(label: &str) -> Label {
     let message = Label::builder()
         .label(label)
@@ -51,10 +63,16 @@ pub fn create_current_chat(label: &str) -> Label {
     message
 }
 
+/// Creates a gtk scrolled window.
+/// 
+/// Receives nothing, returns a ScrolledWindow.
 pub fn create_scrollwindow() -> ScrolledWindow {
     ScrolledWindow::builder().min_content_height(280).build()
 }
 
+/// Creates gtk welcome box with title and message.
+/// 
+/// Receives nothing, returns a Box.
 pub fn create_welcome_box() -> Box {
     let title = Label::builder()
         .label(WELCOME_TITLE)
@@ -90,6 +108,9 @@ pub fn create_welcome_box() -> Box {
     welcome_box
 }
 
+/// Creates gtk button.
+/// 
+/// Receives nothing, returns a Button.
 pub fn create_notifications_button() -> Button {
     let notifications_button = create_button("🔔 notifications (0)");
     notifications_button.set_margin_top(5);
