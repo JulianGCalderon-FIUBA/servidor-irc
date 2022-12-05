@@ -3,7 +3,7 @@ pub mod requests;
 use gtk::{
     glib::{GString, Sender},
     prelude::*,
-    Application, ApplicationWindow, Button, Entry, Orientation, Label,
+    Application, ApplicationWindow, Button, Entry, Orientation, Label, PasswordEntry,
 };
 use gtk4 as gtk;
 
@@ -12,7 +12,7 @@ use self::requests::register_request;
 use super::{
     widgets_creation::{
         build_application_window, create_center_button, create_entry, create_label_input_box,
-        create_main_box, create_error_label,
+        create_main_box, create_error_label, create_password_entry,
     },
     MAIN_BOX_CSS,
 };
@@ -28,7 +28,7 @@ pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
     pub username_entry: Entry,
-    pub pass_entry: Entry,
+    pub pass_entry: PasswordEntry,
     pub login_button: Button,
     pub error_label: Label,
     sender: Sender<ControllerMessage>,
@@ -40,7 +40,7 @@ impl RegisterView {
             realname_entry: create_entry(""),
             nick_entry: create_entry(""),
             username_entry: create_entry(""),
-            pass_entry: create_entry(""),
+            pass_entry: create_password_entry(""),
             login_button: create_center_button(LOGIN_BUTTON_TEXT),
             error_label: create_error_label(),
             sender,
@@ -71,7 +71,7 @@ impl RegisterView {
         main_box.append(&password_box);
 
         main_box.append(&self.login_button);
-        
+
         self.error_label.set_margin_bottom(10);
         main_box.append(&self.error_label);
 
@@ -92,7 +92,7 @@ impl RegisterView {
     fn connect_button(
         &self,
         realname_entry: Entry,
-        pass_entry: Entry,
+        pass_entry: PasswordEntry,
         nick_entry: Entry,
         username_entry: Entry,
         error_label: Label,
