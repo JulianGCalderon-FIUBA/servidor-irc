@@ -72,5 +72,6 @@ impl AddClientView {
         for client in clients {
             self.client_combobox.append_text(&client.clone());
         }
+        self.client_combobox.set_active(Some(0));
     }
 }

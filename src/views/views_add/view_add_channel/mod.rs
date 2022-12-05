@@ -143,6 +143,7 @@ impl AddChannelView {
         for channel in &channels {
             self.channel_combobox.append_text(&channel.clone());
         }
+        self.channel_combobox.set_active(Some(0));
     }
 
     fn disable_join_channel_option(&mut self) {
