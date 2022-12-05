@@ -9,3 +9,8 @@ pub fn change_conversation_request(conversation: String, sender: Sender<Controll
     };
     sender.send(request).expect("ERROR: change conversation");
 }
+
+pub fn quit_request(sender: Sender<ControllerMessage>) {
+    let request = ControllerMessage::Quit {};
+    sender.send(request).expect("ERROR: quit")
+}

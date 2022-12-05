@@ -22,6 +22,7 @@ pub enum ControllerMessage {
     JoinChannel {
         channel: String,
     },
+    Quit {},
     QuitChannel {},
     RecieveInvite {
         nickname: String,

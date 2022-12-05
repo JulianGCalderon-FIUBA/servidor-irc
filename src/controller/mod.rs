@@ -200,6 +200,11 @@ impl Controller {
                     current_conv = nickname;
                     main_view.change_conversation(last_conv, current_conv.clone());
                 }
+                Quit {} => {
+                    println!("Estoy haciendo quit");
+                    let quit_message = format!("QUIT");
+                    client.send_raw(&quit_message).expect("ERROR: Quit message");
+                }
                 QuitChannel {} => {
                     let part_message = format!("{} {}", PART_COMMAND, current_conv);
                     client.send_raw(&part_message).expect("ERROR: Part message");
