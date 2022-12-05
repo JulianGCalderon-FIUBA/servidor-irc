@@ -5,12 +5,24 @@ use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT
 
 pub fn add_view_to_add_client_request(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::AddViewToAddClient {})
+        .send(ControllerMessage::SendNamesMessageToAddClient {})
         .expect(ERROR_TEXT);
 }
 
 pub fn send_list_request(sender: Sender<ControllerMessage>) {
     sender
         .send(ControllerMessage::SendListMessage {})
+        .expect(ERROR_TEXT);
+}
+
+pub fn add_notifications_view_request(sender: Sender<ControllerMessage>) {
+    sender
+        .send(ControllerMessage::AddNotificationsView {})
+        .expect(ERROR_TEXT);
+}
+
+pub fn add_user_info_view(sender: Sender<ControllerMessage>) {
+    sender
+        .send(ControllerMessage::AddUserInfoView {})
         .expect(ERROR_TEXT);
 }

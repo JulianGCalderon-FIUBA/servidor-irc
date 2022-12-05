@@ -1,10 +1,54 @@
 use crate::server::{
-    connection_handler::{
-        connection_handler_trait::ConnectionHandlerCommands,
-        server_handler::tests::dummy_server_handler,
-    },
+    connection_handler::{server_handler::tests::dummy_server_handler, ConnectionHandlerCommands},
     testing::{dummy_client, dummy_distant_server, dummy_external_client, dummy_server},
 };
+
+#[test]
+fn squit_with_invalid_arguments_is_ignored() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername3"));
+
+    let prefix = Some("oper".to_string());
+    let parameters = vec!["servername2".to_string()];
+    handler.squit_command((None, parameters, None)).unwrap();
+    handler.squit_command((prefix, vec![], None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername3")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn squit_with_unknown_server_is_ignored() {
+    let mut handler = dummy_server_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername3"));
+
+    let prefix = Some("oper".to_string());
+    let parameters = vec!["servername2".to_string()];
+    handler.squit_command((prefix, parameters, None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername3")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
 
 #[test]
 fn squit_removes_server_from_database() {
@@ -188,10 +232,10 @@ fn squit_relays_client_quit_to_local_clients_on_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     let prefix = Some("oper".to_string());
     let parameters = vec!["servername2".to_string()];

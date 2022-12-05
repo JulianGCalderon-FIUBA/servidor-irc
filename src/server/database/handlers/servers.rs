@@ -19,12 +19,16 @@ impl<C: Connection> Database<C> {
 
     pub fn handle_get_servername(&self, respond_to: Sender<String>) {
         let servername = self.info.servername.clone();
-        respond_to.send(servername).unwrap();
+        respond_to
+            .send(servername)
+            .expect("Handler receiver should not be dropped");
     }
 
-    pub fn handle_get_serverinfo(&self, respond_to: Sender<String>) {
+    pub fn handle_get_own_server_info(&self, respond_to: Sender<String>) {
         let serverinfo = self.info.serverinfo.clone();
-        respond_to.send(serverinfo).unwrap();
+        respond_to
+            .send(serverinfo)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_server_stream(
@@ -33,16 +37,31 @@ impl<C: Connection> Database<C> {
         respond_to: Sender<Result<C, DatabaseError>>,
     ) {
         let stream = self.get_server_stream(&server);
-        respond_to.send(stream).unwrap();
+        respond_to
+            .send(stream)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_get_all_servers(&self, respond_to: Sender<Vec<String>>) {
         let servers = self.get_all_servers();
-        respond_to.send(servers).unwrap();
+        respond_to
+            .send(servers)
+            .expect("Handler receiver should not be dropped");
     }
 
     pub fn handle_remove_server(&mut self, servername: String) {
         self.remove_server(servername);
+    }
+
+    pub fn handle_get_server_info(
+        &self,
+        server: String,
+        respond_to: Sender<Result<ServerInfo, DatabaseError>>,
+    ) {
+        let server_info = self.get_server_info(server);
+        respond_to
+            .send(server_info)
+            .expect("Handler receiver should not be dropped");
     }
 }
 
@@ -73,7 +92,7 @@ impl<C: Connection> Database<C> {
     }
 
     fn add_immediate_server(&mut self, server: ImmediateServer<C>) {
-        let servername = server.info.servername.clone();
+        let servername = server.info().servername;
         debug_print!("Adding immediate server {servername}");
         self.immediate_servers.insert(servername, server);
     }
@@ -81,5 +100,18 @@ impl<C: Connection> Database<C> {
         let servername = server.servername.clone();
         debug_print!("Adding distant server {servername}");
         self.distant_servers.insert(servername, server);
+    }
+
+    fn get_server_info(&self, server: String) -> Result<ServerInfo, DatabaseError> {
+        if let Some(server) = self.immediate_servers.get(&server) {
+            return Ok(server.info());
+        }
+
+        let server = some_or_return!(
+            self.distant_servers.get(&server),
+            Err(DatabaseError::NoSuchServer)
+        );
+
+        Ok(server.clone())
     }
 }

@@ -98,3 +98,33 @@ label {
     color: white;
     font-size: 10px;
 }
+
+.warning_text{
+    color: red;
+    font-size: 12px;
+}
+
+.disabled_button {
+    color: rgb(97, 95, 95);
+    background-color: rgb(43, 40, 40);
+}
+
+.channel_first_character {
+    font-size: 20px;
+}
+
+.notifications_button{
+    background-color: black;
+    border-color: transparent;
+    border-radius: 0px;
+}
+
+.notifications_button_on{
+    background-color: rgb(184, 45, 45);
+}
+
+.notifications_container{
+    border-radius: 10px;
+    border: 1px solid white;
+    background-color: #000103;
+}

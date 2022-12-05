@@ -18,9 +18,3 @@ pub fn register_request(
     };
     sender.send(register).expect("Error: pass command");
 }
-
-pub fn change_view_to_main_request(nickname: GString, sender: Sender<ControllerMessage>) {
-    sender
-        .send(ControllerMessage::ChangeViewToMain { nickname })
-        .expect("Error: pass command");
-}

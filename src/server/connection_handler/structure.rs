@@ -12,8 +12,6 @@ use super::{
     READ_FROM_STREAM_TIMEOUT_MS,
 };
 
-// const READ_FROM_STREAM_TIMEOUT_MS: u64 = 100;
-
 pub type CommandArgs = (Option<String>, Vec<String>, Option<String>);
 
 pub trait ConnectionHandlerStructure<C: Connection>:
@@ -21,7 +19,9 @@ pub trait ConnectionHandlerStructure<C: Connection>:
 {
     fn try_handle(&mut self) -> io::Result<()> {
         let timeout = Duration::from_millis(READ_FROM_STREAM_TIMEOUT_MS);
-        self.stream().set_read_timeout(Some(timeout)).unwrap();
+        self.stream()
+            .set_read_timeout(Some(timeout))
+            .expect("Duration should never be zero or None");
 
         loop {
             if self.server_shutdown() {
@@ -93,7 +93,8 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn on_server_shutdown(&mut self) -> io::Result<()> {
-        self.stream().send(&"Server has shutdown")
+        self.stream().send(&"Server has shutdown")?;
+        self.stream().shutdown()
     }
 
     fn on_timeout(&mut self) -> io::Result<()> {

@@ -1,8 +1,7 @@
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerAsserts,
-};
+use crate::server::connection_handler::{CommandArgs, ConnectionHandlerAsserts};
 use crate::server::consts::commands::*;
+use crate::server::consts::user::{INVALID_NICKNAME_CHARACTERS, INVALID_NICKNAME_PREFIXES};
 use crate::server::responses::ErrorReply;
 
 use super::RegistrationHandler;
@@ -31,6 +30,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
         }
 
         let nickname = &params[0];
+
+        if nickname.len() > 9
+            || nickname.contains(INVALID_NICKNAME_CHARACTERS)
+            || nickname.starts_with(INVALID_NICKNAME_PREFIXES)
+        {
+            return Err(ErrorReply::ErroneousNickname432 {
+                nickname: nickname.to_string(),
+            });
+        }
 
         self.assert_nickname_collision(nickname)
     }

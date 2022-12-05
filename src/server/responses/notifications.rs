@@ -6,7 +6,7 @@ use crate::server::data_structures::*;
 
 use super::to_trail;
 
-/// Possible notifications that can be sent for different commands.
+/// Notifications that can be sent for different commands.
 pub enum Notification {
     Quit {
         nickname: String,
@@ -128,7 +128,7 @@ impl Display for Notification {
             Notification::User { client } => {
                 format!(
                     ":{} {USER_COMMAND} {} {} {} :{}",
-                    client.nickname(),
+                    client.nickname,
                     client.username,
                     client.hostname,
                     client.servername,

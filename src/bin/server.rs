@@ -23,7 +23,9 @@ fn main() {
         };
 
         let split: Vec<&str> = line.split_whitespace().collect();
-
+        if split.is_empty() {
+            continue;
+        }
         match split[0] {
             "QUIT" => {
                 server.quit();

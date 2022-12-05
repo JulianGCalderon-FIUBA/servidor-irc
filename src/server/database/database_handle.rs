@@ -1,483 +1,588 @@
-use std::sync::mpsc::{self, Sender};
+use std::sync::mpsc::Sender;
 
-use crate::server::consts::modes::UserFlag;
+use crate::macros::own;
+use crate::server::consts::user_flag::UserFlag;
 use crate::server::data_structures::*;
-use crate::server::{connection::Connection, consts::modes::ChannelFlag};
+use crate::server::{connection::Connection, consts::channel_flag::ChannelFlag};
 
 use super::{database_error::DatabaseError, database_message::DatabaseMessage};
 
-/// A DatabaseHandle handles and makes request to the main Database. Works as an intermediary so external structures cannot acces the Database directly.
+/// A DatabaseHandle handles and makes request to the main Database.
+/// Works as an intermediary so external structures cannot acces the Database directly.
 pub struct DatabaseHandle<C: Connection> {
     sender: Sender<DatabaseMessage<C>>,
 }
 
 impl<C: Connection> DatabaseHandle<C> {
-    pub fn add_channop(&self, channel: &str, nickname: &str) {
-        let request = DatabaseMessage::AddChanop {
-            channel: channel.to_string(),
-            nickname: nickname.to_string(),
-        };
-        self.sender.send(request).unwrap();
-    }
-
-    /// Sends AddClient request.
-    pub fn add_local_client(&self, client: LocalClient<C>) {
-        let request = DatabaseMessage::AddLocalClient { client };
-        self.sender.send(request).unwrap();
-    }
-
-    /// Sends AddClient request.
-    pub fn add_external_client(&self, client: ExternalClient) {
-        let request = DatabaseMessage::AddExternalClient { client };
-        self.sender.send(request).unwrap();
-    }
-
-    /// Sends AddClientToChannel request.
-    pub fn add_client_to_channel(&self, nickname: &str, channel_name: &str) {
-        let request = DatabaseMessage::AddClientToChannel {
-            nickname: nickname.to_string(),
-            channel: channel_name.to_string(),
-        };
-        self.sender.send(request).unwrap();
-    }
-
-    pub fn add_immediate_server(&self, server: ImmediateServer<C>) {
-        let request = DatabaseMessage::AddImmediateServer { server };
-        self.sender.send(request).unwrap();
-    }
-
-    pub fn add_distant_server(&self, server: ServerInfo) {
-        let request = DatabaseMessage::AddDistantServer { server };
-        self.sender.send(request).unwrap();
-    }
-
-    pub fn add_speaker(&self, channel: &str, nickname: &str) {
-        let request = DatabaseMessage::AddSpeaker {
-            channel: channel.to_string(),
-            nickname: nickname.to_string(),
-        };
-        self.sender.send(request).unwrap();
-    }
-
-    /// Sends AreCredentialsValid request and returns answer.
-    pub fn are_credentials_valid(&self, username: &str, password: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::AreCredentialsValid {
-            username: username.to_string(),
-            password: password.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn channel_has_mode(&self, channel: &str, flag: &ChannelFlag) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::ChannelHasMode {
-            channel: channel.to_string(),
-            flag: flag.clone(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends ContainsChannel request and returns answer.
-    pub fn contains_channel(&self, channel: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::ContainsChannel {
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends ContainsClient request and returns answer.
-    pub fn contains_client(&self, nickname: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::ContainsClient {
-            nickname: nickname.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn contains_server(&self, servername: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::ContainsServer {
-            servername: servername.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends DisconnectClient request.
-    pub fn disconnect_client(&self, nickname: &str) {
-        let request = DatabaseMessage::DisconnectClient {
-            nickname: nickname.to_string(),
-        };
-        self.sender.send(request).unwrap();
-    }
-
-    /// Sends GetAllChannels request and returns answer.
-    pub fn get_all_channels(&self) -> Vec<String> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetAllChannels { respond_to: sender };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends GetAllClients request and returns answer.
-    pub fn get_all_clients(&self) -> Vec<ClientInfo> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetAllClients { respond_to: sender };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn get_away_message(&self, nickname: &str) -> Result<Option<String>, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetAwayMessage {
-            nickname: nickname.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn get_channel_banmask(&self, channel: &str) -> Result<Vec<String>, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetChannelBanMask {
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn get_channel_key(&self, channel: &str) -> Result<Option<String>, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetChannelKey {
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn get_channel_limit(&self, channel: &str) -> Result<Option<usize>, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetChannelLimit {
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends GetChannelsForClient request and returns answer.
-    pub fn get_channels_for_client(&self, nickname: &str) -> Result<Vec<String>, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetChannelsForClient {
-            nickname: nickname.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends GetClientsForChannel request and returns answer.
-    pub fn get_channel_clients(&self, channel: &str) -> Result<Vec<String>, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetChannelClients {
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends GetStream request and returns answer.
-    pub fn get_local_stream(&self, nickname: &str) -> Result<C, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetLocalStream {
-            nickname: nickname.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn get_server_stream(&self, servername: &str) -> Result<C, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetServerStream {
-            server: servername.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn get_topic_for_channel(&self, channel: &str) -> Result<Option<String>, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetChannelTopic {
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn is_channel_operator(&self, channel: &str, nick: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::IsChannelOperator {
-            channel: channel.to_string(),
-            nickname: nick.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub fn is_channel_speaker(&self, channel: &str, nickname: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::IsChannelSpeaker {
-            channel: channel.to_string(),
-            nickname: nickname.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends IsClientInChannel request and returns answer.
-    pub fn is_client_in_channel(&self, nickname: &str, channel: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::IsClientInChannel {
-            nickname: nickname.to_string(),
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Sends IsServerOperator request and returns answer.
-    pub fn is_server_operator(&self, nickname: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::IsServerOperator {
-            nickname: nickname.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    /// Creates new DatabaseHandle
     pub fn new(sender: Sender<DatabaseMessage<C>>) -> Self {
         Self { sender }
     }
-
-    pub fn remove_channop(&self, channel: &str, nickname: &str) {
-        let request = DatabaseMessage::RemoveChanop {
-            channel: channel.to_string(),
-            nickname: nickname.to_string(),
-        };
-        self.sender.send(request).unwrap();
+    pub fn add_channel_banmask(&self, channel: &str, mask: &str) {
+        own!(channel, mask);
+        let request = DatabaseMessage::AddChannelBanmask { channel, mask };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
-
-    /// Sends RemoveClientToChannel request.
-    pub fn remove_client_from_channel(&self, nickname: &str, channel_name: &str) {
-        let request = DatabaseMessage::RemoveClientFromChannel {
-            nickname: nickname.to_string(),
-            channel: channel_name.to_string(),
-        };
-        self.sender.send(request).unwrap();
+    pub fn add_channel_invite(&self, channel: &str, client: &str) {
+        own!(channel, client);
+        let request = DatabaseMessage::AddChannelInvite { channel, client };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
-
-    pub fn remove_speaker(&self, channel: &str, nickname: &str) {
-        let request = DatabaseMessage::RemoveSpeaker {
-            channel: channel.to_string(),
-            nickname: nickname.to_string(),
-        };
-        self.sender.send(request).unwrap();
+    pub fn add_channel_operator(&self, channel: &str, nickname: &str) {
+        own!(channel, nickname);
+        let request = DatabaseMessage::AddChannelOperator { channel, nickname };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
-
-    pub fn set_away_message(&self, message: &Option<String>, nickname: &str) {
-        let request = DatabaseMessage::SetAwayMessage {
-            message: message.to_owned(),
-            nickname: nickname.to_string(),
-        };
-        self.sender.send(request).unwrap();
+    pub fn add_channel_speaker(&self, channel: &str, nickname: &str) {
+        own!(channel, nickname);
+        let request = DatabaseMessage::AddChannelSpeaker { channel, nickname };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
-
-    pub fn add_channel_banmask(&self, channel: &str, banmask: &str) {
-        let request = DatabaseMessage::AddChannelBanMask {
-            channel: channel.to_string(),
-            mask: banmask.to_string(),
-        };
-        self.sender.send(request).unwrap();
+    pub fn add_client_to_channel(&self, channel: &str, nickname: &str) {
+        own!(channel, nickname);
+        let request = DatabaseMessage::AddClientToChannel { channel, nickname };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
-
-    pub fn set_channel_key(&self, channel: &str, key: Option<String>) {
-        let request = DatabaseMessage::SetChannelKey {
-            channel: channel.to_string(),
-            key,
-        };
-        self.sender.send(request).unwrap();
+    pub fn add_distant_server(&self, server: ServerInfo) {
+        let request = DatabaseMessage::AddDistantServer { server };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
-
-    pub fn set_channel_limit(&self, channel: &str, limit: Option<usize>) {
-        let request = DatabaseMessage::SetChannelLimit {
-            channel: channel.to_string(),
-            limit,
-        };
-        self.sender.send(request).unwrap();
+    pub fn add_external_client(&self, client: ExternalClient) {
+        let request = DatabaseMessage::AddExternalClient { client };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
-
-    pub fn set_channel_mode(&self, channel: &str, flag: ChannelFlag) {
-        let request = DatabaseMessage::SetChannelMode {
-            channel: channel.to_string(),
+    pub fn add_immediate_server(&self, server: ImmediateServer<C>) {
+        let request = DatabaseMessage::AddImmediateServer { server };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn add_local_client(&self, client: LocalClient<C>) {
+        let request = DatabaseMessage::AddLocalClient { client };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn are_credentials_valid(&self, username: &str, password: &str) -> bool {
+        own!(username, password);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::AreCredentialsValid {
+            username,
+            password,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn channel_has_flag(&self, channel: &str, flag: ChannelFlag) -> bool {
+        own!(channel);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::ChannelHasFlag {
+            channel,
             flag,
+            respond_to,
         };
-        self.sender.send(request).unwrap();
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    pub fn set_channel_topic(&self, channel: &str, topic: &str) {
-        let request = DatabaseMessage::SetChannelTopic {
-            channel: channel.to_string(),
-            topic: topic.to_string(),
+    pub fn channel_has_invite(&self, channel: &str, client: &str) -> bool {
+        own!(channel, client);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::ChannelHasClientInvite {
+            channel,
+            client,
+            respond_to,
         };
-        self.sender.send(request).unwrap();
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    /// Sends SetServerOperator request.
-    pub fn set_server_operator(&self, nickname: &str) {
-        let request = DatabaseMessage::SetServerOperator {
-            nickname: nickname.to_string(),
+    pub fn contains_channel(&self, channel: &str) -> bool {
+        own!(channel);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::ContainsChannel {
+            channel,
+            respond_to,
         };
-        self.sender.send(request).unwrap();
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    pub fn remove_channel_banmask(&self, channel: &str, banmask: &str) {
-        let request = DatabaseMessage::RemoveChannelBanMask {
-            channel: channel.to_string(),
-            mask: banmask.to_string(),
+    pub fn contains_client(&self, nickname: &str) -> bool {
+        own!(nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::ContainsClient {
+            nickname,
+            respond_to,
         };
-        self.sender.send(request).unwrap();
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    pub fn unset_channel_mode(&self, channel: &str, flag: ChannelFlag) {
-        let request = DatabaseMessage::UnsetChannelMode {
-            channel: channel.to_string(),
-            flag,
+    pub fn contains_server(&self, servername: &str) -> bool {
+        own!(servername);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::ContainsServer {
+            servername,
+            respond_to,
         };
-        self.sender.send(request).unwrap();
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    /// Sends UpdateNickname request and returns answer.
-    pub fn update_nickname(&self, old_nickname: &str, new_nickname: &str) {
-        let request = DatabaseMessage::UpdateNickname {
-            old_nickname: old_nickname.to_string(),
-            new_nickname: new_nickname.to_string(),
-        };
-        self.sender.send(request).unwrap();
+    pub fn disconnect_client(&self, nickname: &str) {
+        own!(nickname);
+        let request = DatabaseMessage::DisconnectClient { nickname };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
-
-    pub fn get_server_name(&self) -> String {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetServerName { respond_to: sender };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
+    pub fn get_all_channels(&self) -> Vec<String> {
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetAllChannels { respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    pub fn get_server_info(&self) -> String {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetServerInfo { respond_to: sender };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
+    pub fn get_all_clients(&self) -> Vec<ClientInfo> {
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetAllClients { respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    pub fn get_channel_config(&self, channel: &str) -> Result<ChannelConfiguration, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetChannelConfig {
-            channel: channel.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
     pub fn get_all_servers(&self) -> Vec<String> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetAllServers { respond_to: sender };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetAllServers { respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    pub(crate) fn is_local_client(&self, client: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
+    pub fn get_away_message(&self, nickname: &str) -> Result<Option<String>, DatabaseError> {
+        own!(nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetAwayMessage {
+            nickname,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_channel_banmask(&self, channel: &str) -> Result<Vec<String>, DatabaseError> {
+        own!(channel);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetChannelBanmask {
+            channel,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_channel_clients(&self, channel: &str) -> Result<Vec<String>, DatabaseError> {
+        own!(channel);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetChannelClients {
+            channel,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_channel_config(&self, channel: &str) -> Result<ChannelConfiguration, DatabaseError> {
+        own!(channel);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetChannelConfig {
+            channel,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_channel_key(&self, channel: &str) -> Result<Option<String>, DatabaseError> {
+        own!(channel);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetChannelKey {
+            channel,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_channel_limit(&self, channel: &str) -> Result<Option<usize>, DatabaseError> {
+        own!(channel);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetChannelLimit {
+            channel,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_channel_topic(&self, channel: &str) -> Result<Option<String>, DatabaseError> {
+        own!(channel);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetChannelTopic {
+            channel,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_channels_for_client(&self, nickname: &str) -> Result<Vec<String>, DatabaseError> {
+        own!(nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetChannelsForClient {
+            nickname,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_client_info(&self, client: &str) -> Result<ClientInfo, DatabaseError> {
+        own!(client);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetClientInfo { client, respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_immediate_server(&self, client: &str) -> Result<String, DatabaseError> {
+        own!(client);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetImmediateServer { client, respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_local_stream(&self, nickname: &str) -> Result<C, DatabaseError> {
+        own!(nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetLocalStream {
+            nickname,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_own_server_info(&self) -> String {
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetOwnServerInfo { respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_server_info(&self, server: &str) -> Result<ServerInfo, DatabaseError> {
+        own!(server);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetServerInfo { server, respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_server_name(&self) -> String {
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetServerName { respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn get_server_stream(&self, server: &str) -> Result<C, DatabaseError> {
+        own!(server);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::GetServerStream { server, respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn is_channel_operator(&self, channel: &str, nickname: &str) -> bool {
+        own!(channel, nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::IsChannelOperator {
+            channel,
+            nickname,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn is_channel_speaker(&self, channel: &str, nickname: &str) -> bool {
+        own!(channel, nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::IsChannelSpeaker {
+            channel,
+            nickname,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn is_client_in_channel(&self, channel: &str, nickname: &str) -> bool {
+        own!(channel, nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::IsClientInChannel {
+            channel,
+            nickname,
+            respond_to,
+        };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn is_immediate_server(&self, server: &str) -> bool {
+        own!(server);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::IsImmediateServer { server, respond_to };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
+    }
+    pub fn is_local_client(&self, nickname: &str) -> bool {
+        own!(nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
         let request = DatabaseMessage::IsLocalClient {
-            nickname: client.to_string(),
-            respond_to: sender,
+            nickname,
+            respond_to,
         };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    pub(crate) fn get_immediate_server(&self, client: &str) -> Result<String, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetImmediateServer {
-            client: client.to_string(),
-            respond_to: sender,
+    pub fn is_server_operator(&self, nickname: &str) -> bool {
+        own!(nickname);
+        let (respond_to, receive_from) = std::sync::mpsc::channel();
+        let request = DatabaseMessage::IsServerOperator {
+            nickname,
+            respond_to,
         };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+        receive_from
+            .recv()
+            .expect("Handle sender should not be dropped")
     }
-
-    pub(crate) fn get_client_info(&self, nickname: &str) -> Result<ClientInfo, DatabaseError> {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::GetClientInfo {
-            client: nickname.to_string(),
-            respond_to: sender,
+    pub fn remove_channel_banmask(&self, channel: &str, mask: &str) {
+        own!(channel, mask);
+        let request = DatabaseMessage::RemoveChannelBanmask { channel, mask };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn remove_channel_operator(&self, channel: &str, nickname: &str) {
+        own!(channel, nickname);
+        let request = DatabaseMessage::RemoveChannelOperator { channel, nickname };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn remove_channel_speaker(&self, channel: &str, nickname: &str) {
+        own!(channel, nickname);
+        let request = DatabaseMessage::RemoveChannelSpeaker { channel, nickname };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn remove_client_from_channel(&self, channel: &str, nickname: &str) {
+        own!(channel, nickname);
+        let request = DatabaseMessage::RemoveClientFromChannel { channel, nickname };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn remove_server(&self, servername: &str) {
+        own!(servername);
+        let request = DatabaseMessage::RemoveServer { servername };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn set_away_message(&self, nickname: &str, message: Option<String>) {
+        own!(nickname);
+        let request = DatabaseMessage::SetAwayMessage { nickname, message };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn set_channel_flag(&self, channel: &str, flag: ChannelFlag) {
+        own!(channel);
+        let request = DatabaseMessage::SetChannelFlag { channel, flag };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn set_channel_key(&self, channel: &str, key: Option<String>) {
+        own!(channel);
+        let request = DatabaseMessage::SetChannelKey { channel, key };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn set_channel_limit(&self, channel: &str, limit: Option<usize>) {
+        own!(channel);
+        let request = DatabaseMessage::SetChannelLimit { channel, limit };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn set_channel_topic(&self, channel: &str, topic: &str) {
+        own!(channel, topic);
+        let request = DatabaseMessage::SetChannelTopic { channel, topic };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn set_server_operator(&self, nickname: &str) {
+        own!(nickname);
+        let request = DatabaseMessage::SetServerOperator { nickname };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn set_user_flag(&self, user: &str, flag: UserFlag) {
+        own!(user);
+        let request = DatabaseMessage::SetUserFlag { user, flag };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn unset_channel_flag(&self, channel: &str, flag: ChannelFlag) {
+        own!(channel);
+        let request = DatabaseMessage::UnsetChannelFlag { channel, flag };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn unset_user_flag(&self, user: &str, flag: UserFlag) {
+        own!(user);
+        let request = DatabaseMessage::UnsetUserFlag { user, flag };
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
+    }
+    pub fn update_nickname(&self, old_nickname: &str, new_nickname: &str) {
+        own!(old_nickname, new_nickname);
+        let request = DatabaseMessage::UpdateNickname {
+            old_nickname,
+            new_nickname,
         };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub(crate) fn is_immediate_server(&self, servername: &str) -> bool {
-        let (sender, receiver) = mpsc::channel();
-        let request = DatabaseMessage::IsImmediateServer {
-            server: servername.to_string(),
-            respond_to: sender,
-        };
-        self.sender.send(request).unwrap();
-        receiver.recv().unwrap()
-    }
-
-    pub(crate) fn remove_server(&self, servername: &str) {
-        let request = DatabaseMessage::RemoveServer {
-            servername: servername.to_string(),
-        };
-        self.sender.send(request).unwrap();
-    }
-
-    pub(crate) fn set_user_mode(&self, user: &str, flag: UserFlag) {
-        let user = user.to_string();
-        let request = DatabaseMessage::SetUserMode { user, flag };
-        self.sender.send(request).unwrap();
-    }
-
-    pub(crate) fn unset_user_mode(&self, user: &str, flag: UserFlag) {
-        let user = user.to_string();
-        let request = DatabaseMessage::UnsetUserMode { user, flag };
-        self.sender.send(request).unwrap();
+        self.sender
+            .send(request)
+            .expect("Database receiver should not be dropped");
     }
 }
-
 impl<C: Connection> Clone for DatabaseHandle<C> {
     fn clone(&self) -> Self {
         Self {

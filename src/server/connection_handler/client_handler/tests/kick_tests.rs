@@ -22,7 +22,7 @@ fn kick_fails_when_not_on_channel() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick1"));
-    handler.database.add_client_to_channel("nick1", "#channel1");
+    handler.database.add_client_to_channel("#channel1", "nick1");
 
     let parameters = vec!["#channel1".to_string(), "nick1".to_string()];
     handler.kick_command((None, parameters, None)).unwrap();
@@ -38,10 +38,10 @@ fn kick_fails_when_not_operator() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel1");
+    handler.database.add_client_to_channel("#channel1", "nick2");
     handler
         .database
-        .add_client_to_channel("nickname", "#channel1");
+        .add_client_to_channel("#channel1", "nickname");
 
     let parameters = vec!["#channel1".to_string(), "nickname".to_string()];
     handler.kick_command((None, parameters, None)).unwrap();
@@ -72,13 +72,13 @@ fn can_kick_user_from_channel() {
     handler.database.add_local_client(dummy_client("nick2"));
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+        .add_client_to_channel("#channel", "nickname");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
     handler.kick_command((None, parameters, None)).unwrap();
 
-    assert!(!handler.database.is_client_in_channel("nick2", "#channel"));
+    assert!(!handler.database.is_client_in_channel("#channel", "nick2"));
 
     assert_eq!(
         ":nickname KICK #channel nick2\r\n",
@@ -90,24 +90,6 @@ fn can_kick_user_from_channel() {
     );
 }
 
-// #[test]
-// fn can_kick_user_with_old_nickname() {
-//     let mut handler = dummy_client_handler();
-
-//     handler.database.add_local_client(dummy_client("nick2"));
-//     handler
-//         .database
-//         .add_client_to_channel("nickname", "#channel");
-//     handler.database.add_client_to_channel("nick2", "#channel");
-
-//     handler.database.update_nickname("nick2", "nick3");
-
-//     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
-//     handler.kick_command((None, parameters, None)).unwrap();
-
-//     assert!(!handler.database.is_client_in_channel("nick3", "#channel"));
-// }
-
 #[test]
 fn can_kick_user_from_channel_with_comment() {
     let mut handler = dummy_client_handler();
@@ -115,14 +97,14 @@ fn can_kick_user_from_channel_with_comment() {
     handler.database.add_local_client(dummy_client("nick2"));
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
+        .add_client_to_channel("#channel", "nickname");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
     let trailing = Some("no lollygagging".to_string());
     handler.kick_command((None, parameters, trailing)).unwrap();
 
-    assert!(!handler.database.is_client_in_channel("nick2", "#channel"));
+    assert!(!handler.database.is_client_in_channel("#channel", "nick2"));
 
     assert_eq!(
         ":nickname KICK #channel nick2 :no lollygagging\r\n",
@@ -142,16 +124,16 @@ fn can_kick_multiple_user() {
     handler.database.add_local_client(dummy_client("nick3"));
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_client_to_channel("nick3", "#channel");
+        .add_client_to_channel("#channel", "nickname");
+    handler.database.add_client_to_channel("#channel", "nick2");
+    handler.database.add_client_to_channel("#channel", "nick3");
 
     let parameters = vec!["#channel,#channel".to_string(), "nick2,nick3".to_string()];
     let trailing = Some("no lollygagging".to_string());
     handler.kick_command((None, parameters, trailing)).unwrap();
 
-    assert!(!handler.database.is_client_in_channel("nick2", "#channel"));
-    assert!(!handler.database.is_client_in_channel("nick3", "#channel"));
+    assert!(!handler.database.is_client_in_channel("#channel", "nick2"));
+    assert!(!handler.database.is_client_in_channel("#channel", "nick3"));
 }
 
 #[test]
@@ -162,9 +144,9 @@ fn kick_notifies_users_in_channel() {
     handler.database.add_local_client(dummy_client("nick3"));
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
-    handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_client_to_channel("nick3", "#channel");
+        .add_client_to_channel("#channel", "nickname");
+    handler.database.add_client_to_channel("#channel", "nick2");
+    handler.database.add_client_to_channel("#channel", "nick3");
 
     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
     let trailing = Some("no lollygagging".to_string());
@@ -199,10 +181,10 @@ fn on_distributed_channels_kick_is_relayed_to_all_servers() {
 
     handler
         .database()
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
     handler
         .database()
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
 
     let params = vec!["#channel".to_string(), "nickname1".to_string()];
     let trail = Some("message".to_string());

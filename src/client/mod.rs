@@ -15,7 +15,7 @@ pub struct Client {
 const CRLF: &[u8; 2] = b"\r\n";
 
 impl Client {
-    /// Creates new client connected to received address.
+    /// Creates new [`Client`] connected to received address.
     pub fn new(address: String) -> io::Result<Self> {
         let write_stream = TcpStream::connect(address)?;
         let read_stream = Some(write_stream.try_clone()?);
@@ -27,6 +27,9 @@ impl Client {
         })
     }
 
+    /// Spawns a thread that reads message from the connected stream
+    /// Calls `on_message` method on each message
+    /// Thread ends on IO error
     pub fn start_async_read<F>(&mut self, on_message: F)
     where
         F: Fn(Result<Message, CreationError>) + Send + 'static,
@@ -42,11 +45,19 @@ impl Client {
         self.read_thread = Some(handle);
     }
 
+    pub fn sync_read(&mut self) -> Result<Message, CreationError> {
+        let read_stream = self
+            .read_stream
+            .as_mut()
+            .expect("There should be a read stream");
+        Message::read_from(read_stream)
+    }
+
     pub fn async_print(&mut self) {
         self.start_async_read(print_message);
     }
 
-    /// Sends message to Server.
+    /// Sends message to connected stream.
     pub fn send_raw(&mut self, message: &str) -> io::Result<()> {
         let bytes = message.as_bytes();
 
@@ -54,6 +65,7 @@ impl Client {
         self.write_stream.write_all(CRLF)
     }
 
+    /// Returns true when connection with stream finalized
     pub fn finished_asnyc_read(&self) -> bool {
         if let Some(join_handle) = &self.read_thread {
             return join_handle.is_finished();

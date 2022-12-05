@@ -1,3 +1,5 @@
+use crate::server::testing::dummy_server;
+
 use super::*;
 
 #[test]
@@ -40,4 +42,37 @@ fn can_register_as_operator() {
     );
 
     assert!(handler.database.is_server_operator("nickname"));
+}
+
+#[test]
+fn oper_is_relayed_as_mode_to_all_servers() {
+    let mut handler = dummy_client_handler();
+
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername3"));
+
+    let parameters = vec!["admin".to_string(), "admin".to_string()];
+    handler.oper_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        ":nickname MODE nickname +o\r\n",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+
+    assert_eq!(
+        ":nickname MODE nickname +o\r\n",
+        handler
+            .database
+            .get_server_stream("servername3")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
 }

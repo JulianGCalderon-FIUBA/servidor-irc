@@ -1,8 +1,14 @@
 use std::fmt::Display;
 
-use crate::server::{consts::commands::QUIT_COMMAND, data_structures::ClientInfo};
+use crate::{
+    macros::own,
+    server::{
+        consts::{commands::QUIT_COMMAND, user_flag::UserFlag},
+        data_structures::ClientInfo,
+    },
+};
 
-/// Possible s the commands can generate.
+/// Responses the server can generate for valid client commands.
 pub enum CommandResponse {
     WhoisUser311 {
         client_info: ClientInfo,
@@ -18,10 +24,6 @@ pub enum CommandResponse {
     EndOfWho315 {
         name: Option<String>,
     },
-    // WhoisIdle317 {
-    //     nickname: String,
-    //     seconds: u8,
-    // },
     EndOfWhois318 {
         nickname: String,
     },
@@ -83,6 +85,9 @@ pub enum CommandResponse {
     UserModeIs221 {
         user_modes: String,
     },
+    Welcome001 {
+        client: ClientInfo,
+    },
 }
 
 impl Display for CommandResponse {
@@ -91,7 +96,7 @@ impl Display for CommandResponse {
             CommandResponse::WhoisUser311 { client_info } => {
                 format!(
                     "311 {} {} {} *: {}",
-                    client_info.nickname(),
+                    client_info.nickname,
                     client_info.username,
                     client_info.hostname,
                     client_info.realname,
@@ -113,9 +118,7 @@ impl Display for CommandResponse {
                     name.to_owned().unwrap_or_default()
                 )
             }
-            // CommandResponse::WhoisIdle317 { nickname, seconds } => {
-            //     format!("317 {nickname} {seconds} :seconds idle")
-            // }
+
             CommandResponse::EndOfWhois318 { nickname } => {
                 format!("318 {nickname} :End of /WHOIS list")
             }
@@ -147,17 +150,7 @@ impl Display for CommandResponse {
             CommandResponse::WhoReply352 {
                 channel,
                 client_info,
-            } => {
-                format!(
-                    "352 {} {} {} {} {} \\MODOS :HOPCOUNT {}",
-                    channel.as_ref().unwrap_or(&"*".to_string()),
-                    client_info.username,
-                    client_info.hostname,
-                    client_info.servername,
-                    client_info.nickname(),
-                    client_info.realname,
-                )
-            }
+            } => build_whoreply_message(client_info, channel),
             CommandResponse::NameReply353 { channel, clients } => {
                 format!("353 {channel} :{}", clients.join(" "))
             }
@@ -187,13 +180,50 @@ impl Display for CommandResponse {
             CommandResponse::Quit { message } => {
                 format!("{QUIT_COMMAND} :{message}")
             }
-            CommandResponse::UserModeIs221 { user_modes } => format!("221 {user_modes}"),
+            CommandResponse::UserModeIs221 { user_modes } => {
+                format!("221 {user_modes}")
+            }
+            CommandResponse::Welcome001 { client } => {
+                format!(
+                    "001 {} :Welcome to {} Network, {} !{} @{}",
+                    client.realname,
+                    client.servername,
+                    client.nickname,
+                    client.username,
+                    client.hostname
+                )
+            }
         };
         write!(f, "{string}")
     }
 }
 
+fn build_whoreply_message(client_info: &ClientInfo, channel: &Option<String>) -> String {
+    let basic_info = format!(
+        "{} {} {} {}",
+        client_info.username, client_info.hostname, client_info.servername, client_info.nickname,
+    );
+
+    let flags = client_info
+        .flags
+        .keys()
+        .map(UserFlag::to_char)
+        .collect::<String>();
+
+    format!(
+        "352 {} {} {} :{} {}",
+        channel.as_ref().unwrap_or(&"*".to_string()),
+        basic_info,
+        flags,
+        client_info.hopcount,
+        client_info.realname,
+    )
+}
+
 impl CommandResponse {
+    pub fn welcome(client: ClientInfo) -> Self {
+        CommandResponse::Welcome001 { client }
+    }
     pub fn channel_mode_is(channel: &str, mode: char, mode_params: Option<Vec<String>>) -> Self {
         let channel = channel.to_string();
 
@@ -300,7 +330,8 @@ impl CommandResponse {
         }
     }
 
-    pub fn inviting(inviting_client: String, channel: String) -> Self {
+    pub fn inviting(inviting_client: &str, channel: &str) -> Self {
+        own!(inviting_client, channel);
         Self::Inviting341 {
             nickname: inviting_client,
             channel,

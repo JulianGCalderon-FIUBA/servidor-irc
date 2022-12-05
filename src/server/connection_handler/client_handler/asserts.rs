@@ -1,9 +1,13 @@
+use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::CommandArgs;
-use crate::server::connection_handler::connection_handler_trait::ConnectionHandlerAsserts;
+use crate::server::connection_handler::CommandArgs;
+use crate::server::connection_handler::ConnectionHandlerAsserts;
 use crate::server::consts::channel::*;
+use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::consts::commands::*;
 use crate::server::consts::modes::*;
+use crate::server::consts::user::INVALID_NICKNAME_CHARACTERS;
+use crate::server::consts::user::INVALID_NICKNAME_PREFIXES;
 use crate::server::data_structures::*;
 use crate::server::responses::ErrorReply;
 
@@ -21,6 +25,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         }
 
         let nickname = &params[0];
+
+        if nickname.len() > 9
+            || nickname.contains(INVALID_NICKNAME_CHARACTERS)
+            || nickname.starts_with(INVALID_NICKNAME_PREFIXES)
+        {
+            return Err(ErrorReply::ErroneousNickname432 {
+                nickname: nickname.to_string(),
+            });
+        }
         self.assert_nickname_not_in_use(nickname)
     }
 
@@ -83,15 +96,13 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         let channel = &params[1];
 
         self.assert_exists_client(invited_client)?;
-
-        if self.database.contains_channel(channel) {
-            self.assert_is_in_channel(channel)?;
-            self.assert_client_not_on_channel(invited_client, channel)?;
-        }
+        self.assert_exists_channel(channel)?;
+        self.assert_is_in_channel(channel)?;
+        self.assert_client_not_on_channel(invited_client, channel)?;
 
         if self
             .database
-            .channel_has_mode(channel, &ChannelFlag::InviteOnly)
+            .channel_has_flag(channel, ChannelFlag::InviteOnly)
         {
             self.assert_is_channel_operator(channel)?;
         }
@@ -116,7 +127,14 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         if params.is_empty() {
             return Err(ErrorReply::NoNicknameGiven431);
         }
-
+        if params.len() > 1 {
+            let server = &params[0];
+            if !self.database.contains_server(server) {
+                return Err(ErrorReply::NoSuchServer402 {
+                    server: server.to_string(),
+                });
+            }
+        }
         Ok(())
     }
 
@@ -134,7 +152,7 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(channel, &ChannelFlag::TopicByOperatorOnly)
+            .channel_has_flag(channel, ChannelFlag::TopicByOperatorOnly)
         {
             self.assert_is_channel_operator(channel)?;
         }
@@ -155,16 +173,17 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
 
         let target = &params[0];
 
-        if target.starts_with([DISTRIBUTED_CHANNEL, LOCAL_CHANNEL]) {
+        if self.is_channel(target) {
             self.assert_exists_channel(target)?;
             self.assert_is_in_channel(target)?;
-            self.assert_is_channel_operator(target)?;
         } else if target != &self.nickname {
             return Err(ErrorReply::UsersDontMatch502);
         }
-
         if params.len() > 1 {
             self.assert_modes_starts_correctly(&params[1])?;
+        }
+        if params.len() > 1 && self.is_channel(target) {
+            self.assert_is_channel_operator(target)?;
         }
 
         Ok(())
@@ -236,7 +255,7 @@ impl<C: Connection> ClientHandler<C> {
         client: &str,
         channel: &str,
     ) -> Result<(), ErrorReply> {
-        if self.database.is_client_in_channel(client, channel) {
+        if self.database.is_client_in_channel(channel, client) {
             return Err(ErrorReply::UserOnChannel443 {
                 nickname: client.to_string(),
                 channel: channel.to_string(),
@@ -338,7 +357,7 @@ impl<C: Connection> ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(&channel, &ChannelFlag::NoOutsideMessages)
+            .channel_has_flag(&channel, ChannelFlag::NoOutsideMessages)
             && !self.is_in_channel(&channel)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
@@ -346,7 +365,7 @@ impl<C: Connection> ClientHandler<C> {
 
         if self
             .database
-            .channel_has_mode(&channel, &ChannelFlag::Moderated)
+            .channel_has_flag(&channel, ChannelFlag::Moderated)
             && !self.database.is_channel_speaker(&channel, &self.nickname)
         {
             return Err(ErrorReply::CannotSendToChannel404 { channel });
@@ -363,7 +382,8 @@ impl<C: Connection> ClientHandler<C> {
         let channels_for_client = self
             .database
             .get_channels_for_client(&self.nickname)
-            .unwrap();
+            .expect("Client should exist");
+
         if channels_for_client.len() == MAX_CHANNELS {
             let channel = channel.to_string();
             return Err(ErrorReply::TooManyChannels405 { channel });
@@ -376,7 +396,24 @@ impl<C: Connection> ClientHandler<C> {
 
         self.assert_channel_is_not_full(channel)?;
 
-        self.assert_is_not_banned_from_channel(channel)
+        self.assert_is_not_banned_from_channel(channel)?;
+
+        self.assert_is_invited_to_invite_only_channel(channel)
+    }
+
+    fn assert_is_invited_to_invite_only_channel(&self, channel: &str) -> Result<(), ErrorReply> {
+        let is_invite_only = self
+            .database
+            .channel_has_flag(channel, ChannelFlag::InviteOnly);
+        let is_invited = self.database.channel_has_invite(channel, &self.nickname);
+
+        if is_invite_only && !is_invited {
+            return Err(ErrorReply::InviteOnlyChannel473 {
+                channel: channel.to_string(),
+            });
+        }
+
+        Ok(())
     }
 
     pub fn assert_can_kick_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
@@ -403,7 +440,7 @@ impl<C: Connection> ClientHandler<C> {
 
         let channel = channel.to_string();
 
-        if !self.database.is_client_in_channel(client, &channel) {
+        if !self.database.is_client_in_channel(&channel, client) {
             return Err(ErrorReply::NotOnChannel442 { channel });
         }
 
@@ -411,7 +448,12 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_can_set_key(&mut self, channel: &str) -> Result<(), ErrorReply> {
-        if self.database.get_channel_key(channel).unwrap().is_some() {
+        if self
+            .database
+            .get_channel_key(channel)
+            .expect("Channel should exist")
+            .is_some()
+        {
             return Err(ErrorReply::KeySet467 {
                 channel: channel.to_string(),
             });
@@ -447,7 +489,9 @@ impl<C: Connection> ClientHandler<C> {
         let channel = channel.to_string();
 
         if let Ok(Some(limit)) = self.database.get_channel_limit(&channel) {
-            if self.database.get_channel_clients(&channel).unwrap().len() >= limit {
+            let channel_clients =
+                ok_or_return!(self.database.get_channel_clients(&channel), Ok(()));
+            if channel_clients.len() >= limit {
                 return Err(ErrorReply::ChannelIsFull471 { channel });
             }
         }
@@ -455,7 +499,8 @@ impl<C: Connection> ClientHandler<C> {
     }
 
     pub fn assert_is_not_banned_from_channel(&self, channel: &str) -> Result<(), ErrorReply> {
-        for mask in self.database.get_channel_banmask(channel).unwrap() {
+        let channel_banmasks = ok_or_return!(self.database.get_channel_banmask(channel), Ok(()));
+        for mask in channel_banmasks {
             if self.client_matches_banmask(&self.nickname, &mask) {
                 let channel = channel.to_string();
                 return Err(ErrorReply::BannedFromChannel474 { channel });

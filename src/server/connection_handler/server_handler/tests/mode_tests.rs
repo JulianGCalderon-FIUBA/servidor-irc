@@ -1,11 +1,67 @@
+use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::{
-    connection_handler::{
-        connection_handler_trait::ConnectionHandlerCommands,
-        server_handler::tests::dummy_server_handler,
-    },
-    consts::modes::ChannelFlag,
+    connection_handler::{server_handler::tests::dummy_server_handler, ConnectionHandlerCommands},
+    consts::user_flag::UserFlag,
     testing::{dummy_client, dummy_external_client, dummy_server},
 };
+
+#[test]
+fn mode_with_invalid_arguments_is_invalid() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_immediate_server(dummy_server("servername2"));
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+b".to_string(),
+        "banmask".to_string(),
+    ];
+    handler.mode_command((None, parameters, None)).unwrap();
+
+    let prefix = Some("sender".to_string());
+    let parameters = vec![
+        "#channel".to_string(),
+        "&b".to_string(),
+        "banmask".to_string(),
+    ];
+    handler
+        .mode_command((prefix.clone(), parameters, None))
+        .unwrap();
+    let parameters = vec![
+        "#channel".to_string(),
+        "+y".to_string(),
+        "banmask".to_string(),
+    ];
+    handler
+        .mode_command((prefix.clone(), parameters, None))
+        .unwrap();
+
+    let parameters = vec![
+        "#channel".to_string(),
+        "+ui".to_string(),
+        "banmask".to_string(),
+    ];
+    handler
+        .mode_command((prefix.clone(), parameters, None))
+        .unwrap();
+
+    let parameters = vec!["#channel".to_string()];
+    handler
+        .mode_command((prefix.clone(), parameters, None))
+        .unwrap();
+
+    handler.mode_command((prefix, vec![], None)).unwrap();
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_server_stream("servername2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
 
 #[test]
 fn mode_is_relayed_to_all_other_servers() {
@@ -61,7 +117,7 @@ fn mode_is_never_relayed_to_sending_server() {
 }
 
 #[test]
-fn mode_is_relayed_to_local_clients_on_channel() {
+fn channel_mode_is_relayed_to_local_clients_on_channel() {
     let mut handler = dummy_server_handler();
     handler
         .database
@@ -71,7 +127,7 @@ fn mode_is_relayed_to_local_clients_on_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
 
     let parameters = vec!["#channel".to_string(), "+s".to_string()];
     let prefix = Some("sender".to_string());
@@ -96,15 +152,15 @@ fn mode_is_relayed_to_local_clients_on_channel() {
 }
 
 #[test]
-fn mode_adds_channop() {
+fn channel_mode_adds_channop() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
 
@@ -119,16 +175,16 @@ fn mode_adds_channop() {
 }
 
 #[test]
-fn mode_removes_channop() {
+fn channel_mode_removes_channop() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_channop("#channel", "nick2");
+    handler.database.add_client_to_channel("#channel", "nick2");
+    handler.database.add_channel_operator("#channel", "nick2");
 
     assert!(handler.database.is_channel_operator("#channel", "nick2"));
 
@@ -145,13 +201,13 @@ fn mode_removes_channop() {
 }
 
 #[test]
-fn mode_sets_limit_to_channel() {
+fn channel_mode_sets_limit_to_channel() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(handler
         .database
@@ -170,13 +226,13 @@ fn mode_sets_limit_to_channel() {
 }
 
 #[test]
-fn mode_unsets_channel_limit() {
+fn channel_mode_unsets_channel_limit() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
     handler.database.set_channel_limit("#channel", Some(5));
 
     assert_eq!(
@@ -196,13 +252,13 @@ fn mode_unsets_channel_limit() {
 }
 
 #[test]
-fn mode_sets_banmask() {
+fn channel_mode_sets_banmask() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(handler
         .database
@@ -227,13 +283,13 @@ fn mode_sets_banmask() {
 }
 
 #[test]
-fn mode_unsets_banmask() {
+fn channel_mode_unsets_banmask() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_channel_banmask("#channel", "banmask");
     handler.database.add_channel_banmask("#channel", "banmask2");
@@ -274,16 +330,16 @@ fn mode_unsets_banmask() {
 }
 
 #[test]
-fn mode_adds_speaker_to_channel() {
+fn channel_mode_adds_speaker_to_channel() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
+    handler.database.add_client_to_channel("#channel", "nick2");
 
     assert!(!handler.database.is_channel_speaker("#channel", "nick2"));
 
@@ -299,17 +355,17 @@ fn mode_adds_speaker_to_channel() {
 }
 
 #[test]
-fn mode_removes_speakers_from_channel() {
+fn channel_mode_removes_speakers_from_channel() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     handler.database.add_local_client(dummy_client("nick2"));
-    handler.database.add_client_to_channel("nick2", "#channel");
-    handler.database.add_speaker("#channel", "nick2");
+    handler.database.add_client_to_channel("#channel", "nick2");
+    handler.database.add_channel_speaker("#channel", "nick2");
 
     assert!(handler.database.is_channel_speaker("#channel", "nick2"));
 
@@ -325,13 +381,13 @@ fn mode_removes_speakers_from_channel() {
 }
 
 #[test]
-fn mode_sets_channel_key() {
+fn channel_mode_sets_channel_key() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(handler
         .database
@@ -350,13 +406,13 @@ fn mode_sets_channel_key() {
 }
 
 #[test]
-fn mode_unsets_channel_key() {
+fn channel_mode_unsets_channel_key() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
     handler
         .database
         .set_channel_key("#channel", Some("key".to_string()));
@@ -378,17 +434,17 @@ fn mode_unsets_channel_key() {
 }
 
 #[test]
-fn mode_sets_and_unsets_private_flag() {
+fn channel_mode_sets_and_unsets_private_flag() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 
     let mut parameters = vec!["#channel".to_string(), "+p".to_string()];
     let prefix = Some("sender".to_string());
@@ -397,7 +453,7 @@ fn mode_sets_and_unsets_private_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 
     parameters = vec!["#channel".to_string(), "-p".to_string()];
 
@@ -407,21 +463,21 @@ fn mode_sets_and_unsets_private_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Private));
+        .channel_has_flag("#channel", ChannelFlag::Private));
 }
 
 #[test]
-fn mode_sets_and_unsets_secret_flag() {
+fn channel_mode_sets_and_unsets_secret_flag() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 
     let mut parameters = vec!["#channel".to_string(), "+s".to_string()];
     let prefix = Some("sender".to_string());
@@ -430,7 +486,7 @@ fn mode_sets_and_unsets_secret_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 
     parameters = vec!["#channel".to_string(), "-s".to_string()];
 
@@ -440,21 +496,21 @@ fn mode_sets_and_unsets_secret_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Secret));
+        .channel_has_flag("#channel", ChannelFlag::Secret));
 }
 
 #[test]
-fn mode_sets_and_unsets_invite_only_flag() {
+fn channel_mode_sets_and_unsets_invite_only_flag() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 
     let mut parameters = vec!["#channel".to_string(), "+i".to_string()];
     let prefix = Some("sender".to_string());
@@ -463,7 +519,7 @@ fn mode_sets_and_unsets_invite_only_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 
     parameters = vec!["#channel".to_string(), "-i".to_string()];
 
@@ -473,21 +529,21 @@ fn mode_sets_and_unsets_invite_only_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::InviteOnly));
+        .channel_has_flag("#channel", ChannelFlag::InviteOnly));
 }
 
 #[test]
-fn mode_sets_and_unsets_topic_flag() {
+fn channel_mode_sets_and_unsets_topic_flag() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 
     let mut parameters = vec!["#channel".to_string(), "+t".to_string()];
     let prefix = Some("sender".to_string());
@@ -496,7 +552,7 @@ fn mode_sets_and_unsets_topic_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 
     parameters = vec!["#channel".to_string(), "-t".to_string()];
 
@@ -506,20 +562,20 @@ fn mode_sets_and_unsets_topic_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::TopicByOperatorOnly));
+        .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
 }
 #[test]
-fn mode_sets_and_unsets_no_outside_messages_flag() {
+fn channel_mode_sets_and_unsets_no_outside_messages_flag() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 
     let mut parameters = vec!["#channel".to_string(), "+n".to_string()];
     let prefix = Some("sender".to_string());
@@ -528,7 +584,7 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 
     parameters = vec!["#channel".to_string(), "-n".to_string()];
 
@@ -538,21 +594,21 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::NoOutsideMessages));
+        .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
 }
 
 #[test]
-fn mode_sets_and_unsets_moderated_flag() {
+fn channel_mode_sets_and_unsets_moderated_flag() {
     let mut handler = dummy_server_handler();
     handler.database.add_local_client(dummy_client("nickname"));
 
     handler
         .database
-        .add_client_to_channel("nickname", "#channel");
+        .add_client_to_channel("#channel", "nickname");
 
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
 
     let mut parameters = vec!["#channel".to_string(), "+m".to_string()];
     let prefix = Some("sender".to_string());
@@ -561,7 +617,7 @@ fn mode_sets_and_unsets_moderated_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
 
     parameters = vec!["#channel".to_string(), "-m".to_string()];
 
@@ -571,5 +627,125 @@ fn mode_sets_and_unsets_moderated_flag() {
     assert_eq!("", handler.stream.read_wbuf_to_string());
     assert!(!handler
         .database
-        .channel_has_mode("#channel", &ChannelFlag::Moderated));
+        .channel_has_flag("#channel", ChannelFlag::Moderated));
+}
+
+#[test]
+fn user_mode_sets_and_unsets_invisible_flag() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_external_client(dummy_external_client("nickname", "servername"));
+
+    let parameters = vec!["nickname".to_string(), "+i".to_string()];
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
+
+    assert!(handler
+        .database
+        .get_client_info("nickname")
+        .unwrap()
+        .flags
+        .contains_key(&UserFlag::Invisible));
+
+    let parameters = vec!["nickname".to_string(), "-i".to_string()];
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
+
+    assert!(!handler
+        .database
+        .get_client_info("nickname")
+        .unwrap()
+        .flags
+        .contains_key(&UserFlag::Invisible));
+}
+
+#[test]
+fn user_mode_sets_and_unsets_server_notices_flag() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_external_client(dummy_external_client("nickname", "servername"));
+
+    let parameters = vec!["nickname".to_string(), "+s".to_string()];
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
+
+    assert!(handler
+        .database
+        .get_client_info("nickname")
+        .unwrap()
+        .flags
+        .contains_key(&UserFlag::ReceiveServerNotices));
+
+    let parameters = vec!["nickname".to_string(), "-s".to_string()];
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
+
+    assert!(!handler
+        .database
+        .get_client_info("nickname")
+        .unwrap()
+        .flags
+        .contains_key(&UserFlag::ReceiveServerNotices));
+}
+
+#[test]
+fn user_mode_sets_and_unsets_server_wallop_flag() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_external_client(dummy_external_client("nickname", "servername"));
+
+    let parameters = vec!["nickname".to_string(), "+w".to_string()];
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
+
+    assert!(handler
+        .database
+        .get_client_info("nickname")
+        .unwrap()
+        .flags
+        .contains_key(&UserFlag::ReceivesWallops));
+
+    let parameters = vec!["nickname".to_string(), "-w".to_string()];
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
+
+    assert!(!handler
+        .database
+        .get_client_info("nickname")
+        .unwrap()
+        .flags
+        .contains_key(&UserFlag::ReceivesWallops));
+}
+
+#[test]
+fn user_mode_sets_and_unsets_operator_flag() {
+    let mut handler = dummy_server_handler();
+    handler
+        .database
+        .add_external_client(dummy_external_client("nickname", "servername"));
+
+    let parameters = vec!["nickname".to_string(), "+o".to_string()];
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
+
+    assert!(handler
+        .database
+        .get_client_info("nickname")
+        .unwrap()
+        .flags
+        .contains_key(&UserFlag::Operator));
+
+    let parameters = vec!["nickname".to_string(), "-o".to_string()];
+    let prefix = Some("sender".to_string());
+    handler.mode_command((prefix, parameters, None)).unwrap();
+
+    assert!(!handler
+        .database
+        .get_client_info("nickname")
+        .unwrap()
+        .flags
+        .contains_key(&UserFlag::Operator));
 }

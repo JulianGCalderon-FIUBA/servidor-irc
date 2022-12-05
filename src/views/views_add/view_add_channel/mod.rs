@@ -1,7 +1,8 @@
 pub mod requests;
 pub mod utils;
-pub mod widget_creations;
+pub mod widgets_creation;
 
+use gtk::Label;
 use gtk::{
     glib::Sender, prelude::*, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
     Orientation::Horizontal, Orientation::Vertical,
@@ -10,19 +11,20 @@ use gtk4 as gtk;
 
 use self::requests::join_channel_request;
 use self::utils::{active_button, disable_button, disactive_button, switch_visibility};
-use self::widget_creations::{
+use self::widgets_creation::{
     create_active_button, create_box, create_combobox, create_inactive_button,
 };
 
-use super::widget_creations::create_main_box_add_view;
+use super::widgets_creation::create_main_box_add_view;
 use super::{
     super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
-    widget_creations::create_title,
+    widgets_creation::create_title,
 };
 
 use crate::controller::controller_message::ControllerMessage;
 use crate::views::widgets_creation::{
-    build_application_window, create_center_button, create_label_input_box,
+    build_application_window, create_center_button, create_error_label, create_label,
+    create_label_input_box,
 };
 
 const TITLE: &str = "Add channel";
@@ -42,6 +44,7 @@ pub struct AddChannelView {
     pub create_channel_box: Box,
     pub channel_entry: Entry,
     pub channel_combobox: ComboBoxText,
+    pub error_label: Label,
     pub add_new_channel_button: Button,
     pub add_existing_channel_button: Button,
     sender: Sender<ControllerMessage>,
@@ -56,6 +59,7 @@ impl AddChannelView {
             create_channel_box: create_box(Vertical),
             channel_entry: create_entry(""),
             channel_combobox: create_combobox(),
+            error_label: create_error_label(),
             add_new_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
             add_existing_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
             sender,
@@ -95,7 +99,11 @@ impl AddChannelView {
             self.join_channel_box.clone(),
         );
 
-        self.connect_add_new_channel_button(self.channel_entry.clone(), self.sender.clone());
+        self.connect_add_new_channel_button(
+            self.channel_entry.clone(),
+            self.error_label.clone(),
+            self.sender.clone(),
+        );
         if !channels.is_empty() {
             self.connect_add_existing_channel_button(
                 self.channel_combobox.clone(),
@@ -120,10 +128,14 @@ impl AddChannelView {
     fn append_create_channel_box(&mut self, main_box: Box) {
         let entry_box = create_label_input_box(CHANNEL_LABEL_TEXT);
         self.channel_entry.add_css_class(ADD_CHANNEL_ENTRY_CSS);
+        let channel_first_character = create_label("#");
+        channel_first_character.add_css_class("channel_first_character");
+        entry_box.append(&channel_first_character);
         entry_box.append(&self.channel_entry);
         self.create_channel_box.append(&entry_box);
-        self.create_channel_box.set_visible(false);
         self.create_channel_box.append(&self.add_new_channel_button);
+        self.create_channel_box.append(&self.error_label);
+        self.create_channel_box.set_visible(false);
         main_box.append(&self.create_channel_box);
     }
 
@@ -131,6 +143,7 @@ impl AddChannelView {
         for channel in &channels {
             self.channel_combobox.append_text(&channel.clone());
         }
+        self.channel_combobox.set_active(Some(0));
     }
 
     fn disable_join_channel_option(&mut self) {
@@ -168,17 +181,33 @@ impl AddChannelView {
                 return;
             }
 
-            join_channel_request(combobox.active_text().unwrap(), sender.clone());
+            join_channel_request(combobox.active_text().unwrap().to_string(), sender.clone());
         });
     }
 
-    fn connect_add_new_channel_button(&self, input: Entry, sender: Sender<ControllerMessage>) {
+    fn connect_add_new_channel_button(
+        &self,
+        input: Entry,
+        error_label: Label,
+        sender: Sender<ControllerMessage>,
+    ) {
         self.add_new_channel_button.connect_clicked(move |_| {
-            if !entry_is_valid(&input.text()) {
+            let mut text = input.text().to_string();
+            error_label.set_text("");
+
+            if !entry_is_valid(&text, 15) {
+                if !text.is_empty() {
+                    error_label.set_text("¡Channel name too long! Max: 15 characters");
+                } else {
+                    error_label.set_text("¡Channel name is empty!");
+                }
                 return;
             }
+            if !text.starts_with('#') {
+                text = format!("#{}", text);
+            }
 
-            join_channel_request(input.text(), sender.clone());
+            join_channel_request(text, sender.clone());
         });
     }
 }

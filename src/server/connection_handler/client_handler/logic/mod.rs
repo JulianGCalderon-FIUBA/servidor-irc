@@ -2,7 +2,7 @@ use std::io;
 
 use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
+use crate::server::connection_handler::{
     CommandArgs, ConnectionHandlerLogic, ConnectionHandlerUtils,
 };
 
@@ -13,12 +13,11 @@ use crate::server::consts::channel::{DISTRIBUTED_CHANNEL, LOCAL_CHANNEL};
 use crate::server::data_structures::*;
 use crate::server::responses::{CommandResponse, Notification};
 
-use self::utils::collect_list;
-
+use super::utils::collect_list;
 use super::ClientHandler;
 
+/// Contains the extended logic of the MODE command.
 mod mode_logic;
-mod utils;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn nick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
@@ -39,14 +38,14 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         self.database.set_server_operator(&self.nickname);
         self.stream.send(&CommandResponse::you_are_oper())?;
 
-        // TODO: RELAY MODE TO OTHER SERVERS
+        self.send_oper_notification();
 
         Ok(true)
     }
 
     fn privmsg_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, trail) = arguments;
-        let content = trail.unwrap();
+        let content = trail.expect("Verified in assert");
         let targets = params.remove(0);
 
         for target in targets.split(',') {
@@ -63,8 +62,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn notice_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, trail) = arguments;
-        let content = trail.unwrap();
-        let targets = params.pop().unwrap();
+        let content = trail.expect("Verified in assert");
+        let targets = params.pop().expect("Verified in assert");
 
         for target in targets.split(',') {
             if let Err(error) = self.assert_target_is_valid(target) {
@@ -72,7 +71,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 continue;
             }
 
-            self.send_notice_to_target(target, &content)?;
+            self.send_notice_to_target(target, &content);
         }
 
         Ok(true)
@@ -94,7 +93,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
             self.send_join_notification(channel);
 
-            self.database.add_client_to_channel(&self.nickname, channel);
+            self.database.add_client_to_channel(channel, &self.nickname);
 
             self.send_join_response(channel)?;
         }
@@ -104,7 +103,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn part_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
-        let channels = params.pop().unwrap();
+        let channels = params.pop().expect("Verified in assert");
 
         for channel in channels.split(',') {
             if let Err(error) = self.assert_can_part_channel(channel) {
@@ -115,7 +114,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             self.send_part_notification(channel);
 
             self.database
-                .remove_client_from_channel(&self.nickname, channel);
+                .remove_client_from_channel(channel, &self.nickname);
         }
 
         Ok(true)
@@ -123,19 +122,17 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn invite_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
-        let channel = params.pop().unwrap();
-        let invited_client = params.pop().unwrap();
+        let channel = params.pop().expect("Verified in assert");
+        let invited_client = params.pop().expect("Verified in assert");
         let inviting_client = self.nickname.clone();
 
-        if self
-            .send_invite_notification(invited_client, &channel)
-            .is_ok()
-        {
-            self.stream
-                .send(&CommandResponse::inviting(inviting_client, channel))?;
+        self.send_invite_notification(&invited_client, &channel)
+            .ok();
 
-            // ADD TO CLIENT/CHANNEL INVITATIONS
-        }
+        self.stream
+            .send(&CommandResponse::inviting(&inviting_client, &channel))?;
+
+        self.database.add_channel_invite(&channel, &invited_client);
 
         Ok(true)
     }
@@ -157,7 +154,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         }
 
         if params.is_empty() {
-            self.stream.send(&CommandResponse::end_of_names(""))?;
+            self.send_name_response_for_remaining_clients()?;
         }
 
         Ok(true)
@@ -200,8 +197,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn whois_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
-        let nickmasks = params.pop().unwrap();
-        let _server = params.get(0);
+        let nickmasks = params.pop().expect("Verified in assert");
+        let server = params.get(0);
 
         for nickmask in nickmasks.split(',') {
             let clients: Vec<ClientInfo> = self.get_clients_for_nickmask(nickmask);
@@ -211,6 +208,11 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 continue;
             }
             for client in clients {
+                if let Some(server) = server {
+                    if &client.servername != server {
+                        continue;
+                    }
+                }
                 self.send_whois_response(client)?;
             }
         }
@@ -220,7 +222,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
     fn away_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, _, trail) = arguments;
-        self.database.set_away_message(&trail, &self.nickname);
+        self.database
+            .set_away_message(&self.nickname, trail.clone());
 
         let away_notification = Notification::away(&self.nickname, &trail);
         let reply = match trail {
@@ -307,20 +310,16 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
             let server_clients: Vec<ClientInfo> = all_clients
                 .into_iter()
                 .filter(|client| {
-                    let server = ok_or_return!(
-                        self.database.get_immediate_server(&client.nickname()),
-                        false
-                    );
+                    let server =
+                        ok_or_return!(self.database.get_immediate_server(&client.nickname), false);
                     server == *servername
                 })
                 .collect();
 
             for client in server_clients {
-                self.database.disconnect_client(&client.nickname());
-                self.send_quit_notification(&client.nickname(), "Net split");
+                self.database.disconnect_client(&client.nickname);
+                self.send_quit_notification(&client.nickname, "Net split");
             }
-
-            // preguntar si hay que desconectarlos o eliminarlos
         }
 
         Ok(true)
@@ -329,7 +328,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
 impl<C: Connection> ClientHandler<C> {
     fn send_privmsg_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
-        self.send_privmsg_notification(target, content)?;
+        self.send_privmsg_notification(target, content);
 
         if let Ok(Some(message)) = self.database.get_away_message(target) {
             self.stream.send(&CommandResponse::away(target, &message))?;
@@ -338,10 +337,8 @@ impl<C: Connection> ClientHandler<C> {
         Ok(())
     }
 
-    fn send_notice_to_target(&mut self, target: &str, content: &str) -> io::Result<()> {
-        self.send_notice_notification(target, content)?;
-
-        Ok(())
+    fn send_notice_to_target(&mut self, target: &str, content: &str) {
+        self.send_notice_notification(target, content);
     }
 
     fn kick_client_from_channel(
@@ -351,7 +348,7 @@ impl<C: Connection> ClientHandler<C> {
         comment: &Option<String>,
     ) {
         self.send_kick_notification(channel, nickname, comment);
-        self.database.remove_client_from_channel(nickname, channel);
+        self.database.remove_client_from_channel(channel, nickname);
     }
 
     fn mode_command_for_channel(
@@ -360,7 +357,7 @@ impl<C: Connection> ClientHandler<C> {
         mut args: Vec<String>,
     ) -> Result<(), io::Error> {
         if args.is_empty() {
-            self.send_channel_mode_is_response(&channel)?; // falta soporte para usuarios
+            self.send_channel_mode_is_response(&channel)?;
             return Ok(());
         }
 
@@ -379,7 +376,7 @@ impl<C: Connection> ClientHandler<C> {
 
     fn mode_command_for_user(&mut self, user: String, mut args: Vec<String>) -> io::Result<()> {
         if args.is_empty() {
-            self.send_user_mode_is_response(&user)?; // falta soporte para usuarios
+            self.send_user_mode_is_response(&user)?;
             return Ok(());
         }
 

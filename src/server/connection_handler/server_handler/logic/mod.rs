@@ -2,9 +2,7 @@ use std::io;
 
 use crate::macros::ok_or_return;
 use crate::server::connection::Connection;
-use crate::server::connection_handler::connection_handler_trait::{
-    CommandArgs, ConnectionHandlerLogic,
-};
+use crate::server::connection_handler::{CommandArgs, ConnectionHandlerLogic};
 
 use crate::server::connection_handler::mode_requests::{
     parse_channel_mode_string, parse_user_mode_string,
@@ -14,6 +12,7 @@ use crate::server::data_structures::*;
 
 use super::ServerHandler;
 
+/// Contains the extended logic of the MODE command.
 mod mode_logic;
 
 impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
@@ -28,7 +27,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
             return Ok(true);
         }
 
-        let hopcount = params[0].parse::<usize>().unwrap();
+        let hopcount = params[0].parse::<usize>().expect("Verified in assert");
         self.send_nick_notification(&nickname, hopcount);
         self.hopcounts.insert(nickname, hopcount);
 
@@ -38,17 +37,21 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn user_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (prefix, params, trail) = arguments;
 
-        let nickname = &prefix.unwrap();
+        let nickname = &prefix.expect("Verified in assert");
         let client = ClientBuilder::<C>::new()
             .nickname(nickname)
-            .hopcount(self.hopcounts.remove(nickname).unwrap())
-            .username(params.get(0).unwrap())
-            .hostname(params.get(1).unwrap())
-            .servername(params.get(2).unwrap())
-            .realname(&trail.unwrap())
+            .hopcount(
+                self.hopcounts
+                    .remove(nickname)
+                    .expect("Hopcount value should be saved in hopcounts"),
+            )
+            .username(params.get(0).expect("Verified in assert"))
+            .hostname(params.get(1).expect("Verified in assert"))
+            .servername(params.get(2).expect("Verified in assert"))
+            .realname(&trail.expect("Verified in assert"))
             .immediate(&self.servername)
             .build_external_client()
-            .unwrap();
+            .expect("Client's information should be stored and available");
 
         self.send_user_notification(&client.get_info());
         self.database.add_external_client(client);
@@ -59,9 +62,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn privmsg_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (prefix, mut params, trail) = arguments;
 
-        let sender = prefix.unwrap();
+        let sender = prefix.expect("Verified in assert");
         let target = params.remove(0);
-        let content = trail.unwrap();
+        let content = trail.expect("Verified in assert");
 
         self.send_privmsg_notification(&sender, &target, &content);
 
@@ -75,9 +78,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn notice_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, mut params, trail) = arguments;
 
-        let sender = prefix.unwrap();
+        let sender = prefix.expect("Verified in assert");
         let target = params.remove(0);
-        let content = trail.unwrap();
+        let content = trail.expect("Verified in assert");
 
         self.send_notice_notification(&sender, &target, &content);
 
@@ -87,9 +90,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn join_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, mut params, _) = arguments;
 
-        let nickname = prefix.unwrap();
+        let nickname = prefix.expect("Verified in assert");
         let channel = params.remove(0);
-        self.database.add_client_to_channel(&nickname, &channel);
+        self.database.add_client_to_channel(&channel, &nickname);
         self.send_join_notification(&nickname, &channel);
         Ok(true)
     }
@@ -97,10 +100,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn part_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, mut params, _) = arguments;
 
-        let nickname = prefix.unwrap();
+        let nickname = prefix.expect("Verified in assert");
         let channel = params.remove(0);
         self.database
-            .remove_client_from_channel(&nickname, &channel);
+            .remove_client_from_channel(&channel, &nickname);
         self.send_part_notification(&nickname, &channel);
         Ok(true)
     }
@@ -108,7 +111,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn invite_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, params, _) = arguments;
 
-        let inviting = &prefix.unwrap();
+        let inviting = &prefix.expect("Verified in assert");
         let invited = &params[0];
         let channel = &params[1];
 
@@ -119,9 +122,9 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn away_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, _, trail) = arguments;
         self.database
-            .set_away_message(&trail, prefix.as_ref().unwrap());
+            .set_away_message(prefix.as_ref().expect("Verified in assert"), trail.clone());
 
-        let nickname = prefix.unwrap();
+        let nickname = prefix.expect("Verified in assert");
         let message = trail;
 
         self.send_away_notification(&nickname, &message);
@@ -131,7 +134,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn topic_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, params, _) = arguments;
 
-        let nickname = &prefix.unwrap();
+        let nickname = &prefix.expect("Verified in assert");
         let channel = &params[0];
         let topic = &params[1];
         self.database.set_channel_topic(channel, topic);
@@ -143,13 +146,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn kick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, mut params, trail) = arguments;
 
-        let kicker = prefix.unwrap();
+        let kicker = prefix.expect("Verified in assert");
         let kicked = params.remove(1);
         let channel = params.remove(0);
         let message = trail;
 
         self.send_kick_notification(&kicker, &channel, &kicked, &message);
-        self.database.remove_client_from_channel(&kicked, &channel);
+        self.database.remove_client_from_channel(&channel, &kicked);
 
         Ok(true)
     }
@@ -157,10 +160,10 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn mode_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, mut params, _) = arguments;
 
-        let sender = prefix.unwrap();
+        let sender = prefix.expect("Verified in assert");
         let target = params.remove(0);
 
-        let mode = params.get(0).unwrap().to_string();
+        let mode = params.get(0).expect("Verified in assert").to_string();
         let argument = params.get(1).map(|s| s.to_string()).unwrap_or_default();
         let request = format!("{mode} {argument}");
 
@@ -178,8 +181,8 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn quit_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, _, trail) = arguments;
 
-        let nickname = prefix.unwrap();
-        let message = trail.unwrap();
+        let nickname = prefix.expect("Verified in assert");
+        let message = trail.expect("Verified in assert");
 
         self.database.disconnect_client(&nickname);
         self.send_quit_notification(nickname, message);
@@ -190,9 +193,12 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn server_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, mut params, trail) = arguments;
 
-        let hopcount = params.remove(1).parse::<usize>().unwrap();
+        let hopcount = params
+            .remove(1)
+            .parse::<usize>()
+            .expect("Verified in assert");
         let servername = params.remove(0);
-        let serverinfo = trail.unwrap();
+        let serverinfo = trail.expect("Verified in assert");
 
         self.send_server_notification(&servername, hopcount + 1, &serverinfo);
 
@@ -204,7 +210,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn squit_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (prefix, params, trail) = arguments;
 
-        let sender = prefix.unwrap();
+        let sender = prefix.expect("Verified in assert");
         let servername = &params[0];
         let comment = trail;
 
@@ -217,22 +223,18 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
             let server_clients: Vec<ClientInfo> = all_clients
                 .into_iter()
                 .filter(|client| {
-                    let server = ok_or_return!(
-                        self.database.get_immediate_server(&client.nickname()),
-                        false
-                    );
+                    let server =
+                        ok_or_return!(self.database.get_immediate_server(&client.nickname), false);
                     server == *servername
                 })
                 .collect();
 
             for client in server_clients {
-                println!("desconectando al cliente: {}", client.nickname());
-                self.database.disconnect_client(&client.nickname());
+                println!("desconectando al cliente: {}", client.nickname);
+                self.database.disconnect_client(&client.nickname);
 
-                self.send_quit_notification(client.nickname(), "Net split".to_string());
+                self.send_quit_notification(client.nickname, "Net split".to_string());
             }
-
-            // preguntar si hay que desconectarlos o eliminarlos
         }
 
         Ok(true)

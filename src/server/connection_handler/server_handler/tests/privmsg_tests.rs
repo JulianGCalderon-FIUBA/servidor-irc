@@ -1,5 +1,5 @@
 use crate::server::{
-    connection_handler::connection_handler_trait::ConnectionHandlerCommands,
+    connection_handler::ConnectionHandlerCommands,
     testing::{dummy_client, dummy_external_client, dummy_server},
 };
 
@@ -9,7 +9,16 @@ use super::dummy_server_handler;
 fn privmsg_is_ignored_without_enough_parameters() {
     let mut handler = dummy_server_handler();
 
-    assert!(handler.privmsg_command((None, vec![], None)).is_ok());
+    let prefix = Some("sender".to_string());
+    let params = vec!["target".to_string()];
+    let trail = Some("message".to_string());
+    handler
+        .privmsg_command((None, params.clone(), trail.clone()))
+        .unwrap();
+    handler
+        .privmsg_command((prefix.clone(), vec![], trail))
+        .unwrap();
+    handler.privmsg_command((prefix, params, None)).unwrap();
 }
 
 #[test]
@@ -81,10 +90,10 @@ fn privmsg_to_channel_is_relayed_to_all_local_clients_in_channel() {
 
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
     handler
         .database
         .add_external_client(dummy_external_client("sender", "servername"));
@@ -131,10 +140,10 @@ fn privmsg_to_channel_is_relayed_to_each_necesary_server_once() {
         .add_immediate_server(dummy_server("servername2"));
     handler
         .database
-        .add_client_to_channel("nickname1", "#channel");
+        .add_client_to_channel("#channel", "nickname1");
     handler
         .database
-        .add_client_to_channel("nickname2", "#channel");
+        .add_client_to_channel("#channel", "nickname2");
     handler.database.add_client_to_channel("sender", "#channel");
 
     let prefix = Some("sender".to_string());

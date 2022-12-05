@@ -1,8 +1,7 @@
-use crate::{
-    macros::{ok_or_return, some_or_return},
-    server::consts::modes::{
-        ChannelFlag, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
-    },
+use crate::macros::{ok_or_return, some_or_return};
+use crate::server::consts::channel_flag::ChannelFlag;
+use crate::server::consts::modes::{
+    SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT,
 };
 
 #[derive(Clone)]

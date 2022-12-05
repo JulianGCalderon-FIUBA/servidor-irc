@@ -1,10 +1,6 @@
 pub mod requests;
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Align, Box, Button, Label, Orientation,
-};
+use gtk::{glib::Sender, prelude::*, Align, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
 use crate::controller::{controller_handler::is_channel, controller_message::ControllerMessage};
@@ -18,7 +14,7 @@ use super::MainView;
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
 impl MainView {
-    pub fn create_conv_info(&mut self, nickname: &GString) -> Box {
+    pub fn create_conv_info(&mut self, nickname: &str) -> Box {
         let conv_info = Box::builder()
             .orientation(Orientation::Vertical)
             .width_request(177)
@@ -34,7 +30,7 @@ impl MainView {
         conv_info.append(&self.channel_members_button);
         conv_info.append(&self.invite_button);
 
-        self.set_my_chat_mode();
+        self.welcome_view();
 
         self.connect_quit_channel(self.current_chat.clone(), self.sender.clone());
         self.connect_invite_button(self.sender.clone());
@@ -69,6 +65,10 @@ impl MainView {
     }
 
     pub fn remove_conversation(&mut self, conversation: String) {
+        if self.channels_buttons.len() == 10 {
+            self.add_channel.remove_css_class("disabled_button");
+            self.add_channel.add_css_class("add");
+        }
         let collection_of_buttons: &mut Vec<Button>;
         let conversation_box: &Box;
         if is_channel(conversation.clone()) {
@@ -89,14 +89,22 @@ impl MainView {
         if !collection_of_buttons.is_empty() {
             collection_of_buttons.remove(counter);
         }
-        self.welcome_view();
+        // self.welcome_view();
     }
 
-    fn welcome_view(&mut self) {
+    pub fn welcome_view(&mut self) {
         self.current_chat.set_label("");
         self.scrollwindow_chat.set_visible(false);
+        self.input.set_sensitive(false);
+        self.input.set_text("");
+        self.error_label.set_text("");
         self.send_message.set_sensitive(false);
         self.welcome_box.set_visible(true);
+        self.quit_channel_button.set_visible(true);
+        self.quit_channel_button.remove_css_class("exit_channel");
+        self.quit_channel_button.add_css_class("disabled_button");
+        self.invite_button.set_visible(false);
+        self.channel_members_button.set_visible(false);
     }
 
     pub fn get_my_channels(&mut self) -> Vec<String> {
@@ -107,21 +115,33 @@ impl MainView {
         my_channels
     }
 
+    pub fn get_my_clients(&mut self) -> Vec<String> {
+        let mut my_clients: Vec<String> = vec![];
+        for client_button in &self.clients_buttons {
+            my_clients.push(client_button.label().unwrap().to_string());
+        }
+        my_clients
+    }
+
     pub fn set_client_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
+        if self.quit_channel_button.has_css_class("disabled_button") {
+            self.quit_channel_button.remove_css_class("disabled_button");
+            self.quit_channel_button.add_css_class("exit_channel");
+        }
+
         self.invite_button.set_visible(true);
         self.channel_members_button.set_visible(false);
     }
 
     pub fn set_channel_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
+        if self.quit_channel_button.has_css_class("disabled_button") {
+            self.quit_channel_button.remove_css_class("disabled_button");
+            self.quit_channel_button.add_css_class("exit_channel");
+        }
+
         self.invite_button.set_visible(false);
         self.channel_members_button.set_visible(true);
-    }
-
-    pub fn set_my_chat_mode(&mut self) {
-        self.quit_channel_button.set_visible(true);
-        self.invite_button.set_visible(false);
-        self.channel_members_button.set_visible(false);
     }
 }

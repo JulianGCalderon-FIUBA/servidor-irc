@@ -2,15 +2,17 @@ use std::collections::HashMap;
 
 use crate::{
     message::Message,
-    server::consts::commands::{INVITE_COMMAND, PRIVMSG_COMMAND},
+    server::consts::commands::{INVITE_COMMAND, KICK_COMMAND, PRIVMSG_COMMAND},
 };
 
-use super::controller_message::ControllerMessage;
+use super::{controller_message::ControllerMessage, ERR_NICK_COLLISION_WARNING_TEXT};
 
+pub const LOGIN_OK: &str = "001";
 pub const LIST_RPL_COMMAND: &str = "322";
 pub const END_LIST_RPL_COMMAND: &str = "323";
 pub const NAMES_RPL_COMMAND: &str = "353";
 pub const END_NAMES_RPL_COMMAND: &str = "366";
+pub const ERR_NICK_COLLISION: &str = "436";
 
 static mut CHANNELS_LIST_COMMAND: Vec<String> = vec![];
 static mut CHANNELS_NAMES_COMMAND: Vec<String> = vec![];
@@ -51,6 +53,19 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         INVITE_COMMAND => ControllerMessage::RecieveInvite {
             nickname: message.get_prefix().clone().unwrap(),
             channel: message.get_parameters()[1].clone(),
+        },
+        KICK_COMMAND => ControllerMessage::ReceiveKick {
+            kicked: message.get_parameters()[1].clone(),
+            channel: message.get_parameters()[0].clone(),
+        },
+        LOGIN_OK => ControllerMessage::ChangeViewToMain {
+            realname: message.get_parameters()[0].clone(),
+            servername: message.get_parameters()[1].clone(),
+            nickname: message.get_parameters()[2].clone(),
+            username: message.get_parameters()[3].clone(),
+        },
+        ERR_NICK_COLLISION => ControllerMessage::AddWarningView {
+            message: ERR_NICK_COLLISION_WARNING_TEXT.to_string(),
         },
         END_LIST_RPL_COMMAND => unsafe {
             let channels_clone: Vec<String> = CHANNELS_LIST_COMMAND.clone();
