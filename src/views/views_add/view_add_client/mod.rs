@@ -1,4 +1,4 @@
-/// Contains definition of used requests. 
+/// Contains definition of used requests.
 pub mod requests;
 
 use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, ComboBoxText};
@@ -42,7 +42,7 @@ impl AddClientView {
     }
 
     /// Returns the view's window.
-    /// 
+    ///
     /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, clients: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
@@ -67,8 +67,8 @@ impl AddClientView {
     }
 
     /// Connects add client button.
-    /// 
-    /// Sends add client request to the controller. 
+    ///
+    /// Sends add client request to the controller.
     fn connect_add_client_button(&self, combobox: ComboBoxText, sender: Sender<ControllerMessage>) {
         self.add_client_button.connect_clicked(move |_| {
             if combobox.active_text().is_none() {

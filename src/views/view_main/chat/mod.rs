@@ -57,8 +57,8 @@ impl MainView {
     }
 
     /// Connects send button.
-    /// 
-    /// Sends a private message request to the controller. 
+    ///
+    /// Sends a private message request to the controller.
     fn connect_send_button(
         &self,
         input: Entry,
@@ -90,7 +90,7 @@ impl MainView {
     }
 
     /// Creates a new message in a channel chat.  
-    /// 
+    ///
     /// Function is used when a channel message is received.
     pub fn receive_priv_channel_message(
         &mut self,
@@ -121,7 +121,7 @@ impl MainView {
     }
 
     /// Creates a new message in a client chat.  
-    /// 
+    ///
     /// Function is used when a client message is received.
     pub fn receive_priv_client_message(
         &mut self,
@@ -154,8 +154,8 @@ impl MainView {
     }
 
     /// Returns bool if the messages should be shown.  
-    /// 
-    /// If it is received by the sender, returns false. 
+    ///
+    /// If it is received by the sender, returns false.
     pub fn should_show_nickname(
         messages: Option<&Vec<Vec<gtk4::Label>>>,
         sender_nickname: String

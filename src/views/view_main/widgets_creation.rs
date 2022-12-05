@@ -15,7 +15,7 @@ use super::{
 };
 
 /// Creates gtk button with a label.
-/// 
+///
 /// Receives a &str, returns a Button.
 pub fn create_add_button(label: &str) -> Button {
     let add_button = create_button_with_margin(label);
@@ -24,7 +24,7 @@ pub fn create_add_button(label: &str) -> Button {
 }
 
 /// Creates gtk box.
-/// 
+///
 /// Receives nothing, returns a Box.
 pub fn create_message_box() -> Box {
     Box::builder()
@@ -39,7 +39,7 @@ pub fn create_message_box() -> Box {
 }
 
 /// Creates gtk box.
-/// 
+///
 /// Receives nothing, returns a Box.
 pub fn create_channels_and_client_box() -> Box {
     Box::builder()
@@ -49,7 +49,7 @@ pub fn create_channels_and_client_box() -> Box {
 }
 
 /// Creates gtk label with a label.
-/// 
+///
 /// Receives a &str, returns a Label.
 pub fn create_current_chat(label: &str) -> Label {
     let message = Label::builder()
@@ -64,14 +64,14 @@ pub fn create_current_chat(label: &str) -> Label {
 }
 
 /// Creates a gtk scrolled window.
-/// 
+///
 /// Receives nothing, returns a ScrolledWindow.
 pub fn create_scrollwindow() -> ScrolledWindow {
     ScrolledWindow::builder().min_content_height(280).build()
 }
 
 /// Creates gtk welcome box with title and message.
-/// 
+///
 /// Receives nothing, returns a Box.
 pub fn create_welcome_box() -> Box {
     let title = Label::builder()
@@ -109,7 +109,7 @@ pub fn create_welcome_box() -> Box {
 }
 
 /// Creates gtk button.
-/// 
+///
 /// Receives nothing, returns a Button.
 pub fn create_notifications_button() -> Button {
     let notifications_button = create_button(NO_NOTIFICATIONS_TEXT);

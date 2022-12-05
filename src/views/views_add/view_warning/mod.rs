@@ -13,7 +13,7 @@ use super::{
 const TITLE: &str = "We are sorry :(";
 
 /// Shows warning view.  
-/// Contains the warning label and an exit button. 
+/// Contains the warning label and an exit button.
 pub struct WarningView {
     button: Button,
 }
@@ -33,7 +33,7 @@ impl WarningView {
     }
 
     /// Returns the view's window.
-    /// 
+    ///
     /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, warning_text: String) -> ApplicationWindow {
         let window = build_application_window();
@@ -58,8 +58,8 @@ impl WarningView {
     }
 
     /// Connects exit button.
-    /// 
-    /// Closes the window. 
+    ///
+    /// Closes the window.
     fn connect_button(&mut self, window: ApplicationWindow) {
         self.button.connect_clicked(move |_| {
             window.close();

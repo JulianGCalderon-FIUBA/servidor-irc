@@ -389,7 +389,7 @@ impl Controller {
     }
 
     /// Returns clients that are not from the current user.  
-    /// 
+    ///
     /// Receives a Vec<String> and a Vec<String>, returns a Vec<String>
     fn clients_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
@@ -407,7 +407,7 @@ impl Controller {
     }
 
     /// Returns channels that are not from the current user.
-    /// 
+    ///
     /// Receives a Vec<String> and a Vec<String>, returns a Vec<String>
     fn channels_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
@@ -420,7 +420,7 @@ impl Controller {
     }
 
     /// Returns all server clients.
-    /// 
+    ///
     /// Receives a HashMap<String, Vec<String>>, returns a Vec<String>
     fn server_clients(channels_and_clients: HashMap<String, Vec<String>>) -> Vec<String> {
         let mut clients_set: Vec<String> = vec![];
@@ -435,7 +435,7 @@ impl Controller {
     }
 
     /// Returns all clients to add.  
-    /// 
+    ///
     /// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
     fn clients_to_add(
         channels_and_clients: HashMap<String, Vec<String>>,
@@ -450,11 +450,20 @@ impl Controller {
                     .unwrap(),
             );
         }
+        if all_clients.contains(&format!("@{current_nickname}")) {
+            all_clients.remove(
+                all_clients
+                    .iter()
+                    .position(|x| *x == format!("@{current_nickname}"))
+                    .unwrap(),
+            );
+        }
+
         all_clients
     }
 
     /// Returns all channels from a client.
-    /// 
+    ///
     /// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
     fn client_channels(
         channels_and_clients: HashMap<String, Vec<String>>,
