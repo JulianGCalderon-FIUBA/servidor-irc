@@ -9,17 +9,26 @@ use super::{controller_message::ControllerMessage, ERR_NICK_COLLISION_WARNING_TE
 
 const CHANNEL_FIRST_CHARACTER: &str = "#";
 
-pub const LOGIN_OK: &str = "001";
-pub const LIST_RPL_COMMAND: &str = "322";
+/// 323 -> End of list
 pub const END_LIST_RPL_COMMAND: &str = "323";
-pub const NAMES_RPL_COMMAND: &str = "353";
+/// 366 -> End of names
 pub const END_NAMES_RPL_COMMAND: &str = "366";
+/// 436 -> Nick collision
 pub const ERR_NICK_COLLISION: &str = "436";
+/// 322 -> List command
+pub const LIST_RPL_COMMAND: &str = "322";
+/// 001 -> Succesful registration
+pub const LOGIN_OK: &str = "001";
+/// 353 -> Names command
+pub const NAMES_RPL_COMMAND: &str = "353";
 
 static mut CHANNELS_LIST_COMMAND: Vec<String> = vec![];
 static mut CHANNELS_NAMES_COMMAND: Vec<String> = vec![];
 static mut CLIENTS_NAMES_COMMAND: Vec<Vec<String>> = vec![];
 
+/// Parses a received message and puts it in Controller Message format.
+///
+/// Receives a Message and returns a Controller Message.
 pub fn to_controller_message(message: Message) -> ControllerMessage {
     // commands with no ControllerMessage
     match &message.get_command()[..] {
@@ -104,6 +113,9 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
     }
 }
 
+/// Returns a bool indicating if the conversation is a channel or not.
+///
+/// Receives a String, returns a bool
 pub fn is_channel(parameter: String) -> bool {
     parameter.starts_with(CHANNEL_FIRST_CHARACTER)
 }

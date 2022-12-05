@@ -7,7 +7,7 @@ use gtk4 as gtk;
 use crate::{
     controller::{controller_handler::is_channel, controller_message::ControllerMessage},
     views::{
-        views_add::widgets_creation::create_title, widgets_creation::create_button_with_margin,
+        views_add::widgets_creation::create_title, widgets_creation::create_button_with_margin, view_main::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
     },
 };
 
@@ -19,12 +19,14 @@ use self::{
     widgets_creation::create_separator_sidebar,
 };
 
-use super::{requests::change_conversation_request, utils::adjust_scrollbar, MainView};
+use super::{requests::change_conversation_request, utils::adjust_scrollbar, MainView, NO_NOTIFICATIONS_TEXT};
 
 const CHANNELS_TITLE: &str = "Channels";
 const CLIENTS_TITLE: &str = "Clients";
+const NOTIFICATIONS_CSS: &str = "notifications_button_on";
 
 impl MainView {
+    /// Creates sidebar widgets.
     pub fn create_sidebar(&mut self) -> Box {
         let sidebar = Box::builder()
             .width_request(200)
@@ -59,6 +61,9 @@ impl MainView {
         sidebar
     }
 
+    /// Connects add client button.
+    ///
+    /// Sends add client request to the controller.
     fn connect_add_client_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
             add_view_to_add_client_request(sender.clone());
@@ -71,12 +76,18 @@ impl MainView {
         });
     }
 
+    /// Connects add channel button.
+    ///
+    /// Sends add channel request to the controller.
     pub fn connect_add_channel_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
             send_list_request(sender.clone());
         });
     }
 
+    /// Connects notifications button.
+    ///
+    /// Sends add notification view request to the controller.
     pub fn connect_notifications_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         let button_clone = button.clone();
         button.connect_clicked(move |_| {
@@ -85,6 +96,9 @@ impl MainView {
         });
     }
 
+    /// Adds channel to the sidebar.  
+    ///
+    /// Creates new channel button.
     pub fn add_channel(&mut self, channel: String) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
@@ -96,15 +110,17 @@ impl MainView {
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
         if self.channels_buttons.len() >= 10 {
-            self.add_channel.remove_css_class("add");
-            self.add_channel.add_css_class("disabled_button");
+            self.add_channel.remove_css_class(ADD_BUTTON_CSS);
+            self.add_channel.add_css_class(DISABLE_BUTTON_CSS);
         }
-        println!("Added to {}", channel);
 
         self.messages.insert(channel, vec![]);
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
+    /// Adds client to the sidebar.  
+    ///
+    /// Creates new client button.
     pub fn add_client(&mut self, client: String) {
         change_conversation_request(client.clone(), self.sender.clone());
         let client_button = create_button_with_margin(&client);
@@ -121,6 +137,9 @@ impl MainView {
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
 
+    /// Connects conversation button.
+    ///
+    /// Sends change conversation request to the controller.
     pub fn connect_channel_client_button(
         &self,
         button: Button,
@@ -132,6 +151,9 @@ impl MainView {
         });
     }
 
+    /// Changes conversation view.  
+    ///
+    /// Changes chat label and messages.  
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
         self.scrollwindow_chat.set_visible(true);
@@ -153,14 +175,17 @@ impl MainView {
         }
     }
 
+    /// Cleans screen messages from conversation.  
     fn clean_screen(&mut self, key: String) {
         self.update_screen(key, true);
     }
 
+    /// Loads messages from conversation on the screen.
     fn load_messages_on_chat(&mut self, key: String) {
         self.update_screen(key, false);
     }
 
+    /// Updates screen messages on new conversation.  
     fn update_screen(&mut self, key: String, should_remove: bool) {
         let mut prev_message: Vec<Label> = vec![];
 
@@ -185,11 +210,15 @@ impl MainView {
         }
     }
 
+    /// Returns bool wether there is a sender or not.  
     fn there_is_sender(message: Label, prev_message: Vec<Label>) -> bool {
         message.text() != ""
             && (prev_message.is_empty() || message.text() != prev_message[1].text())
     }
 
+    /// Creates new notification with message.  
+    ///
+    /// Add it to notifications vec.
     pub fn add_notification(&mut self, message: String) {
         self.notifications.push(message);
         let current_notifications_number =
@@ -199,9 +228,12 @@ impl MainView {
             current_notifications_number + 1
         ));
         self.notifications_button
-            .add_css_class("notifications_button_on")
+            .add_css_class(NOTIFICATIONS_CSS)
     }
 
+    /// Get number of notifications.  
+    ///
+    /// Returns u32.
     pub fn get_notifications_number(button: Button) -> u32 {
         const RADIX: u32 = 10;
         let notifications_text = button.label().unwrap().to_string();
@@ -217,13 +249,19 @@ impl MainView {
         number_text.to_digit(RADIX).unwrap()
     }
 
+    /// Sets number of notifications to 0.
+    ///
+    /// Functions is used when notifications are read.
     pub fn remove_unread_notifications(button: Button) {
-        button.set_label("🔔 notifications (0)");
-        if button.has_css_class("notifications_button_on") {
-            button.remove_css_class("notifications_button_on")
+        button.set_label(NO_NOTIFICATIONS_TEXT);
+        if button.has_css_class(NOTIFICATIONS_CSS) {
+            button.remove_css_class(NOTIFICATIONS_CSS)
         }
     }
 
+    /// Gets all notifications.  
+    ///
+    /// Returns a Vec<String>.
     pub fn get_notifications(&mut self) -> Vec<String> {
         self.notifications.clone()
     }

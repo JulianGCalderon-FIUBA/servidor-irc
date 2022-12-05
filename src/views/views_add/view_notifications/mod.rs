@@ -1,3 +1,4 @@
+/// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
 use gtk::{prelude::*, Application, ApplicationWindow, Button, Orientation::Horizontal};
@@ -20,6 +21,8 @@ use super::{
 const NOTIFICATIONS_BOX_CSS: &str = "notifications_container";
 const TITLE: &str = "Notifications";
 
+/// Shows notifications view.  
+/// Contains the notifications and an exit button.  
 pub struct NotificationsView {
     button: Button,
 }
@@ -31,12 +34,16 @@ impl Default for NotificationsView {
 }
 
 impl NotificationsView {
+    /// Creates new [`NotificationsView`]
     pub fn new() -> Self {
         Self {
             button: create_center_button(CONTINUE_BUTTON_TEXT),
         }
     }
 
+    /// Returns the view's window.
+    ///
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, notifications: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -66,6 +73,9 @@ impl NotificationsView {
         window
     }
 
+    /// Connects exit button.
+    ///
+    /// Closes the window.
     fn connect_button(&mut self, window: ApplicationWindow) {
         self.button.connect_clicked(move |_| {
             window.close();

@@ -1,3 +1,4 @@
+/// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
 use gtk::{prelude::*, Application, ApplicationWindow, Button};
@@ -17,6 +18,8 @@ use super::{
 
 const TITLE: &str = "User Information";
 
+/// Shows user info view.  
+/// Contains the user info and an exit button.  
 pub struct UserInfoView {
     button: Button,
 }
@@ -28,12 +31,16 @@ impl Default for UserInfoView {
 }
 
 impl UserInfoView {
+    /// Creates new [`UserInfoView`]
     pub fn new() -> Self {
         Self {
             button: create_center_button(CONTINUE_BUTTON_TEXT),
         }
     }
 
+    /// Returns the view's window.
+    ///
+    /// Receives the controller's app.
     pub fn get_view(
         &mut self,
         app: Application,
@@ -70,6 +77,9 @@ impl UserInfoView {
         window
     }
 
+    /// Connects exit button.
+    ///
+    /// Closes the window.
     fn connect_button(&mut self, window: ApplicationWindow) {
         self.button.connect_clicked(move |_| {
             window.close();

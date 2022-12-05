@@ -1,4 +1,7 @@
+/// Contains definition of used requests.
 pub mod requests;
+
+/// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
 use gtk::{glib::Sender, prelude::*, Align::Start, Application, ApplicationWindow, Button, Label};
@@ -25,6 +28,9 @@ use super::{
 const OPERATOR_FIRST_CHARACTER: &str = "@";
 const TITLE: &str = "Members";
 
+/// Shows channel members view.  
+/// Contains an exit button.  
+/// Uses sender to communicate with controller.
 pub struct ChannelMembersView {
     button: Button,
 }
@@ -36,12 +42,16 @@ impl Default for ChannelMembersView {
 }
 
 impl ChannelMembersView {
+    /// Creates new [`ChannelMembersView`]
     pub fn new() -> Self {
         Self {
             button: create_center_button(CONTINUE_BUTTON_TEXT),
         }
     }
 
+    /// Returns the view's window.
+    ///
+    /// Receives the controller's app.
     pub fn get_view(
         &mut self,
         app: Application,
@@ -71,12 +81,18 @@ impl ChannelMembersView {
         window
     }
 
+    /// Connects exit button.
+    ///
+    /// Closes the window.
     fn connect_button(&mut self, window: ApplicationWindow) {
         self.button.connect_clicked(move |_| {
             window.close();
         });
     }
 
+    /// Lists all members of the channel.
+    ///
+    /// Shows the operator of the channel.
     fn list_members(clients: Vec<String>, main_box: gtk::Box) {
         for client in &clients {
             let label: Label = if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER)
@@ -91,6 +107,9 @@ impl ChannelMembersView {
         }
     }
 
+    /// Lists all members of the channel for the operator.
+    ///
+    /// List members with a kick button next to them.
     fn list_members_operators(
         clients: Vec<String>,
         channel: String,
@@ -125,6 +144,9 @@ impl ChannelMembersView {
         }
     }
 
+    /// Connects kick button.
+    ///
+    /// Sends kick request to the controller.
     fn connect_kick_button(
         kick_button: Button,
         channel: String,
@@ -138,6 +160,9 @@ impl ChannelMembersView {
         });
     }
 
+    /// Gets operator from clients vec.
+    ///
+    /// Returns the operator of the channel.
     fn get_operator(clients: Vec<String>) -> String {
         for client in clients {
             if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER) {

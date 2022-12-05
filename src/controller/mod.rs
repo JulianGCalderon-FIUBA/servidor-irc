@@ -1,4 +1,8 @@
+/// Contains function responsible of handling controller messages
+/// the server receives.
 pub mod controller_handler;
+
+/// Definition of messages the controller can send and receive.
 pub mod controller_message;
 
 use std::collections::HashMap;
@@ -29,13 +33,34 @@ use controller_message::ControllerMessage::*;
 
 use self::controller_message::ControllerMessage;
 
-const ERROR_TEXT: &str = "ERROR";
+const ADD_VIEW_ADD_CLIENT_ERROR_TEXT: &str = "ERROR: Add client view";
+const ADD_VIEW_INVITE_ERROR_TEXT: &str = "ERROR: Add invite view";
+const INVITE_ERROR_TEXT: &str = "ERROR: INVITE command";
+const JOIN_ERROR_TEXT: &str = "ERROR: JOIN command";
+const KICK_ERROR_TEXT: &str = "ERROR: KICK command";
+const LIST_ERROR_TEXT: &str = "ERROR: LIST command";
+const NAMES_ERROR_TEXT: &str = "ERROR: NAMES command";
+const NICK_ERROR_TEXT: &str = "ERROR: NICK command";
+const OPEN_WARNING_ERROR_TEXT: &str = "ERROR: Open warning";
+const PART_ERROR_TEXT: &str = "ERROR: PART command";
+const PASS_ERROR_TEXT: &str = "ERROR: PASS command";
+const PRIVMSG_ERROR_TEXT: &str = "ERROR: PRIVMSG command";
+const QUIT_ERROR_TEXT: &str = "ERROR: QUIT command";
+const USER_ERROR_TEXT: &str = "ERROR: USER command";
+
 const NO_CLIENTS_WARNING_TEXT: &str = "There are no clients to chat with.";
 const NO_CHANNELS_WARNING_TEXT: &str = "You are not in any channel.";
 const CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT: &str =
     "Can't invite because the invited person is in the same channels as you.";
 const ERR_NICK_COLLISION_WARNING_TEXT: &str = "The nickname is in use, please pick another one.";
 
+const DISPLAY_CONNECT_ERROR_TEXT : &str ="Could not connect to a display.";
+const SERVER_CONNECT_ERROR_TEXT : &str ="Error connecting to server";
+const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
+
+/// Has a reference to the application.  
+/// Communicates with the views and the server.  
+/// Handles server errors.
 pub struct Controller {
     app: Application,
 }
@@ -47,33 +72,37 @@ impl Default for Controller {
 }
 
 impl Controller {
+    /// Creates new [`Controller`]
     pub fn new() -> Self {
         let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
         Self { app }
     }
 
+    /// Loads css for widgets
     fn load_css() {
         let provider = CssProvider::new();
         provider.load_from_data(include_bytes!("style.scss"));
 
         StyleContext::add_provider_for_display(
-            &Display::default().expect("Could not connect to a display."),
+            &Display::default().expect(DISPLAY_CONNECT_ERROR_TEXT),
             &provider,
             gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }
 
+    /// Starts running the application in the [`Controller`]
     pub fn start(&mut self) {
         self.app.connect_startup(|_| Self::load_css());
         self.app.connect_activate(Self::build_ui);
         self.app.run();
     }
 
+    /// Builds ui to show windows and handle messages
     fn build_ui(app: &Application) {
         let mut client = match Client::new(ADDRESS.to_string()) {
             Ok(stream) => stream,
-            Err(error) => panic!("Error connecting to server: {:?}", error),
+            Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT}: {:?}", error),
         };
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
@@ -144,7 +173,7 @@ impl Controller {
                             .send(ControllerMessage::AddWarningView {
                                 message: NO_CLIENTS_WARNING_TEXT.to_string(),
                             })
-                            .expect(ERROR_TEXT);
+                            .expect(OPEN_WARNING_ERROR_TEXT);
                     }
                 }
                 AddViewToInviteClient {
@@ -163,7 +192,7 @@ impl Controller {
                             .send(ControllerMessage::AddWarningView {
                                 message: CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT.to_string(),
                             })
-                            .expect(ERROR_TEXT);
+                            .expect(OPEN_WARNING_ERROR_TEXT);
                     }
                 }
                 AddWarningView { message } => {
@@ -192,27 +221,26 @@ impl Controller {
                 JoinChannel { channel } => {
                     add_channel_window.close();
                     let join_message = format!("{} {}", JOIN_COMMAND, channel);
-                    client.send_raw(&join_message).expect(ERROR_TEXT);
+                    client.send_raw(&join_message).expect(JOIN_ERROR_TEXT);
                     main_view.add_channel(channel);
                 }
                 KickMember { channel, member } => {
                     let kick = format!("{} {} {}", KICK_COMMAND, channel, member);
-                    client.send_raw(&kick).expect(ERROR_TEXT);
+                    client.send_raw(&kick).expect(KICK_ERROR_TEXT);
                 }
                 Quit {} => {
                     let quit_message = QUIT_COMMAND.to_string();
-                    client.send_raw(&quit_message).expect("ERROR: Quit message");
+                    client.send_raw(&quit_message).expect(QUIT_ERROR_TEXT);
                 }
                 QuitChannel {} => {
                     let part_message = format!("{} {}", PART_COMMAND, current_conv);
-                    client.send_raw(&part_message).expect("ERROR: Part message");
+                    client.send_raw(&part_message).expect(PART_ERROR_TEXT);
                 }
                 RecieveInvite { nickname, channel } => {
                     let message = format!("{} has invited you to join {}", nickname, channel);
                     main_view.add_notification(message);
                 }
                 ReceiveKick { kicked, channel } => {
-                    println!("kick {} from {}", kicked, channel);
                     if kicked == current_nickname {
                         main_view.remove_conversation(channel.clone());
                         if channel == current_conv {
@@ -235,13 +263,13 @@ impl Controller {
                             .send(ControllerMessage::AddViewToAddClient {
                                 channels_and_clients,
                             })
-                            .expect(ERROR_TEXT);
+                            .expect(ADD_VIEW_ADD_CLIENT_ERROR_TEXT);
                     } else if trying_to_invite_client {
                         sender_clone
                             .send(ControllerMessage::AddViewToInviteClient {
                                 channels_and_clients,
                             })
-                            .expect(ERROR_TEXT);
+                            .expect(ADD_VIEW_INVITE_ERROR_TEXT);
                     } else {
                         ChannelMembersView::new()
                             .get_view(
@@ -286,9 +314,9 @@ impl Controller {
                         "{} {} {} {} :{}",
                         USER_COMMAND, username, username, username, realname
                     );
-                    client.send_raw(&pass_command).expect(ERROR_TEXT);
-                    client.send_raw(&nick_command).expect(ERROR_TEXT);
-                    client.send_raw(&user_command).expect(ERROR_TEXT);
+                    client.send_raw(&pass_command).expect(PASS_ERROR_TEXT);
+                    client.send_raw(&nick_command).expect(NICK_ERROR_TEXT);
+                    client.send_raw(&user_command).expect(USER_ERROR_TEXT);
 
                     let sender_clone = sender.clone();
                     client.start_async_read(move |message| match message {
@@ -296,7 +324,7 @@ impl Controller {
                             let controller_message = to_controller_message(message);
                             sender_clone.send(controller_message).unwrap();
                         }
-                        Err(error) => eprintln!("Failed to read message: {}", error),
+                        Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {}", error),
                     });
                 }
                 RegularMessage { message } => {
@@ -309,28 +337,28 @@ impl Controller {
                 SendInviteMessage { channel } => {
                     invite_window.close();
                     let invite = format!("{} {} {}", INVITE_COMMAND, current_conv, channel);
-                    client.send_raw(&invite).expect(ERROR_TEXT);
+                    client.send_raw(&invite).expect(INVITE_ERROR_TEXT);
                 }
                 SendListMessage {} => {
-                    client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
+                    client.send_raw(LIST_COMMAND).expect(LIST_ERROR_TEXT);
                 }
                 SendNamesMessageToAddClient {} => {
                     trying_to_add_client = true;
                     trying_to_invite_client = false;
-                    client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
+                    client.send_raw(NAMES_COMMAND).expect(NAMES_ERROR_TEXT);
                 }
                 SendNamesMessageToInviteClient {} => {
                     let my_channels = main_view.get_my_channels();
                     if !my_channels.is_empty() {
                         trying_to_add_client = false;
                         trying_to_invite_client = true;
-                        client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
+                        client.send_raw(NAMES_COMMAND).expect(NAMES_ERROR_TEXT);
                     } else {
                         sender_clone
                             .send(ControllerMessage::AddWarningView {
                                 message: NO_CHANNELS_WARNING_TEXT.to_string(),
                             })
-                            .expect(ERROR_TEXT);
+                            .expect(OPEN_WARNING_ERROR_TEXT);
                     }
                 }
                 SendNamesMessageToKnowMembers {} => {
@@ -338,17 +366,17 @@ impl Controller {
                     trying_to_invite_client = false;
                     client
                         .send_raw(&format!("{NAMES_COMMAND} {current_conv}"))
-                        .expect(ERROR_TEXT);
+                        .expect(NAMES_ERROR_TEXT);
                 }
                 SendPrivMessage { message } => {
                     let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
-                    client.send_raw(&priv_message).expect(ERROR_TEXT);
+                    client.send_raw(&priv_message).expect(PRIVMSG_ERROR_TEXT);
                     main_view.send_message(message.to_string(), current_conv.clone());
                 }
                 ToRegister { address } => {
                     client = match Client::new(address) {
-                        Ok(stream) => stream,
-                        Err(error) => panic!("Error connecting to server: {:?}", error),
+                        Ok(stream) => stream, 
+                        Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT} {:?}", error),
                     };
                     ip_window.close();
                     register_window.show();
@@ -360,6 +388,9 @@ impl Controller {
         });
     }
 
+    /// Returns clients that are not from the current user.  
+    ///
+    /// Receives a Vec<String> and a Vec<String>, returns a Vec<String>
     fn clients_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
         for element in &all {
@@ -375,6 +406,9 @@ impl Controller {
         not_mine
     }
 
+    /// Returns channels that are not from the current user.
+    ///
+    /// Receives a Vec<String> and a Vec<String>, returns a Vec<String>
     fn channels_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
         for element in &all {
@@ -385,6 +419,9 @@ impl Controller {
         not_mine
     }
 
+    /// Returns all server clients.
+    ///
+    /// Receives a HashMap<String, Vec<String>>, returns a Vec<String>
     fn server_clients(channels_and_clients: HashMap<String, Vec<String>>) -> Vec<String> {
         let mut clients_set: Vec<String> = vec![];
         for clients_of_channel in channels_and_clients.values() {
@@ -397,6 +434,9 @@ impl Controller {
         clients_set
     }
 
+    /// Returns all clients to add.  
+    ///
+    /// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
     fn clients_to_add(
         channels_and_clients: HashMap<String, Vec<String>>,
         current_nickname: String,
@@ -410,9 +450,21 @@ impl Controller {
                     .unwrap(),
             );
         }
+        if all_clients.contains(&format!("@{current_nickname}")) {
+            all_clients.remove(
+                all_clients
+                    .iter()
+                    .position(|x| *x == format!("@{current_nickname}"))
+                    .unwrap(),
+            );
+        }
+
         all_clients
     }
 
+    /// Returns all channels from a client.
+    ///
+    /// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
     fn client_channels(
         channels_and_clients: HashMap<String, Vec<String>>,
         client: String,

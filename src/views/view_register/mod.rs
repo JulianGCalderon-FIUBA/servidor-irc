@@ -1,3 +1,4 @@
+/// Contains definition of used requests.
 pub mod requests;
 
 use gtk::{
@@ -20,9 +21,14 @@ use super::{
 
 use crate::controller::controller_message::ControllerMessage;
 
-const LOGIN_BUTTON_TEXT: &str = "login";
-const ERR_FIELDS_REQUIRED: &str = "All fields are required";
+const LOGIN_BUTTON_TEXT: &str = "Login";
+const ERR_FIELDS_REQUIRED: &str = "¡All fields are required!";
+const FIELD_MAX_CHARACTERS: usize = 9;
+const FIELD_MAX_CHARACTERS_ERROR: &str = "¡Fields are too long!";
 
+/// Shows registation view.
+/// Contains a realname, nickname, username and password entry.
+/// Uses sender to communicate with controller.
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
@@ -34,6 +40,7 @@ pub struct RegisterView {
 }
 
 impl RegisterView {
+    /// Creates new [`RegisterView`]
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             realname_entry: create_entry(""),
@@ -46,6 +53,9 @@ impl RegisterView {
         }
     }
 
+    /// Returns the view's window.
+    ///
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -88,6 +98,9 @@ impl RegisterView {
         window
     }
 
+    /// Connects connect button.
+    ///
+    /// Sends register request to the controller.
     fn connect_button(
         &self,
         realname_entry: Entry,
@@ -106,18 +119,36 @@ impl RegisterView {
 
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
                 register_request(pass, nickname, username, realname, sender.clone());
+            } else if nickname.len() > FIELD_MAX_CHARACTERS
+                || realname.len() > FIELD_MAX_CHARACTERS
+                || username.len() > FIELD_MAX_CHARACTERS
+                || pass.len() > FIELD_MAX_CHARACTERS
+            {
+                error_label.set_text(&format!(
+                    "{FIELD_MAX_CHARACTERS_ERROR} Max: {FIELD_MAX_CHARACTERS} characters"
+                ));
             } else {
                 error_label.set_text(ERR_FIELDS_REQUIRED);
             }
         });
     }
 
+    /// Checks if entrys are not empty.
+    ///
+    /// Returns a bool.
     fn register_fiels_are_valid(
         pass: &GString,
         nickname: &GString,
         username: &GString,
         realname: &GString,
     ) -> bool {
-        !realname.is_empty() && !pass.is_empty() && !nickname.is_empty() && !username.is_empty()
+        !realname.is_empty()
+            && !pass.is_empty()
+            && !nickname.is_empty()
+            && !username.is_empty()
+            && pass.len() < FIELD_MAX_CHARACTERS
+            && nickname.len() < FIELD_MAX_CHARACTERS
+            && nickname.len() < FIELD_MAX_CHARACTERS
+            && realname.len() < FIELD_MAX_CHARACTERS
     }
 }
