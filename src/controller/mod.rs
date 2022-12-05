@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use crate::{
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND,
-        PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, USER_COMMAND,
+        PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
     views::{
         ip_view::IpView,
@@ -98,80 +98,34 @@ impl Controller {
         let app_clone = app.clone();
         let sender_clone = sender.clone();
 
+        let mut current_nickname: String = String::from("");
         let mut current_realname: String = String::from("");
         let mut current_servername: String = String::from("");
-        let mut current_nickname: String = String::from("");
         let mut current_username: String = String::from("");
         let mut trying_to_add_client: bool = false;
         let mut trying_to_invite_client: bool = false;
 
         receiver.attach(None, move |msg| {
             match msg {
-                ToRegister { address } => {
-                    client = match Client::new(address) {
-                        Ok(stream) => stream,
-                        Err(error) => panic!("Error connecting to server: {:?}", error),
-                    };
-                    ip_window.close();
-                    register_window.show();
-                }
-                Register {
-                    pass,
-                    nickname,
-                    username,
-                    realname,
-                } => {
-                    let pass_command = format!("{} {}", PASS_COMMAND, pass);
-                    let nick_command = format!("{} {}", NICK_COMMAND, nickname);
-                    let user_command = format!(
-                        "{} {} {} {} :{}",
-                        USER_COMMAND, username, username, username, realname
-                    );
-                    client.send_raw(&pass_command).expect(ERROR_TEXT);
-                    client.send_raw(&nick_command).expect(ERROR_TEXT);
-                    client.send_raw(&user_command).expect(ERROR_TEXT);
-
-                    let sender_clone = sender.clone();
-                    client.start_async_read(move |message| match message {
-                        Ok(message) => {
-                            let controller_message = to_controller_message(message);
-                            sender_clone.send(controller_message).unwrap();
-                        }
-                        Err(error) => eprintln!("Failed to read message: {}", error),
-                    });
-                }
-                ChangeViewToMain {
-                    realname,
-                    servername,
-                    nickname,
-                    username,
-                } => {
-                    register_window.close();
-                    current_realname = String::from(&realname[..]);
-                    current_servername = String::from(&servername[..]);
-                    current_nickname = String::from(&nickname[..]);
-                    current_username = String::from(&username[..]);
-                    main_view.get_view(app_clone.clone(), nickname).show();
-                }
-                SendPrivMessage { message } => {
-                    let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
-                    client.send_raw(&priv_message).expect(ERROR_TEXT);
-                    main_view.send_message(message.to_string(), current_conv.clone());
-                }
-                SendNamesMessageToAddClient {} => {
-                    trying_to_add_client = true;
-                    trying_to_invite_client = false;
-                    client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
-                }
-                JoinChannel { channel } => {
-                    add_channel_window.close();
-                    let join_message = format!("{} {}", JOIN_COMMAND, channel);
-                    client.send_raw(&join_message).expect(ERROR_TEXT);
-                    main_view.add_channel(channel);
-                }
                 AddNewClient { new_client } => {
                     add_client_window.close();
                     main_view.add_client(new_client.to_string());
+                }
+                AddNotificationsView {} => {
+                    NotificationsView::new()
+                        .get_view(app_clone.clone(), main_view.get_notifications())
+                        .show();
+                }
+                AddUserInfoView {} => {
+                    UserInfoView::new()
+                        .get_view(
+                            app_clone.clone(),
+                            current_realname.clone(),
+                            current_servername.clone(),
+                            current_nickname.clone(),
+                            current_username.clone(),
+                        )
+                        .show();
                 }
                 AddViewToAddClient {
                     channels_and_clients,
@@ -193,84 +147,6 @@ impl Controller {
                             .expect(ERROR_TEXT);
                     }
                 }
-                ReceivePrivMessage {
-                    sender_nickname,
-                    message,
-                    channel,
-                } => {
-                    if let Some(..) = channel {
-                        main_view.receive_priv_channel_message(
-                            message,
-                            sender_nickname,
-                            channel.unwrap(),
-                            current_conv.clone(),
-                        );
-                    } else {
-                        main_view.receive_priv_client_message(
-                            message,
-                            sender_nickname,
-                            current_conv.clone(),
-                        );
-                    }
-                }
-                ChangeConversation { nickname } => {
-                    let last_conv = current_conv.clone();
-                    current_conv = nickname;
-                    main_view.change_conversation(last_conv, current_conv.clone());
-                }
-                Quit {} => {
-                    println!("Estoy haciendo quit");
-                    let quit_message = "QUIT".to_string();
-                    client.send_raw(&quit_message).expect("ERROR: Quit message");
-                }
-                QuitChannel {} => {
-                    let part_message = format!("{} {}", PART_COMMAND, current_conv);
-                    client.send_raw(&part_message).expect("ERROR: Part message");
-                }
-                RemoveConversation {} => {
-                    main_view.remove_conversation(current_conv.clone());
-                    main_view.welcome_view();
-                }
-                SendNamesMessageToInviteClient {} => {
-                    let my_channels = main_view.get_my_channels();
-                    if !my_channels.is_empty() {
-                        trying_to_add_client = false;
-                        trying_to_invite_client = true;
-                        client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
-                    } else {
-                        sender_clone
-                            .send(ControllerMessage::AddWarningView {
-                                message: NO_CHANNELS_WARNING_TEXT.to_string(),
-                            })
-                            .expect(ERROR_TEXT);
-                    }
-                }
-                SendInviteMessage { channel } => {
-                    invite_window.close();
-                    let invite = format!("{} {} {}", INVITE_COMMAND, current_conv, channel);
-                    client.send_raw(&invite).expect(ERROR_TEXT);
-                }
-                RecieveInvite { nickname, channel } => {
-                    let message = format!("{} has invited you to join {}", nickname, channel);
-                    main_view.add_notification(message);
-                }
-                SendListMessage {} => {
-                    client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
-                }
-                ReceiveListChannels { channels } => {
-                    add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
-                        app_clone.clone(),
-                        Self::channels_not_mine(channels, main_view.get_my_channels()),
-                    );
-                    add_channel_window.show();
-                }
-                SendNamesMessageToKnowMembers {} => {
-                    trying_to_add_client = false;
-                    trying_to_invite_client = false;
-                    client
-                        .send_raw(&format!("{NAMES_COMMAND} {current_conv}"))
-                        .expect(ERROR_TEXT);
-                }
                 AddViewToInviteClient {
                     channels_and_clients,
                 } => {
@@ -289,6 +165,67 @@ impl Controller {
                             })
                             .expect(ERROR_TEXT);
                     }
+                }
+                AddWarningView { message } => {
+                    WarningView::new()
+                        .get_view(app_clone.clone(), message)
+                        .show();
+                }
+                ChangeConversation { nickname } => {
+                    let last_conv = current_conv.clone();
+                    current_conv = nickname;
+                    main_view.change_conversation(last_conv, current_conv.clone());
+                }
+                ChangeViewToMain {
+                    realname,
+                    servername,
+                    nickname,
+                    username,
+                } => {
+                    register_window.close();
+                    current_realname = String::from(&realname[..]);
+                    current_servername = String::from(&servername[..]);
+                    current_nickname = String::from(&nickname[..]);
+                    current_username = String::from(&username[..]);
+                    main_view.get_view(app_clone.clone(), nickname).show();
+                }
+                JoinChannel { channel } => {
+                    add_channel_window.close();
+                    let join_message = format!("{} {}", JOIN_COMMAND, channel);
+                    client.send_raw(&join_message).expect(ERROR_TEXT);
+                    main_view.add_channel(channel);
+                }
+                KickMember { channel, member } => {
+                    let kick = format!("{} {} {}", KICK_COMMAND, channel, member);
+                    client.send_raw(&kick).expect(ERROR_TEXT);
+                }
+                Quit {} => {
+                    let quit_message = QUIT_COMMAND.to_string();
+                    client.send_raw(&quit_message).expect("ERROR: Quit message");
+                }
+                QuitChannel {} => {
+                    let part_message = format!("{} {}", PART_COMMAND, current_conv);
+                    client.send_raw(&part_message).expect("ERROR: Part message");
+                }
+                RecieveInvite { nickname, channel } => {
+                    let message = format!("{} has invited you to join {}", nickname, channel);
+                    main_view.add_notification(message);
+                }
+                ReceiveKick { kicked, channel } => {
+                    println!("kick {} from {}", kicked, channel);
+                    if kicked == current_nickname {
+                        main_view.remove_conversation(channel.clone());
+                        if channel == current_conv {
+                            main_view.welcome_view();
+                        }
+                    }
+                }
+                ReceiveListChannels { channels } => {
+                    add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
+                        app_clone.clone(),
+                        Self::channels_not_mine(channels, main_view.get_my_channels()),
+                    );
+                    add_channel_window.show();
                 }
                 ReceiveNamesChannels {
                     channels_and_clients,
@@ -317,42 +254,104 @@ impl Controller {
                             .show();
                     }
                 }
-                KickMember { channel, member } => {
-                    let kick = format!("{} {} {}", KICK_COMMAND, channel, member);
-                    client.send_raw(&kick).expect(ERROR_TEXT);
-                }
-                ReceiveKick { kicked, channel } => {
-                    println!("kick {} from {}", kicked, channel);
-                    if kicked == current_nickname {
-                        main_view.remove_conversation(channel.clone());
-                        if channel == current_conv {
-                            main_view.welcome_view();
-                        }
+                ReceivePrivMessage {
+                    sender_nickname,
+                    message,
+                    channel,
+                } => {
+                    if let Some(..) = channel {
+                        main_view.receive_priv_channel_message(
+                            message,
+                            sender_nickname,
+                            channel.unwrap(),
+                            current_conv.clone(),
+                        );
+                    } else {
+                        main_view.receive_priv_client_message(
+                            message,
+                            sender_nickname,
+                            current_conv.clone(),
+                        );
                     }
                 }
-                AddNotificationsView {} => {
-                    NotificationsView::new()
-                        .get_view(app_clone.clone(), main_view.get_notifications())
-                        .show();
-                }
-                AddUserInfoView {} => {
-                    UserInfoView::new()
-                        .get_view(
-                            app_clone.clone(),
-                            current_realname.clone(),
-                            current_servername.clone(),
-                            current_nickname.clone(),
-                            current_username.clone(),
-                        )
-                        .show();
-                }
-                AddWarningView { message } => {
-                    WarningView::new()
-                        .get_view(app_clone.clone(), message)
-                        .show();
+                Register {
+                    pass,
+                    nickname,
+                    username,
+                    realname,
+                } => {
+                    let pass_command = format!("{} {}", PASS_COMMAND, pass);
+                    let nick_command = format!("{} {}", NICK_COMMAND, nickname);
+                    let user_command = format!(
+                        "{} {} {} {} :{}",
+                        USER_COMMAND, username, username, username, realname
+                    );
+                    client.send_raw(&pass_command).expect(ERROR_TEXT);
+                    client.send_raw(&nick_command).expect(ERROR_TEXT);
+                    client.send_raw(&user_command).expect(ERROR_TEXT);
+
+                    let sender_clone = sender.clone();
+                    client.start_async_read(move |message| match message {
+                        Ok(message) => {
+                            let controller_message = to_controller_message(message);
+                            sender_clone.send(controller_message).unwrap();
+                        }
+                        Err(error) => eprintln!("Failed to read message: {}", error),
+                    });
                 }
                 RegularMessage { message } => {
                     println!("{}", message);
+                }
+                RemoveConversation {} => {
+                    main_view.remove_conversation(current_conv.clone());
+                    main_view.welcome_view();
+                }
+                SendInviteMessage { channel } => {
+                    invite_window.close();
+                    let invite = format!("{} {} {}", INVITE_COMMAND, current_conv, channel);
+                    client.send_raw(&invite).expect(ERROR_TEXT);
+                }
+                SendListMessage {} => {
+                    client.send_raw(LIST_COMMAND).expect(ERROR_TEXT);
+                }
+                SendNamesMessageToAddClient {} => {
+                    trying_to_add_client = true;
+                    trying_to_invite_client = false;
+                    client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
+                }
+                SendNamesMessageToInviteClient {} => {
+                    let my_channels = main_view.get_my_channels();
+                    if !my_channels.is_empty() {
+                        trying_to_add_client = false;
+                        trying_to_invite_client = true;
+                        client.send_raw(NAMES_COMMAND).expect(ERROR_TEXT);
+                    } else {
+                        sender_clone
+                            .send(ControllerMessage::AddWarningView {
+                                message: NO_CHANNELS_WARNING_TEXT.to_string(),
+                            })
+                            .expect(ERROR_TEXT);
+                    }
+                }
+                SendNamesMessageToKnowMembers {} => {
+                    trying_to_add_client = false;
+                    trying_to_invite_client = false;
+                    client
+                        .send_raw(&format!("{NAMES_COMMAND} {current_conv}"))
+                        .expect(ERROR_TEXT);
+                }
+                SendPrivMessage { message } => {
+                    let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
+                    client.send_raw(&priv_message).expect(ERROR_TEXT);
+                    main_view.send_message(message.to_string(), current_conv.clone());
+                }
+                ToRegister { address } => {
+                    client = match Client::new(address) {
+                        Ok(stream) => stream,
+                        Err(error) => panic!("Error connecting to server: {:?}", error),
+                    };
+                    ip_window.close();
+                    register_window.show();
                 }
             }
             // Returning false here would close the receiver
@@ -436,14 +435,4 @@ impl Controller {
         }
         client_channels_set
     }
-
-    // fn listen_messages(mut client: Client, sender: Sender<ControllerMessage>) {
-    //     client.start_async_read(move |message| match message {
-    //         Ok(message) => {
-    //             let controller_message = to_controller_message(message);
-    //             sender.send(controller_message).unwrap();
-    //         }
-    //         Err(error) => eprintln!("Failed to read message: {}", error),
-    //     });
-    // }
 }
