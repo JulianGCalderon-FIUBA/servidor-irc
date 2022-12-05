@@ -1,3 +1,4 @@
+/// Contains definition of used requests. 
 pub mod requests;
 
 use gtk::{
@@ -24,6 +25,10 @@ const REALNAME_LABEL_TEXT: &str = "Your name:";
 const NICKNAME_LABEL_TEXT: &str = "Nickname:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
 const PASSWORD_LABEL_TEXT: &str = "Password:";
+
+/// Shows registation view.  
+/// Contains a realname, nickname, username and password entry.  
+/// Uses sender to communicate with controller.
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
@@ -34,6 +39,7 @@ pub struct RegisterView {
 }
 
 impl RegisterView {
+    /// Creates new [`RegisterView`]
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             realname_entry: create_entry(""),
@@ -45,6 +51,9 @@ impl RegisterView {
         }
     }
 
+    /// Returns the view's window.
+    /// 
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -83,6 +92,9 @@ impl RegisterView {
         window
     }
 
+    /// Connects connect button.
+    /// 
+    /// Sends register request to the controller. 
     fn connect_button(
         &self,
         realname_entry: Entry,
@@ -104,6 +116,9 @@ impl RegisterView {
         });
     }
 
+    /// Checks if entrys are not empty.  
+    /// 
+    /// Returns a bool.
     fn register_fiels_are_valid(
         pass: &GString,
         nickname: &GString,
