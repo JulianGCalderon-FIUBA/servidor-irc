@@ -422,7 +422,7 @@ impl Controller {
     fn clients_to_add(
         channels_and_clients: HashMap<String, Vec<String>>,
         current_nickname: String,
-    ) -> Vec<String> {
+    ) -> Vec<String> {                    
         let mut all_clients = Self::server_clients(channels_and_clients);
         if all_clients.contains(&current_nickname) {
             all_clients.remove(
@@ -432,6 +432,15 @@ impl Controller {
                     .unwrap(),
             );
         }
+        if all_clients.contains(&format!("@{current_nickname}")) {
+            all_clients.remove(
+                all_clients
+                    .iter()
+                    .position(|x| *x == format!("@{current_nickname}"))
+                    .unwrap(),
+            );
+        }
+
         all_clients
     }
 
