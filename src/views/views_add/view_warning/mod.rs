@@ -7,6 +7,8 @@ use crate::views::widgets_creation::{
 
 use super::widgets_creation::{create_main_box_add_view, create_title};
 
+/// Shows warning view.  
+/// Contains the warning label and an exit button. 
 pub struct WarningView {
     button: Button,
 }
@@ -18,12 +20,16 @@ impl Default for WarningView {
 }
 
 impl WarningView {
+    /// Creates new [`WarningView`]
     pub fn new() -> Self {
         Self {
             button: create_center_button("ok"),
         }
     }
 
+    /// Returns the view's window.
+    /// 
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, warning_text: String) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -46,6 +52,9 @@ impl WarningView {
         window
     }
 
+    /// Connects exit button.
+    /// 
+    /// Closes the window. 
     fn connect_button(&mut self, window: ApplicationWindow) {
         self.button.connect_clicked(move |_| {
             window.close();
