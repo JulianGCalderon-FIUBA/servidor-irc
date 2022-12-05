@@ -198,7 +198,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn whois_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (_, mut params, _) = arguments;
         let nickmasks = params.pop().expect("Verified in assert");
-        let _server = params.get(0);
+        let server = params.get(0);
 
         for nickmask in nickmasks.split(',') {
             let clients: Vec<ClientInfo> = self.get_clients_for_nickmask(nickmask);
@@ -208,6 +208,11 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
                 continue;
             }
             for client in clients {
+                if let Some(server) = server {
+                    if &client.servername != server {
+                        continue;
+                    }
+                }
                 self.send_whois_response(client)?;
             }
         }

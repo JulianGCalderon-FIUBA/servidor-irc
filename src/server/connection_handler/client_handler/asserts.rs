@@ -116,7 +116,14 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         if params.is_empty() {
             return Err(ErrorReply::NoNicknameGiven431);
         }
-
+        if params.len() > 1 {
+            let server = &params[0];
+            if !self.database.contains_server(server) {
+                return Err(ErrorReply::NoSuchServer402 {
+                    server: server.to_string(),
+                });
+            }
+        }
         Ok(())
     }
 
