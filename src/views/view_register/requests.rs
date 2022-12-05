@@ -3,6 +3,9 @@ use gtk4 as gtk;
 
 use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
 
+/// Sends a register request to the controller.  
+/// 
+/// Receives a password, nickname, username and a realname
 pub fn register_request(
     pass: GString,
     nickname: GString,

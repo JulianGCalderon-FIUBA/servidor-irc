@@ -1,3 +1,4 @@
+/// Contains definition of used requests. 
 pub mod requests;
 
 use gtk::{
@@ -25,6 +26,9 @@ const ERR_FIELDS_REQUIRED: &str = "¡All fields are required!";
 const FIELD_MAX_CHARACTERS: usize = 9;
 const FIELD_MAX_CHARACTERS_ERROR: &str = "¡Fields are too long!";
 
+/// Shows registation view.  
+/// Contains a realname, nickname, username and password entry.  
+/// Uses sender to communicate with controller.
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
@@ -36,6 +40,7 @@ pub struct RegisterView {
 }
 
 impl RegisterView {
+    /// Creates new [`RegisterView`]
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             realname_entry: create_entry(""),
@@ -48,6 +53,9 @@ impl RegisterView {
         }
     }
 
+    /// Returns the view's window.
+    /// 
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -90,6 +98,9 @@ impl RegisterView {
         window
     }
 
+    /// Connects connect button.
+    /// 
+    /// Sends register request to the controller. 
     fn connect_button(
         &self,
         realname_entry: Entry,
@@ -124,6 +135,9 @@ impl RegisterView {
         });
     }
 
+    /// Checks if entrys are not empty.  
+    /// 
+    /// Returns a bool.
     fn register_fiels_are_valid(
         pass: &GString,
         nickname: &GString,

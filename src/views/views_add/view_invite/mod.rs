@@ -1,3 +1,4 @@
+/// Contains definition of used requests. 
 pub mod request;
 
 use gtk::ComboBoxText;
@@ -19,6 +20,9 @@ const CHANNEL_LABEL_TEXT: &str = "Channel:";
 const INVITE_BUTTON_TEXT: &str = "Send invite";
 const TITLE: &str = "Send invite";
 
+/// Shows invite view.  
+/// Contains a channel entry and an invite button.  
+/// Uses sender to communicate with controller.
 pub struct InviteView {
     pub channel_combobox: ComboBoxText,
     pub invite_button: Button,
@@ -26,6 +30,7 @@ pub struct InviteView {
 }
 
 impl InviteView {
+    /// Creates new [`InviteView`]
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channel_combobox: create_combobox(),
@@ -34,6 +39,9 @@ impl InviteView {
         }
     }
 
+    /// Returns the view's window.
+    /// 
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, channels: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -55,6 +63,9 @@ impl InviteView {
         window
     }
 
+    /// Connects invite button.
+    /// 
+    /// Sends invite request to the controller. 
     fn connect_invite_button(&self, combobox: ComboBoxText, sender: Sender<ControllerMessage>) {
         self.invite_button.connect_clicked(move |_| {
             if combobox.active_text().is_none() {
@@ -65,6 +76,7 @@ impl InviteView {
         });
     }
 
+    /// Fills combobox options with existing clients.
     fn refill_combobox(&mut self, channels: Vec<String>) {
         for channel in &channels {
             self.channel_combobox.append_text(&channel.clone());

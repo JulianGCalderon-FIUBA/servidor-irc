@@ -1,4 +1,8 @@
+/// Contains function responsible of handling controller messages
+/// the server receives.
 pub mod controller_handler;
+
+/// Definition of messages the controller can send and receive.
 pub mod controller_message;
 
 use std::collections::HashMap;
@@ -53,6 +57,10 @@ const ERR_NICK_COLLISION_WARNING_TEXT: &str = "The nickname is in use, please pi
 const DISPLAY_CONNECT_ERROR_TEXT : &str ="Could not connect to a display.";
 const SERVER_CONNECT_ERROR_TEXT : &str ="Error connecting to server";
 const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
+
+/// Has a reference to the application.  
+/// Communicates with the views and the server.  
+/// Handles server errors.
 pub struct Controller {
     app: Application,
 }
@@ -64,12 +72,14 @@ impl Default for Controller {
 }
 
 impl Controller {
+    /// Creates new [`Controller`]
     pub fn new() -> Self {
         let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
         Self { app }
     }
 
+    /// Loads css for widgets
     fn load_css() {
         let provider = CssProvider::new();
         provider.load_from_data(include_bytes!("style.scss"));
@@ -81,12 +91,14 @@ impl Controller {
         );
     }
 
+    /// Starts running the application in the [`Controller`]
     pub fn start(&mut self) {
         self.app.connect_startup(|_| Self::load_css());
         self.app.connect_activate(Self::build_ui);
         self.app.run();
     }
 
+    /// Builds ui to show windows and handle messages
     fn build_ui(app: &Application) {
         let mut client = match Client::new(ADDRESS.to_string()) {
             Ok(stream) => stream,
@@ -229,7 +241,6 @@ impl Controller {
                     main_view.add_notification(message);
                 }
                 ReceiveKick { kicked, channel } => {
-                    println!("kick {} from {}", kicked, channel);
                     if kicked == current_nickname {
                         main_view.remove_conversation(channel.clone());
                         if channel == current_conv {
@@ -377,6 +388,9 @@ impl Controller {
         });
     }
 
+    /// Returns clients that are not from the current user.  
+    /// 
+    /// Receives a Vec<String> and a Vec<String>, returns a Vec<String>
     fn clients_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
         for element in &all {
@@ -392,6 +406,9 @@ impl Controller {
         not_mine
     }
 
+    /// Returns channels that are not from the current user.
+    /// 
+    /// Receives a Vec<String> and a Vec<String>, returns a Vec<String>
     fn channels_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
         for element in &all {
@@ -402,6 +419,9 @@ impl Controller {
         not_mine
     }
 
+    /// Returns all server clients.
+    /// 
+    /// Receives a HashMap<String, Vec<String>>, returns a Vec<String>
     fn server_clients(channels_and_clients: HashMap<String, Vec<String>>) -> Vec<String> {
         let mut clients_set: Vec<String> = vec![];
         for clients_of_channel in channels_and_clients.values() {
@@ -414,6 +434,9 @@ impl Controller {
         clients_set
     }
 
+    /// Returns all clients to add.  
+    /// 
+    /// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
     fn clients_to_add(
         channels_and_clients: HashMap<String, Vec<String>>,
         current_nickname: String,
@@ -430,6 +453,9 @@ impl Controller {
         all_clients
     }
 
+    /// Returns all channels from a client.
+    /// 
+    /// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
     fn client_channels(
         channels_and_clients: HashMap<String, Vec<String>>,
         client: String,

@@ -1,9 +1,15 @@
+/// Contains definition of used requests. 
+pub mod requests;
+
+/// Contains useful functions.
+pub mod utils;
+
+/// Contains multiple functions that create widgets for the view.
+pub mod widgets_creation;
+
 mod chat;
 mod conv_info;
-pub mod requests;
 mod sidebar;
-pub mod utils;
-pub mod widgets_creation;
 
 use std::collections::HashMap;
 
@@ -50,6 +56,10 @@ const WELCOME_TITLE_CSS: &str = "welcome_title";
 const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
 const NO_NOTIFICATIONS_CSS: &str = "notifications_button";
 const DISABLE_BUTTON_CSS: &str = "disabled_button";
+
+/// Shows main view.  
+/// Contains the sidebar, chat and features.  
+/// Uses sender to communicate with controller.
 pub struct MainView {
     pub channels_box: Box,
     pub channels_buttons: Vec<Button>,
@@ -77,6 +87,7 @@ pub struct MainView {
 }
 
 impl MainView {
+    /// Creates new [`MainView`]
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             channels_box: create_channels_and_client_box(),
@@ -105,6 +116,9 @@ impl MainView {
         }
     }
 
+    /// Returns the view's window.
+    /// 
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, nickname: String) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -135,6 +149,7 @@ impl MainView {
         window
     }
 
+    /// Closes the app.
     fn close_view(window: ApplicationWindow, app: Application, sender: Sender<ControllerMessage>) {
         window.connect_destroy(move |_| {
             quit_request(sender.clone());
