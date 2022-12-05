@@ -27,7 +27,7 @@ impl Client {
         })
     }
 
-    /// Spawns a thraed that reads message from the connected stream
+    /// Spawns a thread that reads message from the connected stream
     /// Calls `on_message` method on each message
     /// Thread ends on IO error
     pub fn start_async_read<F>(&mut self, on_message: F)
@@ -43,6 +43,14 @@ impl Client {
 
         let handle = thread::spawn(|| async_read(read_stream, on_message));
         self.read_thread = Some(handle);
+    }
+
+    pub fn sync_read(&mut self) -> Result<Message, CreationError> {
+        let read_stream = self
+            .read_stream
+            .as_mut()
+            .expect("There should be a read stream");
+        Message::read_from(read_stream)
     }
 
     pub fn async_print(&mut self) {
