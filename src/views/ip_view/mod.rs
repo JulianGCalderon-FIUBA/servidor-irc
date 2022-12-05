@@ -12,15 +12,16 @@ use self::requests::to_register_request;
 use super::{
     widgets_creation::{
         build_application_window, create_center_button, create_entry, create_label_input_box,
-        create_main_box,
+        create_main_box, create_label,
     },
     MAIN_BOX_CSS,
 };
 
 use crate::{controller::controller_message::ControllerMessage, ADDRESS};
 
-const LOGIN_BUTTON_TEXT: &str = "login";
+const CONNECT_BUTTON_TEXT: &str = "Connect";
 const ADDRESS_LABEL_TEXT: &str = "IP Address:";
+const ADDRESS_MESSAGE: &str = "Leave it empty to use the default IP...";
 pub struct IpView {
     pub address_entry: Entry,
     pub ok_button: Button,
@@ -31,7 +32,7 @@ impl IpView {
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             address_entry: create_entry(""),
-            ok_button: create_center_button(LOGIN_BUTTON_TEXT),
+            ok_button: create_center_button(CONNECT_BUTTON_TEXT),
             sender,
         }
     }
@@ -40,12 +41,15 @@ impl IpView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Orientation::Vertical, 300, 300);
+        let main_box = create_main_box(Orientation::Vertical, 150, 300);
         main_box.add_css_class(MAIN_BOX_CSS);
 
         let address_box = create_label_input_box(ADDRESS_LABEL_TEXT);
         address_box.append(&self.address_entry);
         main_box.append(&address_box);
+
+        let label = create_label(ADDRESS_MESSAGE);
+        main_box.append(&label);
 
         main_box.append(&self.ok_button);
 
