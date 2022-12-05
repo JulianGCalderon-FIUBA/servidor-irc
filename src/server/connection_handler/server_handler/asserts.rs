@@ -252,7 +252,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
         let servername = &params[0];
 
-        if !self.database.contains_server(servername) {
+        if !self.database.contains_server(servername)
+            && servername != &self.database.get_server_name()
+        {
             return Err(ErrorReply::NoReply);
         }
         Ok(())

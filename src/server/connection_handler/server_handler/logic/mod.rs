@@ -15,6 +15,8 @@ use super::ServerHandler;
 /// Contains the extended logic of the MODE command.
 mod mode_logic;
 
+pub const SQUIT_MESSAGE: &str = "Net split";
+
 impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
     fn nick_logic(&mut self, arguments: CommandArgs) -> std::io::Result<bool> {
         let (prefix, mut params, _) = arguments;
@@ -69,10 +71,6 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
         self.send_privmsg_notification(&sender, &target, &content);
 
         Ok(true)
-    }
-
-    fn oper_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
-        todo!()
     }
 
     fn notice_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
@@ -216,25 +214,13 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
 
         self.send_squit_notification(&sender, servername, comment);
 
+        if &self.database.get_server_name() == servername {
+            self.disconnect_server(&self.servername.clone());
+            return Ok(false);
+        }
+
         if self.database.is_immediate_server(servername) {
-            self.database.remove_server(servername);
-
-            let all_clients = self.database.get_all_clients();
-            let server_clients: Vec<ClientInfo> = all_clients
-                .into_iter()
-                .filter(|client| {
-                    let server =
-                        ok_or_return!(self.database.get_immediate_server(&client.nickname), false);
-                    server == *servername
-                })
-                .collect();
-
-            for client in server_clients {
-                println!("desconectando al cliente: {}", client.nickname);
-                self.database.disconnect_client(&client.nickname);
-
-                self.send_quit_notification(client.nickname, "Net split".to_string());
-            }
+            self.disconnect_server(servername);
         }
 
         Ok(true)
@@ -270,5 +256,24 @@ impl<C: Connection> ServerHandler<C> {
         let request = mode_requests.remove(0);
 
         self.handle_user_mode_request(&user, request);
+    }
+
+    fn disconnect_server(&mut self, servername: &String) {
+        self.database.remove_server(servername);
+        let all_clients = self.database.get_all_clients();
+        let server_clients: Vec<ClientInfo> = all_clients
+            .into_iter()
+            .filter(|client| {
+                let server =
+                    ok_or_return!(self.database.get_immediate_server(&client.nickname), false);
+                server == *servername
+            })
+            .collect();
+        for client in server_clients {
+            println!("desconectando al cliente: {}", client.nickname);
+            self.database.disconnect_client(&client.nickname);
+
+            self.send_quit_notification(client.nickname, SQUIT_MESSAGE.to_string());
+        }
     }
 }
