@@ -7,7 +7,7 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use super::{CHAT_CSS, MESSAGE_BOX_CSS, RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS};
+use super::{CHAT_CSS, MESSAGE_BOX_CSS, RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS, MESSAGE_SENDER_NAME_CSS};
 
 /// Creates a gtk message label.  
 /// 
@@ -52,7 +52,7 @@ pub fn create_sender_nickname_label(label: &str) -> Label {
         .margin_start(12)
         .halign(gtk::Align::Start)
         .build();
-    sender_nickname_label.add_css_class("message_sender_name");
+    sender_nickname_label.add_css_class(MESSAGE_SENDER_NAME_CSS);
     sender_nickname_label
 }
 

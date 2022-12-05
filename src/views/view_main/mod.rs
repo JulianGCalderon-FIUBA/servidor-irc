@@ -53,6 +53,9 @@ const WELCOME_MESSAGE: &str = "Open a new chat to start...";
 const WELCOME_MESSAGE_CSS: &str = "welcome_message";
 const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
 const WELCOME_TITLE_CSS: &str = "welcome_title";
+const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
+const NO_NOTIFICATIONS_CSS: &str = "notifications_button";
+const DISABLE_BUTTON_CSS: &str = "disabled_button";
 
 /// Shows main view.  
 /// Contains the sidebar, chat and features.  

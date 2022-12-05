@@ -11,7 +11,7 @@ use crate::views::widgets_creation::{create_button, create_button_with_margin};
 
 use super::{
     ADD_BUTTON_CSS, CURRENT_CHAT_TITLE_CSS, WELCOME_MESSAGE, WELCOME_MESSAGE_CSS, WELCOME_TITLE,
-    WELCOME_TITLE_CSS,
+    WELCOME_TITLE_CSS, NO_NOTIFICATIONS_TEXT, NO_NOTIFICATIONS_CSS,
 };
 
 /// Creates gtk button with a label.
@@ -112,8 +112,8 @@ pub fn create_welcome_box() -> Box {
 /// 
 /// Receives nothing, returns a Button.
 pub fn create_notifications_button() -> Button {
-    let notifications_button = create_button("🔔 notifications (0)");
+    let notifications_button = create_button(NO_NOTIFICATIONS_TEXT);
     notifications_button.set_margin_top(5);
-    notifications_button.add_css_class("notifications_button");
+    notifications_button.add_css_class(NO_NOTIFICATIONS_CSS);
     notifications_button
 }
