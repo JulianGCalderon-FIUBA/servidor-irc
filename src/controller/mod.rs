@@ -1,4 +1,8 @@
+/// Contains function responsible of handling controller messages
+/// the server receives.
 pub mod controller_handler;
+
+/// Definition of messages the controller can send and receive.
 pub mod controller_message;
 
 use std::collections::HashMap;
@@ -33,6 +37,10 @@ const NO_CLIENTS_WARNING_TEXT: &str = "There are no clients to chat with.";
 const NO_CHANNELS_WARNING_TEXT: &str = "You are not in any channel.";
 const CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT: &str =
     "Can't invite because the invited person is in the same channels as you.";
+
+/// Has a reference to the application.  
+/// Communicates with the views and the server.  
+/// Handles server errors.
 pub struct Controller {
     app: Application,
 }
@@ -44,6 +52,7 @@ impl Default for Controller {
 }
 
 impl Controller {
+    /// Creates new [`Controller`]
     pub fn new() -> Self {
         let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
 
@@ -61,6 +70,7 @@ impl Controller {
         );
     }
 
+    /// Starts running the application in the [`Controller`]
     pub fn start(&mut self) {
         self.app.connect_startup(|_| Self::load_css());
         self.app.connect_activate(Self::build_ui);
