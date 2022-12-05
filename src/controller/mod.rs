@@ -112,7 +112,6 @@ impl Controller {
                     nickname,
                     username,
                     realname,
-                    address,
                 } => {
                     let pass_command = format!("{} {}", PASS_COMMAND, pass);
                     let nick_command = format!("{} {}", NICK_COMMAND, nickname);

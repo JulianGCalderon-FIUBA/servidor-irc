@@ -37,7 +37,6 @@ pub enum ControllerMessage {
         nickname: GString,
         username: GString,
         realname: GString,
-        address: String,
     },
     RegularMessage {
         message: String,
