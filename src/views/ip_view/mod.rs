@@ -1,5 +1,7 @@
 pub mod requests;
 
+use std::{net::IpAddr, str::FromStr};
+
 use gtk::{
     glib::{GString, Sender},
     prelude::*,
@@ -84,7 +86,7 @@ impl IpView {
     fn register_fiels_are_valid(
         address: &String,
     ) -> bool {
-        true
+        IpAddr::from_str(address).unwrap().is_ipv4()
     }
 
     fn unpack_entry(address: GString) -> String {
