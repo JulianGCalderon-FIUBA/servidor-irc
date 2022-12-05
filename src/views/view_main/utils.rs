@@ -9,7 +9,7 @@ pub fn adjust_scrollbar(scrolled_window: ScrolledWindow) {
 }
 
 /// Checks if entry is valid and returns a bool.
-/// 
+///
 /// Checks if entry is empty and if it does not exceed the amount of characters.
 pub fn entry_is_valid(entry_text: &str, max_characters: usize) -> bool {
     !entry_text.is_empty() && entry_text.len() < max_characters

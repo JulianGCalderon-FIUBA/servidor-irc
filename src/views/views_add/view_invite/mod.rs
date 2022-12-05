@@ -1,4 +1,4 @@
-/// Contains definition of used requests. 
+/// Contains definition of used requests.
 pub mod request;
 
 use gtk::ComboBoxText;
@@ -40,7 +40,7 @@ impl InviteView {
     }
 
     /// Returns the view's window.
-    /// 
+    ///
     /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, channels: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
@@ -64,8 +64,8 @@ impl InviteView {
     }
 
     /// Connects invite button.
-    /// 
-    /// Sends invite request to the controller. 
+    ///
+    /// Sends invite request to the controller.
     fn connect_invite_button(&self, combobox: ComboBoxText, sender: Sender<ControllerMessage>) {
         self.invite_button.connect_clicked(move |_| {
             if combobox.active_text().is_none() {

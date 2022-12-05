@@ -6,7 +6,7 @@ use crate::views::widgets_creation::create_button;
 use super::{ACTIVE_SELECT_BUTTON_CSS, INACTIVE_SELECT_BUTTON_CSS};
 
 /// Creates gtk box with orientation.
-/// 
+///
 /// Receives Orientation, returns a Box.
 pub fn create_box(orientation: Orientation) -> Box {
     Box::builder()
@@ -18,7 +18,7 @@ pub fn create_box(orientation: Orientation) -> Box {
 }
 
 /// Creates gtk active button with label.
-/// 
+///
 /// Receives &str, returns a Button.
 pub fn create_active_button(label: &str) -> Button {
     let join_channel_button = create_button(label);
@@ -27,7 +27,7 @@ pub fn create_active_button(label: &str) -> Button {
 }
 
 /// Creates gtk inactive button with label.
-/// 
+///
 /// Receives &str, returns a Button.
 pub fn create_inactive_button(label: &str) -> Button {
     let join_channel_button = create_button(label);
@@ -36,7 +36,7 @@ pub fn create_inactive_button(label: &str) -> Button {
 }
 
 /// Creates gtk combo box.
-/// 
+///
 /// Receives nothing, returns a ComboBoxText.
 pub fn create_combobox() -> ComboBoxText {
     ComboBoxText::builder().width_request(172).build()

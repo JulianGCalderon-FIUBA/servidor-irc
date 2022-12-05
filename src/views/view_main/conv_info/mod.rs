@@ -41,8 +41,8 @@ impl MainView {
     }
 
     /// Connects quit channel button.
-    /// 
-    /// Sends quit channel request to the controller. 
+    ///
+    /// Sends quit channel request to the controller.
     fn connect_quit_channel(
         &mut self,
         current_conversation: Label,
@@ -57,8 +57,8 @@ impl MainView {
     }
 
     /// Connects invite button.
-    /// 
-    /// Sends invite view request to the controller. 
+    ///
+    /// Sends invite view request to the controller.
     fn connect_invite_button(&mut self, sender: Sender<ControllerMessage>) {
         self.invite_button.connect_clicked(move |_| {
             add_invite_view_request(sender.clone());
@@ -66,8 +66,8 @@ impl MainView {
     }
 
     /// Connects members button.
-    /// 
-    /// Sends names request to the controller. 
+    ///
+    /// Sends names request to the controller.
     fn connect_members_button(&mut self, sender: Sender<ControllerMessage>) {
         self.channel_members_button.connect_clicked(move |_| {
             send_names_request(sender.clone());
@@ -75,7 +75,7 @@ impl MainView {
     }
 
     /// Removes conversation from sidebar.  
-    /// 
+    ///
     /// Removes conversation button.
     pub fn remove_conversation(&mut self, conversation: String) {
         if self.channels_buttons.len() == 10 {
@@ -105,7 +105,7 @@ impl MainView {
     }
 
     /// Shows welcome view.  
-    /// 
+    ///
     /// Welcome view is used when no conversation is selected.
     pub fn welcome_view(&mut self) {
         self.current_chat.set_label("");
@@ -122,7 +122,7 @@ impl MainView {
         self.channel_members_button.set_visible(false);
     }
 
-    /// Returns users channels. 
+    /// Returns users channels.
     pub fn get_my_channels(&mut self) -> Vec<String> {
         let mut my_channels: Vec<String> = vec![];
         for channel_button in &self.channels_buttons {
@@ -141,7 +141,7 @@ impl MainView {
     }
 
     /// Sets view to client chat mode.
-    /// 
+    ///
     /// Function is used when a client chat is selected.
     pub fn set_client_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
@@ -155,7 +155,7 @@ impl MainView {
     }
 
     /// Sets view to channel chat mode.
-    /// 
+    ///
     /// Function is used when a channel chat is selected.
     pub fn set_channel_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);

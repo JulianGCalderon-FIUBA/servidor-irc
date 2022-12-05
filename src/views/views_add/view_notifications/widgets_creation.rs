@@ -6,7 +6,7 @@ use crate::views::view_main::widgets_creation::create_scrollwindow;
 use super::NOTIFICATIONS_BOX_CSS;
 
 /// Creates a notifications scrolled window.
-/// 
+///
 /// Receives nothing, returns a ScrolledWindow.
 pub fn create_notifications_scrollwindow() -> ScrolledWindow {
     let scrollwindow = create_scrollwindow();
@@ -17,7 +17,7 @@ pub fn create_notifications_scrollwindow() -> ScrolledWindow {
 }
 
 /// Creates gtk box.
-/// 
+///
 /// Receives nothing, returns a Box.
 pub fn create_box_container() -> Box {
     Box::builder().orientation(Vertical).valign(Start).build()

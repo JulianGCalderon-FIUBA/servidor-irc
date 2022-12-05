@@ -1,4 +1,4 @@
-/// Contains definition of used requests. 
+/// Contains definition of used requests.
 pub mod requests;
 
 /// Contains useful functions.
@@ -82,7 +82,7 @@ impl AddChannelView {
     }
 
     /// Returns the view's window.
-    /// 
+    ///
     /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, channels: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
@@ -134,7 +134,7 @@ impl AddChannelView {
     }
 
     /// Add join existing channel box.
-    /// 
+    ///
     /// Button is visible if user can join an existing channel.
     fn append_join_channel_box(&mut self, channels: Vec<String>, main_box: Box) {
         let entry_box = create_label_input_box(CHANNEL_LABEL_TEXT);
@@ -147,7 +147,7 @@ impl AddChannelView {
     }
 
     /// Add join new channel box.
-    /// 
+    ///
     /// Button is visible if user cannot join an existing channel.
     fn append_create_channel_box(&mut self, main_box: Box) {
         let entry_box = create_label_input_box(CHANNEL_LABEL_TEXT);
@@ -183,8 +183,8 @@ impl AddChannelView {
     }
 
     /// Connects select button.
-    /// 
-    /// Changes visibility of joining option. 
+    ///
+    /// Changes visibility of joining option.
     fn connect_select_button(
         &self,
         _active_button: Button,
@@ -201,8 +201,8 @@ impl AddChannelView {
     }
 
     /// Connects add existing channel button.
-    /// 
-    /// Sends join channel request to the controller. 
+    ///
+    /// Sends join channel request to the controller.
     fn connect_add_existing_channel_button(
         &self,
         combobox: ComboBoxText,
@@ -218,8 +218,8 @@ impl AddChannelView {
     }
 
     /// Connects add new channel button.
-    /// 
-    /// Sends join channel request to the controller. 
+    ///
+    /// Sends join channel request to the controller.
     fn connect_add_new_channel_button(
         &self,
         input: Entry,

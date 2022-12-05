@@ -42,7 +42,7 @@ impl NotificationsView {
     }
 
     /// Returns the view's window.
-    /// 
+    ///
     /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, notifications: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
@@ -74,8 +74,8 @@ impl NotificationsView {
     }
 
     /// Connects exit button.
-    /// 
-    /// Closes the window. 
+    ///
+    /// Closes the window.
     fn connect_button(&mut self, window: ApplicationWindow) {
         self.button.connect_clicked(move |_| {
             window.close();

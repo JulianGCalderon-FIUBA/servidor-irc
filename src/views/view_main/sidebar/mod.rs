@@ -61,14 +61,13 @@ impl MainView {
     }
 
     /// Connects add client button.
-    /// 
-    /// Sends add client request to the controller. 
+    ///
+    /// Sends add client request to the controller.
     fn connect_add_client_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
             add_view_to_add_client_request(sender.clone());
         });
     }
-
 
     fn connect_user_info_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
@@ -76,10 +75,9 @@ impl MainView {
         });
     }
 
-
     /// Connects add channel button.
-    /// 
-    /// Sends add channel request to the controller. 
+    ///
+    /// Sends add channel request to the controller.
     pub fn connect_add_channel_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
             send_list_request(sender.clone());
@@ -87,8 +85,8 @@ impl MainView {
     }
 
     /// Connects notifications button.
-    /// 
-    /// Sends add notification view request to the controller. 
+    ///
+    /// Sends add notification view request to the controller.
     pub fn connect_notifications_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         let button_clone = button.clone();
         button.connect_clicked(move |_| {
@@ -98,8 +96,8 @@ impl MainView {
     }
 
     /// Adds channel to the sidebar.  
-    /// 
-    /// Creates new channel button. 
+    ///
+    /// Creates new channel button.
     pub fn add_channel(&mut self, channel: String) {
         change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
@@ -120,8 +118,8 @@ impl MainView {
     }
 
     /// Adds client to the sidebar.  
-    /// 
-    /// Creates new client button. 
+    ///
+    /// Creates new client button.
     pub fn add_client(&mut self, client: String) {
         change_conversation_request(client.clone(), self.sender.clone());
         let client_button = create_button_with_margin(&client);
@@ -139,8 +137,8 @@ impl MainView {
     }
 
     /// Connects conversation button.
-    /// 
-    /// Sends change conversation request to the controller. 
+    ///
+    /// Sends change conversation request to the controller.
     pub fn connect_channel_client_button(
         &self,
         button: Button,
@@ -153,7 +151,7 @@ impl MainView {
     }
 
     /// Changes conversation view.  
-    /// 
+    ///
     /// Changes chat label and messages.  
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
@@ -218,7 +216,7 @@ impl MainView {
     }
 
     /// Creates new notification with message.  
-    /// 
+    ///
     /// Add it to notifications vec.
     pub fn add_notification(&mut self, message: String) {
         self.notifications.push(message);
@@ -233,7 +231,7 @@ impl MainView {
     }
 
     /// Get number of notifications.  
-    /// 
+    ///
     /// Returns u32.
     pub fn get_notifications_number(button: Button) -> u32 {
         const RADIX: u32 = 10;
@@ -251,7 +249,7 @@ impl MainView {
     }
 
     /// Sets number of notifications to 0.
-    /// 
+    ///
     /// Functions is used when notifications are read.
     pub fn remove_unread_notifications(button: Button) {
         button.set_label("🔔 notifications (0)");
@@ -261,7 +259,7 @@ impl MainView {
     }
 
     /// Gets all notifications.  
-    /// 
+    ///
     /// Returns a Vec<String>.
     pub fn get_notifications(&mut self) -> Vec<String> {
         self.notifications.clone()

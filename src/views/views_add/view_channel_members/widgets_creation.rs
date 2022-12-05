@@ -5,7 +5,7 @@ use gtk::{Align::Start, Box, Button, Label, Orientation::Horizontal};
 const KICK_LABEL: &str = "Kick";
 
 /// Creates gtk box.
-/// 
+///
 /// Receives nothing, returns a Box.
 pub fn create_kick_label_box() -> Box {
     Box::builder()
@@ -17,14 +17,14 @@ pub fn create_kick_label_box() -> Box {
 }
 
 /// Creates gtk kick button.
-/// 
+///
 /// Receives nothing, returns a Button.
 pub fn create_kick_button() -> Button {
     Button::builder().label(KICK_LABEL).build()
 }
 
 /// Creates gtk kick label.
-/// 
+///
 /// Receives member name, returns a Label.
 pub fn create_kick_label(label: &str) -> Label {
     Label::builder()

@@ -6,7 +6,7 @@ use crate::views::{widgets_creation::create_label, MAIN_BOX_CSS};
 use super::ADD_VIEW_TITLE_CSS;
 
 /// Creates gtk main box.
-/// 
+///
 /// Receives nothing, returns a Box.
 pub fn create_main_box_add_view() -> Box {
     let main_box = Box::builder()
@@ -19,7 +19,7 @@ pub fn create_main_box_add_view() -> Box {
 }
 
 /// Creates gtk title label.
-/// 
+///
 /// Receives title text, returns a Label.
 pub fn create_title(title_text: &str) -> Label {
     let title = create_label(title_text);

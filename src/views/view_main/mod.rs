@@ -1,4 +1,4 @@
-/// Contains definition of used requests. 
+/// Contains definition of used requests.
 pub mod requests;
 
 /// Contains useful functions.
@@ -114,7 +114,7 @@ impl MainView {
     }
 
     /// Returns the view's window.
-    /// 
+    ///
     /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, nickname: String) -> ApplicationWindow {
         let window = build_application_window();
