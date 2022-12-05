@@ -19,6 +19,8 @@ use super::ClientHandler;
 /// Contains the extended logic of the MODE command.
 mod mode_logic;
 
+pub const SQUIT_MESSAGE: &str = "Net split";
+
 impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
     fn nick_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
         let (_, params, _) = arguments;
@@ -318,7 +320,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
             for client in server_clients {
                 self.database.disconnect_client(&client.nickname);
-                self.send_quit_notification(&client.nickname, "Net split");
+                self.send_quit_notification(&client.nickname, SQUIT_MESSAGE);
             }
         }
 

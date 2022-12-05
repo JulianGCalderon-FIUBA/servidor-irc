@@ -41,3 +41,6 @@ pub const INVISIBLE: char = 'i';
 pub const OPERATOR: char = 'o';
 pub const RECEIVES_SERVER_NOTICES: char = 's';
 pub const RECEIVES_WALLOPS: char = 'w';
+
+pub const ADD_OPERATOR: &str = "+o";
+pub const NO_TOPIC: &str = "No topic set";
