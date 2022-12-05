@@ -14,6 +14,7 @@ use super::MainView;
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 
 impl MainView {
+    /// Creates conversation info widgets.
     pub fn create_conv_info(&mut self, nickname: &str) -> Box {
         let conv_info = Box::builder()
             .orientation(Orientation::Vertical)
@@ -39,6 +40,9 @@ impl MainView {
         conv_info
     }
 
+    /// Connects quit channel button.
+    /// 
+    /// Sends quit channel request to the controller. 
     fn connect_quit_channel(
         &mut self,
         current_conversation: Label,
@@ -52,18 +56,27 @@ impl MainView {
         });
     }
 
+    /// Connects invite button.
+    /// 
+    /// Sends invite view request to the controller. 
     fn connect_invite_button(&mut self, sender: Sender<ControllerMessage>) {
         self.invite_button.connect_clicked(move |_| {
             add_invite_view_request(sender.clone());
         });
     }
 
+    /// Connects members button.
+    /// 
+    /// Sends names request to the controller. 
     fn connect_members_button(&mut self, sender: Sender<ControllerMessage>) {
         self.channel_members_button.connect_clicked(move |_| {
             send_names_request(sender.clone());
         });
     }
 
+    /// Removes conversation from sidebar.  
+    /// 
+    /// Removes conversation button.
     pub fn remove_conversation(&mut self, conversation: String) {
         if self.channels_buttons.len() == 10 {
             self.add_channel.remove_css_class("disabled_button");
@@ -92,6 +105,9 @@ impl MainView {
         // self.welcome_view();
     }
 
+    /// Shows welcome view.  
+    /// 
+    /// Welcome view is used when no conversation is selected.
     pub fn welcome_view(&mut self) {
         self.current_chat.set_label("");
         self.scrollwindow_chat.set_visible(false);
@@ -107,6 +123,7 @@ impl MainView {
         self.channel_members_button.set_visible(false);
     }
 
+    /// Returns users channels. 
     pub fn get_my_channels(&mut self) -> Vec<String> {
         let mut my_channels: Vec<String> = vec![];
         for channel_button in &self.channels_buttons {
@@ -115,6 +132,7 @@ impl MainView {
         my_channels
     }
 
+    /// Returns users clients.
     pub fn get_my_clients(&mut self) -> Vec<String> {
         let mut my_clients: Vec<String> = vec![];
         for client_button in &self.clients_buttons {
@@ -123,6 +141,9 @@ impl MainView {
         my_clients
     }
 
+    /// Sets view to client chat mode.
+    /// 
+    /// Function is used when a client chat is selected.
     pub fn set_client_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
         if self.quit_channel_button.has_css_class("disabled_button") {
@@ -134,6 +155,9 @@ impl MainView {
         self.channel_members_button.set_visible(false);
     }
 
+    /// Sets view to channel chat mode.
+    /// 
+    /// Function is used when a channel chat is selected.
     pub fn set_channel_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
         if self.quit_channel_button.has_css_class("disabled_button") {
