@@ -1,5 +1,5 @@
 pub mod requests;
-pub mod widget_creation;
+pub mod widgets_creation;
 
 use gtk::{glib::Sender, prelude::*, Align::Start, Application, ApplicationWindow, Button, Label};
 use gtk4 as gtk;
@@ -7,17 +7,17 @@ use gtk4 as gtk;
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
-        views_add::view_channel_members::widget_creation::create_kick_label_box,
+        views_add::view_channel_members::widgets_creation::create_kick_label_box,
         widgets_creation::{build_application_window, create_center_button, create_label},
     },
 };
 
 use self::{
     requests::kick_request,
-    widget_creation::{create_kick_button, create_kick_label},
+    widgets_creation::{create_kick_button, create_kick_label},
 };
 
-use super::widget_creations::{create_main_box_add_view, create_title};
+use super::widgets_creation::{create_main_box_add_view, create_title};
 
 pub struct ChannelMembersView {
     button: Button,
@@ -80,12 +80,11 @@ impl ChannelMembersView {
     fn list_members(clients: Vec<String>, main_box: gtk::Box) {
         for client in &clients {
             //mejorar
-            let label: Label;
-            if client.starts_with("@") {
-                label = create_label(&format!("\t •\tOP: {}", &client[1..]));
+            let label: Label = if let Some(stripped) = client.strip_prefix('@') {
+                create_label(&format!("\t •\tOP: {}", stripped))
             } else {
-                label = create_label(&format!("\t •\t{}", client));
-            }
+                create_label(&format!("\t •\t{}", client))
+            };
             label.set_halign(Start);
             label.set_margin_start(20);
             main_box.append(&label);

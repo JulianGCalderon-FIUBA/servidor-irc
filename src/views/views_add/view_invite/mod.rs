@@ -6,9 +6,9 @@ use gtk4 as gtk;
 
 use self::request::invite_request;
 
-use super::view_add_channel::widget_creations::create_combobox;
-use super::widget_creations::create_main_box_add_view;
-use super::widget_creations::create_title;
+use super::view_add_channel::widgets_creation::create_combobox;
+use super::widgets_creation::create_main_box_add_view;
+use super::widgets_creation::create_title;
 
 use crate::controller::controller_message::ControllerMessage;
 use crate::views::widgets_creation::{

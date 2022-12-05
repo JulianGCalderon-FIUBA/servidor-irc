@@ -8,6 +8,7 @@ pub enum ControllerMessage {
     AddNewClient {
         new_client: GString,
     },
+    AddNotificationsView {},
     SendNamesMessageToAddClient {},
     AddViewToAddClient {
         channels_and_clients: HashMap<String, Vec<String>>,

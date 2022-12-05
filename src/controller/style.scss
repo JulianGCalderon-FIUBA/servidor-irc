@@ -114,3 +114,19 @@ label {
 .channel_first_character {
     font-size: 20px;
 }
+
+.notifications_button{
+    background-color: black;
+    border-color: transparent;
+    border-radius: 0px;
+}
+
+.notifications_button_on{
+    background-color: rgb(184, 45, 45);
+}
+
+.notifications_container{
+    border-radius: 10px;
+    border: 1px solid white;
+    background-color: #000103;
+}
