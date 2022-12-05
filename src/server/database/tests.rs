@@ -263,6 +263,8 @@ fn can_verify_channel_operator() {
     database.add_client_to_channel("#channel", "nickname1");
     database.add_client_to_channel("#channel", "nickname2");
 
+    database.add_channel_operator("#channel", "nickname1");
+
     assert!(database.is_channel_operator("#channel", "nickname1"));
     assert!(!database.is_channel_operator("#channel", "nickname2"));
 }
@@ -368,7 +370,6 @@ fn can_add_and_remove_channel_operator() {
     database.add_client_to_channel("#channel", "nick");
     database.add_client_to_channel("#channel", "nick2");
 
-    assert!(database.is_channel_operator("#channel", "nick"));
     assert!(!database.is_channel_operator("#channel", "nick2"));
 
     database.add_channel_operator("#channel", "nick2");
@@ -444,7 +445,6 @@ fn can_get_channel_configuration() {
     database.set_channel_topic("#channel", "topic");
 
     let mut expected = ChannelConfiguration::new();
-    expected.operators.push("nick".to_string());
     expected.user_limit = Some(5);
     expected.flags.push(ChannelFlag::Moderated);
     expected.topic = Some("topic".to_string());

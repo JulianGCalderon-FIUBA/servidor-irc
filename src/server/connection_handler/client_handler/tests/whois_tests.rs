@@ -76,7 +76,7 @@ fn whois_returns_nick_info_with_channels() {
 
     assert_eq!("311 nickname username 127.0.0.1 *: realname", responses[0]);
     assert_eq!("312 nickname servername :serverinfo", responses[1]);
-    assert_eq!("319 nickname : @#hola", responses[2]);
+    assert_eq!("319 nickname : #hola", responses[2]);
     assert_eq!("318 nickname :End of /WHOIS list", responses[3]);
 }
 
@@ -119,7 +119,7 @@ fn whois_returns_complete_nick_info() {
     assert_eq!("311 nickname username 127.0.0.1 *: realname", responses[0]);
     assert_eq!("312 nickname servername :serverinfo", responses[1]);
     assert_eq!("313 nickname :Is an IRC operator", responses[2]);
-    assert_eq!("319 nickname : @#hola", responses[3]);
+    assert_eq!("319 nickname : #hola", responses[3]);
     assert_eq!("301 nickname :away message", responses[4]);
     assert_eq!("318 nickname :End of /WHOIS list", responses[5]);
 }

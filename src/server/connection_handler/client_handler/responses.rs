@@ -357,4 +357,10 @@ impl<C: Connection> ClientHandler<C> {
         let notification = Notification::mode(&self.nickname, user, &request);
         self.send_message_to_all_servers(&notification);
     }
+
+    pub(super) fn send_channel_operator_notification(&self, channel: &str, nickname: &str) {
+        let request = ChannelModeRequest::AddOperator(nickname.to_string());
+        let notification = Notification::mode(&self.nickname, channel, &request.to_string());
+        self.send_message_to_all_servers(&notification);
+    }
 }

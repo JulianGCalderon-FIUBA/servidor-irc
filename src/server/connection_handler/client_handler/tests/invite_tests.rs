@@ -136,6 +136,7 @@ fn can_invite_user_in_moderated_channel_if_channop() {
 
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_channel_operator("#hola", "nickname");
 
     handler
         .database

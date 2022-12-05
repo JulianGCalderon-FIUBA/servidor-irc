@@ -196,7 +196,6 @@ fn channel_mode_removes_channop() {
     let prefix = Some("sender".to_string());
     handler.mode_command((prefix, parameters, None)).unwrap();
 
-    assert!(handler.database.is_channel_operator("#channel", "nickname"));
     assert!(!handler.database.is_channel_operator("#channel", "nick2"));
 }
 

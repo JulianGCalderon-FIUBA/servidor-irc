@@ -13,12 +13,11 @@ pub struct Channel {
 }
 
 impl Channel {
-    /// Creates a new [`Channel`] with creator set as operator.
+    /// Creates a new [`Channel`]
     pub fn new(name: String, creator: String) -> Self {
-        let clients = vec![creator.clone()];
+        let clients = vec![creator];
 
-        let mut config = ChannelConfiguration::new();
-        config.operators.push(creator);
+        let config = ChannelConfiguration::new();
 
         Self {
             name,
