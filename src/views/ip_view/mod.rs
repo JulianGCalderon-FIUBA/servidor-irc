@@ -59,6 +59,15 @@ impl IpView {
 
         window.set_child(Some(&main_box));
 
+        let sender_clone = self.sender.clone();
+        let app_clone = app.clone();
+
+        window.connect_destroy(move |_| {
+            println!("quity");
+            quit_request(sender_clone.clone());
+            app_clone.quit();
+        });
+
         Self::close_view(window.clone(), app, self.sender.clone());
 
         window
@@ -96,7 +105,6 @@ impl IpView {
 
     fn close_view(window: ApplicationWindow, app: Application, sender: Sender<ControllerMessage>) {
         window.connect_destroy(move |_| {
-            println!("quity");
             quit_request(sender.clone());
             app.quit();
         });
