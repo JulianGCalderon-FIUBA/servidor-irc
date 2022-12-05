@@ -69,12 +69,20 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
             kicked: message.get_parameters()[1].clone(),
             channel: message.get_parameters()[0].clone(),
         },
-        LOGIN_OK => ControllerMessage::ChangeViewToMain {
-            realname: "realname".to_string(),
-            servername: "servername".to_string(),
-            nickname: "nickname".to_string(),
-            username: "username".to_string(),
-        },
+        LOGIN_OK => {
+            let trailing_text: String = message.get_trailing().clone().unwrap();
+            let trailing_strings = trailing_text.split(' ').collect::<Vec<&str>>();
+            println!("{:?}", trailing_strings);
+
+            let mut username = trailing_strings[5].to_string();
+            username.remove(0);
+            ControllerMessage::ChangeViewToMain {
+                realname: message.get_parameters()[0].clone(),
+                servername: trailing_strings[2].to_string(),
+                nickname: trailing_strings[4].to_string(),
+                username,
+            }
+        }
         PRIVMSG_COMMAND => {
             let message_text = message.get_trailing().clone().unwrap();
             let sender_nickname = message.get_prefix().clone().unwrap();
