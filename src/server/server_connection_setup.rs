@@ -207,7 +207,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         channel: &str,
     ) -> Result<(), io::Error> {
         for speaker in speakers {
-            let request = format!("+{SET_SPEAKER} {:?}", speaker);
+            let request = format!("+{SET_SPEAKER} {speaker}");
             let notification = Notification::mode(sender, channel, &request);
 
             self.stream.send(&notification)?;
@@ -222,7 +222,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         channel: &str,
     ) -> Result<(), io::Error> {
         for banmask in banmasks {
-            let request = format!("+{SET_BANMASK} {:?}", banmask);
+            let request = format!("+{SET_BANMASK} {banmask}");
             let notification = Notification::mode(sender, channel, &request);
 
             self.stream.send(&notification)?;
@@ -252,7 +252,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         channel: &str,
     ) -> Result<(), io::Error> {
         if let Some(key) = key {
-            let request = format!("+{SET_KEY} {:?}", key);
+            let request = format!("+{SET_KEY} {key}");
             let notification = Notification::mode(sender, channel, &request);
 
             self.stream.send(&notification)?;
