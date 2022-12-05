@@ -17,9 +17,9 @@ use crate::{
     },
 };
 
-const TITLE: &str = "Add client";
 const ADD_CLIENT_BUTTON_TEXT: &str = "Add client";
 const CLIENT_LABEL_TEXT: &str = "Client:";
+const TITLE: &str = "Add client";
 
 pub struct AddClientView {
     pub client_combobox: ComboBoxText,
