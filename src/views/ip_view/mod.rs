@@ -86,7 +86,14 @@ impl IpView {
     fn register_fiels_are_valid(
         address: &String,
     ) -> bool {
-        IpAddr::from_str(address).unwrap().is_ipv4()
+        let ip: Vec<&str> = address.split(":").collect();
+        if ip.len() != 2 {
+            return false
+        }
+        match IpAddr::from_str(ip[0]) {
+            Ok(_) => ip[1].parse::<i32>().expect("Not a number") < 10000,
+            Err(_) => false
+        }
     }
 
     fn unpack_entry(address: GString) -> String {
