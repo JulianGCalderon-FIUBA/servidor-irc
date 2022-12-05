@@ -220,7 +220,7 @@ impl Controller {
                 }
                 Quit {} => {
                     println!("Estoy haciendo quit");
-                    let quit_message = format!("QUIT");
+                    let quit_message = "QUIT".to_string();
                     client.send_raw(&quit_message).expect("ERROR: Quit message");
                 }
                 QuitChannel {} => {

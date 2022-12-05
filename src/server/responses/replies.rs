@@ -24,10 +24,6 @@ pub enum CommandResponse {
     EndOfWho315 {
         name: Option<String>,
     },
-    // WhoisIdle317 {
-    //     nickname: String,
-    //     seconds: u8,
-    // },
     EndOfWhois318 {
         nickname: String,
     },
@@ -90,10 +86,7 @@ pub enum CommandResponse {
         user_modes: String,
     },
     Welcome001 {
-        nickname: String,
-        servername: String,
-        username: String,
-        realname: String,
+        client: ClientInfo,
     },
 }
 
@@ -125,9 +118,7 @@ impl Display for CommandResponse {
                     name.to_owned().unwrap_or_default()
                 )
             }
-            // CommandResponse::WhoisIdle317 { nickname, seconds } => {
-            //     format!("317 {nickname} {seconds} :seconds idle")
-            // }
+
             CommandResponse::EndOfWhois318 { nickname } => {
                 format!("318 {nickname} :End of /WHOIS list")
             }
@@ -192,13 +183,15 @@ impl Display for CommandResponse {
             CommandResponse::UserModeIs221 { user_modes } => {
                 format!("221 {user_modes}")
             }
-            CommandResponse::Welcome001 {
-                nickname,
-                servername,
-                username,
-                realname,
-            } => {
-                format!("001 {realname} {servername} {nickname} {username} :Welcome to server {servername}, nickname: {nickname}, username: {username}")
+            CommandResponse::Welcome001 { client } => {
+                format!(
+                    "001 {} :Welcome to {} Network, {} !{} @{}",
+                    client.realname,
+                    client.servername,
+                    client.nickname,
+                    client.username,
+                    client.hostname
+                )
             }
         };
         write!(f, "{string}")
@@ -228,15 +221,8 @@ fn build_whoreply_message(client_info: &ClientInfo, channel: &Option<String>) ->
 }
 
 impl CommandResponse {
-    pub fn welcome(nickname: &str, servername: &str, username: &str, realname: &str) -> Self {
-        own!(nickname, servername, username, realname);
-
-        CommandResponse::Welcome001 {
-            nickname,
-            servername,
-            username,
-            realname,
-        }
+    pub fn welcome(client: ClientInfo) -> Self {
+        CommandResponse::Welcome001 { client }
     }
     pub fn channel_mode_is(channel: &str, mode: char, mode_params: Option<Vec<String>>) -> Self {
         let channel = channel.to_string();

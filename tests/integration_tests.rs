@@ -100,7 +100,7 @@ fn client_can_register_in_server() {
 
     let response = client.sync_read().unwrap();
     assert_eq!(
-        "001 nickname :Welcome to server lemonpie, username",
+        "001 realname :Welcome to lemonpie Network, nickname !username @127.0.0.1",
         response.to_string()
     );
 
@@ -155,7 +155,7 @@ fn can_connect_two_servers() {
 
     let response1 = client1.sync_read().unwrap();
     assert_eq!(
-        "001 nickname1 :Welcome to server lemonpie, username1",
+        "001 realname1 :Welcome to lemonpie Network, nickname1 !username1 @127.0.0.1",
         response1.to_string()
     );
 
@@ -172,7 +172,7 @@ fn can_connect_two_servers() {
 
     let response2 = client2.sync_read().unwrap();
     assert_eq!(
-        "001 nickname2 :Welcome to server chocotorta, username2",
+        "001 realname2 :Welcome to chocotorta Network, nickname2 !username2 @127.0.0.1",
         response2.to_string()
     );
 
