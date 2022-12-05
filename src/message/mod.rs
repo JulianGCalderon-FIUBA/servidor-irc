@@ -92,6 +92,7 @@ impl Message {
     /// Reads single line from a stream, calling a read for every byte read
     fn read_line(stream: &mut dyn Read, buffer: &mut String) -> io::Result<()> {
         let mut content = String::new();
+
         while !content.as_bytes().ends_with(LF) {
             let mut buffer = [0; 1];
             stream.read_exact(&mut buffer)?;

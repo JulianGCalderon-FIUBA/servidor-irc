@@ -115,6 +115,7 @@ impl Server {
             .expect("DatabaseHandle should only be None when dropped");
 
         let mut registerer = ServerConnectionSetup::new(stream.try_clone()?, database.clone());
+
         registerer.register_outcoming()?;
 
         let online = Arc::clone(&self.online);
