@@ -25,6 +25,10 @@ use crate::{controller::controller_message::ControllerMessage, ADDRESS};
 const CONNECT_BUTTON_TEXT: &str = "Connect";
 const ADDRESS_LABEL_TEXT: &str = "IP Address:";
 const ADDRESS_MESSAGE: &str = "Leave it empty to use the default IP...";
+
+/// Shows ip selection view.  
+/// Contains an address entry.  
+/// Uses sender to communicate with controller.
 pub struct IpView {
     pub address_entry: Entry,
     pub ok_button: Button,
@@ -32,6 +36,7 @@ pub struct IpView {
 }
 
 impl IpView {
+    /// Creates new [`IpView`].
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             address_entry: create_entry(""),
@@ -40,6 +45,9 @@ impl IpView {
         }
     }
 
+    /// Returns the view's window.
+    /// 
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -63,6 +71,9 @@ impl IpView {
         window
     }
 
+    /// Connects connect button.
+    /// 
+    /// Sends to register request to the controller. 
     fn connect_button(&self, address_entry: Entry, sender: Sender<ControllerMessage>) {
         self.ok_button.connect_clicked(move |_| {
             let address = Self::unpack_entry(address_entry.text());
@@ -74,6 +85,9 @@ impl IpView {
         });
     }
 
+    /// Checks if the input address has an ipv4 format.  
+    /// 
+    /// Returns a bool
     fn register_fiels_are_valid(address: &str) -> bool {
         let ip: Vec<&str> = address.split(':').collect();
         if ip.len() != 2 {
@@ -85,6 +99,9 @@ impl IpView {
         }
     }
 
+    /// Returns the input address.  
+    /// 
+    /// If the address is empty, returns the default address.  
     fn unpack_entry(address: GString) -> String {
         if address.is_empty() {
             ADDRESS.to_string()
