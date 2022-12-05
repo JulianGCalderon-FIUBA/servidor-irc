@@ -223,7 +223,6 @@ impl Controller {
                     main_view.add_notification(message);
                 }
                 ReceiveKick { kicked, channel } => {
-                    println!("kick {} from {}", kicked, channel);
                     if kicked == current_nickname {
                         main_view.remove_conversation(channel.clone());
                         if channel == current_conv {
@@ -283,14 +282,6 @@ impl Controller {
                             sender_nickname,
                             current_conv.clone(),
                         );
-                    }
-                }
-                ReceiveKick { kicked, channel } => {
-                    if kicked == current_nickname {
-                        main_view.remove_conversation(channel.clone());
-                        if channel == current_conv {
-                            main_view.welcome_view();
-                        }
                     }
                 }
                 Register {

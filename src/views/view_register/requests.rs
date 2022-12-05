@@ -21,14 +21,3 @@ pub fn register_request(
     };
     sender.send(register).expect(ERROR_TEXT);
 }
-
-/// Sends a change view to main request to the controller.  
-/// 
-/// Receives a nickname
-pub fn change_view_to_main_request(nickname: GString, sender: Sender<ControllerMessage>) {
-    sender
-        .send(ControllerMessage::ChangeViewToMain {
-            nickname: nickname.to_string(),
-        })
-        .expect(ERROR_TEXT);
-}

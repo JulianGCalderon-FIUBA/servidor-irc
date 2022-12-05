@@ -21,11 +21,6 @@ use super::{
 
 use crate::controller::controller_message::ControllerMessage;
 
-const LOGIN_BUTTON_TEXT: &str = "login";
-const REALNAME_LABEL_TEXT: &str = "Your name:";
-const NICKNAME_LABEL_TEXT: &str = "Nickname:";
-const USERNAME_LABEL_TEXT: &str = "Username:";
-const PASSWORD_LABEL_TEXT: &str = "Password:";
 const LOGIN_BUTTON_TEXT: &str = "Login";
 const ERR_FIELDS_REQUIRED: &str = "¡All fields are required!";
 const FIELD_MAX_CHARACTERS: usize = 9;
