@@ -101,6 +101,7 @@ fn can_modify_topic_if_channop_on_channel_with_topic_flag() {
 
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("#hola", "nickname");
+    handler.database.add_channel_operator("#hola", "nickname");
 
     handler
         .database

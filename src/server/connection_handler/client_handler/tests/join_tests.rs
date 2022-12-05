@@ -258,15 +258,14 @@ fn can_join_multiple_channels_with_keys() {
     let mut handler = dummy_client_handler();
 
     handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_local_client(dummy_client("nick3"));
+
     handler.database.add_client_to_channel("#channel1", "nick2");
+    handler.database.add_client_to_channel("#channel2", "nick3");
 
     handler
         .database
         .set_channel_key("#channel1", Some("key1".to_string()));
-
-    handler.database.add_local_client(dummy_client("nick3"));
-    handler.database.add_client_to_channel("#channel2", "nick3");
-
     handler
         .database
         .set_channel_key("#channel2", Some("key2".to_string()));
@@ -416,7 +415,7 @@ fn distributed_channels_joins_are_relayed_to_all_servers() {
     handler.join_command((None, parameters, None)).unwrap();
 
     assert_eq!(
-        ":nickname JOIN #channel\r\n",
+        ":nickname JOIN #channel\r\n:nickname MODE #channel +o nickname\r\n",
         handler
             .database
             .get_server_stream("servername1")
@@ -424,7 +423,7 @@ fn distributed_channels_joins_are_relayed_to_all_servers() {
             .read_wbuf_to_string()
     );
     assert_eq!(
-        ":nickname JOIN #channel\r\n",
+        ":nickname JOIN #channel\r\n:nickname MODE #channel +o nickname\r\n",
         handler
             .database
             .get_server_stream("servername2")
