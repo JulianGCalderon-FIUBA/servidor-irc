@@ -50,6 +50,9 @@ impl MainView {
         sidebar.append(&self.add_client);
         sidebar.append(&create_separator_sidebar());
         sidebar.append(&self.notifications_button);
+        self.user_info.connect_clicked(|_| println!("Hi"));
+        sidebar.append(&self.user_info);
+
 
         sidebar
     }
