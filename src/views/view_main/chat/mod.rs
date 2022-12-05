@@ -27,15 +27,11 @@ const MESSAGE_BOX_CSS: &str = "message_box";
 impl MainView {
     /// Creates chat widgets.
     pub fn create_chat(&mut self) -> Box {
-        // self.current_chat.set_label(nickname);
-
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
 
-        message_sender_box.append(&self.user_info);
-
-        self.input.set_hexpand(true);
-        self.input.set_width_request(500);
+        self.input.set_width_request(600);
+        self.input.set_margin_start(15);
         message_sender_box.append(&self.input);
 
         self.scrollwindow_chat.set_child(Some(&self.message_box));

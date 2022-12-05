@@ -102,3 +102,106 @@ fn nick_update_is_relayed_to_all_servers() {
             .read_wbuf_to_string()
     );
 }
+
+#[test]
+fn nick_fails_with_long_nickname() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nicknamenickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 nicknamenickname :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn nick_fails_with_invalid_prefix() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["#nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 #nickname :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let parameters = vec!["&nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 &nickname :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let parameters = vec!["$nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 $nickname :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let parameters = vec![":nickname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 :nickname :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn nick_fails_with_invalid_character() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nick.name".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 nick.name :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let parameters = vec!["nickname!".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 nickname! :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let parameters = vec!["ni,ckname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 ni,ckname :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let parameters = vec!["nick*name".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 nick*name :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let parameters = vec!["ni?ckname".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 ni?ckname :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+
+    let parameters = vec!["nickname@".to_string()];
+    handler.nick_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "432 nickname@ :Erroneous nickname\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}

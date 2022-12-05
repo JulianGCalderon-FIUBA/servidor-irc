@@ -2,13 +2,16 @@ use std::env;
 use std::io::{stdin, BufRead, BufReader};
 
 use internet_relay_chat::server::Server;
-use internet_relay_chat::{ADDRESS, SERVERNAME};
+use internet_relay_chat::{ADDRESS, SERVERINFO, SERVERNAME};
+
+const QUIT_CONNECTION_COMMAND: &str = "QUIT";
+const CONNECT_TO_SERVER_COMMAND: &str = "CONNECT";
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let (address, servername) = unpack_args(args);
 
-    let serverinfo = "serverinfo".to_string();
+    let serverinfo = SERVERINFO.to_string();
     let mut server = Server::start(servername, serverinfo);
 
     if let Err(error) = server.listen_to(address) {
@@ -23,13 +26,15 @@ fn main() {
         };
 
         let split: Vec<&str> = line.split_whitespace().collect();
-
+        if split.is_empty() {
+            continue;
+        }
         match split[0] {
-            "QUIT" => {
+            QUIT_CONNECTION_COMMAND => {
                 server.quit();
                 return;
             }
-            "CONNECT" => {
+            CONNECT_TO_SERVER_COMMAND => {
                 server.connect_to(split[1]);
             }
             _ => (),

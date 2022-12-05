@@ -4,7 +4,7 @@ pub mod requests;
 use gtk::{
     glib::{GString, Sender},
     prelude::*,
-    Application, ApplicationWindow, Button, Entry, Orientation,
+    Application, ApplicationWindow, Button, Entry, Label, Orientation, PasswordEntry,
 };
 use gtk4 as gtk;
 
@@ -12,10 +12,11 @@ use self::requests::register_request;
 
 use super::{
     widgets_creation::{
-        build_application_window, create_center_button, create_entry, create_label_input_box,
-        create_main_box,
+        build_application_window, create_center_button, create_entry, create_error_label,
+        create_label_input_box, create_main_box, create_password_entry,
     },
-    MAIN_BOX_CSS,
+    MAIN_BOX_CSS, NICKNAME_LABEL_TEXT, PASSWORD_LABEL_TEXT, REALNAME_LABEL_TEXT,
+    USERNAME_LABEL_TEXT,
 };
 
 use crate::controller::controller_message::ControllerMessage;
@@ -25,6 +26,10 @@ const REALNAME_LABEL_TEXT: &str = "Your name:";
 const NICKNAME_LABEL_TEXT: &str = "Nickname:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
 const PASSWORD_LABEL_TEXT: &str = "Password:";
+const LOGIN_BUTTON_TEXT: &str = "Login";
+const ERR_FIELDS_REQUIRED: &str = "¡All fields are required!";
+const FIELD_MAX_CHARACTERS: usize = 9;
+const FIELD_MAX_CHARACTERS_ERROR: &str = "¡Fields are too long!";
 
 /// Shows registation view.  
 /// Contains a realname, nickname, username and password entry.  
@@ -33,8 +38,9 @@ pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
     pub username_entry: Entry,
-    pub pass_entry: Entry,
+    pub pass_entry: PasswordEntry,
     pub login_button: Button,
+    pub error_label: Label,
     sender: Sender<ControllerMessage>,
 }
 
@@ -45,8 +51,9 @@ impl RegisterView {
             realname_entry: create_entry(""),
             nick_entry: create_entry(""),
             username_entry: create_entry(""),
-            pass_entry: create_entry(""),
+            pass_entry: create_password_entry(""),
             login_button: create_center_button(LOGIN_BUTTON_TEXT),
+            error_label: create_error_label(),
             sender,
         }
     }
@@ -79,11 +86,15 @@ impl RegisterView {
 
         main_box.append(&self.login_button);
 
+        self.error_label.set_margin_bottom(10);
+        main_box.append(&self.error_label);
+
         self.connect_button(
             self.realname_entry.clone(),
             self.pass_entry.clone(),
             self.nick_entry.clone(),
             self.username_entry.clone(),
+            self.error_label.clone(),
             self.sender.clone(),
         );
 
@@ -98,12 +109,14 @@ impl RegisterView {
     fn connect_button(
         &self,
         realname_entry: Entry,
-        pass_entry: Entry,
+        pass_entry: PasswordEntry,
         nick_entry: Entry,
         username_entry: Entry,
+        error_label: Label,
         sender: Sender<ControllerMessage>,
     ) {
         self.login_button.connect_clicked(move |_| {
+            error_label.set_text("");
             let pass = pass_entry.text();
             let nickname = nick_entry.text();
             let username = username_entry.text();
@@ -111,7 +124,18 @@ impl RegisterView {
 
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
                 register_request(pass, nickname, username, realname, sender.clone());
-                // change_view_to_main_request(nickname, sender.clone());
+            } else {
+                if nickname.len() > FIELD_MAX_CHARACTERS
+                    || realname.len() > FIELD_MAX_CHARACTERS
+                    || username.len() > FIELD_MAX_CHARACTERS
+                    || pass.len() > FIELD_MAX_CHARACTERS
+                {
+                    error_label.set_text(&format!(
+                        "{FIELD_MAX_CHARACTERS_ERROR} Max: {FIELD_MAX_CHARACTERS} characters"
+                    ));
+                } else {
+                    error_label.set_text(ERR_FIELDS_REQUIRED);
+                }
             }
         });
     }
@@ -125,6 +149,13 @@ impl RegisterView {
         username: &GString,
         realname: &GString,
     ) -> bool {
-        !realname.is_empty() && !pass.is_empty() && !nickname.is_empty() && !username.is_empty()
+        !realname.is_empty()
+            && !pass.is_empty()
+            && !nickname.is_empty()
+            && !username.is_empty()
+            && pass.len() < FIELD_MAX_CHARACTERS
+            && nickname.len() < FIELD_MAX_CHARACTERS
+            && nickname.len() < FIELD_MAX_CHARACTERS
+            && realname.len() < FIELD_MAX_CHARACTERS
     }
 }

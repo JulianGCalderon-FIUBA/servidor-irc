@@ -13,6 +13,7 @@ use super::{
 };
 
 pub type CommandArgs = (Option<String>, Vec<String>, Option<String>);
+const SERVER_SHUTDOWN_MESSAGE: &str = "Server has shutdown";
 
 pub trait ConnectionHandlerStructure<C: Connection>:
     ConnectionHandlerCommands<C> + ConnectionHandlerGetters<C> + ConnectionHandlerUtils<C>
@@ -93,7 +94,8 @@ pub trait ConnectionHandlerStructure<C: Connection>:
     }
 
     fn on_server_shutdown(&mut self) -> io::Result<()> {
-        self.stream().send(&"Server has shutdown")
+        self.stream().send(&SERVER_SHUTDOWN_MESSAGE)?;
+        self.stream().shutdown()
     }
 
     fn on_timeout(&mut self) -> io::Result<()> {

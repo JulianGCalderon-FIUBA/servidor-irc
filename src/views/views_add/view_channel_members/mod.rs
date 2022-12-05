@@ -20,7 +20,13 @@ use self::{
     widgets_creation::{create_kick_button, create_kick_label},
 };
 
-use super::widgets_creation::{create_main_box_add_view, create_title};
+use super::{
+    widgets_creation::{create_main_box_add_view, create_title},
+    CONTINUE_BUTTON_TEXT,
+};
+
+const OPERATOR_FIRST_CHARACTER: &str = "@";
+const TITLE: &str = "Members";
 
 /// Shows channel members view.  
 /// Contains an exit button.  
@@ -39,7 +45,7 @@ impl ChannelMembersView {
     /// Creates new [`ChannelMembersView`]
     pub fn new() -> Self {
         Self {
-            button: create_center_button("ok"),
+            button: create_center_button(CONTINUE_BUTTON_TEXT),
         }
     }
 
@@ -59,7 +65,7 @@ impl ChannelMembersView {
 
         let main_box = create_main_box_add_view();
 
-        main_box.append(&create_title("Members"));
+        main_box.append(&create_title(TITLE));
 
         if nickname == Self::get_operator(clients.clone()) {
             Self::list_members_operators(clients, channel, main_box.clone(), sender, window.clone())
@@ -89,8 +95,8 @@ impl ChannelMembersView {
     /// Shows the operator of the channel.
     fn list_members(clients: Vec<String>, main_box: gtk::Box) {
         for client in &clients {
-            //mejorar
-            let label: Label = if let Some(stripped) = client.strip_prefix('@') {
+            let label: Label = if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER)
+            {
                 create_label(&format!("\t •\tOP: {}", stripped))
             } else {
                 create_label(&format!("\t •\t{}", client))
@@ -114,7 +120,7 @@ impl ChannelMembersView {
         for client in clients {
             let client_label_box = create_kick_label_box();
 
-            if let Some(stripped) = client.strip_prefix('@') {
+            if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER) {
                 let label = create_kick_label(&format!("\t •\tOP: {}", stripped));
                 client_label_box.append(&label);
             } else {
@@ -159,7 +165,7 @@ impl ChannelMembersView {
     /// Returns the operator of the channel.
     fn get_operator(clients: Vec<String>) -> String {
         for client in clients {
-            if let Some(stripped) = client.strip_prefix('@') {
+            if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER) {
                 return stripped.to_string();
             }
         }

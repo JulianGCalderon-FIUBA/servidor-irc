@@ -16,9 +16,9 @@ use crate::views::widgets_creation::{
     build_application_window, create_center_button, create_label_input_box,
 };
 
-const TITLE: &str = "Send invite";
 const CHANNEL_LABEL_TEXT: &str = "Channel:";
 const INVITE_BUTTON_TEXT: &str = "Send invite";
+const TITLE: &str = "Send invite";
 
 /// Shows invite view.  
 /// Contains a channel entry and an invite button.  

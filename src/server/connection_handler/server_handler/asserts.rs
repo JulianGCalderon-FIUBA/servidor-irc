@@ -2,6 +2,7 @@ use crate::server::connection::Connection;
 use crate::server::connection_handler::{CommandArgs, ConnectionHandlerAsserts};
 
 use crate::server::consts::modes::{ADD_MODE, REMOVE_MODE, VALID_CHANNEL_MODES, VALID_USER_MODES};
+use crate::server::consts::user::{INVALID_NICKNAME_CHARACTERS, INVALID_NICKNAME_PREFIXES};
 use crate::server::responses::ErrorReply;
 
 use super::ServerHandler;
@@ -27,6 +28,14 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         }
 
         let nickname = &params[0];
+
+        if nickname.len() > 9
+            || nickname.contains(INVALID_NICKNAME_CHARACTERS)
+            || nickname.starts_with(INVALID_NICKNAME_PREFIXES)
+        {
+            return Err(ErrorReply::NoReply);
+        }
+
         self.assert_nickname_not_in_use(nickname)
     }
 
@@ -243,7 +252,9 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
 
         let servername = &params[0];
 
-        if !self.database.contains_server(servername) {
+        if !self.database.contains_server(servername)
+            && servername != &self.database.get_server_name()
+        {
             return Err(ErrorReply::NoReply);
         }
         Ok(())

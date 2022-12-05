@@ -1,7 +1,7 @@
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
-use gtk::{prelude::*, Application, ApplicationWindow, Button};
+use gtk::{prelude::*, Application, ApplicationWindow, Button, Orientation::Horizontal};
 use gtk4 as gtk;
 
 use crate::views::{
@@ -13,7 +13,13 @@ use crate::views::{
     },
 };
 
-use super::widgets_creation::{create_main_box_add_view, create_title};
+use super::{
+    widgets_creation::{create_main_box_add_view, create_title},
+    CONTINUE_BUTTON_TEXT,
+};
+
+const NOTIFICATIONS_BOX_CSS: &str = "notifications_container";
+const TITLE: &str = "Notifications";
 
 /// Shows notifications view.  
 /// Contains the notifications and an exit button.  
@@ -31,7 +37,7 @@ impl NotificationsView {
     /// Creates new [`NotificationsView`]
     pub fn new() -> Self {
         Self {
-            button: create_center_button("ok"),
+            button: create_center_button(CONTINUE_BUTTON_TEXT),
         }
     }
 
@@ -44,13 +50,13 @@ impl NotificationsView {
 
         let main_box = create_main_box_add_view();
 
-        main_box.append(&create_title("Notifications"));
+        main_box.append(&create_title(TITLE));
 
         let scrollwindow = create_notifications_scrollwindow();
         let container = create_box_container();
         for (i, notification) in notifications.iter().enumerate() {
             if i != 0 {
-                let separator = create_separator(gtk::Orientation::Horizontal);
+                let separator = create_separator(Horizontal);
                 separator.set_hexpand(true);
                 container.append(&separator);
             }

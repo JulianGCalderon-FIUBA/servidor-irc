@@ -18,9 +18,9 @@ use crate::{
     },
 };
 
-const TITLE: &str = "Add client";
 const ADD_CLIENT_BUTTON_TEXT: &str = "Add client";
 const CLIENT_LABEL_TEXT: &str = "Client:";
+const TITLE: &str = "Add client";
 
 /// Shows add client view.  
 /// Contains a client entry and an add new client button.  

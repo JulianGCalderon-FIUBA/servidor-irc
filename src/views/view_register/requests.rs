@@ -1,7 +1,7 @@
 use gtk::glib::{GString, Sender};
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
 
 /// Sends a register request to the controller.  
 /// 
@@ -19,7 +19,7 @@ pub fn register_request(
         username,
         realname,
     };
-    sender.send(register).expect("Error: pass command");
+    sender.send(register).expect(ERROR_TEXT);
 }
 
 /// Sends a change view to main request to the controller.  
@@ -30,5 +30,5 @@ pub fn change_view_to_main_request(nickname: GString, sender: Sender<ControllerM
         .send(ControllerMessage::ChangeViewToMain {
             nickname: nickname.to_string(),
         })
-        .expect("Error: pass command");
+        .expect(ERROR_TEXT);
 }

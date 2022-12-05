@@ -1,6 +1,6 @@
 use gtk::{
     prelude::*, Align::Center, ApplicationWindow, Box, Button, Entry, Label, Orientation,
-    Orientation::Horizontal, Separator,
+    Orientation::Horizontal, PasswordEntry, Separator,
 };
 use gtk4 as gtk;
 
@@ -11,6 +11,13 @@ use super::APP_TITLE;
 /// Receives a &str, returns an Entry.
 pub fn create_entry(placeholder: &str) -> Entry {
     Entry::builder().placeholder_text(placeholder).build()
+}
+
+
+pub fn create_password_entry(placeholder: &str) -> PasswordEntry {
+    PasswordEntry::builder()
+        .placeholder_text(placeholder)
+        .build()
 }
 
 /// Creates a gtk box with orientation, height and width.  

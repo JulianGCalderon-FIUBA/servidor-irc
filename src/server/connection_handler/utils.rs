@@ -14,6 +14,7 @@ pub trait ConnectionHandlerUtils<C: Connection>: ConnectionHandlerGetters<C> {
         }
 
         let server = ok_or_return!(self.database().get_immediate_server(nickname), Ok(()));
+
         self.send_message_to_server(message, &server)
     }
 

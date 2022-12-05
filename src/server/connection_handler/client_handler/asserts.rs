@@ -6,6 +6,8 @@ use crate::server::consts::channel::*;
 use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::consts::commands::*;
 use crate::server::consts::modes::*;
+use crate::server::consts::user::INVALID_NICKNAME_CHARACTERS;
+use crate::server::consts::user::INVALID_NICKNAME_PREFIXES;
 use crate::server::data_structures::*;
 use crate::server::responses::ErrorReply;
 
@@ -23,6 +25,15 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         }
 
         let nickname = &params[0];
+
+        if nickname.len() > 9
+            || nickname.contains(INVALID_NICKNAME_CHARACTERS)
+            || nickname.starts_with(INVALID_NICKNAME_PREFIXES)
+        {
+            return Err(ErrorReply::ErroneousNickname432 {
+                nickname: nickname.to_string(),
+            });
+        }
         self.assert_nickname_not_in_use(nickname)
     }
 

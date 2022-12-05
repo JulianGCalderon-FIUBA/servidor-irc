@@ -13,6 +13,9 @@ pub mod view_invite;
 /// Contains notifications view.
 pub mod view_notifications;
 
+/// Contains user info view.
+pub mod view_user_info;
+
 /// Contains warning view.
 pub mod view_warning;
 
@@ -20,3 +23,4 @@ pub mod view_warning;
 pub mod widgets_creation;
 
 const ADD_VIEW_TITLE_CSS: &str = "add_view_title";
+const CONTINUE_BUTTON_TEXT: &str = "Ok";

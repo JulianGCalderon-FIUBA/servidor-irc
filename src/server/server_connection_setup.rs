@@ -11,7 +11,7 @@ use super::{
         channel::DISTRIBUTED_CHANNEL,
         channel_flag::ChannelFlag,
         commands::SERVER_COMMAND,
-        modes::{SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT},
+        modes::{ADD_OPERATOR, SET_BANMASK, SET_KEY, SET_OPERATOR, SET_SPEAKER, SET_USER_LIMIT},
     },
     database::DatabaseHandle,
     responses::{ErrorReply, Notification},
@@ -171,7 +171,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         self.stream.send(&Notification::mode(
             &client.nickname,
             &client.nickname,
-            "+o",
+            ADD_OPERATOR,
         ))
     }
 
@@ -207,7 +207,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         channel: &str,
     ) -> Result<(), io::Error> {
         for speaker in speakers {
-            let request = format!("+{SET_SPEAKER} {:?}", speaker);
+            let request = format!("+{SET_SPEAKER} {speaker}");
             let notification = Notification::mode(sender, channel, &request);
 
             self.stream.send(&notification)?;
@@ -222,7 +222,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         channel: &str,
     ) -> Result<(), io::Error> {
         for banmask in banmasks {
-            let request = format!("+{SET_BANMASK} {:?}", banmask);
+            let request = format!("+{SET_BANMASK} {banmask}");
             let notification = Notification::mode(sender, channel, &request);
 
             self.stream.send(&notification)?;
@@ -252,7 +252,7 @@ impl<C: Connection> ServerConnectionSetup<C> {
         channel: &str,
     ) -> Result<(), io::Error> {
         if let Some(key) = key {
-            let request = format!("+{SET_KEY} {:?}", key);
+            let request = format!("+{SET_KEY} {key}");
             let notification = Notification::mode(sender, channel, &request);
 
             self.stream.send(&notification)?;

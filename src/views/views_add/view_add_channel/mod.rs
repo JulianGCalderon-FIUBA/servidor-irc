@@ -32,15 +32,21 @@ use crate::views::widgets_creation::{
     create_label_input_box,
 };
 
-const TITLE: &str = "Add channel";
-const JOIN_CHANNEL_BUTTON_TEXT: &str = "Join existing channel";
-const CREATE_CHANNEL_BUTTON_TEXT: &str = "Create new channel";
 const ADD_CHANNEL_BUTTON_TEXT: &str = "Add channel";
+const CHANNEL_FIRST_CHARACTER: &str = "#";
 const CHANNEL_LABEL_TEXT: &str = "Channel:";
+const CHANNEL_NAME_MAX_CHARACTERS: usize = 15;
+const CREATE_CHANNEL_BUTTON_TEXT: &str = "Create new channel";
+const ERR_CHANNEL_NAME_EMPTY: &str = "¡Channel name is empty!";
+const ERR_CHANNEL_NAME_TOO_LONG: &str = "¡Channel name too long!";
+const JOIN_CHANNEL_BUTTON_TEXT: &str = "Join existing channel";
+const TITLE: &str = "Add channel";
+
 const ACTIVE_SELECT_BUTTON_CSS: &str = "active_select_button";
-const INACTIVE_SELECT_BUTTON_CSS: &str = "inactive_select_button";
-const DISABLE_SELECT_BUTTON_CSS: &str = "disable_select_button";
 const ADD_CHANNEL_ENTRY_CSS: &str = "add_channel_entry";
+const CHANNEL_FIRST_CHARACTER_LABEL_CSS: &str = "channel_first_character";
+const DISABLE_SELECT_BUTTON_CSS: &str = "disable_select_button";
+const INACTIVE_SELECT_BUTTON_CSS: &str = "inactive_select_button";
 
 /// Shows add channel view.  
 /// Contains a channel entry and an add new channel button.  
@@ -146,8 +152,8 @@ impl AddChannelView {
     fn append_create_channel_box(&mut self, main_box: Box) {
         let entry_box = create_label_input_box(CHANNEL_LABEL_TEXT);
         self.channel_entry.add_css_class(ADD_CHANNEL_ENTRY_CSS);
-        let channel_first_character = create_label("#");
-        channel_first_character.add_css_class("channel_first_character");
+        let channel_first_character = create_label(CHANNEL_FIRST_CHARACTER);
+        channel_first_character.add_css_class(CHANNEL_FIRST_CHARACTER_LABEL_CSS);
         entry_box.append(&channel_first_character);
         entry_box.append(&self.channel_entry);
         self.create_channel_box.append(&entry_box);
@@ -224,16 +230,18 @@ impl AddChannelView {
             let mut text = input.text().to_string();
             error_label.set_text("");
 
-            if !entry_is_valid(&text, 15) {
+            if !entry_is_valid(&text, CHANNEL_NAME_MAX_CHARACTERS) {
                 if !text.is_empty() {
-                    error_label.set_text("¡Channel name too long! Max: 15 characters");
+                    error_label.set_text(ERR_CHANNEL_NAME_TOO_LONG);
                 } else {
-                    error_label.set_text("¡Channel name is empty!");
+                    error_label.set_text(&format!(
+                        "{ERR_CHANNEL_NAME_EMPTY} Max: {CHANNEL_NAME_MAX_CHARACTERS} characters"
+                    ));
                 }
                 return;
             }
-            if !text.starts_with('#') {
-                text = format!("#{}", text);
+            if !text.starts_with(CHANNEL_FIRST_CHARACTER) {
+                text = format!("{}{}", CHANNEL_FIRST_CHARACTER, text);
             }
 
             join_channel_request(text, sender.clone());
