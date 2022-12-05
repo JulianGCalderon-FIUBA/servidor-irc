@@ -43,7 +43,7 @@ const DISABLE_SELECT_BUTTON_CSS: &str = "disable_select_button";
 const ADD_CHANNEL_ENTRY_CSS: &str = "add_channel_entry";
 
 /// Shows add channel view.  
-/// Contains a channel entry and an add new channel.  
+/// Contains a channel entry and an add new channel button.  
 /// Uses sender to communicate with controller.
 pub struct AddChannelView {
     pub join_channel_button: Button,

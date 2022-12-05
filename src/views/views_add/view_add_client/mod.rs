@@ -1,3 +1,4 @@
+/// Contains definition of used requests. 
 pub mod requests;
 
 use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, ComboBoxText};
@@ -21,6 +22,9 @@ const TITLE: &str = "Add client";
 const ADD_CLIENT_BUTTON_TEXT: &str = "Add client";
 const CLIENT_LABEL_TEXT: &str = "Client:";
 
+/// Shows add client view.  
+/// Contains a client entry and an add new client button.  
+/// Uses sender to communicate with controller.
 pub struct AddClientView {
     pub client_combobox: ComboBoxText,
     pub add_client_button: Button,
@@ -28,6 +32,7 @@ pub struct AddClientView {
 }
 
 impl AddClientView {
+    /// Creates new [`AddClientView`]
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             client_combobox: create_combobox(),
@@ -36,6 +41,9 @@ impl AddClientView {
         }
     }
 
+    /// Returns the view's window.
+    /// 
+    /// Receives the controller's app.
     pub fn get_view(&mut self, app: Application, clients: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
@@ -58,6 +66,9 @@ impl AddClientView {
         window
     }
 
+    /// Connects add client button.
+    /// 
+    /// Sends add client request to the controller. 
     fn connect_add_client_button(&self, combobox: ComboBoxText, sender: Sender<ControllerMessage>) {
         self.add_client_button.connect_clicked(move |_| {
             if combobox.active_text().is_none() {
@@ -68,6 +79,7 @@ impl AddClientView {
         });
     }
 
+    /// Fills combobox options with existing clients
     fn refill_combobox(&mut self, clients: Vec<String>) {
         for client in clients {
             self.client_combobox.append_text(&client.clone());
