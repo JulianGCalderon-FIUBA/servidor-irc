@@ -1,16 +1,16 @@
 use gtk::glib::Sender;
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
 
 pub fn change_conversation_request(conversation: String, sender: Sender<ControllerMessage>) {
     let request = ControllerMessage::ChangeConversation {
         nickname: conversation,
     };
-    sender.send(request).expect("ERROR: change conversation");
+    sender.send(request).expect(ERROR_TEXT);
 }
 
 pub fn quit_request(sender: Sender<ControllerMessage>) {
     let request = ControllerMessage::Quit {};
-    sender.send(request).expect("ERROR: quit")
+    sender.send(request).expect(ERROR_TEXT)
 }

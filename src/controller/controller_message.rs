@@ -4,21 +4,19 @@ use gtk4::glib::GString;
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
-    SendNamesMessageToInviteClient {},
-    AddViewToInviteClient {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
     AddNewClient {
         new_client: GString,
     },
     AddNotificationsView {},
     AddUserInfoView {},
-    AddWarningView {
-        message: String,
-    },
-    SendNamesMessageToAddClient {},
     AddViewToAddClient {
         channels_and_clients: HashMap<String, Vec<String>>,
+    },
+    AddViewToInviteClient {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
+    AddWarningView {
+        message: String,
     },
     ChangeConversation {
         nickname: String,
@@ -32,18 +30,31 @@ pub enum ControllerMessage {
     JoinChannel {
         channel: String,
     },
+    KickMember {
+        channel: String,
+        member: String,
+    },
     Quit {},
     QuitChannel {},
     RecieveInvite {
         nickname: String,
         channel: String,
     },
+    ReceiveKick {
+        kicked: String,
+        channel: String,
+    },
+    ReceiveListChannels {
+        channels: Vec<String>,
+    },
+    ReceiveNamesChannels {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
     ReceivePrivMessage {
         sender_nickname: String,
         message: String,
         channel: Option<String>,
     },
-    RemoveConversation {},
     Register {
         pass: GString,
         nickname: GString,
@@ -53,29 +64,18 @@ pub enum ControllerMessage {
     RegularMessage {
         message: String,
     },
+    RemoveConversation {},
     SendInviteMessage {
         channel: GString,
     },
-    ToRegister {
-        address: String,
-    },
-    ReceiveListChannels {
-        channels: Vec<String>,
-    },
-    ReceiveNamesChannels {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
     SendListMessage {},
+    SendNamesMessageToAddClient {},
+    SendNamesMessageToInviteClient {},
     SendNamesMessageToKnowMembers {},
     SendPrivMessage {
         message: GString,
     },
-    KickMember {
-        channel: String,
-        member: String,
-    },
-    ReceiveKick {
-        kicked: String,
-        channel: String,
+    ToRegister {
+        address: String,
     },
 }

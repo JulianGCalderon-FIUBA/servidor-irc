@@ -3,7 +3,7 @@ pub mod requests;
 use gtk::{
     glib::{GString, Sender},
     prelude::*,
-    Application, ApplicationWindow, Button, Entry, Orientation, Label, PasswordEntry,
+    Application, ApplicationWindow, Button, Entry, Label, Orientation, PasswordEntry,
 };
 use gtk4 as gtk;
 
@@ -11,19 +11,18 @@ use self::requests::register_request;
 
 use super::{
     widgets_creation::{
-        build_application_window, create_center_button, create_entry, create_label_input_box,
-        create_main_box, create_error_label, create_password_entry,
+        build_application_window, create_center_button, create_entry, create_error_label,
+        create_label_input_box, create_main_box, create_password_entry,
     },
-    MAIN_BOX_CSS,
+    MAIN_BOX_CSS, NICKNAME_LABEL_TEXT, PASSWORD_LABEL_TEXT, REALNAME_LABEL_TEXT,
+    USERNAME_LABEL_TEXT,
 };
 
 use crate::controller::controller_message::ControllerMessage;
 
 const LOGIN_BUTTON_TEXT: &str = "login";
-const REALNAME_LABEL_TEXT: &str = "Your name:";
-const NICKNAME_LABEL_TEXT: &str = "Nickname:";
-const USERNAME_LABEL_TEXT: &str = "Username:";
-const PASSWORD_LABEL_TEXT: &str = "Password:";
+const ERR_FIELDS_REQUIRED: &str = "All fields are required";
+
 pub struct RegisterView {
     pub realname_entry: Entry,
     pub nick_entry: Entry,
@@ -107,8 +106,8 @@ impl RegisterView {
 
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
                 register_request(pass, nickname, username, realname, sender.clone());
-            } else{
-                error_label.set_text("All fields are required");
+            } else {
+                error_label.set_text(ERR_FIELDS_REQUIRED);
             }
         });
     }

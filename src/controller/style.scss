@@ -1,56 +1,17 @@
-.main_box {
-    background-color: black;
-}
-
-.sidebar {
-    background-color: #020311;
-}
-
-button {
+.active_select_button{
+    background-color: rgb(222, 117, 52);
+    border: solid 1px white;
+    border-radius: 0px;
     color: white;
-    border: solid 2px white;
 }
 
 .add {
-    color: white;
     background-color: #177934;
-}
-
-.exit_channel {
     color: white;
-    background-color: #681a1a;
 }
 
-label {
-    font-family: Helvetica;
-    font-weight: bold;
-}
-
-.send_message {
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #767a75;
-}
-
-.received_message {
-    border-radius: 5px;
-    padding: 10px;
-    background-color: #577771;
-}
-
-.empty_message {
-    border-radius: 5px;
-    padding: 10px;
-}
-
-.message_box {
-    border: solid 2px #b13415;
-    border-radius: 5px;
-}
-
-.current_chat {
-    font-size: 20px;
-    font-family: monospace;
+.add_channel_entry {
+    border: solid 2px white;
 }
 
 .add_view_title {
@@ -58,59 +19,66 @@ label {
     font-family: monospace;
 }
 
-.welcome_title {
-    font-size: 30px;
-    font-family: monospace;
-}
-
-.welcome_message {
-    font-size: 25px;
-    font-family: monospace;
-    color: rgb(173, 172, 172);
-}
-
-.active_select_button{
-    border: solid 1px white;
-    border-radius: 0px;
+button {
+    border: solid 2px white;
     color: white;
-    background-color: rgb(222, 117, 52);
 }
 
-.inactive_select_button {
-    border-color: transparent;
-    border-radius: 0px;
-    color: rgb(22, 21, 21);
-    background-color: rgb(72, 68, 68);
+.channel_first_character {
+    font-size: 20px;
+}
+
+.current_chat {
+    font-family: monospace;
+    font-size: 20px;
 }
 
 .disable_select_button {
+    background-color: rgb(43, 40, 40);
     border-color: transparent;
     border-radius: 0px;
     color: rgb(0, 0, 0);
-    background-color: rgb(43, 40, 40);
 }
 
-.add_channel_entry {
-    border: solid 2px white;
+.disabled_button {
+    background-color: rgb(43, 40, 40);
+    color: rgb(97, 95, 95);
+}
+
+.empty_message {
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.exit_channel {
+    background-color: #681a1a;
+    color: white;
+}
+
+.inactive_select_button {
+    background-color: rgb(72, 68, 68);
+    border-color: transparent;
+    border-radius: 0px;
+    color: rgb(22, 21, 21);
+}
+
+label {
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
+.main_box {
+    background-color: black;
+}
+
+.message_box {
+    border: solid 2px #b13415;
+    border-radius: 5px;
 }
 
 .message_sender_name {
     color: white;
     font-size: 10px;
-}
-
-.warning_text{
-    color: red;
-    font-size: 12px;
-}
-
-.disabled_button {
-    color: rgb(97, 95, 95);
-    background-color: rgb(43, 40, 40);
-}
-
-.channel_first_character {
-    font-size: 20px;
 }
 
 .notifications_button{
@@ -124,7 +92,40 @@ label {
 }
 
 .notifications_container{
-    border-radius: 10px;
-    border: 1px solid white;
     background-color: #000103;
+    border: 1px solid white;
+    border-radius: 10px;
 }
+
+.received_message {
+    background-color: #577771;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.send_message {
+    background-color: #767a75;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.sidebar {
+    background-color: #020311;
+}
+
+.welcome_message {
+    color: rgb(173, 172, 172);
+    font-family: monospace;
+    font-size: 25px;
+}
+
+.warning_text{
+    color: red;
+    font-size: 12px;
+}
+
+.welcome_title {
+    font-family: monospace;
+    font-size: 30px;
+}
+
