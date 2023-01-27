@@ -207,6 +207,20 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ClientHandler<C> {
         self.assert_exists_server(server)?;
         Ok(())
     }
+
+    fn assert_ctcp_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (_, params, trail) = arguments;
+        self.assert_has_enough_params(&params.get(0), CTCP_COMMAND)?;
+
+        let target = &params[0];
+        self.assert_target_is_valid(target)?;
+
+        if trail.is_none() {
+            return Err(ErrorReply::NoTextToSend412 {});
+        }
+
+        Ok(())
+    }
 }
 
 impl<C: Connection> ClientHandler<C> {

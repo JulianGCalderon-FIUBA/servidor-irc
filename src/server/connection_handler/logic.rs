@@ -64,4 +64,7 @@ pub trait ConnectionHandlerLogic<C: Connection> {
     fn squit_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
         Ok(true)
     }
+    fn ctcp_logic(&mut self, _arguments: CommandArgs) -> io::Result<bool> {
+        Ok(true)
+    }
 }

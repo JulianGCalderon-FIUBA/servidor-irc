@@ -138,6 +138,10 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for RegistrationHandler<C> {
     fn assert_squit_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
         Err(ErrorReply::NotRegistered451)
     }
+
+    fn assert_ctcp_command_is_valid(&self, _arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        Err(ErrorReply::NotRegistered451)
+    }
 }
 
 impl<C: Connection> RegistrationHandler<C> {

@@ -333,6 +333,20 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
 
         Ok(true)
     }
+
+    fn ctcp_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (_, mut params, trail) = arguments;
+
+        let target = params.remove(0);
+        let mut content = trail.expect("Verified in assert");
+
+        content.insert(0, 1 as char);
+        content.push(1 as char);
+
+        self.send_privmsg_notification(&target, &content);
+
+        Ok(true)
+    }
 }
 
 impl<C: Connection> ClientHandler<C> {

@@ -227,6 +227,18 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ServerHandler<C> {
 
         Ok(true)
     }
+
+    fn ctcp_logic(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        let (prefix, mut params, trail) = arguments;
+
+        let sender = prefix.expect("Verified in assert");
+        let target = params.remove(0);
+        let content = trail.expect("Verified in assert");
+
+        self.send_privmsg_notification(&sender, &target, &content);
+
+        Ok(true)
+    }
 }
 
 impl<C: Connection> ServerHandler<C> {
