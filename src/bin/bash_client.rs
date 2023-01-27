@@ -12,7 +12,7 @@ fn main() {
 
     let mut client = match Client::new(address) {
         Ok(stream) => stream,
-        Err(error) => return eprintln!("Error connecting to server: {:?}", error),
+        Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
 
     client.async_print();
@@ -32,7 +32,7 @@ fn main() {
         };
 
         if let Err(error) = client.send_raw(&line) {
-            eprintln!("Error sending message to server: {}", error);
+            eprintln!("Error sending message to server: {error}");
             break;
         }
     }

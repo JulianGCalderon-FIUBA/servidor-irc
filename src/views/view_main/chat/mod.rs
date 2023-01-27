@@ -72,9 +72,7 @@ impl MainView {
                 if !input_text.is_empty() {
                     error_label.set_text(
                         &format!(
-                            "{} Max: {} characters",
-                            MESSAGE_MAX_CHARACTERS_ERROR,
-                            MESSAGE_MAX_CHARACTERS
+                            "{MESSAGE_MAX_CHARACTERS_ERROR} Max: {MESSAGE_MAX_CHARACTERS} characters"
                         )
                     );
                 } else {

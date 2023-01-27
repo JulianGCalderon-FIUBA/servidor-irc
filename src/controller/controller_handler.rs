@@ -81,7 +81,7 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         LOGIN_OK => {
             let trailing_text: String = message.get_trailing().clone().unwrap();
             let trailing_strings = trailing_text.split(' ').collect::<Vec<&str>>();
-            println!("{:?}", trailing_strings);
+            println!("{trailing_strings:?}");
 
             let mut username = trailing_strings[5].to_string();
             username.remove(0);

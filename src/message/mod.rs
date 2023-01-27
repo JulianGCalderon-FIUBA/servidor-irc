@@ -132,17 +132,17 @@ fn unexpected_eof_error() -> Error {
 impl std::fmt::Display for Message {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if let Some(prefix) = &self.prefix {
-            write!(f, ":{} ", prefix)?;
+            write!(f, ":{prefix} ")?;
         }
 
         write!(f, "{}", self.command)?;
 
         for parameter in self.parameters.iter() {
-            write!(f, " {}", parameter)?;
+            write!(f, " {parameter}")?;
         }
 
         if let Some(trailing) = &self.trailing {
-            write!(f, " :{}", trailing)
+            write!(f, " :{trailing}")
         } else {
             Ok(())
         }

@@ -93,7 +93,7 @@ impl Drop for Client {
     fn drop(&mut self) {
         if let Some(handler) = self.read_thread.take() {
             if let Err(error) = handler.join() {
-                eprintln!("Error: {:?}", error);
+                eprintln!("Error: {error:?}");
             }
         }
     }

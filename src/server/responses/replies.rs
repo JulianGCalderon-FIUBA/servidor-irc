@@ -142,7 +142,7 @@ impl Display for CommandResponse {
                 format!("331 {channel} :No topic is set")
             }
             CommandResponse::Topic332 { channel, topic } => {
-                format!("332 {} :{}", channel, topic)
+                format!("332 {channel} :{topic}")
             }
             CommandResponse::Inviting341 { channel, nickname } => {
                 format!("341 {channel} {nickname}")

@@ -102,7 +102,7 @@ impl Controller {
     fn build_ui(app: &Application) {
         let mut client = match Client::new(ADDRESS.to_string()) {
             Ok(stream) => stream,
-            Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT}: {:?}", error),
+            Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT}: {error:?}"),
         };
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
@@ -220,12 +220,12 @@ impl Controller {
                 }
                 JoinChannel { channel } => {
                     add_channel_window.close();
-                    let join_message = format!("{} {}", JOIN_COMMAND, channel);
+                    let join_message = format!("{JOIN_COMMAND} {channel}");
                     client.send_raw(&join_message).expect(JOIN_ERROR_TEXT);
                     main_view.add_channel(channel);
                 }
                 KickMember { channel, member } => {
-                    let kick = format!("{} {} {}", KICK_COMMAND, channel, member);
+                    let kick = format!("{KICK_COMMAND} {channel} {member}");
                     client.send_raw(&kick).expect(KICK_ERROR_TEXT);
                 }
                 Quit {} => {
@@ -233,11 +233,11 @@ impl Controller {
                     client.send_raw(&quit_message).expect(QUIT_ERROR_TEXT);
                 }
                 QuitChannel {} => {
-                    let part_message = format!("{} {}", PART_COMMAND, current_conv);
+                    let part_message = format!("{PART_COMMAND} {current_conv}");
                     client.send_raw(&part_message).expect(PART_ERROR_TEXT);
                 }
                 RecieveInvite { nickname, channel } => {
-                    let message = format!("{} has invited you to join {}", nickname, channel);
+                    let message = format!("{nickname} has invited you to join {channel}");
                     main_view.add_notification(message);
                 }
                 ReceiveKick { kicked, channel } => {
@@ -308,11 +308,10 @@ impl Controller {
                     username,
                     realname,
                 } => {
-                    let pass_command = format!("{} {}", PASS_COMMAND, pass);
-                    let nick_command = format!("{} {}", NICK_COMMAND, nickname);
+                    let pass_command = format!("{PASS_COMMAND} {pass}");
+                    let nick_command = format!("{NICK_COMMAND} {nickname}");
                     let user_command = format!(
-                        "{} {} {} {} :{}",
-                        USER_COMMAND, username, username, username, realname
+                        "{USER_COMMAND} {username} {username} {username} :{realname}"
                     );
                     client.send_raw(&pass_command).expect(PASS_ERROR_TEXT);
                     client.send_raw(&nick_command).expect(NICK_ERROR_TEXT);
@@ -324,11 +323,11 @@ impl Controller {
                             let controller_message = to_controller_message(message);
                             sender_clone.send(controller_message).unwrap();
                         }
-                        Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {}", error),
+                        Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {error}"),
                     });
                 }
                 RegularMessage { message } => {
-                    println!("{}", message);
+                    println!("{message}");
                 }
                 RemoveConversation {} => {
                     main_view.remove_conversation(current_conv.clone());
@@ -336,7 +335,7 @@ impl Controller {
                 }
                 SendInviteMessage { channel } => {
                     invite_window.close();
-                    let invite = format!("{} {} {}", INVITE_COMMAND, current_conv, channel);
+                    let invite = format!("{INVITE_COMMAND} {current_conv} {channel}");
                     client.send_raw(&invite).expect(INVITE_ERROR_TEXT);
                 }
                 SendListMessage {} => {
@@ -369,14 +368,14 @@ impl Controller {
                         .expect(NAMES_ERROR_TEXT);
                 }
                 SendPrivMessage { message } => {
-                    let priv_message = format!("{} {} :{}", PRIVMSG_COMMAND, current_conv, message);
+                    let priv_message = format!("{PRIVMSG_COMMAND} {current_conv} :{message}");
                     client.send_raw(&priv_message).expect(PRIVMSG_ERROR_TEXT);
                     main_view.send_message(message.to_string(), current_conv.clone());
                 }
                 ToRegister { address } => {
                     client = match Client::new(address) {
                         Ok(stream) => stream, 
-                        Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT} {:?}", error),
+                        Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT} {error:?}"),
                     };
                     ip_window.close();
                     register_window.show();
