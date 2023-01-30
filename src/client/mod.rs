@@ -3,7 +3,6 @@ use std::net::{TcpListener, TcpStream};
 use std::thread;
 use std::{io, thread::JoinHandle};
 
-use crate::macros::some_or_return;
 use crate::message::{CreationError, Message};
 
 /// Represents a client that can connect to a Server.
@@ -161,7 +160,7 @@ fn is_ctcp(message: &Message) -> bool {
     true
 }
 
-fn is_valid_dcc_chat(content: &str) -> bool {
+fn is_valid_dcc_chat(_content: &str) -> bool {
     // let mut arguments: Vec<&str> = content.split(' ').collect();
     // let port = some_or_return!(arguments.pop(), false);
     // let address = some_or_return!(arguments.pop(), false);
@@ -172,6 +171,6 @@ fn is_valid_dcc_chat(content: &str) -> bool {
     true
 }
 
-fn ctc_start_listener() -> TcpListener {
+fn _ctc_start_listener() -> TcpListener {
     todo!()
 }
