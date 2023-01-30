@@ -1,3 +1,4 @@
+use std::process::Command;
 use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
@@ -14,6 +15,12 @@ fn main() {
         Ok(stream) => stream,
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
+
+    // Command::new("sh")
+    //     .arg("-c")
+    //     .arg("echo hello")
+    //     .output()
+    //     .expect("failed to execute process");
 
     // client.async_print();
     client.async_zzz();
