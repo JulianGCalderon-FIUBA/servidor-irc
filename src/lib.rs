@@ -33,6 +33,7 @@ pub mod views;
 
 /// This module contains useful macros used across the project.
 mod macros;
+pub mod ctcp;
 
 /// Default parameters for client-server connection
 pub const ADDRESS: &str = "127.0.0.1:9000";
