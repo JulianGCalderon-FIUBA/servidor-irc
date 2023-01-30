@@ -18,3 +18,16 @@ pub fn is_ctcp_message(message: &Message) -> bool {
 
     first == &CONTROL_CHARACTER && last == &CONTROL_CHARACTER
 }
+
+pub fn get_ctcp_message(message: &Message) -> Option<String> {
+    if !is_ctcp_message(message) {
+        return None;
+    }
+
+    let mut content = message.get_trailing().to_owned().unwrap();
+
+    content.remove(0);
+    content.pop();
+
+    Some(content)
+}

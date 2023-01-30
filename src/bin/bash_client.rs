@@ -4,6 +4,9 @@ use std::time::Duration;
 use std::{env, io};
 
 use internet_relay_chat::client::Client;
+use internet_relay_chat::ctcp::dcc_message::dcc_type::DccType;
+use internet_relay_chat::ctcp::dcc_message::DccMessage;
+use internet_relay_chat::ctcp::{get_ctcp_message, is_ctcp_message};
 use internet_relay_chat::message::{CreationError, Message};
 use internet_relay_chat::ADDRESS;
 
@@ -16,7 +19,7 @@ fn main() {
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
 
-    client.start_async_read(print_message);
+    client.start_async_read(xxx);
 
     let (stdin, handle) = spawn_stdin_channel();
 
@@ -71,9 +74,43 @@ fn spawn_stdin_channel() -> (Receiver<String>, JoinHandle<()>) {
     (rx, handle)
 }
 
-fn print_message(message: Result<Message, CreationError>) {
+fn _print_message(message: Result<Message, CreationError>) {
     match message {
         Ok(message) => println!("{message}"),
         Err(error) => eprintln!("{error:?}"),
     }
+}
+
+fn xxx(message: Result<Message, CreationError>) {
+    let message = match message {
+        Ok(message) => message,
+        Err(error) => return eprintln!("{error:?}"),
+    };
+
+    if !is_ctcp_message(&message) {
+        return println!("{message}");
+    }
+
+    let ctcp_message = get_ctcp_message(&message).unwrap();
+
+    let dcc_message = match DccMessage::parse(ctcp_message) {
+        Ok(dcc_message) => dcc_message,
+        Err(error) => return eprintln!("{error:?}"),
+    };
+
+    match dcc_message.type_ {
+        DccType::Chat => chat_command(dcc_message),
+        DccType::Send => unimplemented!(),
+        DccType::Unknown => eprintln!("Unknown type"),
+    }
+}
+
+fn chat_command(message: DccMessage) {
+    let ip = message.ip;
+    let port = message.port;
+    let address = format!("{ip}:{port}");
+
+    // let dcc_connection = DccConnection::connect(address);
+
+    println!("Connecting to {address}");
 }
