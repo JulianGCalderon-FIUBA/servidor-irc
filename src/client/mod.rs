@@ -135,11 +135,7 @@ fn zzz_message(message: Result<Message, CreationError>) {
 
     let socket_address = format!("{ip}:{port}");
 
-    print!("HOLA");
-
     let mut stream = TcpStream::connect(socket_address).unwrap();
-
-    print!("HOLA");
 
     stream.write_all(b"NICK ana").unwrap();
     stream.write_all(CRLF).unwrap();
