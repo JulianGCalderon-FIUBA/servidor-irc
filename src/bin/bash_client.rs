@@ -15,7 +15,8 @@ fn main() {
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
 
-    client.async_print();
+    // client.async_print();
+    client.async_zzz();
 
     let (stdin, handle) = spawn_stdin_channel();
 

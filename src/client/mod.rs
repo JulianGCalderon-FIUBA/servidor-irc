@@ -1,8 +1,10 @@
+use std::fmt::Arguments;
 use std::io::{BufReader, Write};
-use std::net::TcpStream;
+use std::net::{Ipv4Addr, TcpListener, TcpStream};
 use std::thread;
 use std::{io, thread::JoinHandle};
 
+use crate::macros::some_or_return;
 use crate::message::{CreationError, Message};
 
 /// Represents a client that can connect to a Server.
@@ -57,6 +59,10 @@ impl Client {
         self.start_async_read(print_message);
     }
 
+    pub fn async_zzz(&mut self) {
+        self.start_async_read(zzz_message);
+    }
+
     /// Sends message to connected stream.
     pub fn send_raw(&mut self, message: &str) -> io::Result<()> {
         let bytes = message.as_bytes();
@@ -104,4 +110,73 @@ fn print_message(message: Result<Message, CreationError>) {
         Ok(message) => println!("{message}"),
         Err(error) => eprintln!("{error:?}"),
     }
+}
+
+fn zzz_message(message: Result<Message, CreationError>) {
+    let message = message.unwrap();
+
+    if !is_ctcp(&message) {
+        return print_message(Ok(message));
+    }
+
+    let mut content = message.unpack().3.unwrap();
+
+    if !is_valid_dcc_chat(&content) {
+        return print!("INVALIDO");
+    }
+
+    content.remove(0);
+    content.pop();
+
+    let mut arguments: Vec<&str> = content.split(' ').collect();
+
+    let port = arguments.pop().unwrap();
+    let ip = arguments.pop().unwrap();
+
+    let socket_address = format!("{ip}:{port}");
+
+    print!("HOLA");
+
+    let mut stream = TcpStream::connect(socket_address).unwrap();
+
+    print!("HOLA");
+
+    stream.write_all(b"NICK ana").unwrap();
+    stream.write_all(CRLF).unwrap();
+    stream.write_all(b"USER ana ana ana :ana").unwrap();
+    stream.write_all(CRLF).unwrap()
+}
+
+fn is_ctcp(message: &Message) -> bool {
+    let command = message.get_command();
+    let trailing: Vec<char> = message.get_trailing().as_ref().unwrap().chars().collect();
+
+    if command != "PRIVMSG" {
+        return false;
+    }
+
+    if *trailing.first().unwrap() != 1 as char {
+        return false;
+    }
+
+    if *trailing.last().unwrap() != 1 as char {
+        return false;
+    }
+
+    true
+}
+
+fn is_valid_dcc_chat(content: &str) -> bool {
+    // let mut arguments: Vec<&str> = content.split(' ').collect();
+    // let port = some_or_return!(arguments.pop(), false);
+    // let address = some_or_return!(arguments.pop(), false);
+    // let arg = some_or_return!(arguments.pop(), false);
+    // let ty = some_or_return!(arguments.pop(), false);
+    // let dcc = some_or_return!(arguments.pop(), false);
+
+    true
+}
+
+fn ctc_start_listener() -> TcpListener {
+    todo!()
 }
