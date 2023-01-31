@@ -24,7 +24,7 @@ impl DccMessage {
         if first != DCC {
             return Err("Must start with DCC".to_string());
         }
-
+        // esto se va a romper cuando sea DCC SEND porque tiene como último parámetro el tamaño del archivo
         let port = arguments.pop().unwrap().to_string();
         let ip = arguments.pop().unwrap().to_string();
         let argument = arguments.pop().unwrap().to_string();
