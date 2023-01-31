@@ -5,6 +5,132 @@ use crate::server::{
 };
 
 #[test]
+fn ctcp_fails_with_empty_params() {
+    let mut handler = dummy_client_handler();
+    let parameters = vec![];
+
+    handler.ctcp_command((None, parameters, None)).unwrap();
+
+    assert_eq!(
+        "461 CTCP :Not enough parameters\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn ctcp_fails_with_invalid_target() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["nick1".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.ctcp_command((None, parameters, trailing)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("401 nick1 :No such nick/channel", responses[0]);
+}
+
+#[test]
+fn ctcp_fails_with_invalid_channel_target() {
+    let mut handler = dummy_client_handler();
+
+    let parameters = vec!["#channel".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.ctcp_command((None, parameters, trailing)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("401 #channel :No such nick/channel", responses[0]);
+}
+
+#[test]
+fn ctcp_fails_with_not_on_channel_with_flag_n() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_local_client(dummy_client("nick2"));
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler.database.add_client_to_channel("#channel", "nick2");
+
+    handler
+        .database
+        .set_channel_flag("#channel", ChannelFlag::NoOutsideMessages);
+
+    let parameters = vec!["#channel".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.ctcp_command((None, parameters, trailing)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("404 #channel :Cannot send to channel", responses[0]);
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_local_stream("nick1")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_local_stream("nick2")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn ctcp_fails_if_not_speaker_on_channel_with_flag_m() {
+    let mut handler = dummy_client_handler();
+
+    handler.database.add_local_client(dummy_client("nick1"));
+    handler.database.add_client_to_channel("#channel", "nick1");
+    handler
+        .database
+        .add_client_to_channel("#channel", "nickname");
+
+    handler
+        .database
+        .set_channel_flag("#channel", ChannelFlag::Moderated);
+
+    let parameters = vec!["#channel".to_string()];
+    let trailing = Some("message!".to_string());
+    handler.ctcp_command((None, parameters, trailing)).unwrap();
+
+    let responses = handler.stream.get_responses();
+
+    assert_eq!("404 #channel :Cannot send to channel", responses[0]);
+
+    assert_eq!(
+        "",
+        handler
+            .database
+            .get_local_stream("nick1")
+            .unwrap()
+            .read_wbuf_to_string()
+    );
+}
+
+#[test]
+fn ctcp_fails_with_no_text() {
+    let mut handler = dummy_client_handler();
+    handler.database.add_local_client(dummy_client("nick1"));
+
+    let parameters = vec!["nick1".to_string()];
+    let trailing = None;
+    handler.ctcp_command((None, parameters, trailing)).unwrap();
+
+    assert_eq!(
+        "412 :No text to send\r\n",
+        handler.stream.read_wbuf_to_string()
+    );
+}
+
+#[test]
 fn ctcp_works_with_valid_target_client() {
     let mut handler = dummy_client_handler();
 
