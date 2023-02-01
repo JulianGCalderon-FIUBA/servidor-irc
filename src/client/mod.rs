@@ -3,7 +3,7 @@ use std::net::TcpStream;
 use std::thread;
 use std::{io, thread::JoinHandle};
 
-use crate::message::{CreationError, Message};
+use crate::message::{CreationError, Message, CRLF};
 
 /// Represents a client that can connect to a Server.
 pub struct Client {
@@ -11,8 +11,6 @@ pub struct Client {
     read_stream: Option<TcpStream>,
     read_thread: Option<JoinHandle<()>>,
 }
-
-pub const CRLF: &[u8; 2] = b"\r\n";
 
 impl Client {
     /// Creates new [`Client`] connected to received address.

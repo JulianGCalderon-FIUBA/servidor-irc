@@ -16,8 +16,8 @@ pub struct Message {
     trailing: Option<String>,
 }
 
-const CRLF: &[u8] = b"\r\n";
-const LF: &[u8] = b"\n";
+pub const CRLF: &[u8] = b"\r\n";
+pub const LF: &[u8] = b"\n";
 const PREFIX_CHARACTER: u8 = b':';
 const MAX_LENGTH: usize = 510;
 const INVALID_CHARACTERS: [char; 3] = ['\r', '\n', '\0'];
@@ -52,7 +52,7 @@ impl Message {
     pub fn read_from(stream: &mut dyn Read) -> Result<Self, CreationError> {
         let mut content = String::new();
 
-        Self::read_line(stream, &mut content)?;
+        read_line(stream, &mut content)?;
 
         if content.as_bytes().ends_with(CRLF) {
             content.pop();
@@ -87,21 +87,6 @@ impl Message {
         let message = Self::new(&content)?;
 
         Ok(message)
-    }
-
-    /// Reads single line from a stream, calling a read for every byte read
-    fn read_line(stream: &mut dyn Read, buffer: &mut String) -> io::Result<()> {
-        let mut content = String::new();
-
-        while !content.as_bytes().ends_with(LF) {
-            let mut buffer = [0; 1];
-            stream.read_exact(&mut buffer)?;
-            content.push(buffer[0] as char)
-        }
-
-        buffer.push_str(&content);
-
-        Ok(())
     }
 
     pub fn unpack(self) -> (Option<String>, String, Vec<String>, Option<String>) {
@@ -147,4 +132,19 @@ impl std::fmt::Display for Message {
             Ok(())
         }
     }
+}
+
+/// Reads single line from a stream, calling a read for every byte read
+pub fn read_line(stream: &mut dyn Read, buffer: &mut String) -> io::Result<()> {
+    let mut content = String::new();
+
+    while !content.as_bytes().ends_with(LF) {
+        let mut buffer = [0; 1];
+        stream.read_exact(&mut buffer)?;
+        content.push(buffer[0] as char)
+    }
+
+    buffer.push_str(&content);
+
+    Ok(())
 }

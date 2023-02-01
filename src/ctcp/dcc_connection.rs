@@ -1,29 +1,25 @@
 use std::{
     io::{self, Write},
-    net::{TcpListener, TcpStream},
+    net::TcpStream,
 };
 
-use crate::client::CRLF;
+use crate::message::{read_line, CRLF};
 
 pub struct DccConnection {
     stream: TcpStream,
 }
 
 impl DccConnection {
-    pub fn start_listening() -> io::Result<TcpListener> {
-        TcpListener::bind("0.0.0.0:0")
-    }
-
-    pub fn accept(listener: TcpListener) -> io::Result<Self> {
-        let stream = listener.accept()?.0;
+    pub fn new(stream: TcpStream) -> io::Result<Self> {
+        stream.set_nonblocking(true)?;
 
         Ok(Self { stream })
     }
 
-    pub fn connect(address: String) -> io::Result<Self> {
+    pub fn connect(address: &str) -> io::Result<Self> {
         let stream = TcpStream::connect(address)?;
 
-        Ok(Self { stream })
+        Self::new(stream)
     }
 
     /// Sends message to connected stream.
@@ -35,7 +31,24 @@ impl DccConnection {
     }
 
     pub fn read_message(&mut self) -> io::Result<String> {
-        // READ MESSAGE FROM STREAM, ¿ASYNC?
-        todo!()
+        let mut content = String::new();
+
+        read_line(&mut self.stream, &mut content)?;
+
+        if content.as_bytes().ends_with(CRLF) {
+            content.pop();
+            content.pop();
+        } else {
+            return error_no_trailing_crlf();
+        }
+
+        Ok(content)
     }
+}
+
+fn error_no_trailing_crlf() -> Result<String, io::Error> {
+    Err(io::Error::new(
+        io::ErrorKind::InvalidInput,
+        "Message should be trailed with CRLF",
+    ))
 }
