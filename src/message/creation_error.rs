@@ -12,8 +12,8 @@ pub enum CreationError {
 impl fmt::Display for CreationError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::IoError(err) => write!(f, "IoError: {}", err),
-            Self::ParsingError(err) => write!(f, "ParseError: {}", err),
+            Self::IoError(err) => write!(f, "IoError: {err}"),
+            Self::ParsingError(err) => write!(f, "ParseError: {err}"),
         }
     }
 }

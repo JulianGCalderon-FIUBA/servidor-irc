@@ -3,6 +3,7 @@ use crate::server::consts::channel_flag::ChannelFlag;
 use crate::server::testing::{dummy_client, dummy_database, MockTcpStream};
 
 mod away_tests;
+mod ctcp_tests;
 mod invite_tests;
 mod join_tests;
 mod kick_tests;

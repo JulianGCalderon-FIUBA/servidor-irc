@@ -1,9 +1,12 @@
 use std::io::{BufReader, Write};
 use std::net::TcpStream;
+use std::sync::mpsc;
 use std::thread;
 use std::{io, thread::JoinHandle};
 
-use crate::message::{CreationError, Message};
+use mpsc::Sender;
+
+use crate::message::{CreationError, Message, CRLF};
 
 /// Represents a client that can connect to a Server.
 pub struct Client {
@@ -11,8 +14,6 @@ pub struct Client {
     read_stream: Option<TcpStream>,
     read_thread: Option<JoinHandle<()>>,
 }
-
-const CRLF: &[u8; 2] = b"\r\n";
 
 impl Client {
     /// Creates new [`Client`] connected to received address.
@@ -45,16 +46,21 @@ impl Client {
         self.read_thread = Some(handle);
     }
 
+    pub fn start_async_send(&mut self, sender: Sender<Result<Message, CreationError>>) {
+        let read_stream = match self.read_stream.take() {
+            Some(read_stream) => read_stream,
+            None => return,
+        };
+
+        thread::spawn(|| async_send(read_stream, sender));
+    }
+
     pub fn sync_read(&mut self) -> Result<Message, CreationError> {
         let read_stream = self
             .read_stream
             .as_mut()
             .expect("There should be a read stream");
         Message::read_from(read_stream)
-    }
-
-    pub fn async_print(&mut self) {
-        self.start_async_read(print_message);
     }
 
     /// Sends message to connected stream.
@@ -89,19 +95,26 @@ where
     }
 }
 
+fn async_send(
+    read_stream: TcpStream,
+    sender: Sender<Result<Message, CreationError>>,
+) -> Result<(), mpsc::SendError<Result<Message, CreationError>>> {
+    let mut reader = BufReader::new(read_stream);
+    loop {
+        let message = Message::read_from_buffer(&mut reader);
+        if let Err(CreationError::IoError(_)) = message {
+            return Ok(());
+        }
+        sender.send(message)?;
+    }
+}
+
 impl Drop for Client {
     fn drop(&mut self) {
         if let Some(handler) = self.read_thread.take() {
             if let Err(error) = handler.join() {
-                eprintln!("Error: {:?}", error);
+                eprintln!("Error: {error:?}");
             }
         }
-    }
-}
-
-fn print_message(message: Result<Message, CreationError>) {
-    match message {
-        Ok(message) => println!("{message}"),
-        Err(error) => eprintln!("{error:?}"),
     }
 }

@@ -97,9 +97,9 @@ impl ChannelMembersView {
         for client in &clients {
             let label: Label = if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER)
             {
-                create_label(&format!("\t •\tOP: {}", stripped))
+                create_label(&format!("\t •\tOP: {stripped}"))
             } else {
-                create_label(&format!("\t •\t{}", client))
+                create_label(&format!("\t •\t{client}"))
             };
             label.set_halign(Start);
             label.set_margin_start(20);
@@ -121,10 +121,10 @@ impl ChannelMembersView {
             let client_label_box = create_kick_label_box();
 
             if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER) {
-                let label = create_kick_label(&format!("\t •\tOP: {}", stripped));
+                let label = create_kick_label(&format!("\t •\tOP: {stripped}"));
                 client_label_box.append(&label);
             } else {
-                let label = create_kick_label(&format!("\t •\t{}", client));
+                let label = create_kick_label(&format!("\t •\t{client}"));
                 let kick_button = create_kick_button();
                 Self::connect_kick_button(
                     kick_button.clone(),

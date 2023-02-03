@@ -23,4 +23,5 @@ pub trait ConnectionHandlerAsserts<C: Connection> {
     fn assert_quit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply>;
     fn assert_server_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply>;
     fn assert_squit_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply>;
+    fn assert_ctcp_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply>;
 }

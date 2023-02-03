@@ -241,7 +241,7 @@ impl AddChannelView {
                 return;
             }
             if !text.starts_with(CHANNEL_FIRST_CHARACTER) {
-                text = format!("{}{}", CHANNEL_FIRST_CHARACTER, text);
+                text = format!("{CHANNEL_FIRST_CHARACTER}{text}");
             }
 
             join_channel_request(text, sender.clone());
