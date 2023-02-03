@@ -1,4 +1,4 @@
-use std::sync::mpsc::{self, Receiver, RecvTimeoutError};
+use std::sync::mpsc::{self, Receiver, RecvError, RecvTimeoutError};
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
 use std::{env, io};
@@ -16,15 +16,24 @@ fn main() {
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
 
-    client.start_async_read(xxx);
+    let (sender, receiver) = mpsc::channel();
+
+    // client.start_async_read(print_message);
+    client.start_async_send(sender);
+
+    thread::spawn(move || -> Result<(), RecvError> {
+        loop {
+            print_message(receiver.recv()?);
+        }
+    });
 
     let (stdin, handle) = spawn_stdin_channel();
 
     loop {
-        if client.finished_asnyc_read() {
-            println!("Connection with server was closed, press enter to continue.");
-            break;
-        }
+        // if client.finished_asnyc_read() {
+        //     println!("Connection with server was closed, press enter to continue.");
+        //     break;
+        // }
 
         let line = match stdin.recv_timeout(Duration::from_millis(100)) {
             Ok(line) => line,
@@ -71,16 +80,9 @@ fn spawn_stdin_channel() -> (Receiver<String>, JoinHandle<()>) {
     (rx, handle)
 }
 
-fn _print_message(message: Result<Message, CreationError>) {
+fn print_message(message: Result<Message, CreationError>) {
     match message {
         Ok(message) => println!("{message}"),
         Err(error) => eprintln!("{error:?}"),
     }
-}
-
-fn xxx(message: Result<Message, CreationError>) {
-    let message = match message {
-        Ok(message) => message,
-        Err(error) => return eprintln!("{error:?}"),
-    };
 }

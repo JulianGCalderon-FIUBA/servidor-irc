@@ -1,7 +1,10 @@
 use std::io::{BufReader, Write};
 use std::net::TcpStream;
+use std::sync::mpsc;
 use std::thread;
 use std::{io, thread::JoinHandle};
+
+use mpsc::Sender;
 
 use crate::message::{CreationError, Message, CRLF};
 
@@ -43,6 +46,15 @@ impl Client {
         self.read_thread = Some(handle);
     }
 
+    pub fn start_async_send(&mut self, sender: Sender<Result<Message, CreationError>>) {
+        let read_stream = match self.read_stream.take() {
+            Some(read_stream) => read_stream,
+            None => return,
+        };
+
+        thread::spawn(|| async_send(read_stream, sender));
+    }
+
     pub fn sync_read(&mut self) -> Result<Message, CreationError> {
         let read_stream = self
             .read_stream
@@ -80,6 +92,20 @@ where
             return;
         }
         on_message(message);
+    }
+}
+
+fn async_send(
+    read_stream: TcpStream,
+    sender: Sender<Result<Message, CreationError>>,
+) -> Result<(), mpsc::SendError<Result<Message, CreationError>>> {
+    let mut reader = BufReader::new(read_stream);
+    loop {
+        let message = Message::read_from_buffer(&mut reader);
+        if let Err(CreationError::IoError(_)) = message {
+            return Ok(());
+        }
+        sender.send(message)?;
     }
 }
 
