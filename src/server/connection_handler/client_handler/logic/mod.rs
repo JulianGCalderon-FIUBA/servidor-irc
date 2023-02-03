@@ -343,7 +343,7 @@ impl<C: Connection> ConnectionHandlerLogic<C> for ClientHandler<C> {
         content.insert(0, 1 as char);
         content.push(1 as char);
 
-        self.send_privmsg_notification(&target, &content);
+        self.send_privmsg_to_target(&target, &content)?;
 
         Ok(true)
     }
