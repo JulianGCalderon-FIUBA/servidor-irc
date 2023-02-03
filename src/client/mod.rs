@@ -3,7 +3,6 @@ use std::net::{TcpListener, TcpStream};
 use std::thread;
 use std::{io, thread::JoinHandle};
 
-// use crate::macros::some_or_return;
 use crate::message::{CreationError, Message};
 
 /// Represents a client that can connect to a Server.
