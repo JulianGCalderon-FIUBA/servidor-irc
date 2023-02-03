@@ -31,8 +31,9 @@ pub mod controller;
 /// This allows the user to use the application.
 pub mod views;
 
+pub mod ctcp;
 /// This module contains useful macros used across the project.
-mod macros;
+pub mod macros;
 
 /// Default parameters for client-server connection
 pub const ADDRESS: &str = "127.0.0.1:9000";

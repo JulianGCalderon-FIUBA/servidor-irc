@@ -4,6 +4,7 @@ use std::time::Duration;
 use std::{env, io};
 
 use internet_relay_chat::client::Client;
+use internet_relay_chat::message::{CreationError, Message};
 use internet_relay_chat::ADDRESS;
 
 fn main() {
@@ -15,14 +16,7 @@ fn main() {
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
 
-    // Command::new("sh")
-    //     .arg("-c")
-    //     .arg("echo hello")
-    //     .output()
-    //     .expect("failed to execute process");
-
-    // client.async_print();
-    client.async_zzz();
+    client.start_async_read(xxx);
 
     let (stdin, handle) = spawn_stdin_channel();
 
@@ -75,4 +69,18 @@ fn spawn_stdin_channel() -> (Receiver<String>, JoinHandle<()>) {
     });
 
     (rx, handle)
+}
+
+fn _print_message(message: Result<Message, CreationError>) {
+    match message {
+        Ok(message) => println!("{message}"),
+        Err(error) => eprintln!("{error:?}"),
+    }
+}
+
+fn xxx(message: Result<Message, CreationError>) {
+    let message = match message {
+        Ok(message) => message,
+        Err(error) => return eprintln!("{error:?}"),
+    };
 }
