@@ -10,7 +10,7 @@ use gtk4 as gtk;
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
-        views_add::view_channel_members::widgets_creation::create_kick_label_box,
+        add_views::view_channel_members::widgets_creation::create_kick_label_box,
         widgets_creation::{build_application_window, create_center_button, create_label},
     },
 };

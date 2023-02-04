@@ -1,7 +1,7 @@
 use gtk4::prelude::WidgetExt;
 use gtk4::{Align::Start, Box, Orientation::Vertical, ScrolledWindow};
 
-use crate::views::view_main::widgets_creation::create_scrollwindow;
+use crate::views::main_view::widgets_creation::create_scrollwindow;
 
 use super::NOTIFICATIONS_BOX_CSS;
 

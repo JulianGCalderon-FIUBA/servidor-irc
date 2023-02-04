@@ -7,8 +7,8 @@ use gtk4 as gtk;
 use crate::{
     controller::{controller_handler::is_channel, controller_message::ControllerMessage},
     views::{
-        view_main::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
-        views_add::widgets_creation::create_title,
+        main_view::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
+        add_views::widgets_creation::create_title,
         widgets_creation::create_button_with_margin,
     },
 };

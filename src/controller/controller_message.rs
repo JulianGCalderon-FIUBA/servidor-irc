@@ -15,6 +15,7 @@ pub enum ControllerMessage {
     AddViewToInviteClient {
         channels_and_clients: HashMap<String, Vec<String>>,
     },
+    AddViewToSafeConversation {},
     AddWarningView {
         message: String,
     },

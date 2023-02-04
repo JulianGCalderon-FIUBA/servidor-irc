@@ -3,13 +3,13 @@ pub mod ip_view;
 
 /// The application's main view.  
 /// Containts conversations, chat and features.  
-pub mod view_main;
+pub mod main_view;
 
 /// Contains the registration view.  
-pub mod view_register;
+pub mod register_view;
 
 /// Contains multiples views that help use of the features.
-pub mod views_add;
+pub mod add_views;
 
 /// Contains multiple functions that create widgets for every view.
 pub mod widgets_creation;

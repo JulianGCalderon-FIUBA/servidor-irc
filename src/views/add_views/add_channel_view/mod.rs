@@ -22,7 +22,7 @@ use self::widgets_creation::{
 
 use super::widgets_creation::create_main_box_add_view;
 use super::{
-    super::{view_main::utils::entry_is_valid, widgets_creation::create_entry},
+    super::{main_view::utils::entry_is_valid, widgets_creation::create_entry},
     widgets_creation::create_title,
 };
 

@@ -6,7 +6,7 @@ use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage,
-    views::{view_main::utils::entry_is_valid, widgets_creation::create_label},
+    views::{main_view::utils::entry_is_valid, widgets_creation::create_label},
 };
 
 use self::{
