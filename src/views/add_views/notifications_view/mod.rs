@@ -5,7 +5,7 @@ use gtk::{prelude::*, Application, ApplicationWindow, Button, Orientation::Horiz
 use gtk4 as gtk;
 
 use crate::views::{
-    add_views::view_notifications::widgets_creation::{
+    add_views::notifications_view::widgets_creation::{
         create_box_container, create_notifications_scrollwindow,
     },
     widgets_creation::{

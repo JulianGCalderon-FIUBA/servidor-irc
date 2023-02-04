@@ -7,7 +7,7 @@ use gtk4 as gtk;
 
 use self::request::invite_request;
 
-use super::view_add_channel::widgets_creation::create_combobox;
+use super::add_channel_view::widgets_creation::create_combobox;
 use super::widgets_creation::create_main_box_add_view;
 use super::widgets_creation::create_title;
 

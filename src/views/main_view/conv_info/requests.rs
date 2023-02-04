@@ -31,7 +31,9 @@ pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
 }
 
 pub fn add_safe_conversation_view_request(sender: Sender<ControllerMessage>) {
-    sender.send(ControllerMessage::AddViewToSafeConversation {}).expect(ERROR_TEXT);
+    sender
+        .send(ControllerMessage::AddViewToSafeConversation {})
+        .expect(ERROR_TEXT);
 }
 
 /// Sends a names request to the controller.

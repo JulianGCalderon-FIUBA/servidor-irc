@@ -1,23 +1,23 @@
 /// Contains add channel view.
-pub mod view_add_channel;
+pub mod add_channel_view;
 
 /// Contains add client view.
-pub mod view_add_client;
+pub mod add_client_view;
 
 /// Contains channel members view.
-pub mod view_channel_members;
+pub mod channel_members_view;
 
 /// Contains invite view.
-pub mod view_invite;
+pub mod invite_view;
 
 /// Contains notifications view.
-pub mod view_notifications;
+pub mod notifications_view;
 
 /// Contains user info view.
-pub mod view_user_info;
+pub mod user_info_view;
 
 /// Contains warning view.
-pub mod view_warning;
+pub mod warning_view;
 
 /// Contains multiple functions that create widgets for every view.
 pub mod widgets_creation;

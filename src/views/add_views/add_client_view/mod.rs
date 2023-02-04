@@ -7,7 +7,7 @@ use gtk4 as gtk;
 use self::requests::add_client_button_request;
 
 use super::{
-    view_add_channel::widgets_creation::create_combobox,
+    add_channel_view::widgets_creation::create_combobox,
     widgets_creation::{create_main_box_add_view, create_title},
 };
 
