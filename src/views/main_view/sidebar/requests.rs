@@ -26,12 +26,12 @@ pub fn send_list_request(sender: Sender<ControllerMessage>) {
 /// Receives nothing.
 pub fn add_notifications_view_request(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::AddNotificationsView {})
+        .send(ControllerMessage::OpenNotificationsView {})
         .expect(ERROR_TEXT);
 }
 
 pub fn add_user_info_view(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::AddUserInfoView {})
+        .send(ControllerMessage::OpenUserInfoView {})
         .expect(ERROR_TEXT);
 }

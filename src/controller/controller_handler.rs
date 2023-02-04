@@ -67,10 +67,10 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
                 channels_and_clients: hashmap,
             }
         },
-        ERR_NICK_COLLISION => ControllerMessage::AddWarningView {
+        ERR_NICK_COLLISION => ControllerMessage::OpenWarningView {
             message: ERR_NICK_COLLISION_WARNING_TEXT.to_string(),
         },
-        INVITE_COMMAND => ControllerMessage::RecieveInvite {
+        INVITE_COMMAND => ControllerMessage::ReceiveInvite {
             nickname: message.get_prefix().clone().unwrap(),
             channel: message.get_parameters()[1].clone(),
         },
@@ -85,7 +85,7 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
 
             let mut username = trailing_strings[5].to_string();
             username.remove(0);
-            ControllerMessage::ChangeViewToMain {
+            ControllerMessage::OpenMainView {
                 realname: message.get_parameters()[0].clone(),
                 servername: trailing_strings[2].to_string(),
                 nickname: trailing_strings[4].to_string(),

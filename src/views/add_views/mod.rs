@@ -13,6 +13,9 @@ pub mod invite_view;
 /// Contains notifications view.
 pub mod notifications_view;
 
+/// Contains safe conversation view.
+pub mod safe_conversation_view;
+
 /// Contains user info view.
 pub mod user_info_view;
 

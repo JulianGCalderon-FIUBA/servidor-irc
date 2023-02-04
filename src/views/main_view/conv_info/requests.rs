@@ -32,7 +32,7 @@ pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
 
 pub fn add_safe_conversation_view_request(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::AddViewToSafeConversation {})
+        .send(ControllerMessage::OpenSafeConversationView {})
         .expect(ERROR_TEXT);
 }
 
