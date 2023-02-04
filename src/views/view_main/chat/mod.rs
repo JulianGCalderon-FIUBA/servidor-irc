@@ -1,26 +1,23 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{ glib::Sender, prelude::*, Box, Entry, Label };
+use gtk::{glib::Sender, prelude::*, Box, Entry, Label};
 use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage,
-    views::{ view_main::utils::entry_is_valid, widgets_creation::create_label },
+    views::{view_main::utils::entry_is_valid, widgets_creation::create_label},
 };
 
 use self::{
     requests::priv_message_request,
     widgets_creation::{
-        create_chat_box,
-        create_message_sender_box,
-        create_received_message,
-        create_send_message,
+        create_chat_box, create_message_sender_box, create_received_message, create_send_message,
         create_sender_nickname_label,
     },
 };
 
-use super::{ utils::adjust_scrollbar, MainView };
+use super::{utils::adjust_scrollbar, MainView};
 
 const MESSAGE_MAX_CHARACTERS: usize = 70;
 const MESSAGE_MAX_CHARACTERS_ERROR: &str = "¡Message too long!";
@@ -45,7 +42,11 @@ impl MainView {
         self.scrollwindow_chat.set_child(Some(&self.message_box));
         self.scrollwindow_chat.set_visible(false);
 
-        self.connect_send_button(self.input.clone(), self.sender.clone(), self.error_label.clone());
+        self.connect_send_button(
+            self.input.clone(),
+            self.sender.clone(),
+            self.error_label.clone(),
+        );
         message_sender_box.append(&self.send_message);
 
         chat.append(&self.current_chat);
@@ -63,18 +64,16 @@ impl MainView {
         &self,
         input: Entry,
         sender: Sender<ControllerMessage>,
-        error_label: Label
+        error_label: Label,
     ) {
         self.send_message.connect_clicked(move |_| {
             error_label.set_text("");
             let input_text = input.text();
             if !entry_is_valid(&input_text, MESSAGE_MAX_CHARACTERS) {
                 if !input_text.is_empty() {
-                    error_label.set_text(
-                        &format!(
-                            "{MESSAGE_MAX_CHARACTERS_ERROR} Max: {MESSAGE_MAX_CHARACTERS} characters"
-                        )
-                    );
+                    error_label.set_text(&format!(
+                        "{MESSAGE_MAX_CHARACTERS_ERROR} Max: {MESSAGE_MAX_CHARACTERS} characters"
+                    ));
                 } else {
                     error_label.set_text(EMPTY_MESSAGE_ERROR);
                 }
@@ -95,16 +94,15 @@ impl MainView {
         message_text: String,
         sender_nickname: String,
         channel: String,
-        current_conv: String
+        current_conv: String,
     ) {
         if sender_nickname == self.user_info.label().unwrap() {
             return;
         }
 
         let sender_nickname_label = create_sender_nickname_label(&sender_nickname);
-        if
-            channel == current_conv &&
-            Self::should_show_nickname(self.messages.get(&channel), sender_nickname)
+        if channel == current_conv
+            && Self::should_show_nickname(self.messages.get(&channel), sender_nickname)
         {
             self.message_box.append(&sender_nickname_label);
         }
@@ -115,7 +113,10 @@ impl MainView {
             adjust_scrollbar(self.scrollwindow_chat.clone());
         }
 
-        self.messages.get_mut(&channel).unwrap().push(vec![message, sender_nickname_label]);
+        self.messages
+            .get_mut(&channel)
+            .unwrap()
+            .push(vec![message, sender_nickname_label]);
     }
 
     /// Creates a new message in a client chat.  
@@ -125,13 +126,13 @@ impl MainView {
         &mut self,
         message_text: String,
         nickname: String,
-        current_conv: String
+        current_conv: String,
     ) {
         let message_label = create_received_message(&message_text);
-        self.messages
-            .get_mut(&nickname)
-            .unwrap()
-            .push(vec![message_label.clone(), create_sender_nickname_label("")]);
+        self.messages.get_mut(&nickname).unwrap().push(vec![
+            message_label.clone(),
+            create_sender_nickname_label(""),
+        ]);
 
         if nickname == current_conv {
             self.message_box.append(&message_label);
@@ -156,19 +157,19 @@ impl MainView {
     /// If it is received by the sender, returns false.
     pub fn should_show_nickname(
         messages: Option<&Vec<Vec<gtk4::Label>>>,
-        sender_nickname: String
+        sender_nickname: String,
     ) -> bool {
-        Self::prev_message_has_different_sender(messages, sender_nickname) ||
-            messages.unwrap().is_empty()
+        Self::prev_message_has_different_sender(messages, sender_nickname)
+            || messages.unwrap().is_empty()
     }
 
     /// Returns bool, whether the previous message was sent by a different sender.
     pub fn prev_message_has_different_sender(
         messages: Option<&Vec<Vec<gtk4::Label>>>,
-        sender_nickname: String
+        sender_nickname: String,
     ) -> bool {
-        messages.is_some() &&
-            messages.unwrap().last().is_some() &&
-            messages.unwrap().last().unwrap()[1].text() != sender_nickname
+        messages.is_some()
+            && messages.unwrap().last().is_some()
+            && messages.unwrap().last().unwrap()[1].text() != sender_nickname
     }
 }

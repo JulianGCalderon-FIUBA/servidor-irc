@@ -7,7 +7,9 @@ use gtk4 as gtk;
 use crate::{
     controller::{controller_handler::is_channel, controller_message::ControllerMessage},
     views::{
-        views_add::widgets_creation::create_title, widgets_creation::create_button_with_margin, view_main::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
+        view_main::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
+        views_add::widgets_creation::create_title,
+        widgets_creation::create_button_with_margin,
     },
 };
 
@@ -19,7 +21,9 @@ use self::{
     widgets_creation::create_separator_sidebar,
 };
 
-use super::{requests::change_conversation_request, utils::adjust_scrollbar, MainView, NO_NOTIFICATIONS_TEXT};
+use super::{
+    requests::change_conversation_request, utils::adjust_scrollbar, MainView, NO_NOTIFICATIONS_TEXT,
+};
 
 const CHANNELS_TITLE: &str = "Channels";
 const CLIENTS_TITLE: &str = "Clients";
@@ -227,8 +231,7 @@ impl MainView {
             "🔔 notifications ({})",
             current_notifications_number + 1
         ));
-        self.notifications_button
-            .add_css_class(NOTIFICATIONS_CSS)
+        self.notifications_button.add_css_class(NOTIFICATIONS_CSS)
     }
 
     /// Get number of notifications.  

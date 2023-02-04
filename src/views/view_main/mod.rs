@@ -43,10 +43,12 @@ use super::{
 
 const ADD_BUTTON_TEXT: &str = "+";
 const ENTRY_PLACEHOLDER: &str = "Message...";
-const SEND_BUTTON_TEXT: &str = "Send";
+const SEND_BUTTON_TEXT: &str = "➤";
+
 const QUIT_BUTTON_TEXT: &str = "x";
 const MEMBERS_BUTTON_TEXT: &str = "Members";
 const INVITE_BUTTON_TEXT: &str = "Invite to channel";
+const SAFE_CONVERSATION_BUTTON_TEXT: &str = "🔐 Safe conversation 🔐";
 const ADD_BUTTON_CSS: &str = "add";
 const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
 const WELCOME_MESSAGE: &str = "Open a new chat to start...";
@@ -57,8 +59,8 @@ const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
 const NO_NOTIFICATIONS_CSS: &str = "notifications_button";
 const DISABLE_BUTTON_CSS: &str = "disabled_button";
 
-/// Shows main view.  
-/// Contains the sidebar, chat and features.  
+/// Shows main view.
+/// Contains the sidebar, chat and features.
 /// Uses sender to communicate with controller.
 pub struct MainView {
     pub channels_box: Box,
@@ -83,6 +85,7 @@ pub struct MainView {
     pub channel_members_button: Button,
     pub quit_channel_button: Button,
     pub invite_button: Button,
+    pub safe_conversation_button: Button,
     sender: Sender<ControllerMessage>,
 }
 
@@ -112,6 +115,7 @@ impl MainView {
             quit_channel_button: create_button_with_margin(QUIT_BUTTON_TEXT),
             channel_members_button: create_button_with_margin(MEMBERS_BUTTON_TEXT),
             invite_button: create_button_with_margin(INVITE_BUTTON_TEXT),
+            safe_conversation_button: create_button_with_margin(SAFE_CONVERSATION_BUTTON_TEXT),
             sender,
         }
     }

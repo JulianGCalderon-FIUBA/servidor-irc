@@ -3,7 +3,7 @@ use gtk4 as gtk;
 
 use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
 
-/// Sends a quit channel request to the controller.  
+/// Sends a quit channel request to the controller.
 ///
 /// Receives nothing.
 pub fn quit_channel_request(sender: Sender<ControllerMessage>) {
@@ -12,7 +12,7 @@ pub fn quit_channel_request(sender: Sender<ControllerMessage>) {
         .expect(ERROR_TEXT);
 }
 
-/// Sends a remove conversation request to the controller.  
+/// Sends a remove conversation request to the controller.
 ///
 /// Receives nothing.
 pub fn remove_conversation_request(sender: Sender<ControllerMessage>) {
@@ -21,7 +21,7 @@ pub fn remove_conversation_request(sender: Sender<ControllerMessage>) {
         .expect(ERROR_TEXT);
 }
 
-/// Sends an add invite view request to the controller.  
+/// Sends an add invite view request to the controller.
 ///
 /// Receives nothing.
 pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
@@ -30,7 +30,11 @@ pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
         .expect(ERROR_TEXT);
 }
 
-/// Sends a names request to the controller.  
+pub fn add_safe_conversation_view_request(sender: Sender<ControllerMessage>) {
+    //sender.send(ControllerMessage::AddViewToSafeConversation {}).expect(ERROR_TEXT);
+}
+
+/// Sends a names request to the controller.
 ///
 /// Receives nothing.
 pub fn send_names_request(sender: Sender<ControllerMessage>) {

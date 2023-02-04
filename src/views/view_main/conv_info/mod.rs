@@ -6,12 +6,14 @@ use gtk4 as gtk;
 use crate::controller::{controller_handler::is_channel, controller_message::ControllerMessage};
 
 use self::requests::{
-    add_invite_view_request, quit_channel_request, remove_conversation_request, send_names_request,
+    add_invite_view_request, add_safe_conversation_view_request, quit_channel_request,
+    remove_conversation_request, send_names_request,
 };
 
 use super::{MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS};
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
+const SAFE_CONVERSATION_BUTTON_CSS: &str = "safe_conversation";
 
 impl MainView {
     /// Creates conversation info widgets.
@@ -25,16 +27,20 @@ impl MainView {
 
         self.quit_channel_button
             .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
-        self.user_info.set_label(nickname);
+        self.safe_conversation_button
+            .add_css_class(SAFE_CONVERSATION_BUTTON_CSS);
 
+        self.user_info.set_label(nickname);
         conv_info.append(&self.quit_channel_button);
         conv_info.append(&self.channel_members_button);
         conv_info.append(&self.invite_button);
+        conv_info.append(&self.safe_conversation_button);
 
         self.welcome_view();
 
         self.connect_quit_channel(self.current_chat.clone(), self.sender.clone());
         self.connect_invite_button(self.sender.clone());
+        self.connect_safe_conversation_button(self.sender.clone());
         self.connect_members_button(self.sender.clone());
 
         conv_info
@@ -65,6 +71,12 @@ impl MainView {
         });
     }
 
+    fn connect_safe_conversation_button(&mut self, sender: Sender<ControllerMessage>) {
+        self.safe_conversation_button.connect_clicked(move |_| {
+            add_safe_conversation_view_request(sender.clone());
+        });
+    }
+
     /// Connects members button.
     ///
     /// Sends names request to the controller.
@@ -74,7 +86,7 @@ impl MainView {
         });
     }
 
-    /// Removes conversation from sidebar.  
+    /// Removes conversation from sidebar.
     ///
     /// Removes conversation button.
     pub fn remove_conversation(&mut self, conversation: String) {
@@ -104,7 +116,7 @@ impl MainView {
         }
     }
 
-    /// Shows welcome view.  
+    /// Shows welcome view.
     ///
     /// Welcome view is used when no conversation is selected.
     pub fn welcome_view(&mut self) {
@@ -116,7 +128,8 @@ impl MainView {
         self.send_message.set_sensitive(false);
         self.welcome_box.set_visible(true);
         self.quit_channel_button.set_visible(true);
-        self.quit_channel_button.remove_css_class(EXIT_CHANNEL_BUTTON_CSS);
+        self.quit_channel_button
+            .remove_css_class(EXIT_CHANNEL_BUTTON_CSS);
         self.quit_channel_button.add_css_class(DISABLE_BUTTON_CSS);
         self.invite_button.set_visible(false);
         self.channel_members_button.set_visible(false);
@@ -146,8 +159,10 @@ impl MainView {
     pub fn set_client_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
         if self.quit_channel_button.has_css_class(DISABLE_BUTTON_CSS) {
-            self.quit_channel_button.remove_css_class(DISABLE_BUTTON_CSS);
-            self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
+            self.quit_channel_button
+                .remove_css_class(DISABLE_BUTTON_CSS);
+            self.quit_channel_button
+                .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         }
 
         self.invite_button.set_visible(true);
@@ -160,8 +175,10 @@ impl MainView {
     pub fn set_channel_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
         if self.quit_channel_button.has_css_class(DISABLE_BUTTON_CSS) {
-            self.quit_channel_button.remove_css_class(DISABLE_BUTTON_CSS);
-            self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
+            self.quit_channel_button
+                .remove_css_class(DISABLE_BUTTON_CSS);
+            self.quit_channel_button
+                .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         }
 
         self.invite_button.set_visible(false);

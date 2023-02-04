@@ -7,7 +7,9 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use super::{CHAT_CSS, MESSAGE_BOX_CSS, RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS, MESSAGE_SENDER_NAME_CSS};
+use super::{
+    CHAT_CSS, MESSAGE_BOX_CSS, MESSAGE_SENDER_NAME_CSS, RECEIVED_MESSAGE_CSS, SEND_MESSAGE_CSS,
+};
 
 /// Creates a gtk message label.  
 ///
