@@ -1,10 +1,13 @@
 use gtk::{
-    prelude::*, Align::Center, ApplicationWindow, Box, Button, Entry, Label, Orientation,
-    Orientation::Horizontal, PasswordEntry, Separator,
+    prelude::*,
+    Align::{Center, End},
+    ApplicationWindow, Box, Button, Entry, Label, Orientation,
+    Orientation::{Horizontal, Vertical},
+    PasswordEntry, ScrolledWindow, Separator,
 };
 use gtk4 as gtk;
 
-use super::{APP_TITLE, WARNING_TEXT_CSS};
+use super::{APP_TITLE, CHAT_CSS, MESSAGE_BOX_CSS, WARNING_TEXT_CSS};
 
 /// Creates gtk entry with a placeholder.
 ///
@@ -115,4 +118,47 @@ pub fn create_error_label() -> Label {
         .build();
     error_label.add_css_class(WARNING_TEXT_CSS);
     error_label
+}
+
+/// Creates the chat box.  
+///
+/// Receives nothing, returns a Box.
+pub fn create_chat_box() -> Box {
+    let chat = Box::builder()
+        .orientation(Vertical)
+        .halign(Center)
+        .valign(End)
+        .hexpand(true)
+        .build();
+    chat.add_css_class(CHAT_CSS);
+    chat
+}
+
+/// Creates the sender box.
+///
+/// Receives nothing, returns a Box.
+pub fn create_message_sender_box() -> Box {
+    Box::builder()
+        .orientation(Horizontal)
+        .margin_top(20)
+        .margin_bottom(20)
+        .halign(gtk::Align::Center)
+        .hexpand(true)
+        .build()
+}
+
+/// Creates the scrolled window in the chat.
+///
+/// Receives nothing, returns a ScrolledWindow.
+pub fn create_scrollwindow_chat() -> ScrolledWindow {
+    let scrolled_window = ScrolledWindow::builder()
+        .min_content_height(720)
+        .max_content_width(500)
+        .margin_top(20)
+        .margin_start(20)
+        .margin_end(20)
+        .margin_bottom(20)
+        .build();
+    scrolled_window.add_css_class(MESSAGE_BOX_CSS);
+    scrolled_window
 }

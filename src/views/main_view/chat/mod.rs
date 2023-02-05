@@ -6,14 +6,16 @@ use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage,
-    views::{main_view::utils::entry_is_valid, widgets_creation::create_label},
+    views::{
+        main_view::utils::entry_is_valid,
+        widgets_creation::{create_chat_box, create_label, create_message_sender_box},
+    },
 };
 
 use self::{
     requests::priv_message_request,
     widgets_creation::{
-        create_chat_box, create_message_sender_box, create_received_message, create_send_message,
-        create_sender_nickname_label,
+        create_received_message, create_send_message, create_sender_nickname_label,
     },
 };
 
@@ -25,8 +27,6 @@ const EMPTY_MESSAGE_ERROR: &str = "¡Message is empty!";
 
 const RECEIVED_MESSAGE_CSS: &str = "received_message";
 const SEND_MESSAGE_CSS: &str = "send_message";
-const CHAT_CSS: &str = "chat";
-const MESSAGE_BOX_CSS: &str = "message_box";
 const MESSAGE_SENDER_NAME_CSS: &str = "message_sender_name";
 
 impl MainView {
@@ -86,7 +86,7 @@ impl MainView {
         });
     }
 
-    /// Creates a new message in a channel chat.  
+    /// Creates a new message in a channel chat.
     ///
     /// Function is used when a channel message is received.
     pub fn receive_priv_channel_message(
@@ -119,7 +119,7 @@ impl MainView {
             .push(vec![message, sender_nickname_label]);
     }
 
-    /// Creates a new message in a client chat.  
+    /// Creates a new message in a client chat.
     ///
     /// Function is used when a client message is received.
     pub fn receive_priv_client_message(
@@ -152,7 +152,7 @@ impl MainView {
             .push(vec![message, create_label("")]);
     }
 
-    /// Returns bool if the messages should be shown.  
+    /// Returns bool if the messages should be shown.
     ///
     /// If it is received by the sender, returns false.
     pub fn should_show_nickname(

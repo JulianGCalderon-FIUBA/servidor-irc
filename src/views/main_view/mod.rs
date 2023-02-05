@@ -25,7 +25,6 @@ use gtk4 as gtk;
 use crate::controller::controller_message::ControllerMessage;
 
 use self::{
-    chat::widgets_creation::create_scrollwindow_chat,
     requests::quit_request,
     widgets_creation::{
         create_add_button, create_channels_and_client_box, create_current_chat, create_message_box,
@@ -36,14 +35,12 @@ use self::{
 use super::{
     widgets_creation::{
         build_application_window, create_button_with_margin, create_entry, create_error_label,
-        create_separator,
+        create_scrollwindow_chat, create_separator,
     },
-    MAIN_BOX_CSS,
+    ENTRY_PLACEHOLDER, MAIN_BOX_CSS, SEND_BUTTON_TEXT,
 };
 
 const ADD_BUTTON_TEXT: &str = "+";
-const ENTRY_PLACEHOLDER: &str = "Message...";
-const SEND_BUTTON_TEXT: &str = "➤";
 
 const QUIT_BUTTON_TEXT: &str = "x";
 const MEMBERS_BUTTON_TEXT: &str = "Members";

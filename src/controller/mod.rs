@@ -10,30 +10,18 @@ use std::collections::HashMap;
 
 use crate::{
     server::consts::commands::{
-        INVITE_COMMAND,
-        JOIN_COMMAND,
-        KICK_COMMAND,
-        LIST_COMMAND,
-        NAMES_COMMAND,
-        NICK_COMMAND,
-        PART_COMMAND,
-        PASS_COMMAND,
-        PRIVMSG_COMMAND,
-        QUIT_COMMAND,
-        USER_COMMAND,
+        INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND,
+        PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
     views::{
         add_views::{
-            add_channel_view::AddChannelView,
-            invite_view::InviteView,
-            notifications_view::NotificationsView,
-            user_info_view::UserInfoView,
+            add_channel_view::AddChannelView, invite_view::InviteView,
+            notifications_view::NotificationsView, user_info_view::UserInfoView,
             warning_view::WarningView,
         },
         add_views::{
-            add_client_view::AddClientView,
-            channel_members_view::ChannelMembersView,
-            safe_conversation_view::{ SafeConversationView, self },
+            add_client_view::AddClientView, channel_members_view::ChannelMembersView,
+            safe_conversation_view::SafeConversationView,
         },
         ip_view::IpView,
         register_view::RegisterView,
@@ -41,21 +29,21 @@ use crate::{
 };
 use gtk4 as gtk;
 
-use crate::{ client::Client, views::main_view::MainView, ADDRESS };
+use crate::{client::Client, views::main_view::MainView, ADDRESS};
 use gtk::{
     gdk::Display,
-    glib::{ self, Sender },
+    glib::{self, Sender},
     prelude::*,
-    Application,
-    CssProvider,
-    StyleContext,
-    ApplicationWindow,
+    Application, CssProvider, StyleContext,
 };
 
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
 
-use self::{ controller_message::ControllerMessage, utils::is_not_empty };
+use self::{
+    controller_message::ControllerMessage,
+    utils::{is_not_empty, push_if_absent, remove_element},
+};
 
 const ADD_VIEW_ADD_CLIENT_ERROR_TEXT: &str = "ERROR: Add client view";
 const ADD_VIEW_INVITE_ERROR_TEXT: &str = "ERROR: Add invite view";
@@ -111,7 +99,7 @@ impl Controller {
         StyleContext::add_provider_for_display(
             &Display::default().expect(DISPLAY_CONNECT_ERROR_TEXT),
             &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }
 
@@ -139,15 +127,11 @@ impl Controller {
         let mut main_view = MainView::new(sender.clone());
         let mut main_window = MainView::new(sender.clone()).get_view(app.clone(), "".to_string());
 
-        let mut add_channel_window = AddChannelView::new(sender.clone()).get_view(
-            app.clone(),
-            vec![]
-        );
+        let mut add_channel_window =
+            AddChannelView::new(sender.clone()).get_view(app.clone(), vec![]);
 
-        let mut add_client_window = AddClientView::new(sender.clone()).get_view(
-            app.clone(),
-            vec![]
-        );
+        let mut add_client_window =
+            AddClientView::new(sender.clone()).get_view(app.clone(), vec![]);
 
         let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
 
@@ -184,40 +168,45 @@ impl Controller {
                     let message = format!("{KICK_COMMAND} {channel} {member}");
                     client.send_raw(&message).expect(KICK_ERROR_TEXT);
                 }
-                OpenAddClientView { channels_and_clients } => {
+                OpenAddClientView {
+                    channels_and_clients,
+                } => {
                     let clients_to_add: Vec<String> = Self::clients_not_mine(
                         Self::clients_to_add(channels_and_clients, current_nickname.clone()),
-                        main_view.get_my_clients()
+                        main_view.get_my_clients(),
                     );
                     if is_not_empty(&clients_to_add) {
-                        add_client_window = AddClientView::new(sender_clone.clone()).get_view(
-                            app_clone.clone(),
-                            clients_to_add
-                        );
+                        add_client_window = AddClientView::new(sender_clone.clone())
+                            .get_view(app_clone.clone(), clients_to_add);
                         add_client_window.show();
                     } else {
                         Self::open_warning_view(sender.clone(), NO_CLIENTS_WARNING_TEXT);
                     }
                 }
-                OpenInviteClientView { channels_and_clients } => {
+                OpenInviteClientView {
+                    channels_and_clients,
+                } => {
                     let channels_to_invite = Self::channels_not_mine(
                         main_view.get_my_channels(),
-                        Self::client_channels(channels_and_clients, current_conv.clone())
+                        Self::client_channels(channels_and_clients, current_conv.clone()),
                     );
                     if is_not_empty(&channels_to_invite) {
-                        invite_window = InviteView::new(sender_clone.clone()).get_view(
-                            app_clone.clone(),
-                            channels_to_invite
-                        );
+                        invite_window = InviteView::new(sender_clone.clone())
+                            .get_view(app_clone.clone(), channels_to_invite);
                         invite_window.show();
                     } else {
                         Self::open_warning_view(
                             sender.clone(),
-                            CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT
+                            CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT,
                         );
                     }
                 }
-                OpenMainView { realname, servername, nickname, username } => {
+                OpenMainView {
+                    realname,
+                    servername,
+                    nickname,
+                    username,
+                } => {
                     register_window.close();
                     current_realname = String::from(&realname[..]);
                     current_servername = String::from(&servername[..]);
@@ -244,12 +233,14 @@ impl Controller {
                             current_realname.clone(),
                             current_servername.clone(),
                             current_nickname.clone(),
-                            current_username.clone()
+                            current_username.clone(),
                         )
                         .show();
                 }
                 OpenWarningView { message } => {
-                    WarningView::new().get_view(app_clone.clone(), message).show();
+                    WarningView::new()
+                        .get_view(app_clone.clone(), message)
+                        .show();
                 }
                 Quit {} => {
                     let quit_message = QUIT_COMMAND.to_string();
@@ -274,11 +265,13 @@ impl Controller {
                 ReceiveListChannels { channels } => {
                     add_channel_window = AddChannelView::new(sender_clone.clone()).get_view(
                         app_clone.clone(),
-                        Self::channels_not_mine(channels, main_view.get_my_channels())
+                        Self::channels_not_mine(channels, main_view.get_my_channels()),
                     );
                     add_channel_window.show();
                 }
-                ReceiveNamesChannels { channels_and_clients } => {
+                ReceiveNamesChannels {
+                    channels_and_clients,
+                } => {
                     if trying_to_add_client {
                         sender_clone
                             .send(ControllerMessage::OpenAddClientView {
@@ -298,46 +291,52 @@ impl Controller {
                                 channels_and_clients[&current_conv].clone(),
                                 current_nickname.clone(),
                                 current_conv.clone(),
-                                sender.clone()
+                                sender.clone(),
                             )
                             .show();
                     }
                 }
-                ReceivePrivMessage { sender_nickname, message, channel } => {
+                ReceivePrivMessage {
+                    sender_nickname,
+                    message,
+                    channel,
+                } => {
                     if let Some(..) = channel {
                         main_view.receive_priv_channel_message(
                             message,
                             sender_nickname,
                             channel.unwrap(),
-                            current_conv.clone()
+                            current_conv.clone(),
                         );
                     } else {
                         main_view.receive_priv_client_message(
                             message,
                             sender_nickname,
-                            current_conv.clone()
+                            current_conv.clone(),
                         );
                     }
                 }
-                Register { pass, nickname, username, realname } => {
+                Register {
+                    pass,
+                    nickname,
+                    username,
+                    realname,
+                } => {
                     let pass_command = format!("{PASS_COMMAND} {pass}");
                     let nick_command = format!("{NICK_COMMAND} {nickname}");
-                    let user_command = format!(
-                        "{USER_COMMAND} {username} {username} {username} :{realname}"
-                    );
+                    let user_command =
+                        format!("{USER_COMMAND} {username} {username} {username} :{realname}");
                     client.send_raw(&pass_command).expect(PASS_ERROR_TEXT);
                     client.send_raw(&nick_command).expect(NICK_ERROR_TEXT);
                     client.send_raw(&user_command).expect(USER_ERROR_TEXT);
 
                     let sender_clone = sender.clone();
-                    client.start_async_read(move |message| {
-                        match message {
-                            Ok(message) => {
-                                let controller_message = to_controller_message(message);
-                                sender_clone.send(controller_message).unwrap();
-                            }
-                            Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {error}"),
+                    client.start_async_read(move |message| match message {
+                        Ok(message) => {
+                            let controller_message = to_controller_message(message);
+                            sender_clone.send(controller_message).unwrap();
                         }
+                        Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {error}"),
                     });
                 }
                 RegularMessage { message } => {
@@ -399,7 +398,9 @@ impl Controller {
 
     fn open_warning_view(sender: Sender<ControllerMessage>, warning_text: &str) {
         sender
-            .send(ControllerMessage::OpenWarningView { message: warning_text.to_string() })
+            .send(ControllerMessage::OpenWarningView {
+                message: warning_text.to_string(),
+            })
             .expect(OPEN_WARNING_ERROR_TEXT);
     }
 
@@ -409,14 +410,9 @@ impl Controller {
     fn clients_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
         for element in &all {
-            let no_operator_indicator = if let Some(stripped) = element.strip_prefix('@') {
-                stripped.to_string()
-            } else {
-                element.to_string()
-            };
-            if !mine.contains(&no_operator_indicator) {
-                not_mine.push(no_operator_indicator.clone());
-            }
+            let element_without_operator_indicator: String =
+                Self::remove_operator_indicator(element);
+            push_if_absent(&mine, &mut not_mine, element_without_operator_indicator);
         }
         not_mine
     }
@@ -427,9 +423,7 @@ impl Controller {
     fn channels_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
         let mut not_mine: Vec<String> = vec![];
         for element in &all {
-            if !mine.contains(element) {
-                not_mine.push(element.clone());
-            }
+            push_if_absent(&mine, &mut not_mine, element.to_string());
         }
         not_mine
     }
@@ -441,9 +435,7 @@ impl Controller {
         let mut clients_set: Vec<String> = vec![];
         for clients_of_channel in channels_and_clients.values() {
             for client in clients_of_channel {
-                if !clients_set.contains(client) {
-                    clients_set.push(client.to_string());
-                }
+                push_if_absent(&clients_set.clone(), &mut clients_set, client.to_string());
             }
         }
         clients_set
@@ -454,27 +446,16 @@ impl Controller {
     /// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
     fn clients_to_add(
         channels_and_clients: HashMap<String, Vec<String>>,
-        current_nickname: String
+        current_nickname: String,
     ) -> Vec<String> {
         let mut all_clients = Self::server_clients(channels_and_clients);
-        if all_clients.contains(&current_nickname) {
-            all_clients.remove(
-                all_clients
-                    .iter()
-                    .position(|x| *x == current_nickname)
-                    .unwrap()
-            );
-        }
-        if all_clients.contains(&format!("@{current_nickname}")) {
-            all_clients.remove(
-                all_clients
-                    .iter()
-                    .position(|x| *x == format!("@{current_nickname}"))
-                    .unwrap()
-            );
-        }
-
+        Self::remove_myself(&mut all_clients, current_nickname);
         all_clients
+    }
+
+    fn remove_myself(all_clients: &mut Vec<String>, current_nickname: String) {
+        remove_element(all_clients, &current_nickname);
+        remove_element(all_clients, &format!("@{current_nickname}"));
     }
 
     /// Returns all channels from a client.
@@ -482,25 +463,28 @@ impl Controller {
     /// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
     fn client_channels(
         channels_and_clients: HashMap<String, Vec<String>>,
-        client: String
+        client: String,
     ) -> Vec<String> {
         let mut client_channels_set: Vec<String> = vec![];
         for channel in channels_and_clients.keys() {
             let mut clients: Vec<String> = vec![];
             for element in channels_and_clients.get(channel).unwrap() {
-                let no_operator_indicator: String = if
-                    let Some(stripped) = element.strip_prefix('@')
-                {
-                    stripped.to_string()
-                } else {
-                    element.to_string()
-                };
-                clients.push(no_operator_indicator);
+                let element_without_operator_indicator: String =
+                    Self::remove_operator_indicator(element);
+                clients.push(element_without_operator_indicator);
             }
             if clients.contains(&client) {
                 client_channels_set.push((&channel).to_string());
             }
         }
         client_channels_set
+    }
+
+    fn remove_operator_indicator(element: &str) -> String {
+        if let Some(stripped) = element.strip_prefix('@') {
+            stripped.to_string()
+        } else {
+            element.to_string()
+        }
     }
 }
