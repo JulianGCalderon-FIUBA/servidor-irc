@@ -4,6 +4,7 @@ pub mod controller_handler;
 
 /// Definition of messages the controller can send and receive.
 pub mod controller_message;
+pub mod utils;
 
 use std::collections::HashMap;
 
@@ -41,12 +42,20 @@ use crate::{
 use gtk4 as gtk;
 
 use crate::{ client::Client, views::main_view::MainView, ADDRESS };
-use gtk::{ gdk::Display, glib, prelude::*, Application, CssProvider, StyleContext };
+use gtk::{
+    gdk::Display,
+    glib::{ self, Sender },
+    prelude::*,
+    Application,
+    CssProvider,
+    StyleContext,
+    ApplicationWindow,
+};
 
 use controller_handler::to_controller_message;
 use controller_message::ControllerMessage::*;
 
-use self::controller_message::ControllerMessage;
+use self::{ controller_message::ControllerMessage, utils::is_not_empty };
 
 const ADD_VIEW_ADD_CLIENT_ERROR_TEXT: &str = "ERROR: Add client view";
 const ADD_VIEW_INVITE_ERROR_TEXT: &str = "ERROR: Add invite view";
@@ -140,10 +149,6 @@ impl Controller {
             vec![]
         );
 
-        let mut safe_conversation_window = SafeConversationView::new(sender.clone()).get_view(
-            app.clone()
-        );
-
         let mut invite_window = InviteView::new(sender.clone()).get_view(app.clone(), vec![]);
 
         let mut current_conv = "".to_string();
@@ -171,32 +176,27 @@ impl Controller {
                 }
                 JoinChannel { channel } => {
                     add_channel_window.close();
-                    let join_message = format!("{JOIN_COMMAND} {channel}");
-                    client.send_raw(&join_message).expect(JOIN_ERROR_TEXT);
+                    let message = format!("{JOIN_COMMAND} {channel}");
+                    client.send_raw(&message).expect(JOIN_ERROR_TEXT);
                     main_view.add_channel(channel);
                 }
                 KickMember { channel, member } => {
-                    let kick = format!("{KICK_COMMAND} {channel} {member}");
-                    client.send_raw(&kick).expect(KICK_ERROR_TEXT);
+                    let message = format!("{KICK_COMMAND} {channel} {member}");
+                    client.send_raw(&message).expect(KICK_ERROR_TEXT);
                 }
                 OpenAddClientView { channels_and_clients } => {
                     let clients_to_add: Vec<String> = Self::clients_not_mine(
                         Self::clients_to_add(channels_and_clients, current_nickname.clone()),
                         main_view.get_my_clients()
                     );
-
-                    if !clients_to_add.is_empty() {
+                    if is_not_empty(&clients_to_add) {
                         add_client_window = AddClientView::new(sender_clone.clone()).get_view(
                             app_clone.clone(),
                             clients_to_add
                         );
                         add_client_window.show();
                     } else {
-                        sender_clone
-                            .send(ControllerMessage::OpenWarningView {
-                                message: NO_CLIENTS_WARNING_TEXT.to_string(),
-                            })
-                            .expect(OPEN_WARNING_ERROR_TEXT);
+                        Self::open_warning_view(sender.clone(), NO_CLIENTS_WARNING_TEXT);
                     }
                 }
                 OpenInviteClientView { channels_and_clients } => {
@@ -204,18 +204,17 @@ impl Controller {
                         main_view.get_my_channels(),
                         Self::client_channels(channels_and_clients, current_conv.clone())
                     );
-                    if !channels_to_invite.is_empty() {
+                    if is_not_empty(&channels_to_invite) {
                         invite_window = InviteView::new(sender_clone.clone()).get_view(
                             app_clone.clone(),
                             channels_to_invite
                         );
                         invite_window.show();
                     } else {
-                        sender_clone
-                            .send(ControllerMessage::OpenWarningView {
-                                message: CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT.to_string(),
-                            })
-                            .expect(OPEN_WARNING_ERROR_TEXT);
+                        Self::open_warning_view(
+                            sender.clone(),
+                            CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT
+                        );
                     }
                 }
                 OpenMainView { realname, servername, nickname, username } => {
@@ -234,10 +233,9 @@ impl Controller {
                 }
                 OpenSafeConversationView {} => {
                     main_window.hide();
-                    safe_conversation_window = SafeConversationView::new(
-                        sender_clone.clone()
-                    ).get_view(app_clone.clone());
-                    safe_conversation_window.show();
+                    SafeConversationView::new(sender_clone.clone())
+                        .get_view(app_clone.clone())
+                        .show();
                 }
                 OpenUserInfoView {} => {
                     UserInfoView::new()
@@ -364,16 +362,12 @@ impl Controller {
                 }
                 SendNamesMessageToInviteClient {} => {
                     let my_channels = main_view.get_my_channels();
-                    if !my_channels.is_empty() {
+                    if is_not_empty(&my_channels) {
                         trying_to_add_client = false;
                         trying_to_invite_client = true;
                         client.send_raw(NAMES_COMMAND).expect(NAMES_ERROR_TEXT);
                     } else {
-                        sender_clone
-                            .send(ControllerMessage::OpenWarningView {
-                                message: NO_CHANNELS_WARNING_TEXT.to_string(),
-                            })
-                            .expect(OPEN_WARNING_ERROR_TEXT);
+                        Self::open_warning_view(sender.clone(), NO_CHANNELS_WARNING_TEXT);
                     }
                 }
                 SendNamesMessageToKnowMembers {} => {
@@ -401,6 +395,12 @@ impl Controller {
             // and have senders fail
             glib::Continue(true)
         });
+    }
+
+    fn open_warning_view(sender: Sender<ControllerMessage>, warning_text: &str) {
+        sender
+            .send(ControllerMessage::OpenWarningView { message: warning_text.to_string() })
+            .expect(OPEN_WARNING_ERROR_TEXT);
     }
 
     /// Returns clients that are not from the current user.
