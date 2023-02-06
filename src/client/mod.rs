@@ -1,3 +1,6 @@
+mod client;
+mod async_reader;
+
 use std::io::{BufReader, Write};
 use std::net::TcpStream;
 use std::sync::mpsc;
