@@ -3,7 +3,8 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 use std::{env, io};
 
-use internet_relay_chat::client::Client;
+use internet_relay_chat::client::async_reader::AsyncReader;
+use internet_relay_chat::client::clientt::Clientt;
 use internet_relay_chat::message::{CreationError, Message};
 use internet_relay_chat::ADDRESS;
 
@@ -11,15 +12,19 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let address = unpack_args(args);
 
-    let mut client = match Client::new(address) {
+    let mut client = match Clientt::new(address) {
         Ok(stream) => stream,
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
 
     let (sender, receiver) = mpsc::channel();
 
-    // client.start_async_read(print_message);
-    client.start_async_send(sender);
+    let stream = match client.try_clone() {
+        Ok(stream) => stream,
+        Err(error) => return eprintln!("Error cloning stream: {error:?}"),
+    };
+
+    let _reader = AsyncReader::new(stream, sender);
 
     thread::spawn(move || -> Result<(), RecvError> {
         loop {
@@ -30,18 +35,13 @@ fn main() {
     let (stdin, handle) = spawn_stdin_channel();
 
     loop {
-        // if client.finished_asnyc_read() {
-        //     println!("Connection with server was closed, press enter to continue.");
-        //     break;
-        // }
-
         let line = match stdin.recv_timeout(Duration::from_millis(100)) {
             Ok(line) => line,
             Err(RecvTimeoutError::Timeout) => continue,
             Err(RecvTimeoutError::Disconnected) => break,
         };
 
-        if let Err(error) = client.send_raw(&line) {
+        if let Err(error) = client.send(&line) {
             eprintln!("Error sending message to server: {error}");
             break;
         }

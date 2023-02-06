@@ -38,3 +38,13 @@ fn async_send(
         sender.send(message)?;
     }
 }
+
+impl Drop for AsyncReader {
+    fn drop(&mut self) {
+        if let Some(handler) = self.thread.take() {
+            if let Err(error) = handler.join() {
+                eprintln!("Error: {error:?}");
+            }
+        }
+    }
+}

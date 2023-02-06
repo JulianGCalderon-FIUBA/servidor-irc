@@ -1,5 +1,5 @@
-mod client;
-mod async_reader;
+pub mod async_reader;
+pub mod clientt;
 
 use std::io::{BufReader, Write};
 use std::net::TcpStream;

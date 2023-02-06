@@ -6,11 +6,11 @@ use std::{
 use crate::message::CRLF;
 
 /// Represents a client that can connect to a Server.
-pub struct Client {
-    stream: TcpStream,
+pub struct Clientt {
+    pub stream: TcpStream,
 }
 
-impl Client {
+impl Clientt {
     /// Creates new [`Client`] connected to received address.
     pub fn new(address: String) -> io::Result<Self> {
         let stream = TcpStream::connect(address)?;
@@ -26,9 +26,7 @@ impl Client {
         self.stream.write_all(CRLF)
     }
 
-    pub fn try_clone(&mut self) -> io::Result<Self> {
-        Ok(Self {
-            stream: self.stream.try_clone()?,
-        })
+    pub fn try_clone(&mut self) -> io::Result<TcpStream> {
+        self.stream.try_clone()
     }
 }
