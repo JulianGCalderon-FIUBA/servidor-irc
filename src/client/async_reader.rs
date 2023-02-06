@@ -23,6 +23,14 @@ impl AsyncReader {
             thread: Some(handle),
         }
     }
+    /// Returns true when connection with stream finalized
+    pub fn finished_asnyc_read(&self) -> bool {
+        if let Some(join_handle) = &self.thread {
+            return join_handle.is_finished();
+        }
+
+        true
+    }
 }
 
 fn async_send(

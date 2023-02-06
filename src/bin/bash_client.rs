@@ -24,7 +24,7 @@ fn main() {
         Err(error) => return eprintln!("Error cloning stream: {error:?}"),
     };
 
-    let _reader = AsyncReader::new(stream, sender);
+    let reader = AsyncReader::new(stream, sender);
 
     thread::spawn(move || -> Result<(), RecvError> {
         loop {
@@ -35,6 +35,10 @@ fn main() {
     let (stdin, handle) = spawn_stdin_channel();
 
     loop {
+        if reader.finished_asnyc_read() {
+            println!("Connection with server was closed, press enter to continue.");
+            break;
+        }
         let line = match stdin.recv_timeout(Duration::from_millis(100)) {
             Ok(line) => line,
             Err(RecvTimeoutError::Timeout) => continue,
