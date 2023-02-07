@@ -1,58 +1,83 @@
 use std::{
-    io::BufReader,
+    io,
     net::TcpStream,
-    sync::mpsc::{self, SendError, Sender},
+    sync::{
+        atomic::{AtomicBool, Ordering},
+        mpsc, Arc,
+    },
     thread::{self, JoinHandle},
 };
 
 use crate::message::{CreationError, Message};
 
-type MessageReadingThreadHandle = JoinHandle<Result<(), SendError<Result<Message, CreationError>>>>;
-
 /// Represents a client that can connect to a Server.
 pub struct AsyncReader {
-    thread: Option<MessageReadingThreadHandle>,
+    stream: Option<TcpStream>,
+    handle: Option<JoinHandle<SendThreadReturn>>,
+    running: Arc<AtomicBool>,
 }
 
 impl AsyncReader {
-    /// Creates new [`Client`] connected to received address.
-    pub fn new(stream: TcpStream, sender: Sender<Result<Message, CreationError>>) -> Self {
-        let handle = thread::spawn(|| async_send(stream, sender));
-
+    pub fn new(stream: TcpStream) -> Self {
         Self {
-            thread: Some(handle),
+            stream: Some(stream),
+            running: Arc::new(AtomicBool::new(false)),
+            handle: None,
         }
     }
-    /// Returns true when connection with stream finalized
-    pub fn finished_asnyc_read(&self) -> bool {
-        if let Some(join_handle) = &self.thread {
-            return join_handle.is_finished();
-        }
 
-        true
+    /// Creates new [`Client`] connected to received address.
+    pub fn spawn(&mut self) -> mpsc::Receiver<Result<Message, CreationError>> {
+        let stream = self.stream.take().expect("reader is already running");
+
+        let (sender, receiver) = mpsc::channel();
+
+        let running = Arc::clone(&self.running);
+        thread::spawn(|| async_send(stream, sender, running));
+
+        receiver
     }
-}
 
-fn async_send(
-    stream: TcpStream,
-    sender: Sender<Result<Message, CreationError>>,
-) -> Result<(), mpsc::SendError<Result<Message, CreationError>>> {
-    let mut reader = BufReader::new(stream);
-    loop {
-        let message = Message::read_from_buffer(&mut reader);
-        if let Err(CreationError::IoError(_)) = message {
-            return Ok(());
-        }
-        sender.send(message)?;
+    pub fn join(&mut self) -> std::thread::Result<SendThreadReturn> {
+        self.running.store(false, Ordering::Relaxed);
+
+        let handle = self.handle.take().expect("should be running");
+        handle.join()
+    }
+
+    pub fn running(&self) -> bool {
+        self.running.load(Ordering::Relaxed)
     }
 }
 
 impl Drop for AsyncReader {
     fn drop(&mut self) {
-        if let Some(handler) = self.thread.take() {
-            if let Err(error) = handler.join() {
-                eprintln!("Error: {error:?}");
-            }
+        if self.running() {
+            self.join().ok();
         }
     }
+}
+
+type SendThreadReturn = Result<(), mpsc::SendError<Result<Message, CreationError>>>;
+
+fn async_send(
+    mut stream: TcpStream,
+    sender: mpsc::Sender<Result<Message, CreationError>>,
+    running: Arc<AtomicBool>,
+) -> SendThreadReturn {
+    while running.as_ref().load(Ordering::Relaxed) {
+        let message = Message::read_from(&mut stream);
+        if let Err(CreationError::IoError(io_error)) = &message {
+            if let io::ErrorKind::WouldBlock = io_error.kind() {
+                continue;
+            } else {
+                sender.send(message)?;
+                return Ok(());
+            }
+        }
+
+        sender.send(message)?;
+    }
+
+    Ok(())
 }

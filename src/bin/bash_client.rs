@@ -17,14 +17,14 @@ fn main() {
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
 
-    let (sender, receiver) = mpsc::channel();
-
     let stream = match client.get_stream() {
         Ok(stream) => stream,
         Err(error) => return eprintln!("Error cloning stream: {error:?}"),
     };
 
-    let reader = AsyncReader::new(stream, sender);
+    let mut reader = AsyncReader::new(stream);
+
+    let receiver = reader.spawn();
 
     thread::spawn(move || -> Result<(), RecvError> {
         loop {
@@ -35,7 +35,7 @@ fn main() {
     let (stdin, handle) = spawn_stdin_channel();
 
     loop {
-        if reader.finished_asnyc_read() {
+        if !reader.running() {
             println!("Connection with server was closed, press enter to continue.");
             break;
         }
