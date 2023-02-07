@@ -54,7 +54,6 @@ fn async_send(
             if let io::ErrorKind::WouldBlock = io_error.kind() {
                 continue;
             } else {
-                sender.send(message)?;
                 break;
             }
         }
