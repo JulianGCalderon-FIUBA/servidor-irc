@@ -19,7 +19,7 @@ fn main() {
 
     let (sender, receiver) = mpsc::channel();
 
-    let stream = match client.try_clone() {
+    let stream = match client.get_stream() {
         Ok(stream) => stream,
         Err(error) => return eprintln!("Error cloning stream: {error:?}"),
     };

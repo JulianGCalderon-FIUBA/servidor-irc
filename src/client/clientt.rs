@@ -26,7 +26,13 @@ impl Clientt {
         self.stream.write_all(CRLF)
     }
 
-    pub fn try_clone(&mut self) -> io::Result<TcpStream> {
+    pub fn try_clone(&mut self) -> io::Result<Self> {
+        Ok(Self {
+            stream: self.stream.try_clone()?,
+        })
+    }
+
+    pub fn get_stream(&self) -> io::Result<TcpStream> {
         self.stream.try_clone()
     }
 }
