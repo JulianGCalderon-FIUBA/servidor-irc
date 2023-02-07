@@ -12,7 +12,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let address = unpack_args(args);
 
-    let mut client = match Clientt::new(address) {
+    let mut client = match Clientt::connect(address) {
         Ok(stream) => stream,
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };

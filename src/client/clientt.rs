@@ -11,8 +11,12 @@ pub struct Clientt {
 }
 
 impl Clientt {
+    pub fn new(stream: TcpStream) -> Self {
+        Self { stream }
+    }
+
     /// Creates new [`Client`] connected to received address.
-    pub fn new(address: String) -> io::Result<Self> {
+    pub fn connect(address: String) -> io::Result<Self> {
         let stream = TcpStream::connect(address)?;
 
         Ok(Self { stream })
