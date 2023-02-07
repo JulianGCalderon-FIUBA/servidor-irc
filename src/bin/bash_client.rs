@@ -22,10 +22,7 @@ fn main() {
         Err(error) => return eprintln!("Error cloning stream: {error:?}"),
     };
 
-    let mut reader = AsyncReader::new(stream);
-
-    let receiver = reader.spawn();
-
+    let (reader, receiver) = AsyncReader::spawn(stream);
     thread::spawn(move || -> Result<(), RecvError> {
         loop {
             print_message(receiver.recv()?);
