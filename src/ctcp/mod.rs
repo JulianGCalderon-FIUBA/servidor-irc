@@ -1,18 +1,9 @@
-use std::{
-    io::{self, Write},
-    net::{TcpListener, TcpStream},
-};
+use crate::{macros::some_or_return, message::Message, server::consts::commands::PRIVMSG_COMMAND};
 
-use crate::{
-    macros::some_or_return,
-    message::{Message, CRLF},
-    server::consts::commands::PRIVMSG_COMMAND,
-};
-
-use self::dcc_connection::DccConnection;
-
-pub mod dcc_connection;
+pub mod dcc_chat;
+mod dcc_chat_sender;
 pub mod dcc_message;
+mod dcc_chat_receiver;
 
 pub const CONTROL_CHARACTER: char = 1 as char;
 
@@ -41,43 +32,4 @@ pub fn get_ctcp_message(message: &Message) -> Option<String> {
     content.pop();
 
     Some(content)
-}
-
-pub fn issue_chat_command(server: &mut TcpStream, client: &str) -> io::Result<TcpListener> {
-    let listener = TcpListener::bind("0.0.0.0:0")?;
-
-    let address = listener.local_addr()?;
-
-    let ip = address.ip();
-    let port = address.port();
-
-    write!(server, "CTCP {client} :DCC CHAT {ip} {port}")?;
-    server.write_all(CRLF)?;
-
-    Ok(listener)
-}
-
-pub fn receive_chat_accept(listener: TcpListener) -> io::Result<DccConnection> {
-    let stream = listener.accept()?.0;
-
-    DccConnection::new(stream)
-}
-
-pub fn receive_chat_decline(listener: TcpListener) {
-    drop(listener)
-}
-
-pub fn accept_chat_command(
-    server: &mut TcpStream,
-    client: &str,
-    address: &str,
-) -> io::Result<DccConnection> {
-    write!(server, "CTCP {client} :DCC CHAT accept")?;
-    server.write_all(CRLF)?;
-
-    DccConnection::connect(address)
-}
-pub fn decline_chat_command(server: &mut TcpStream, client: &str) -> io::Result<()> {
-    write!(server, "CTCP {client} :DCC CHAT decline")?;
-    server.write_all(CRLF)
 }
