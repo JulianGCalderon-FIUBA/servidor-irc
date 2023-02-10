@@ -15,26 +15,31 @@ use crate::{
     views::{
         main_view::widgets_creation::{create_current_chat, create_message_box},
         widgets_creation::{
-            build_application_window, create_button_with_margin, create_center_button,
-            create_chat_box, create_entry, create_error_label, create_label,
-            create_message_sender_box, create_scrollwindow_chat,
+            build_application_window,
+            create_button_with_margin,
+            create_chat_box,
+            create_entry,
+            create_error_label,
+            create_message_sender_box,
+            create_scrollwindow_chat,
+            // create_label, create_center_button
         },
         ENTRY_PLACEHOLDER, SEND_BUTTON_TEXT,
     },
 };
 
-use self::{
-    requests::kick_request,
-    widgets_creation::{create_kick_button, create_kick_label},
-};
+// use self::{
+//     requests::kick_request,
+//     widgets_creation::{create_kick_button, create_kick_label},
+// };
 
-use super::{
-    widgets_creation::{create_main_box_add_view, create_title},
-    CONTINUE_BUTTON_TEXT,
-};
+// use super::{
+//     widgets_creation::{create_main_box_add_view, create_title},
+//     CONTINUE_BUTTON_TEXT,
+// };
 
-const OPERATOR_FIRST_CHARACTER: &str = "@";
-const TITLE: &str = "Members";
+// const OPERATOR_FIRST_CHARACTER: &str = "@";
+// const TITLE: &str = "Members";
 
 /// Shows channel members view.
 /// Contains an exit button.
@@ -110,9 +115,9 @@ impl SafeConversationView {
 
     fn connect_send_button(
         &self,
-        input: Entry,
-        sender: Sender<ControllerMessage>,
-        error_label: Label,
+        _input: Entry,
+        _sender: Sender<ControllerMessage>,
+        _error_label: Label,
     ) {
         self.send_message.connect_clicked(move |_| {
             // error_label.set_text("");
@@ -136,7 +141,7 @@ impl SafeConversationView {
         });
     }
 
-    pub fn send_message(&mut self, message: String, nickname: String) {
+    pub fn send_message(&mut self, _message: String, _nickname: String) {
         // let message = create_send_message(&message);
         // self.message_box.append(&message);
         // adjust_scrollbar(self.scrollwindow_chat.clone());
