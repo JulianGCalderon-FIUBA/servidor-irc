@@ -169,6 +169,6 @@ impl ChannelMembersView {
                 return stripped.to_string();
             }
         }
-        "".to_string()
+        String::new()
     }
 }

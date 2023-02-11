@@ -1,4 +1,5 @@
 pub mod message_matcher;
+pub mod names_message_intention;
 pub mod utils;
 
 use gtk4 as gtk;
@@ -21,7 +22,13 @@ use gtk::{
     Application, ApplicationWindow,
 };
 
+use crate::controller::controller_message::ControllerMessage::{
+    OpenAddClientView, OpenInviteClientView, OpenWarningView,
+};
+
 use crate::controller::ControllerMessage::*;
+
+use self::names_message_intention::NamesMessageIntention::{self, Undefined};
 
 use super::controller_message::ControllerMessage;
 
@@ -41,8 +48,7 @@ pub struct InterfaceController {
     main_window: ApplicationWindow,
     register_window: ApplicationWindow,
     sender: Sender<ControllerMessage>,
-    trying_to_add_client: bool,
-    trying_to_invite_client: bool,
+    names_message_intention: NamesMessageIntention,
 }
 
 impl InterfaceController {
@@ -61,11 +67,10 @@ impl InterfaceController {
             invite_window: InviteView::new(sender.clone()).get_view(app.clone(), vec![]),
             ip_window: IpView::new(sender.clone()).get_view(app.clone()),
             main_view: MainView::new(sender.clone()),
-            main_window: MainView::new(sender.clone()).get_view(app.clone(), "".to_string()),
+            main_window: MainView::new(sender.clone()).get_view(app.clone(), String::new()),
             register_window: RegisterView::new(sender.clone()).get_view(app),
             sender,
-            trying_to_add_client: false,
-            trying_to_invite_client: false,
+            names_message_intention: Undefined
         }
     }
 

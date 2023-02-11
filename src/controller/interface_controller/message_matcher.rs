@@ -5,17 +5,17 @@ use gtk4 as gtk;
 use crate::{
     client::Client,
     controller::{
-        controller_handler::to_controller_message, controller_message::ControllerMessage,
+        controller_handler::to_controller_message,
+        controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
         ADD_VIEW_ADD_CLIENT_ERROR_TEXT, ADD_VIEW_INVITE_ERROR_TEXT,
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, FAILED_TO_READ_MESSAGE_ERROR_TEXT,
-        INVITE_ERROR_TEXT, JOIN_ERROR_TEXT, KICK_ERROR_TEXT, LIST_ERROR_TEXT, NAMES_ERROR_TEXT,
-        NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT, NO_CLIENTS_WARNING_TEXT, PART_ERROR_TEXT,
-        PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT, QUIT_ERROR_TEXT, SERVER_CONNECT_ERROR_TEXT,
-        USER_ERROR_TEXT,
+        INVITE_ERROR_TEXT, JOIN_ERROR_TEXT, KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT,
+        NO_CHANNELS_WARNING_TEXT, NO_CLIENTS_WARNING_TEXT, PART_ERROR_TEXT, PASS_ERROR_TEXT,
+        PRIVMSG_ERROR_TEXT, QUIT_ERROR_TEXT, SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
     },
     server::consts::commands::{
-        INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NAMES_COMMAND, NICK_COMMAND,
-        PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
+        INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
+        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
     views::add_views::{
         add_channel_view::AddChannelView, add_client_view::AddClientView,
@@ -27,11 +27,9 @@ use crate::{
 use gtk::{glib::GString, prelude::*};
 
 use super::{
-    utils::{
-        channels_not_mine, client_channels, clients_not_mine, clients_to_add, is_not_empty,
-        send_open_warning_view,
-    },
+    utils::{channels_not_mine, is_not_empty},
     InterfaceController,
+    NamesMessageIntention::*,
 };
 
 impl InterfaceController {
@@ -60,33 +58,26 @@ impl InterfaceController {
     }
 
     pub fn open_add_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
-        let clients_to_add: Vec<String> = clients_not_mine(
-            clients_to_add(channels_and_clients, self.current_nickname.clone()),
-            self.main_view.get_my_clients(),
-        );
-        if is_not_empty(&clients_to_add) {
-            self.add_client_window =
-                AddClientView::new(self.sender.clone()).get_view(self.app.clone(), clients_to_add);
+        let clients_not_mine: Vec<String> = self.clients_not_mine(channels_and_clients);
+        if is_not_empty(&clients_not_mine) {
+            self.add_client_window = AddClientView::new(self.sender.clone())
+                .get_view(self.app.clone(), clients_not_mine);
             self.add_client_window.show();
         } else {
-            send_open_warning_view(self.sender.clone(), NO_CLIENTS_WARNING_TEXT);
+            self.send_open_warning_view(NO_CLIENTS_WARNING_TEXT);
         }
     }
 
     pub fn open_invite_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
-        let channels_to_invite = channels_not_mine(
-            self.main_view.get_my_channels(),
-            client_channels(channels_and_clients, self.current_conv.clone()),
-        );
+        let my_channels = self.main_view.get_my_channels();
+        let current_conv_channels = self.current_conv_channels(channels_and_clients);
+        let channels_to_invite = channels_not_mine(my_channels, current_conv_channels);
         if is_not_empty(&channels_to_invite) {
             self.invite_window =
                 InviteView::new(self.sender.clone()).get_view(self.app.clone(), channels_to_invite);
             self.invite_window.show();
         } else {
-            send_open_warning_view(
-                self.sender.clone(),
-                CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT,
-            );
+            self.send_open_warning_view(CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT);
         }
     }
 
@@ -138,8 +129,7 @@ impl InterfaceController {
     }
 
     pub fn quit(&mut self) {
-        let quit_message = QUIT_COMMAND.to_string();
-        self.client.send_raw(&quit_message).expect(QUIT_ERROR_TEXT);
+        self.client.send_raw(QUIT_COMMAND).expect(QUIT_ERROR_TEXT);
     }
 
     pub fn quit_channel(&mut self) {
@@ -170,28 +160,33 @@ impl InterfaceController {
     }
 
     pub fn receive_names_channels(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
-        if self.trying_to_add_client {
-            self.sender
-                .send(ControllerMessage::OpenAddClientView {
-                    channels_and_clients,
-                })
-                .expect(ADD_VIEW_ADD_CLIENT_ERROR_TEXT);
-        } else if self.trying_to_invite_client {
-            self.sender
-                .send(ControllerMessage::OpenInviteClientView {
-                    channels_and_clients,
-                })
-                .expect(ADD_VIEW_INVITE_ERROR_TEXT);
-        } else {
-            ChannelMembersView::new()
-                .get_view(
-                    self.app.clone(),
-                    channels_and_clients[&self.current_conv].clone(),
-                    self.current_nickname.clone(),
-                    self.current_conv.clone(),
-                    self.sender.clone(),
-                )
-                .show();
+        match self.names_message_intention {
+            AddClient => {
+                self.sender
+                    .send(OpenAddClientView {
+                        channels_and_clients,
+                    })
+                    .expect(ADD_VIEW_ADD_CLIENT_ERROR_TEXT);
+            }
+            InviteClient => {
+                self.sender
+                    .send(OpenInviteClientView {
+                        channels_and_clients,
+                    })
+                    .expect(ADD_VIEW_INVITE_ERROR_TEXT);
+            }
+            KnowMembers => {
+                ChannelMembersView::new()
+                    .get_view(
+                        self.app.clone(),
+                        channels_and_clients[&self.current_conv].clone(),
+                        self.current_nickname.clone(),
+                        self.current_conv.clone(),
+                        self.sender.clone(),
+                    )
+                    .show();
+            }
+            _ => {}
         }
     }
 
@@ -262,26 +257,20 @@ impl InterfaceController {
     }
 
     pub fn send_names_message_to_add_client(&mut self) {
-        self.trying_to_add_client = true;
-        self.trying_to_invite_client = false;
-        self.send_names_message(None);
+        self.send_names_message(AddClient, None);
     }
 
     pub fn send_names_message_to_invite_client(&mut self) {
         let my_channels = self.main_view.get_my_channels();
         if is_not_empty(&my_channels) {
-            self.trying_to_add_client = false;
-            self.trying_to_invite_client = true;
-            self.send_names_message(None);
+            self.send_names_message(InviteClient, None);
         } else {
-            send_open_warning_view(self.sender.clone(), NO_CHANNELS_WARNING_TEXT);
+            self.send_open_warning_view(NO_CHANNELS_WARNING_TEXT);
         }
     }
 
     pub fn send_names_message_to_know_members(&mut self) {
-        self.trying_to_add_client = false;
-        self.trying_to_invite_client = false;
-        self.send_names_message(Some(self.current_conv.clone()));
+        self.send_names_message(KnowMembers, Some(self.current_conv.clone()));
     }
 
     pub fn send_priv_message(&mut self, message: GString) {
@@ -300,13 +289,5 @@ impl InterfaceController {
         };
         self.ip_window.close();
         self.register_window.show();
-    }
-
-    // AUXILIAR FUNCTIONS
-
-    pub fn send_names_message(&mut self, parameter: Option<String>) {
-        let parameter_value = parameter.unwrap_or_else(|| "".to_string());
-        let message = format!("{NAMES_COMMAND} {}", parameter_value);
-        self.client.send_raw(&message).expect(NAMES_ERROR_TEXT);
     }
 }
