@@ -16,7 +16,7 @@ use crate::{
     },
 };
 use gtk::{
-    glib::{self, Sender},
+    glib::{self, Receiver, Sender},
     prelude::*,
     Application, ApplicationWindow,
 };
@@ -26,75 +26,50 @@ use crate::controller::ControllerMessage::*;
 use super::controller_message::ControllerMessage;
 
 pub struct InterfaceController {
-    app: Application,
-    client: Client,
-    sender: Sender<ControllerMessage>,
-    ip_window: ApplicationWindow,
-    register_window: ApplicationWindow,
-    main_view: MainView,
-    main_window: ApplicationWindow,
     add_channel_window: ApplicationWindow,
     add_client_window: ApplicationWindow,
-    invite_window: ApplicationWindow,
+    app: Application,
+    client: Client,
     current_conv: String,
     current_nickname: String,
     current_realname: String,
     current_servername: String,
     current_username: String,
+    invite_window: ApplicationWindow,
+    ip_window: ApplicationWindow,
+    main_view: MainView,
+    main_window: ApplicationWindow,
+    register_window: ApplicationWindow,
+    sender: Sender<ControllerMessage>,
     trying_to_add_client: bool,
     trying_to_invite_client: bool,
 }
 
 impl InterfaceController {
     /// Creates new [`Client`] connected to received address.
-    pub fn new(app: Application, client: Client) -> Self {
-        let (sender, _) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+    pub fn new(app: Application, client: Client, sender: Sender<ControllerMessage>) -> Self {
         Self {
-            app: app.clone(),
-            client,
-            sender: sender.clone(),
-            ip_window: IpView::new(sender.clone()).get_view(app.clone()),
-            register_window: RegisterView::new(sender.clone()).get_view(app.clone()),
-            main_view: MainView::new(sender.clone()),
-            main_window: MainView::new(sender.clone()).get_view(app.clone(), "".to_string()),
             add_channel_window: AddChannelView::new(sender.clone()).get_view(app.clone(), vec![]),
             add_client_window: AddClientView::new(sender.clone()).get_view(app.clone(), vec![]),
-            invite_window: InviteView::new(sender).get_view(app, vec![]),
-            current_conv: "".to_string(),
-            current_nickname: String::from(""),
-            current_realname: String::from(""),
-            current_servername: String::from(""),
-            current_username: String::from(""),
+            app: app.clone(),
+            client,
+            current_conv: String::new(),
+            current_nickname: String::new(),
+            current_realname: String::new(),
+            current_servername: String::new(),
+            current_username: String::new(),
+            invite_window: InviteView::new(sender.clone()).get_view(app.clone(), vec![]),
+            ip_window: IpView::new(sender.clone()).get_view(app.clone()),
+            main_view: MainView::new(sender.clone()),
+            main_window: MainView::new(sender.clone()).get_view(app.clone(), "".to_string()),
+            register_window: RegisterView::new(sender.clone()).get_view(app),
+            sender,
             trying_to_add_client: false,
             trying_to_invite_client: false,
         }
     }
 
-    pub fn initialize_values(&mut self) {
-        self.ip_window = IpView::new(self.sender.clone()).get_view(self.app.clone());
-
-        self.register_window = RegisterView::new(self.sender.clone()).get_view(self.app.clone());
-
-        self.main_view = MainView::new(self.sender.clone());
-        self.main_window =
-            MainView::new(self.sender.clone()).get_view(self.app.clone(), "".to_string());
-
-        self.add_channel_window =
-            AddChannelView::new(self.sender.clone()).get_view(self.app.clone(), vec![]);
-
-        self.add_client_window =
-            AddClientView::new(self.sender.clone()).get_view(self.app.clone(), vec![]);
-
-        self.invite_window =
-            InviteView::new(self.sender.clone()).get_view(self.app.clone(), vec![]);
-    }
-
-    pub fn build(mut self) {
-        let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
-        self.sender = sender;
-
-        self.initialize_values();
-
+    pub fn build(mut self, receiver: Receiver<ControllerMessage>) {
         self.ip_window.show();
 
         receiver.attach(None, move |msg| {

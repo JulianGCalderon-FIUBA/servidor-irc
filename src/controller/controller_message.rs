@@ -7,26 +7,8 @@ pub enum ControllerMessage {
     AddNewClient {
         new_client: GString,
     },
-    OpenNotificationsView {},
-    OpenUserInfoView {},
-    OpenAddClientView {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
-    OpenInviteClientView {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
-    OpenSafeConversationView {},
-    OpenWarningView {
-        message: String,
-    },
     ChangeConversation {
         nickname: String,
-    },
-    OpenMainView {
-        realname: String,
-        servername: String,
-        nickname: String,
-        username: String,
     },
     JoinChannel {
         channel: String,
@@ -34,6 +16,24 @@ pub enum ControllerMessage {
     KickMember {
         channel: String,
         member: String,
+    },
+    OpenAddClientView {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
+    OpenInviteClientView {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
+    OpenMainView {
+        realname: String,
+        servername: String,
+        nickname: String,
+        username: String,
+    },
+    OpenNotificationsView {},
+    OpenSafeConversationView {},
+    OpenUserInfoView {},
+    OpenWarningView {
+        message: String,
     },
     Quit {},
     QuitChannel {},

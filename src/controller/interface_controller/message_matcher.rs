@@ -264,7 +264,7 @@ impl InterfaceController {
     pub fn send_names_message_to_add_client(&mut self) {
         self.trying_to_add_client = true;
         self.trying_to_invite_client = false;
-        self.client.send_raw(NAMES_COMMAND).expect(NAMES_ERROR_TEXT);
+        self.send_names_message(None);
     }
 
     pub fn send_names_message_to_invite_client(&mut self) {
@@ -272,7 +272,7 @@ impl InterfaceController {
         if is_not_empty(&my_channels) {
             self.trying_to_add_client = false;
             self.trying_to_invite_client = true;
-            self.client.send_raw(NAMES_COMMAND).expect(NAMES_ERROR_TEXT);
+            self.send_names_message(None);
         } else {
             send_open_warning_view(self.sender.clone(), NO_CHANNELS_WARNING_TEXT);
         }
@@ -281,9 +281,7 @@ impl InterfaceController {
     pub fn send_names_message_to_know_members(&mut self) {
         self.trying_to_add_client = false;
         self.trying_to_invite_client = false;
-        self.client
-            .send_raw(&format!("{NAMES_COMMAND} {}", self.current_conv))
-            .expect(NAMES_ERROR_TEXT);
+        self.send_names_message(Some(self.current_conv.clone()));
     }
 
     pub fn send_priv_message(&mut self, message: GString) {
@@ -302,5 +300,13 @@ impl InterfaceController {
         };
         self.ip_window.close();
         self.register_window.show();
+    }
+
+    // AUXILIAR FUNCTIONS
+
+    pub fn send_names_message(&mut self, parameter: Option<String>) {
+        let parameter_value = parameter.unwrap_or_else(|| "".to_string());
+        let message = format!("{NAMES_COMMAND} {}", parameter_value);
+        self.client.send_raw(&message).expect(NAMES_ERROR_TEXT);
     }
 }

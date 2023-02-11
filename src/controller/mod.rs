@@ -9,7 +9,7 @@ pub mod interface_controller;
 use gtk4 as gtk;
 
 use crate::{client::Client, ADDRESS};
-use gtk::{gdk::Display, prelude::*, Application, CssProvider, StyleContext};
+use gtk::{gdk::Display, glib, prelude::*, Application, CssProvider, StyleContext};
 
 use self::{controller_message::ControllerMessage, interface_controller::InterfaceController};
 
@@ -85,6 +85,8 @@ impl Controller {
             Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT}: {error:?}"),
         };
 
-        InterfaceController::new(app.clone(), client).build();
+        let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+
+        InterfaceController::new(app.clone(), client, sender).build(receiver);
     }
 }
