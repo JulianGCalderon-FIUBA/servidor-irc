@@ -7,11 +7,11 @@ use crate::{
     controller::{
         controller_handler::to_controller_message,
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
-        ADD_VIEW_ADD_CLIENT_ERROR_TEXT, ADD_VIEW_INVITE_ERROR_TEXT,
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, FAILED_TO_READ_MESSAGE_ERROR_TEXT,
         INVITE_ERROR_TEXT, JOIN_ERROR_TEXT, KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT,
-        NO_CHANNELS_WARNING_TEXT, NO_CLIENTS_WARNING_TEXT, PART_ERROR_TEXT, PASS_ERROR_TEXT,
-        PRIVMSG_ERROR_TEXT, QUIT_ERROR_TEXT, SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
+        NO_CHANNELS_WARNING_TEXT, NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT,
+        OPEN_INVITE_VIEW_ERROR_TEXT, PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT,
+        QUIT_ERROR_TEXT, SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
     },
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
@@ -166,14 +166,14 @@ impl InterfaceController {
                     .send(OpenAddClientView {
                         channels_and_clients,
                     })
-                    .expect(ADD_VIEW_ADD_CLIENT_ERROR_TEXT);
+                    .expect(OPEN_ADD_CLIENT_VIEW_ERROR_TEXT);
             }
             InviteClient => {
                 self.sender
                     .send(OpenInviteClientView {
                         channels_and_clients,
                     })
-                    .expect(ADD_VIEW_INVITE_ERROR_TEXT);
+                    .expect(OPEN_INVITE_VIEW_ERROR_TEXT);
             }
             KnowMembers => {
                 ChannelMembersView::new()

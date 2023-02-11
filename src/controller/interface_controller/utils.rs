@@ -64,7 +64,7 @@ impl InterfaceController {
         parameter: Option<String>,
     ) {
         self.names_message_intention = intention;
-        let parameter_value = parameter.unwrap_or_else(|| String::new());
+        let parameter_value = parameter.unwrap_or_default();
         let message = format!("{NAMES_COMMAND} {}", parameter_value);
         self.client.send_raw(&message).expect(NAMES_ERROR_TEXT);
     }

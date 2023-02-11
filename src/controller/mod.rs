@@ -13,8 +13,9 @@ use gtk::{gdk::Display, glib, prelude::*, Application, CssProvider, StyleContext
 
 use self::{controller_message::ControllerMessage, interface_controller::InterfaceController};
 
-const ADD_VIEW_ADD_CLIENT_ERROR_TEXT: &str = "ERROR: Add client view";
-const ADD_VIEW_INVITE_ERROR_TEXT: &str = "ERROR: Add invite view";
+const OPEN_ADD_CLIENT_VIEW_ERROR_TEXT: &str = "ERROR: Open add client view";
+const OPEN_INVITE_VIEW_ERROR_TEXT: &str = "ERROR: Open invite view";
+
 const INVITE_ERROR_TEXT: &str = "ERROR: INVITE command";
 const JOIN_ERROR_TEXT: &str = "ERROR: JOIN command";
 const KICK_ERROR_TEXT: &str = "ERROR: KICK command";
@@ -28,15 +29,15 @@ const PRIVMSG_ERROR_TEXT: &str = "ERROR: PRIVMSG command";
 const QUIT_ERROR_TEXT: &str = "ERROR: QUIT command";
 const USER_ERROR_TEXT: &str = "ERROR: USER command";
 
-const NO_CLIENTS_WARNING_TEXT: &str = "There are no clients to chat with.";
-const NO_CHANNELS_WARNING_TEXT: &str = "You are not in any channel.";
 const CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT: &str =
     "The client you want to invite is already in all your channels.";
 const ERR_NICK_COLLISION_WARNING_TEXT: &str = "The nickname is in use, please pick another one.";
+const NO_CHANNELS_WARNING_TEXT: &str = "You are not in any channel.";
+const NO_CLIENTS_WARNING_TEXT: &str = "There are no clients to chat with.";
 
 const DISPLAY_CONNECT_ERROR_TEXT: &str = "Could not connect to a display.";
-const SERVER_CONNECT_ERROR_TEXT: &str = "Error connecting to server";
 const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
+const SERVER_CONNECT_ERROR_TEXT: &str = "Error connecting to server";
 
 /// Has a reference to the application.
 /// Communicates with the views and the server.

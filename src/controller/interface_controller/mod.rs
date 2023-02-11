@@ -70,7 +70,7 @@ impl InterfaceController {
             main_window: MainView::new(sender.clone()).get_view(app.clone(), String::new()),
             register_window: RegisterView::new(sender.clone()).get_view(app),
             sender,
-            names_message_intention: Undefined
+            names_message_intention: Undefined,
         }
     }
 
