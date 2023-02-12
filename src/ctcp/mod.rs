@@ -1,9 +1,7 @@
 use crate::{macros::some_or_return, message::Message, server::consts::commands::PRIVMSG_COMMAND};
 
 pub mod dcc_chat;
-mod dcc_chat_sender;
 pub mod dcc_message;
-mod dcc_chat_receiver;
 
 pub const CONTROL_CHARACTER: char = 1 as char;
 

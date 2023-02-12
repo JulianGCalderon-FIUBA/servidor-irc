@@ -5,7 +5,7 @@ use std::{
 
 use crate::message::CRLF;
 
-use super::dcc_chat::DccChat;
+use super::DccChat;
 
 struct DccChatSender {
     server: TcpStream,

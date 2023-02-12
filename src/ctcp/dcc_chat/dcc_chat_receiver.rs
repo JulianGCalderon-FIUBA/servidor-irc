@@ -3,7 +3,7 @@ use std::{
     net::TcpStream,
 };
 
-use super::dcc_chat::DccChat;
+use super::DccChat;
 use crate::message::CRLF;
 
 struct DccChatReceiver {

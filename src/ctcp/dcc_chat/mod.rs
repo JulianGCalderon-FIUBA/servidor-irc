@@ -3,6 +3,9 @@ use std::{
     net::TcpStream,
 };
 
+mod dcc_chat_receiver;
+mod dcc_chat_sender;
+
 use crate::message::{read_line, CRLF};
 
 pub struct DccChat {
