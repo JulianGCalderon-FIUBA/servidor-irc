@@ -5,7 +5,7 @@ pub mod utils;
 use gtk4 as gtk;
 
 use crate::{
-    client::Client,
+    client::client::Client,
     views::{
         add_views::{
             add_channel_view::AddChannelView, add_client_view::AddClientView,

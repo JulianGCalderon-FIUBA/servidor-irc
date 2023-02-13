@@ -8,7 +8,7 @@ pub mod interface_controller;
 
 use gtk4 as gtk;
 
-use crate::{client::Client, ADDRESS};
+use crate::{client::client::Client, ADDRESS};
 use gtk::{gdk::Display, glib, prelude::*, Application, CssProvider, StyleContext};
 
 use self::{controller_message::ControllerMessage, interface_controller::InterfaceController};
@@ -81,7 +81,7 @@ impl Controller {
 
     /// Builds ui to show windows and handle messages
     fn build_ui(app: &Application) {
-        let client = match Client::new(ADDRESS.to_string()) {
+        let client = match Client::connect(ADDRESS.to_string()) {
             Ok(stream) => stream,
             Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT}: {error:?}"),
         };

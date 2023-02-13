@@ -66,7 +66,7 @@ impl InterfaceController {
         self.names_message_intention = intention;
         let parameter_value = parameter.unwrap_or_default();
         let message = format!("{NAMES_COMMAND} {}", parameter_value);
-        self.client.send_raw(&message).expect(NAMES_ERROR_TEXT);
+        self.client.send(&message).expect(NAMES_ERROR_TEXT);
     }
 
     pub fn send_open_warning_view(&mut self, warning_text: &str) {

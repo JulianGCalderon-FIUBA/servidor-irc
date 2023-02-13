@@ -1,9 +1,9 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, thread};
 
 use gtk4 as gtk;
 
 use crate::{
-    client::Client,
+    client::{async_reader::AsyncReader, client::Client},
     controller::{
         controller_handler::to_controller_message,
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
@@ -48,13 +48,13 @@ impl InterfaceController {
     pub fn join_channel(&mut self, channel: String) {
         self.add_channel_window.close();
         let message = format!("{JOIN_COMMAND} {channel}");
-        self.client.send_raw(&message).expect(JOIN_ERROR_TEXT);
+        self.client.send(&message).expect(JOIN_ERROR_TEXT);
         self.main_view.add_channel(channel);
     }
 
     pub fn kick_member(&mut self, channel: String, member: String) {
         let message = format!("{KICK_COMMAND} {channel} {member}");
-        self.client.send_raw(&message).expect(KICK_ERROR_TEXT);
+        self.client.send(&message).expect(KICK_ERROR_TEXT);
     }
 
     pub fn open_add_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
@@ -129,12 +129,12 @@ impl InterfaceController {
     }
 
     pub fn quit(&mut self) {
-        self.client.send_raw(QUIT_COMMAND).expect(QUIT_ERROR_TEXT);
+        self.client.send(QUIT_COMMAND).expect(QUIT_ERROR_TEXT);
     }
 
     pub fn quit_channel(&mut self) {
         let part_message = format!("{PART_COMMAND} {}", self.current_conv);
-        self.client.send_raw(&part_message).expect(PART_ERROR_TEXT);
+        self.client.send(&part_message).expect(PART_ERROR_TEXT);
     }
 
     pub fn receive_invite(&mut self, channel: String, nickname: String) {
@@ -222,17 +222,22 @@ impl InterfaceController {
         let pass_command = format!("{PASS_COMMAND} {pass}");
         let nick_command = format!("{NICK_COMMAND} {nickname}");
         let user_command = format!("{USER_COMMAND} {username} {username} {username} :{realname}");
-        self.client.send_raw(&pass_command).expect(PASS_ERROR_TEXT);
-        self.client.send_raw(&nick_command).expect(NICK_ERROR_TEXT);
-        self.client.send_raw(&user_command).expect(USER_ERROR_TEXT);
+        self.client.send(&pass_command).expect(PASS_ERROR_TEXT);
+        self.client.send(&nick_command).expect(NICK_ERROR_TEXT);
+        self.client.send(&user_command).expect(USER_ERROR_TEXT);
 
         let sender_clone = self.sender.clone();
-        self.client.start_async_read(move |message| match message {
-            Ok(message) => {
-                let controller_message = to_controller_message(message);
-                sender_clone.send(controller_message).unwrap();
+        let (_async_reader, message_receiver) =
+            AsyncReader::spawn(self.client.get_stream().expect("error"));
+        thread::spawn(move || {
+            let message_received = message_receiver.recv().expect("error");
+            match message_received {
+                Ok(message) => {
+                    let controller_message = to_controller_message(message);
+                    sender_clone.send(controller_message).unwrap();
+                }
+                Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {error}"),
             }
-            Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {error}"),
         });
     }
 
@@ -249,11 +254,11 @@ impl InterfaceController {
     pub fn send_invite_message(&mut self, channel: GString) {
         self.invite_window.close();
         let invite = format!("{INVITE_COMMAND} {} {channel}", self.current_conv);
-        self.client.send_raw(&invite).expect(INVITE_ERROR_TEXT);
+        self.client.send(&invite).expect(INVITE_ERROR_TEXT);
     }
 
     pub fn send_list_message(&mut self) {
-        self.client.send_raw(LIST_COMMAND).expect(LIST_ERROR_TEXT);
+        self.client.send(LIST_COMMAND).expect(LIST_ERROR_TEXT);
     }
 
     pub fn send_names_message_to_add_client(&mut self) {
@@ -275,15 +280,13 @@ impl InterfaceController {
 
     pub fn send_priv_message(&mut self, message: GString) {
         let priv_message = format!("{PRIVMSG_COMMAND} {} :{message}", self.current_conv);
-        self.client
-            .send_raw(&priv_message)
-            .expect(PRIVMSG_ERROR_TEXT);
+        self.client.send(&priv_message).expect(PRIVMSG_ERROR_TEXT);
         self.main_view
             .send_message(message.to_string(), self.current_conv.clone());
     }
 
     pub fn to_register(&mut self, address: String) {
-        self.client = match Client::new(address) {
+        self.client = match Client::connect(address) {
             Ok(stream) => stream,
             Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT} {error:?}"),
         };
