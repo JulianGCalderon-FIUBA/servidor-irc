@@ -5,11 +5,11 @@ use std::{
 
 use crate::message::{read_line, CRLF};
 
-pub struct DccConnection {
+pub struct DccChat {
     stream: TcpStream,
 }
 
-impl DccConnection {
+impl DccChat {
     pub fn new(stream: TcpStream) -> io::Result<Self> {
         stream.set_nonblocking(true)?;
 
