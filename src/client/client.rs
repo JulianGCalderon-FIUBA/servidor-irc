@@ -6,11 +6,11 @@ use std::{
 use crate::message::CRLF;
 
 /// Represents a client that can connect to a Server.
-pub struct Clientt {
+pub struct Client {
     pub stream: TcpStream,
 }
 
-impl Clientt {
+impl Client {
     pub fn new(stream: TcpStream) -> Self {
         Self { stream }
     }

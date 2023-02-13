@@ -4,7 +4,7 @@ use std::time::Duration;
 use std::{env, io};
 
 use internet_relay_chat::client::async_reader::AsyncReader;
-use internet_relay_chat::client::clientt::Clientt;
+use internet_relay_chat::client::client::Client;
 use internet_relay_chat::message::{CreationError, Message};
 use internet_relay_chat::ADDRESS;
 
@@ -12,7 +12,7 @@ fn main() {
     let args: Vec<String> = env::args().collect();
     let address = unpack_args(args);
 
-    let mut client = match Clientt::connect(address) {
+    let mut client = match Client::connect(address) {
         Ok(stream) => stream,
         Err(error) => return eprintln!("Error connecting to server: {error:?}"),
     };
