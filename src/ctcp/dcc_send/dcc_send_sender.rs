@@ -1,18 +1,17 @@
 use std::{
-    fs::{self, File},
+    fs,
     io::{self, Write},
     net::{TcpListener, TcpStream},
 };
 
 use crate::message::CRLF;
 
-use super::DccSend;
+use super::file_transfer::FileTransferer;
 
 struct DccSendSender {
-    server: TcpStream,
-    client: String,
-    filename: String,
     listener: TcpListener,
+    filename: String,
+    filesize: u64,
 }
 
 impl DccSendSender {
@@ -33,16 +32,16 @@ impl DccSendSender {
         server.write_all(CRLF)?;
 
         Ok(Self {
-            server,
-            client,
             listener,
             filename,
+            filesize,
         })
     }
 
-    pub fn accept(self) -> io::Result<DccSend> {
+    pub fn accept(self) -> io::Result<()> {
         let stream = self.listener.accept()?.0;
-        DccSend::upload_file(stream, self.filename)
+
+        FileTransferer::new(stream, self.filename, self.filesize).upload_file()
     }
 
     pub fn close(self) {}

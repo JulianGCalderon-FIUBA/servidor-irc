@@ -5,7 +5,7 @@ use std::{
 
 use crate::message::CRLF;
 
-use super::DccSend;
+use super::file_transfer::FileTransferer;
 
 struct DccSendReceiver {
     server: TcpStream,
@@ -17,11 +17,18 @@ impl DccSendReceiver {
         Self { server, client }
     }
 
-    pub fn accept_send_command(mut self, address: &str) -> io::Result<String> {
+    pub fn accept_send_command(
+        mut self,
+        address: &str,
+        filename: String,
+        filesize: u64,
+    ) -> io::Result<()> {
         write!(self.server, "CTCP {} :DCC SEND accept", self.client)?;
         self.server.write_all(CRLF)?;
 
-        DccSend::download_file(address)
+        let stream = TcpStream::connect(address)?;
+
+        FileTransferer::new(stream, filename, filesize).download_file()
     }
 
     pub fn decline_send_command(mut self) -> io::Result<()> {
