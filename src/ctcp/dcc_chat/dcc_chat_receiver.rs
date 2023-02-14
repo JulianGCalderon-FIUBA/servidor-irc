@@ -1,6 +1,6 @@
 use std::{
     io::{self, Write},
-    net::TcpStream,
+    net::{SocketAddr, TcpStream},
 };
 
 use super::DccChat;
@@ -16,7 +16,7 @@ impl DccChatReceiver {
         Self { server, client }
     }
 
-    pub fn accept_chat_command(mut self, address: &str) -> io::Result<DccChat> {
+    pub fn accept_chat_command(mut self, address: SocketAddr) -> io::Result<DccChat> {
         write!(self.server, "CTCP {} :DCC CHAT accept", self.client)?;
         self.server.write_all(CRLF)?;
 

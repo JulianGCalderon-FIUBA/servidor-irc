@@ -1,6 +1,6 @@
 use std::{
     io::{self, Write},
-    net::TcpStream,
+    net::{SocketAddr, TcpStream},
 };
 
 use crate::message::CRLF;
@@ -19,7 +19,7 @@ impl DccSendReceiver {
 
     pub fn accept_send_command(
         mut self,
-        address: &str,
+        address: SocketAddr,
         filename: String,
         filesize: u64,
     ) -> io::Result<()> {
