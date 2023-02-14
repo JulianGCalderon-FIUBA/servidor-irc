@@ -1,10 +1,10 @@
+mod dcc_chat_receiver;
+mod dcc_chat_sender;
+
 use std::{
     io::{self, Write},
-    net::TcpStream,
+    net::{SocketAddr, TcpStream},
 };
-
-pub mod dcc_chat_receiver;
-pub mod dcc_chat_sender;
 
 use crate::message::{read_line, CRLF};
 
@@ -19,7 +19,7 @@ impl DccChat {
         Ok(Self { stream })
     }
 
-    pub fn connect(address: &str) -> io::Result<Self> {
+    pub fn connect(address: SocketAddr) -> io::Result<Self> {
         let stream = TcpStream::connect(address)?;
 
         Self::new(stream)
