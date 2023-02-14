@@ -58,14 +58,14 @@ impl InterfaceController {
         (channels, clients)
     }
 
-    pub fn process_list_end_message(&mut self) ->  Vec<String>{
+    pub fn process_list_end_message(&mut self) -> Vec<String> {
         let channels: Vec<String> = self.accumulated_channels_from_list.clone();
         self.accumulated_channels_from_list = vec![];
 
         channels
     }
 
-    pub fn process_names_end_message(&mut self) -> HashMap<String, Vec<String>>{
+    pub fn process_names_end_message(&mut self) -> HashMap<String, Vec<String>> {
         let mut channels_and_clients: HashMap<String, Vec<String>> = HashMap::new();
         for i in 0..self.accumulated_channels_from_names.len() {
             let channel = self.accumulated_channels_from_names[i].clone();
