@@ -40,80 +40,79 @@ use super::{
     ENTRY_PLACEHOLDER, MAIN_BOX_CSS, SEND_BUTTON_TEXT,
 };
 
-const ADD_BUTTON_TEXT: &str = "+";
-
-const QUIT_BUTTON_TEXT: &str = "x";
-const MEMBERS_BUTTON_TEXT: &str = "Members";
-const INVITE_BUTTON_TEXT: &str = "Invite to channel";
-const SAFE_CONVERSATION_BUTTON_TEXT: &str = "🔐 Safe conversation 🔐";
 const ADD_BUTTON_CSS: &str = "add";
+const ADD_BUTTON_TEXT: &str = "+";
 const CURRENT_CHAT_TITLE_CSS: &str = "current_chat";
-const WELCOME_MESSAGE: &str = "Open a new chat to start...";
-const WELCOME_MESSAGE_CSS: &str = "welcome_message";
-const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
-const WELCOME_TITLE_CSS: &str = "welcome_title";
-const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
-const NO_NOTIFICATIONS_CSS: &str = "notifications_button";
 const DISABLE_BUTTON_CSS: &str = "disabled_button";
+const INVITE_BUTTON_TEXT: &str = "Invite to channel";
+const MEMBERS_BUTTON_TEXT: &str = "Members";
+const NO_NOTIFICATIONS_CSS: &str = "notifications_button";
+const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
+const QUIT_BUTTON_TEXT: &str = "x";
+const SAFE_CONVERSATION_BUTTON_TEXT: &str = "🔐 Safe conversation 🔐";
+const WELCOME_MESSAGE_CSS: &str = "welcome_message";
+const WELCOME_MESSAGE: &str = "Open a new chat to start...";
+const WELCOME_TITLE_CSS: &str = "welcome_title";
+const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
 
 /// Shows main view.
 /// Contains the sidebar, chat and features.
 /// Uses sender to communicate with controller.
 pub struct MainView {
-    pub channels_box: Box,
-    pub channels_buttons: Vec<Button>,
-    pub scrollwindow_channels: ScrolledWindow,
-    pub add_channel: Button,
-    pub clients_box: Box,
-    pub clients_buttons: Vec<Button>,
-    pub scrollwindow_clients: ScrolledWindow,
-    pub add_client: Button,
-    pub notifications_button: Button,
-    pub notifications: Vec<String>,
-    pub welcome_box: Box,
-    pub current_chat: Label,
+    add_channel: Button,
+    add_client: Button,
+    channel_members_button: Button,
+    channels_box: Box,
+    channels_buttons: Vec<Button>,
+    clients_box: Box,
+    clients_buttons: Vec<Button>,
+    current_chat: Label,
+    error_label: Label,
+    input: Entry,
+    invite_button: Button,
+    message_box: Box,
+    messages: HashMap<String, Vec<Vec<Label>>>,
+    notifications_button: Button,
+    notifications: Vec<String>,
+    quit_channel_button: Button,
+    safe_conversation_button: Button,
+    scrollwindow_channels: ScrolledWindow,
     scrollwindow_chat: ScrolledWindow,
-    pub message_box: Box,
-    pub messages: HashMap<String, Vec<Vec<Label>>>,
-    pub user_info: Button,
-    pub send_message: Button,
-    pub input: Entry,
-    pub error_label: Label,
-    pub channel_members_button: Button,
-    pub quit_channel_button: Button,
-    pub invite_button: Button,
-    pub safe_conversation_button: Button,
+    scrollwindow_clients: ScrolledWindow,
+    send_message: Button,
     sender: Sender<ControllerMessage>,
+    user_info: Button,
+    welcome_box: Box,
 }
 
 impl MainView {
     /// Creates new [`MainView`]
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
+            add_channel: create_add_button(ADD_BUTTON_TEXT),
+            add_client: create_add_button(ADD_BUTTON_TEXT),
+            channel_members_button: create_button_with_margin(MEMBERS_BUTTON_TEXT),
             channels_box: create_channels_and_client_box(),
             channels_buttons: vec![],
-            scrollwindow_channels: create_scrollwindow(),
-            add_channel: create_add_button(ADD_BUTTON_TEXT),
             clients_box: create_channels_and_client_box(),
             clients_buttons: vec![],
-            scrollwindow_clients: create_scrollwindow(),
-            add_client: create_add_button(ADD_BUTTON_TEXT),
-            notifications_button: create_notifications_button(),
-            notifications: vec![],
-            welcome_box: create_welcome_box(),
             current_chat: create_current_chat(""),
-            scrollwindow_chat: create_scrollwindow_chat(),
+            error_label: create_error_label(),
+            input: create_entry(ENTRY_PLACEHOLDER),
+            invite_button: create_button_with_margin(INVITE_BUTTON_TEXT),
             message_box: create_message_box(),
             messages: HashMap::new(),
-            user_info: create_button_with_margin(""),
-            input: create_entry(ENTRY_PLACEHOLDER),
-            send_message: create_button_with_margin(SEND_BUTTON_TEXT),
-            error_label: create_error_label(),
+            notifications_button: create_notifications_button(),
+            notifications: vec![],
             quit_channel_button: create_button_with_margin(QUIT_BUTTON_TEXT),
-            channel_members_button: create_button_with_margin(MEMBERS_BUTTON_TEXT),
-            invite_button: create_button_with_margin(INVITE_BUTTON_TEXT),
             safe_conversation_button: create_button_with_margin(SAFE_CONVERSATION_BUTTON_TEXT),
+            scrollwindow_channels: create_scrollwindow(),
+            scrollwindow_chat: create_scrollwindow_chat(),
+            scrollwindow_clients: create_scrollwindow(),
+            send_message: create_button_with_margin(SEND_BUTTON_TEXT),
             sender,
+            user_info: create_button_with_margin(""),
+            welcome_box: create_welcome_box(),
         }
     }
 

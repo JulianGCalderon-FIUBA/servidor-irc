@@ -52,31 +52,33 @@ const INACTIVE_SELECT_BUTTON_CSS: &str = "inactive_select_button";
 /// Contains a channel entry and an add new channel button.  
 /// Uses sender to communicate with controller.
 pub struct AddChannelView {
-    pub join_channel_button: Button,
-    pub create_channel_button: Button,
-    pub join_channel_box: Box,
-    pub create_channel_box: Box,
-    pub channel_entry: Entry,
-    pub channel_combobox: ComboBoxText,
-    pub error_label: Label,
-    pub add_new_channel_button: Button,
-    pub add_existing_channel_button: Button,
+    add_existing_channel_button: Button,
+    add_new_channel_button: Button,
+    channel_combobox: ComboBoxText,
+    channel_entry: Entry,
+    channels: Vec<String>,
+    create_channel_box: Box,
+    create_channel_button: Button,
+    error_label: Label,
+    join_channel_box: Box,
+    join_channel_button: Button,
     sender: Sender<ControllerMessage>,
 }
 
 impl AddChannelView {
     /// Creates new [`AddChannelView`]
-    pub fn new(sender: Sender<ControllerMessage>) -> Self {
+    pub fn new(channels: Vec<String>, sender: Sender<ControllerMessage>) -> Self {
         Self {
-            join_channel_button: create_active_button(JOIN_CHANNEL_BUTTON_TEXT),
-            create_channel_button: create_inactive_button(CREATE_CHANNEL_BUTTON_TEXT),
-            join_channel_box: create_box(Vertical),
-            create_channel_box: create_box(Vertical),
-            channel_entry: create_entry(""),
-            channel_combobox: create_combobox(),
-            error_label: create_error_label(),
-            add_new_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
             add_existing_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
+            add_new_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
+            channel_combobox: create_combobox(),
+            channel_entry: create_entry(""),
+            channels,
+            create_channel_box: create_box(Vertical),
+            create_channel_button: create_inactive_button(CREATE_CHANNEL_BUTTON_TEXT),
+            error_label: create_error_label(),
+            join_channel_box: create_box(Vertical),
+            join_channel_button: create_active_button(JOIN_CHANNEL_BUTTON_TEXT),
             sender,
         }
     }
@@ -84,7 +86,7 @@ impl AddChannelView {
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, app: Application, channels: Vec<String>) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -97,10 +99,10 @@ impl AddChannelView {
         select_box.append(&self.create_channel_button);
         main_box.append(&select_box);
 
-        self.append_join_channel_box(channels.clone(), main_box.clone());
+        self.append_join_channel_box(main_box.clone());
         self.append_create_channel_box(main_box.clone());
 
-        if channels.is_empty() {
+        if self.channels.is_empty() {
             self.disable_join_channel_option();
         }
 
@@ -122,7 +124,7 @@ impl AddChannelView {
             self.error_label.clone(),
             self.sender.clone(),
         );
-        if !channels.is_empty() {
+        if !self.channels.is_empty() {
             self.connect_add_existing_channel_button(
                 self.channel_combobox.clone(),
                 self.sender.clone(),
@@ -136,9 +138,9 @@ impl AddChannelView {
     /// Add join existing channel box.
     ///
     /// Button is visible if user can join an existing channel.
-    fn append_join_channel_box(&mut self, channels: Vec<String>, main_box: Box) {
+    fn append_join_channel_box(&mut self, main_box: Box) {
         let entry_box = create_label_input_box(CHANNEL_LABEL_TEXT);
-        self.refill_combobox(channels);
+        self.refill_combobox();
         entry_box.append(&self.channel_combobox);
         self.join_channel_box.append(&entry_box);
         self.join_channel_box
@@ -164,8 +166,8 @@ impl AddChannelView {
     }
 
     /// Fills combobox options with existing channels
-    fn refill_combobox(&mut self, channels: Vec<String>) {
-        for channel in &channels {
+    fn refill_combobox(&mut self) {
+        for channel in &self.channels {
             self.channel_combobox.append_text(&channel.clone());
         }
         self.channel_combobox.set_active(Some(0));

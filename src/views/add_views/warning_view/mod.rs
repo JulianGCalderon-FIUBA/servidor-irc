@@ -12,30 +12,26 @@ use super::{
 
 const TITLE: &str = "We are sorry :(";
 
-/// Shows warning view.  
+/// Shows warning view.
 /// Contains the warning label and an exit button.
 pub struct WarningView {
     button: Button,
-}
-
-impl Default for WarningView {
-    fn default() -> Self {
-        Self::new()
-    }
+    warning_text: String,
 }
 
 impl WarningView {
     /// Creates new [`WarningView`]
-    pub fn new() -> Self {
+    pub fn new(warning_text: String) -> Self {
         Self {
             button: create_center_button(CONTINUE_BUTTON_TEXT),
+            warning_text,
         }
     }
 
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, app: Application, warning_text: String) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -44,7 +40,7 @@ impl WarningView {
         let title = create_title(TITLE);
         main_box.append(&title);
 
-        let label = create_label(&warning_text);
+        let label = create_label(&self.warning_text);
         label.set_halign(Start);
         label.set_margin_start(20);
         main_box.append(&label);

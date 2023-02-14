@@ -25,26 +25,22 @@ const TITLE: &str = "Notifications";
 /// Contains the notifications and an exit button.  
 pub struct NotificationsView {
     button: Button,
-}
-
-impl Default for NotificationsView {
-    fn default() -> Self {
-        Self::new()
-    }
+    notifications: Vec<String>,
 }
 
 impl NotificationsView {
     /// Creates new [`NotificationsView`]
-    pub fn new() -> Self {
+    pub fn new(notifications: Vec<String>) -> Self {
         Self {
             button: create_center_button(CONTINUE_BUTTON_TEXT),
+            notifications,
         }
     }
 
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, app: Application, notifications: Vec<String>) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -54,7 +50,7 @@ impl NotificationsView {
 
         let scrollwindow = create_notifications_scrollwindow();
         let container = create_box_container();
-        for (i, notification) in notifications.iter().enumerate() {
+        for (i, notification) in self.notifications.iter().enumerate() {
             if i != 0 {
                 let separator = create_separator(Horizontal);
                 separator.set_hexpand(true);

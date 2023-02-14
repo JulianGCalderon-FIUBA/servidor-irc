@@ -24,16 +24,18 @@ const TITLE: &str = "Send invite";
 /// Contains a channel entry and an invite button.  
 /// Uses sender to communicate with controller.
 pub struct InviteView {
-    pub channel_combobox: ComboBoxText,
-    pub invite_button: Button,
+    channel_combobox: ComboBoxText,
+    channels: Vec<String>,
+    invite_button: Button,
     sender: Sender<ControllerMessage>,
 }
 
 impl InviteView {
     /// Creates new [`InviteView`]
-    pub fn new(sender: Sender<ControllerMessage>) -> Self {
+    pub fn new(channels: Vec<String>, sender: Sender<ControllerMessage>) -> Self {
         Self {
             channel_combobox: create_combobox(),
+            channels,
             invite_button: create_center_button(INVITE_BUTTON_TEXT),
             sender,
         }
@@ -42,7 +44,7 @@ impl InviteView {
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, app: Application, channels: Vec<String>) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -51,7 +53,7 @@ impl InviteView {
         main_box.append(&create_title(TITLE));
 
         let channel_box = create_label_input_box(CHANNEL_LABEL_TEXT);
-        self.refill_combobox(channels);
+        self.refill_combobox();
         channel_box.append(&self.channel_combobox);
         main_box.append(&channel_box);
 
@@ -77,8 +79,8 @@ impl InviteView {
     }
 
     /// Fills combobox options with existing clients.
-    fn refill_combobox(&mut self, channels: Vec<String>) {
-        for channel in &channels {
+    fn refill_combobox(&mut self) {
+        for channel in &self.channels {
             self.channel_combobox.append_text(&channel.clone());
         }
         self.channel_combobox.set_active(Some(0));

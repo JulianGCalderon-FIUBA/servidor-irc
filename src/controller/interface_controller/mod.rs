@@ -2,21 +2,11 @@ pub mod decode_message;
 pub mod message_matcher;
 pub mod names_message_intention;
 pub mod utils;
+pub mod window_creation;
 
 use gtk4 as gtk;
 
-use crate::{
-    client::client::Client,
-    views::{
-        add_views::{
-            add_channel_view::AddChannelView, add_client_view::AddClientView,
-            invite_view::InviteView,
-        },
-        ip_view::IpView,
-        main_view::MainView,
-        register_view::RegisterView,
-    },
-};
+use crate::{client::client::Client, views::main_view::MainView};
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
@@ -29,7 +19,13 @@ use crate::controller::controller_message::ControllerMessage::{
 
 use crate::controller::ControllerMessage::*;
 
-use self::names_message_intention::NamesMessageIntention::{self, Undefined};
+use self::{
+    names_message_intention::NamesMessageIntention::{self, Undefined},
+    window_creation::{
+        add_channel_window, add_client_window, invite_window, ip_window, main_view, main_window,
+        register_window,
+    },
+};
 
 use super::controller_message::ControllerMessage;
 
@@ -42,17 +38,17 @@ pub struct InterfaceController {
     app: Application,
     client: Client,
     current_conv: String,
-    current_nickname: String,
-    current_realname: String,
-    current_servername: String,
-    current_username: String,
     invite_window: ApplicationWindow,
     ip_window: ApplicationWindow,
     main_view: MainView,
     main_window: ApplicationWindow,
+    names_message_intention: NamesMessageIntention,
+    nickname: String,
+    realname: String,
     register_window: ApplicationWindow,
     sender: Sender<ControllerMessage>,
-    names_message_intention: NamesMessageIntention,
+    servername: String,
+    username: String,
 }
 
 impl InterfaceController {
@@ -62,22 +58,22 @@ impl InterfaceController {
             accumulated_channels_from_list: vec![],
             accumulated_channels_from_names: vec![],
             accumulated_clients_from_names: vec![],
-            add_channel_window: AddChannelView::new(sender.clone()).get_view(app.clone(), vec![]),
-            add_client_window: AddClientView::new(sender.clone()).get_view(app.clone(), vec![]),
+            add_channel_window: add_channel_window(&app, vec![], &sender),
+            add_client_window: add_client_window(&app, vec![], &sender),
             app: app.clone(),
             client,
             current_conv: String::new(),
-            current_nickname: String::new(),
-            current_realname: String::new(),
-            current_servername: String::new(),
-            current_username: String::new(),
-            invite_window: InviteView::new(sender.clone()).get_view(app.clone(), vec![]),
-            ip_window: IpView::new(sender.clone()).get_view(app.clone()),
-            main_view: MainView::new(sender.clone()),
-            main_window: MainView::new(sender.clone()).get_view(app.clone(), String::new()),
-            register_window: RegisterView::new(sender.clone()).get_view(app),
-            sender,
+            invite_window: invite_window(&app, vec![], &sender),
+            ip_window: ip_window(&app, &sender),
+            main_view: main_view(&sender),
+            main_window: main_window(&app, String::new(), &sender),
             names_message_intention: Undefined,
+            nickname: String::new(),
+            realname: String::new(),
+            register_window: register_window(&app, &sender),
+            sender,
+            servername: String::new(),
+            username: String::new(),
         }
     }
 

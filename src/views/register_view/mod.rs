@@ -30,26 +30,26 @@ const FIELD_MAX_CHARACTERS_ERROR: &str = "¡Fields are too long!";
 /// Contains a realname, nickname, username and password entry.
 /// Uses sender to communicate with controller.
 pub struct RegisterView {
-    pub realname_entry: Entry,
-    pub nick_entry: Entry,
-    pub username_entry: Entry,
-    pub pass_entry: PasswordEntry,
-    pub login_button: Button,
-    pub error_label: Label,
+    error_label: Label,
+    login_button: Button,
+    nick_entry: Entry,
+    pass_entry: PasswordEntry,
+    realname_entry: Entry,
     sender: Sender<ControllerMessage>,
+    username_entry: Entry,
 }
 
 impl RegisterView {
     /// Creates new [`RegisterView`]
     pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
-            realname_entry: create_entry(""),
-            nick_entry: create_entry(""),
-            username_entry: create_entry(""),
-            pass_entry: create_password_entry(""),
-            login_button: create_center_button(LOGIN_BUTTON_TEXT),
             error_label: create_error_label(),
+            login_button: create_center_button(LOGIN_BUTTON_TEXT),
+            nick_entry: create_entry(""),
+            pass_entry: create_password_entry(""),
+            realname_entry: create_entry(""),
             sender,
+            username_entry: create_entry(""),
         }
     }
 

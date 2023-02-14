@@ -26,17 +26,19 @@ const TITLE: &str = "Add client";
 /// Contains a client entry and an add new client button.  
 /// Uses sender to communicate with controller.
 pub struct AddClientView {
-    pub client_combobox: ComboBoxText,
-    pub add_client_button: Button,
+    add_client_button: Button,
+    client_combobox: ComboBoxText,
+    clients: Vec<String>,
     sender: Sender<ControllerMessage>,
 }
 
 impl AddClientView {
     /// Creates new [`AddClientView`]
-    pub fn new(sender: Sender<ControllerMessage>) -> Self {
+    pub fn new(clients: Vec<String>, sender: Sender<ControllerMessage>) -> Self {
         Self {
-            client_combobox: create_combobox(),
             add_client_button: create_center_button(ADD_CLIENT_BUTTON_TEXT),
+            client_combobox: create_combobox(),
+            clients,
             sender,
         }
     }
@@ -44,7 +46,7 @@ impl AddClientView {
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, app: Application, clients: Vec<String>) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -53,7 +55,7 @@ impl AddClientView {
         main_box.append(&create_title(TITLE));
 
         let client_box = create_label_input_box(CLIENT_LABEL_TEXT);
-        self.refill_combobox(clients);
+        self.refill_combobox();
         client_box.append(&self.client_combobox);
         main_box.append(&client_box);
 
@@ -80,8 +82,8 @@ impl AddClientView {
     }
 
     /// Fills combobox options with existing clients.
-    fn refill_combobox(&mut self, clients: Vec<String>) {
-        for client in clients {
+    fn refill_combobox(&mut self) {
+        for client in &self.clients {
             self.client_combobox.append_text(&client.clone());
         }
         self.client_combobox.set_active(Some(0));

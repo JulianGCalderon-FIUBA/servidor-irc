@@ -39,9 +39,7 @@ impl InterfaceController {
     }
 
     pub fn decode_list_line_message(&mut self, message: Message) -> String {
-        let channel = get_message_parameter(&message, 0);
-
-        channel
+        get_message_parameter(&message, 0) // channel
     }
 
     pub fn process_names_end_message(&mut self) -> HashMap<String, Vec<String>> {

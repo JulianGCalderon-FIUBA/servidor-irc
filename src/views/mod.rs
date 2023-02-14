@@ -22,7 +22,7 @@ const REALNAME_LABEL_TEXT: &str = "Your name:";
 const SERVERNAME_LABEL_TEXT: &str = "Servername:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
 const ENTRY_PLACEHOLDER: &str = "Message...";
-const SEND_BUTTON_TEXT: &str = "➤";
+const SEND_BUTTON_TEXT: &str = "Send"; // ➤ 
 
 const CHAT_CSS: &str = "chat";
 const MAIN_BOX_CSS: &str = "main_box";

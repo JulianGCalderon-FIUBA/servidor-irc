@@ -18,17 +18,15 @@ use crate::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
-    views::add_views::{
-        add_channel_view::AddChannelView, add_client_view::AddClientView,
-        channel_members_view::ChannelMembersView, invite_view::InviteView,
-        notifications_view::NotificationsView, safe_conversation_view::SafeConversationView,
-        user_info_view::UserInfoView, warning_view::WarningView,
-    },
 };
 use gtk::{glib::GString, prelude::*};
 
 use super::{
     utils::{channels_not_mine, is_not_empty},
+    window_creation::{
+        add_channel_window, add_client_window, channel_members_window, invite_window,
+        notifications_window, safe_conversation_window, user_info_window, warning_window,
+    },
     InterfaceController,
     NamesMessageIntention::*,
 };
@@ -40,7 +38,7 @@ impl InterfaceController {
     }
 
     pub fn change_conversation(&mut self, current_conversation: String) {
-        let last_conv = self.current_conv.clone();
+        let last_conv: String = self.current_conv.clone();
         self.current_conv = current_conversation;
         self.main_view
             .change_conversation(last_conv, self.current_conv.clone());
@@ -48,21 +46,20 @@ impl InterfaceController {
 
     pub fn join_channel(&mut self, channel: String) {
         self.add_channel_window.close();
-        let message = format!("{JOIN_COMMAND} {channel}");
+        let message: String = format!("{JOIN_COMMAND} {channel}");
         self.client.send(&message).expect(JOIN_ERROR_TEXT);
         self.main_view.add_channel(channel);
     }
 
     pub fn kick_member(&mut self, channel: String, member: String) {
-        let message = format!("{KICK_COMMAND} {channel} {member}");
+        let message: String = format!("{KICK_COMMAND} {channel} {member}");
         self.client.send(&message).expect(KICK_ERROR_TEXT);
     }
 
     pub fn open_add_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
         let clients_not_mine: Vec<String> = self.clients_not_mine(channels_and_clients);
         if is_not_empty(&clients_not_mine) {
-            self.add_client_window = AddClientView::new(self.sender.clone())
-                .get_view(self.app.clone(), clients_not_mine);
+            self.add_client_window = add_client_window(&self.app, clients_not_mine, &self.sender);
             self.add_client_window.show();
         } else {
             self.send_open_warning_view(NO_CLIENTS_WARNING_TEXT);
@@ -70,12 +67,11 @@ impl InterfaceController {
     }
 
     pub fn open_invite_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
-        let my_channels = self.main_view.get_my_channels();
-        let current_conv_channels = self.current_conv_channels(channels_and_clients);
-        let channels_to_invite = channels_not_mine(my_channels, current_conv_channels);
+        let my_channels: Vec<String> = self.main_view.get_my_channels();
+        let current_conv_channels: Vec<String> = self.current_conv_channels(channels_and_clients);
+        let channels_to_invite: Vec<String> = channels_not_mine(my_channels, current_conv_channels);
         if is_not_empty(&channels_to_invite) {
-            self.invite_window =
-                InviteView::new(self.sender.clone()).get_view(self.app.clone(), channels_to_invite);
+            self.invite_window = invite_window(&self.app, channels_to_invite, &self.sender);
             self.invite_window.show();
         } else {
             self.send_open_warning_view(CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT);
@@ -86,43 +82,33 @@ impl InterfaceController {
         let (nickname, realname, servername, username) = self.decode_registration(message);
 
         self.register_window.close();
-        self.current_realname = realname;
-        self.current_servername = servername;
-        self.current_nickname = nickname.clone();
-        self.current_username = username;
+        self.realname = realname;
+        self.servername = servername;
+        self.nickname = nickname.clone();
+        self.username = username;
         self.main_window = self.main_view.get_view(self.app.clone(), nickname);
         self.main_window.show();
     }
 
     pub fn open_notifications_view(&mut self) {
-        NotificationsView::new()
-            .get_view(self.app.clone(), self.main_view.get_notifications())
-            .show();
+        notifications_window(&self.app, self.main_view.get_notifications()).show();
     }
 
     pub fn open_safe_conversation_view(&mut self) {
         self.main_window.hide();
-        SafeConversationView::new(self.sender.clone())
-            .get_view(self.app.clone())
-            .show();
+        safe_conversation_window(&self.app, &self.sender).show();
     }
 
     pub fn open_user_info_view(&mut self) {
-        UserInfoView::new()
-            .get_view(
-                self.app.clone(),
-                self.current_realname.clone(),
-                self.current_servername.clone(),
-                self.current_nickname.clone(),
-                self.current_username.clone(),
-            )
-            .show();
+        let nickname: String = self.nickname.clone();
+        let realname: String = self.realname.clone();
+        let servername: String = self.servername.clone();
+        let username: String = self.username.clone();
+        user_info_window(&self.app, nickname, realname, servername, username).show();
     }
 
     pub fn open_warning_view(&mut self, message: String) {
-        WarningView::new()
-            .get_view(self.app.clone(), message)
-            .show();
+        warning_window(&self.app, message).show();
     }
 
     pub fn quit(&mut self) {
@@ -130,19 +116,19 @@ impl InterfaceController {
     }
 
     pub fn quit_channel(&mut self) {
-        let part_message = format!("{PART_COMMAND} {}", self.current_conv);
+        let part_message: String = format!("{PART_COMMAND} {}", self.current_conv);
         self.client.send(&part_message).expect(PART_ERROR_TEXT);
     }
 
     pub fn receive_invite(&mut self, message: Message) {
         let (channel, nickname) = self.decode_invite_message(message);
-        let message = format!("{nickname} has invited you to join {channel}");
+        let message: String = format!("{nickname} has invited you to join {channel}");
         self.main_view.add_notification(message);
     }
 
     pub fn receive_kick(&mut self, message: Message) {
         let (channel, kicked) = self.decode_kick_message(message);
-        if kicked == self.current_nickname {
+        if kicked == self.nickname {
             self.main_view.remove_conversation(channel.clone());
             if channel == self.current_conv {
                 self.main_view.welcome_view();
@@ -152,16 +138,15 @@ impl InterfaceController {
 
     pub fn receive_list_end(&mut self) {
         let channels: Vec<String> = self.process_list_end_message();
+        let my_channels: Vec<String> = self.main_view.get_my_channels();
+        let channels_not_mine: Vec<String> = channels_not_mine(channels, my_channels);
 
-        self.add_channel_window = AddChannelView::new(self.sender.clone()).get_view(
-            self.app.clone(),
-            channels_not_mine(channels, self.main_view.get_my_channels()),
-        );
+        self.add_channel_window = add_channel_window(&self.app, channels_not_mine, &self.sender);
         self.add_channel_window.show();
     }
 
     pub fn receive_list_line(&mut self, message: Message) {
-        let channel = self.decode_list_line_message(message);
+        let channel: String = self.decode_list_line_message(message);
         self.accumulated_channels_from_list.push(channel);
     }
 
@@ -190,15 +175,11 @@ impl InterfaceController {
                     .expect(OPEN_INVITE_VIEW_ERROR_TEXT);
             }
             KnowMembers => {
-                ChannelMembersView::new()
-                    .get_view(
-                        self.app.clone(),
-                        channels_and_clients[&self.current_conv].clone(),
-                        self.current_nickname.clone(),
-                        self.current_conv.clone(),
-                        self.sender.clone(),
-                    )
-                    .show();
+                let channel: String = self.current_conv.clone();
+                let clients: Vec<String> = channels_and_clients[&self.current_conv].clone();
+                let nickname: String = self.nickname.clone();
+
+                channel_members_window(&self.app, channel, clients, nickname, &self.sender).show();
             }
             _ => {}
         }
@@ -229,9 +210,10 @@ impl InterfaceController {
         username: GString,
         realname: GString,
     ) {
-        let pass_command = format!("{PASS_COMMAND} {pass}");
-        let nick_command = format!("{NICK_COMMAND} {nickname}");
-        let user_command = format!("{USER_COMMAND} {username} {username} {username} :{realname}");
+        let pass_command: String = format!("{PASS_COMMAND} {pass}");
+        let nick_command: String = format!("{NICK_COMMAND} {nickname}");
+        let user_command: String =
+            format!("{USER_COMMAND} {username} {username} {username} :{realname}");
         self.client.send(&pass_command).expect(PASS_ERROR_TEXT);
         self.client.send(&nick_command).expect(NICK_ERROR_TEXT);
         self.client.send(&user_command).expect(USER_ERROR_TEXT);
@@ -264,7 +246,7 @@ impl InterfaceController {
 
     pub fn send_invite_message(&mut self, channel: GString) {
         self.invite_window.close();
-        let invite = format!("{INVITE_COMMAND} {} {channel}", self.current_conv);
+        let invite: String = format!("{INVITE_COMMAND} {} {channel}", self.current_conv);
         self.client.send(&invite).expect(INVITE_ERROR_TEXT);
     }
 
@@ -277,7 +259,7 @@ impl InterfaceController {
     }
 
     pub fn send_names_message_to_invite_client(&mut self) {
-        let my_channels = self.main_view.get_my_channels();
+        let my_channels: Vec<String> = self.main_view.get_my_channels();
         if is_not_empty(&my_channels) {
             self.send_names_message(InviteClient, None);
         } else {

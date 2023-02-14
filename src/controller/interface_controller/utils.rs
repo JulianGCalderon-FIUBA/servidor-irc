@@ -55,9 +55,9 @@ impl InterfaceController {
     }
 
     pub fn remove_myself(&mut self, all_clients: &mut Vec<String>) {
-        let current_nickname = self.current_nickname.clone();
-        remove_element(all_clients, &current_nickname);
-        remove_element(all_clients, &format!("@{current_nickname}"));
+        let nickname = self.nickname.clone();
+        remove_element(all_clients, &nickname);
+        remove_element(all_clients, &format!("@{nickname}"));
     }
 
     pub fn send_names_message(

@@ -28,38 +28,38 @@ use super::{
 const OPERATOR_FIRST_CHARACTER: &str = "@";
 const TITLE: &str = "Members";
 
-/// Shows channel members view.  
-/// Contains an exit button.  
+/// Shows channel members view.
+/// Contains an exit button.
 /// Uses sender to communicate with controller.
 pub struct ChannelMembersView {
     button: Button,
-}
-
-impl Default for ChannelMembersView {
-    fn default() -> Self {
-        Self::new()
-    }
+    channel: String,
+    clients: Vec<String>,
+    nickname: String,
+    sender: Sender<ControllerMessage>,
 }
 
 impl ChannelMembersView {
     /// Creates new [`ChannelMembersView`]
-    pub fn new() -> Self {
+    pub fn new(
+        channel: String,
+        clients: Vec<String>,
+        nickname: String,
+        sender: Sender<ControllerMessage>,
+    ) -> Self {
         Self {
             button: create_center_button(CONTINUE_BUTTON_TEXT),
+            channel,
+            clients,
+            nickname,
+            sender,
         }
     }
 
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(
-        &mut self,
-        app: Application,
-        clients: Vec<String>,
-        nickname: String,
-        channel: String,
-        sender: Sender<ControllerMessage>,
-    ) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -67,10 +67,10 @@ impl ChannelMembersView {
 
         main_box.append(&create_title(TITLE));
 
-        if nickname == Self::get_operator(clients.clone()) {
-            Self::list_members_operators(clients, channel, main_box.clone(), sender, window.clone())
+        if self.nickname.clone() == self.get_operator() {
+            self.list_members_operators(main_box.clone(), window.clone());
         } else {
-            Self::list_members(clients, main_box.clone());
+            self.list_members(main_box.clone());
         }
 
         main_box.append(&self.button);
@@ -93,8 +93,8 @@ impl ChannelMembersView {
     /// Lists all members of the channel.
     ///
     /// Shows the operator of the channel.
-    fn list_members(clients: Vec<String>, main_box: gtk::Box) {
-        for client in &clients {
+    fn list_members(&mut self, main_box: gtk::Box) {
+        for client in &self.clients {
             let label: Label = if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER)
             {
                 create_label(&format!("\t •\tOP: {stripped}"))
@@ -110,14 +110,8 @@ impl ChannelMembersView {
     /// Lists all members of the channel for the operator.
     ///
     /// List members with a kick button next to them.
-    fn list_members_operators(
-        clients: Vec<String>,
-        channel: String,
-        main_box: gtk::Box,
-        sender: Sender<ControllerMessage>,
-        window: ApplicationWindow,
-    ) {
-        for client in clients {
+    fn list_members_operators(&mut self, main_box: gtk::Box, window: ApplicationWindow) {
+        for client in self.clients.clone() {
             let client_label_box = create_kick_label_box();
 
             if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER) {
@@ -126,13 +120,7 @@ impl ChannelMembersView {
             } else {
                 let label = create_kick_label(&format!("\t •\t{client}"));
                 let kick_button = create_kick_button();
-                Self::connect_kick_button(
-                    kick_button.clone(),
-                    channel.clone(),
-                    client,
-                    sender.clone(),
-                    window.clone(),
-                );
+                self.connect_kick_button(kick_button.clone(), client, window.clone());
 
                 client_label_box.append(&label);
                 client_label_box.append(&kick_button);
@@ -148,12 +136,14 @@ impl ChannelMembersView {
     ///
     /// Sends kick request to the controller.
     fn connect_kick_button(
+        &mut self,
         kick_button: Button,
-        channel: String,
         member: String,
-        sender: Sender<ControllerMessage>,
         window: ApplicationWindow,
     ) {
+        let sender = self.sender.clone();
+        let channel = self.channel.clone();
+
         kick_button.connect_clicked(move |_| {
             kick_request(channel.clone(), member.clone(), sender.clone());
             window.close();
@@ -163,8 +153,8 @@ impl ChannelMembersView {
     /// Gets operator from clients vec.
     ///
     /// Returns the operator of the channel.
-    fn get_operator(clients: Vec<String>) -> String {
-        for client in clients {
+    fn get_operator(&mut self) -> String {
+        for client in self.clients.clone() {
             if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER) {
                 return stripped.to_string();
             }
