@@ -13,6 +13,7 @@ use crate::{
         OPEN_INVITE_VIEW_ERROR_TEXT, PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT,
         QUIT_ERROR_TEXT, SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
     },
+    message::Message,
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
@@ -81,18 +82,14 @@ impl InterfaceController {
         }
     }
 
-    pub fn open_main_view(
-        &mut self,
-        realname: String,
-        servername: String,
-        nickname: String,
-        username: String,
-    ) {
+    pub fn open_main_view(&mut self, message: Message) {
+        let (nickname, realname, servername, username) = self.decode_registration(message);
+
         self.register_window.close();
-        self.current_realname = String::from(&realname[..]);
-        self.current_servername = String::from(&servername[..]);
-        self.current_nickname = String::from(&nickname[..]);
-        self.current_username = String::from(&username[..]);
+        self.current_realname = realname;
+        self.current_servername = servername;
+        self.current_nickname = nickname.clone();
+        self.current_username = username;
         self.main_window = self.main_view.get_view(self.app.clone(), nickname);
         self.main_window.show();
     }
@@ -137,12 +134,14 @@ impl InterfaceController {
         self.client.send(&part_message).expect(PART_ERROR_TEXT);
     }
 
-    pub fn receive_invite(&mut self, channel: String, nickname: String) {
+    pub fn receive_invite(&mut self, message: Message) {
+        let (channel, nickname) = self.decode_invite_message(message);
         let message = format!("{nickname} has invited you to join {channel}");
         self.main_view.add_notification(message);
     }
 
-    pub fn receive_kick(&mut self, channel: String, kicked: String) {
+    pub fn receive_kick(&mut self, message: Message) {
+        let (channel, kicked) = self.decode_kick_message(message);
         if kicked == self.current_nickname {
             self.main_view.remove_conversation(channel.clone());
             if channel == self.current_conv {
@@ -151,7 +150,9 @@ impl InterfaceController {
         }
     }
 
-    pub fn receive_list_channels(&mut self, channels: Vec<String>) {
+    pub fn receive_list_end(&mut self) {
+        let channels: Vec<String> = self.process_list_end_message();
+
         self.add_channel_window = AddChannelView::new(self.sender.clone()).get_view(
             self.app.clone(),
             channels_not_mine(channels, self.main_view.get_my_channels()),
@@ -159,7 +160,20 @@ impl InterfaceController {
         self.add_channel_window.show();
     }
 
-    pub fn receive_names_channels(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
+    pub fn receive_list_line(&mut self, message: Message) {
+        let channel = self.decode_list_line_message(message);
+        self.accumulated_channels_from_list.push(channel);
+    }
+
+    pub fn receive_names_line(&mut self, message: Message) {
+        let (channels, clients) = self.decode_names_line_message(message);
+        self.accumulated_channels_from_names.push(channels);
+        self.accumulated_clients_from_names.push(clients);
+    }
+
+    pub fn receive_names_end(&mut self) {
+        let channels_and_clients: HashMap<String, Vec<String>> = self.process_names_end_message();
+
         match self.names_message_intention {
             AddClient => {
                 self.sender
@@ -190,12 +204,8 @@ impl InterfaceController {
         }
     }
 
-    pub fn receive_priv_message(
-        &mut self,
-        channel: Option<String>,
-        message: String,
-        sender_nickname: String,
-    ) {
+    pub fn receive_priv_message(&mut self, message: Message) {
+        let (channel, message, sender_nickname) = self.decode_priv_message(message);
         if let Some(..) = channel {
             self.main_view.receive_priv_channel_message(
                 message,

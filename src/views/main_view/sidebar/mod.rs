@@ -5,7 +5,7 @@ use gtk::{glib::Sender, prelude::*, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
 use crate::{
-    controller::{controller_handler::is_channel, controller_message::ControllerMessage},
+    controller::{controller_message::ControllerMessage, interface_controller::utils::is_channel},
     views::{
         add_views::widgets_creation::create_title,
         main_view::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
