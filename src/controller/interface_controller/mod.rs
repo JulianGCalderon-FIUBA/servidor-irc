@@ -1,3 +1,4 @@
+pub mod decode_message;
 pub mod message_matcher;
 pub mod names_message_intention;
 pub mod utils;
@@ -33,6 +34,9 @@ use self::names_message_intention::NamesMessageIntention::{self, Undefined};
 use super::controller_message::ControllerMessage;
 
 pub struct InterfaceController {
+    accumulated_channels_from_list: Vec<String>,
+    accumulated_clients_from_names: Vec<Vec<String>>,
+    accumulated_channels_from_names: Vec<String>,
     add_channel_window: ApplicationWindow,
     add_client_window: ApplicationWindow,
     app: Application,
@@ -55,6 +59,9 @@ impl InterfaceController {
     /// Creates new [`Client`] connected to received address.
     pub fn new(app: Application, client: Client, sender: Sender<ControllerMessage>) -> Self {
         Self {
+            accumulated_channels_from_list: vec![],
+            accumulated_clients_from_names: vec![],
+            accumulated_channels_from_names: vec![],
             add_channel_window: AddChannelView::new(sender.clone()).get_view(app.clone(), vec![]),
             add_client_window: AddClientView::new(sender.clone()).get_view(app.clone(), vec![]),
             app: app.clone(),
@@ -101,13 +108,8 @@ impl InterfaceController {
                 } => {
                     self.open_invite_client_view(channels_and_clients);
                 }
-                OpenMainView {
-                    realname,
-                    servername,
-                    nickname,
-                    username,
-                } => {
-                    self.open_main_view(realname, servername, nickname, username);
+                OpenMainView { message } => {
+                    self.open_main_view(message);
                 }
                 OpenNotificationsView {} => {
                     self.open_notifications_view();
@@ -127,26 +129,26 @@ impl InterfaceController {
                 QuitChannel {} => {
                     self.quit_channel();
                 }
-                ReceiveInvite { nickname, channel } => {
-                    self.receive_invite(channel, nickname);
+                ReceiveInvite { message } => {
+                    self.receive_invite(message);
                 }
-                ReceiveKick { kicked, channel } => {
-                    self.receive_kick(channel, kicked);
+                ReceiveKick { message } => {
+                    self.receive_kick(message);
                 }
-                ReceiveListChannels { channels } => {
-                    self.receive_list_channels(channels);
+                ReceiveListEnd {} => {
+                    self.receive_list_end();
                 }
-                ReceiveNamesChannels {
-                    channels_and_clients,
-                } => {
-                    self.receive_names_channels(channels_and_clients);
+                ReceiveListLine { message } => {
+                    self.receive_list_line(message);
                 }
-                ReceivePrivMessage {
-                    sender_nickname,
-                    message,
-                    channel,
-                } => {
-                    self.receive_priv_message(channel, message, sender_nickname);
+                ReceiveNamesLine { message } => {
+                    self.receive_names_line(message);
+                }
+                ReceiveNamesEnd {} => {
+                    self.receive_names_end();
+                }
+                ReceivePrivMessage { message } => {
+                    self.receive_priv_message(message);
                 }
                 Register {
                     pass,

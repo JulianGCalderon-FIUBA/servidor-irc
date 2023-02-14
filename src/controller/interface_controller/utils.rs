@@ -9,6 +9,8 @@ use super::{names_message_intention::NamesMessageIntention, InterfaceController}
 
 use crate::controller::controller_message::ControllerMessage::OpenWarningView;
 
+const CHANNEL_FIRST_CHARACTER: &str = "#";
+
 impl InterfaceController {
     /// Returns all clients to add.
     ///
@@ -144,4 +146,11 @@ pub fn remove_operator_indicator(element: &str) -> String {
     } else {
         element.to_string()
     }
+}
+
+/// Returns a bool indicating if the conversation is a channel or not.
+///
+/// Receives a String, returns a bool
+pub fn is_channel(parameter: String) -> bool {
+    parameter.starts_with(CHANNEL_FIRST_CHARACTER)
 }

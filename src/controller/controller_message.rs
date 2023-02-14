@@ -2,6 +2,8 @@ use std::collections::HashMap;
 
 use gtk4::glib::GString;
 
+use crate::message::Message;
+
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
     AddNewClient {
@@ -24,10 +26,7 @@ pub enum ControllerMessage {
         channels_and_clients: HashMap<String, Vec<String>>,
     },
     OpenMainView {
-        realname: String,
-        servername: String,
-        nickname: String,
-        username: String,
+        message: Message,
     },
     OpenNotificationsView {},
     OpenSafeConversationView {},
@@ -38,23 +37,21 @@ pub enum ControllerMessage {
     Quit {},
     QuitChannel {},
     ReceiveInvite {
-        nickname: String,
-        channel: String,
+        message: Message,
     },
     ReceiveKick {
-        kicked: String,
-        channel: String,
+        message: Message,
     },
-    ReceiveListChannels {
-        channels: Vec<String>,
-    },
-    ReceiveNamesChannels {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
+    ReceiveListEnd {},
+    ReceiveNamesEnd {},
     ReceivePrivMessage {
-        sender_nickname: String,
-        message: String,
-        channel: Option<String>,
+        message: Message,
+    },
+    ReceiveListLine {
+        message: Message,
+    },
+    ReceiveNamesLine {
+        message: Message,
     },
     Register {
         pass: GString,

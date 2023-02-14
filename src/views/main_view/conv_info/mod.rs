@@ -3,7 +3,9 @@ pub mod requests;
 use gtk::{glib::Sender, prelude::*, Align, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
-use crate::controller::{controller_handler::is_channel, controller_message::ControllerMessage};
+use crate::controller::{
+    controller_message::ControllerMessage, interface_controller::utils::is_channel,
+};
 
 use self::requests::{
     add_invite_view_request, add_safe_conversation_view_request, quit_channel_request,
