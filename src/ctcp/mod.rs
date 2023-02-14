@@ -2,6 +2,7 @@ use crate::{macros::some_or_return, message::Message, server::consts::commands::
 
 pub mod dcc_chat;
 pub mod dcc_message;
+pub mod dcc_send;
 
 pub const CONTROL_CHARACTER: char = 1 as char;
 

@@ -22,7 +22,7 @@ impl DccChatSender {
         let ip = address.ip();
         let port = address.port();
 
-        write!(server, "CTCP {client} :DCC CHAT {ip} {port}")?;
+        write!(server, "CTCP {client} :DCC CHAT chat {ip} {port}")?;
         server.write_all(CRLF)?;
 
         Ok(Self {
@@ -77,7 +77,7 @@ for every server message:
 
 /*
 ** EMISION DE MENSAJES
-si el cliente apreta el boton de iniciar un dcc chat:
+si el cliente aprieta el boton de iniciar un dcc chat:
     let dcs = DccChatSender::issue(tcpStream del servidor, cliente);
     guardar el dcs en la estructura, con el cliente asociado (hashmap)
 */
