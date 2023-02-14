@@ -124,6 +124,13 @@ pub fn client_channels(
     client_channels_set
 }
 
+/// Returns a bool indicating if the conversation is a channel or not.
+///
+/// Receives a String, returns a bool
+pub fn is_channel(parameter: String) -> bool {
+    parameter.starts_with(CHANNEL_FIRST_CHARACTER)
+}
+
 pub fn is_not_empty(vector: &Vec<String>) -> bool {
     !vector.is_empty()
 }
@@ -146,11 +153,4 @@ pub fn remove_operator_indicator(element: &str) -> String {
     } else {
         element.to_string()
     }
-}
-
-/// Returns a bool indicating if the conversation is a channel or not.
-///
-/// Receives a String, returns a bool
-pub fn is_channel(parameter: String) -> bool {
-    parameter.starts_with(CHANNEL_FIRST_CHARACTER)
 }

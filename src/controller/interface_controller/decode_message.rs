@@ -4,58 +4,31 @@ use crate::message::Message;
 
 use super::{utils::is_channel, InterfaceController};
 
+pub fn get_message_prefix(message: &Message) -> String {
+    message.get_prefix().clone().unwrap()
+}
+
+pub fn get_message_trailing(message: &Message) -> String {
+    message.get_trailing().clone().unwrap()
+}
+
+pub fn get_message_parameter(message: &Message, index: usize) -> String {
+    message.get_parameters()[index].clone()
+}
+
 impl InterfaceController {
     pub fn decode_invite_message(&mut self, message: Message) -> (String, String) {
-        let channel = message.get_parameters()[1].clone();
-        let nickname = message.get_prefix().clone().unwrap();
+        let channel = get_message_parameter(&message, 1);
+        let nickname = get_message_prefix(&message);
 
         (channel, nickname)
     }
 
     pub fn decode_kick_message(&mut self, message: Message) -> (String, String) {
-        let channel = message.get_parameters()[0].clone();
-        let kicked = message.get_parameters()[1].clone();
+        let channel = get_message_parameter(&message, 0);
+        let kicked = get_message_parameter(&message, 1);
 
         (channel, kicked)
-    }
-
-    pub fn decode_registration(&mut self, message: Message) -> (String, String, String, String) {
-        let trailing_text = message.get_trailing().clone().unwrap();
-        let trailing_strings = trailing_text.split(' ').collect::<Vec<&str>>();
-        println!("{trailing_strings:?}");
-        let mut username = trailing_strings[5].to_string();
-        username.remove(0);
-        let realname = message.get_parameters()[0].clone();
-        let servername = trailing_strings[2].to_string();
-        let nickname = trailing_strings[4].to_string();
-
-        (nickname, realname, servername, username)
-    }
-
-    pub fn decode_priv_message(&mut self, message: Message) -> (Option<String>, String, String) {
-        let message_text = message.get_trailing().clone().unwrap();
-        let sender_nickname = message.get_prefix().clone().unwrap();
-        let channel = if is_channel(message.get_parameters()[0].clone()) {
-            Some(message.get_parameters()[0].clone())
-        } else {
-            None
-        };
-
-        (channel, message_text, sender_nickname)
-    }
-
-    pub fn decode_list_line_message(&mut self, message: Message) -> String {
-        let channel = message.get_parameters()[0].clone();
-
-        channel
-    }
-
-    pub fn decode_names_line_message(&mut self, message: Message) -> (String, Vec<String>) {
-        let channels = message.get_parameters()[0].clone();
-        let trailing: String = message.get_trailing().clone().unwrap();
-        let clients: Vec<String> = trailing.split(' ').map(|s| s.to_string()).collect();
-
-        (channels, clients)
     }
 
     pub fn process_list_end_message(&mut self) -> Vec<String> {
@@ -63,6 +36,12 @@ impl InterfaceController {
         self.accumulated_channels_from_list = vec![];
 
         channels
+    }
+
+    pub fn decode_list_line_message(&mut self, message: Message) -> String {
+        let channel = get_message_parameter(&message, 0);
+
+        channel
     }
 
     pub fn process_names_end_message(&mut self) -> HashMap<String, Vec<String>> {
@@ -76,5 +55,39 @@ impl InterfaceController {
         self.accumulated_clients_from_names = vec![];
 
         channels_and_clients
+    }
+
+    pub fn decode_names_line_message(&mut self, message: Message) -> (String, Vec<String>) {
+        let channels = get_message_parameter(&message, 0);
+        let trailing: String = get_message_trailing(&message);
+        let clients: Vec<String> = trailing.split(' ').map(|s| s.to_string()).collect();
+
+        (channels, clients)
+    }
+
+    pub fn decode_priv_message(&mut self, message: Message) -> (Option<String>, String, String) {
+        let message_text = get_message_trailing(&message);
+        let sender_nickname = get_message_prefix(&message);
+        let channel_value = get_message_parameter(&message, 0);
+        let channel = if is_channel(channel_value.clone()) {
+            Some(channel_value)
+        } else {
+            None
+        };
+
+        (channel, message_text, sender_nickname)
+    }
+
+    pub fn decode_registration(&mut self, message: Message) -> (String, String, String, String) {
+        let trailing_text = get_message_trailing(&message);
+        let trailing_strings = trailing_text.split(' ').collect::<Vec<&str>>();
+        println!("{trailing_strings:?}");
+        let mut username = trailing_strings[5].to_string();
+        username.remove(0);
+        let realname = get_message_parameter(&message, 0);
+        let servername = trailing_strings[2].to_string();
+        let nickname = trailing_strings[4].to_string();
+
+        (nickname, realname, servername, username)
     }
 }

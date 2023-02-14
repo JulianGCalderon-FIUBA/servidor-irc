@@ -35,8 +35,8 @@ use super::controller_message::ControllerMessage;
 
 pub struct InterfaceController {
     accumulated_channels_from_list: Vec<String>,
-    accumulated_clients_from_names: Vec<Vec<String>>,
     accumulated_channels_from_names: Vec<String>,
+    accumulated_clients_from_names: Vec<Vec<String>>,
     add_channel_window: ApplicationWindow,
     add_client_window: ApplicationWindow,
     app: Application,
@@ -60,8 +60,8 @@ impl InterfaceController {
     pub fn new(app: Application, client: Client, sender: Sender<ControllerMessage>) -> Self {
         Self {
             accumulated_channels_from_list: vec![],
-            accumulated_clients_from_names: vec![],
             accumulated_channels_from_names: vec![],
+            accumulated_clients_from_names: vec![],
             add_channel_window: AddChannelView::new(sender.clone()).get_view(app.clone(), vec![]),
             add_client_window: AddClientView::new(sender.clone()).get_view(app.clone(), vec![]),
             app: app.clone(),
