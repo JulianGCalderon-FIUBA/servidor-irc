@@ -30,8 +30,8 @@ const ADDRESS_MESSAGE: &str = "Leave it empty to use the default IP...";
 /// Contains an address entry.  
 /// Uses sender to communicate with controller.
 pub struct IpView {
-    pub address_entry: Entry,
-    pub ok_button: Button,
+    address_entry: Entry,
+    ok_button: Button,
     sender: Sender<ControllerMessage>,
 }
 

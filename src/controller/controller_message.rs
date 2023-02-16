@@ -2,30 +2,15 @@ use std::collections::HashMap;
 
 use gtk4::glib::GString;
 
+use crate::message::Message;
+
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
     AddNewClient {
         new_client: GString,
     },
-    AddNotificationsView {},
-    AddUserInfoView {},
-    AddViewToAddClient {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
-    AddViewToInviteClient {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
-    AddWarningView {
-        message: String,
-    },
     ChangeConversation {
         nickname: String,
-    },
-    ChangeViewToMain {
-        realname: String,
-        servername: String,
-        nickname: String,
-        username: String,
     },
     JoinChannel {
         channel: String,
@@ -34,26 +19,39 @@ pub enum ControllerMessage {
         channel: String,
         member: String,
     },
-    Quit {},
-    QuitChannel {},
-    RecieveInvite {
-        nickname: String,
-        channel: String,
-    },
-    ReceiveKick {
-        kicked: String,
-        channel: String,
-    },
-    ReceiveListChannels {
-        channels: Vec<String>,
-    },
-    ReceiveNamesChannels {
+    OpenAddClientView {
         channels_and_clients: HashMap<String, Vec<String>>,
     },
-    ReceivePrivMessage {
-        sender_nickname: String,
+    OpenInviteClientView {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
+    OpenMainView {
+        message: Message,
+    },
+    OpenNotificationsView {},
+    OpenSafeConversationView {},
+    OpenUserInfoView {},
+    OpenWarningView {
         message: String,
-        channel: Option<String>,
+    },
+    Quit {},
+    QuitChannel {},
+    ReceiveInvite {
+        message: Message,
+    },
+    ReceiveKick {
+        message: Message,
+    },
+    ReceiveListEnd {},
+    ReceiveNamesEnd {},
+    ReceivePrivMessage {
+        message: Message,
+    },
+    ReceiveListLine {
+        message: Message,
+    },
+    ReceiveNamesLine {
+        message: Message,
     },
     Register {
         pass: GString,

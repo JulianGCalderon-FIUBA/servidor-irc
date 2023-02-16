@@ -3,13 +3,13 @@ pub mod ip_view;
 
 /// The application's main view.  
 /// Containts conversations, chat and features.  
-pub mod view_main;
+pub mod main_view;
 
 /// Contains the registration view.  
-pub mod view_register;
+pub mod register_view;
 
 /// Contains multiples views that help use of the features.
-pub mod views_add;
+pub mod add_views;
 
 /// Contains multiple functions that create widgets for every view.
 pub mod widgets_creation;
@@ -21,6 +21,10 @@ const PASSWORD_LABEL_TEXT: &str = "Password:";
 const REALNAME_LABEL_TEXT: &str = "Your name:";
 const SERVERNAME_LABEL_TEXT: &str = "Servername:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
+const ENTRY_PLACEHOLDER: &str = "Message...";
+const SEND_BUTTON_TEXT: &str = "Send"; // ➤ 
 
+const CHAT_CSS: &str = "chat";
 const MAIN_BOX_CSS: &str = "main_box";
-const WARNING_TEXT_CSS: &str ="warning_text";
+const MESSAGE_BOX_CSS: &str = "message_box";
+const WARNING_TEXT_CSS: &str = "warning_text";
