@@ -22,7 +22,7 @@ impl MainView {
     pub fn create_conv_info(&mut self, nickname: &str) -> Box {
         let conv_info = Box::builder()
             .orientation(Orientation::Vertical)
-            .width_request(177)
+            .width_request(250)
             .margin_end(12)
             .halign(Align::Start)
             .build();
