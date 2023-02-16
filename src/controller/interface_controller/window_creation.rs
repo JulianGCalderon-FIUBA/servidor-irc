@@ -53,7 +53,7 @@ pub fn ip_window(app: &Application, sender: &Sender<ControllerMessage>) -> Appli
     IpView::new(sender.clone()).get_view(app.clone())
 }
 
-pub fn main_view( sender: &Sender<ControllerMessage>) -> MainView {
+pub fn main_view(sender: &Sender<ControllerMessage>) -> MainView {
     MainView::new(sender.clone())
 }
 

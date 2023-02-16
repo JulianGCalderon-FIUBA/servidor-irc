@@ -129,10 +129,12 @@ impl MainView {
         current_conv: String,
     ) {
         let message_label = create_received_message(&message_text);
-        self.messages.get_mut(&nickname).unwrap().push(vec![
-            message_label.clone(),
-            create_sender_nickname_label(""),
-        ]);
+        if let Some(messages) = self.messages.get_mut(&nickname) {
+            messages.push(vec![
+                message_label.clone(),
+                create_sender_nickname_label(""),
+            ]);
+        }
 
         if nickname == current_conv {
             self.message_box.append(&message_label);
