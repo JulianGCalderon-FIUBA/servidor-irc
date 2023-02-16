@@ -135,6 +135,7 @@ impl MainView {
         self.quit_channel_button.add_css_class(DISABLE_BUTTON_CSS);
         self.invite_button.set_visible(false);
         self.channel_members_button.set_visible(false);
+        self.safe_conversation_button.set_visible(false);
     }
 
     /// Returns users channels.
@@ -168,6 +169,7 @@ impl MainView {
         }
 
         self.invite_button.set_visible(true);
+        self.safe_conversation_button.set_visible(true);
         self.channel_members_button.set_visible(false);
     }
 
@@ -184,6 +186,7 @@ impl MainView {
         }
 
         self.invite_button.set_visible(false);
+        self.safe_conversation_button.set_visible(false);
         self.channel_members_button.set_visible(true);
     }
 }
