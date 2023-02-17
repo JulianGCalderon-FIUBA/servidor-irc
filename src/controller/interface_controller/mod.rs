@@ -91,6 +91,10 @@ impl InterfaceController {
                 ChangeConversation { nickname } => {
                     self.change_conversation(nickname);
                 }
+                DccInvitation { client, message } => {
+                    // println!("{}", message);
+                    self.dcc_invitation(client, message);
+                }
                 JoinChannel { channel } => {
                     self.join_channel(channel);
                 }

@@ -17,7 +17,7 @@ use crate::{
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND, CTCP_COMMAND
-    }, ctcp::dcc_chat_sender::DccChatSender,
+    }, ctcp::{dcc_chat_sender::DccChatSender, dcc_message::DccMessage},
 };
 use gtk::{glib::GString, prelude::*};
 
@@ -25,7 +25,7 @@ use super::{
     utils::{channels_not_mine, is_not_empty},
     window_creation::{
         add_channel_window, add_client_window, channel_members_window, invite_window,
-        notifications_window, safe_conversation_window, user_info_window, warning_window,
+        notifications_window, user_info_window, warning_window,
     },
     InterfaceController,
     NamesMessageIntention::*,
@@ -42,6 +42,11 @@ impl InterfaceController {
         self.current_conv = current_conversation;
         self.main_view
             .change_conversation(last_conv, self.current_conv.clone());
+    }
+
+    pub fn dcc_invitation(&mut self, client: String, message: DccMessage) {
+        // dcc_invitation_window().show()
+        println!("The client is {} and the message is {}", client, message.address);
     }
 
     pub fn join_channel(&mut self, channel: String) {

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use gtk4::glib::GString;
 
-use crate::message::Message;
+use crate::{message::Message, ctcp::dcc_message::DccMessage};
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
@@ -11,6 +11,10 @@ pub enum ControllerMessage {
     },
     ChangeConversation {
         nickname: String,
+    },
+    DccInvitation {
+        client: String,
+        message: DccMessage,
     },
     JoinChannel {
         channel: String,

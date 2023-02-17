@@ -1,12 +1,12 @@
 use crate::{
     message::Message,
-    server::consts::commands::{INVITE_COMMAND, KICK_COMMAND, PRIVMSG_COMMAND},
+    server::consts::commands::{INVITE_COMMAND, KICK_COMMAND, PRIVMSG_COMMAND}, ctcp::{get_ctcp_message, dcc_message::DccMessage},
 };
 
 use super::{
     controller_message::ControllerMessage::{
         self, OpenMainView, OpenWarningView, ReceiveInvite, ReceiveKick, ReceiveListEnd,
-        ReceiveListLine, ReceiveNamesEnd, ReceiveNamesLine, ReceivePrivMessage, RegularMessage,
+        ReceiveListLine, ReceiveNamesEnd, ReceiveNamesLine, ReceivePrivMessage, RegularMessage, DccInvitation,
     },
     ERR_NICK_COLLISION_WARNING_TEXT,
 };
@@ -39,9 +39,27 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         LOGIN_OK => OpenMainView { message },
         NAMES_END_COMMAND => ReceiveNamesEnd {},
         NAMES_LINE_COMMAND => ReceiveNamesLine { message },
-        PRIVMSG_COMMAND => ReceivePrivMessage { message }, // if ctcp
+        PRIVMSG_COMMAND => parse_priv_message(message),
+            // ReceivePrivMessage { message } // if ctcp,
         _ => RegularMessage {
             message: message.to_string(),
         },
     }
+}
+
+fn parse_priv_message(message: Message) -> ControllerMessage {
+    match get_ctcp_message(&message) {
+        Some(_) => {
+            let trailing = message.get_trailing().clone().unwrap();
+            let client = message.get_prefix().clone().unwrap();
+            println!("trailing: {} \n client:{}", trailing, client);
+            DccInvitation { client: client.to_string(), message: DccMessage::parse(trailing).unwrap() }
+        }
+        None => ReceivePrivMessage { message }
+    }
+    // if get_ctcp_message(&message).unwrap().is_empty() {
+    //     return ReceivePrivMessage { message };
+    // } else {
+    //     return 
+    // }
 }
