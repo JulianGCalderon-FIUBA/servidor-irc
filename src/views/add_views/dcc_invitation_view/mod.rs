@@ -63,7 +63,7 @@ impl DccInvitationView {
         let button_box = create_main_box(Orientation::Horizontal, 150, 300);
         // main_box.add_css_class(MAIN_BOX_CSS);
 
-        self.connect_accept_button(client, address, self.sender.clone());
+        self.connect_accept_button(client.clone(), address, self.sender.clone());
         self.connect_decline_button(client, self.sender.clone());
 
         button_box.append(&self.accept_button);
