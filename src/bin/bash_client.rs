@@ -4,7 +4,7 @@ use std::time::Duration;
 use std::{env, io};
 
 use internet_relay_chat::client::async_reader::AsyncReader;
-use internet_relay_chat::client::client::Client;
+use internet_relay_chat::client::Client;
 use internet_relay_chat::message::{CreationError, Message};
 use internet_relay_chat::ADDRESS;
 

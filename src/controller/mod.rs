@@ -8,7 +8,7 @@ pub mod interface_controller;
 
 use gtk4 as gtk;
 
-use crate::{client::client::Client, ADDRESS};
+use crate::{client::Client, ADDRESS};
 use gtk::{gdk::Display, glib, prelude::*, Application, CssProvider, StyleContext};
 
 use self::{controller_message::ControllerMessage, interface_controller::InterfaceController};

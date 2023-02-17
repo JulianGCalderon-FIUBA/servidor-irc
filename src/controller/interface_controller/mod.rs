@@ -6,7 +6,7 @@ pub mod window_creation;
 
 use gtk4 as gtk;
 
-use crate::{client::client::Client, views::main_view::MainView};
+use crate::{client::Client, views::main_view::MainView};
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
