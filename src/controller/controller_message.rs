@@ -29,7 +29,7 @@ pub enum ControllerMessage {
         message: Message,
     },
     OpenNotificationsView {},
-    OpenSafeConversationView {},
+    SafeConversationRequest {},
     OpenUserInfoView {},
     OpenWarningView {
         message: String,

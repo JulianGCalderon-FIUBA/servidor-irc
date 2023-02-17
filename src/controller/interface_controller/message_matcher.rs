@@ -16,8 +16,8 @@ use crate::{
     message::Message,
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
-        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
-    },
+        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND, CTCP_COMMAND
+    }, ctcp::dcc_chat_sender::DccChatSender,
 };
 use gtk::{glib::GString, prelude::*};
 
@@ -94,9 +94,13 @@ impl InterfaceController {
         notifications_window(&self.app, self.main_view.get_notifications()).show();
     }
 
-    pub fn open_safe_conversation_view(&mut self) {
-        self.main_window.hide();
-        safe_conversation_window(&self.app, &self.sender).show();
+    pub fn send_safe_conversation_request(&mut self) {
+        // self.main_window.hide();
+        // safe_conversation_window(&self.app, &self.sender).show();
+        println!("Sending safe conv request");
+        let stream = self.client.get_stream().unwrap();
+        let chat_sender = DccChatSender::send(stream, self.current_conv.clone()).unwrap();
+        self.safe_conversations.insert(self.current_conv.clone(), chat_sender);
     }
 
     pub fn open_user_info_view(&mut self) {

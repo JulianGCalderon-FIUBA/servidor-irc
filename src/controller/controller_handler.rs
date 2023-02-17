@@ -39,7 +39,7 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         LOGIN_OK => OpenMainView { message },
         NAMES_END_COMMAND => ReceiveNamesEnd {},
         NAMES_LINE_COMMAND => ReceiveNamesLine { message },
-        PRIVMSG_COMMAND => ReceivePrivMessage { message },
+        PRIVMSG_COMMAND => ReceivePrivMessage { message }, // if ctcp
         _ => RegularMessage {
             message: message.to_string(),
         },

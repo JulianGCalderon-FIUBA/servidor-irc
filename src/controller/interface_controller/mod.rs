@@ -6,12 +6,13 @@ pub mod window_creation;
 
 use gtk4 as gtk;
 
-use crate::{client::client::Client, views::main_view::MainView};
+use crate::{client::client::Client, views::main_view::MainView, ctcp::dcc_chat_sender::DccChatSender};
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
     Application, ApplicationWindow,
 };
+use std::collections::HashMap;
 
 use crate::controller::controller_message::ControllerMessage::{
     OpenAddClientView, OpenInviteClientView, OpenWarningView,
@@ -46,6 +47,7 @@ pub struct InterfaceController {
     nickname: String,
     realname: String,
     register_window: ApplicationWindow,
+    safe_conversations: HashMap<String, DccChatSender>,
     sender: Sender<ControllerMessage>,
     servername: String,
     username: String,
@@ -71,6 +73,7 @@ impl InterfaceController {
             nickname: String::new(),
             realname: String::new(),
             register_window: register_window(&app, &sender),
+            safe_conversations: HashMap::new(),
             sender,
             servername: String::new(),
             username: String::new(),
@@ -109,9 +112,6 @@ impl InterfaceController {
                 }
                 OpenNotificationsView {} => {
                     self.open_notifications_view();
-                }
-                OpenSafeConversationView {} => {
-                    self.open_safe_conversation_view();
                 }
                 OpenUserInfoView {} => {
                     self.open_user_info_view();
@@ -159,6 +159,9 @@ impl InterfaceController {
                 }
                 RemoveConversation {} => {
                     self.remove_conversation();
+                }
+                SafeConversationRequest { } => {
+                    self.send_safe_conversation_request();
                 }
                 SendInviteMessage { channel } => {
                     self.send_invite_message(channel);

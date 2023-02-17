@@ -6,7 +6,7 @@ use std::{
 use super::dcc_chat::DccChat;
 use crate::message::CRLF;
 
-struct DccChatReceiver {
+pub struct DccChatReceiver {
     server: TcpStream,
     client: String,
 }
