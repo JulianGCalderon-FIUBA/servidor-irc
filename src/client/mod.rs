@@ -5,7 +5,7 @@ use std::{
     net::TcpStream,
 };
 
-use crate::message::CRLF;
+use crate::message::{CreationError, Message, CRLF};
 
 /// Represents a client that can connect to a Server.
 pub struct Client {
@@ -30,6 +30,11 @@ impl Client {
 
         self.stream.write_all(bytes)?;
         self.stream.write_all(CRLF)
+    }
+
+    /// Sends message to connected stream.
+    pub fn read(&mut self) -> Result<Message, CreationError> {
+        Message::read_from(&mut self.stream)
     }
 
     pub fn try_clone(&mut self) -> io::Result<Self> {
