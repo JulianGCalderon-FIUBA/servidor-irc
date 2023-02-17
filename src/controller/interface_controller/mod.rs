@@ -85,6 +85,9 @@ impl InterfaceController {
 
         receiver.attach(None, move |msg| {
             match msg {
+                AcceptDccChat { client, address } => {
+                    println!("DCC CHAT ACCEPTED");
+                }
                 AddNewClient { new_client } => {
                     self.add_new_client(new_client);
                 }
@@ -92,7 +95,6 @@ impl InterfaceController {
                     self.change_conversation(nickname);
                 }
                 DccInvitation { client, message } => {
-                    // println!("{}", message);
                     self.dcc_invitation(client, message);
                 }
                 JoinChannel { channel } => {

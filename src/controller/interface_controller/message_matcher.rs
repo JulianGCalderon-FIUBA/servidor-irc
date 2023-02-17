@@ -25,7 +25,7 @@ use super::{
     utils::{channels_not_mine, is_not_empty},
     window_creation::{
         add_channel_window, add_client_window, channel_members_window, invite_window,
-        notifications_window, user_info_window, warning_window,
+        notifications_window, user_info_window, warning_window, dcc_invitation_window
     },
     InterfaceController,
     NamesMessageIntention::*,
@@ -45,8 +45,8 @@ impl InterfaceController {
     }
 
     pub fn dcc_invitation(&mut self, client: String, message: DccMessage) {
-        // dcc_invitation_window().show()
-        println!("The client is {} and the message is {}", client, message.address);
+        dcc_invitation_window(&self.app, client, message.address, &self.sender).show()
+        // println!("The client is {} and the message is {}", client, message.address);
     }
 
     pub fn join_channel(&mut self, channel: String) {

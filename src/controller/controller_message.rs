@@ -6,6 +6,10 @@ use crate::{message::Message, ctcp::dcc_message::DccMessage};
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
+    AcceptDccChat {
+        client: String,
+        address: String,
+    },
     AddNewClient {
         new_client: GString,
     },
