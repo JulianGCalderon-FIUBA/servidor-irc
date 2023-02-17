@@ -10,7 +10,7 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use self::requests::accept_request;
+use self::requests::{accept_request, decline_request};
 
 use crate::views::{
     widgets_creation::{
@@ -64,6 +64,7 @@ impl DccInvitationView {
         // main_box.add_css_class(MAIN_BOX_CSS);
 
         self.connect_accept_button(client, address, self.sender.clone());
+        self.connect_decline_button(client, self.sender.clone());
 
         button_box.append(&self.accept_button);
         button_box.append(&self.decline_button);
@@ -76,12 +77,21 @@ impl DccInvitationView {
         window
     }
 
-    /// Connects connect button.
+    /// Connects accept button.
     ///
-    /// Sends to register request to the controller.
+    /// Sends accept request to the controller.
     fn connect_accept_button(&self, client: String, address: String, sender: Sender<ControllerMessage>) {
         self.accept_button.connect_clicked(move |_| {
             accept_request(client.clone(), address.clone(), sender.clone());
+        });
+    }
+
+    /// Connects decline button.
+    ///
+    /// Sends decline request to the controller.
+    fn connect_decline_button(&self, client: String, sender: Sender<ControllerMessage>) {
+        self.decline_button.connect_clicked(move |_| {
+            decline_request(client.clone(), sender.clone());
         });
     }
 

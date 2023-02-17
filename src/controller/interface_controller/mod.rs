@@ -97,6 +97,9 @@ impl InterfaceController {
                 DccInvitation { client, message } => {
                     self.dcc_invitation(client, message);
                 }
+                DeclineDccChat { client } => {
+                    println!("DCC CHAT DECLINED");
+                }
                 JoinChannel { channel } => {
                     self.join_channel(channel);
                 }

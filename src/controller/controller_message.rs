@@ -20,6 +20,9 @@ pub enum ControllerMessage {
         client: String,
         message: DccMessage,
     },
+    DeclineDccChat {
+        client: String,
+    },
     JoinChannel {
         channel: String,
     },
