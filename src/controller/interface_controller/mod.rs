@@ -6,7 +6,7 @@ pub mod window_creation;
 
 use gtk4 as gtk;
 
-use crate::{client::client::Client, views::main_view::MainView, ctcp::dcc_chat_sender::DccChatSender};
+use crate::{client::client::Client, views::main_view::MainView, ctcp::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver}};
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
@@ -39,6 +39,8 @@ pub struct InterfaceController {
     app: Application,
     client: Client,
     current_conv: String,
+    dcc_recievers: HashMap<String, DccChatReceiver>,
+    dcc_senders: HashMap<String, DccChatSender>,
     invite_window: ApplicationWindow,
     ip_window: ApplicationWindow,
     main_view: MainView,
@@ -47,7 +49,6 @@ pub struct InterfaceController {
     nickname: String,
     realname: String,
     register_window: ApplicationWindow,
-    safe_conversations: HashMap<String, DccChatSender>,
     sender: Sender<ControllerMessage>,
     servername: String,
     username: String,
@@ -65,6 +66,8 @@ impl InterfaceController {
             app: app.clone(),
             client,
             current_conv: String::new(),
+            dcc_recievers: HashMap::new(),
+            dcc_senders: HashMap::new(),
             invite_window: invite_window(&app, vec![], &sender),
             ip_window: ip_window(&app, &sender),
             main_view: main_view(&sender),
@@ -73,7 +76,6 @@ impl InterfaceController {
             nickname: String::new(),
             realname: String::new(),
             register_window: register_window(&app, &sender),
-            safe_conversations: HashMap::new(),
             sender,
             servername: String::new(),
             username: String::new(),
@@ -86,6 +88,7 @@ impl InterfaceController {
         receiver.attach(None, move |msg| {
             match msg {
                 AcceptDccChat { client, address } => {
+                    self.accept_dcc_chat(client, address);
                     println!("DCC CHAT ACCEPTED");
                 }
                 AddNewClient { new_client } => {

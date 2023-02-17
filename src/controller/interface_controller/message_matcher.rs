@@ -17,7 +17,7 @@ use crate::{
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND, CTCP_COMMAND
-    }, ctcp::{dcc_chat_sender::DccChatSender, dcc_message::DccMessage},
+    }, ctcp::{dcc_chat_sender::DccChatSender, dcc_message::DccMessage, dcc_chat_receiver::DccChatReceiver},
 };
 use gtk::{glib::GString, prelude::*};
 
@@ -32,6 +32,10 @@ use super::{
 };
 
 impl InterfaceController {
+    pub fn accept_dcc_chat(&mut self, client: String, address: String) {
+        // let dcc_chat = self.dcc_recievers.get(&client).unwrap().accept_chat_command(&address);
+    }
+
     pub fn add_new_client(&mut self, new_client: GString) {
         self.add_client_window.close();
         self.main_view.add_client(new_client.to_string());
@@ -45,8 +49,11 @@ impl InterfaceController {
     }
 
     pub fn dcc_invitation(&mut self, client: String, message: DccMessage) {
+        let stream = self.client.get_stream().unwrap();
+        let dcc_reciever = DccChatReceiver::new(stream, client.clone());
+        self.dcc_recievers.insert(client.clone(), dcc_reciever);
+
         dcc_invitation_window(&self.app, client, message.address, &self.sender).show()
-        // println!("The client is {} and the message is {}", client, message.address);
     }
 
     pub fn join_channel(&mut self, channel: String) {
@@ -100,12 +107,9 @@ impl InterfaceController {
     }
 
     pub fn send_safe_conversation_request(&mut self) {
-        // self.main_window.hide();
-        // safe_conversation_window(&self.app, &self.sender).show();
-        println!("Sending safe conv request");
         let stream = self.client.get_stream().unwrap();
         let chat_sender = DccChatSender::send(stream, self.current_conv.clone()).unwrap();
-        self.safe_conversations.insert(self.current_conv.clone(), chat_sender);
+        self.dcc_senders.insert(self.current_conv.clone(), chat_sender);
     }
 
     pub fn open_user_info_view(&mut self) {
