@@ -1,35 +1,28 @@
+mod dcc_chat;
+mod dcc_message;
+mod dcc_send;
+
 use crate::{macros::some_or_return, message::Message, server::consts::commands::PRIVMSG_COMMAND};
 
-pub mod dcc_chat;
-mod dcc_chat_sender;
-pub mod dcc_message;
-mod dcc_chat_receiver;
+pub const CONTROL_CHARACTER: char = '\x01';
 
-pub const CONTROL_CHARACTER: char = 1 as char;
-
-pub fn is_ctcp_message(message: &Message) -> bool {
+pub fn parse_ctcp(message: &Message) -> Option<String> {
     let command = message.get_command();
-    let trailing: Vec<char> = message.get_trailing().as_ref().unwrap().chars().collect();
-
     if command != PRIVMSG_COMMAND {
-        return false;
-    }
-
-    let first = some_or_return!(trailing.first(), false);
-    let last = some_or_return!(trailing.last(), false);
-
-    first == &CONTROL_CHARACTER && last == &CONTROL_CHARACTER
-}
-
-pub fn get_ctcp_message(message: &Message) -> Option<String> {
-    if !is_ctcp_message(message) {
         return None;
     }
 
-    let mut content = message.get_trailing().to_owned().unwrap();
+    let mut trailing: Vec<char> = message.get_trailing().to_owned().unwrap().chars().collect();
 
-    content.remove(0);
-    content.pop();
+    let first = some_or_return!(trailing.first(), None);
+    let last = some_or_return!(trailing.last(), None);
 
-    Some(content)
+    if first != &CONTROL_CHARACTER || last != &CONTROL_CHARACTER {
+        return None;
+    }
+
+    trailing.remove(0);
+    trailing.pop();
+
+    Some(trailing.into_iter().collect())
 }
