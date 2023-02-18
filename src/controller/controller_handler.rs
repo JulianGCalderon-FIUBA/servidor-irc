@@ -53,8 +53,8 @@ fn parse_priv_message(message: Message) -> ControllerMessage {
         Some(_) => {
             let trailing = message.get_trailing().clone().unwrap();
             let client = message.get_prefix().clone().unwrap();
-            println!("trailing: {} \n client:{}", trailing, client);
-            let mut arguments: Vec<String> = trailing.split(' ').map(|s| s.to_string()).collect();
+
+            let arguments: Vec<String> = trailing.split(' ').map(|s| s.to_string()).collect();
             match arguments[2].as_str() {
                 "accept" => DccRecieveAccept { client },
                 "decline" => DccRecieveDecline { client },

@@ -91,7 +91,6 @@ impl InterfaceController {
             match msg {
                 AcceptDccChat { client, address } => {
                     self.accept_dcc_chat(client, address);
-                    println!("DCC CHAT ACCEPTED");
                 }
                 AddNewClient { new_client } => {
                     self.add_new_client(new_client);

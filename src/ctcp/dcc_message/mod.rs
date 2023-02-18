@@ -19,11 +19,7 @@ impl DccMessage {
         //     return Err("Not enough arguments".to_string());
         // }
 
-        println!("message: {}\nargument len: {}", message, arguments.len());
-
         let first = arguments.remove(0);
-
-        println!("first: {}", first);
 
         // if first != DCC {
         //     return Err("Must start with DCC".to_string());
