@@ -6,7 +6,7 @@ pub mod window_creation;
 
 use gtk4 as gtk;
 
-use crate::{client::client::Client, views::main_view::MainView, ctcp::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver}};
+use crate::{client::client::Client, views::main_view::MainView, ctcp::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver, dcc_chat::DccChat}};
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
@@ -41,6 +41,7 @@ pub struct InterfaceController {
     current_conv: String,
     dcc_recievers: HashMap<String, DccChatReceiver>,
     dcc_senders: HashMap<String, DccChatSender>,
+    dcc_chats: HashMap<String, DccChat>,
     invite_window: ApplicationWindow,
     ip_window: ApplicationWindow,
     main_view: MainView,
@@ -68,6 +69,7 @@ impl InterfaceController {
             current_conv: String::new(),
             dcc_recievers: HashMap::new(),
             dcc_senders: HashMap::new(),
+            dcc_chats: HashMap::new(),
             invite_window: invite_window(&app, vec![], &sender),
             ip_window: ip_window(&app, &sender),
             main_view: main_view(&sender),
@@ -100,8 +102,14 @@ impl InterfaceController {
                 DccInvitation { client, message } => {
                     self.dcc_invitation(client, message);
                 }
+                DccRecieveAccept { client } => {
+                    self.dcc_recieve_accept(client);
+                }
+                DccRecieveDecline { client } => {
+                    self.dcc_recieve_decline(client);
+                }
                 DeclineDccChat { client } => {
-                    println!("DCC CHAT DECLINED");
+                    self.decline_dcc_chat(client);
                 }
                 JoinChannel { channel } => {
                     self.join_channel(channel);

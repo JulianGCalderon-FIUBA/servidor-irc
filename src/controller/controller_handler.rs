@@ -6,7 +6,8 @@ use crate::{
 use super::{
     controller_message::ControllerMessage::{
         self, OpenMainView, OpenWarningView, ReceiveInvite, ReceiveKick, ReceiveListEnd,
-        ReceiveListLine, ReceiveNamesEnd, ReceiveNamesLine, ReceivePrivMessage, RegularMessage, DccInvitation,
+        ReceiveListLine, ReceiveNamesEnd, ReceiveNamesLine, ReceivePrivMessage, RegularMessage, 
+        DccInvitation, DccRecieveAccept, DccRecieveDecline,
     },
     ERR_NICK_COLLISION_WARNING_TEXT,
 };
@@ -53,8 +54,13 @@ fn parse_priv_message(message: Message) -> ControllerMessage {
             let trailing = message.get_trailing().clone().unwrap();
             let client = message.get_prefix().clone().unwrap();
             println!("trailing: {} \n client:{}", trailing, client);
-            DccInvitation { client: client.to_string(), message: DccMessage::parse(trailing).unwrap() }
-        }
+            let mut arguments: Vec<String> = trailing.split(' ').map(|s| s.to_string()).collect();
+            match arguments[2].as_str() {
+                "accept" => DccRecieveAccept { client },
+                "decline" => DccRecieveDecline { client },
+                _ => DccInvitation { client: client.to_string(), message: DccMessage::parse(trailing).unwrap() }
+            }
+        },
         None => ReceivePrivMessage { message }
     }
     // if get_ctcp_message(&message).unwrap().is_empty() {

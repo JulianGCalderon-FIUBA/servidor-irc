@@ -15,7 +15,7 @@ pub struct DccChatSender {
 
 impl DccChatSender {
     pub fn send(mut server: TcpStream, client: String) -> io::Result<Self> {
-        let listener = TcpListener::bind("0.0.0.0:0")?;
+        let listener = TcpListener::bind("127.0.0.1:12345")?;
 
         let address = listener.local_addr()?;
 

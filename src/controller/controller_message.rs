@@ -20,6 +20,12 @@ pub enum ControllerMessage {
         client: String,
         message: DccMessage,
     },
+    DccRecieveAccept {
+        client: String,
+    },
+    DccRecieveDecline {
+        client: String,
+    },
     DeclineDccChat {
         client: String,
     },
