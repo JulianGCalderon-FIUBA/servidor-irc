@@ -15,7 +15,7 @@ pub struct DccChatSender {
 
 impl DccChatSender {
     pub fn send(mut server: TcpStream, client: String) -> io::Result<Self> {
-        let listener = TcpListener::bind("127.0.0.1:12345")?;
+        let listener = TcpListener::bind("127.0.0.1:9001")?;
 
         let address = listener.local_addr()?;
 
@@ -38,6 +38,12 @@ impl DccChatSender {
     }
 
     pub fn close(self) {}
+}
+
+impl Drop for DccChatSender {
+    fn drop(&mut self) {
+        println!("dropping DccChatSender");
+    }
 }
 
 /*
