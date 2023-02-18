@@ -1,5 +1,8 @@
 mod dcc_parsing_error;
 
+#[cfg(test)]
+mod tests;
+
 use std::{net::SocketAddr, str::FromStr};
 
 use crate::macros::{ok_or_return, some_or_return};
@@ -12,6 +15,17 @@ const RESUME_TYPE: &str = "RESUME";
 const ACCEPT_TYPE: &str = "ACCEPT";
 const CLOSE_TYPE: &str = "CLOSE";
 
+const DCC: &str = "DCC";
+
+const CHAT_CHAT_PROTOCOL: &str = "chat";
+const CHAT_ACCEPT_PROTOCOL: &str = "accept";
+const CHAT_DECLINE_PROTOCOL: &str = "decline";
+
+/*
+   DCC CHAT accept
+   DCC CHAT decline
+*/
+
 enum DccMessage {
     Send {
         filename: String,
@@ -21,7 +35,9 @@ enum DccMessage {
     Chat {
         address: SocketAddr,
     },
-    Close {},
+    ChatAccept,
+    ChatDecline,
+    Close,
     Resume {
         filename: String,
         port: u16,
@@ -41,7 +57,7 @@ impl DccMessage {
 
         let dcc = some_or_return!(arguments.pop(), Err(DccParsingError::EmptyMessage));
 
-        if dcc != "DCC" {
+        if dcc != DCC {
             return Err(DccParsingError::NoDcc);
         }
 
@@ -64,12 +80,16 @@ impl DccMessage {
 fn parse_chat_command(mut arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {
     let protocol = some_or_return!(arguments.pop(), Err(DccParsingError::NoProtocol));
 
-    if protocol != "chat" {
-        return Err(DccParsingError::InvalidProtocol);
+    match &protocol[..] {
+        CHAT_ACCEPT_PROTOCOL => Ok(DccMessage::ChatAccept),
+        CHAT_DECLINE_PROTOCOL => Ok(DccMessage::ChatDecline),
+        CHAT_CHAT_PROTOCOL => parse_chat_chat_command(arguments),
+        _ => Err(DccParsingError::InvalidProtocol),
     }
+}
 
+fn parse_chat_chat_command(mut arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {
     let address = parse_address(&mut arguments)?;
-
     Ok(DccMessage::Chat { address })
 }
 
@@ -131,11 +151,11 @@ fn parse_address(arguments: &mut Vec<String>) -> Result<SocketAddr, DccParsingEr
     let ip = some_or_return!(arguments.pop(), Err(DccParsingError::NoIp));
     let port = some_or_return!(arguments.pop(), Err(DccParsingError::NoPort));
 
-    let address = format!("{ip}:{port}");
-    let address = ok_or_return!(
-        SocketAddr::from_str(&address),
+    let formatted_address = format!("{ip}:{port}");
+    let socket_address = ok_or_return!(
+        SocketAddr::from_str(&formatted_address),
         Err(DccParsingError::InvalidAddress)
     );
 
-    Ok(address)
+    Ok(socket_address)
 }
