@@ -61,6 +61,24 @@ fn send_is_parsed_correctly() {
 }
 
 #[test]
+fn send_accept_is_parsed_correctly() {
+    let raw_message = "DCC SEND accept".to_string();
+
+    let dcc_message = DccMessage::parse(raw_message).unwrap();
+
+    matches!(dcc_message, DccMessage::SendAccept);
+}
+
+#[test]
+fn send_decline_is_parsed_correctly() {
+    let raw_message = "DCC SEND decline".to_string();
+
+    let dcc_message = DccMessage::parse(raw_message).unwrap();
+
+    matches!(dcc_message, DccMessage::SendDecline);
+}
+
+#[test]
 fn resume_is_parsed_correctly() {
     let raw_message = "DCC RESUME filename 9000 256".to_string();
 

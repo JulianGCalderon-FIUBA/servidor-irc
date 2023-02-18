@@ -21,6 +21,9 @@ const CHAT_CHAT_PROTOCOL: &str = "chat";
 const CHAT_ACCEPT_PROTOCOL: &str = "accept";
 const CHAT_DECLINE_PROTOCOL: &str = "decline";
 
+const SEND_ACCEPT_PROTOCOL: &str = "accept";
+const SEND_DECLINE_PROTOCOL: &str = "decline";
+
 /*
    DCC CHAT accept
    DCC CHAT decline
@@ -32,6 +35,8 @@ enum DccMessage {
         address: SocketAddr,
         filesize: u64,
     },
+    SendAccept,
+    SendDecline,
     Chat {
         address: SocketAddr,
     },
@@ -94,7 +99,17 @@ fn parse_chat_chat_command(mut arguments: Vec<String>) -> Result<DccMessage, Dcc
 }
 
 fn parse_send_command(mut arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {
-    let filename = some_or_return!(arguments.pop(), Err(DccParsingError::NoFilename));
+    let protocol = some_or_return!(arguments.pop(), Err(DccParsingError::NoFilename));
+
+    if arguments.is_empty() {
+        if protocol == SEND_ACCEPT_PROTOCOL {
+            return Ok(DccMessage::SendAccept);
+        } else if protocol == SEND_DECLINE_PROTOCOL {
+            return Ok(DccMessage::SendDecline);
+        }
+    }
+
+    let filename = protocol;
 
     let address = parse_address(&mut arguments)?;
 
