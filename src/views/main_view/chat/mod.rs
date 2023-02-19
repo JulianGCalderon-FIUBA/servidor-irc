@@ -21,7 +21,7 @@ use self::{
 
 use super::{utils::adjust_scrollbar, MainView};
 
-const MESSAGE_MAX_CHARACTERS: usize = 70;
+const MESSAGE_MAX_CHARACTERS: usize = 60;
 const MESSAGE_MAX_CHARACTERS_ERROR: &str = "¡Message too long!";
 const EMPTY_MESSAGE_ERROR: &str = "¡Message is empty!";
 
