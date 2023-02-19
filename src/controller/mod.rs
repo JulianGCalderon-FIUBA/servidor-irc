@@ -31,6 +31,7 @@ const USER_ERROR_TEXT: &str = "ERROR: USER command";
 
 const CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT: &str =
     "The client you want to invite is already in all your channels.";
+const ERR_IS_ALREADY_ON_CHANNEL_WARNING_TEXT : &str = "You are already on this channel, please write another name";
 const ERR_NICK_COLLISION_WARNING_TEXT: &str = "The nickname is in use, please pick another one.";
 const NO_CHANNELS_WARNING_TEXT: &str = "You are not in any channel.";
 const NO_CLIENTS_WARNING_TEXT: &str = "There are no clients to chat with.";

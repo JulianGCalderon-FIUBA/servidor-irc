@@ -17,15 +17,15 @@ use crate::{
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
-    },
+    }
 };
 use gtk::{glib::GString, prelude::*};
 
 use super::{
     utils::{channels_not_mine, is_not_empty},
     window_creation::{
-        add_channel_window, add_client_window, channel_members_window, invite_window,
-        notifications_window, safe_conversation_window, user_info_window, warning_window,
+         add_client_window, channel_members_window, invite_window,
+        notifications_window, safe_conversation_window, user_info_window, warning_window, add_channel_view, main_view,
     },
     InterfaceController,
     NamesMessageIntention::*,
@@ -44,13 +44,17 @@ impl InterfaceController {
             .change_conversation(last_conv, self.current_conv.clone());
     }
 
+    pub fn error_when_adding_channel(&mut self, message: String){
+        self.add_channel_view.set_error_text(message);
+    }
+    
+    // send_join_message
     pub fn join_channel(&mut self, channel: String) {
-        self.add_channel_window.close();
         let message: String = format!("{JOIN_COMMAND} {channel}");
         self.client.send(&message).expect(JOIN_ERROR_TEXT);
-        self.main_view.add_channel(channel);
     }
 
+    // send_kick_message
     pub fn kick_member(&mut self, channel: String, member: String) {
         let message: String = format!("{KICK_COMMAND} {channel} {member}");
         self.client.send(&message).expect(KICK_ERROR_TEXT);
@@ -86,6 +90,8 @@ impl InterfaceController {
         self.servername = servername;
         self.nickname = nickname.clone();
         self.username = username;
+
+        self.main_view = main_view(&self.sender);
         self.main_window = self.main_view.get_view(self.app.clone(), nickname);
         self.main_window.show();
     }
@@ -111,10 +117,12 @@ impl InterfaceController {
         warning_window(&self.app, message).show();
     }
 
+    // send_quit_message
     pub fn quit(&mut self) {
         self.client.send(QUIT_COMMAND).expect(QUIT_ERROR_TEXT);
     }
 
+    // send_part_message
     pub fn quit_channel(&mut self) {
         let part_message: String = format!("{PART_COMMAND} {}", self.current_conv);
         self.client.send(&part_message).expect(PART_ERROR_TEXT);
@@ -124,6 +132,13 @@ impl InterfaceController {
         let (channel, nickname) = self.decode_invite_message(message);
         let message: String = format!("{nickname} has invited you to join {channel}");
         self.main_view.add_notification(message);
+    }
+
+    pub fn receive_join(&mut self, message: Message) {
+        let channel = self.decode_join_message(message);
+
+        self.add_channel_window.close();
+        self.main_view.add_channel(channel);
     }
 
     pub fn receive_kick(&mut self, message: Message) {
@@ -141,7 +156,8 @@ impl InterfaceController {
         let my_channels: Vec<String> = self.main_view.get_my_channels();
         let channels_not_mine: Vec<String> = channels_not_mine(channels, my_channels);
 
-        self.add_channel_window = add_channel_window(&self.app, channels_not_mine, &self.sender);
+        self.add_channel_view = add_channel_view(&self.sender);
+        self.add_channel_window = self.add_channel_view.get_view(self.app.clone(), channels_not_mine);
         self.add_channel_window.show();
     }
 

@@ -12,6 +12,9 @@ pub enum ControllerMessage {
     ChangeConversation {
         nickname: String,
     },
+    ErrorWhenAddingChannel{
+        message: String,
+    },
     JoinChannel {
         channel: String,
     },
@@ -39,6 +42,7 @@ pub enum ControllerMessage {
     ReceiveInvite {
         message: Message,
     },
+    ReceiveJoin {message: Message},
     ReceiveKick {
         message: Message,
     },
