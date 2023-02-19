@@ -4,7 +4,7 @@ pub mod requests;
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Align::Start, Application, ApplicationWindow, Button, Label};
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button};
 use gtk4 as gtk;
 
 use crate::{
@@ -15,10 +15,7 @@ use crate::{
     },
 };
 
-use self::{
-    requests::kick_request,
-    widgets_creation::{create_kick_button, create_kick_label},
-};
+use self::{requests::kick_request, widgets_creation::create_kick_button};
 
 use super::{
     widgets_creation::{create_main_box_add_view, create_title},
@@ -67,11 +64,7 @@ impl ChannelMembersView {
 
         main_box.append(&create_title(TITLE));
 
-        if self.nickname.clone() == self.get_operator() {
-            self.list_members_operators(main_box.clone(), window.clone());
-        } else {
-            self.list_members(main_box.clone());
-        }
+        self.list_members(main_box.clone(), window.clone());
 
         main_box.append(&self.button);
 
@@ -90,44 +83,29 @@ impl ChannelMembersView {
         });
     }
 
-    /// Lists all members of the channel.
-    ///
-    /// Shows the operator of the channel.
-    fn list_members(&mut self, main_box: gtk::Box) {
-        for client in &self.clients {
-            let label: Label = if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER)
-            {
-                create_label(&format!("\t •\tOP: {stripped}"))
-            } else {
-                create_label(&format!("\t •\t{client}"))
-            };
-            label.set_halign(Start);
-            label.set_margin_start(20);
-            main_box.append(&label);
-        }
-    }
-
     /// Lists all members of the channel for the operator.
     ///
     /// List members with a kick button next to them.
-    fn list_members_operators(&mut self, main_box: gtk::Box, window: ApplicationWindow) {
+    fn list_members(&mut self, main_box: gtk::Box, window: ApplicationWindow) {
+        let im_operator = self.nickname.clone() == self.get_operator();
+
         for client in self.clients.clone() {
             let client_label_box = create_kick_label_box();
 
             if let Some(stripped) = client.strip_prefix(OPERATOR_FIRST_CHARACTER) {
-                let label = create_kick_label(&format!("\t •\tOP: {stripped}"));
+                let label = create_label(&format!("\t 👑\t {stripped}\t"));
                 client_label_box.append(&label);
             } else {
-                let label = create_kick_label(&format!("\t •\t{client}"));
-                let kick_button = create_kick_button();
-                self.connect_kick_button(kick_button.clone(), client, window.clone());
-
+                let label = create_label(&format!("\t ⦿\t {client}\t"));
                 client_label_box.append(&label);
-                client_label_box.append(&kick_button);
+
+                if im_operator {
+                    let kick_button = create_kick_button();
+                    self.connect_kick_button(kick_button.clone(), client, window.clone());
+                    client_label_box.append(&kick_button);
+                }
             }
 
-            client_label_box.set_halign(Start);
-            client_label_box.set_margin_start(20);
             main_box.append(&client_label_box);
         }
     }

@@ -33,7 +33,7 @@ pub fn create_message_box() -> Box {
         .margin_bottom(10)
         .margin_start(10)
         .margin_bottom(10)
-        .width_request(645)
+        .width_request(638)
         .halign(Start)
         .build()
 }
