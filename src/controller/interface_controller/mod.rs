@@ -7,7 +7,7 @@ pub mod window_creation;
 use gtk4 as gtk;
 
 use crate::{
-    client::client::Client,
+    client::Client,
     views::{add_views::add_channel_view::AddChannelView, main_view::MainView},
 };
 use gtk::{
