@@ -15,12 +15,8 @@ use crate::{
     },
 };
 
-pub fn add_channel_window(
-    app: &Application,
-    channels: Vec<String>,
-    sender: &Sender<ControllerMessage>,
-) -> ApplicationWindow {
-    AddChannelView::new(channels, sender.clone()).get_view(app.clone())
+pub fn add_channel_view(sender: &Sender<ControllerMessage>) -> AddChannelView {
+    AddChannelView::new(sender.clone())
 }
 
 pub fn add_client_window(
@@ -55,14 +51,6 @@ pub fn ip_window(app: &Application, sender: &Sender<ControllerMessage>) -> Appli
 
 pub fn main_view(sender: &Sender<ControllerMessage>) -> MainView {
     MainView::new(sender.clone())
-}
-
-pub fn main_window(
-    app: &Application,
-    nickname: String,
-    sender: &Sender<ControllerMessage>,
-) -> ApplicationWindow {
-    main_view(sender).get_view(app.clone(), nickname)
 }
 
 pub fn notifications_window(app: &Application, notifications: Vec<String>) -> ApplicationWindow {

@@ -6,7 +6,10 @@ pub mod window_creation;
 
 use gtk4 as gtk;
 
-use crate::{client::Client, views::main_view::MainView};
+use crate::{
+    client::Client,
+    views::{add_views::add_channel_view::AddChannelView, main_view::MainView},
+};
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
@@ -22,8 +25,7 @@ use crate::controller::ControllerMessage::*;
 use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
-        add_channel_window, add_client_window, invite_window, ip_window, main_view, main_window,
-        register_window,
+        add_channel_view, add_client_window, invite_window, ip_window, main_view, register_window,
     },
 };
 
@@ -33,6 +35,7 @@ pub struct InterfaceController {
     accumulated_channels_from_list: Vec<String>,
     accumulated_channels_from_names: Vec<String>,
     accumulated_clients_from_names: Vec<Vec<String>>,
+    add_channel_view: AddChannelView,
     add_channel_window: ApplicationWindow,
     add_client_window: ApplicationWindow,
     app: Application,
@@ -58,7 +61,8 @@ impl InterfaceController {
             accumulated_channels_from_list: vec![],
             accumulated_channels_from_names: vec![],
             accumulated_clients_from_names: vec![],
-            add_channel_window: add_channel_window(&app, vec![], &sender),
+            add_channel_view: add_channel_view(&sender),
+            add_channel_window: add_channel_view(&sender).get_view(app.clone(), vec![]),
             add_client_window: add_client_window(&app, vec![], &sender),
             app: app.clone(),
             client,
@@ -66,7 +70,7 @@ impl InterfaceController {
             invite_window: invite_window(&app, vec![], &sender),
             ip_window: ip_window(&app, &sender),
             main_view: main_view(&sender),
-            main_window: main_window(&app, String::new(), &sender),
+            main_window: main_view(&sender).get_view(app.clone(), String::new()),
             names_message_intention: Undefined,
             nickname: String::new(),
             realname: String::new(),
@@ -88,11 +92,8 @@ impl InterfaceController {
                 ChangeConversation { nickname } => {
                     self.change_conversation(nickname);
                 }
-                JoinChannel { channel } => {
-                    self.join_channel(channel);
-                }
-                KickMember { channel, member } => {
-                    self.kick_member(channel, member);
+                ErrorWhenAddingChannel { message } => {
+                    self.error_when_adding_channel(message);
                 }
                 OpenAddClientView {
                     channels_and_clients,
@@ -119,14 +120,11 @@ impl InterfaceController {
                 OpenWarningView { message } => {
                     self.open_warning_view(message);
                 }
-                Quit {} => {
-                    self.quit();
-                }
-                QuitChannel {} => {
-                    self.quit_channel();
-                }
                 ReceiveInvite { message } => {
                     self.receive_invite(message);
+                }
+                ReceiveJoin { message } => {
+                    self.receive_join(message);
                 }
                 ReceiveKick { message } => {
                     self.receive_kick(message);
@@ -163,6 +161,12 @@ impl InterfaceController {
                 SendInviteMessage { channel } => {
                     self.send_invite_message(channel);
                 }
+                SendJoinMessage { channel } => {
+                    self.send_join_message(channel);
+                }
+                SendKickMessage { channel, member } => {
+                    self.send_kick_message(channel, member);
+                }
                 SendListMessage {} => {
                     self.send_list_message();
                 }
@@ -175,8 +179,14 @@ impl InterfaceController {
                 SendNamesMessageToKnowMembers {} => {
                     self.send_names_message_to_know_members();
                 }
+                SendPartMessage {} => {
+                    self.send_part_message();
+                }
                 SendPrivMessage { message } => {
                     self.send_priv_message(message);
+                }
+                SendQuitMessage {} => {
+                    self.send_quit_message();
                 }
                 ToRegister { address } => {
                     self.to_register(address);

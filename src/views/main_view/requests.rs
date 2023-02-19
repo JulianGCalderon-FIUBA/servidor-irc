@@ -17,6 +17,6 @@ pub fn change_conversation_request(conversation: String, sender: Sender<Controll
 ///
 /// Receives nothing.
 pub fn quit_request(sender: Sender<ControllerMessage>) {
-    let request = ControllerMessage::Quit {};
+    let request = ControllerMessage::SendQuitMessage {};
     sender.send(request).expect(ERROR_TEXT)
 }

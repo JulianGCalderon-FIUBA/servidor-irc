@@ -48,8 +48,8 @@ const CHANNEL_FIRST_CHARACTER_LABEL_CSS: &str = "channel_first_character";
 const DISABLE_SELECT_BUTTON_CSS: &str = "disable_select_button";
 const INACTIVE_SELECT_BUTTON_CSS: &str = "inactive_select_button";
 
-/// Shows add channel view.  
-/// Contains a channel entry and an add new channel button.  
+/// Shows add channel view.
+/// Contains a channel entry and an add new channel button.
 /// Uses sender to communicate with controller.
 pub struct AddChannelView {
     add_existing_channel_button: Button,
@@ -67,13 +67,13 @@ pub struct AddChannelView {
 
 impl AddChannelView {
     /// Creates new [`AddChannelView`]
-    pub fn new(channels: Vec<String>, sender: Sender<ControllerMessage>) -> Self {
+    pub fn new(sender: Sender<ControllerMessage>) -> Self {
         Self {
             add_existing_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
             add_new_channel_button: create_center_button(ADD_CHANNEL_BUTTON_TEXT),
             channel_combobox: create_combobox(),
             channel_entry: create_entry(""),
-            channels,
+            channels: vec![],
             create_channel_box: create_box(Vertical),
             create_channel_button: create_inactive_button(CREATE_CHANNEL_BUTTON_TEXT),
             error_label: create_error_label(),
@@ -86,9 +86,11 @@ impl AddChannelView {
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application, channels: Vec<String>) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
+
+        self.channels = channels;
 
         let main_box = create_main_box_add_view();
 
@@ -248,5 +250,9 @@ impl AddChannelView {
 
             join_channel_request(text, sender.clone());
         });
+    }
+
+    pub fn set_error_text(&mut self, text: String) {
+        self.error_label.set_text(&text);
     }
 }

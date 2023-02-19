@@ -24,7 +24,7 @@ use gtk::{glib::GString, prelude::*};
 use super::{
     utils::{channels_not_mine, is_not_empty},
     window_creation::{
-        add_channel_window, add_client_window, channel_members_window, invite_window,
+        add_channel_view, add_client_window, channel_members_window, invite_window, main_view,
         notifications_window, safe_conversation_window, user_info_window, warning_window,
     },
     InterfaceController,
@@ -44,16 +44,8 @@ impl InterfaceController {
             .change_conversation(last_conv, self.current_conv.clone());
     }
 
-    pub fn join_channel(&mut self, channel: String) {
-        self.add_channel_window.close();
-        let message: String = format!("{JOIN_COMMAND} {channel}");
-        self.client.send(&message).expect(JOIN_ERROR_TEXT);
-        self.main_view.add_channel(channel);
-    }
-
-    pub fn kick_member(&mut self, channel: String, member: String) {
-        let message: String = format!("{KICK_COMMAND} {channel} {member}");
-        self.client.send(&message).expect(KICK_ERROR_TEXT);
+    pub fn error_when_adding_channel(&mut self, message: String) {
+        self.add_channel_view.set_error_text(message);
     }
 
     pub fn open_add_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
@@ -86,6 +78,8 @@ impl InterfaceController {
         self.servername = servername;
         self.nickname = nickname.clone();
         self.username = username;
+
+        self.main_view = main_view(&self.sender);
         self.main_window = self.main_view.get_view(self.app.clone(), nickname);
         self.main_window.show();
     }
@@ -111,19 +105,17 @@ impl InterfaceController {
         warning_window(&self.app, message).show();
     }
 
-    pub fn quit(&mut self) {
-        self.client.send(QUIT_COMMAND).expect(QUIT_ERROR_TEXT);
-    }
-
-    pub fn quit_channel(&mut self) {
-        let part_message: String = format!("{PART_COMMAND} {}", self.current_conv);
-        self.client.send(&part_message).expect(PART_ERROR_TEXT);
-    }
-
     pub fn receive_invite(&mut self, message: Message) {
         let (channel, nickname) = self.decode_invite_message(message);
         let message: String = format!("{nickname} has invited you to join {channel}");
         self.main_view.add_notification(message);
+    }
+
+    pub fn receive_join(&mut self, message: Message) {
+        let channel = self.decode_join_message(message);
+
+        self.add_channel_window.close();
+        self.main_view.add_channel(channel);
     }
 
     pub fn receive_kick(&mut self, message: Message) {
@@ -141,7 +133,10 @@ impl InterfaceController {
         let my_channels: Vec<String> = self.main_view.get_my_channels();
         let channels_not_mine: Vec<String> = channels_not_mine(channels, my_channels);
 
-        self.add_channel_window = add_channel_window(&self.app, channels_not_mine, &self.sender);
+        self.add_channel_view = add_channel_view(&self.sender);
+        self.add_channel_window = self
+            .add_channel_view
+            .get_view(self.app.clone(), channels_not_mine);
         self.add_channel_window.show();
     }
 
@@ -250,6 +245,16 @@ impl InterfaceController {
         self.client.send(&invite).expect(INVITE_ERROR_TEXT);
     }
 
+    pub fn send_join_message(&mut self, channel: String) {
+        let message: String = format!("{JOIN_COMMAND} {channel}");
+        self.client.send(&message).expect(JOIN_ERROR_TEXT);
+    }
+
+    pub fn send_kick_message(&mut self, channel: String, member: String) {
+        let message: String = format!("{KICK_COMMAND} {channel} {member}");
+        self.client.send(&message).expect(KICK_ERROR_TEXT);
+    }
+
     pub fn send_list_message(&mut self) {
         self.client.send(LIST_COMMAND).expect(LIST_ERROR_TEXT);
     }
@@ -271,11 +276,20 @@ impl InterfaceController {
         self.send_names_message(KnowMembers, Some(self.current_conv.clone()));
     }
 
+    pub fn send_part_message(&mut self) {
+        let part_message: String = format!("{PART_COMMAND} {}", self.current_conv);
+        self.client.send(&part_message).expect(PART_ERROR_TEXT);
+    }
+
     pub fn send_priv_message(&mut self, message: GString) {
         let priv_message = format!("{PRIVMSG_COMMAND} {} :{message}", self.current_conv);
         self.client.send(&priv_message).expect(PRIVMSG_ERROR_TEXT);
         self.main_view
             .send_message(message.to_string(), self.current_conv.clone());
+    }
+
+    pub fn send_quit_message(&mut self) {
+        self.client.send(QUIT_COMMAND).expect(QUIT_ERROR_TEXT);
     }
 
     pub fn to_register(&mut self, address: String) {
