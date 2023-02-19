@@ -6,7 +6,10 @@ pub mod window_creation;
 
 use gtk4 as gtk;
 
-use crate::{client::client::Client, views::{main_view::MainView, add_views::add_channel_view::AddChannelView}};
+use crate::{
+    client::client::Client,
+    views::{add_views::add_channel_view::AddChannelView, main_view::MainView},
+};
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
@@ -22,8 +25,7 @@ use crate::controller::ControllerMessage::*;
 use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
-         add_client_window, invite_window, ip_window, main_view,
-        register_window, add_channel_view,
+        add_channel_view, add_client_window, invite_window, ip_window, main_view, register_window,
     },
 };
 
@@ -90,7 +92,7 @@ impl InterfaceController {
                 ChangeConversation { nickname } => {
                     self.change_conversation(nickname);
                 }
-                ErrorWhenAddingChannel{ message}=>{
+                ErrorWhenAddingChannel { message } => {
                     self.error_when_adding_channel(message);
                 }
                 OpenAddClientView {
@@ -121,7 +123,7 @@ impl InterfaceController {
                 ReceiveInvite { message } => {
                     self.receive_invite(message);
                 }
-                ReceiveJoin { message} => {
+                ReceiveJoin { message } => {
                     self.receive_join(message);
                 }
                 ReceiveKick { message } => {

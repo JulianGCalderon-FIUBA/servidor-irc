@@ -9,40 +9,26 @@ pub mod widgets_creation;
 
 use gtk::Label;
 use gtk::{
-    glib::Sender,
-    prelude::*,
-    Application,
-    ApplicationWindow,
-    Box,
-    Button,
-    ComboBoxText,
-    Entry,
-    Orientation::Horizontal,
-    Orientation::Vertical,
+    glib::Sender, prelude::*, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
+    Orientation::Horizontal, Orientation::Vertical,
 };
 use gtk4 as gtk;
 
 use self::requests::join_channel_request;
-use self::utils::{ active_button, disable_button, disactive_button, switch_visibility };
+use self::utils::{active_button, disable_button, disactive_button, switch_visibility};
 use self::widgets_creation::{
-    create_active_button,
-    create_box,
-    create_combobox,
-    create_inactive_button,
+    create_active_button, create_box, create_combobox, create_inactive_button,
 };
 
 use super::widgets_creation::create_main_box_add_view;
 use super::{
-    super::{ main_view::utils::entry_is_valid, widgets_creation::create_entry },
+    super::{main_view::utils::entry_is_valid, widgets_creation::create_entry},
     widgets_creation::create_title,
 };
 
 use crate::controller::controller_message::ControllerMessage;
 use crate::views::widgets_creation::{
-    build_application_window,
-    create_center_button,
-    create_error_label,
-    create_label,
+    build_application_window, create_center_button, create_error_label, create_label,
     create_label_input_box,
 };
 
@@ -126,24 +112,24 @@ impl AddChannelView {
             self.join_channel_button.clone(),
             self.create_channel_button.clone(),
             self.join_channel_box.clone(),
-            self.create_channel_box.clone()
+            self.create_channel_box.clone(),
         );
         self.connect_select_button(
             self.create_channel_button.clone(),
             self.join_channel_button.clone(),
             self.create_channel_box.clone(),
-            self.join_channel_box.clone()
+            self.join_channel_box.clone(),
         );
 
         self.connect_add_new_channel_button(
             self.channel_entry.clone(),
             self.error_label.clone(),
-            self.sender.clone()
+            self.sender.clone(),
         );
         if !self.channels.is_empty() {
             self.connect_add_existing_channel_button(
                 self.channel_combobox.clone(),
-                self.sender.clone()
+                self.sender.clone(),
             );
         }
 
@@ -159,7 +145,8 @@ impl AddChannelView {
         self.refill_combobox();
         entry_box.append(&self.channel_combobox);
         self.join_channel_box.append(&entry_box);
-        self.join_channel_box.append(&self.add_existing_channel_button);
+        self.join_channel_box
+            .append(&self.add_existing_channel_button);
         main_box.append(&self.join_channel_box);
     }
 
@@ -193,7 +180,10 @@ impl AddChannelView {
         self.join_channel_button.set_sensitive(false);
         active_button(self.create_channel_button.clone());
         disable_button(self.join_channel_button.clone());
-        switch_visibility(self.create_channel_box.clone(), self.join_channel_box.clone());
+        switch_visibility(
+            self.create_channel_box.clone(),
+            self.join_channel_box.clone(),
+        );
     }
 
     /// Connects select button.
@@ -204,7 +194,7 @@ impl AddChannelView {
         _active_button: Button,
         _disactive_button: Button,
         visible_box: Box,
-        no_visible_box: Box
+        no_visible_box: Box,
     ) {
         let create_channel_button_clone = _active_button.clone();
         _active_button.connect_clicked(move |_| {
@@ -220,7 +210,7 @@ impl AddChannelView {
     fn connect_add_existing_channel_button(
         &self,
         combobox: ComboBoxText,
-        sender: Sender<ControllerMessage>
+        sender: Sender<ControllerMessage>,
     ) {
         self.add_existing_channel_button.connect_clicked(move |_| {
             if combobox.active_text().is_none() {
@@ -238,7 +228,7 @@ impl AddChannelView {
         &self,
         input: Entry,
         error_label: Label,
-        sender: Sender<ControllerMessage>
+        sender: Sender<ControllerMessage>,
     ) {
         self.add_new_channel_button.connect_clicked(move |_| {
             let mut text = input.text().to_string();
@@ -248,11 +238,9 @@ impl AddChannelView {
                 if !text.is_empty() {
                     error_label.set_text(ERR_CHANNEL_NAME_TOO_LONG);
                 } else {
-                    error_label.set_text(
-                        &format!(
-                            "{ERR_CHANNEL_NAME_EMPTY} Max: {CHANNEL_NAME_MAX_CHARACTERS} characters"
-                        )
-                    );
+                    error_label.set_text(&format!(
+                        "{ERR_CHANNEL_NAME_EMPTY} Max: {CHANNEL_NAME_MAX_CHARACTERS} characters"
+                    ));
                 }
                 return;
             }

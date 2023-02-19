@@ -5,10 +5,11 @@ use crate::{
 
 use super::{
     controller_message::ControllerMessage::{
-        self, OpenMainView, OpenWarningView, ReceiveInvite, ReceiveKick, ReceiveListEnd,
-        ReceiveListLine, ReceiveNamesEnd,ReceiveJoin, ReceiveNamesLine, ReceivePrivMessage, RegularMessage,ErrorWhenAddingChannel
+        self, ErrorWhenAddingChannel, OpenMainView, OpenWarningView, ReceiveInvite, ReceiveJoin,
+        ReceiveKick, ReceiveListEnd, ReceiveListLine, ReceiveNamesEnd, ReceiveNamesLine,
+        ReceivePrivMessage, RegularMessage,
     },
-    ERR_NICK_COLLISION_WARNING_TEXT, ERR_IS_ALREADY_ON_CHANNEL_WARNING_TEXT,
+    ERR_IS_ALREADY_ON_CHANNEL_WARNING_TEXT, ERR_NICK_COLLISION_WARNING_TEXT,
 };
 
 pub const ERR_IS_ALREADY_ON_CHANNEL: &str = "443";
@@ -34,7 +35,9 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         ERR_NICK_COLLISION => OpenWarningView {
             message: ERR_NICK_COLLISION_WARNING_TEXT.to_string(),
         },
-        ERR_IS_ALREADY_ON_CHANNEL => ErrorWhenAddingChannel{message: ERR_IS_ALREADY_ON_CHANNEL_WARNING_TEXT.to_string()},
+        ERR_IS_ALREADY_ON_CHANNEL => ErrorWhenAddingChannel {
+            message: ERR_IS_ALREADY_ON_CHANNEL_WARNING_TEXT.to_string(),
+        },
         INVITE_COMMAND => ReceiveInvite { message },
         JOIN_COMMAND => ReceiveJoin { message },
         KICK_COMMAND => ReceiveKick { message },

@@ -12,7 +12,7 @@ pub enum ControllerMessage {
     ChangeConversation {
         nickname: String,
     },
-    ErrorWhenAddingChannel{
+    ErrorWhenAddingChannel {
         message: String,
     },
     OpenAddClientView {
@@ -33,7 +33,9 @@ pub enum ControllerMessage {
     ReceiveInvite {
         message: Message,
     },
-    ReceiveJoin {message: Message},
+    ReceiveJoin {
+        message: Message,
+    },
     ReceiveKick {
         message: Message,
     },

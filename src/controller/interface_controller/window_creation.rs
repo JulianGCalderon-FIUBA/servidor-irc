@@ -1,17 +1,13 @@
-use gtk4::{ glib::Sender, Application, ApplicationWindow };
+use gtk4::{glib::Sender, Application, ApplicationWindow};
 
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
         add_views::{
-            add_channel_view::AddChannelView,
-            add_client_view::AddClientView,
-            channel_members_view::ChannelMembersView,
-            invite_view::InviteView,
-            notifications_view::NotificationsView,
-            safe_conversation_view::SafeConversationView,
-            user_info_view::UserInfoView,
-            warning_view::WarningView,
+            add_channel_view::AddChannelView, add_client_view::AddClientView,
+            channel_members_view::ChannelMembersView, invite_view::InviteView,
+            notifications_view::NotificationsView, safe_conversation_view::SafeConversationView,
+            user_info_view::UserInfoView, warning_view::WarningView,
         },
         ip_view::IpView,
         main_view::MainView,
@@ -26,7 +22,7 @@ pub fn add_channel_view(sender: &Sender<ControllerMessage>) -> AddChannelView {
 pub fn add_client_window(
     app: &Application,
     clients: Vec<String>,
-    sender: &Sender<ControllerMessage>
+    sender: &Sender<ControllerMessage>,
 ) -> ApplicationWindow {
     AddClientView::new(clients, sender.clone()).get_view(app.clone())
 }
@@ -36,7 +32,7 @@ pub fn channel_members_window(
     channel: String,
     clients: Vec<String>,
     nickname: String,
-    sender: &Sender<ControllerMessage>
+    sender: &Sender<ControllerMessage>,
 ) -> ApplicationWindow {
     ChannelMembersView::new(channel, clients, nickname, sender.clone()).get_view(app.clone())
 }
@@ -44,7 +40,7 @@ pub fn channel_members_window(
 pub fn invite_window(
     app: &Application,
     channels: Vec<String>,
-    sender: &Sender<ControllerMessage>
+    sender: &Sender<ControllerMessage>,
 ) -> ApplicationWindow {
     InviteView::new(channels, sender.clone()).get_view(app.clone())
 }
@@ -67,7 +63,7 @@ pub fn register_window(app: &Application, sender: &Sender<ControllerMessage>) ->
 
 pub fn safe_conversation_window(
     app: &Application,
-    sender: &Sender<ControllerMessage>
+    sender: &Sender<ControllerMessage>,
 ) -> ApplicationWindow {
     SafeConversationView::new(sender.clone()).get_view(app.clone())
 }
@@ -77,7 +73,7 @@ pub fn user_info_window(
     nickname: String,
     realname: String,
     servername: String,
-    username: String
+    username: String,
 ) -> ApplicationWindow {
     UserInfoView::new(nickname, realname, servername, username).get_view(app.clone())
 }

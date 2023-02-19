@@ -1,4 +1,4 @@
-use crate::controller::controller_message::ControllerMessage;
+use crate::controller::controller_message::ControllerMessage::{self, SendJoinMessage};
 use crate::views::ERROR_TEXT;
 use gtk::glib::Sender;
 
@@ -9,6 +9,6 @@ use gtk4 as gtk;
 /// Receives a channel name.
 pub fn join_channel_request(input: String, sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::SendJoinMessage { channel: input })
+        .send(SendJoinMessage { channel: input })
         .expect(ERROR_TEXT);
 }
