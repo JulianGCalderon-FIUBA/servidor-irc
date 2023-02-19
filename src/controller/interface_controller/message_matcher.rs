@@ -47,18 +47,6 @@ impl InterfaceController {
     pub fn error_when_adding_channel(&mut self, message: String){
         self.add_channel_view.set_error_text(message);
     }
-    
-    // send_join_message
-    pub fn join_channel(&mut self, channel: String) {
-        let message: String = format!("{JOIN_COMMAND} {channel}");
-        self.client.send(&message).expect(JOIN_ERROR_TEXT);
-    }
-
-    // send_kick_message
-    pub fn kick_member(&mut self, channel: String, member: String) {
-        let message: String = format!("{KICK_COMMAND} {channel} {member}");
-        self.client.send(&message).expect(KICK_ERROR_TEXT);
-    }
 
     pub fn open_add_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
         let clients_not_mine: Vec<String> = self.clients_not_mine(channels_and_clients);
@@ -115,17 +103,6 @@ impl InterfaceController {
 
     pub fn open_warning_view(&mut self, message: String) {
         warning_window(&self.app, message).show();
-    }
-
-    // send_quit_message
-    pub fn quit(&mut self) {
-        self.client.send(QUIT_COMMAND).expect(QUIT_ERROR_TEXT);
-    }
-
-    // send_part_message
-    pub fn quit_channel(&mut self) {
-        let part_message: String = format!("{PART_COMMAND} {}", self.current_conv);
-        self.client.send(&part_message).expect(PART_ERROR_TEXT);
     }
 
     pub fn receive_invite(&mut self, message: Message) {
@@ -266,6 +243,16 @@ impl InterfaceController {
         self.client.send(&invite).expect(INVITE_ERROR_TEXT);
     }
 
+    pub fn send_join_message(&mut self, channel: String) {
+        let message: String = format!("{JOIN_COMMAND} {channel}");
+        self.client.send(&message).expect(JOIN_ERROR_TEXT);
+    }
+
+    pub fn send_kick_message(&mut self, channel: String, member: String) {
+        let message: String = format!("{KICK_COMMAND} {channel} {member}");
+        self.client.send(&message).expect(KICK_ERROR_TEXT);
+    }
+    
     pub fn send_list_message(&mut self) {
         self.client.send(LIST_COMMAND).expect(LIST_ERROR_TEXT);
     }
@@ -287,6 +274,11 @@ impl InterfaceController {
         self.send_names_message(KnowMembers, Some(self.current_conv.clone()));
     }
 
+    pub fn send_part_message(&mut self) {
+        let part_message: String = format!("{PART_COMMAND} {}", self.current_conv);
+        self.client.send(&part_message).expect(PART_ERROR_TEXT);
+    }
+    
     pub fn send_priv_message(&mut self, message: GString) {
         let priv_message = format!("{PRIVMSG_COMMAND} {} :{message}", self.current_conv);
         self.client.send(&priv_message).expect(PRIVMSG_ERROR_TEXT);
@@ -294,6 +286,10 @@ impl InterfaceController {
             .send_message(message.to_string(), self.current_conv.clone());
     }
 
+    pub fn send_quit_message(&mut self) {
+        self.client.send(QUIT_COMMAND).expect(QUIT_ERROR_TEXT);
+    }
+    
     pub fn to_register(&mut self, address: String) {
         self.client = match Client::connect(address) {
             Ok(stream) => stream,

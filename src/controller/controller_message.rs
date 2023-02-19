@@ -15,13 +15,6 @@ pub enum ControllerMessage {
     ErrorWhenAddingChannel{
         message: String,
     },
-    JoinChannel {
-        channel: String,
-    },
-    KickMember {
-        channel: String,
-        member: String,
-    },
     OpenAddClientView {
         channels_and_clients: HashMap<String, Vec<String>>,
     },
@@ -37,8 +30,6 @@ pub enum ControllerMessage {
     OpenWarningView {
         message: String,
     },
-    Quit {},
-    QuitChannel {},
     ReceiveInvite {
         message: Message,
     },
@@ -70,13 +61,22 @@ pub enum ControllerMessage {
     SendInviteMessage {
         channel: GString,
     },
+    SendJoinMessage {
+        channel: String,
+    },
+    SendKickMessage {
+        channel: String,
+        member: String,
+    },
     SendListMessage {},
     SendNamesMessageToAddClient {},
     SendNamesMessageToInviteClient {},
     SendNamesMessageToKnowMembers {},
+    SendPartMessage {},
     SendPrivMessage {
         message: GString,
     },
+    SendQuitMessage {},
     ToRegister {
         address: String,
     },

@@ -9,6 +9,6 @@ use gtk4 as gtk;
 /// Receives a channel name.
 pub fn join_channel_request(input: String, sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::JoinChannel { channel: input })
+        .send(ControllerMessage::SendJoinMessage { channel: input })
         .expect(ERROR_TEXT);
 }

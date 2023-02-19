@@ -93,12 +93,6 @@ impl InterfaceController {
                 ErrorWhenAddingChannel{ message}=>{
                     self.error_when_adding_channel(message);
                 }
-                JoinChannel { channel } => {
-                    self.join_channel(channel);
-                }
-                KickMember { channel, member } => {
-                    self.kick_member(channel, member);
-                }
                 OpenAddClientView {
                     channels_and_clients,
                 } => {
@@ -123,12 +117,6 @@ impl InterfaceController {
                 }
                 OpenWarningView { message } => {
                     self.open_warning_view(message);
-                }
-                Quit {} => {
-                    self.quit();
-                }
-                QuitChannel {} => {
-                    self.quit_channel();
                 }
                 ReceiveInvite { message } => {
                     self.receive_invite(message);
@@ -171,6 +159,12 @@ impl InterfaceController {
                 SendInviteMessage { channel } => {
                     self.send_invite_message(channel);
                 }
+                SendJoinMessage { channel } => {
+                    self.send_join_message(channel);
+                }
+                SendKickMessage { channel, member } => {
+                    self.send_kick_message(channel, member);
+                }
                 SendListMessage {} => {
                     self.send_list_message();
                 }
@@ -183,8 +177,14 @@ impl InterfaceController {
                 SendNamesMessageToKnowMembers {} => {
                     self.send_names_message_to_know_members();
                 }
+                SendPartMessage {} => {
+                    self.send_part_message();
+                }
                 SendPrivMessage { message } => {
                     self.send_priv_message(message);
+                }
+                SendQuitMessage {} => {
+                    self.send_quit_message();
                 }
                 ToRegister { address } => {
                     self.to_register(address);

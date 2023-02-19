@@ -9,6 +9,8 @@ use gtk4 as gtk;
 /// Receives a channel name and a member.
 pub fn kick_request(channel: String, member: String, sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::KickMember { channel, member })
+        .send(ControllerMessage::SendKickMessage { channel, member })
         .expect(ERROR_TEXT);
 }
+
+//revisar ControllerMessage::

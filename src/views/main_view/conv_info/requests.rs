@@ -8,7 +8,7 @@ use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT
 /// Receives nothing.
 pub fn quit_channel_request(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::QuitChannel {})
+        .send(ControllerMessage::SendPartMessage {})
         .expect(ERROR_TEXT);
 }
 
