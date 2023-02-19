@@ -3,7 +3,7 @@ use std::{collections::HashMap, thread};
 use gtk4 as gtk;
 
 use crate::{
-    client::{async_reader::AsyncReader, client::Client},
+    client::{async_reader::AsyncReader, Client},
     controller::{
         controller_handler::to_controller_message,
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
