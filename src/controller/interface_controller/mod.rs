@@ -4,10 +4,12 @@ pub mod names_message_intention;
 pub mod utils;
 pub mod window_creation;
 
+use std::thread;
+
 use gtk4 as gtk;
 
 use crate::{
-    client::Client,
+    client::{Client, async_reader::AsyncReader},
     views::{add_views::add_channel_view::AddChannelView, main_view::MainView},
 };
 use gtk::{
@@ -29,7 +31,9 @@ use self::{
     },
 };
 
-use super::controller_message::ControllerMessage;
+use super::{controller_message::ControllerMessage, controller_handler::to_controller_message};
+
+const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
 
 pub struct InterfaceController {
     accumulated_channels_from_list: Vec<String>,
@@ -79,6 +83,23 @@ impl InterfaceController {
             servername: String::new(),
             username: String::new(),
         }
+    }
+
+    pub fn start_listening(&mut self){
+        let sender_clone = self.sender.clone();
+        let (_async_reader, message_receiver) =
+            AsyncReader::spawn(self.client.get_stream().expect("error"));
+        thread::spawn(move || {
+            while let Ok(message_received) = message_receiver.recv() {
+                match message_received {
+                    Ok(message) => {
+                        let controller_message = to_controller_message(message);
+                        sender_clone.send(controller_message).unwrap();
+                    }
+                    Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {error}"),
+                }
+            }
+        });
     }
 
     pub fn build(mut self, receiver: Receiver<ControllerMessage>) {
