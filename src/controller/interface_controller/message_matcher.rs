@@ -182,19 +182,12 @@ impl InterfaceController {
 
     pub fn receive_priv_message(&mut self, message: Message) {
         let (channel, message, sender_nickname) = self.decode_priv_message(message);
-        if let Some(..) = channel {
-            self.main_view.receive_priv_channel_message(
-                message,
-                sender_nickname,
-                channel.unwrap(),
-                self.current_conv.clone(),
-            );
+        if let Some(channel_name) = channel {
+            self.main_view
+                .receive_priv_channel_message(message, sender_nickname, channel_name);
         } else {
-            self.main_view.receive_priv_client_message(
-                message,
-                sender_nickname,
-                self.current_conv.clone(),
-            );
+            self.main_view
+                .receive_priv_client_message(message, sender_nickname);
         }
     }
 

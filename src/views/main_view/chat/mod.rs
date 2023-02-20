@@ -94,23 +94,19 @@ impl MainView {
         message_text: String,
         sender_nickname: String,
         channel: String,
-        current_conv: String,
     ) {
         if sender_nickname == self.user_info.label().unwrap() {
             return;
         }
 
         let sender_nickname_label = create_sender_nickname_label(&sender_nickname);
-        if channel == current_conv
-            && Self::should_show_nickname(self.messages.get(&channel), sender_nickname)
-        {
-            self.message_box.append(&sender_nickname_label);
-        }
-
         let message = create_received_message(&message_text);
-        if channel == current_conv {
-            self.message_box.append(&message);
-            adjust_scrollbar(self.scrollwindow_chat.clone());
+
+        if self.is_actual_conversation(&channel) {
+            if self.should_show_nickname(&channel, sender_nickname) {
+                self.message_box.append(&sender_nickname_label);
+            }
+            self.append_message(&message);
         }
 
         self.messages
@@ -122,12 +118,7 @@ impl MainView {
     /// Creates a new message in a client chat.
     ///
     /// Function is used when a client message is received.
-    pub fn receive_priv_client_message(
-        &mut self,
-        message_text: String,
-        nickname: String,
-        current_conv: String,
-    ) {
+    pub fn receive_priv_client_message(&mut self, message_text: String, nickname: String) {
         let message_label = create_received_message(&message_text);
         if let Some(messages) = self.messages.get_mut(&nickname) {
             messages.push(vec![
@@ -136,17 +127,15 @@ impl MainView {
             ]);
         }
 
-        if nickname == current_conv {
-            self.message_box.append(&message_label);
-            adjust_scrollbar(self.scrollwindow_chat.clone());
+        if self.is_actual_conversation(&nickname) {
+            self.append_message(&message_label);
         }
     }
 
     /// Creates sent message label in the chat.
     pub fn send_message(&mut self, message: String, nickname: String) {
         let message = create_send_message(&message);
-        self.message_box.append(&message);
-        adjust_scrollbar(self.scrollwindow_chat.clone());
+        self.append_message(&message);
 
         self.messages
             .get_mut(&nickname)
@@ -157,10 +146,8 @@ impl MainView {
     /// Returns bool if the messages should be shown.
     ///
     /// If it is received by the sender, returns false.
-    pub fn should_show_nickname(
-        messages: Option<&Vec<Vec<gtk4::Label>>>,
-        sender_nickname: String,
-    ) -> bool {
+    pub fn should_show_nickname(&mut self, channel: &str, sender_nickname: String) -> bool {
+        let messages = self.messages.get(channel);
         Self::prev_message_has_different_sender(messages, sender_nickname)
             || messages.unwrap().is_empty()
     }
@@ -173,5 +160,14 @@ impl MainView {
         messages.is_some()
             && messages.unwrap().last().is_some()
             && messages.unwrap().last().unwrap()[1].text() != sender_nickname
+    }
+
+    pub fn is_actual_conversation(&mut self, name: &str) -> bool {
+        name == self.current_chat.label()
+    }
+
+    pub fn append_message(&mut self, message: &Label) {
+        self.message_box.append(message);
+        adjust_scrollbar(self.scrollwindow_chat.clone());
     }
 }
