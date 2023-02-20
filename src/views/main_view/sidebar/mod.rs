@@ -23,7 +23,7 @@ use self::{
 
 use super::{
     requests::change_conversation_request,
-    utils::{adjust_scrollbar, add_notification_to_button},
+    utils::{add_notification_to_button, adjust_scrollbar},
     MainView, NO_NOTIFICATIONS_TEXT,
 };
 

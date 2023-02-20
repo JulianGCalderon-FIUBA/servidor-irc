@@ -39,7 +39,8 @@ impl InterfaceController {
 
     pub fn change_conversation(&mut self, current_conversation: String) {
         self.current_conv = current_conversation;
-        self.main_view.change_conversation(self.current_conv.clone());
+        self.main_view
+            .change_conversation(self.current_conv.clone());
     }
 
     pub fn error_when_adding_channel(&mut self, message: String) {

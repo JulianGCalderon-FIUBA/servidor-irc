@@ -39,7 +39,7 @@ pub fn button_has_notifications(button: &Button) -> bool {
     button.has_css_class(NOTIFICATION_ON_BUTTON_CSS)
 }
 
-pub fn add_notification_to_button(button: &Button, button_text: String){
+pub fn add_notification_to_button(button: &Button, button_text: String) {
     let mut notifications_number = 0;
     if button_has_notifications(&button) {
         notifications_number = get_notifications_number(&button);
