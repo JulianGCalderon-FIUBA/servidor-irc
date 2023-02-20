@@ -5,7 +5,8 @@ use gtk::{glib::Sender, prelude::*, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
 use crate::{
-    controller::{controller_message::ControllerMessage, interface_controller::utils::is_channel},
+    controller::{controller_message::ControllerMessage, utils::is_channel},
+    server::consts::channel::MAX_CHANNELS,
     views::{
         add_views::widgets_creation::create_title,
         main_view::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
@@ -115,7 +116,7 @@ impl MainView {
         );
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
-        if self.channels_buttons.len() >= 10 {
+        if self.channels_buttons.len() >= MAX_CHANNELS {
             self.add_channel.remove_css_class(ADD_BUTTON_CSS);
             self.add_channel.add_css_class(DISABLE_BUTTON_CSS);
         }

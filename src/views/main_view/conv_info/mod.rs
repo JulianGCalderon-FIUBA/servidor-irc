@@ -3,8 +3,12 @@ pub mod requests;
 use gtk::{glib::Sender, prelude::*, Align, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
-use crate::controller::{
-    controller_message::ControllerMessage, interface_controller::utils::is_channel,
+use crate::{
+    controller::{
+        controller_message::ControllerMessage,
+        utils::{first_word_of_button, is_channel},
+    },
+    server::consts::channel::MAX_CHANNELS,
 };
 
 use self::requests::{
@@ -92,7 +96,7 @@ impl MainView {
     ///
     /// Removes conversation button.
     pub fn remove_conversation(&mut self, conversation: String) {
-        if self.channels_buttons.len() == 10 {
+        if self.channels_buttons.len() == MAX_CHANNELS {
             self.add_channel.remove_css_class(DISABLE_BUTTON_CSS);
             self.add_channel.add_css_class(ADD_BUTTON_CSS);
         }
@@ -107,7 +111,8 @@ impl MainView {
         }
         let mut counter = 0;
         for button in collection_of_buttons.clone() {
-            if button.label().unwrap() == conversation {
+            let button_text = first_word_of_button(&button);
+            if button_text == conversation {
                 conversation_box.remove(&button);
                 break;
             }
@@ -141,7 +146,8 @@ impl MainView {
     pub fn get_my_channels(&mut self) -> Vec<String> {
         let mut my_channels: Vec<String> = vec![];
         for channel_button in &self.channels_buttons {
-            my_channels.push(channel_button.label().unwrap().to_string());
+            let button_text = first_word_of_button(channel_button);
+            my_channels.push(button_text.to_string());
         }
         my_channels
     }
@@ -150,7 +156,8 @@ impl MainView {
     pub fn get_my_clients(&mut self) -> Vec<String> {
         let mut my_clients: Vec<String> = vec![];
         for client_button in &self.clients_buttons {
-            my_clients.push(client_button.label().unwrap().to_string());
+            let button_text = first_word_of_button(client_button);
+            my_clients.push(button_text.to_string());
         }
         my_clients
     }

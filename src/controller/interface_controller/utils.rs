@@ -1,15 +1,18 @@
 use std::collections::HashMap;
 
 use crate::{
-    controller::{NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT},
+    controller::{
+        utils::{
+            all_clients, client_channels, push_if_absent, remove_element, remove_operator_indicator,
+        },
+        NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
+    },
     server::consts::commands::NAMES_COMMAND,
 };
 
 use super::{names_message_intention::NamesMessageIntention, InterfaceController};
 
 use crate::controller::controller_message::ControllerMessage::OpenWarningView;
-
-const CHANNEL_FIRST_CHARACTER: &str = "#";
 
 impl InterfaceController {
     /// Returns all clients to add.
@@ -76,81 +79,5 @@ impl InterfaceController {
             message: warning_text.to_string(),
         };
         self.sender.send(to_send).expect(OPEN_WARNING_ERROR_TEXT);
-    }
-}
-
-/// Returns all clients.
-///
-/// Receives a HashMap<String, Vec<String>>, returns a Vec<String>
-pub fn all_clients(channels_and_clients: HashMap<String, Vec<String>>) -> Vec<String> {
-    let mut clients_set: Vec<String> = vec![];
-    for clients_of_channel in channels_and_clients.values() {
-        for client in clients_of_channel {
-            push_if_absent(&clients_set.clone(), &mut clients_set, client.to_string());
-        }
-    }
-    clients_set
-}
-
-/// Returns channels that are not from the current user.
-///
-/// Receives a Vec<String> and a Vec<String>, returns a Vec<String>
-pub fn channels_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
-    let mut not_mine: Vec<String> = vec![];
-    for element in &all {
-        push_if_absent(&mine, &mut not_mine, element.to_string());
-    }
-    not_mine
-}
-
-/// Returns all channels from a client.
-///
-/// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
-pub fn client_channels(
-    channels_and_clients: HashMap<String, Vec<String>>,
-    client: String,
-) -> Vec<String> {
-    let mut client_channels_set: Vec<String> = vec![];
-    for channel in channels_and_clients.keys() {
-        let mut clients: Vec<String> = vec![];
-        for element in channels_and_clients.get(channel).unwrap() {
-            let element_without_operator_indicator: String = remove_operator_indicator(element);
-            clients.push(element_without_operator_indicator);
-        }
-        if clients.contains(&client) {
-            client_channels_set.push((&channel).to_string());
-        }
-    }
-    client_channels_set
-}
-
-/// Returns a bool indicating if the conversation is a channel or not.
-///
-/// Receives a String, returns a bool
-pub fn is_channel(parameter: String) -> bool {
-    parameter.starts_with(CHANNEL_FIRST_CHARACTER)
-}
-
-pub fn is_not_empty(vector: &Vec<String>) -> bool {
-    !vector.is_empty()
-}
-
-pub fn push_if_absent(original_vector: &[String], new_vector: &mut Vec<String>, element: String) {
-    if !original_vector.contains(&element) {
-        new_vector.push(element);
-    }
-}
-
-pub fn remove_element(vector: &mut Vec<String>, element: &String) {
-    if vector.contains(element) {
-        vector.remove(vector.iter().position(|x| x == element).unwrap());
-    }
-}
-
-pub fn remove_operator_indicator(element: &str) -> String {
-    if let Some(stripped) = element.strip_prefix('@') {
-        stripped.to_string()
-    } else {
-        element.to_string()
     }
 }

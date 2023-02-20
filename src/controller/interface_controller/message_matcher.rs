@@ -7,6 +7,7 @@ use crate::{
     controller::{
         controller_handler::to_controller_message,
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
+        utils::{channels_not_mine, is_not_empty},
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, FAILED_TO_READ_MESSAGE_ERROR_TEXT,
         INVITE_ERROR_TEXT, JOIN_ERROR_TEXT, KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT,
         NO_CHANNELS_WARNING_TEXT, NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT,
@@ -22,7 +23,6 @@ use crate::{
 use gtk::{glib::GString, prelude::*};
 
 use super::{
-    utils::{channels_not_mine, is_not_empty},
     window_creation::{
         add_channel_view, add_client_window, channel_members_window, invite_window, main_view,
         notifications_window, safe_conversation_window, user_info_window, warning_window,

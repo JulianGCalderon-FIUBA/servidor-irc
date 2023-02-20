@@ -5,7 +5,9 @@ use gtk::{glib::Sender, prelude::*, Box, Button, Entry, Label};
 use gtk4 as gtk;
 
 use crate::{
-    controller::{controller_message::ControllerMessage, interface_controller::utils::is_channel},
+    controller::{
+        controller_message::ControllerMessage, utils::first_word_of_button, utils::is_channel,
+    },
     views::{
         main_view::utils::entry_is_valid,
         widgets_creation::{create_chat_box, create_label, create_message_sender_box},
@@ -135,17 +137,12 @@ impl MainView {
         let button = vector
             .into_iter()
             .find(|button| {
-                name = self.first_word_of_button(button);
+                name = first_word_of_button(button);
                 name == conv_name
             })
             .unwrap();
 
         (button, name)
-    }
-
-    pub fn first_word_of_button(&mut self, button: &Button) -> String {
-        let text = button.label().unwrap().to_string();
-        text.split_whitespace().collect::<Vec<&str>>()[0].to_string()
     }
 
     /// Creates a new message in a client chat.

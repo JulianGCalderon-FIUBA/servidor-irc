@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use crate::message::Message;
+use crate::{controller::utils::is_channel, message::Message};
 
-use super::{utils::is_channel, InterfaceController};
+use super::InterfaceController;
 
 pub fn get_message_prefix(message: &Message) -> String {
     message.get_prefix().clone().unwrap()
