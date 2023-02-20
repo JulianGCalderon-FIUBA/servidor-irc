@@ -48,6 +48,7 @@ const INVITE_BUTTON_TEXT: &str = "Invite to channel";
 const MEMBERS_BUTTON_TEXT: &str = "Members";
 const NO_NOTIFICATIONS_CSS: &str = "notifications_button";
 const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
+const NOTIFICATION_ON_BUTTON_CSS: &str = "notifications_button_on";
 const QUIT_BUTTON_TEXT: &str = "x";
 const SAFE_CONVERSATION_BUTTON_TEXT: &str = "🔐 Safe conversation 🔐";
 const WELCOME_MESSAGE_CSS: &str = "welcome_message";

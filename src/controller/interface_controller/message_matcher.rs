@@ -38,10 +38,8 @@ impl InterfaceController {
     }
 
     pub fn change_conversation(&mut self, current_conversation: String) {
-        let last_conv: String = self.current_conv.clone();
         self.current_conv = current_conversation;
-        self.main_view
-            .change_conversation(last_conv, self.current_conv.clone());
+        self.main_view.change_conversation(self.current_conv.clone());
     }
 
     pub fn error_when_adding_channel(&mut self, message: String) {
@@ -277,8 +275,7 @@ impl InterfaceController {
     pub fn send_priv_message(&mut self, message: GString) {
         let priv_message = format!("{PRIVMSG_COMMAND} {} :{message}", self.current_conv);
         self.client.send(&priv_message).expect(PRIVMSG_ERROR_TEXT);
-        self.main_view
-            .send_message(message.to_string(), self.current_conv.clone());
+        self.main_view.send_message(message.to_string());
     }
 
     pub fn send_quit_message(&mut self) {

@@ -22,7 +22,9 @@ use self::{
 };
 
 use super::{
-    requests::change_conversation_request, utils::adjust_scrollbar, MainView, NO_NOTIFICATIONS_TEXT,
+    requests::change_conversation_request,
+    utils::{adjust_scrollbar, add_notification_to_button},
+    MainView, NO_NOTIFICATIONS_TEXT,
 };
 
 const CHANNELS_TITLE: &str = "Channels";
@@ -158,7 +160,7 @@ impl MainView {
     /// Changes conversation view.  
     ///
     /// Changes chat label and messages.  
-    pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
+    pub fn change_conversation(&mut self, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
         self.scrollwindow_chat.set_visible(true);
         self.send_message.set_sensitive(true);
@@ -168,7 +170,7 @@ impl MainView {
 
         self.welcome_box.set_visible(false);
 
-        self.clean_screen(last_conv);
+        self.clean_screen(self.current_chat.label().to_string());
         self.load_messages_on_chat(conversation_label.clone());
 
         self.quit_channel_button.set_visible(true);
@@ -225,31 +227,7 @@ impl MainView {
     /// Add it to notifications vec.
     pub fn add_notification(&mut self, message: String) {
         self.notifications.push(message);
-        let current_notifications_number =
-            Self::get_notifications_number(self.notifications_button.clone());
-        self.notifications_button.set_label(&format!(
-            "🔔 notifications ({})",
-            current_notifications_number + 1
-        ));
-        self.notifications_button.add_css_class(NOTIFICATIONS_CSS)
-    }
-
-    /// Get number of notifications.  
-    ///
-    /// Returns u32.
-    pub fn get_notifications_number(button: Button) -> u32 {
-        const RADIX: u32 = 10;
-        let notifications_text = button.label().unwrap().to_string();
-        let number_text = *notifications_text
-            .split('(')
-            .collect::<Vec<&str>>()
-            .last()
-            .unwrap()
-            .chars()
-            .collect::<Vec<char>>()
-            .first()
-            .unwrap();
-        number_text.to_digit(RADIX).unwrap()
+        add_notification_to_button(&self.notifications_button, String::from("🔔 notifications"));
     }
 
     /// Sets number of notifications to 0.
