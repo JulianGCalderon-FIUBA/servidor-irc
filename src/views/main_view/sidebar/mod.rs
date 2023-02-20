@@ -160,7 +160,7 @@ impl MainView {
     /// Changes conversation view.  
     ///
     /// Changes chat label and messages.  
-    pub fn change_conversation(&mut self, conversation_label: String) {
+    pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
         self.current_chat.set_label(&conversation_label);
         self.scrollwindow_chat.set_visible(true);
         self.send_message.set_sensitive(true);
@@ -170,7 +170,7 @@ impl MainView {
 
         self.welcome_box.set_visible(false);
 
-        self.clean_screen(self.current_chat.label().to_string());
+        self.clean_screen(last_conv);
         self.load_messages_on_chat(conversation_label.clone());
 
         self.quit_channel_button.set_visible(true);
