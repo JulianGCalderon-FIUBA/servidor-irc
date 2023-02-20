@@ -133,7 +133,6 @@ impl MainView {
         };
         let mut name = String::new();
         let button = vector
-            .clone()
             .into_iter()
             .find(|button| {
                 name = self.first_word_of_button(button);
