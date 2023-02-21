@@ -39,7 +39,6 @@ const NO_CHANNELS_WARNING_TEXT: &str = "You are not in any channel.";
 const NO_CLIENTS_WARNING_TEXT: &str = "There are no clients to chat with.";
 
 const DISPLAY_CONNECT_ERROR_TEXT: &str = "Could not connect to a display.";
-const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
 const SERVER_CONNECT_ERROR_TEXT: &str = "Error connecting to server";
 
 /// Has a reference to the application.

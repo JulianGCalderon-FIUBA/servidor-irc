@@ -1,18 +1,16 @@
-use std::{collections::HashMap, thread};
+use std::collections::HashMap;
 
 use gtk4 as gtk;
 
 use crate::{
-    client::{async_reader::AsyncReader, Client},
+    client::Client,
     controller::{
-        controller_handler::to_controller_message,
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
-        utils::{channels_not_mine, vec_is_not_empty},
-        CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, FAILED_TO_READ_MESSAGE_ERROR_TEXT,
-        INVITE_ERROR_TEXT, JOIN_ERROR_TEXT, KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT,
-        NO_CHANNELS_WARNING_TEXT, NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT,
-        OPEN_INVITE_VIEW_ERROR_TEXT, PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT,
-        QUIT_ERROR_TEXT, SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
+        CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
+        KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
+        NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT, OPEN_INVITE_VIEW_ERROR_TEXT,
+        PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT, QUIT_ERROR_TEXT,
+        SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT, utils::{vec_is_not_empty, channels_not_mine},
     },
     message::Message,
     server::consts::commands::{
@@ -208,21 +206,6 @@ impl InterfaceController {
         self.client.send(&pass_command).expect(PASS_ERROR_TEXT);
         self.client.send(&nick_command).expect(NICK_ERROR_TEXT);
         self.client.send(&user_command).expect(USER_ERROR_TEXT);
-
-        let sender_clone = self.sender.clone();
-        let (_async_reader, message_receiver) =
-            AsyncReader::spawn(self.client.get_stream().expect("error"));
-        thread::spawn(move || {
-            while let Ok(message_received) = message_receiver.recv() {
-                match message_received {
-                    Ok(message) => {
-                        let controller_message = to_controller_message(message);
-                        sender_clone.send(controller_message).unwrap();
-                    }
-                    Err(error) => eprintln!("{FAILED_TO_READ_MESSAGE_ERROR_TEXT}: {error}"),
-                }
-            }
-        });
     }
 
     pub fn regular_message(&mut self, message: String) {
@@ -292,6 +275,9 @@ impl InterfaceController {
             Ok(stream) => stream,
             Err(error) => panic!("{SERVER_CONNECT_ERROR_TEXT} {error:?}"),
         };
+
+        self.start_listening();
+
         self.ip_window.close();
         self.register_window.show();
     }
