@@ -317,6 +317,8 @@ impl InterfaceController {
                     sender.send(ControllerMessage::SendFile { path }).unwrap();
                 }
             }
+
+            fcd.close();
         });
     }
 
@@ -412,6 +414,8 @@ impl InterfaceController {
                         .unwrap();
                 }
             }
+
+            fcd.close();
         });
     }
 
