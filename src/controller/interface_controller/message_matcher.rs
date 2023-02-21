@@ -377,38 +377,47 @@ impl InterfaceController {
 
     fn deceive_dcc_send(
         &mut self,
-        sender: String,
+        sender_client: String,
         filename: String,
         address: SocketAddr,
         filesize: u64,
     ) {
-        // let file_chooser_dialog = FileChooserDialog::builder()
-        //     .transient_for(&self.main_window)
-        //     .action(gtk::FileChooserAction::Save)
-        //     .build();
-        // file_chooser_dialog.present();
+        let file_chooser_dialog = FileChooserDialog::builder()
+            .transient_for(&self.main_window)
+            .action(gtk::FileChooserAction::Save)
+            .build();
+        file_chooser_dialog.present();
 
-        // file_chooser_dialog.add_button("Download", ResponseType::Accept);
+        file_chooser_dialog.add_button("Download", ResponseType::Accept);
 
         let dcc_send_receiver = DccSendReceiver::new(
             self.client.get_stream().unwrap(),
-            sender,
+            sender_client.clone(),
             filename,
             filesize,
             address,
         );
+        self.dcc_send_receivers
+            .insert(sender_client.clone(), dcc_send_receiver);
 
-        let path = PathBuf::from("demo.txt");
-        dcc_send_receiver.accept_send_command(path).unwrap();
-
-        // file_chooser_dialog.connect_response(move |fcd, _| {});
+        let sender = self.sender.clone();
+        file_chooser_dialog.connect_response(move |fcd, _| {
+            if let Some(file) = fcd.file() {
+                if let Some(path) = file.path() {
+                    sender
+                        .send(ControllerMessage::DownloadFile {
+                            path,
+                            sender: sender_client.clone(),
+                        })
+                        .unwrap();
+                }
+            }
+        });
     }
 
-    // fn download_file(path: PathBuf, sender: String) {
-    //     if let Some(dcc_send_receiver) = dcc_send_receivers.remove(sender) {
-    //         dcc_send_receiver
-    //             .accept_send_command(address, path, filesize)
-    //             .unwrap();
-    //     }
-    // }
+    pub fn download_file(&mut self, sender: String, path: std::path::PathBuf) {
+        if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
+            dcc_send_receiver.accept_send_command(path).unwrap();
+        }
+    }
 }

@@ -10,7 +10,7 @@ use gtk4 as gtk;
 
 use crate::{
     client::{async_reader::AsyncReader, Client},
-    ctcp::dcc_send::dcc_send_sender::DccSendSender,
+    ctcp::dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender},
     views::{add_views::add_channel_view::AddChannelView, main_view::MainView},
 };
 use gtk::{
@@ -58,6 +58,7 @@ pub struct InterfaceController {
     servername: String,
     username: String,
     dcc_send_senders: HashMap<String, DccSendSender>,
+    dcc_send_receivers: HashMap<String, DccSendReceiver>,
 }
 
 impl InterfaceController {
@@ -85,6 +86,7 @@ impl InterfaceController {
             servername: String::new(),
             username: String::new(),
             dcc_send_senders: HashMap::new(),
+            dcc_send_receivers: HashMap::new(),
         }
     }
 
@@ -220,6 +222,9 @@ impl InterfaceController {
                 }
                 SendFile { path } => {
                     self.send_file(path);
+                }
+                DownloadFile { sender, path } => {
+                    self.download_file(sender, path);
                 }
             }
             // Returning false here would close the receiver
