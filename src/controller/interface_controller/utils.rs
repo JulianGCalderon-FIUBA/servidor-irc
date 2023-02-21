@@ -1,9 +1,10 @@
 use std::{collections::HashMap, net::SocketAddr};
 
 use gtk4::{
+    glib::Sender,
     prelude::*,
     traits::{DialogExt, FileChooserExt, GtkWindowExt},
-    ButtonsType, FileChooserDialog, MessageDialog, MessageType, ResponseType,
+    ApplicationWindow, ButtonsType, FileChooserDialog, MessageDialog, MessageType, ResponseType,
 };
 
 use crate::{
@@ -154,40 +155,24 @@ impl InterfaceController {
             .buttons(ButtonsType::YesNo)
             .build();
         message_dialog.present();
+        self.connect_download_request_dialog(message_dialog, sender.clone());
 
         let server_stream = self.client.get_stream().unwrap();
         let dcc_send_receiver =
             DccSendReceiver::new(server_stream, sender.clone(), filename, filesize, address);
 
-        self.dcc_send_receivers
-            .insert(sender.clone(), dcc_send_receiver);
+        self.dcc_send_receivers.insert(sender, dcc_send_receiver);
+    }
 
+    fn connect_download_request_dialog(&mut self, message_dialog: MessageDialog, sender: String) {
         let channel_sender = self.sender.clone();
         let main_window = self.main_window.clone();
         message_dialog.connect_response(move |message_dialog, response_type| {
             if let ResponseType::Yes = response_type {
-                let file_chooser_dialog = FileChooserDialog::builder()
-                    .transient_for(&main_window)
-                    .action(gtk4::FileChooserAction::Save)
-                    .build();
-
-                file_chooser_dialog.add_button("Download", ResponseType::Accept);
-                file_chooser_dialog.present();
-
                 let sender = sender.clone();
                 let channel_sender = channel_sender.clone();
-
-                file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
-                    let Some(file) = file_chooser_dialog.file() else {return};
-                    let Some(path) = file.path() else {return};
-
-                    let sender = sender.clone();
-                    let download_file_request = ControllerMessage::DownloadFile { path, sender };
-
-                    channel_sender.send(download_file_request).unwrap();
-
-                    file_chooser_dialog.destroy();
-                });
+                let main_window = main_window.clone();
+                build_file_chooser_dialog_for_download(main_window, sender, channel_sender);
             } else {
                 let sender = sender.clone();
                 let ignore_file_request = ControllerMessage::IgnoreFile { sender };
@@ -198,6 +183,32 @@ impl InterfaceController {
             message_dialog.destroy();
         });
     }
+}
+
+fn build_file_chooser_dialog_for_download(
+    main_window: ApplicationWindow,
+    sender: String,
+    channel_sender: Sender<ControllerMessage>,
+) {
+    let file_chooser_dialog = FileChooserDialog::builder()
+        .transient_for(&main_window)
+        .action(gtk4::FileChooserAction::Save)
+        .build();
+
+    file_chooser_dialog.add_button("Download", ResponseType::Accept);
+    file_chooser_dialog.present();
+
+    file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
+        let Some(file) = file_chooser_dialog.file() else {return};
+        let Some(path) = file.path() else {return};
+
+        let sender = sender.clone();
+        let download_file_request = ControllerMessage::DownloadFile { path, sender };
+
+        channel_sender.send(download_file_request).unwrap();
+
+        file_chooser_dialog.destroy();
+    });
 }
 
 /// Returns all clients.
