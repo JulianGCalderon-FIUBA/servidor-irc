@@ -1,13 +1,15 @@
 use std::{
     io::{self, Write},
     net::{SocketAddr, TcpStream},
+    path::PathBuf,
+    thread,
 };
 
 use crate::message::CRLF;
 
 use super::file_transfer::FileTransferer;
 
-struct DccSendReceiver {
+pub struct DccSendReceiver {
     server: TcpStream,
     client: String,
 }
@@ -20,7 +22,7 @@ impl DccSendReceiver {
     pub fn accept_send_command(
         mut self,
         address: SocketAddr,
-        filename: String,
+        filename: PathBuf,
         filesize: u64,
     ) -> io::Result<()> {
         write!(self.server, "CTCP {} :DCC SEND accept", self.client)?;
@@ -28,7 +30,8 @@ impl DccSendReceiver {
 
         let stream = TcpStream::connect(address)?;
 
-        FileTransferer::new(stream, filename, filesize).download_file()
+        thread::spawn(move || FileTransferer::new(stream, filename, filesize).download_file());
+        Ok(())
     }
 
     pub fn decline_send_command(mut self) -> io::Result<()> {

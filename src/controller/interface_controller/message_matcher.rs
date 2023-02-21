@@ -1,16 +1,24 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf, thread};
 
 use gtk4 as gtk;
 
 use crate::{
     client::Client,
     controller::{
-        controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
+        controller_message::ControllerMessage::{self, OpenAddClientView, OpenInviteClientView},
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
         KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
         NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT, OPEN_INVITE_VIEW_ERROR_TEXT,
         PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT, QUIT_ERROR_TEXT,
         SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
+    },
+    ctcp::{
+        dcc_message::DccMessage,
+        dcc_send::{
+            dcc_send_receiver::{self, DccSendReceiver},
+            dcc_send_sender::DccSendSender,
+        },
+        parse_ctcp,
     },
     message::Message,
     server::consts::commands::{
@@ -18,7 +26,7 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{glib::GString, prelude::*};
+use gtk::{glib::GString, prelude::*, FileChooserDialog, ResponseType};
 
 use super::{
     utils::{channels_not_mine, is_not_empty},
@@ -180,6 +188,14 @@ impl InterfaceController {
     }
 
     pub fn receive_priv_message(&mut self, message: Message) {
+        if let Some(ctcp_message) = parse_ctcp(&message) {
+            if let Ok(dcc_message) = DccMessage::parse(ctcp_message) {
+                let sender = message.get_prefix().to_owned().unwrap();
+                self.receive_dcc_message(sender, dcc_message);
+                return;
+            }
+        }
+
         let (channel, message, sender_nickname) = self.decode_priv_message(message);
         if let Some(..) = channel {
             self.main_view.receive_priv_channel_message(
@@ -286,5 +302,78 @@ impl InterfaceController {
 
         self.ip_window.close();
         self.register_window.show();
+    }
+
+    pub fn open_file_chooser_dialog_view(&mut self) {
+        let file_chooser_dialog = FileChooserDialog::builder()
+            .transient_for(&self.main_window)
+            .action(gtk::FileChooserAction::Open)
+            .build();
+        file_chooser_dialog.present();
+
+        file_chooser_dialog.add_button("Send", ResponseType::Accept);
+
+        let sender = self.sender.clone();
+        file_chooser_dialog.connect_response(move |fcd, _| {
+            if let Some(file) = fcd.file() {
+                if let Some(path) = file.path() {
+                    sender.send(ControllerMessage::SendFile { path }).unwrap();
+                }
+            }
+        });
+    }
+
+    pub fn send_file(&mut self, path: PathBuf) {
+        let dcc_send_sender = DccSendSender::send(
+            self.client.get_stream().unwrap(),
+            self.current_conv.clone(),
+            path,
+        )
+        .unwrap();
+
+        println!(
+            "guardando el sender en el hashmap, con la clave {}",
+            self.current_conv
+        );
+
+        self.dcc_send_senders
+            .insert(self.current_conv.clone(), dcc_send_sender);
+    }
+
+    fn receive_dcc_message(&mut self, sender: String, dcc_message: DccMessage) {
+        match dcc_message {
+            DccMessage::Send {
+                filename,
+                address,
+                filesize,
+            } => {
+                let dcc_send_receiver = DccSendReceiver::new(self.client.get_stream().unwrap(), sender);
+                let path = PathBuf::from(filename);
+                dcc_send_receiver.accept_send_command(address, path, filesize).unwrap();
+            }
+            DccMessage::SendAccept => {
+                println!("recibi un send accept, voy a buscar en el hashmap el sender apropiado, con la clave {sender}");
+                if let Some(dcc_send_sender) = self.dcc_send_senders.remove(&sender) {
+                    println!("encontre en el hashmap, voy a aceptar la transferencia");
+                    dcc_send_sender.accept().unwrap();
+                }
+            },
+            _ => unimplemented!()
+            // DccMessage::SendDecline => todo!(),
+            // DccMessage::Chat { address } => todo!(),
+            // DccMessage::ChatAccept => todo!(),
+            // DccMessage::ChatDecline => todo!(),
+            // DccMessage::Close => todo!(),
+            // DccMessage::Resume {
+            //     filename,
+            //     port,
+            //     position,
+            // } => todo!(),
+            // DccMessage::Accept {
+            //     filename,
+            //     port,
+            //     position,
+            // } => todo!(),
+        }
     }
 }

@@ -4,12 +4,13 @@ pub mod names_message_intention;
 pub mod utils;
 pub mod window_creation;
 
-use std::thread;
+use std::{collections::HashMap, thread};
 
 use gtk4 as gtk;
 
 use crate::{
-    client::{Client, async_reader::AsyncReader},
+    client::{async_reader::AsyncReader, Client},
+    ctcp::dcc_send::dcc_send_sender::DccSendSender,
     views::{add_views::add_channel_view::AddChannelView, main_view::MainView},
 };
 use gtk::{
@@ -31,7 +32,7 @@ use self::{
     },
 };
 
-use super::{controller_message::ControllerMessage, controller_handler::to_controller_message};
+use super::{controller_handler::to_controller_message, controller_message::ControllerMessage};
 
 const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
 
@@ -56,6 +57,7 @@ pub struct InterfaceController {
     sender: Sender<ControllerMessage>,
     servername: String,
     username: String,
+    dcc_send_senders: HashMap<String, DccSendSender>,
 }
 
 impl InterfaceController {
@@ -82,10 +84,11 @@ impl InterfaceController {
             sender,
             servername: String::new(),
             username: String::new(),
+            dcc_send_senders: HashMap::new(),
         }
     }
 
-    pub fn start_listening(&mut self){
+    pub fn start_listening(&mut self) {
         let sender_clone = self.sender.clone();
         let (_async_reader, message_receiver) =
             AsyncReader::spawn(self.client.get_stream().expect("error"));
@@ -211,6 +214,12 @@ impl InterfaceController {
                 }
                 ToRegister { address } => {
                     self.to_register(address);
+                }
+                OpenFileDialogChooserView {} => {
+                    self.open_file_chooser_dialog_view();
+                }
+                SendFile { path } => {
+                    self.send_file(path);
                 }
             }
             // Returning false here would close the receiver

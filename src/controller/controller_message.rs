@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 use gtk4::glib::GString;
 
@@ -26,6 +26,7 @@ pub enum ControllerMessage {
     },
     OpenNotificationsView {},
     OpenSafeConversationView {},
+    OpenFileDialogChooserView {},
     OpenUserInfoView {},
     OpenWarningView {
         message: String,
@@ -81,5 +82,8 @@ pub enum ControllerMessage {
     SendQuitMessage {},
     ToRegister {
         address: String,
+    },
+    SendFile {
+        path: PathBuf,
     },
 }

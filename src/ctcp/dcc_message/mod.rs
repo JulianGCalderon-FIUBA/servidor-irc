@@ -29,7 +29,8 @@ const SEND_DECLINE_PROTOCOL: &str = "decline";
    DCC CHAT decline
 */
 
-enum DccMessage {
+#[derive(Debug)]
+pub enum DccMessage {
     Send {
         filename: String,
         address: SocketAddr,

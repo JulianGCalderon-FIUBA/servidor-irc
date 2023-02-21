@@ -2,20 +2,22 @@ use std::{
     fs,
     io::{self, Write},
     net::{TcpListener, TcpStream},
+    path::PathBuf,
+    thread,
 };
 
 use crate::message::CRLF;
 
 use super::file_transfer::FileTransferer;
 
-struct DccSendSender {
+pub struct DccSendSender {
     listener: TcpListener,
-    filename: String,
+    file: PathBuf,
     filesize: u64,
 }
 
 impl DccSendSender {
-    pub fn send(mut server: TcpStream, client: String, filename: String) -> io::Result<Self> {
+    pub fn send(mut server: TcpStream, client: String, file: PathBuf) -> io::Result<Self> {
         let listener = TcpListener::bind("0.0.0.0:0")?;
 
         let address = listener.local_addr()?;
@@ -23,7 +25,8 @@ impl DccSendSender {
         let ip = address.ip();
         let port = address.port();
 
-        let filesize = fs::metadata(filename.clone())?.len();
+        let filesize = fs::metadata(&file)?.len();
+        let filename = file.as_path().file_name().unwrap().to_str().unwrap();
 
         write!(
             server,
@@ -33,7 +36,7 @@ impl DccSendSender {
 
         Ok(Self {
             listener,
-            filename,
+            file,
             filesize,
         })
     }
@@ -41,7 +44,9 @@ impl DccSendSender {
     pub fn accept(self) -> io::Result<()> {
         let stream = self.listener.accept()?.0;
 
-        FileTransferer::new(stream, self.filename, self.filesize).upload_file()
+        thread::spawn(move || FileTransferer::new(stream, self.file, self.filesize).upload_file());
+
+        Ok(())
     }
 
     pub fn close(self) {}

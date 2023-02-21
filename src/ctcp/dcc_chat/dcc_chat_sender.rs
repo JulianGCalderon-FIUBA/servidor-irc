@@ -7,7 +7,7 @@ use crate::message::CRLF;
 
 use super::DccChat;
 
-struct DccChatSender {
+pub struct DccChatSender {
     server: TcpStream,
     client: String,
     listener: TcpListener,
