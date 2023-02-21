@@ -146,7 +146,7 @@ fn parse_resume_command(mut arguments: Vec<String>) -> Result<DccMessage, DccPar
     })
 }
 
-fn parse_accept_command(mut arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {
+fn parse_accept_command(arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {
     if let DccMessage::Resume {
         filename,
         port,

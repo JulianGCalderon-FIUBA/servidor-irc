@@ -1,8 +1,9 @@
 use std::{
     fs,
     io::{self, Write},
-    net::{TcpListener, TcpStream},
+    net::{IpAddr, TcpListener, TcpStream},
     path::PathBuf,
+    str::FromStr,
     thread,
 };
 
@@ -11,22 +12,23 @@ use crate::message::CRLF;
 use super::file_transfer::FileTransferer;
 
 pub struct DccSendSender {
+    server: TcpStream,
+    client: String,
     listener: TcpListener,
-    file: PathBuf,
-    filesize: u64,
+    path: PathBuf,
 }
 
 impl DccSendSender {
-    pub fn send(mut server: TcpStream, client: String, file: PathBuf) -> io::Result<Self> {
+    pub fn send(mut server: TcpStream, client: String, path: PathBuf) -> io::Result<Self> {
         let listener = TcpListener::bind("0.0.0.0:0")?;
 
         let address = listener.local_addr()?;
 
-        let ip = address.ip();
+        let ip = IpAddr::from_str("127.0.0.1").unwrap();
         let port = address.port();
 
-        let filesize = fs::metadata(&file)?.len();
-        let filename = file.as_path().file_name().unwrap().to_str().unwrap();
+        let filesize = fs::metadata(&path)?.len();
+        let filename = path.as_path().file_name().unwrap().to_str().unwrap();
 
         write!(
             server,
@@ -36,17 +38,40 @@ impl DccSendSender {
 
         Ok(Self {
             listener,
-            file,
-            filesize,
+            path,
+            server,
+            client,
         })
     }
 
     pub fn accept(self) -> io::Result<()> {
         let stream = self.listener.accept()?.0;
 
-        thread::spawn(move || FileTransferer::new(stream, self.file, self.filesize).upload_file());
+        let filesize = fs::metadata(self.path.clone())?.len();
+
+        thread::spawn(move || FileTransferer::new(stream, self.path, filesize).upload_file());
 
         Ok(())
+    }
+
+    pub fn resume(mut self, position: u64) -> io::Result<()> {
+        let address = self.listener.local_addr()?;
+
+        let filename = self.path.as_path().file_name().unwrap().to_str().unwrap();
+
+        write!(
+            self.server,
+            "CTCP {} :DCC ACCEPT {} {} {position}",
+            self.client,
+            filename,
+            address.port(),
+        )?;
+        self.server.write_all(CRLF)?;
+
+        let stream = self.listener.accept()?.0;
+        let filesize = fs::metadata(self.path.clone())?.len();
+
+        FileTransferer::new(stream, self.path, filesize).resume_upload_file(position)
     }
 
     pub fn close(self) {}

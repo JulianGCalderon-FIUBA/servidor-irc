@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::SocketAddr, path::PathBuf, thread};
+use std::{collections::HashMap, net::SocketAddr, path::PathBuf};
 
 use gtk4 as gtk;
 
@@ -14,10 +14,7 @@ use crate::{
     },
     ctcp::{
         dcc_message::DccMessage,
-        dcc_send::{
-            dcc_send_receiver::{self, DccSendReceiver},
-            dcc_send_sender::DccSendSender,
-        },
+        dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender},
         parse_ctcp,
     },
     message::Message,
@@ -350,7 +347,7 @@ impl InterfaceController {
             DccMessage::SendDecline => {
                 self.receive_dcc_send_decline(sender);
             }
-            DccMessage::Chat { address } => todo!(),
+            DccMessage::Chat { address: _address } => todo!(),
             DccMessage::ChatAccept => todo!(),
             DccMessage::ChatDecline => todo!(),
             DccMessage::Close => todo!(),
@@ -385,17 +382,26 @@ impl InterfaceController {
         address: SocketAddr,
         filesize: u64,
     ) {
-        let file_chooser_dialog = FileChooserDialog::builder()
-            .transient_for(&self.main_window)
-            .action(gtk::FileChooserAction::Save)
-            .build();
-        file_chooser_dialog.present();
+        // let file_chooser_dialog = FileChooserDialog::builder()
+        //     .transient_for(&self.main_window)
+        //     .action(gtk::FileChooserAction::Save)
+        //     .build();
+        // file_chooser_dialog.present();
 
-        file_chooser_dialog.add_button("Download", ResponseType::Accept);
+        // file_chooser_dialog.add_button("Download", ResponseType::Accept);
 
-        let dcc_send_receiver = DccSendReceiver::new(self.client.get_stream().unwrap(), sender);
+        let dcc_send_receiver = DccSendReceiver::new(
+            self.client.get_stream().unwrap(),
+            sender,
+            filename,
+            filesize,
+            address,
+        );
 
-        file_chooser_dialog.connect_response(move |fcd, _| {});
+        let path = PathBuf::from("demo.txt");
+        dcc_send_receiver.accept_send_command(path).unwrap();
+
+        // file_chooser_dialog.connect_response(move |fcd, _| {});
     }
 
     // fn download_file(path: PathBuf, sender: String) {
