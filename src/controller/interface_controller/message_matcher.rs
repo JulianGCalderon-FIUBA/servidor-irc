@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf, thread};
+use std::{collections::HashMap, net::SocketAddr, path::PathBuf, thread};
 
 use gtk4 as gtk;
 
@@ -331,11 +331,6 @@ impl InterfaceController {
         )
         .unwrap();
 
-        println!(
-            "guardando el sender en el hashmap, con la clave {}",
-            self.current_conv
-        );
-
         self.dcc_send_senders
             .insert(self.current_conv.clone(), dcc_send_sender);
     }
@@ -347,23 +342,19 @@ impl InterfaceController {
                 address,
                 filesize,
             } => {
-                let dcc_send_receiver = DccSendReceiver::new(self.client.get_stream().unwrap(), sender);
-                let path = PathBuf::from(filename);
-                dcc_send_receiver.accept_send_command(address, path, filesize).unwrap();
+                self.deceive_dcc_send(sender, filename, address, filesize);
             }
             DccMessage::SendAccept => {
-                println!("recibi un send accept, voy a buscar en el hashmap el sender apropiado, con la clave {sender}");
-                if let Some(dcc_send_sender) = self.dcc_send_senders.remove(&sender) {
-                    println!("encontre en el hashmap, voy a aceptar la transferencia");
-                    dcc_send_sender.accept().unwrap();
-                }
-            },
-            _ => unimplemented!()
-            // DccMessage::SendDecline => todo!(),
-            // DccMessage::Chat { address } => todo!(),
-            // DccMessage::ChatAccept => todo!(),
-            // DccMessage::ChatDecline => todo!(),
-            // DccMessage::Close => todo!(),
+                self.receive_dcc_send_accept(sender);
+            }
+            DccMessage::SendDecline => {
+                self.receive_dcc_send_decline(sender);
+            }
+            DccMessage::Chat { address } => todo!(),
+            DccMessage::ChatAccept => todo!(),
+            DccMessage::ChatDecline => todo!(),
+            DccMessage::Close => todo!(),
+            _ => unimplemented!(),
             // DccMessage::Resume {
             //     filename,
             //     port,
@@ -376,4 +367,42 @@ impl InterfaceController {
             // } => todo!(),
         }
     }
+
+    fn receive_dcc_send_decline(&mut self, sender: String) {
+        self.dcc_send_senders.remove(&sender);
+    }
+
+    fn receive_dcc_send_accept(&mut self, sender: String) {
+        if let Some(dcc_send_sender) = self.dcc_send_senders.remove(&sender) {
+            dcc_send_sender.accept().unwrap();
+        }
+    }
+
+    fn deceive_dcc_send(
+        &mut self,
+        sender: String,
+        filename: String,
+        address: SocketAddr,
+        filesize: u64,
+    ) {
+        let file_chooser_dialog = FileChooserDialog::builder()
+            .transient_for(&self.main_window)
+            .action(gtk::FileChooserAction::Save)
+            .build();
+        file_chooser_dialog.present();
+
+        file_chooser_dialog.add_button("Download", ResponseType::Accept);
+
+        let dcc_send_receiver = DccSendReceiver::new(self.client.get_stream().unwrap(), sender);
+
+        file_chooser_dialog.connect_response(move |fcd, _| {});
+    }
+
+    // fn download_file(path: PathBuf, sender: String) {
+    //     if let Some(dcc_send_receiver) = dcc_send_receivers.remove(sender) {
+    //         dcc_send_receiver
+    //             .accept_send_command(address, path, filesize)
+    //             .unwrap();
+    //     }
+    // }
 }
