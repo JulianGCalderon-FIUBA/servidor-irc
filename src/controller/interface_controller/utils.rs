@@ -172,7 +172,7 @@ impl InterfaceController {
                 let sender = sender.clone();
                 let channel_sender = channel_sender.clone();
                 let main_window = main_window.clone();
-                build_file_chooser_dialog_for_download(main_window, sender, channel_sender);
+                build_file_download_chooser_dialog(main_window, sender, channel_sender);
             } else {
                 let sender = sender.clone();
                 let ignore_file_request = ControllerMessage::IgnoreFile { sender };
@@ -185,7 +185,7 @@ impl InterfaceController {
     }
 }
 
-fn build_file_chooser_dialog_for_download(
+fn build_file_download_chooser_dialog(
     main_window: ApplicationWindow,
     sender: String,
     channel_sender: Sender<ControllerMessage>,
