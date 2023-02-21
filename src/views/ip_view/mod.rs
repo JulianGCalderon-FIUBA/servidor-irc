@@ -3,11 +3,7 @@ pub mod requests;
 
 use std::{net::IpAddr, str::FromStr};
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Application, ApplicationWindow, Button, Entry, Orientation,
-};
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation};
 use gtk4 as gtk;
 
 use self::requests::to_register_request;
@@ -76,7 +72,7 @@ impl IpView {
     /// Sends to register request to the controller.
     fn connect_button(&self, address_entry: Entry, sender: Sender<ControllerMessage>) {
         self.ok_button.connect_clicked(move |_| {
-            let address = Self::unpack_entry(address_entry.text());
+            let address = Self::unpack_entry(address_entry.text().to_string());
 
             if Self::register_fiels_are_valid(&address) {
                 to_register_request(address, sender.clone());
@@ -101,11 +97,11 @@ impl IpView {
     /// Returns the input address.  
     ///
     /// If the address is empty, returns the default address.  
-    fn unpack_entry(address: GString) -> String {
+    fn unpack_entry(address: String) -> String {
         if address.is_empty() {
             ADDRESS.to_string()
         } else {
-            address.to_string()
+            address
         }
     }
 }

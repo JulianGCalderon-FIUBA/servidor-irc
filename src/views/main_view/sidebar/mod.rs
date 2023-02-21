@@ -133,7 +133,7 @@ impl MainView {
     ///
     /// Creates new client button.
     pub fn add_client(&mut self, client: &str) {
-        let client_button = create_button_with_margin(&client);
+        let client_button = create_button_with_margin(client);
         self.connect_channel_client_button(
             client_button.clone(),
             client.to_string(),

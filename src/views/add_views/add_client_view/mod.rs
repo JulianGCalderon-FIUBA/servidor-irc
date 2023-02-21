@@ -77,7 +77,7 @@ impl AddClientView {
                 return;
             }
 
-            add_client_button_request(combobox.active_text().unwrap(), sender.clone());
+            add_client_button_request(combobox.active_text().unwrap().to_string(), sender.clone());
         });
     }
 

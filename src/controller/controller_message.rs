@@ -1,13 +1,11 @@
 use std::collections::HashMap;
 
-use gtk4::glib::GString;
-
 use crate::message::Message;
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
     AddNewClient {
-        new_client: GString,
+        new_client: String,
     },
     ChangeConversation {
         nickname: String,
@@ -51,17 +49,17 @@ pub enum ControllerMessage {
         message: Message,
     },
     Register {
-        pass: GString,
-        nickname: GString,
-        username: GString,
-        realname: GString,
+        pass: String,
+        nickname: String,
+        username: String,
+        realname: String,
     },
     RegularMessage {
         message: String,
     },
     RemoveConversation {},
     SendInviteMessage {
-        channel: GString,
+        channel: String,
     },
     SendJoinMessage {
         channel: String,
@@ -76,7 +74,7 @@ pub enum ControllerMessage {
     SendNamesMessageToKnowMembers {},
     SendPartMessage {},
     SendPrivMessage {
-        message: GString,
+        message: String,
     },
     SendQuitMessage {},
     ToRegister {

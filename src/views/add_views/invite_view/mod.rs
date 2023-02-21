@@ -74,7 +74,7 @@ impl InviteView {
                 return;
             }
 
-            invite_request(combobox.active_text().unwrap(), sender.clone());
+            invite_request(combobox.active_text().unwrap().to_string(), sender.clone());
         });
     }
 

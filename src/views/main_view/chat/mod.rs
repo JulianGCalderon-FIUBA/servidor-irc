@@ -71,7 +71,7 @@ impl MainView {
     ) {
         self.send_message.connect_clicked(move |_| {
             error_label.set_text("");
-            let input_text = input.text();
+            let input_text = input.text().to_string();
             if !entry_is_valid(&input_text, MESSAGE_MAX_CHARACTERS) {
                 if is_not_empty(&input_text) {
                     error_label.set_text(&format!(
@@ -133,7 +133,7 @@ impl MainView {
     pub fn receive_priv_client_message(&mut self, message_text: String, nickname: String) {
         let message_label = create_received_message(&message_text);
 
-        if let None = self.messages.get_mut(&nickname) {
+        if self.messages.get_mut(&nickname).is_none() {
             self.add_client(&nickname);
         }
         let messages = self.messages.get_mut(&nickname).unwrap();

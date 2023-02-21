@@ -20,7 +20,7 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{glib::GString, prelude::*};
+use gtk::prelude::*;
 
 use super::{
     window_creation::{
@@ -32,10 +32,10 @@ use super::{
 };
 
 impl InterfaceController {
-    pub fn add_new_client(&mut self, new_client: GString) {
+    pub fn add_new_client(&mut self, new_client: String) {
         self.add_client_window.close();
         self.main_view.add_client(&new_client);
-        self.change_conversation((&new_client).to_string());
+        self.change_conversation(new_client.to_string());
     }
 
     pub fn change_conversation(&mut self, current_conversation: String) {
@@ -193,13 +193,7 @@ impl InterfaceController {
         }
     }
 
-    pub fn register(
-        &mut self,
-        pass: GString,
-        nickname: GString,
-        username: GString,
-        realname: GString,
-    ) {
+    pub fn register(&mut self, pass: String, nickname: String, username: String, realname: String) {
         let pass_command: String = format!("{PASS_COMMAND} {pass}");
         let nick_command: String = format!("{NICK_COMMAND} {nickname}");
         let user_command: String =
@@ -234,7 +228,7 @@ impl InterfaceController {
         self.main_view.welcome_view();
     }
 
-    pub fn send_invite_message(&mut self, channel: GString) {
+    pub fn send_invite_message(&mut self, channel: String) {
         self.invite_window.close();
         let invite: String = format!("{INVITE_COMMAND} {} {channel}", self.current_conv);
         self.client.send(&invite).expect(INVITE_ERROR_TEXT);
@@ -276,10 +270,10 @@ impl InterfaceController {
         self.client.send(&part_message).expect(PART_ERROR_TEXT);
     }
 
-    pub fn send_priv_message(&mut self, message: GString) {
+    pub fn send_priv_message(&mut self, message: String) {
         let priv_message = format!("{PRIVMSG_COMMAND} {} :{message}", self.current_conv);
         self.client.send(&priv_message).expect(PRIVMSG_ERROR_TEXT);
-        self.main_view.send_message(message.to_string());
+        self.main_view.send_message(message);
     }
 
     pub fn send_quit_message(&mut self) {
