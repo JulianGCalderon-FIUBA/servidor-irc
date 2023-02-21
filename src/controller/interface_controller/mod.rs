@@ -226,6 +226,9 @@ impl InterfaceController {
                 DownloadFile { sender, path } => {
                     self.download_file(sender, path);
                 }
+                IgnoreFile { sender } => {
+                    self.ignore_file(sender);
+                }
             }
             // Returning false here would close the receiver
             // and have senders fail

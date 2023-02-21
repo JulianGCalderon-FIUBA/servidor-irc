@@ -329,4 +329,10 @@ impl InterfaceController {
 
         dcc_send_receiver.accept_send_command(path).unwrap();
     }
+
+    pub fn ignore_file(&mut self, sender: String) {
+        let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) else { return };
+
+        dcc_send_receiver.decline_send_command().unwrap();
+    }
 }

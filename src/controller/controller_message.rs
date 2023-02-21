@@ -91,4 +91,7 @@ pub enum ControllerMessage {
         sender: String,
         path: PathBuf,
     },
+    IgnoreFile {
+        sender: String,
+    },
 }

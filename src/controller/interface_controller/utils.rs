@@ -3,7 +3,7 @@ use std::{collections::HashMap, net::SocketAddr};
 use gtk4::{
     prelude::*,
     traits::{DialogExt, FileChooserExt, GtkWindowExt},
-    FileChooserDialog, ResponseType,
+    ButtonsType, FileChooserDialog, MessageDialog, MessageType, ResponseType,
 };
 
 use crate::{
@@ -146,14 +146,14 @@ impl InterfaceController {
         address: SocketAddr,
         filesize: u64,
     ) {
-        let file_chooser_dialog = FileChooserDialog::builder()
+        let message_dialog = MessageDialog::builder()
+            .message_type(MessageType::Question)
             .transient_for(&self.main_window)
-            .action(gtk4::FileChooserAction::Save)
+            .text(&format!("{sender} wishes to send you a file: {filename}"))
+            .secondary_text("Do you want to download it?")
+            .buttons(ButtonsType::YesNo)
             .build();
-
-        file_chooser_dialog.add_button("Download", ResponseType::Accept);
-
-        file_chooser_dialog.present();
+        message_dialog.present();
 
         let server_stream = self.client.get_stream().unwrap();
         let dcc_send_receiver =
@@ -163,16 +163,39 @@ impl InterfaceController {
             .insert(sender.clone(), dcc_send_receiver);
 
         let channel_sender = self.sender.clone();
-        file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
-            let Some(file) = file_chooser_dialog.file() else {return};
-            let Some(path) = file.path() else {return};
+        let main_window = self.main_window.clone();
+        message_dialog.connect_response(move |message_dialog, response_type| {
+            if let ResponseType::Yes = response_type {
+                let file_chooser_dialog = FileChooserDialog::builder()
+                    .transient_for(&main_window)
+                    .action(gtk4::FileChooserAction::Save)
+                    .build();
 
-            let sender = sender.clone();
-            let download_file_request = ControllerMessage::DownloadFile { path, sender };
+                file_chooser_dialog.add_button("Download", ResponseType::Accept);
+                file_chooser_dialog.present();
 
-            channel_sender.send(download_file_request).unwrap();
+                let sender = sender.clone();
+                let channel_sender = channel_sender.clone();
 
-            file_chooser_dialog.destroy();
+                file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
+                    let Some(file) = file_chooser_dialog.file() else {return};
+                    let Some(path) = file.path() else {return};
+
+                    let sender = sender.clone();
+                    let download_file_request = ControllerMessage::DownloadFile { path, sender };
+
+                    channel_sender.send(download_file_request).unwrap();
+
+                    file_chooser_dialog.destroy();
+                });
+            } else {
+                let sender = sender.clone();
+                let ignore_file_request = ControllerMessage::IgnoreFile { sender };
+
+                channel_sender.send(ignore_file_request).unwrap();
+            }
+
+            message_dialog.destroy();
         });
     }
 }
