@@ -34,7 +34,8 @@ use super::{
 impl InterfaceController {
     pub fn add_new_client(&mut self, new_client: GString) {
         self.add_client_window.close();
-        self.main_view.add_client(new_client.to_string());
+        self.main_view.add_client(&new_client);
+        self.change_conversation((&new_client).to_string());
     }
 
     pub fn change_conversation(&mut self, current_conversation: String) {
@@ -115,7 +116,8 @@ impl InterfaceController {
         let channel = self.decode_join_message(message);
 
         self.add_channel_window.close();
-        self.main_view.add_channel(channel);
+        self.main_view.add_channel(channel.clone());
+        self.change_conversation(channel);
     }
 
     pub fn receive_kick(&mut self, message: Message) {

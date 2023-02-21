@@ -132,12 +132,15 @@ impl MainView {
     /// Function is used when a client message is received.
     pub fn receive_priv_client_message(&mut self, message_text: String, nickname: String) {
         let message_label = create_received_message(&message_text);
-        if let Some(messages) = self.messages.get_mut(&nickname) {
-            messages.push(vec![
-                message_label.clone(),
-                create_sender_nickname_label(""),
-            ]);
+
+        if let None = self.messages.get_mut(&nickname) {
+            self.add_client(&nickname);
         }
+        let messages = self.messages.get_mut(&nickname).unwrap();
+        messages.push(vec![
+            message_label.clone(),
+            create_sender_nickname_label(""),
+        ]);
 
         if self.is_actual_conversation(&nickname) {
             self.append_message(&message_label);

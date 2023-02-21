@@ -112,7 +112,6 @@ impl MainView {
     ///
     /// Creates new channel button.
     pub fn add_channel(&mut self, channel: String) {
-        change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
         self.connect_channel_client_button(
             channel_button.clone(),
@@ -133,18 +132,17 @@ impl MainView {
     /// Adds client to the sidebar.
     ///
     /// Creates new client button.
-    pub fn add_client(&mut self, client: String) {
-        change_conversation_request(client.clone(), self.sender.clone());
+    pub fn add_client(&mut self, client: &str) {
         let client_button = create_button_with_margin(&client);
         self.connect_channel_client_button(
             client_button.clone(),
-            client.clone(),
+            client.to_string(),
             self.sender.clone(),
         );
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
 
-        self.messages.insert(client, vec![]);
+        self.messages.insert(client.to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
