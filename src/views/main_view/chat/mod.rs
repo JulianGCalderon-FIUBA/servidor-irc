@@ -1,13 +1,11 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Button, Entry, Label};
+use gtk::{glib::Sender, prelude::*, Box, Entry, Label};
 use gtk4 as gtk;
 
 use crate::{
-    controller::{
-        controller_message::ControllerMessage, utils::first_word_of_button, utils::is_channel,
-    },
+    controller::{controller_message::ControllerMessage, utils::is_not_empty},
     views::{
         main_view::utils::entry_is_valid,
         widgets_creation::{create_chat_box, create_label, create_message_sender_box},
@@ -75,7 +73,7 @@ impl MainView {
             error_label.set_text("");
             let input_text = input.text();
             if !entry_is_valid(&input_text, MESSAGE_MAX_CHARACTERS) {
-                if !input_text.is_empty() {
+                if is_not_empty(&input_text) {
                     error_label.set_text(&format!(
                         "{MESSAGE_MAX_CHARACTERS_ERROR} Max: {MESSAGE_MAX_CHARACTERS} characters"
                     ));
@@ -125,24 +123,6 @@ impl MainView {
     pub fn add_notification_to_button(&mut self, conv_name: String) {
         let (button, name) = self.find_button_by_name(&conv_name);
         add_notification_to_button(&button, name);
-    }
-
-    pub fn find_button_by_name(&mut self, conv_name: &str) -> (Button, String) {
-        let vector = if is_channel(conv_name.to_string()) {
-            self.channels_buttons.clone()
-        } else {
-            self.clients_buttons.clone()
-        };
-        let mut name = String::new();
-        let button = vector
-            .into_iter()
-            .find(|button| {
-                name = first_word_of_button(button);
-                name == conv_name
-            })
-            .unwrap();
-
-        (button, name)
     }
 
     /// Creates a new message in a client chat.

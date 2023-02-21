@@ -1,5 +1,7 @@
 use gtk4::{prelude::*, Button, ScrolledWindow};
 
+use crate::controller::utils::is_not_empty;
+
 use super::NOTIFICATION_ON_BUTTON_CSS;
 
 /// Adjusts scrollbar in a scrolled window.
@@ -14,7 +16,7 @@ pub fn adjust_scrollbar(scrolled_window: ScrolledWindow) {
 ///
 /// Checks if entry is empty and if it does not exceed the amount of characters.
 pub fn entry_is_valid(entry_text: &str, max_characters: usize) -> bool {
-    !entry_text.is_empty() && entry_text.len() < max_characters
+    is_not_empty(entry_text) && entry_text.len() < max_characters
 }
 
 /// Get number of notifications.  
@@ -37,6 +39,17 @@ pub fn get_notifications_number(button: &Button) -> u32 {
 
 pub fn button_has_notifications(button: &Button) -> bool {
     button.has_css_class(NOTIFICATION_ON_BUTTON_CSS)
+}
+
+pub fn remove_button_notifications(button: &Button, no_notifications_text: &str) {
+    button.set_label(no_notifications_text);
+    button.remove_css_class(NOTIFICATION_ON_BUTTON_CSS);
+}
+
+pub fn remove_button_notifications_if_any(button: &Button, no_notifications_text: &str){
+    if button_has_notifications(button) {
+        remove_button_notifications(button, no_notifications_text);
+    }
 }
 
 pub fn add_notification_to_button(button: &Button, button_text: String) {

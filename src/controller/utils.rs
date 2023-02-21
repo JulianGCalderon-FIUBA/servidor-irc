@@ -2,6 +2,7 @@ use gtk4::{traits::ButtonExt, Button};
 use std::collections::HashMap;
 
 const CHANNEL_FIRST_CHARACTER: &str = "#";
+const OPERATOR_CHARACTER: char = '@';
 
 /// Returns all clients.
 ///
@@ -51,12 +52,16 @@ pub fn client_channels(
 /// Returns a bool indicating if the conversation is a channel or not.
 ///
 /// Receives a String, returns a bool
-pub fn is_channel(parameter: String) -> bool {
+pub fn is_channel(parameter: &str) -> bool {
     parameter.starts_with(CHANNEL_FIRST_CHARACTER)
 }
 
-pub fn is_not_empty(vector: &Vec<String>) -> bool {
+pub fn vec_is_not_empty(vector: &Vec<String>) -> bool {
     !vector.is_empty()
+}
+
+pub fn is_not_empty(text: &str) -> bool {
+    !text.is_empty()
 }
 
 pub fn push_if_absent(original_vector: &[String], new_vector: &mut Vec<String>, element: String) {
@@ -72,7 +77,7 @@ pub fn remove_element(vector: &mut Vec<String>, element: &String) {
 }
 
 pub fn remove_operator_indicator(element: &str) -> String {
-    if let Some(stripped) = element.strip_prefix('@') {
+    if let Some(stripped) = element.strip_prefix(OPERATOR_CHARACTER) {
         stripped.to_string()
     } else {
         element.to_string()

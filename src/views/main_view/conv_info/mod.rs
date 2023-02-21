@@ -61,7 +61,7 @@ impl MainView {
         sender: Sender<ControllerMessage>,
     ) {
         self.quit_channel_button.connect_clicked(move |_| {
-            if is_channel(current_conversation.label().to_string()) {
+            if is_channel(&current_conversation.label()) {
                 quit_channel_request(sender.clone());
             }
             remove_conversation_request(sender.clone());
@@ -102,7 +102,7 @@ impl MainView {
         }
         let collection_of_buttons: &mut Vec<Button>;
         let conversation_box: &Box;
-        if is_channel(conversation.clone()) {
+        if is_channel(&conversation) {
             collection_of_buttons = &mut self.channels_buttons;
             conversation_box = &mut self.channels_box;
         } else {

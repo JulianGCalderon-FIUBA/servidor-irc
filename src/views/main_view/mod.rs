@@ -22,7 +22,10 @@ use gtk::{
 };
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::controller::{
+    controller_message::ControllerMessage,
+    utils::{first_word_of_button, is_channel},
+};
 
 use self::{
     requests::quit_request,
@@ -156,5 +159,23 @@ impl MainView {
             quit_request(sender.clone());
             app.quit();
         });
+    }
+
+    pub fn find_button_by_name(&mut self, conv_name: &str) -> (Button, String) {
+        let vector = if is_channel(conv_name) {
+            self.channels_buttons.clone()
+        } else {
+            self.clients_buttons.clone()
+        };
+        let mut name = String::new();
+        let button = vector
+            .into_iter()
+            .find(|button| {
+                name = first_word_of_button(button);
+                name == conv_name
+            })
+            .unwrap();
+
+        (button, name)
     }
 }

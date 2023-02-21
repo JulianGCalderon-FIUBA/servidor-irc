@@ -7,7 +7,7 @@ use crate::{
     controller::{
         controller_handler::to_controller_message,
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
-        utils::{channels_not_mine, is_not_empty},
+        utils::{channels_not_mine, vec_is_not_empty},
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, FAILED_TO_READ_MESSAGE_ERROR_TEXT,
         INVITE_ERROR_TEXT, JOIN_ERROR_TEXT, KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT,
         NO_CHANNELS_WARNING_TEXT, NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT,
@@ -50,7 +50,7 @@ impl InterfaceController {
 
     pub fn open_add_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
         let clients_not_mine: Vec<String> = self.clients_not_mine(channels_and_clients);
-        if is_not_empty(&clients_not_mine) {
+        if vec_is_not_empty(&clients_not_mine) {
             self.add_client_window = add_client_window(&self.app, clients_not_mine, &self.sender);
             self.add_client_window.show();
         } else {
@@ -62,7 +62,7 @@ impl InterfaceController {
         let my_channels: Vec<String> = self.main_view.get_my_channels();
         let current_conv_channels: Vec<String> = self.current_conv_channels(channels_and_clients);
         let channels_to_invite: Vec<String> = channels_not_mine(my_channels, current_conv_channels);
-        if is_not_empty(&channels_to_invite) {
+        if vec_is_not_empty(&channels_to_invite) {
             self.invite_window = invite_window(&self.app, channels_to_invite, &self.sender);
             self.invite_window.show();
         } else {
@@ -258,7 +258,7 @@ impl InterfaceController {
 
     pub fn send_names_message_to_invite_client(&mut self) {
         let my_channels: Vec<String> = self.main_view.get_my_channels();
-        if is_not_empty(&my_channels) {
+        if vec_is_not_empty(&my_channels) {
             self.send_names_message(InviteClient, None);
         } else {
             self.send_open_warning_view(NO_CHANNELS_WARNING_TEXT);

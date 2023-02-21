@@ -71,7 +71,7 @@ impl InterfaceController {
         let message_text = get_message_trailing(&message);
         let sender_nickname = get_message_prefix(&message);
         let channel_value = get_message_parameter(&message, 0);
-        let channel = if is_channel(channel_value.clone()) {
+        let channel = if is_channel(&channel_value) {
             Some(channel_value)
         } else {
             None

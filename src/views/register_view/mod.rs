@@ -19,7 +19,7 @@ use super::{
     USERNAME_LABEL_TEXT,
 };
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::controller::{controller_message::ControllerMessage, utils::is_not_empty};
 
 const LOGIN_BUTTON_TEXT: &str = "Login";
 const ERR_FIELDS_REQUIRED: &str = "¡All fields are required!";
@@ -142,10 +142,10 @@ impl RegisterView {
         username: &GString,
         realname: &GString,
     ) -> bool {
-        !realname.is_empty()
-            && !pass.is_empty()
-            && !nickname.is_empty()
-            && !username.is_empty()
+        is_not_empty(realname)
+            && is_not_empty(pass)
+            && is_not_empty(nickname)
+            && is_not_empty(username)
             && pass.len() < FIELD_MAX_CHARACTERS
             && nickname.len() < FIELD_MAX_CHARACTERS
             && nickname.len() < FIELD_MAX_CHARACTERS
