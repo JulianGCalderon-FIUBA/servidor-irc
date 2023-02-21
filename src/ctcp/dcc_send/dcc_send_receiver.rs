@@ -14,14 +14,14 @@ pub struct DccSendReceiver {
     client: String,
     address: SocketAddr,
     filesize: u64,
-    og_filename: String,
+    filename: String,
 }
 
 impl DccSendReceiver {
     pub fn new(
         server: TcpStream,
         client: String,
-        og_filename: String,
+        filename: String,
         filesize: u64,
         address: SocketAddr,
     ) -> Self {
@@ -30,17 +30,17 @@ impl DccSendReceiver {
             client,
             address,
             filesize,
-            og_filename,
+            filename,
         }
     }
 
-    pub fn accept_send_command(mut self, filename: PathBuf) -> io::Result<()> {
+    pub fn accept_send_command(mut self, filepath: PathBuf) -> io::Result<()> {
         write!(self.server, "CTCP {} :DCC SEND accept", self.client)?;
         self.server.write_all(CRLF)?;
 
         let stream = TcpStream::connect(self.address)?;
 
-        thread::spawn(move || FileTransferer::new(stream, filename, self.filesize).download_file());
+        thread::spawn(move || FileTransferer::new(stream, filepath, self.filesize).download_file());
 
         Ok(())
     }
@@ -50,7 +50,7 @@ impl DccSendReceiver {
             self.server,
             self.client,
             self.address,
-            self.og_filename,
+            self.filename,
             self.filesize,
             position,
         )

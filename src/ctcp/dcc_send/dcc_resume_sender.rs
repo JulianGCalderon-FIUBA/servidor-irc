@@ -19,7 +19,7 @@ impl DccResumeSender {
         mut server: TcpStream,
         client: String,
         address: SocketAddr,
-        og_filename: String,
+        filename: String,
         filesize: u64,
         position: u64,
     ) -> io::Result<Self> {
@@ -27,7 +27,7 @@ impl DccResumeSender {
             server,
             "CTCP {} :DCC RESUME {} {} {position}",
             client,
-            og_filename,
+            filename,
             address.port(),
         )?;
         server.write_all(CRLF)?;
@@ -39,9 +39,9 @@ impl DccResumeSender {
         })
     }
 
-    pub fn accept(self, path: PathBuf) -> io::Result<()> {
+    pub fn accept(self, filepath: PathBuf) -> io::Result<()> {
         let stream = TcpStream::connect(self.address)?;
-        FileTransferer::new(stream, path, self.filesize).resume_download_file(self.position)
+        FileTransferer::new(stream, filepath, self.filesize).resume_download_file(self.position)
     }
 
     pub fn close(self) {}
