@@ -28,6 +28,13 @@ impl InterfaceController {
         message.get_parameters()[0].clone() // channel
     }
 
+    pub fn decode_join_notification_message(&mut self, message: Message) -> (String, String) {
+        let channel = get_message_parameter(&message, 0);
+        let client = get_message_prefix(&message);
+
+        (channel, client)
+    }
+
     pub fn decode_kick_message(&mut self, message: Message) -> (String, String) {
         let channel = get_message_parameter(&message, 0);
         let kicked = get_message_parameter(&message, 1);

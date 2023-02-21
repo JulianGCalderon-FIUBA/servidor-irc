@@ -6,8 +6,8 @@ use crate::{
 use super::{
     controller_message::ControllerMessage::{
         self, ErrorWhenAddingChannel, OpenMainView, OpenWarningView, ReceiveInvite, ReceiveJoin,
-        ReceiveKick, ReceiveListEnd, ReceiveListLine, ReceiveNamesEnd, ReceiveNamesLine,
-        ReceivePrivMessage, RegularMessage,
+        ReceiveJoinNotification, ReceiveKick, ReceiveListEnd, ReceiveListLine, ReceiveNamesEnd,
+        ReceiveNamesLine, ReceivePrivMessage, RegularMessage,
     },
     ERR_IS_ALREADY_ON_CHANNEL_WARNING_TEXT, ERR_NICK_COLLISION_WARNING_TEXT,
 };
@@ -16,6 +16,7 @@ pub const ERR_IS_ALREADY_ON_CHANNEL: &str = "443";
 /// 436 -> Nick collision
 pub const ERR_NICK_COLLISION: &str = "436";
 pub const JOIN_COMMAND: &str = "331";
+pub const JOIN_NOTIFICATION_COMMAND: &str = "JOIN";
 /// 323 -> End of list
 pub const LIST_END_COMMAND: &str = "323";
 /// 322 -> List command
@@ -47,6 +48,7 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         NAMES_END_COMMAND => ReceiveNamesEnd {},
         NAMES_LINE_COMMAND => ReceiveNamesLine { message },
         PRIVMSG_COMMAND => ReceivePrivMessage { message },
+        JOIN_NOTIFICATION_COMMAND => ReceiveJoinNotification { message },
         _ => RegularMessage {
             message: message.to_string(),
         },

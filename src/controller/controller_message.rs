@@ -34,6 +34,9 @@ pub enum ControllerMessage {
     ReceiveJoin {
         message: Message,
     },
+    ReceiveJoinNotification {
+        message: Message,
+    },
     ReceiveKick {
         message: Message,
     },

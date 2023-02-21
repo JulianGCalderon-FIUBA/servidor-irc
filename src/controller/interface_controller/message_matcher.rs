@@ -120,6 +120,13 @@ impl InterfaceController {
         self.change_conversation(channel);
     }
 
+    pub fn receive_join_notification(&mut self, message: Message) {
+        let (channel, client) = self.decode_join_notification_message(message);
+
+        let message: String = format!("{client} has joined {channel}");
+        self.main_view.add_notification(message);
+    }
+
     pub fn receive_kick(&mut self, message: Message) {
         let (channel, kicked) = self.decode_kick_message(message);
         if kicked == self.nickname {

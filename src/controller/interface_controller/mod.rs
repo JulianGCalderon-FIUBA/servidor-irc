@@ -126,6 +126,7 @@ impl InterfaceController {
                 ReceiveJoin { message } => {
                     self.receive_join(message);
                 }
+                ReceiveJoinNotification { message } => self.receive_join_notification(message),
                 ReceiveKick { message } => {
                     self.receive_kick(message);
                 }
