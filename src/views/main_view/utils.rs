@@ -2,7 +2,7 @@ use gtk4::{prelude::*, Button, ScrolledWindow};
 
 use crate::controller::utils::is_not_empty;
 
-use super::NOTIFICATION_ON_BUTTON_CSS;
+use super::{CHAT_BUTTON_SELECTED_CSS, NOTIFICATION_ON_BUTTON_CSS};
 
 /// Adjusts scrollbar in a scrolled window.
 pub fn adjust_scrollbar(scrolled_window: ScrolledWindow) {
@@ -46,7 +46,7 @@ pub fn remove_button_notifications(button: &Button, no_notifications_text: &str)
     button.remove_css_class(NOTIFICATION_ON_BUTTON_CSS);
 }
 
-pub fn remove_button_notifications_if_any(button: &Button, no_notifications_text: &str){
+pub fn remove_button_notifications_if_any(button: &Button, no_notifications_text: &str) {
     if button_has_notifications(button) {
         remove_button_notifications(button, no_notifications_text);
     }
@@ -61,4 +61,12 @@ pub fn add_notification_to_button(button: &Button, button_text: String) {
     }
 
     button.set_label(&format!("{} ({})", button_text, notifications_number + 1));
+}
+
+pub fn select_conversation_button(button: &Button) {
+    button.add_css_class(CHAT_BUTTON_SELECTED_CSS);
+}
+
+pub fn deselect_conversation_button(button: &Button) {
+    button.remove_css_class(CHAT_BUTTON_SELECTED_CSS);
 }

@@ -1,24 +1,25 @@
 pub mod requests;
 mod widgets_creation;
 
-use gtk::{ glib::Sender, prelude::*, Box, Button, Label, Orientation };
+use gtk::{glib::Sender, prelude::*, Box, Button, Label, Orientation};
 use gtk4 as gtk;
 
 use crate::{
-    controller::{ controller_message::ControllerMessage, utils::is_channel },
+    controller::{
+        controller_message::ControllerMessage,
+        utils::{is_channel, is_not_empty},
+    },
     server::consts::channel::MAX_CHANNELS,
     views::{
         add_views::widgets_creation::create_title,
-        main_view::{ ADD_BUTTON_CSS, DISABLE_BUTTON_CSS },
+        main_view::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
         widgets_creation::create_button_with_margin,
     },
 };
 
 use self::{
     requests::{
-        add_notifications_view_request,
-        add_user_info_view,
-        add_view_to_add_client_request,
+        add_notifications_view_request, add_user_info_view, add_view_to_add_client_request,
         send_list_request,
     },
     widgets_creation::create_separator_sidebar,
@@ -27,12 +28,10 @@ use self::{
 use super::{
     requests::change_conversation_request,
     utils::{
-        add_notification_to_button,
-        adjust_scrollbar,
-        remove_button_notifications_if_any,
+        add_notification_to_button, adjust_scrollbar, deselect_conversation_button,
+        remove_button_notifications_if_any, select_conversation_button,
     },
-    MainView,
-    NO_NOTIFICATIONS_TEXT,
+    MainView, NO_NOTIFICATIONS_TEXT,
 };
 
 const CHANNELS_TITLE: &str = "Channels";
@@ -41,11 +40,15 @@ const CLIENTS_TITLE: &str = "Clients";
 impl MainView {
     /// Creates sidebar widgets.
     pub fn create_sidebar(&mut self) -> Box {
-        let sidebar = Box::builder().width_request(200).orientation(Orientation::Vertical).build();
+        let sidebar = Box::builder()
+            .width_request(200)
+            .orientation(Orientation::Vertical)
+            .build();
 
         //Channels box
         let channels_title = create_title(CHANNELS_TITLE);
-        self.scrollwindow_channels.set_child(Some(&self.channels_box));
+        self.scrollwindow_channels
+            .set_child(Some(&self.channels_box));
         self.connect_add_channel_button(self.add_channel.clone(), self.sender.clone());
 
         //Clients box
@@ -114,7 +117,7 @@ impl MainView {
         self.connect_channel_client_button(
             channel_button.clone(),
             channel.clone(),
-            self.sender.clone()
+            self.sender.clone(),
         );
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
@@ -136,7 +139,7 @@ impl MainView {
         self.connect_channel_client_button(
             client_button.clone(),
             client.clone(),
-            self.sender.clone()
+            self.sender.clone(),
         );
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
@@ -153,7 +156,7 @@ impl MainView {
         &self,
         button: Button,
         channel_or_client: String,
-        sender: Sender<ControllerMessage>
+        sender: Sender<ControllerMessage>,
     ) {
         button.connect_clicked(move |_| {
             change_conversation_request(channel_or_client.clone(), sender.clone());
@@ -164,26 +167,51 @@ impl MainView {
     ///
     /// Changes chat label and messages.
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
-        self.current_chat.set_label(&conversation_label);
-        self.scrollwindow_chat.set_visible(true);
-        self.send_message.set_sensitive(true);
-        self.input.set_sensitive(true);
-        self.error_label.set_text("");
-        self.input.set_text("");
-
-        self.welcome_box.set_visible(false);
-
+        self.update_chat_view_when_change_conversation(&conversation_label);
+        self.update_last_chat_button_when_change_conversation(&last_conv);
+        self.update_chat_button_when_clicked(&conversation_label);
         self.clean_screen(last_conv);
         self.load_messages_on_chat(conversation_label.clone());
+    }
 
-        let (conversation_button, _) = self.find_button_by_name(&conversation_label);
-        remove_button_notifications_if_any(&conversation_button, &conversation_label);
-
+    fn update_chat_view_when_change_conversation(&mut self, conversation_label: &str) {
         self.quit_channel_button.set_visible(true);
-        if is_channel(&conversation_label) {
+        self.remove_welcome_view_if_any();
+        if is_channel(conversation_label) {
             self.set_channel_chat_mode();
         } else {
             self.set_client_chat_mode();
+        }
+        self.current_chat.set_label(conversation_label);
+        self.error_label.set_text("");
+        self.input.set_text("");
+    }
+
+    fn remove_welcome_view_if_any(&mut self) {
+        if self.welcome_box.is_visible() {
+            self.remove_welcome_view();
+        }
+    }
+
+    fn remove_welcome_view(&mut self) {
+        self.welcome_box.set_visible(false);
+        self.scrollwindow_chat.set_visible(true);
+        self.send_message.set_sensitive(true);
+        self.input.set_sensitive(true);
+    }
+
+    fn update_chat_button_when_clicked(&mut self, conversation_label: &str) {
+        let (conversation_button, _) = self.find_button_by_name(conversation_label);
+        if let Some(button) = conversation_button {
+            remove_button_notifications_if_any(&button, conversation_label);
+            select_conversation_button(&button);
+        }
+    }
+
+    fn update_last_chat_button_when_change_conversation(&mut self, conversation_label: &str) {
+        let (conversation_button, _) = self.find_button_by_name(conversation_label);
+        if let Some(button) = conversation_button {
+            deselect_conversation_button(&button);
         }
     }
 
@@ -201,7 +229,7 @@ impl MainView {
     fn update_screen(&mut self, key: String, should_remove: bool) {
         let mut prev_message: Vec<Label> = vec![];
 
-        if self.messages.contains_key(&key) {
+        if is_not_empty(&key) && self.messages.contains_key(&key) {
             let messages = self.messages.get(&key).unwrap();
             for message in messages {
                 if Self::there_is_sender(message[1].clone(), prev_message) {
@@ -224,8 +252,8 @@ impl MainView {
 
     /// Returns bool wether there is a sender or not.
     fn there_is_sender(message: Label, prev_message: Vec<Label>) -> bool {
-        message.text() != "" &&
-            (prev_message.is_empty() || message.text() != prev_message[1].text())
+        message.text() != ""
+            && (prev_message.is_empty() || message.text() != prev_message[1].text())
     }
 
     /// Creates new notification with message.

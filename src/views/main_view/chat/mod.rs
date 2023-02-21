@@ -121,8 +121,10 @@ impl MainView {
     }
 
     pub fn add_notification_to_button(&mut self, conv_name: String) {
-        let (button, name) = self.find_button_by_name(&conv_name);
-        add_notification_to_button(&button, name);
+        let (finded_button, name) = self.find_button_by_name(&conv_name);
+        if let Some(button) = finded_button {
+            add_notification_to_button(&button, name);
+        }
     }
 
     /// Creates a new message in a client chat.

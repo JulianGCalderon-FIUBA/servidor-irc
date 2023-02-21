@@ -58,6 +58,7 @@ const WELCOME_MESSAGE_CSS: &str = "welcome_message";
 const WELCOME_MESSAGE: &str = "Open a new chat to start...";
 const WELCOME_TITLE_CSS: &str = "welcome_title";
 const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
+const CHAT_BUTTON_SELECTED_CSS: &str = "selected_chat_button";
 
 /// Shows main view.
 /// Contains the sidebar, chat and features.
@@ -161,20 +162,17 @@ impl MainView {
         });
     }
 
-    pub fn find_button_by_name(&mut self, conv_name: &str) -> (Button, String) {
+    pub fn find_button_by_name(&mut self, conv_name: &str) -> (Option<Button>, String) {
         let vector = if is_channel(conv_name) {
             self.channels_buttons.clone()
         } else {
             self.clients_buttons.clone()
         };
         let mut name = String::new();
-        let button = vector
-            .into_iter()
-            .find(|button| {
-                name = first_word_of_button(button);
-                name == conv_name
-            })
-            .unwrap();
+        let button = vector.into_iter().find(|button| {
+            name = first_word_of_button(button);
+            name == conv_name
+        });
 
         (button, name)
     }
