@@ -185,14 +185,24 @@ impl InterfaceController {
     }
 
     pub fn receive_priv_message(&mut self, message: Message) {
-        if let Some(ctcp_message) = parse_ctcp(&message) {
-            if let Ok(dcc_message) = DccMessage::parse(ctcp_message) {
-                let sender = message.get_prefix().to_owned().unwrap();
-                self.receive_dcc_message(sender, dcc_message);
-                return;
+        match parse_ctcp(&message) {
+            Some(content) => {
+                let sender = message.unpack().0.unwrap();
+                self.receive_ctcp(sender, content);
+            }
+            None => {
+                self.receive_regular_privmsg(message);
             }
         }
+    }
 
+    fn receive_ctcp(&mut self, sender: String, content: String) {
+        let Ok(dcc_message) = DccMessage::parse(content) else { return };
+
+        self.receive_dcc_message(sender, dcc_message);
+    }
+
+    fn receive_regular_privmsg(&mut self, message: Message) {
         let (channel, message, sender_nickname) = self.decode_priv_message(message);
         if let Some(..) = channel {
             self.main_view.receive_priv_channel_message(
@@ -354,16 +364,6 @@ impl InterfaceController {
             DccMessage::ChatDecline => todo!(),
             DccMessage::Close => todo!(),
             _ => unimplemented!(),
-            // DccMessage::Resume {
-            //     filename,
-            //     port,
-            //     position,
-            // } => todo!(),
-            // DccMessage::Accept {
-            //     filename,
-            //     port,
-            //     position,
-            // } => todo!(),
         }
     }
 
