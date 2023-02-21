@@ -220,8 +220,8 @@ impl InterfaceController {
                 OpenFileDialogChooserView {} => {
                     self.open_file_chooser_dialog_view();
                 }
-                SendFile { path } => {
-                    self.send_file(path);
+                SendFile { path, target } => {
+                    self.send_dcc_send(target, path);
                 }
                 DownloadFile { sender, path } => {
                     self.download_file(sender, path);

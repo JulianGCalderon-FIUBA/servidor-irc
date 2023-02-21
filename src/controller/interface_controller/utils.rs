@@ -1,7 +1,17 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, net::SocketAddr};
+
+use gtk4::{
+    prelude::*,
+    traits::{DialogExt, FileChooserExt, GtkWindowExt},
+    FileChooserDialog, ResponseType,
+};
 
 use crate::{
-    controller::{NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT},
+    controller::{
+        controller_message::ControllerMessage, NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
+    },
+    ctcp::{dcc_message::DccMessage, dcc_send::dcc_send_receiver::DccSendReceiver},
+    message::Message,
     server::consts::commands::NAMES_COMMAND,
 };
 
@@ -76,6 +86,94 @@ impl InterfaceController {
             message: warning_text.to_string(),
         };
         self.sender.send(to_send).expect(OPEN_WARNING_ERROR_TEXT);
+    }
+
+    pub fn receive_regular_privmsg(&mut self, message: Message) {
+        let (channel, message, sender_nickname) = self.decode_priv_message(message);
+        if let Some(..) = channel {
+            self.main_view.receive_priv_channel_message(
+                message,
+                sender_nickname,
+                channel.unwrap(),
+                self.current_conv.clone(),
+            );
+        } else {
+            self.main_view.receive_priv_client_message(
+                message,
+                sender_nickname,
+                self.current_conv.clone(),
+            );
+        }
+    }
+
+    pub fn receive_dcc_message(&mut self, sender: String, dcc_message: DccMessage) {
+        match dcc_message {
+            DccMessage::Send {
+                filename,
+                address,
+                filesize,
+            } => {
+                self.receive_dcc_send(sender, filename, address, filesize);
+            }
+            DccMessage::SendAccept => {
+                self.receive_dcc_send_accept(sender);
+            }
+            DccMessage::SendDecline => {
+                self.receive_dcc_send_decline(sender);
+            }
+            DccMessage::Chat { address: _address } => todo!(),
+            DccMessage::ChatAccept => todo!(),
+            DccMessage::ChatDecline => todo!(),
+            DccMessage::Close => todo!(),
+            _ => unimplemented!(),
+        }
+    }
+
+    pub fn receive_dcc_send_decline(&mut self, sender: String) {
+        self.dcc_send_senders.remove(&sender);
+    }
+
+    pub fn receive_dcc_send_accept(&mut self, sender: String) {
+        if let Some(dcc_send_sender) = self.dcc_send_senders.remove(&sender) {
+            dcc_send_sender.accept().unwrap();
+        }
+    }
+
+    pub fn receive_dcc_send(
+        &mut self,
+        sender: String,
+        filename: String,
+        address: SocketAddr,
+        filesize: u64,
+    ) {
+        let file_chooser_dialog = FileChooserDialog::builder()
+            .transient_for(&self.main_window)
+            .action(gtk4::FileChooserAction::Save)
+            .build();
+
+        file_chooser_dialog.add_button("Download", ResponseType::Accept);
+
+        file_chooser_dialog.present();
+
+        let server_stream = self.client.get_stream().unwrap();
+        let dcc_send_receiver =
+            DccSendReceiver::new(server_stream, sender.clone(), filename, filesize, address);
+
+        self.dcc_send_receivers
+            .insert(sender.clone(), dcc_send_receiver);
+
+        let channel_sender = self.sender.clone();
+        file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
+            let Some(file) = file_chooser_dialog.file() else {return};
+            let Some(path) = file.path() else {return};
+
+            let sender = sender.clone();
+            let download_file_request = ControllerMessage::DownloadFile { path, sender };
+
+            channel_sender.send(download_file_request).unwrap();
+
+            file_chooser_dialog.destroy();
+        });
     }
 }
 

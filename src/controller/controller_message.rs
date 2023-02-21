@@ -84,6 +84,7 @@ pub enum ControllerMessage {
         address: String,
     },
     SendFile {
+        target: String,
         path: PathBuf,
     },
     DownloadFile {
