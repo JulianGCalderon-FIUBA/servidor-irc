@@ -34,6 +34,7 @@ use super::{
 impl InterfaceController {
     pub fn accept_dcc_chat(&mut self, client: String, address: String) {
         println!("address: {}", address);
+        self.dcc_invitation.close();
         let dcc = self.dcc_recievers.remove(&client).unwrap();
         let dcc_chat = dcc.accept_chat_command(&address).unwrap();
         self.dcc_chats.insert(client, dcc_chat);
@@ -56,7 +57,8 @@ impl InterfaceController {
         let dcc_reciever = DccChatReceiver::new(stream, client.clone());
         self.dcc_recievers.insert(client.clone(), dcc_reciever);
 
-        dcc_invitation_window(&self.app, client, message.address, &self.sender).show()
+        self.dcc_invitation = dcc_invitation_window(&self.app, client, message.address, &self.sender);
+        self.dcc_invitation.show();
     }
 
     pub fn dcc_recieve_accept(&mut self, client: String) {
@@ -71,6 +73,7 @@ impl InterfaceController {
     }
 
     pub fn decline_dcc_chat(&mut self, client: String) {
+        self.dcc_invitation.close();
         self.dcc_recievers.remove(&client).unwrap().decline_chat_command().unwrap();
     }
 

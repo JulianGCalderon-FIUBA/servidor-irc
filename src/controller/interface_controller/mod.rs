@@ -6,7 +6,7 @@ pub mod window_creation;
 
 use gtk4 as gtk;
 
-use crate::{client::client::Client, views::main_view::MainView, ctcp::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver, dcc_chat::DccChat}};
+use crate::{client::client::Client, views::{main_view::MainView, add_views::dcc_invitation_view::DccInvitationView}, ctcp::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver, dcc_chat::DccChat}};
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
@@ -24,7 +24,7 @@ use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
         add_channel_window, add_client_window, invite_window, ip_window, main_view, main_window,
-        register_window,
+        register_window, dcc_invitation_window,
     },
 };
 
@@ -39,6 +39,7 @@ pub struct InterfaceController {
     app: Application,
     client: Client,
     current_conv: String,
+    dcc_invitation: ApplicationWindow,
     dcc_recievers: HashMap<String, DccChatReceiver>,
     dcc_senders: HashMap<String, DccChatSender>,
     dcc_chats: HashMap<String, DccChat>,
@@ -67,6 +68,7 @@ impl InterfaceController {
             app: app.clone(),
             client,
             current_conv: String::new(),
+            dcc_invitation: dcc_invitation_window(&app, String::new(), String::new(), &sender),
             dcc_recievers: HashMap::new(),
             dcc_senders: HashMap::new(),
             dcc_chats: HashMap::new(),

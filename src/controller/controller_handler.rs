@@ -50,15 +50,19 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
 
 fn parse_priv_message(message: Message) -> ControllerMessage {
     match get_ctcp_message(&message) {
-        Some(_) => {
+        Some(ctcp_message) => {
             let trailing = message.get_trailing().clone().unwrap();
             let client = message.get_prefix().clone().unwrap();
 
-            let arguments: Vec<String> = trailing.split(' ').map(|s| s.to_string()).collect();
+            println!("CTCP message: {}", ctcp_message);
+            let arguments: Vec<String> = ctcp_message.split(' ').map(|s| s.to_string()).collect();
+            for i in arguments.clone() {
+                println!("argument: {}", i);
+            }
             match arguments[2].as_str() {
                 "accept" => DccRecieveAccept { client },
                 "decline" => DccRecieveDecline { client },
-                _ => DccInvitation { client: client.to_string(), message: DccMessage::parse(trailing).unwrap() }
+                _ => DccInvitation { client: client.to_string(), message: DccMessage::parse(ctcp_message).unwrap() }
             }
         },
         None => ReceivePrivMessage { message }
