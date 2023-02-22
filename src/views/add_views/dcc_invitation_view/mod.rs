@@ -1,12 +1,12 @@
 /// Contains definition of used requests.
 pub mod requests;
 
-use std::{net::{IpAddr, SocketAddr}, str::FromStr};
+use std::net::SocketAddr;
 
 use gtk::{
-    glib::{GString, Sender},
+    glib::Sender,
     prelude::*,
-    Application, ApplicationWindow, Button, Entry, Label, Orientation,
+    Application, ApplicationWindow, Button, Orientation,
 };
 use gtk4 as gtk;
 
@@ -14,13 +14,12 @@ use self::requests::{accept_request, decline_request};
 
 use crate::views::{
     widgets_creation::{
-        build_application_window, create_center_button, create_entry, create_label,
-        create_label_input_box, create_main_box,
+        build_application_window, create_center_button, create_label, create_main_box,
     },
     MAIN_BOX_CSS,
 };
 
-use crate::{controller::controller_message::ControllerMessage, ADDRESS};
+use crate::controller::controller_message::ControllerMessage;
 
 const ACCEPT_BUTTON_TEXT: &str = "Accept";
 const DECLINE_BUTTON_TEXT: &str = "Decline";
@@ -102,30 +101,5 @@ impl DccInvitationView {
         self.decline_button.connect_clicked(move |_| {
             decline_request(client.clone(), sender.clone());
         });
-    }
-
-    /// Checks if the input address has an ipv4 format.  
-    ///
-    /// Returns a bool
-    fn register_fiels_are_valid(address: &str) -> bool {
-        let ip: Vec<&str> = address.split(':').collect();
-        if ip.len() != 2 {
-            return false;
-        }
-        match IpAddr::from_str(ip[0]) {
-            Ok(_) => ip[1].parse::<i32>().expect("Not a number") < 10000,
-            Err(_) => false,
-        }
-    }
-
-    /// Returns the input address.  
-    ///
-    /// If the address is empty, returns the default address.  
-    fn unpack_entry(address: GString) -> String {
-        if address.is_empty() {
-            ADDRESS.to_string()
-        } else {
-            address.to_string()
-        }
     }
 }
