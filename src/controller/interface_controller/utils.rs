@@ -122,9 +122,15 @@ impl InterfaceController {
             DccMessage::SendDecline => {
                 self.receive_dcc_send_decline(sender);
             }
-            DccMessage::Chat { address: _address } => todo!(),
-            DccMessage::ChatAccept => todo!(),
-            DccMessage::ChatDecline => todo!(),
+            DccMessage::Chat { address } => {
+                self.dcc_invitation(sender, address);
+            },
+            DccMessage::ChatAccept => {
+                self.dcc_recieve_accept(sender);
+            },
+            DccMessage::ChatDecline => {
+                self.dcc_recieve_decline(sender);
+            },
             DccMessage::Close => todo!(),
             _ => unimplemented!(),
         }

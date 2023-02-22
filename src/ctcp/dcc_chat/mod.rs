@@ -1,5 +1,5 @@
-mod dcc_chat_receiver;
-mod dcc_chat_sender;
+pub mod dcc_chat_receiver;
+pub mod dcc_chat_sender;
 
 use std::{
     io::{self, Write},

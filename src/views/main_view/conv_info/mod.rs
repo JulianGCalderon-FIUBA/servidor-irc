@@ -22,7 +22,7 @@ impl MainView {
     pub fn create_conv_info(&mut self, nickname: &str) -> Box {
         let conv_info = Box::builder()
             .orientation(Orientation::Vertical)
-            .width_request(177)
+            .width_request(250)
             .margin_end(12)
             .halign(Align::Start)
             .build();
@@ -144,6 +144,7 @@ impl MainView {
         self.safe_conversation_button.set_visible(false);
         self.send_file_button.set_visible(false);
         self.channel_members_button.set_visible(false);
+        self.safe_conversation_button.set_visible(false);
     }
 
     /// Returns users channels.

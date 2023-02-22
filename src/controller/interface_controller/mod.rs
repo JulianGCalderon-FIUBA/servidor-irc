@@ -4,14 +4,15 @@ pub mod names_message_intention;
 pub mod utils;
 pub mod window_creation;
 
-use std::{collections::HashMap, thread};
+use std::{collections::HashMap, thread, net::{SocketAddr, IpAddr, Ipv4Addr}};
 
 use gtk4 as gtk;
 
 use crate::{
     client::{async_reader::AsyncReader, Client},
-    ctcp::dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender},
-    views::{add_views::add_channel_view::AddChannelView, main_view::MainView},
+    ctcp::{dcc_chat::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver, DccChat},
+        dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender}},
+    views::{add_views::dcc_invitation_view::DccInvitationView, add_views::add_channel_view::AddChannelView, main_view::MainView},
 };
 use gtk::{
     glib::{self, Receiver, Sender},
@@ -28,7 +29,8 @@ use crate::controller::ControllerMessage::*;
 use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
-        add_channel_view, add_client_window, invite_window, ip_window, main_view, register_window,
+        add_channel_view, add_client_window, invite_window,
+        ip_window, main_view, register_window, dcc_invitation_window,
     },
 };
 
@@ -46,6 +48,10 @@ pub struct InterfaceController {
     app: Application,
     client: Client,
     current_conv: String,
+    dcc_invitation: ApplicationWindow,
+    dcc_recievers: HashMap<String, DccChatReceiver>,
+    dcc_senders: HashMap<String, DccChatSender>,
+    dcc_chats: HashMap<String, DccChat>,
     invite_window: ApplicationWindow,
     ip_window: ApplicationWindow,
     main_view: MainView,
@@ -74,6 +80,10 @@ impl InterfaceController {
             app: app.clone(),
             client,
             current_conv: String::new(),
+            dcc_invitation: dcc_invitation_window(&app, String::new(), SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127,0,0,1)), 8080), &sender),
+            dcc_recievers: HashMap::new(),
+            dcc_senders: HashMap::new(),
+            dcc_chats: HashMap::new(),
             invite_window: invite_window(&app, vec![], &sender),
             ip_window: ip_window(&app, &sender),
             main_view: main_view(&sender),
@@ -112,6 +122,9 @@ impl InterfaceController {
 
         receiver.attach(None, move |msg| {
             match msg {
+                AcceptDccChat { client, address } => {
+                    self.accept_dcc_chat(client, address);
+                }
                 AddNewClient { new_client } => {
                     self.add_new_client(new_client);
                 }
@@ -120,6 +133,24 @@ impl InterfaceController {
                 }
                 ErrorWhenAddingChannel { message } => {
                     self.error_when_adding_channel(message);
+                }
+                DccInvitation { client, message } => {
+                    self.dcc_invitation(client, message);
+                }
+                DccRecieveAccept { client } => {
+                    self.dcc_recieve_accept(client);
+                }
+                DccRecieveDecline { client } => {
+                    self.dcc_recieve_decline(client);
+                }
+                DeclineDccChat { client } => {
+                    self.decline_dcc_chat(client);
+                }
+                JoinChannel { channel } => {
+                    self.join_channel(channel);
+                }
+                KickMember { channel, member } => {
+                    self.kick_member(channel, member);
                 }
                 OpenAddClientView {
                     channels_and_clients,
@@ -136,9 +167,6 @@ impl InterfaceController {
                 }
                 OpenNotificationsView {} => {
                     self.open_notifications_view();
-                }
-                OpenSafeConversationView {} => {
-                    self.open_safe_conversation_view();
                 }
                 OpenUserInfoView {} => {
                     self.open_user_info_view();
@@ -183,6 +211,9 @@ impl InterfaceController {
                 }
                 RemoveConversation {} => {
                     self.remove_conversation();
+                }
+                SafeConversationRequest { } => {
+                    self.send_safe_conversation_request();
                 }
                 SendInviteMessage { channel } => {
                     self.send_invite_message(channel);

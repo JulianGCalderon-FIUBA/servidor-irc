@@ -1,5 +1,7 @@
 use gtk4::{glib::Sender, Application, ApplicationWindow};
 
+use std::net::SocketAddr;
+
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
@@ -7,7 +9,7 @@ use crate::{
             add_channel_view::AddChannelView, add_client_view::AddClientView,
             channel_members_view::ChannelMembersView, invite_view::InviteView,
             notifications_view::NotificationsView, safe_conversation_view::SafeConversationView,
-            user_info_view::UserInfoView, warning_view::WarningView,
+            user_info_view::UserInfoView, warning_view::WarningView, dcc_invitation_view::DccInvitationView
         },
         ip_view::IpView,
         main_view::MainView,
@@ -36,6 +38,21 @@ pub fn channel_members_window(
 ) -> ApplicationWindow {
     ChannelMembersView::new(channel, clients, nickname, sender.clone()).get_view(app.clone())
 }
+
+pub fn dcc_invitation_window(
+    app: &Application,
+    client: String,
+    address: SocketAddr,
+    sender: &Sender<ControllerMessage>,
+) -> ApplicationWindow {
+    DccInvitationView::new(sender.clone()).get_view(app.clone(), client, address)
+}
+
+// pub fn dcc_invitation_window(
+//     sender: &Sender<ControllerMessage>,
+// ) -> DccInvitationView {
+//     DccInvitationView::new(sender.clone())
+// }
 
 pub fn invite_window(
     app: &Application,

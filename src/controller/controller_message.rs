@@ -1,11 +1,15 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{collections::HashMap, path::PathBuf, net::SocketAddr};
 
 use gtk4::glib::GString;
 
-use crate::message::Message;
+use crate::{message::Message, ctcp::dcc_message::DccMessage};
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
+    AcceptDccChat {
+        client: String,
+        address: SocketAddr,
+    },
     AddNewClient {
         new_client: GString,
     },
@@ -14,6 +18,26 @@ pub enum ControllerMessage {
     },
     ErrorWhenAddingChannel {
         message: String,
+    },
+    DccInvitation {
+        client: String,
+        message: SocketAddr,
+    },
+    DccRecieveAccept {
+        client: String,
+    },
+    DccRecieveDecline {
+        client: String,
+    },
+    DeclineDccChat {
+        client: String,
+    },
+    JoinChannel {
+        channel: String,
+    },
+    KickMember {
+        channel: String,
+        member: String,
     },
     OpenAddClientView {
         channels_and_clients: HashMap<String, Vec<String>>,
@@ -25,8 +49,8 @@ pub enum ControllerMessage {
         message: Message,
     },
     OpenNotificationsView {},
-    OpenSafeConversationView {},
     OpenFileDialogChooserView {},
+    SafeConversationRequest {},
     OpenUserInfoView {},
     OpenWarningView {
         message: String,
