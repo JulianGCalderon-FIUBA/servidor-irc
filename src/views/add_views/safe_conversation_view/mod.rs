@@ -5,15 +5,15 @@ pub mod requests;
 pub mod widgets_creation;
 
 use gtk::{
-    glib::Sender, prelude::*, Application, ApplicationWindow, Box, Button, Entry, Label,
-    ScrolledWindow,
+    glib::{Sender, GString}, prelude::*, Application, ApplicationWindow, Box, Button, Entry, Label,
+    ScrolledWindow, Orientation,
 };
 use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
-        main_view::widgets_creation::{create_current_chat, create_message_box},
+        main_view::{widgets_creation::{create_current_chat, create_message_box}, utils::{entry_is_valid, adjust_scrollbar}},
         widgets_creation::{
             build_application_window,
             create_button_with_margin,
@@ -21,25 +21,18 @@ use crate::{
             create_entry,
             create_error_label,
             create_message_sender_box,
-            create_scrollwindow_chat,
+            create_scrollwindow_chat, create_main_box,
             // create_label, create_center_button
         },
-        ENTRY_PLACEHOLDER, SEND_BUTTON_TEXT,
+        ENTRY_PLACEHOLDER, SEND_BUTTON_TEXT, MAIN_BOX_CSS,
     },
 };
 
-// use self::{
-//     requests::kick_request,
-//     widgets_creation::{create_kick_button, create_kick_label},
-// };
+use self::{widgets_creation::create_send_message, requests::send_safe_message_request};
 
-// use super::{
-//     widgets_creation::{create_main_box_add_view, create_title},
-//     CONTINUE_BUTTON_TEXT,
-// };
-
-// const OPERATOR_FIRST_CHARACTER: &str = "@";
-// const TITLE: &str = "Members";
+const MESSAGE_MAX_CHARACTERS: usize = 60;
+const MESSAGE_MAX_CHARACTERS_ERROR: &str = "¡Message too long!";
+const EMPTY_MESSAGE_ERROR: &str = "¡Message is empty!";
 
 /// Shows channel members view.
 /// Contains an exit button.
@@ -63,7 +56,7 @@ impl SafeConversationView {
             scrollwindow_chat: create_scrollwindow_chat(),
             error_label: create_error_label(),
             send_message: create_button_with_margin(SEND_BUTTON_TEXT),
-            current_chat: create_current_chat(""),
+            current_chat: create_current_chat("hola gente"),
             sender,
         }
     }
@@ -75,17 +68,6 @@ impl SafeConversationView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        // let main_box = create_main_box_add_view();
-
-        // main_box.append(&create_title(TITLE));
-
-        // main_box.append(&self.button);
-
-        // self.connect_button(window.clone());
-
-        // window.set_child(Some(&main_box));
-        // window
-
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
 
@@ -94,10 +76,10 @@ impl SafeConversationView {
         message_sender_box.append(&self.input);
 
         self.scrollwindow_chat.set_child(Some(&self.message_box));
-        self.scrollwindow_chat.set_visible(false);
 
         self.connect_send_button(
             self.input.clone(),
+            self.current_chat.label(),
             self.sender.clone(),
             self.error_label.clone(),
         );
@@ -115,36 +97,37 @@ impl SafeConversationView {
 
     fn connect_send_button(
         &self,
-        _input: Entry,
-        _sender: Sender<ControllerMessage>,
-        _error_label: Label,
+        input: Entry,
+        current_chat: GString,
+        sender: Sender<ControllerMessage>,
+        error_label: Label,
     ) {
         self.send_message.connect_clicked(move |_| {
-            // error_label.set_text("");
-            // let input_text = input.text();
-            // if !entry_is_valid(&input_text, MESSAGE_MAX_CHARACTERS) {
-            //     if !input_text.is_empty() {
-            //         error_label.set_text(
-            //             &format!(
-            //                 "{MESSAGE_MAX_CHARACTERS_ERROR} Max: {MESSAGE_MAX_CHARACTERS} characters"
-            //             )
-            //         );
-            //     } else {
-            //         error_label.set_text(EMPTY_MESSAGE_ERROR);
-            //     }
-            //     return;
-            // }
+            error_label.set_text("");
+            let input_text = input.text();
+            if !entry_is_valid(&input_text, MESSAGE_MAX_CHARACTERS) {
+                if !input_text.is_empty() {
+                    error_label.set_text(
+                        &format!(
+                            "{MESSAGE_MAX_CHARACTERS_ERROR} Max: {MESSAGE_MAX_CHARACTERS} characters"
+                        )
+                    );
+                } else {
+                    error_label.set_text(EMPTY_MESSAGE_ERROR);
+                }
+                return;
+            }
 
-            // priv_message_request(input_text, sender.clone());
+            send_safe_message_request(input_text.to_string(), current_chat.to_string(), sender.clone());
 
-            // input.set_text("");
+            input.set_text("");
         });
     }
 
-    pub fn send_message(&mut self, _message: String, _nickname: String) {
-        // let message = create_send_message(&message);
-        // self.message_box.append(&message);
-        // adjust_scrollbar(self.scrollwindow_chat.clone());
+    pub fn send_message(&mut self, message: String) {
+        let message = create_send_message(&message);
+        self.message_box.append(&message);
+        adjust_scrollbar(self.scrollwindow_chat.clone());
 
         // self.messages
         //     .get_mut(&nickname)

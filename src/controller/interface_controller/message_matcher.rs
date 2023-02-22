@@ -26,7 +26,7 @@ use super::{
     utils::{channels_not_mine, is_not_empty},
     window_creation::{
         add_channel_view, add_client_window, channel_members_window, dcc_invitation_window, 
-        invite_window, main_view, notifications_window, safe_conversation_window, user_info_window, warning_window,
+        invite_window, main_view, notifications_window, safe_conversation_view, user_info_window, warning_window,
     },
     InterfaceController,
     NamesMessageIntention::*,
@@ -39,7 +39,7 @@ impl InterfaceController {
         let dcc = self.dcc_recievers.remove(&client).unwrap();
         let dcc_chat = dcc.accept_chat_command(address).unwrap();
         self.dcc_chats.insert(client, dcc_chat);
-        self.safe_conversation_window.show();
+        self.safe_conversation_view.get_view(self.app.clone()).show();
     }
 
     pub fn add_new_client(&mut self, new_client: GString) {
@@ -70,7 +70,7 @@ impl InterfaceController {
     pub fn dcc_recieve_accept(&mut self, client: String) {
         let dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
         self.dcc_chats.insert(client, dcc_chat);
-        self.safe_conversation_window.show();
+        self.safe_conversation_view.get_view(self.app.clone()).show();
         println!("established dcc chat");
     }
 
@@ -141,6 +141,14 @@ impl InterfaceController {
         let chat_sender = DccChatSender::send(stream, self.current_conv.clone()).unwrap();
         self.dcc_senders
             .insert(self.current_conv.clone(), chat_sender);
+    }
+
+    pub fn send_safe_message(&mut self, client: String, message: String) {
+        let dcc = self.dcc_chats.remove(&client);
+        if let Some(mut dcc_chat) = dcc {
+            dcc_chat.send_raw(&message).unwrap();
+        }
+        self.safe_conversation_view.send_message(message);
     }
 
     pub fn open_user_info_view(&mut self) {

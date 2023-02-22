@@ -78,11 +78,10 @@ pub fn register_window(app: &Application, sender: &Sender<ControllerMessage>) ->
     RegisterView::new(sender.clone()).get_view(app.clone())
 }
 
-pub fn safe_conversation_window(
-    app: &Application,
+pub fn safe_conversation_view(
     sender: &Sender<ControllerMessage>,
-) -> ApplicationWindow {
-    SafeConversationView::new(sender.clone()).get_view(app.clone())
+) -> SafeConversationView {
+    SafeConversationView::new(sender.clone())
 }
 
 pub fn user_info_window(

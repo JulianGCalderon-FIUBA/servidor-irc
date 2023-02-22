@@ -1,14 +1,14 @@
-use crate::controller::controller_message::ControllerMessage::{self, SendKickMessage};
+use crate::controller::controller_message::ControllerMessage::{self, SendSafeMessage};
 use crate::views::ERROR_TEXT;
 use gtk::glib::Sender;
 
 use gtk4 as gtk;
 
-/// Sends a kick request to the controller.  
+/// Sends a safe message.  
 ///
 /// Receives a channel name and a member.
-pub fn kick_request(channel: String, member: String, sender: Sender<ControllerMessage>) {
+pub fn send_safe_message_request(message: String, client: String, sender: Sender<ControllerMessage>) {
     sender
-        .send(SendKickMessage { channel, member })
+        .send(SendSafeMessage { client, message })
         .expect(ERROR_TEXT);
 }

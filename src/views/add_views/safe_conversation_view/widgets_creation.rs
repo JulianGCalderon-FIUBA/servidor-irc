@@ -1,39 +1,30 @@
 use gtk4 as gtk;
 
-use gtk::{Align::Start, Box, Button, Label, Orientation::Horizontal};
+use gtk::{Align::Start, Box, Button, Label, Orientation::Horizontal, traits::WidgetExt};
 
-const KICK_LABEL: &str = "Kick";
+const RECEIVED_MESSAGE_CSS: &str = "received_message";
+const SEND_MESSAGE_CSS: &str = "send_message";
 
-/// Creates gtk box.
+
+/// Creates a gtk message label.
 ///
-/// Receives nothing, returns a Box.
-pub fn create_kick_label_box() -> Box {
-    Box::builder()
-        .orientation(Horizontal)
-        .halign(Start)
-        .margin_top(20)
-        .margin_bottom(20)
-        .build()
-}
-
-/// Creates gtk kick button.
-///
-/// Receives nothing, returns a Button.
-pub fn create_kick_button() -> Button {
-    Button::builder().label(KICK_LABEL).build()
-}
-
-/// Creates gtk kick label.
-///
-/// Receives member name, returns a Label.
-pub fn create_kick_label(label: &str) -> Label {
+/// Receives message, returns a Label.
+pub fn create_message(label: &str) -> Label {
     Label::builder()
         .label(label)
-        .margin_top(12)
-        .margin_bottom(12)
+        .margin_top(5)
+        .margin_bottom(5)
         .margin_start(12)
         .margin_end(12)
-        .halign(Start)
-        .valign(Start)
         .build()
+}
+
+/// Creates a sent message.
+///
+/// Receives message, returns a Label.
+pub fn create_send_message(label: &str) -> Label {
+    let message = create_message(label);
+    message.set_halign(gtk4::Align::End);
+    message.add_css_class(SEND_MESSAGE_CSS);
+    message
 }

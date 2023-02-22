@@ -12,7 +12,7 @@ use crate::{
     client::{async_reader::AsyncReader, Client},
     ctcp::{dcc_chat::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver, DccChat},
         dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender}},
-    views::{add_views::dcc_invitation_view::DccInvitationView, add_views::add_channel_view::AddChannelView, main_view::MainView},
+    views::{add_views::{dcc_invitation_view::DccInvitationView, safe_conversation_view::SafeConversationView}, add_views::add_channel_view::AddChannelView, main_view::MainView},
 };
 use gtk::{
     glib::{self, Receiver, Sender},
@@ -30,7 +30,7 @@ use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
         add_channel_view, add_client_window, invite_window,
-        ip_window, main_view, register_window, dcc_invitation_window, safe_conversation_window,
+        ip_window, main_view, register_window, dcc_invitation_window, safe_conversation_view,
     },
 };
 
@@ -60,7 +60,7 @@ pub struct InterfaceController {
     nickname: String,
     realname: String,
     register_window: ApplicationWindow,
-    safe_conversation_window: ApplicationWindow,
+    safe_conversation_view: SafeConversationView,
     sender: Sender<ControllerMessage>,
     servername: String,
     username: String,
@@ -93,7 +93,7 @@ impl InterfaceController {
             nickname: String::new(),
             realname: String::new(),
             register_window: register_window(&app, &sender),
-            safe_conversation_window: safe_conversation_window(&app, &sender),
+            safe_conversation_view: safe_conversation_view(&sender),
             sender,
             servername: String::new(),
             username: String::new(),
@@ -246,6 +246,9 @@ impl InterfaceController {
                 }
                 SendQuitMessage {} => {
                     self.send_quit_message();
+                }
+                SendSafeMessage { client, message } => {
+                    self.send_safe_message(client, message);
                 }
                 ToRegister { address } => {
                     self.to_register(address);

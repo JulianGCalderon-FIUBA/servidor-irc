@@ -104,6 +104,10 @@ pub enum ControllerMessage {
         message: GString,
     },
     SendQuitMessage {},
+    SendSafeMessage {
+        client: String, 
+        message: String,
+    },
     ToRegister {
         address: String,
     },
