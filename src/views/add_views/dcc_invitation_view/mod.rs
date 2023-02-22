@@ -6,7 +6,7 @@ use std::{net::IpAddr, str::FromStr};
 use gtk::{
     glib::{GString, Sender},
     prelude::*,
-    Application, ApplicationWindow, Button, Entry, Orientation, Label,
+    Application, ApplicationWindow, Button, Entry, Label, Orientation,
 };
 use gtk4 as gtk;
 
@@ -48,7 +48,12 @@ impl DccInvitationView {
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, app: Application, client: String, address: String) -> ApplicationWindow {
+    pub fn get_view(
+        &mut self,
+        app: Application,
+        client: String,
+        address: String,
+    ) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -62,7 +67,6 @@ impl DccInvitationView {
 
         let button_box = create_main_box(Orientation::Horizontal, 150, 300);
         // main_box.add_css_class(MAIN_BOX_CSS);
-
         self.connect_accept_button(client.clone(), address, self.sender.clone());
         self.connect_decline_button(client, self.sender.clone());
 
@@ -80,7 +84,12 @@ impl DccInvitationView {
     /// Connects accept button.
     ///
     /// Sends accept request to the controller.
-    fn connect_accept_button(&self, client: String, address: String, sender: Sender<ControllerMessage>) {
+    fn connect_accept_button(
+        &self,
+        client: String,
+        address: String,
+        sender: Sender<ControllerMessage>,
+    ) {
         self.accept_button.connect_clicked(move |_| {
             accept_request(client.clone(), address.clone(), sender.clone());
         });

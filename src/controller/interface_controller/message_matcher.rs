@@ -13,19 +13,22 @@ use crate::{
         OPEN_INVITE_VIEW_ERROR_TEXT, PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT,
         QUIT_ERROR_TEXT, SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
     },
+    ctcp::{
+        dcc_chat_receiver::DccChatReceiver, dcc_chat_sender::DccChatSender, dcc_message::DccMessage,
+    },
     message::Message,
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
-        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND, CTCP_COMMAND
-    }, ctcp::{dcc_chat_sender::DccChatSender, dcc_message::DccMessage, dcc_chat_receiver::DccChatReceiver},
+        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
+    },
 };
 use gtk::{glib::GString, prelude::*};
 
 use super::{
     utils::{channels_not_mine, is_not_empty},
     window_creation::{
-        add_channel_window, add_client_window, channel_members_window, invite_window,
-        notifications_window, user_info_window, warning_window, dcc_invitation_window
+        add_channel_window, add_client_window, channel_members_window, dcc_invitation_window,
+        invite_window, notifications_window, user_info_window, warning_window,
     },
     InterfaceController,
     NamesMessageIntention::*,
@@ -130,7 +133,8 @@ impl InterfaceController {
     pub fn send_safe_conversation_request(&mut self) {
         let stream = self.client.get_stream().unwrap();
         let chat_sender = DccChatSender::send(stream, self.current_conv.clone()).unwrap();
-        self.dcc_senders.insert(self.current_conv.clone(), chat_sender);
+        self.dcc_senders
+            .insert(self.current_conv.clone(), chat_sender);
     }
 
     pub fn open_user_info_view(&mut self) {
