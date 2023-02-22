@@ -2,16 +2,17 @@ use std::{
     fs::File,
     io::{self, Seek, SeekFrom},
     net::TcpStream,
+    path::PathBuf,
 };
 
 pub struct FileTransferer {
     stream: TcpStream,
-    filename: String,
+    filename: PathBuf,
     filesize: u64,
 }
 
 impl FileTransferer {
-    pub fn new(stream: TcpStream, filename: String, filesize: u64) -> Self {
+    pub fn new(stream: TcpStream, filename: PathBuf, filesize: u64) -> Self {
         Self {
             stream,
             filename,

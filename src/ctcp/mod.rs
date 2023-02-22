@@ -1,6 +1,6 @@
-mod dcc_chat;
-mod dcc_message;
-mod dcc_send;
+pub mod dcc_chat;
+pub mod dcc_message;
+pub mod dcc_send;
 
 use crate::{macros::some_or_return, message::Message, server::consts::commands::PRIVMSG_COMMAND};
 

@@ -1,7 +1,7 @@
 use std::{
-    fs,
     io::{self, Write},
-    net::{SocketAddr, TcpListener, TcpStream},
+    net::{SocketAddr, TcpStream},
+    path::PathBuf,
 };
 
 use crate::message::CRLF;
@@ -10,7 +10,6 @@ use super::file_transfer::FileTransferer;
 
 pub struct DccResumeSender {
     address: SocketAddr,
-    filename: String,
     filesize: u64,
     position: u64,
 }
@@ -35,16 +34,14 @@ impl DccResumeSender {
 
         Ok(Self {
             address,
-            filename,
             filesize,
             position,
         })
     }
 
-    pub fn accept(self) -> io::Result<()> {
+    pub fn accept(self, filepath: PathBuf) -> io::Result<()> {
         let stream = TcpStream::connect(self.address)?;
-        FileTransferer::new(stream, self.filename, self.filesize)
-            .resume_download_file(self.position)
+        FileTransferer::new(stream, filepath, self.filesize).resume_download_file(self.position)
     }
 
     pub fn close(self) {}

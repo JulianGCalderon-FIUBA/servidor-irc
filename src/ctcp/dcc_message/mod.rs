@@ -29,6 +29,7 @@ const SEND_DECLINE_PROTOCOL: &str = "decline";
    DCC CHAT decline
 */
 
+#[derive(Debug)]
 pub enum DccMessage {
     Send {
         filename: String,
@@ -145,7 +146,7 @@ fn parse_resume_command(mut arguments: Vec<String>) -> Result<DccMessage, DccPar
     })
 }
 
-fn parse_accept_command(mut arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {
+fn parse_accept_command(arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {
     if let DccMessage::Resume {
         filename,
         port,
