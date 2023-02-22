@@ -30,7 +30,7 @@ use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
         add_channel_view, add_client_window, invite_window,
-        ip_window, main_view, register_window, dcc_invitation_window,
+        ip_window, main_view, register_window, dcc_invitation_window, safe_conversation_window,
     },
 };
 
@@ -60,6 +60,7 @@ pub struct InterfaceController {
     nickname: String,
     realname: String,
     register_window: ApplicationWindow,
+    safe_conversation_window: ApplicationWindow,
     sender: Sender<ControllerMessage>,
     servername: String,
     username: String,
@@ -92,6 +93,7 @@ impl InterfaceController {
             nickname: String::new(),
             realname: String::new(),
             register_window: register_window(&app, &sender),
+            safe_conversation_window: safe_conversation_window(&app, &sender),
             sender,
             servername: String::new(),
             username: String::new(),

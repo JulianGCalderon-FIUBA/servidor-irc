@@ -39,6 +39,7 @@ impl InterfaceController {
         let dcc = self.dcc_recievers.remove(&client).unwrap();
         let dcc_chat = dcc.accept_chat_command(address).unwrap();
         self.dcc_chats.insert(client, dcc_chat);
+        self.safe_conversation_window.show();
     }
 
     pub fn add_new_client(&mut self, new_client: GString) {
@@ -69,7 +70,8 @@ impl InterfaceController {
     pub fn dcc_recieve_accept(&mut self, client: String) {
         let dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
         self.dcc_chats.insert(client, dcc_chat);
-        println!("establshed dcc chat");
+        self.safe_conversation_window.show();
+        println!("established dcc chat");
     }
 
     pub fn dcc_recieve_decline(&mut self, client: String) {
