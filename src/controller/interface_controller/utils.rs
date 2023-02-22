@@ -199,8 +199,17 @@ fn build_file_download_chooser_dialog(
     file_chooser_dialog.present();
 
     file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
-        let Some(file) = file_chooser_dialog.file() else {return};
-        let Some(path) = file.path() else {return};
+        let file = if let Some(file) = file_chooser_dialog.file() {
+            file
+        } else {
+            return
+        };
+        
+        let path = if let Some(path) = file.path() {
+            path
+        } else {
+            return
+        };
 
         let sender = sender.clone();
         let download_file_request = ControllerMessage::DownloadFile { path, sender };

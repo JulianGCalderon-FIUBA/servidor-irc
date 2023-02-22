@@ -184,7 +184,12 @@ impl InterfaceController {
         match parse_ctcp(&message) {
             Some(content) => {
                 let sender = message.unpack().0.unwrap();
-                let Ok(dcc_message) = DccMessage::parse(content) else { return };
+                
+                let dcc_message = if let Ok(dcc_message) = DccMessage::parse(content) {
+                    dcc_message
+                } else {
+                    return
+                };
 
                 self.receive_dcc_message(sender, dcc_message);
             }
@@ -305,8 +310,17 @@ impl InterfaceController {
         let sender = self.sender.clone();
 
         file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
-            let Some(file) = file_chooser_dialog.file() else {return};
-            let Some(path) = file.path() else {return};
+            let file = if let Some(file) = file_chooser_dialog.file() {
+                file
+            } else {
+                return
+            };
+            
+            let path = if let Some(path) = file.path() {
+                path
+            } else {
+                return
+            };
 
             let target = target.clone();
 
@@ -325,13 +339,21 @@ impl InterfaceController {
     }
 
     pub fn download_file(&mut self, sender: String, path: PathBuf) {
-        let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) else { return };
+        let dcc_send_receiver = if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
+            dcc_send_receiver
+        } else {
+            return
+        };
 
         dcc_send_receiver.accept_send_command(path).unwrap();
     }
 
     pub fn ignore_file(&mut self, sender: String) {
-        let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) else { return };
+        let dcc_send_receiver = if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
+            dcc_send_receiver
+        } else {
+            return
+        };
 
         dcc_send_receiver.decline_send_command().unwrap();
     }
