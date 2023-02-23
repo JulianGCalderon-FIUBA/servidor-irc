@@ -92,7 +92,6 @@ impl InterfaceController {
 
     pub fn dcc_recieve_decline(&mut self, client: String) {
         self.dcc_senders.remove(&client).unwrap().close();
-        println!("declined dcc chat");
     }
 
     pub fn decline_dcc_chat(&mut self, client: String) {
@@ -277,7 +276,6 @@ impl InterfaceController {
     }
 
     pub fn receive_safe_message(&mut self, _client: String, message: String) {
-        // println!("message from {}: {}", client, message);
         self.safe_conversation_view.receive_message(message);
     }
 
