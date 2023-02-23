@@ -37,13 +37,14 @@ impl InterfaceController {
         self.dcc_invitation.close();
         let dcc = self.dcc_recievers.remove(&client).unwrap();
         let dcc_chat = dcc.accept_chat_command(address).unwrap();
+        let stream = dcc_chat.get_stream().unwrap();
         self.dcc_chats.insert(client.clone(), dcc_chat);
 
         let (dcc_sender, dcc_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        self.start_listening_dcc(dcc_sender);
+        self.start_listening_dcc(stream, dcc_sender);
 
-        self.receiver_attach(client.clone(), dcc_receiver, self.sender);
+        self.receiver_attach(client.clone(), dcc_receiver, self.sender.clone());
 
         self.safe_conversation_view = safe_conversation_view(&self.sender);
         self.safe_conversation_view.get_view(&client, self.app.clone()).show();
@@ -76,9 +77,17 @@ impl InterfaceController {
 
     pub fn dcc_recieve_accept(&mut self, client: String) {
         let dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
+        let stream = dcc_chat.get_stream().unwrap();
         self.dcc_chats.insert(client.clone(), dcc_chat);
+
+        let (dcc_sender, dcc_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+
+        self.start_listening_dcc(stream, dcc_sender.clone());
+
+        self.receiver_attach(client.clone(), dcc_receiver, self.sender.clone());
+
+        self.safe_conversation_view = safe_conversation_view(&self.sender);
         self.safe_conversation_view.get_view(&client, self.app.clone()).show();
-        println!("established dcc chat");
     }
 
     pub fn dcc_recieve_decline(&mut self, client: String) {
@@ -265,6 +274,10 @@ impl InterfaceController {
                 self.receive_regular_privmsg(message);
             }
         }
+    }
+
+    pub fn receive_safe_message(&mut self, client: String, message: String) {
+        println!("message from {}: {}", client, message);
     }
 
     pub fn register(

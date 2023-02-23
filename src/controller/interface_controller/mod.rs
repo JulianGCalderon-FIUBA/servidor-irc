@@ -201,6 +201,9 @@ impl InterfaceController {
                 ReceivePrivMessage { message } => {
                     self.receive_priv_message(message);
                 }
+                ReceiveSafeMessage { client, message } => {
+                    self.receive_safe_message(client, message);
+                }
                 Register {
                     pass,
                     nickname,

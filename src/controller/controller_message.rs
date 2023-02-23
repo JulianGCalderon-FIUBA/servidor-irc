@@ -85,7 +85,10 @@ pub enum ControllerMessage {
         message: String,
     },
     RemoveConversation {},
-    ReceiveSafeMessage {},
+    ReceiveSafeMessage {
+        client: String,
+        message: String,
+    },
     SendInviteMessage {
         channel: GString,
     },

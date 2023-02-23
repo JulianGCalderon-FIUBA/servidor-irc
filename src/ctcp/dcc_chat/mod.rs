@@ -9,7 +9,7 @@ use std::{
 use crate::message::{read_line, CRLF};
 
 pub struct DccChat {
-    stream: TcpStream,
+    pub stream: TcpStream,
 }
 
 impl DccChat {
@@ -46,6 +46,10 @@ impl DccChat {
         }
 
         Ok(content)
+    }
+
+    pub fn get_stream(&self) -> io::Result<TcpStream> {
+        self.stream.try_clone()
     }
 }
 
