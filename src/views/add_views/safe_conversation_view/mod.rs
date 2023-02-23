@@ -6,7 +6,7 @@ pub mod widgets_creation;
 
 use gtk::{
     glib::{Sender, GString}, prelude::*, Application, ApplicationWindow, Box, Button, Entry, Label,
-    ScrolledWindow, Orientation,
+    ScrolledWindow,
 };
 use gtk4 as gtk;
 
@@ -21,10 +21,9 @@ use crate::{
             create_entry,
             create_error_label,
             create_message_sender_box,
-            create_scrollwindow_chat, create_main_box,
-            // create_label, create_center_button
+            create_scrollwindow_chat,
         },
-        ENTRY_PLACEHOLDER, SEND_BUTTON_TEXT, MAIN_BOX_CSS,
+        ENTRY_PLACEHOLDER, SEND_BUTTON_TEXT,
     },
 };
 

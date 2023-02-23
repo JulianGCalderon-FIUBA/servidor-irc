@@ -1,7 +1,5 @@
 use gtk4::glib::{Sender, Receiver, self};
 
-use crate::ctcp::dcc_chat::DccChat;
-use crate::message::Message;
 use crate::{client::async_reader::AsyncReader, controller::controller_message::ControllerMessage};
 
 use crate::controller::controller_message::ControllerMessage::ReceiveSafeMessage;

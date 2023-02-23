@@ -1,12 +1,11 @@
 use crate::{
-    ctcp::{dcc_message::DccMessage},
     message::Message,
     server::consts::commands::{INVITE_COMMAND, KICK_COMMAND, PRIVMSG_COMMAND},
 };
 
 use super::{
     controller_message::ControllerMessage::{
-        self, ErrorWhenAddingChannel, DccInvitation, DccRecieveAccept, DccRecieveDecline, 
+        self, ErrorWhenAddingChannel, 
         OpenMainView, OpenWarningView, ReceiveInvite, ReceiveJoin,
         ReceiveKick, ReceiveListEnd, ReceiveListLine, ReceiveNamesEnd, ReceiveNamesLine,
         ReceivePrivMessage, RegularMessage,

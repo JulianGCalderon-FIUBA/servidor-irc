@@ -2,7 +2,7 @@ use std::{collections::HashMap, path::PathBuf, net::SocketAddr};
 
 use gtk4::glib::GString;
 
-use crate::{message::Message, ctcp::dcc_message::DccMessage};
+use crate::message::Message;
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {

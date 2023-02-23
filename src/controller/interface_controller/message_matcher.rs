@@ -1,9 +1,9 @@
-use std::{collections::HashMap, path::PathBuf, net::SocketAddr, thread};
+use std::{collections::HashMap, path::PathBuf, net::SocketAddr};
 
 use gtk4 as gtk;
 
 use crate::{
-    client::{Client, async_reader::AsyncReader},
+    client::Client,
     controller::{
         controller_message::ControllerMessage::{self, OpenAddClientView, OpenInviteClientView},
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
@@ -20,7 +20,7 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{glib::{GString, Sender}, glib, prelude::*, FileChooserDialog, ResponseType};
+use gtk::{glib::GString, glib, prelude::*, FileChooserDialog, ResponseType};
 
 use super::{
     utils::{channels_not_mine, is_not_empty},
@@ -276,7 +276,7 @@ impl InterfaceController {
         }
     }
 
-    pub fn receive_safe_message(&mut self, client: String, message: String) {
+    pub fn receive_safe_message(&mut self, _client: String, message: String) {
         // println!("message from {}: {}", client, message);
         self.safe_conversation_view.receive_message(message);
     }

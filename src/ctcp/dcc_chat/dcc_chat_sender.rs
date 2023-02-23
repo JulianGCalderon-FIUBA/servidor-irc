@@ -8,8 +8,8 @@ use crate::message::CRLF;
 use super::DccChat;
 
 pub struct DccChatSender {
-    server: TcpStream,
-    client: String,
+    _server: TcpStream,
+    _client: String,
     listener: TcpListener,
 }
 
@@ -26,8 +26,8 @@ impl DccChatSender {
         server.write_all(CRLF)?;
 
         Ok(Self {
-            server,
-            client,
+            _server: server,
+            _client: client,
             listener,
         })
     }

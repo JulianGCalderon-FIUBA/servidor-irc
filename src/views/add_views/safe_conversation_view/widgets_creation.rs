@@ -1,6 +1,6 @@
 use gtk4 as gtk;
 
-use gtk::{Align::Start, Box, Button, Label, Orientation::Horizontal, traits::WidgetExt};
+use gtk::{Align::Start, Label, traits::WidgetExt};
 
 const RECEIVED_MESSAGE_CSS: &str = "received_message";
 const SEND_MESSAGE_CSS: &str = "send_message";

@@ -13,7 +13,7 @@ use crate::{
     client::{async_reader::AsyncReader, Client},
     ctcp::{dcc_chat::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver, DccChat},
         dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender}},
-    views::{add_views::{dcc_invitation_view::DccInvitationView, safe_conversation_view::SafeConversationView}, add_views::add_channel_view::AddChannelView, main_view::MainView},
+    views::{add_views::safe_conversation_view::SafeConversationView, add_views::add_channel_view::AddChannelView, main_view::MainView},
 };
 use gtk::{
     glib::{self, Receiver, Sender},
