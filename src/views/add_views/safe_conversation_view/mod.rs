@@ -56,7 +56,7 @@ impl SafeConversationView {
             scrollwindow_chat: create_scrollwindow_chat(),
             error_label: create_error_label(),
             send_message: create_button_with_margin(SEND_BUTTON_TEXT),
-            current_chat: create_current_chat("hola gente"),
+            current_chat: create_current_chat(""),
             sender,
         }
     }
@@ -64,7 +64,7 @@ impl SafeConversationView {
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
+    pub fn get_view(&mut self, client: &str, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
 
@@ -74,6 +74,8 @@ impl SafeConversationView {
         self.input.set_width_request(600);
         self.input.set_margin_start(15);
         message_sender_box.append(&self.input);
+
+        self.current_chat.set_label(client);
 
         self.scrollwindow_chat.set_child(Some(&self.message_box));
 
