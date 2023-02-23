@@ -1,9 +1,9 @@
-use std::{collections::HashMap, path::PathBuf, net::SocketAddr};
+use std::{collections::HashMap, path::PathBuf, net::SocketAddr, thread};
 
 use gtk4 as gtk;
 
 use crate::{
-    client::Client,
+    client::{Client, async_reader::AsyncReader},
     controller::{
         controller_message::ControllerMessage::{self, OpenAddClientView, OpenInviteClientView},
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
@@ -20,13 +20,13 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{glib::GString, prelude::*, FileChooserDialog, ResponseType};
+use gtk::{glib::{GString, Sender}, glib, prelude::*, FileChooserDialog, ResponseType};
 
 use super::{
     utils::{channels_not_mine, is_not_empty},
     window_creation::{
         add_channel_view, add_client_window, channel_members_window, dcc_invitation_window, 
-        invite_window, main_view, notifications_window, user_info_window, warning_window,
+        invite_window, main_view, notifications_window, user_info_window, warning_window, safe_conversation_view,
     },
     InterfaceController,
     NamesMessageIntention::*,
@@ -38,6 +38,14 @@ impl InterfaceController {
         let dcc = self.dcc_recievers.remove(&client).unwrap();
         let dcc_chat = dcc.accept_chat_command(address).unwrap();
         self.dcc_chats.insert(client.clone(), dcc_chat);
+
+        let (dcc_sender, dcc_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+
+        self.start_listening_dcc(dcc_sender);
+
+        self.receiver_attach(client.clone(), dcc_receiver, self.sender);
+
+        self.safe_conversation_view = safe_conversation_view(&self.sender);
         self.safe_conversation_view.get_view(&client, self.app.clone()).show();
     }
 

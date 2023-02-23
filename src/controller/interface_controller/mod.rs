@@ -3,6 +3,7 @@ pub mod message_matcher;
 pub mod names_message_intention;
 pub mod utils;
 pub mod window_creation;
+pub mod dcc_controller;
 
 use std::{collections::HashMap, thread, net::{SocketAddr, IpAddr, Ipv4Addr}};
 
