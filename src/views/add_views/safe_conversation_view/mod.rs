@@ -28,7 +28,7 @@ use crate::{
     },
 };
 
-use self::{widgets_creation::create_send_message, requests::send_safe_message_request};
+use self::{widgets_creation::{create_send_message, create_received_message}, requests::send_safe_message_request};
 
 const MESSAGE_MAX_CHARACTERS: usize = 60;
 const MESSAGE_MAX_CHARACTERS_ERROR: &str = "¡Message too long!";
@@ -135,5 +135,11 @@ impl SafeConversationView {
         //     .get_mut(&nickname)
         //     .unwrap()
         //     .push(vec![message, create_label("")]);
+    }
+
+    pub fn receive_message(&mut self, message: String) {
+        let message = create_received_message(&message);
+        self.message_box.append(&message);
+        adjust_scrollbar(self.scrollwindow_chat.clone());
     }
 }

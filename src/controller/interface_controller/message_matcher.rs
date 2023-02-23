@@ -277,7 +277,8 @@ impl InterfaceController {
     }
 
     pub fn receive_safe_message(&mut self, client: String, message: String) {
-        println!("message from {}: {}", client, message);
+        // println!("message from {}: {}", client, message);
+        self.safe_conversation_view.receive_message(message);
     }
 
     pub fn register(

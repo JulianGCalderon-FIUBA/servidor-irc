@@ -28,3 +28,13 @@ pub fn create_send_message(label: &str) -> Label {
     message.add_css_class(SEND_MESSAGE_CSS);
     message
 }
+
+/// Creates a received message.
+///
+/// Receives message, returns a Label.
+pub fn create_received_message(label: &str) -> Label {
+    let message = create_message(label);
+    message.set_halign(Start);
+    message.add_css_class(RECEIVED_MESSAGE_CSS);
+    message
+}
