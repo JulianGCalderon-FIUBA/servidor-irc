@@ -1,7 +1,7 @@
-// mod utils;
-// use std::{thread, time::Duration};
+mod utils;
+use std::{thread, time::Duration};
 
-// use internet_relay_chat::client::Client;
+use internet_relay_chat::client::Client;
 
 use crate::utils::{create_lemonpie_server, create_server};
 
