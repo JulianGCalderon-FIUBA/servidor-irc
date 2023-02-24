@@ -10,13 +10,16 @@ use gtk4 as gtk;
 
 use crate::{
     client::{async_reader::AsyncReader, Client},
-    ctcp::dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender},
+    ctcp::dcc_send::{
+        dcc_resume_sender::DccResumeSender, dcc_send_receiver::DccSendReceiver,
+        dcc_send_sender::DccSendSender,
+    },
     views::{add_views::add_channel_view::AddChannelView, main_view::MainView},
 };
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
-    Application, ApplicationWindow, Dialog,
+    Application, ApplicationWindow, MessageDialog,
 };
 
 use crate::controller::controller_message::ControllerMessage::{
@@ -32,7 +35,10 @@ use self::{
     },
 };
 
-use super::{controller_handler::to_controller_message, controller_message::ControllerMessage};
+use super::{
+    controller_handler::to_controller_message, controller_message::ControllerMessage,
+    failed_transfer::Transfer,
+};
 
 const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
 
@@ -59,7 +65,9 @@ pub struct InterfaceController {
     username: String,
     dcc_send_senders: HashMap<String, DccSendSender>,
     dcc_send_receivers: HashMap<String, DccSendReceiver>,
-    cancel_dialogs: HashMap<String, Dialog>,
+    dcc_resume_senders: HashMap<String, DccResumeSender>,
+    cancel_dialogs: HashMap<String, MessageDialog>,
+    downloads: Vec<Transfer>,
 }
 
 impl InterfaceController {
@@ -89,6 +97,8 @@ impl InterfaceController {
             dcc_send_senders: HashMap::new(),
             dcc_send_receivers: HashMap::new(),
             cancel_dialogs: HashMap::new(),
+            downloads: Vec::new(),
+            dcc_resume_senders: HashMap::new(),
         }
     }
 
@@ -231,8 +241,16 @@ impl InterfaceController {
                 IgnoreFile { sender } => {
                     self.ignore_file(sender);
                 }
-                SendResult { sender, result } => self.send_result(sender, result),
-                ReceiveResult { sender, result } => self.receive_result(sender, result),
+                SendResult { sender, result } => {
+                    self.send_result(sender, result);
+                }
+                ReceiveResult {
+                    sender,
+                    name,
+                    result,
+                } => {
+                    self.receive_result(sender, name, result);
+                }
             }
             // Returning false here would close the receiver
             // and have senders fail

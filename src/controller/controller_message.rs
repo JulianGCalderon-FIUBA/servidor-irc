@@ -100,6 +100,7 @@ pub enum ControllerMessage {
     },
     ReceiveResult {
         sender: String,
+        name: String,
         result: Result<(), std::io::Error>,
     },
 }

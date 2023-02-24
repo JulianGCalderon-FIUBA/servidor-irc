@@ -1,7 +1,7 @@
 mod transfer_controller;
 
 use std::{
-    fs::File,
+    fs::{File, OpenOptions},
     io::{self, Read, Seek, SeekFrom, Write},
     net::TcpStream,
     path::PathBuf,
@@ -42,16 +42,22 @@ impl FileTransferer {
         self.to_file(file)
     }
 
-    pub fn resume_upload_file(self, position: u64) -> io::Result<()> {
+    pub fn resume_upload_file(mut self, position: u64) -> io::Result<()> {
         let mut file = File::open(self.filename.clone())?;
         file.seek(SeekFrom::Start(position))?;
+
+        self.filesize -= position;
 
         self.to_stream(file)
     }
 
-    pub fn resume_download_file(self, position: u64) -> io::Result<()> {
-        let mut file = File::open(self.filename.clone())?;
+    pub fn resume_download_file(mut self, position: u64) -> io::Result<()> {
+        let mut file = OpenOptions::new()
+            .append(true)
+            .open(self.filename.clone())?;
         file.seek(SeekFrom::Start(position))?;
+
+        self.filesize -= position;
 
         self.to_file(file)
     }
@@ -60,7 +66,7 @@ impl FileTransferer {
         let total_bytes_read = copy(self.cancelled, &mut file, &mut self.stream)?;
 
         if total_bytes_read != self.filesize {
-            return Err(error_uploading());
+            return Err(eof());
         }
 
         Ok(())
@@ -70,7 +76,7 @@ impl FileTransferer {
         let total_bytes_read = copy(self.cancelled, &mut self.stream, &mut file)?;
 
         if total_bytes_read != self.filesize {
-            return Err(error_downloading());
+            return Err(eof());
         }
 
         Ok(())
@@ -92,15 +98,23 @@ fn copy<R: Read, W: Write>(
         to.write_all(&buffer[..bytes_read])?;
         total_bytes_read += bytes_read as u64;
     }
+
+    if cancelled.load(std::sync::atomic::Ordering::Relaxed) {
+        return Err(interrupted());
+    }
+
     to.flush()?;
 
     Ok(total_bytes_read)
 }
 
-fn error_uploading() -> io::Error {
-    io::Error::new(io::ErrorKind::Other, "Error uploading file")
+fn eof() -> io::Error {
+    io::Error::new(
+        io::ErrorKind::UnexpectedEof,
+        "transfer could not be completed",
+    )
 }
 
-fn error_downloading() -> io::Error {
-    io::Error::new(io::ErrorKind::Other, "Error downloading file")
+fn interrupted() -> io::Error {
+    io::Error::new(io::ErrorKind::Interrupted, "transfer was interrupted")
 }

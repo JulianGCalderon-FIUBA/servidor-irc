@@ -4,7 +4,6 @@ use std::{
     net::{IpAddr, TcpListener, TcpStream},
     path::{Path, PathBuf},
     str::FromStr,
-    thread,
 };
 
 use crate::message::CRLF;
@@ -53,7 +52,7 @@ impl DccSendSender {
 
     pub fn decline(self) {}
 
-    pub fn resume(mut self, position: u64) -> io::Result<()> {
+    pub fn resume(mut self, position: u64) -> io::Result<(FileTransferer, TransferController)> {
         let port = self.listener.local_addr()?.port();
         let filename = filename_from_pathbuf(&self.filepath);
 
@@ -67,14 +66,7 @@ impl DccSendSender {
         let stream = self.listener.accept()?.0;
         let filesize = fs::metadata(&self.filepath)?.len();
 
-        thread::spawn(move || {
-            FileTransferer::new(stream, self.filepath.clone(), filesize)
-                .0
-                .resume_upload_file(position)
-                .unwrap();
-        });
-
-        Ok(())
+        Ok(FileTransferer::new(stream, self.filepath.clone(), filesize))
     }
 }
 

@@ -4,6 +4,7 @@ pub mod controller_handler;
 
 /// Definition of messages the controller can send and receive.
 pub mod controller_message;
+mod failed_transfer;
 pub mod interface_controller;
 
 use gtk4 as gtk;

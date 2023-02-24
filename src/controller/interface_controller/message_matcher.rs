@@ -1,4 +1,4 @@
-use std::{cell::RefCell, collections::HashMap, path::PathBuf, thread};
+use std::{cell::RefCell, collections::HashMap, io, path::PathBuf, thread};
 
 use gtk4 as gtk;
 
@@ -6,6 +6,7 @@ use crate::{
     client::Client,
     controller::{
         controller_message::ControllerMessage::{self, OpenAddClientView, OpenInviteClientView},
+        failed_transfer::Transfer,
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
         KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
         NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT, OPEN_INVITE_VIEW_ERROR_TEXT,
@@ -19,7 +20,7 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{glib::GString, prelude::*, Dialog, FileChooserDialog, ResponseType};
+use gtk::{glib::GString, prelude::*, ButtonsType, FileChooserDialog, MessageDialog, ResponseType};
 
 use super::{
     utils::{channels_not_mine, is_not_empty},
@@ -346,6 +347,16 @@ impl InterfaceController {
                 return;
             };
 
+        let download = Transfer {
+            client: sender.clone(),
+            name: dcc_send_receiver.original_name(),
+            path: path.clone(),
+            failed: false,
+        };
+        self.downloads.push(download);
+
+        let name = dcc_send_receiver.original_name();
+
         let (transferer, controller) = dcc_send_receiver.accept_send_command(path).unwrap();
 
         let sender_channel = self.sender.clone();
@@ -354,17 +365,17 @@ impl InterfaceController {
             let result = transferer.download_file();
             let message = ControllerMessage::ReceiveResult {
                 sender: sender_client,
+                name,
                 result,
             };
             sender_channel.send(message).unwrap();
         });
 
-        let cancel_dialog = Dialog::builder()
+        let cancel_dialog = MessageDialog::builder()
             .title("Download in progress")
+            .buttons(ButtonsType::Cancel)
             .transient_for(&self.main_window)
             .build();
-
-        cancel_dialog.add_button("Cancel", ResponseType::Cancel);
 
         cancel_dialog.present();
 
@@ -385,15 +396,23 @@ impl InterfaceController {
         dcc_send_receiver.decline_send_command().unwrap();
     }
 
-    pub fn send_result(&mut self, sender: String, _result: Result<(), std::io::Error>) {
-        if let Some(dialog) = self.cancel_dialogs.remove(&sender) {
-            dialog.destroy();
-        }
+    pub fn send_result(&mut self, sender: String, result: io::Result<()>) {
+        self.transfer_result(result, sender);
     }
 
-    pub fn receive_result(&mut self, sender: String, _result: Result<(), std::io::Error>) {
-        if let Some(dialog) = self.cancel_dialogs.remove(&sender) {
-            dialog.destroy();
+    pub fn receive_result(&mut self, sender: String, name: String, result: io::Result<()>) {
+        let position = self
+            .downloads
+            .iter()
+            .position(|transfer| transfer.client == sender && transfer.name == name)
+            .unwrap();
+
+        if result.is_err() {
+            self.downloads.get_mut(position).unwrap().failed = true;
+        } else {
+            self.downloads.remove(position);
         }
+
+        self.transfer_result(result, sender);
     }
 }

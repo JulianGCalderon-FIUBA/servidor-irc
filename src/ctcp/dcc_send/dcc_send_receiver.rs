@@ -48,7 +48,7 @@ impl DccSendReceiver {
         Ok(FileTransferer::new(stream, filepath, self.filesize))
     }
 
-    pub fn resume_send_command(self, position: u64) -> io::Result<DccResumeSender> {
+    pub fn resume_send_command(self, position: u64, path: PathBuf) -> io::Result<DccResumeSender> {
         DccResumeSender::send(
             self.server,
             self.client,
@@ -56,11 +56,16 @@ impl DccSendReceiver {
             self.filename,
             self.filesize,
             position,
+            path,
         )
     }
 
     pub fn decline_send_command(mut self) -> io::Result<()> {
         write!(self.server, "CTCP {} :DCC SEND decline", self.client)?;
         self.server.write_all(CRLF)
+    }
+
+    pub fn original_name(&self) -> String {
+        self.filename.clone()
     }
 }
