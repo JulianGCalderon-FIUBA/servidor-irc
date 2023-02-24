@@ -41,7 +41,9 @@ impl DccResumeSender {
 
     pub fn accept(self, filepath: PathBuf) -> io::Result<()> {
         let stream = TcpStream::connect(self.address)?;
-        FileTransferer::new(stream, filepath, self.filesize).resume_download_file(self.position)
+        FileTransferer::new(stream, filepath, self.filesize)
+            .0
+            .resume_download_file(self.position)
     }
 
     pub fn close(self) {}

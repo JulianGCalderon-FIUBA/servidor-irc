@@ -2,12 +2,14 @@ use std::{
     io::{self, Write},
     net::{SocketAddr, TcpStream},
     path::PathBuf,
-    thread,
 };
 
 use crate::message::CRLF;
 
-use super::{dcc_resume_sender::DccResumeSender, file_transfer::FileTransferer};
+use super::{
+    dcc_resume_sender::DccResumeSender,
+    file_transfer::{FileTransferer, TransferController},
+};
 
 pub struct DccSendReceiver {
     server: TcpStream,
@@ -34,15 +36,16 @@ impl DccSendReceiver {
         }
     }
 
-    pub fn accept_send_command(mut self, filepath: PathBuf) -> io::Result<()> {
+    pub fn accept_send_command(
+        mut self,
+        filepath: PathBuf,
+    ) -> io::Result<(FileTransferer, TransferController)> {
         write!(self.server, "CTCP {} :DCC SEND accept", self.client)?;
         self.server.write_all(CRLF)?;
 
         let stream = TcpStream::connect(self.address)?;
 
-        thread::spawn(move || FileTransferer::new(stream, filepath, self.filesize).download_file());
-
-        Ok(())
+        Ok(FileTransferer::new(stream, filepath, self.filesize))
     }
 
     pub fn resume_send_command(self, position: u64) -> io::Result<DccResumeSender> {

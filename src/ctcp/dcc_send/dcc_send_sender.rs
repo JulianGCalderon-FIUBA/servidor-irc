@@ -9,7 +9,7 @@ use std::{
 
 use crate::message::CRLF;
 
-use super::file_transfer::FileTransferer;
+use super::file_transfer::{FileTransferer, TransferController};
 
 pub struct DccSendSender {
     server: TcpStream,
@@ -44,13 +44,11 @@ impl DccSendSender {
         })
     }
 
-    pub fn accept(self) -> io::Result<()> {
+    pub fn accept(self) -> io::Result<(FileTransferer, TransferController)> {
         let stream = self.listener.accept()?.0;
         let filesize = fs::metadata(&self.filepath)?.len();
 
-        thread::spawn(move || FileTransferer::new(stream, self.filepath, filesize).upload_file());
-
-        Ok(())
+        Ok(FileTransferer::new(stream, self.filepath, filesize))
     }
 
     pub fn decline(self) {}
@@ -71,6 +69,7 @@ impl DccSendSender {
 
         thread::spawn(move || {
             FileTransferer::new(stream, self.filepath.clone(), filesize)
+                .0
                 .resume_upload_file(position)
                 .unwrap();
         });

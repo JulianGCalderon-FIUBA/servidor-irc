@@ -16,7 +16,7 @@ use crate::{
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
-    Application, ApplicationWindow,
+    Application, ApplicationWindow, Dialog,
 };
 
 use crate::controller::controller_message::ControllerMessage::{
@@ -59,6 +59,7 @@ pub struct InterfaceController {
     username: String,
     dcc_send_senders: HashMap<String, DccSendSender>,
     dcc_send_receivers: HashMap<String, DccSendReceiver>,
+    cancel_dialogs: HashMap<String, Dialog>,
 }
 
 impl InterfaceController {
@@ -87,6 +88,7 @@ impl InterfaceController {
             username: String::new(),
             dcc_send_senders: HashMap::new(),
             dcc_send_receivers: HashMap::new(),
+            cancel_dialogs: HashMap::new(),
         }
     }
 
@@ -229,6 +231,8 @@ impl InterfaceController {
                 IgnoreFile { sender } => {
                     self.ignore_file(sender);
                 }
+                SendResult { sender, result } => self.send_result(sender, result),
+                ReceiveResult { sender, result } => self.receive_result(sender, result),
             }
             // Returning false here would close the receiver
             // and have senders fail

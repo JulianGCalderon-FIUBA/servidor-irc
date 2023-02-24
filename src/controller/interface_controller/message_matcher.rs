@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf};
+use std::{cell::RefCell, collections::HashMap, path::PathBuf, thread};
 
 use gtk4 as gtk;
 
@@ -19,7 +19,7 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{glib::GString, prelude::*, FileChooserDialog, ResponseType};
+use gtk::{glib::GString, prelude::*, Dialog, FileChooserDialog, ResponseType};
 
 use super::{
     utils::{channels_not_mine, is_not_empty},
@@ -184,11 +184,11 @@ impl InterfaceController {
         match parse_ctcp(&message) {
             Some(content) => {
                 let sender = message.unpack().0.unwrap();
-                
+
                 let dcc_message = if let Ok(dcc_message) = DccMessage::parse(content) {
                     dcc_message
                 } else {
-                    return
+                    return;
                 };
 
                 self.receive_dcc_message(sender, dcc_message);
@@ -313,13 +313,13 @@ impl InterfaceController {
             let file = if let Some(file) = file_chooser_dialog.file() {
                 file
             } else {
-                return
+                return;
             };
-            
+
             let path = if let Some(path) = file.path() {
                 path
             } else {
-                return
+                return;
             };
 
             let target = target.clone();
@@ -339,22 +339,61 @@ impl InterfaceController {
     }
 
     pub fn download_file(&mut self, sender: String, path: PathBuf) {
-        let dcc_send_receiver = if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
-            dcc_send_receiver
-        } else {
-            return
-        };
+        let dcc_send_receiver =
+            if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
+                dcc_send_receiver
+            } else {
+                return;
+            };
 
-        dcc_send_receiver.accept_send_command(path).unwrap();
+        let (transferer, controller) = dcc_send_receiver.accept_send_command(path).unwrap();
+
+        let sender_channel = self.sender.clone();
+        let sender_client = sender.clone();
+        thread::spawn(move || {
+            let result = transferer.download_file();
+            let message = ControllerMessage::ReceiveResult {
+                sender: sender_client,
+                result,
+            };
+            sender_channel.send(message).unwrap();
+        });
+
+        let cancel_dialog = Dialog::builder()
+            .title("Download in progress")
+            .transient_for(&self.main_window)
+            .build();
+
+        cancel_dialog.add_button("Cancel", ResponseType::Cancel);
+
+        cancel_dialog.present();
+
+        let controller_cell = RefCell::new(controller);
+        cancel_dialog.connect_response(move |_, _| controller_cell.borrow_mut().cancel());
+
+        self.cancel_dialogs.insert(sender, cancel_dialog);
     }
 
     pub fn ignore_file(&mut self, sender: String) {
-        let dcc_send_receiver = if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
-            dcc_send_receiver
-        } else {
-            return
-        };
+        let dcc_send_receiver =
+            if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
+                dcc_send_receiver
+            } else {
+                return;
+            };
 
         dcc_send_receiver.decline_send_command().unwrap();
+    }
+
+    pub fn send_result(&mut self, sender: String, _result: Result<(), std::io::Error>) {
+        if let Some(dialog) = self.cancel_dialogs.remove(&sender) {
+            dialog.destroy();
+        }
+    }
+
+    pub fn receive_result(&mut self, sender: String, _result: Result<(), std::io::Error>) {
+        if let Some(dialog) = self.cancel_dialogs.remove(&sender) {
+            dialog.destroy();
+        }
     }
 }

@@ -1,10 +1,11 @@
-use std::{collections::HashMap, net::SocketAddr};
+use std::{cell::RefCell, collections::HashMap, net::SocketAddr, thread};
 
 use gtk4::{
     glib::Sender,
     prelude::*,
     traits::{DialogExt, FileChooserExt, GtkWindowExt},
-    ApplicationWindow, ButtonsType, FileChooserDialog, MessageDialog, MessageType, ResponseType,
+    ApplicationWindow, ButtonsType, Dialog, FileChooserDialog, MessageDialog, MessageType,
+    ResponseType,
 };
 
 use crate::{
@@ -135,9 +136,38 @@ impl InterfaceController {
     }
 
     pub fn receive_dcc_send_accept(&mut self, sender: String) {
-        if let Some(dcc_send_sender) = self.dcc_send_senders.remove(&sender) {
-            dcc_send_sender.accept().unwrap();
-        }
+        let dcc_send_sender = if let Some(dcc_send_sender) = self.dcc_send_senders.remove(&sender) {
+            dcc_send_sender
+        } else {
+            return;
+        };
+
+        let (transferer, controller) = dcc_send_sender.accept().unwrap();
+
+        let sender_channel = self.sender.clone();
+        let sender_client = sender.clone();
+        thread::spawn(move || {
+            let result = transferer.upload_file();
+            let message = ControllerMessage::SendResult {
+                sender: sender_client,
+                result,
+            };
+            sender_channel.send(message).unwrap();
+        });
+
+        let cancel_dialog = Dialog::builder()
+            .title("Upload in progress")
+            .transient_for(&self.main_window)
+            .build();
+
+        cancel_dialog.add_button("Cancel", ResponseType::Cancel);
+
+        cancel_dialog.present();
+
+        let controller_cell = RefCell::new(controller);
+        cancel_dialog.connect_response(move |_, _| controller_cell.borrow_mut().cancel());
+
+        self.cancel_dialogs.insert(sender, cancel_dialog);
     }
 
     pub fn receive_dcc_send(
@@ -202,13 +232,13 @@ fn build_file_download_chooser_dialog(
         let file = if let Some(file) = file_chooser_dialog.file() {
             file
         } else {
-            return
+            return;
         };
-        
+
         let path = if let Some(path) = file.path() {
             path
         } else {
-            return
+            return;
         };
 
         let sender = sender.clone();
