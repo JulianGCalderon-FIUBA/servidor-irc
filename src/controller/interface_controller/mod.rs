@@ -1,9 +1,10 @@
 pub mod decode_message;
+mod download;
 pub mod message_matcher;
 pub mod names_message_intention;
+mod resume_utils;
 pub mod utils;
 pub mod window_creation;
-mod resume_utils;
 
 use std::{collections::HashMap, thread};
 
@@ -30,16 +31,14 @@ use crate::controller::controller_message::ControllerMessage::{
 use crate::controller::ControllerMessage::*;
 
 use self::{
+    download::Download,
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
         add_channel_view, add_client_window, invite_window, ip_window, main_view, register_window,
     },
 };
 
-use super::{
-    controller_handler::to_controller_message, controller_message::ControllerMessage,
-    failed_transfer::Transfer,
-};
+use super::{controller_handler::to_controller_message, controller_message::ControllerMessage};
 
 const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
 
@@ -68,7 +67,7 @@ pub struct InterfaceController {
     dcc_send_receivers: HashMap<String, DccSendReceiver>,
     dcc_resume_senders: HashMap<String, DccResumeSender>,
     cancel_dialogs: HashMap<String, MessageDialog>,
-    downloads: Vec<Transfer>,
+    downloads: Vec<Download>,
 }
 
 impl InterfaceController {

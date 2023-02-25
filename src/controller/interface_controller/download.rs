@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-pub struct Transfer {
+pub struct Download {
     pub client: String,
     pub name: String,
     pub path: PathBuf,

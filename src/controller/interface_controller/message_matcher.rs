@@ -6,7 +6,6 @@ use crate::{
     client::Client,
     controller::{
         controller_message::ControllerMessage::{self, OpenAddClientView, OpenInviteClientView},
-        failed_transfer::Transfer,
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
         KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
         NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT, OPEN_INVITE_VIEW_ERROR_TEXT,
@@ -24,6 +23,7 @@ use crate::{
 use gtk::{glib::GString, prelude::*, FileChooserDialog, ResponseType};
 
 use super::{
+    download::Download,
     utils::{channels_not_mine, is_not_empty},
     window_creation::{
         add_channel_view, add_client_window, channel_members_window, invite_window, main_view,
@@ -339,7 +339,7 @@ impl InterfaceController {
     pub fn download_file(&mut self, sender: String, path: PathBuf) {
         let dcc_send_receiver = some_or_return!(self.dcc_send_receivers.remove(&sender));
 
-        let download = Transfer {
+        let download = Download {
             client: sender.clone(),
             name: dcc_send_receiver.original_name(),
             path: path.clone(),

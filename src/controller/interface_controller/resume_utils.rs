@@ -9,12 +9,12 @@ use gtk4::{
 };
 
 use crate::{
-    controller::{controller_message::ControllerMessage, failed_transfer::Transfer},
+    controller::controller_message::ControllerMessage,
     ctcp::dcc_send::{dcc_send_receiver::DccSendReceiver, file_transfer::TransferController},
     macros::{ok_or_return, some_or_return},
 };
 
-use super::InterfaceController;
+use super::{download::Download, InterfaceController};
 
 impl InterfaceController {
     pub fn receive_dcc_send_decline(&mut self, sender: String) {
@@ -153,7 +153,7 @@ impl InterfaceController {
     ) {
         let dcc_resume_sender = some_or_return!(self.dcc_resume_senders.remove(&sender));
 
-        let download = Transfer {
+        let download = Download {
             client: sender.clone(),
             name: dcc_resume_sender.original_name(),
             path: dcc_resume_sender.path(),
