@@ -1,7 +1,12 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, net::TcpStream};
+
+use gtk4::glib::{Receiver, Sender};
 
 use crate::{
-    controller::{NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT},
+    controller::{
+        glib::{MainContext, PRIORITY_DEFAULT},
+        NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
+    },
     ctcp::dcc_message::DccMessage,
     message::Message,
     server::consts::commands::NAMES_COMMAND,
@@ -90,45 +95,61 @@ impl InterfaceController {
                 self.current_conv.clone(),
             );
         } else {
-            self.main_view.receive_priv_client_message(
-                message,
-                sender_nickname,
-                self.current_conv.clone(),
-            );
+            self.main_view
+                .receive_priv_client_message(message, sender_nickname);
         }
     }
 
-    pub fn receive_dcc_message(&mut self, sender: String, dcc_message: DccMessage) {
+    pub fn receive_dcc_message(&mut self, message: Message, content: String) {
+        let (_, _, sender_nickname) = self.decode_priv_message(message);
+
+        let dcc_message = if let Ok(dcc_message) = DccMessage::parse(content) {
+            dcc_message
+        } else {
+            return;
+        };
+
         match dcc_message {
             DccMessage::Send {
                 filename,
                 address,
                 filesize,
             } => {
-                self.receive_dcc_send(sender, filename, address, filesize);
+                self.receive_dcc_send(sender_nickname, filename, address, filesize);
             }
             DccMessage::SendAccept => {
-                self.receive_dcc_send_accept(sender);
+                self.receive_dcc_send_accept(sender_nickname);
             }
             DccMessage::SendDecline => {
-                self.receive_dcc_send_decline(sender);
+                self.receive_dcc_send_decline(sender_nickname);
             }
-            DccMessage::Chat { address: _address } => todo!(),
-            DccMessage::ChatAccept => todo!(),
-            DccMessage::ChatDecline => todo!(),
+            DccMessage::Chat { address } => {
+                self.open_dcc_invitation_view(sender_nickname, address);
+            }
+            DccMessage::ChatAccept => {
+                self.dcc_receive_accept(sender_nickname);
+            }
+            DccMessage::ChatDecline => {
+                self.dcc_receive_decline(sender_nickname);
+            }
             DccMessage::Close => todo!(),
             DccMessage::Resume {
                 filename,
                 port,
                 position,
-            } => self.receive_dcc_resume(sender, filename, port, position),
+            } => self.receive_dcc_resume(sender_nickname, filename, port, position),
             DccMessage::Accept {
                 filename,
                 port,
                 position,
-            } => self.receive_dcc_accept(sender, filename, port, position),
+            } => self.receive_dcc_accept(sender_nickname, filename, port, position),
         }
     }
+
+    pub fn get_stream(&mut self) -> TcpStream {
+        self.client.get_stream().unwrap()
+    }
+
 }
 
 /// Returns all clients.
@@ -205,4 +226,8 @@ pub fn remove_operator_indicator(element: &str) -> String {
     } else {
         element.to_string()
     }
+}
+
+pub fn get_sender_and_receiver() -> (Sender<String>, Receiver<String>) {
+    MainContext::channel(PRIORITY_DEFAULT)
 }

@@ -1,133 +1,137 @@
-// .active_select_button {
-//     background-color: rgb(222, 117, 52);
-//     border: solid 1px white;
-//     border-radius: 0px;
-//     color: white;
-// }
+.active_select_button {
+    background-color: rgb(222, 117, 52);
+    border: solid 1px white;
+    border-radius: 0px;
+    color: white;
+}
 
-// .add {
-//     background-color: #177934;
-//     color: white;
-// }
+.chat{
+	background-color: black;
+}
 
-// .add_channel_entry {
-//     border: solid 2px white;
-// }
+.add {
+    background-color: #177934;
+    color: white;
+}
 
-// .add_view_title {
-//     font-size: 20px;
-//     font-family: monospace;
-// }
+.add_channel_entry {
+    border: solid 2px white;
+}
 
-// button {
-//     border: solid 2px white;
-//     color: white;
-// }
+.add_view_title {
+    font-size: 20px;
+    font-family: monospace;
+}
 
-// .channel_first_character {
-//     font-size: 20px;
-// }
+button {
+    border: solid 2px white;
+    color: white;
+}
 
-// .current_chat {
-//     font-family: monospace;
-//     font-size: 20px;
-// }
+.channel_first_character {
+    font-size: 20px;
+}
 
-// .disable_select_button {
-//     background-color: rgb(43, 40, 40);
-//     border-color: transparent;
-//     border-radius: 0px;
-//     color: rgb(0, 0, 0);
-// }
+.current_chat {
+    font-family: monospace;
+    font-size: 20px;
+}
 
-// .disabled_button {
-//     background-color: rgb(43, 40, 40);
-//     color: rgb(97, 95, 95);
-// }
+.disable_select_button {
+    background-color: rgb(43, 40, 40);
+    border-color: transparent;
+    border-radius: 0px;
+    color: rgb(0, 0, 0);
+}
 
-// .exit_channel {
-//     background-color: #681a1a;
-//     color: white;
-// }
+.disabled_button {
+    background-color: rgb(43, 40, 40);
+    color: rgb(97, 95, 95);
+}
 
-// .inactive_select_button {
-//     background-color: rgb(72, 68, 68);
-//     border-color: transparent;
-//     border-radius: 0px;
-//     color: rgb(22, 21, 21);
-// }
+.exit_channel {
+    background-color: #681a1a;
+    color: white;
+}
 
-// label {
-//     font-family: Helvetica;
-//     font-weight: bold;
-// }
+.inactive_select_button {
+    background-color: rgb(72, 68, 68);
+    border-color: transparent;
+    border-radius: 0px;
+    color: rgb(22, 21, 21);
+}
 
-// .main_box {
-//     background-color: black;
-// }
+label {
+    font-family: Helvetica;
+    font-weight: bold;
+}
 
-// .kick_button {
-//     font-size: 5px;
-//     border: solid 1px white;
-//     background-color: transparent;
-// }
+.main_box {
+    background-color: black;
+}
 
-// .message_box {
-//     border: solid 2px #b13415;
-//     border-radius: 5px;
-// }
+.kick_button {
+    font-size: 5px;
+    border: solid 1px white;
+    background-color: transparent;
+}
 
-// .message_sender_name {
-//     color: white;
-//     font-size: 10px;
-// }
+.message_box {
+    border: solid 2px #b13415;
+    border-radius: 5px;
+}
 
-// .notifications_button {
-//     background-color: black;
-//     border-color: transparent;
-//     border-radius: 0px;
-// }
+.message_sender_name {
+    color: white;
+    font-size: 10px;
+}
 
-// .notifications_button_on {
-//     background-color: rgb(184, 45, 45);
-// }
+.notifications_button {
+    background-color: black;
+    border-color: transparent;
+    border-radius: 0px;
+}
 
-// .notifications_container {
-//     background-color: #000103;
-//     border: 1px solid white;
-//     border-radius: 10px;
-// }
+.notifications_button_on {
+    background-color: rgb(184, 45, 45);
+}
 
-// .received_message {
-//     background-color: #577771;
-//     border-radius: 5px;
-//     padding: 10px;
-// }
+.notifications_container {
+    background-color: #000103;
+    border: 1px solid white;
+    border-radius: 10px;
+}
 
-// .send_message {
-//     background-color: #767a75;
-//     border-radius: 5px;
-//     padding: 10px;
-// }
+.received_message {
+    background-color: #577771;
+    border-radius: 5px;
+    padding: 10px;
+}
 
-// .welcome_message {
-//     color: rgb(173, 172, 172);
-//     font-family: monospace;
-//     font-size: 25px;
-// }
+.send_message {
+    background-color: #767a75;
+    border-radius: 5px;
+    padding: 10px;
+}
 
-// .warning_text {
-//     color: red;
-//     font-size: 12px;
-// }
+.welcome_message {
+    color: rgb(173, 172, 172);
+    font-family: monospace;
+    font-size: 25px;
+}
 
-// .welcome_title {
-//     font-family: monospace;
-//     font-size: 30px;
-// }
+.warning_text {
+    color: red;
+    font-size: 12px;
+}
 
-// .safe_conversation {
-//     background-color: #0b0b0b;
-//     color: rgb(255, 0, 0);
-//     border: none;
-// }
+.welcome_title {
+    font-family: monospace;
+    font-size: 30px;
+}
+
+.safe_conversation {
+    background-color: #0b0b0b;
+    color: rgb(255, 0, 0);
+    border: none;
+}

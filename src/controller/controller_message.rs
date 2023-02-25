@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io, path::PathBuf};
+use std::{collections::HashMap, io, net::SocketAddr, path::PathBuf};
 
 use gtk4::glib::GString;
 
@@ -6,6 +6,10 @@ use crate::message::Message;
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
+    AcceptDccChat {
+        client: String,
+        address: SocketAddr,
+    },
     AddNewClient {
         new_client: GString,
     },
@@ -14,6 +18,26 @@ pub enum ControllerMessage {
     },
     ErrorWhenAddingChannel {
         message: String,
+    },
+    OpenDccInvitationView {
+        client: String,
+        message: SocketAddr,
+    },
+    DccreceiveAccept {
+        client: String,
+    },
+    DccreceiveDecline {
+        client: String,
+    },
+    DeclineDccChat {
+        client: String,
+    },
+    JoinChannel {
+        channel: String,
+    },
+    KickMember {
+        channel: String,
+        member: String,
     },
     OpenAddClientView {
         channels_and_clients: HashMap<String, Vec<String>>,
@@ -25,8 +49,8 @@ pub enum ControllerMessage {
         message: Message,
     },
     OpenNotificationsView {},
-    OpenSafeConversationView {},
     OpenFileDialogChooserView {},
+    SendSafeConversationRequest {},
     OpenUserInfoView {},
     OpenWarningView {
         message: String,
@@ -61,6 +85,10 @@ pub enum ControllerMessage {
         message: String,
     },
     RemoveConversation {},
+    ReceiveSafeMessage {
+        client: String,
+        message: String,
+    },
     SendInviteMessage {
         channel: GString,
     },
@@ -80,6 +108,10 @@ pub enum ControllerMessage {
         message: GString,
     },
     SendQuitMessage {},
+    SendSafeMessage {
+        client: String,
+        message: String,
+    },
     ToRegister {
         address: String,
     },

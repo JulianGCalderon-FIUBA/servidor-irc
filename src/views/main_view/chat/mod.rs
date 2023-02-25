@@ -122,12 +122,7 @@ impl MainView {
     /// Creates a new message in a client chat.
     ///
     /// Function is used when a client message is received.
-    pub fn receive_priv_client_message(
-        &mut self,
-        message_text: String,
-        nickname: String,
-        current_conv: String,
-    ) {
+    pub fn receive_priv_client_message(&mut self, message_text: String, nickname: String) {
         let message_label = create_received_message(&message_text);
         if let Some(messages) = self.messages.get_mut(&nickname) {
             messages.push(vec![
@@ -136,7 +131,7 @@ impl MainView {
             ]);
         }
 
-        if nickname == current_conv {
+        if nickname == self.current_chat.label() {
             self.message_box.append(&message_label);
             adjust_scrollbar(self.scrollwindow_chat.clone());
         }

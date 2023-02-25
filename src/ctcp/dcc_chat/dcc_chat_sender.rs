@@ -8,14 +8,14 @@ use crate::message::CRLF;
 use super::DccChat;
 
 pub struct DccChatSender {
-    server: TcpStream,
-    client: String,
+    _server: TcpStream,
+    _client: String,
     listener: TcpListener,
 }
 
 impl DccChatSender {
     pub fn send(mut server: TcpStream, client: String) -> io::Result<Self> {
-        let listener = TcpListener::bind("0.0.0.0:0")?;
+        let listener = TcpListener::bind("127.0.0.1:9001")?;
 
         let address = listener.local_addr()?;
 
@@ -26,8 +26,8 @@ impl DccChatSender {
         server.write_all(CRLF)?;
 
         Ok(Self {
-            server,
-            client,
+            _server: server,
+            _client: client,
             listener,
         })
     }

@@ -73,7 +73,9 @@ fn can_kick_user_from_channel() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_client_to_channel("#channel", "nick2");
 
     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
@@ -99,7 +101,9 @@ fn can_kick_user_from_channel_with_comment() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_client_to_channel("#channel", "nick2");
 
     let parameters = vec!["#channel".to_string(), "nick2".to_string()];
@@ -127,7 +131,9 @@ fn can_kick_multiple_user() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_client_to_channel("#channel", "nick2");
     handler.database.add_client_to_channel("#channel", "nick3");
 
@@ -148,7 +154,9 @@ fn kick_notifies_users_in_channel() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_client_to_channel("#channel", "nick2");
     handler.database.add_client_to_channel("#channel", "nick3");
 
@@ -186,7 +194,9 @@ fn on_distributed_channels_kick_is_relayed_to_all_servers() {
     handler
         .database()
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler
         .database()
         .add_client_to_channel("#channel", "nickname1");
