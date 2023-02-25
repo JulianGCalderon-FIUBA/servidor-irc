@@ -8,18 +8,26 @@ use std::{
     thread,
 };
 
+use magic_crypt::MagicCryptTrait;
+use magic_crypt::{new_magic_crypt, MagicCrypt256};
+
 use crate::message::{read_line, CRLF};
 
 pub struct DccChat {
     pub stream: TcpStream,
     pub read_stream: Option<TcpStream>,
+    pub magic_crypt: MagicCrypt256,
 }
 
 impl DccChat {
     pub fn new(stream: TcpStream) -> io::Result<Self> {
+        let read_stream = Some(stream.try_clone()?);
+        let magic_crypt = new_magic_crypt!("magickey", 256);
+
         Ok(Self {
-            read_stream: Some(stream.try_clone()?),
             stream,
+            read_stream,
+            magic_crypt,
         })
     }
 
@@ -31,9 +39,9 @@ impl DccChat {
 
     /// Sends message to connected stream.
     pub fn send_raw(&mut self, message: &str) -> io::Result<()> {
-        let bytes = message.as_bytes();
+        let bytes = self.magic_crypt.encrypt_str_to_base64(message);
 
-        self.stream.write_all(bytes)?;
+        self.stream.write_all(bytes.as_bytes())?;
         self.stream.write_all(CRLF)
     }
 
@@ -41,8 +49,13 @@ impl DccChat {
         let (sender, receiver) = mpsc::channel();
 
         let mut stream = self.read_stream.take().unwrap();
+        let magic_crypt = self.magic_crypt.clone();
         thread::spawn(move || loop {
-            while let Ok(message) = read_message(&mut stream) {
+            while let Ok(encrypted_message) = read_message(&mut stream) {
+                let message = magic_crypt
+                    .decrypt_base64_to_string(&encrypted_message)
+                    .unwrap();
+
                 sender.send(message).unwrap();
             }
         });
