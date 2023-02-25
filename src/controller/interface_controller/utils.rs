@@ -1,7 +1,10 @@
-use std::{collections::HashMap, net::{SocketAddr, TcpStream}};
+use std::{
+    collections::HashMap,
+    net::{SocketAddr, TcpStream},
+};
 
 use gtk4::{
-    glib::{Sender, Receiver},
+    glib::{Receiver, Sender},
     prelude::*,
     traits::{DialogExt, FileChooserExt, GtkWindowExt},
     ApplicationWindow, ButtonsType, FileChooserDialog, MessageDialog, MessageType, ResponseType,
@@ -9,8 +12,9 @@ use gtk4::{
 
 use crate::{
     controller::{
-        controller_message::ControllerMessage, NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
-        glib::{MainContext, PRIORITY_DEFAULT}
+        controller_message::ControllerMessage,
+        glib::{MainContext, PRIORITY_DEFAULT},
+        NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
     },
     ctcp::{dcc_message::DccMessage, dcc_send::dcc_send_receiver::DccSendReceiver},
     message::Message,
@@ -100,37 +104,44 @@ impl InterfaceController {
                 self.current_conv.clone(),
             );
         } else {
-            self.main_view.receive_priv_client_message(
-                message,
-                sender_nickname
-            );
+            self.main_view
+                .receive_priv_client_message(message, sender_nickname);
         }
     }
 
-    pub fn receive_dcc_message(&mut self, sender: String, dcc_message: DccMessage) {
+    pub fn receive_dcc_message(&mut self, message: Message, content: String) {
+        let (_, _, sender_nickname) = self.decode_priv_message(message);
+
+        let dcc_message = if let Ok(dcc_message) = DccMessage::parse(content) {
+            dcc_message
+        } else {
+            return;
+        };
+
+        println!("## entre acá! dcc msg");
         match dcc_message {
             DccMessage::Send {
                 filename,
                 address,
                 filesize,
             } => {
-                self.receive_dcc_send(sender, filename, address, filesize);
+                self.receive_dcc_send(sender_nickname, filename, address, filesize);
             }
             DccMessage::SendAccept => {
-                self.receive_dcc_send_accept(sender);
+                self.receive_dcc_send_accept(sender_nickname);
             }
             DccMessage::SendDecline => {
-                self.receive_dcc_send_decline(sender);
+                self.receive_dcc_send_decline(sender_nickname);
             }
             DccMessage::Chat { address } => {
-                self.open_dcc_invitation_view(sender, address);
-            },
+                self.open_dcc_invitation_view(sender_nickname, address);
+            }
             DccMessage::ChatAccept => {
-                self.dcc_receive_accept(sender);
-            },
+                self.dcc_receive_accept(sender_nickname);
+            }
             DccMessage::ChatDecline => {
-                self.dcc_receive_decline(sender);
-            },
+                self.dcc_receive_decline(sender_nickname);
+            }
             DccMessage::Close => todo!(),
             _ => unimplemented!(),
         }
@@ -193,7 +204,6 @@ impl InterfaceController {
     pub fn get_stream(&mut self) -> TcpStream {
         self.client.get_stream().unwrap()
     }
-
 }
 
 fn build_file_download_chooser_dialog(
@@ -213,13 +223,13 @@ fn build_file_download_chooser_dialog(
         let file = if let Some(file) = file_chooser_dialog.file() {
             file
         } else {
-            return
+            return;
         };
-        
+
         let path = if let Some(path) = file.path() {
             path
         } else {
-            return
+            return;
         };
 
         let sender = sender.clone();
@@ -307,6 +317,6 @@ pub fn remove_operator_indicator(element: &str) -> String {
     }
 }
 
-pub fn get_sender_and_receiver()-> (Sender<String>, Receiver<String>){
+pub fn get_sender_and_receiver() -> (Sender<String>, Receiver<String>) {
     MainContext::channel(PRIORITY_DEFAULT)
 }

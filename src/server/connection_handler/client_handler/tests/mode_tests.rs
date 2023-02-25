@@ -205,7 +205,9 @@ fn mode_sets_limit_to_channel() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     assert!(handler
         .database
         .get_channel_limit("#channel")
@@ -232,7 +234,9 @@ fn mode_unsets_channel_limit() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.set_channel_limit("#channel", Some(5));
 
     assert_eq!(
@@ -291,7 +295,9 @@ fn mode_sets_banmask() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     assert!(handler
         .database
         .get_channel_banmask("#channel")
@@ -325,7 +331,9 @@ fn mode_unsets_banmask() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_channel_banmask("#channel", "banmask");
     handler.database.add_channel_banmask("#channel", "banmask2");
     assert!(!handler
@@ -564,7 +572,9 @@ fn mode_speaker_fails_with_nick_not_on_channel() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_local_client(dummy_client("nick2"));
 
     let parameters = vec![
@@ -588,7 +598,9 @@ fn mode_sets_channel_key() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     assert!(handler
         .database
         .get_channel_key("#channel")
@@ -615,7 +627,9 @@ fn mode_unsets_channel_key() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler
         .database
         .set_channel_key("#channel", Some("key".to_string()));
@@ -788,7 +802,9 @@ fn mode_sets_and_unsets_invite_only_flag() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     assert!(!handler
         .database
         .channel_has_flag("#channel", ChannelFlag::InviteOnly));
@@ -824,7 +840,9 @@ fn mode_sets_and_unsets_topic_flag() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     assert!(!handler
         .database
         .channel_has_flag("#channel", ChannelFlag::TopicByOperatorOnly));
@@ -859,7 +877,9 @@ fn mode_sets_and_unsets_no_outside_messages_flag() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     assert!(!handler
         .database
         .channel_has_flag("#channel", ChannelFlag::NoOutsideMessages));
@@ -895,7 +915,9 @@ fn mode_sets_and_unsets_moderated_flag() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     assert!(!handler
         .database
         .channel_has_flag("#channel", ChannelFlag::Moderated));
@@ -969,7 +991,9 @@ fn mode_sets_multiple_flags() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("#channel", "nick2");
 
@@ -1009,7 +1033,9 @@ fn mode_unsets_multiple_flags() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("#channel", "nick2");
 
@@ -1049,7 +1075,9 @@ fn mode_sets_and_unsets_multiple_flags() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-    handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler.database.add_local_client(dummy_client("nick2"));
     handler.database.add_client_to_channel("#channel", "nick2");
 
@@ -1098,7 +1126,9 @@ fn mode_sets_and_unsets_multiple_valid_flags() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler
         .database
         .set_channel_flag("#channel", ChannelFlag::Secret);
@@ -1142,7 +1172,9 @@ fn mode_with_no_parameters_returns_channel_mode() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler
         .database
         .set_channel_key("#channel", Some("key".to_string()));
@@ -1169,7 +1201,9 @@ fn mode_works_with_multiples_arguments() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler
         .database
         .add_client_to_channel("#channel", "nickname2");
@@ -1214,7 +1248,9 @@ fn mode_works_with_multiples_arguments_in_disorder() {
     handler
         .database
         .add_client_to_channel("#channel", "nickname");
-        handler.database.add_channel_operator("#channel", "nickname");
+    handler
+        .database
+        .add_channel_operator("#channel", "nickname");
     handler
         .database
         .add_client_to_channel("#channel", "nickname2");

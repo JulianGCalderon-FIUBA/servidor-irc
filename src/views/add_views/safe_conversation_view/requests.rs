@@ -7,7 +7,11 @@ use gtk4 as gtk;
 /// Sends a safe message.  
 ///
 /// Receives a channel name and a member.
-pub fn send_safe_message_request(message: String, client: String, sender: Sender<ControllerMessage>) {
+pub fn send_safe_message_request(
+    message: String,
+    client: String,
+    sender: Sender<ControllerMessage>,
+) {
     sender
         .send(SendSafeMessage { client, message })
         .expect(ERROR_TEXT);

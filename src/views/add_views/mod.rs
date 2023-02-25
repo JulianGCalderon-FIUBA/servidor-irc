@@ -10,7 +10,6 @@ pub mod channel_members_view;
 /// Contains dcc invitation view.
 pub mod dcc_invitation_view;
 
-
 /// Contains invite view.
 pub mod invite_view;
 

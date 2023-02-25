@@ -122,11 +122,7 @@ impl MainView {
     /// Creates a new message in a client chat.
     ///
     /// Function is used when a client message is received.
-    pub fn receive_priv_client_message(
-        &mut self,
-        message_text: String,
-        nickname: String,
-    ) {
+    pub fn receive_priv_client_message(&mut self, message_text: String, nickname: String) {
         let message_label = create_received_message(&message_text);
         if let Some(messages) = self.messages.get_mut(&nickname) {
             messages.push(vec![

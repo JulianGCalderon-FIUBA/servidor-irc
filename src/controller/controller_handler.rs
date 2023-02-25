@@ -5,8 +5,7 @@ use crate::{
 
 use super::{
     controller_message::ControllerMessage::{
-        self, ErrorWhenAddingChannel, 
-        OpenMainView, OpenWarningView, ReceiveInvite, ReceiveJoin,
+        self, ErrorWhenAddingChannel, OpenMainView, OpenWarningView, ReceiveInvite, ReceiveJoin,
         ReceiveKick, ReceiveListEnd, ReceiveListLine, ReceiveNamesEnd, ReceiveNamesLine,
         ReceivePrivMessage, RegularMessage,
     },

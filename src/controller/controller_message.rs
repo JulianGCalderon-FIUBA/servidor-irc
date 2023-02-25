@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf, net::SocketAddr};
+use std::{collections::HashMap, net::SocketAddr, path::PathBuf};
 
 use gtk4::glib::GString;
 
@@ -109,7 +109,7 @@ pub enum ControllerMessage {
     },
     SendQuitMessage {},
     SendSafeMessage {
-        client: String, 
+        client: String,
         message: String,
     },
     ToRegister {

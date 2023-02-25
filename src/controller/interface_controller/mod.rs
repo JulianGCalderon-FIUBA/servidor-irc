@@ -1,19 +1,28 @@
+pub mod dcc_controller;
 pub mod decode_message;
 pub mod message_matcher;
 pub mod names_message_intention;
 pub mod utils;
 pub mod window_creation;
-pub mod dcc_controller;
 
-use std::{collections::HashMap, thread, net::{SocketAddr, IpAddr, Ipv4Addr}};
+use std::{
+    collections::HashMap,
+    net::{IpAddr, Ipv4Addr, SocketAddr},
+    thread,
+};
 
 use gtk4 as gtk;
 
 use crate::{
     client::{async_reader::AsyncReader, Client},
-    ctcp::{dcc_chat::{dcc_chat_sender::DccChatSender, dcc_chat_receiver::DccChatReceiver, DccChat},
-        dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender}},
-    views::{add_views::safe_conversation_view::SafeConversationView, add_views::add_channel_view::AddChannelView, main_view::MainView},
+    ctcp::{
+        dcc_chat::{dcc_chat_receiver::DccChatReceiver, dcc_chat_sender::DccChatSender, DccChat},
+        dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender},
+    },
+    views::{
+        add_views::add_channel_view::AddChannelView,
+        add_views::safe_conversation_view::SafeConversationView, main_view::MainView,
+    },
 };
 use gtk::{
     glib::{self, Receiver, Sender},
@@ -30,8 +39,8 @@ use crate::controller::ControllerMessage::*;
 use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
-        add_channel_view, add_client_window, invite_window,
-        ip_window, main_view, register_window, dcc_invitation_window, safe_conversation_view,
+        add_channel_view, add_client_window, dcc_invitation_window, invite_window, ip_window,
+        main_view, register_window, safe_conversation_view,
     },
 };
 
@@ -82,7 +91,12 @@ impl InterfaceController {
             app: app.clone(),
             client,
             current_conv: String::new(),
-            dcc_invitation_window: dcc_invitation_window(&app, String::new(), SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127,0,0,1)), 8080), &sender),
+            dcc_invitation_window: dcc_invitation_window(
+                &app,
+                String::new(),
+                SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080),
+                &sender,
+            ),
             dcc_receivers: HashMap::new(),
             dcc_senders: HashMap::new(),
             dcc_chats: HashMap::new(),
@@ -94,7 +108,7 @@ impl InterfaceController {
             nickname: String::new(),
             realname: String::new(),
             register_window: register_window(&app, &sender),
-            safe_conversation_view: safe_conversation_view(&sender),
+            safe_conversation_view: safe_conversation_view("".to_string(), &sender),
             sender,
             servername: String::new(),
             username: String::new(),
@@ -218,8 +232,8 @@ impl InterfaceController {
                 RemoveConversation {} => {
                     self.remove_conversation();
                 }
-                SendSafeConversationRequest { } => {
-                    self.send_safe_conversation_request(); 
+                SendSafeConversationRequest {} => {
+                    self.send_safe_conversation_request();
                 }
                 SendInviteMessage { channel } => {
                     self.send_invite_message(channel);

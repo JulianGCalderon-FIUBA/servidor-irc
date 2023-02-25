@@ -3,8 +3,8 @@ use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage::{
-        self, OpenFileDialogChooserView, RemoveConversation,
-        SendNamesMessageToInviteClient, SendNamesMessageToKnowMembers, SendPartMessage,
+        self, OpenFileDialogChooserView, RemoveConversation, SendNamesMessageToInviteClient,
+        SendNamesMessageToKnowMembers, SendPartMessage,
     },
     views::ERROR_TEXT,
 };
