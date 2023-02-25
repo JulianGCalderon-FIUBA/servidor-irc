@@ -40,12 +40,6 @@ impl DccChatSender {
     pub fn close(self) {}
 }
 
-impl Drop for DccChatSender {
-    fn drop(&mut self) {
-        println!("dropping DccChatSender");
-    }
-}
-
 /*
 ** RECEPCION DE MENSAJES **
 for every server message:
