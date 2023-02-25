@@ -3,11 +3,7 @@ pub mod requests;
 
 use std::net::SocketAddr;
 
-use gtk::{
-    glib::Sender,
-    prelude::*,
-    Application, ApplicationWindow, Button, Orientation,
-};
+use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Orientation};
 use gtk4 as gtk;
 
 use self::requests::{accept_request, decline_request};
@@ -90,7 +86,7 @@ impl DccInvitationView {
         sender: Sender<ControllerMessage>,
     ) {
         self.accept_button.connect_clicked(move |_| {
-            accept_request(client.clone(), address.clone(), sender.clone());
+            accept_request(client.clone(), address, sender.clone());
         });
     }
 
