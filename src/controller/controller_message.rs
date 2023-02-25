@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::SocketAddr, path::PathBuf};
+use std::{collections::HashMap, io, net::SocketAddr, path::PathBuf};
 
 use gtk4::glib::GString;
 
@@ -125,5 +125,14 @@ pub enum ControllerMessage {
     },
     IgnoreFile {
         sender: String,
+    },
+    SendResult {
+        sender: String,
+        result: io::Result<()>,
+    },
+    ReceiveResult {
+        sender: String,
+        name: String,
+        result: Result<(), std::io::Error>,
     },
 }

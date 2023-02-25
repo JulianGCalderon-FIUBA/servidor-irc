@@ -1,22 +1,13 @@
-use std::{
-    collections::HashMap,
-    net::{SocketAddr, TcpStream},
-};
+use std::{collections::HashMap, net::TcpStream};
 
-use gtk4::{
-    glib::{Receiver, Sender},
-    prelude::*,
-    traits::{DialogExt, FileChooserExt, GtkWindowExt},
-    ApplicationWindow, ButtonsType, FileChooserDialog, MessageDialog, MessageType, ResponseType,
-};
+use gtk4::glib::{Receiver, Sender};
 
 use crate::{
     controller::{
-        controller_message::ControllerMessage,
         glib::{MainContext, PRIORITY_DEFAULT},
         NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
     },
-    ctcp::{dcc_message::DccMessage, dcc_send::dcc_send_receiver::DccSendReceiver},
+    ctcp::dcc_message::DccMessage,
     message::Message,
     server::consts::commands::NAMES_COMMAND,
 };
@@ -118,7 +109,6 @@ impl InterfaceController {
             return;
         };
 
-        println!("## entre acá! dcc msg");
         match dcc_message {
             DccMessage::Send {
                 filename,
@@ -143,102 +133,22 @@ impl InterfaceController {
                 self.dcc_receive_decline(sender_nickname);
             }
             DccMessage::Close => todo!(),
-            _ => unimplemented!(),
+            DccMessage::Resume {
+                filename,
+                port,
+                position,
+            } => self.receive_dcc_resume(sender_nickname, filename, port, position),
+            DccMessage::Accept {
+                filename,
+                port,
+                position,
+            } => self.receive_dcc_accept(sender_nickname, filename, port, position),
         }
-    }
-
-    pub fn receive_dcc_send_decline(&mut self, sender: String) {
-        self.dcc_send_senders.remove(&sender);
-    }
-
-    pub fn receive_dcc_send_accept(&mut self, sender: String) {
-        if let Some(dcc_send_sender) = self.dcc_send_senders.remove(&sender) {
-            dcc_send_sender.accept().unwrap();
-        }
-    }
-
-    pub fn receive_dcc_send(
-        &mut self,
-        sender: String,
-        filename: String,
-        address: SocketAddr,
-        filesize: u64,
-    ) {
-        let message_dialog = MessageDialog::builder()
-            .message_type(MessageType::Question)
-            .transient_for(&self.main_window)
-            .text(&format!("{sender} wishes to send you a file: {filename}"))
-            .secondary_text("Do you want to download it?")
-            .buttons(ButtonsType::YesNo)
-            .build();
-        message_dialog.present();
-        self.connect_download_request_dialog(message_dialog, sender.clone());
-
-        let server_stream = self.client.get_stream().unwrap();
-        let dcc_send_receiver =
-            DccSendReceiver::new(server_stream, sender.clone(), filename, filesize, address);
-
-        self.dcc_send_receivers.insert(sender, dcc_send_receiver);
-    }
-
-    fn connect_download_request_dialog(&mut self, message_dialog: MessageDialog, sender: String) {
-        let channel_sender = self.sender.clone();
-        let main_window = self.main_window.clone();
-        message_dialog.connect_response(move |message_dialog, response_type| {
-            if let ResponseType::Yes = response_type {
-                let sender = sender.clone();
-                let channel_sender = channel_sender.clone();
-                let main_window = main_window.clone();
-                build_file_download_chooser_dialog(main_window, sender, channel_sender);
-            } else {
-                let sender = sender.clone();
-                let ignore_file_request = ControllerMessage::IgnoreFile { sender };
-
-                channel_sender.send(ignore_file_request).unwrap();
-            }
-
-            message_dialog.destroy();
-        });
     }
 
     pub fn get_stream(&mut self) -> TcpStream {
         self.client.get_stream().unwrap()
     }
-}
-
-fn build_file_download_chooser_dialog(
-    main_window: ApplicationWindow,
-    sender: String,
-    channel_sender: Sender<ControllerMessage>,
-) {
-    let file_chooser_dialog = FileChooserDialog::builder()
-        .transient_for(&main_window)
-        .action(gtk4::FileChooserAction::Save)
-        .build();
-
-    file_chooser_dialog.add_button("Download", ResponseType::Accept);
-    file_chooser_dialog.present();
-
-    file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
-        let file = if let Some(file) = file_chooser_dialog.file() {
-            file
-        } else {
-            return;
-        };
-
-        let path = if let Some(path) = file.path() {
-            path
-        } else {
-            return;
-        };
-
-        let sender = sender.clone();
-        let download_file_request = ControllerMessage::DownloadFile { path, sender };
-
-        channel_sender.send(download_file_request).unwrap();
-
-        file_chooser_dialog.destroy();
-    });
 }
 
 /// Returns all clients.

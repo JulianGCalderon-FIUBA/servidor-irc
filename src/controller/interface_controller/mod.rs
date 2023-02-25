@@ -1,7 +1,9 @@
 pub mod dcc_controller;
 pub mod decode_message;
+mod download;
 pub mod message_matcher;
 pub mod names_message_intention;
+mod resume_utils;
 pub mod utils;
 pub mod window_creation;
 
@@ -15,6 +17,7 @@ use gtk4 as gtk;
 
 use crate::{
     client::{async_reader::AsyncReader, Client},
+    ctcp::dcc_send::dcc_resume_sender::DccResumeSender,
     ctcp::{
         dcc_chat::{dcc_chat_receiver::DccChatReceiver, dcc_chat_sender::DccChatSender, DccChat},
         dcc_send::{dcc_send_receiver::DccSendReceiver, dcc_send_sender::DccSendSender},
@@ -27,16 +30,13 @@ use crate::{
 use gtk::{
     glib::{self, Receiver, Sender},
     prelude::*,
-    Application, ApplicationWindow,
-};
-
-use crate::controller::controller_message::ControllerMessage::{
-    OpenAddClientView, OpenInviteClientView, OpenWarningView,
+    Application, ApplicationWindow, MessageDialog,
 };
 
 use crate::controller::ControllerMessage::*;
 
 use self::{
+    download::Download,
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
         add_channel_view, add_client_window, dcc_invitation_window, invite_window, ip_window,
@@ -76,6 +76,9 @@ pub struct InterfaceController {
     username: String,
     dcc_send_senders: HashMap<String, DccSendSender>,
     dcc_send_receivers: HashMap<String, DccSendReceiver>,
+    dcc_resume_senders: HashMap<String, DccResumeSender>,
+    cancel_dialogs: HashMap<String, MessageDialog>,
+    downloads: Vec<Download>,
 }
 
 impl InterfaceController {
@@ -114,6 +117,9 @@ impl InterfaceController {
             username: String::new(),
             dcc_send_senders: HashMap::new(),
             dcc_send_receivers: HashMap::new(),
+            cancel_dialogs: HashMap::new(),
+            downloads: Vec::new(),
+            dcc_resume_senders: HashMap::new(),
         }
     }
 
@@ -282,6 +288,16 @@ impl InterfaceController {
                 }
                 IgnoreFile { sender } => {
                     self.ignore_file(sender);
+                }
+                SendResult { sender, result } => {
+                    self.send_result(sender, result);
+                }
+                ReceiveResult {
+                    sender,
+                    name,
+                    result,
+                } => {
+                    self.receive_result(sender, name, result);
                 }
             }
             // Returning false here would close the receiver

@@ -1,6 +1,6 @@
 use gtk4::glib::{self, Receiver, Sender};
 
-use crate::{controller::controller_message::ControllerMessage, client::async_reader::AsyncReader};
+use crate::{client::async_reader::AsyncReader, controller::controller_message::ControllerMessage};
 
 use crate::controller::controller_message::ControllerMessage::ReceiveSafeMessage;
 

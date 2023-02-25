@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::SocketAddr, path::PathBuf, thread};
+use std::{collections::HashMap, io, net::SocketAddr, path::PathBuf, thread};
 
 use gtk4 as gtk;
 
@@ -17,6 +17,7 @@ use crate::{
         dcc_send::dcc_send_sender::DccSendSender,
         parse_ctcp,
     },
+    macros::some_or_return,
     message::Message,
     server::consts::commands::{
         INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
@@ -26,6 +27,7 @@ use crate::{
 use gtk::{glib, glib::GString, prelude::*, FileChooserDialog, ResponseType};
 
 use super::{
+    download::Download,
     utils::{channels_not_mine, get_sender_and_receiver, is_not_empty},
     window_creation::{
         add_channel_view, add_client_window, channel_members_window, dcc_invitation_window,
@@ -400,18 +402,14 @@ impl InterfaceController {
 
         let sender = self.sender.clone();
 
-        file_chooser_dialog.connect_response(move |file_chooser_dialog, _| {
-            let file = if let Some(file) = file_chooser_dialog.file() {
-                file
-            } else {
+        file_chooser_dialog.connect_response(move |file_chooser_dialog, response| {
+            if response != ResponseType::Accept {
                 return;
-            };
+            }
 
-            let path = if let Some(path) = file.path() {
-                path
-            } else {
-                return;
-            };
+            let file = some_or_return!(file_chooser_dialog.file());
+
+            let path = some_or_return!(file.path());
 
             let target = target.clone();
 
@@ -430,24 +428,58 @@ impl InterfaceController {
     }
 
     pub fn download_file(&mut self, sender: String, path: PathBuf) {
-        let dcc_send_receiver =
-            if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
-                dcc_send_receiver
-            } else {
-                return;
-            };
+        let dcc_send_receiver = some_or_return!(self.dcc_send_receivers.remove(&sender));
 
-        dcc_send_receiver.accept_send_command(path).unwrap();
+        let download = Download {
+            client: sender.clone(),
+            name: dcc_send_receiver.original_name(),
+            path: path.clone(),
+            failed: false,
+        };
+        self.downloads.push(download);
+
+        let name = dcc_send_receiver.original_name();
+
+        let (transferer, controller) = dcc_send_receiver.accept_send_command(path).unwrap();
+
+        let sender_channel = self.sender.clone();
+        let sender_client = sender.clone();
+        thread::spawn(move || {
+            let result = transferer.download_file();
+            let message = ControllerMessage::ReceiveResult {
+                sender: sender_client,
+                name,
+                result,
+            };
+            sender_channel.send(message).unwrap();
+        });
+
+        self.cancel_transfer_dialog("Download in progress", sender, controller);
     }
 
     pub fn ignore_file(&mut self, sender: String) {
-        let dcc_send_receiver =
-            if let Some(dcc_send_receiver) = self.dcc_send_receivers.remove(&sender) {
-                dcc_send_receiver
-            } else {
-                return;
-            };
+        let dcc_send_receiver = some_or_return!(self.dcc_send_receivers.remove(&sender));
 
         dcc_send_receiver.decline_send_command().unwrap();
+    }
+
+    pub fn send_result(&mut self, sender: String, result: io::Result<()>) {
+        self.transfer_result(result, sender);
+    }
+
+    pub fn receive_result(&mut self, sender: String, name: String, result: io::Result<()>) {
+        let position = self
+            .downloads
+            .iter()
+            .position(|transfer| transfer.client == sender && transfer.name == name)
+            .unwrap();
+
+        if result.is_err() {
+            self.downloads.get_mut(position).unwrap().failed = true;
+        } else {
+            self.downloads.remove(position);
+        }
+
+        self.transfer_result(result, sender);
     }
 }

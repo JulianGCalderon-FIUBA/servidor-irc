@@ -47,12 +47,12 @@ pub enum DccMessage {
     Resume {
         filename: String,
         port: u16,
-        position: usize,
+        position: u64,
     },
     Accept {
         filename: String,
         port: u16,
-        position: usize,
+        position: u64,
     },
 }
 
@@ -135,7 +135,7 @@ fn parse_resume_command(mut arguments: Vec<String>) -> Result<DccMessage, DccPar
 
     let position = some_or_return!(arguments.pop(), Err(DccParsingError::NoPosition));
     let position = ok_or_return!(
-        position.parse::<usize>(),
+        position.parse::<u64>(),
         Err(DccParsingError::InvalidPosition)
     );
 
