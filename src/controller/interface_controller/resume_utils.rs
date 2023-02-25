@@ -1,0 +1,283 @@
+use std::{cell::RefCell, fs, io, net::SocketAddr, thread};
+
+use gtk4::{
+    glib::Sender,
+    prelude::FileExt,
+    traits::{DialogExt, FileChooserExt, GtkWindowExt},
+    ApplicationWindow, ButtonsType, FileChooserDialog, HeaderBar, MessageDialog, MessageType,
+    ResponseType,
+};
+
+use crate::{
+    controller::{controller_message::ControllerMessage, failed_transfer::Transfer},
+    ctcp::dcc_send::{dcc_send_receiver::DccSendReceiver, file_transfer::TransferController},
+    macros::{ok_or_return, some_or_return},
+};
+
+use super::InterfaceController;
+
+impl InterfaceController {
+    pub fn receive_dcc_send_decline(&mut self, sender: String) {
+        self.dcc_send_senders.remove(&sender);
+    }
+
+    pub fn receive_dcc_send_accept(&mut self, sender: String) {
+        let dcc_send_sender = some_or_return!(self.dcc_send_senders.remove(&sender));
+
+        let (transferer, controller) = dcc_send_sender.accept().unwrap();
+
+        let sender_channel = self.sender.clone();
+        let sender_client = sender.clone();
+        thread::spawn(move || {
+            let result = transferer.upload_file();
+            let message = ControllerMessage::SendResult {
+                sender: sender_client,
+                result,
+            };
+            sender_channel.send(message).unwrap();
+        });
+
+        self.cancel_transfer_dialog("Upload in progress", sender, controller);
+    }
+
+    pub fn receive_dcc_send(
+        &mut self,
+        sender: String,
+        filename: String,
+        address: SocketAddr,
+        filesize: u64,
+    ) {
+        let server_stream = self.client.get_stream().unwrap();
+        let dcc_send_receiver = DccSendReceiver::new(
+            server_stream,
+            sender.clone(),
+            filename.clone(),
+            filesize,
+            address,
+        );
+
+        if let Some((path, filesize)) = self.get_failed_transfer_for(sender.clone(), filename) {
+            self.receive_dcc_send_on_failed_transfer(dcc_send_receiver, filesize, path, sender);
+        } else {
+            self.receive_dcc_send_on_new_transfer(sender, dcc_send_receiver);
+        }
+    }
+
+    fn get_failed_transfer_for(
+        &mut self,
+        sender: String,
+        filename: String,
+    ) -> Option<(std::path::PathBuf, u64)> {
+        let transfer = self
+            .downloads
+            .iter()
+            .position(|transfer| {
+                transfer.client == sender && transfer.name == filename && transfer.failed
+            })
+            .map(|index| self.downloads.remove(index));
+
+        let transfer = some_or_return!(transfer, None);
+        let path = transfer.path;
+        let metadata = ok_or_return!(fs::metadata(path.clone()), None);
+        let filesize = metadata.len();
+
+        Some((path, filesize))
+    }
+
+    fn receive_dcc_send_on_failed_transfer(
+        &mut self,
+        dcc_send_receiver: DccSendReceiver,
+        filesize: u64,
+        path: std::path::PathBuf,
+        sender: String,
+    ) {
+        let dcc_resume_sender = dcc_send_receiver
+            .resume_send_command(filesize, path)
+            .unwrap();
+        self.dcc_resume_senders.insert(sender, dcc_resume_sender);
+    }
+
+    fn receive_dcc_send_on_new_transfer(
+        &mut self,
+        sender: String,
+        dcc_send_receiver: DccSendReceiver,
+    ) {
+        let filename = dcc_send_receiver.original_name();
+        let message_dialog = MessageDialog::builder()
+            .message_type(MessageType::Question)
+            .transient_for(&self.main_window)
+            .text(&format!("{sender} wishes to send you a file: {filename}"))
+            .secondary_text("Do you want to download it?")
+            .buttons(ButtonsType::YesNo)
+            .build();
+
+        message_dialog.present();
+        self.connect_download_request_dialog(message_dialog, sender.clone());
+
+        self.dcc_send_receivers.insert(sender, dcc_send_receiver);
+    }
+
+    pub fn receive_dcc_resume(
+        &mut self,
+        sender: String,
+        _filename: String,
+        _port: u16,
+        position: u64,
+    ) {
+        let dcc_send_sender = some_or_return!(self.dcc_send_senders.remove(&sender));
+
+        let (transferer, controller) = dcc_send_sender.resume(position).unwrap();
+
+        let sender_channel = self.sender.clone();
+        let sender_client = sender.clone();
+        thread::spawn(move || {
+            let result = transferer.resume_upload_file(position);
+
+            let message = ControllerMessage::SendResult {
+                sender: sender_client,
+                result,
+            };
+            sender_channel.send(message).unwrap();
+        });
+
+        let dialog_message = "Upload in progress";
+        self.cancel_transfer_dialog(dialog_message, sender, controller);
+    }
+
+    pub fn receive_dcc_accept(
+        &mut self,
+        sender: String,
+        _filename: String,
+        _port: u16,
+        position: u64,
+    ) {
+        let dcc_resume_sender = some_or_return!(self.dcc_resume_senders.remove(&sender));
+
+        let download = Transfer {
+            client: sender.clone(),
+            name: dcc_resume_sender.original_name(),
+            path: dcc_resume_sender.path(),
+            failed: false,
+        };
+        self.downloads.push(download);
+
+        let name = dcc_resume_sender.original_name();
+        let (transferer, controller) = dcc_resume_sender.accept().unwrap();
+
+        let sender_channel = self.sender.clone();
+        let sender_client = sender.clone();
+        thread::spawn(move || {
+            let result = transferer.resume_download_file(position);
+
+            let message = ControllerMessage::ReceiveResult {
+                sender: sender_client,
+                result,
+                name,
+            };
+            sender_channel.send(message).unwrap();
+        });
+
+        let dialog_message = "Download in progress";
+        self.cancel_transfer_dialog(dialog_message, sender, controller);
+    }
+
+    pub fn cancel_transfer_dialog(
+        &mut self,
+        dialog_message: &str,
+        sender_nickname: String,
+        controller: TransferController,
+    ) {
+        let cancel_dialog = MessageDialog::builder()
+            .title(dialog_message)
+            .buttons(ButtonsType::Cancel)
+            .modal(false)
+            .build();
+
+        let header = HeaderBar::new();
+
+        cancel_dialog.set_titlebar(Some(&header));
+
+        cancel_dialog.present();
+
+        let controller_cell = RefCell::new(controller);
+        cancel_dialog.connect_response(move |_, _| controller_cell.borrow_mut().cancel());
+
+        self.cancel_dialogs.insert(sender_nickname, cancel_dialog);
+    }
+
+    pub fn completed_transfer_dialog(&self, title: &str) {
+        let completed_dialog = MessageDialog::builder()
+            .title(title)
+            .transient_for(&self.main_window)
+            .buttons(ButtonsType::Ok)
+            .build();
+
+        completed_dialog.present();
+        completed_dialog.connect_response(move |completed_dialog, _| completed_dialog.destroy());
+    }
+
+    fn connect_download_request_dialog(&mut self, message_dialog: MessageDialog, sender: String) {
+        let channel_sender = self.sender.clone();
+        let main_window = self.main_window.clone();
+        message_dialog.connect_response(move |message_dialog, response_type| {
+            if let ResponseType::Yes = response_type {
+                let sender = sender.clone();
+                let channel_sender = channel_sender.clone();
+                let main_window = main_window.clone();
+                build_file_download_chooser_dialog(main_window, sender, channel_sender);
+            } else {
+                let sender = sender.clone();
+                let ignore_file_request = ControllerMessage::IgnoreFile { sender };
+
+                channel_sender.send(ignore_file_request).unwrap();
+            }
+
+            message_dialog.destroy();
+        });
+    }
+
+    pub fn transfer_result(&mut self, result: Result<(), io::Error>, sender: String) {
+        match result {
+            Ok(()) => self.completed_transfer_dialog("File transfer completed successfully"),
+            Err(error) => {
+                if error.kind() != io::ErrorKind::Interrupted {
+                    self.completed_transfer_dialog("File transfer was interrupted");
+                }
+            }
+        };
+
+        if let Some(dialog) = self.cancel_dialogs.remove(&sender) {
+            dialog.destroy();
+        }
+    }
+}
+
+fn build_file_download_chooser_dialog(
+    main_window: ApplicationWindow,
+    sender: String,
+    channel_sender: Sender<ControllerMessage>,
+) {
+    let file_chooser_dialog = FileChooserDialog::builder()
+        .transient_for(&main_window)
+        .action(gtk4::FileChooserAction::Save)
+        .build();
+
+    file_chooser_dialog.add_button("Download", ResponseType::Accept);
+    file_chooser_dialog.present();
+
+    file_chooser_dialog.connect_response(move |file_chooser_dialog, response| {
+        if response != ResponseType::Accept {
+            return;
+        }
+
+        let file = some_or_return!(file_chooser_dialog.file());
+        let path = some_or_return!(file.path());
+
+        let sender = sender.clone();
+        let download_file_request = ControllerMessage::DownloadFile { path, sender };
+
+        channel_sender.send(download_file_request).unwrap();
+
+        file_chooser_dialog.destroy();
+    });
+}

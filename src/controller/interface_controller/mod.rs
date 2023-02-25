@@ -3,6 +3,7 @@ pub mod message_matcher;
 pub mod names_message_intention;
 pub mod utils;
 pub mod window_creation;
+mod resume_utils;
 
 use std::{collections::HashMap, thread};
 
