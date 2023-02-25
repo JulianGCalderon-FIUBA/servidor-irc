@@ -49,8 +49,8 @@ pub struct InterfaceController {
     app: Application,
     client: Client,
     current_conv: String,
-    dcc_invitation: ApplicationWindow,
-    dcc_recievers: HashMap<String, DccChatReceiver>,
+    dcc_invitation_window: ApplicationWindow,
+    dcc_receivers: HashMap<String, DccChatReceiver>,
     dcc_senders: HashMap<String, DccChatSender>,
     dcc_chats: HashMap<String, DccChat>,
     invite_window: ApplicationWindow,
@@ -82,8 +82,8 @@ impl InterfaceController {
             app: app.clone(),
             client,
             current_conv: String::new(),
-            dcc_invitation: dcc_invitation_window(&app, String::new(), SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127,0,0,1)), 8080), &sender),
-            dcc_recievers: HashMap::new(),
+            dcc_invitation_window: dcc_invitation_window(&app, String::new(), SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127,0,0,1)), 8080), &sender),
+            dcc_receivers: HashMap::new(),
             dcc_senders: HashMap::new(),
             dcc_chats: HashMap::new(),
             invite_window: invite_window(&app, vec![], &sender),
@@ -137,14 +137,14 @@ impl InterfaceController {
                 ErrorWhenAddingChannel { message } => {
                     self.error_when_adding_channel(message);
                 }
-                DccInvitation { client, message } => {
-                    self.dcc_invitation(client, message);
+                OpenDccInvitationView { client, message } => {
+                    self.open_dcc_invitation_view(client, message);
                 }
-                DccRecieveAccept { client } => {
-                    self.dcc_recieve_accept(client);
+                DccreceiveAccept { client } => {
+                    self.dcc_receive_accept(client);
                 }
-                DccRecieveDecline { client } => {
-                    self.dcc_recieve_decline(client);
+                DccreceiveDecline { client } => {
+                    self.dcc_receive_decline(client);
                 }
                 DeclineDccChat { client } => {
                     self.decline_dcc_chat(client);
@@ -218,8 +218,8 @@ impl InterfaceController {
                 RemoveConversation {} => {
                     self.remove_conversation();
                 }
-                SafeConversationRequest { } => {
-                    self.send_safe_conversation_request();
+                SendSafeConversationRequest { } => {
+                    self.send_safe_conversation_request(); 
                 }
                 SendInviteMessage { channel } => {
                     self.send_invite_message(channel);

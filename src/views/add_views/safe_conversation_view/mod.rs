@@ -129,11 +129,6 @@ impl SafeConversationView {
         let message = create_send_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
-
-        // self.messages
-        //     .get_mut(&nickname)
-        //     .unwrap()
-        //     .push(vec![message, create_label("")]);
     }
 
     pub fn receive_message(&mut self, message: String) {

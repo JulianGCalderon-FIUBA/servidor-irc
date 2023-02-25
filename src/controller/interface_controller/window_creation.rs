@@ -48,12 +48,6 @@ pub fn dcc_invitation_window(
     DccInvitationView::new(sender.clone()).get_view(app.clone(), client, address)
 }
 
-// pub fn dcc_invitation_window(
-//     sender: &Sender<ControllerMessage>,
-// ) -> DccInvitationView {
-//     DccInvitationView::new(sender.clone())
-// }
-
 pub fn invite_window(
     app: &Application,
     channels: Vec<String>,

@@ -20,10 +20,10 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{glib::GString, glib, prelude::*, FileChooserDialog, ResponseType};
+use gtk::{glib::GString, prelude::*, FileChooserDialog, ResponseType};
 
 use super::{
-    utils::{channels_not_mine, is_not_empty},
+    utils::{channels_not_mine, is_not_empty, get_sender_and_receiver},
     window_creation::{
         add_channel_view, add_client_window, channel_members_window, dcc_invitation_window, 
         invite_window, main_view, notifications_window, user_info_window, warning_window, safe_conversation_view,
@@ -34,13 +34,13 @@ use super::{
 
 impl InterfaceController {
     pub fn accept_dcc_chat(&mut self, client: String, address: SocketAddr) {
-        self.dcc_invitation.close();
-        let dcc = self.dcc_recievers.remove(&client).unwrap();
+        self.dcc_invitation_window.close();
+        let dcc = self.dcc_receivers.remove(&client).unwrap();
         let dcc_chat = dcc.accept_chat_command(address).unwrap();
         let stream = dcc_chat.get_stream().unwrap();
         self.dcc_chats.insert(client.clone(), dcc_chat);
 
-        let (dcc_sender, dcc_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+        let (dcc_sender, dcc_receiver) = get_sender_and_receiver();
 
         self.start_listening_dcc(stream, dcc_sender);
 
@@ -66,21 +66,21 @@ impl InterfaceController {
         self.add_channel_view.set_error_text(message);
     }
     
-    pub fn dcc_invitation(&mut self, client: String, message: SocketAddr) {
-        let stream = self.client.get_stream().unwrap();
-        let dcc_reciever = DccChatReceiver::new(stream, client.clone());
-        self.dcc_recievers.insert(client.clone(), dcc_reciever);
+    pub fn open_dcc_invitation_view(&mut self, client: String, message: SocketAddr) {
+        let stream = self.get_stream();
+        let dcc_receiver = DccChatReceiver::new(stream, client.clone());
+        self.dcc_receivers.insert(client.clone(), dcc_receiver);
 
-        self.dcc_invitation = dcc_invitation_window(&self.app, client, message, &self.sender);
-        self.dcc_invitation.show();
+        self.dcc_invitation_window = dcc_invitation_window(&self.app, client, message, &self.sender);
+        self.dcc_invitation_window.show();
     }
 
-    pub fn dcc_recieve_accept(&mut self, client: String) {
+    pub fn dcc_receive_accept(&mut self, client: String) {
         let dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
         let stream = dcc_chat.get_stream().unwrap();
         self.dcc_chats.insert(client.clone(), dcc_chat);
 
-        let (dcc_sender, dcc_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+        let (dcc_sender, dcc_receiver) = get_sender_and_receiver();
 
         self.start_listening_dcc(stream, dcc_sender.clone());
 
@@ -90,13 +90,13 @@ impl InterfaceController {
         self.safe_conversation_view.get_view(&client, self.app.clone()).show();
     }
 
-    pub fn dcc_recieve_decline(&mut self, client: String) {
+    pub fn dcc_receive_decline(&mut self, client: String) {
         self.dcc_senders.remove(&client).unwrap().close();
     }
 
     pub fn decline_dcc_chat(&mut self, client: String) {
-        self.dcc_invitation.close();
-        self.dcc_recievers.remove(&client).unwrap().decline_chat_command().unwrap();
+        self.dcc_invitation_window.close();
+        self.dcc_receivers.remove(&client).unwrap().decline_chat_command().unwrap();
     }
 
     pub fn join_channel(&mut self, channel: String) {
@@ -152,19 +152,17 @@ impl InterfaceController {
     }
 
     pub fn send_safe_conversation_request(&mut self) {
-        let stream = self.client.get_stream().unwrap();
+        let stream = self.get_stream();
         let chat_sender = DccChatSender::send(stream, self.current_conv.clone()).unwrap();
         self.dcc_senders
             .insert(self.current_conv.clone(), chat_sender);
     }
 
-    pub fn send_safe_message(&mut self, client: String, message: String) {
-        let dcc = self.dcc_chats.remove(&client);
-        // dcc.send_raw(&message).unwrap();
-        // self.dcc_chats.insert(client, dcc);
+    pub fn send_safe_message(&mut self, receiver_client: String, message: String) {
+        let dcc = self.dcc_chats.remove(&receiver_client);
         if let Some(mut dcc_chat) = dcc {
             dcc_chat.send_raw(&message).unwrap();
-            self.dcc_chats.insert(client, dcc_chat);
+            self.dcc_chats.insert(receiver_client, dcc_chat);
         }
         self.safe_conversation_view.send_message(message);
     }
@@ -412,7 +410,7 @@ impl InterfaceController {
     }
 
     pub fn send_dcc_send(&mut self, target: String, path: PathBuf) {
-        let server_stream = self.client.get_stream().unwrap();
+        let server_stream = self.get_stream();
         let dcc_send_sender = DccSendSender::send(server_stream, target.clone(), path).unwrap();
 
         self.dcc_send_senders.insert(target, dcc_send_sender);

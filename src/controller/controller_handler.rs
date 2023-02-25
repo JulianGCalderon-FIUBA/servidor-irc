@@ -48,32 +48,8 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         NAMES_END_COMMAND => ReceiveNamesEnd {},
         NAMES_LINE_COMMAND => ReceiveNamesLine { message },
         PRIVMSG_COMMAND => ReceivePrivMessage { message },
-        // ReceivePrivMessage { message } // if ctcp,
         _ => RegularMessage {
             message: message.to_string(),
         },
     }
 }
-
-// fn parse_priv_message(message: Message) -> ControllerMessage {
-//     match get_ctcp_message(&message) {
-//         Some(ctcp_message) => {
-//             let client = message.get_prefix().clone().unwrap();
-//             let arguments: Vec<String> = ctcp_message.split(' ').map(|s| s.to_string()).collect();
-//             match arguments[2].as_str() {
-//                 "accept" => DccRecieveAccept { client },
-//                 "decline" => DccRecieveDecline { client },
-//                 _ => DccInvitation {
-//                     client,
-//                     message: DccMessage::parse(ctcp_message).unwrap(),
-//                 },
-//             }
-//         }
-//         None => ReceivePrivMessage { message },
-//     }
-//     if get_ctcp_message(&message).unwrap().is_empty() {
-//         return ReceivePrivMessage { message };
-//     } else {
-//         return
-//     }
-// }

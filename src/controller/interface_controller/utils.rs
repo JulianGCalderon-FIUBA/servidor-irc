@@ -1,7 +1,7 @@
-use std::{collections::HashMap, net::SocketAddr};
+use std::{collections::HashMap, net::{SocketAddr, TcpStream}};
 
 use gtk4::{
-    glib::Sender,
+    glib::{Sender, Receiver},
     prelude::*,
     traits::{DialogExt, FileChooserExt, GtkWindowExt},
     ApplicationWindow, ButtonsType, FileChooserDialog, MessageDialog, MessageType, ResponseType,
@@ -10,6 +10,7 @@ use gtk4::{
 use crate::{
     controller::{
         controller_message::ControllerMessage, NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
+        glib::{MainContext, PRIORITY_DEFAULT}
     },
     ctcp::{dcc_message::DccMessage, dcc_send::dcc_send_receiver::DccSendReceiver},
     message::Message,
@@ -101,8 +102,7 @@ impl InterfaceController {
         } else {
             self.main_view.receive_priv_client_message(
                 message,
-                sender_nickname,
-                self.current_conv.clone(),
+                sender_nickname
             );
         }
     }
@@ -123,13 +123,13 @@ impl InterfaceController {
                 self.receive_dcc_send_decline(sender);
             }
             DccMessage::Chat { address } => {
-                self.dcc_invitation(sender, address);
+                self.open_dcc_invitation_view(sender, address);
             },
             DccMessage::ChatAccept => {
-                self.dcc_recieve_accept(sender);
+                self.dcc_receive_accept(sender);
             },
             DccMessage::ChatDecline => {
-                self.dcc_recieve_decline(sender);
+                self.dcc_receive_decline(sender);
             },
             DccMessage::Close => todo!(),
             _ => unimplemented!(),
@@ -189,6 +189,11 @@ impl InterfaceController {
             message_dialog.destroy();
         });
     }
+
+    pub fn get_stream(&mut self) -> TcpStream {
+        self.client.get_stream().unwrap()
+    }
+
 }
 
 fn build_file_download_chooser_dialog(
@@ -300,4 +305,8 @@ pub fn remove_operator_indicator(element: &str) -> String {
     } else {
         element.to_string()
     }
+}
+
+pub fn get_sender_and_receiver()-> (Sender<String>, Receiver<String>){
+    MainContext::channel(PRIORITY_DEFAULT)
 }

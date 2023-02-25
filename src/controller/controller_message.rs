@@ -19,14 +19,14 @@ pub enum ControllerMessage {
     ErrorWhenAddingChannel {
         message: String,
     },
-    DccInvitation {
+    OpenDccInvitationView {
         client: String,
         message: SocketAddr,
     },
-    DccRecieveAccept {
+    DccreceiveAccept {
         client: String,
     },
-    DccRecieveDecline {
+    DccreceiveDecline {
         client: String,
     },
     DeclineDccChat {
@@ -50,7 +50,7 @@ pub enum ControllerMessage {
     },
     OpenNotificationsView {},
     OpenFileDialogChooserView {},
-    SafeConversationRequest {},
+    SendSafeConversationRequest {},
     OpenUserInfoView {},
     OpenWarningView {
         message: String,

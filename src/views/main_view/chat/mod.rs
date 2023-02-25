@@ -126,7 +126,6 @@ impl MainView {
         &mut self,
         message_text: String,
         nickname: String,
-        current_conv: String,
     ) {
         let message_label = create_received_message(&message_text);
         if let Some(messages) = self.messages.get_mut(&nickname) {
@@ -136,7 +135,7 @@ impl MainView {
             ]);
         }
 
-        if nickname == current_conv {
+        if nickname == self.current_chat.label() {
             self.message_box.append(&message_label);
             adjust_scrollbar(self.scrollwindow_chat.clone());
         }
