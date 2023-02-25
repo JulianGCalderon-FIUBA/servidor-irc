@@ -149,6 +149,7 @@ impl InterfaceController {
     pub fn get_stream(&mut self) -> TcpStream {
         self.client.get_stream().unwrap()
     }
+
 }
 
 /// Returns all clients.

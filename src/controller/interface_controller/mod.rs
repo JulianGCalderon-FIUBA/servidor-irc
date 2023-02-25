@@ -33,6 +33,10 @@ use gtk::{
     Application, ApplicationWindow, MessageDialog,
 };
 
+use crate::controller::controller_message::ControllerMessage::{
+    OpenAddClientView, OpenInviteClientView, OpenWarningView,
+};
+
 use crate::controller::ControllerMessage::*;
 
 use self::{
