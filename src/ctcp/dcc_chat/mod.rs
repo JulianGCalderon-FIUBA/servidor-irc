@@ -1,4 +1,6 @@
+/// Contains structure for dcc chat receiver. A DccChatReceiver handles the receiving end of a dcc chat request.
 pub mod dcc_chat_receiver;
+/// Contains structure for dcc chat sender. A DccSendSender handles the request to send a dcc chat.
 pub mod dcc_chat_sender;
 
 use std::{

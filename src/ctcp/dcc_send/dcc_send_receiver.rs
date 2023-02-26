@@ -11,6 +11,7 @@ use super::{
     file_transfer::{FileTransferer, TransferController},
 };
 
+/// Handles the receiving end of a DCC SEND request.
 pub struct DccSendReceiver {
     server: TcpStream,
     client: String,
@@ -20,6 +21,7 @@ pub struct DccSendReceiver {
 }
 
 impl DccSendReceiver {
+    /// Creates new [`DccSendReceiver`] with information about the file that the client wishes to send.
     pub fn new(
         server: TcpStream,
         client: String,
@@ -36,6 +38,7 @@ impl DccSendReceiver {
         }
     }
 
+    /// Sends command to accept incoming DCC SEND connection and creates a [`FileTransferer`] with the file's information.
     pub fn accept_send_command(
         mut self,
         filepath: PathBuf,
@@ -48,6 +51,7 @@ impl DccSendReceiver {
         Ok(FileTransferer::new(stream, filepath, self.filesize))
     }
 
+    /// Creates and returns a new [`DccResumeSender`].
     pub fn resume_send_command(self, position: u64, path: PathBuf) -> io::Result<DccResumeSender> {
         DccResumeSender::send(
             self.server,
@@ -60,11 +64,13 @@ impl DccSendReceiver {
         )
     }
 
+    /// Sends command to decline incoming DCC SEND connection.
     pub fn decline_send_command(mut self) -> io::Result<()> {
         write!(self.server, "CTCP {} :DCC SEND decline", self.client)?;
         self.server.write_all(CRLF)
     }
 
+    /// Returns file's original name.
     pub fn original_name(&self) -> String {
         self.filename.clone()
     }
