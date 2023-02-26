@@ -1,11 +1,19 @@
 pub mod requests;
 mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Button, Label, Orientation};
+use gtk::{
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
+    Box, Button, Label, Orientation,
+};
 use gtk4 as gtk;
 
 use crate::{
-    controller::{controller_message::ControllerMessage, interface_controller::utils::is_channel},
+    controller::{
+        controller_message::ControllerMessage,
+        utils::{is_channel, is_not_empty},
+    },
+    server::consts::channel::MAX_CHANNELS,
     views::{
         add_views::widgets_creation::create_title,
         main_view::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
@@ -22,12 +30,16 @@ use self::{
 };
 
 use super::{
-    requests::change_conversation_request, utils::adjust_scrollbar, MainView, NO_NOTIFICATIONS_TEXT,
+    requests::change_conversation_request,
+    utils::{
+        add_notification_to_button, adjust_scrollbar, deselect_conversation_button,
+        remove_button_notifications_if_any, select_conversation_button,
+    },
+    MainView, NO_NOTIFICATIONS_TEXT,
 };
 
 const CHANNELS_TITLE: &str = "Channels";
 const CLIENTS_TITLE: &str = "Clients";
-const NOTIFICATIONS_CSS: &str = "notifications_button_on";
 
 impl MainView {
     /// Creates sidebar widgets.
@@ -96,15 +108,14 @@ impl MainView {
         let button_clone = button.clone();
         button.connect_clicked(move |_| {
             add_notifications_view_request(sender.clone());
-            Self::remove_unread_notifications(button_clone.clone());
+            remove_button_notifications_if_any(&button_clone, NO_NOTIFICATIONS_TEXT);
         });
     }
 
-    /// Adds channel to the sidebar.  
+    /// Adds channel to the sidebar.
     ///
     /// Creates new channel button.
     pub fn add_channel(&mut self, channel: String) {
-        change_conversation_request(channel.clone(), self.sender.clone());
         let channel_button = create_button_with_margin(&channel);
         self.connect_channel_client_button(
             channel_button.clone(),
@@ -113,7 +124,7 @@ impl MainView {
         );
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
-        if self.channels_buttons.len() >= 10 {
+        if self.channels_buttons.len() >= MAX_CHANNELS {
             self.add_channel.remove_css_class(ADD_BUTTON_CSS);
             self.add_channel.add_css_class(DISABLE_BUTTON_CSS);
         }
@@ -122,21 +133,20 @@ impl MainView {
         adjust_scrollbar(self.scrollwindow_channels.clone());
     }
 
-    /// Adds client to the sidebar.  
+    /// Adds client to the sidebar.
     ///
     /// Creates new client button.
-    pub fn add_client(&mut self, client: String) {
-        change_conversation_request(client.clone(), self.sender.clone());
-        let client_button = create_button_with_margin(&client);
+    pub fn add_client(&mut self, client: &str) {
+        let client_button = create_button_with_margin(client);
         self.connect_channel_client_button(
             client_button.clone(),
-            client.clone(),
+            client.to_string(),
             self.sender.clone(),
         );
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
 
-        self.messages.insert(client, vec![]);
+        self.messages.insert(client.to_string(), vec![]);
 
         adjust_scrollbar(self.scrollwindow_clients.clone());
     }
@@ -155,31 +165,59 @@ impl MainView {
         });
     }
 
-    /// Changes conversation view.  
+    /// Changes conversation view.
     ///
-    /// Changes chat label and messages.  
+    /// Changes chat label and messages.
     pub fn change_conversation(&mut self, last_conv: String, conversation_label: String) {
-        self.current_chat.set_label(&conversation_label);
-        self.scrollwindow_chat.set_visible(true);
-        self.send_message.set_sensitive(true);
-        self.input.set_sensitive(true);
-        self.error_label.set_text("");
-        self.input.set_text("");
-
-        self.welcome_box.set_visible(false);
-
+        self.update_chat_view_when_change_conversation(&conversation_label);
+        self.update_last_chat_button_when_change_conversation(&last_conv);
+        self.update_chat_button_when_clicked(&conversation_label);
         self.clean_screen(last_conv);
         self.load_messages_on_chat(conversation_label.clone());
+    }
 
+    fn update_chat_view_when_change_conversation(&mut self, conversation_label: &str) {
         self.quit_channel_button.set_visible(true);
+        self.remove_welcome_view_if_any();
         if is_channel(conversation_label) {
             self.set_channel_chat_mode();
         } else {
             self.set_client_chat_mode();
         }
+        self.current_chat.set_label(conversation_label);
+        self.error_label.set_text("");
+        self.input.set_text("");
     }
 
-    /// Cleans screen messages from conversation.  
+    fn remove_welcome_view_if_any(&mut self) {
+        if self.welcome_box.is_visible() {
+            self.remove_welcome_view();
+        }
+    }
+
+    fn remove_welcome_view(&mut self) {
+        self.welcome_box.set_visible(false);
+        self.scrollwindow_chat.set_visible(true);
+        self.send_message.set_sensitive(true);
+        self.input.set_sensitive(true);
+    }
+
+    fn update_chat_button_when_clicked(&mut self, conversation_label: &str) {
+        let (conversation_button, _) = self.find_button_by_name(conversation_label);
+        if let Some(button) = conversation_button {
+            remove_button_notifications_if_any(&button, conversation_label);
+            select_conversation_button(&button);
+        }
+    }
+
+    fn update_last_chat_button_when_change_conversation(&mut self, conversation_label: &str) {
+        let (conversation_button, _) = self.find_button_by_name(conversation_label);
+        if let Some(button) = conversation_button {
+            deselect_conversation_button(&button);
+        }
+    }
+
+    /// Cleans screen messages from conversation.
     fn clean_screen(&mut self, key: String) {
         self.update_screen(key, true);
     }
@@ -189,11 +227,11 @@ impl MainView {
         self.update_screen(key, false);
     }
 
-    /// Updates screen messages on new conversation.  
+    /// Updates screen messages on new conversation.
     fn update_screen(&mut self, key: String, should_remove: bool) {
         let mut prev_message: Vec<Label> = vec![];
 
-        if self.messages.contains_key(&key) {
+        if is_not_empty(&key) && self.messages.contains_key(&key) {
             let messages = self.messages.get(&key).unwrap();
             for message in messages {
                 if Self::there_is_sender(message[1].clone(), prev_message) {
@@ -214,55 +252,21 @@ impl MainView {
         }
     }
 
-    /// Returns bool wether there is a sender or not.  
+    /// Returns bool wether there is a sender or not.
     fn there_is_sender(message: Label, prev_message: Vec<Label>) -> bool {
         message.text() != ""
             && (prev_message.is_empty() || message.text() != prev_message[1].text())
     }
 
-    /// Creates new notification with message.  
+    /// Creates new notification with message.
     ///
     /// Add it to notifications vec.
     pub fn add_notification(&mut self, message: String) {
         self.notifications.push(message);
-        let current_notifications_number =
-            Self::get_notifications_number(self.notifications_button.clone());
-        self.notifications_button.set_label(&format!(
-            "🔔 notifications ({})",
-            current_notifications_number + 1
-        ));
-        self.notifications_button.add_css_class(NOTIFICATIONS_CSS)
+        add_notification_to_button(&self.notifications_button, String::from("🔔 notifications"));
     }
 
-    /// Get number of notifications.  
-    ///
-    /// Returns u32.
-    pub fn get_notifications_number(button: Button) -> u32 {
-        const RADIX: u32 = 10;
-        let notifications_text = button.label().unwrap().to_string();
-        let number_text = *notifications_text
-            .split('(')
-            .collect::<Vec<&str>>()
-            .last()
-            .unwrap()
-            .chars()
-            .collect::<Vec<char>>()
-            .first()
-            .unwrap();
-        number_text.to_digit(RADIX).unwrap()
-    }
-
-    /// Sets number of notifications to 0.
-    ///
-    /// Functions is used when notifications are read.
-    pub fn remove_unread_notifications(button: Button) {
-        button.set_label(NO_NOTIFICATIONS_TEXT);
-        if button.has_css_class(NOTIFICATIONS_CSS) {
-            button.remove_css_class(NOTIFICATIONS_CSS)
-        }
-    }
-
-    /// Gets all notifications.  
+    /// Gets all notifications.
     ///
     /// Returns a Vec<String>.
     pub fn get_notifications(&mut self) -> Vec<String> {

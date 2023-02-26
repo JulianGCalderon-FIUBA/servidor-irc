@@ -1,7 +1,12 @@
 /// Contains definition of used requests.
 pub mod requests;
 
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, ComboBoxText};
+use gtk::{
+    glib::Sender,
+    prelude::ComboBoxExtManual,
+    traits::{BoxExt, ButtonExt, GtkWindowExt},
+    Application, ApplicationWindow, Button, ComboBoxText,
+};
 use gtk4 as gtk;
 
 use self::requests::add_client_button_request;
@@ -77,7 +82,7 @@ impl AddClientView {
                 return;
             }
 
-            add_client_button_request(combobox.active_text().unwrap(), sender.clone());
+            add_client_button_request(combobox.active_text().unwrap().to_string(), sender.clone());
         });
     }
 

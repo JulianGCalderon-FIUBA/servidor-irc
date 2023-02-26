@@ -29,12 +29,8 @@ use crate::{
 };
 use gtk::{
     glib::{self, Receiver, Sender},
-    prelude::*,
+    traits::WidgetExt,
     Application, ApplicationWindow, MessageDialog,
-};
-
-use crate::controller::controller_message::ControllerMessage::{
-    OpenAddClientView, OpenInviteClientView, OpenWarningView,
 };
 
 use crate::controller::ControllerMessage::*;
@@ -60,12 +56,17 @@ pub struct InterfaceController {
     add_channel_window: ApplicationWindow,
     add_client_window: ApplicationWindow,
     app: Application,
+    cancel_dialogs: HashMap<String, MessageDialog>,
     client: Client,
     current_conv: String,
+    dcc_chats: HashMap<String, DccChat>,
     dcc_invitation_window: ApplicationWindow,
     dcc_receivers: HashMap<String, DccChatReceiver>,
+    dcc_resume_senders: HashMap<String, DccResumeSender>,
+    dcc_send_receivers: HashMap<String, DccSendReceiver>,
+    dcc_send_senders: HashMap<String, DccSendSender>,
     dcc_senders: HashMap<String, DccChatSender>,
-    dcc_chats: HashMap<String, DccChat>,
+    downloads: Vec<Download>,
     invite_window: ApplicationWindow,
     ip_window: ApplicationWindow,
     main_view: MainView,
@@ -78,11 +79,6 @@ pub struct InterfaceController {
     sender: Sender<ControllerMessage>,
     servername: String,
     username: String,
-    dcc_send_senders: HashMap<String, DccSendSender>,
-    dcc_send_receivers: HashMap<String, DccSendReceiver>,
-    dcc_resume_senders: HashMap<String, DccResumeSender>,
-    cancel_dialogs: HashMap<String, MessageDialog>,
-    downloads: Vec<Download>,
 }
 
 impl InterfaceController {
@@ -158,20 +154,17 @@ impl InterfaceController {
                 ChangeConversation { nickname } => {
                     self.change_conversation(nickname);
                 }
+                DeclineDccChat { client } => {
+                    self.decline_dcc_chat(client);
+                }
+                DownloadFile { sender, path } => {
+                    self.download_file(sender, path);
+                }
                 ErrorWhenAddingChannel { message } => {
                     self.error_when_adding_channel(message);
                 }
-                OpenDccInvitationView { client, message } => {
-                    self.open_dcc_invitation_view(client, message);
-                }
-                DccreceiveAccept { client } => {
-                    self.dcc_receive_accept(client);
-                }
-                DccreceiveDecline { client } => {
-                    self.dcc_receive_decline(client);
-                }
-                DeclineDccChat { client } => {
-                    self.decline_dcc_chat(client);
+                IgnoreFile { sender } => {
+                    self.ignore_file(sender);
                 }
                 JoinChannel { channel } => {
                     self.join_channel(channel);
@@ -179,10 +172,17 @@ impl InterfaceController {
                 KickMember { channel, member } => {
                     self.kick_member(channel, member);
                 }
+                OpenAddChannelView {} => {
+                    self.open_add_channel_view();
+                }
                 OpenAddClientView {
                     channels_and_clients,
-                } => {
-                    self.open_add_client_view(channels_and_clients);
+                } => self.open_add_client_view(channels_and_clients),
+                OpenDccInvitationView { client, message } => {
+                    self.open_dcc_invitation_view(client, message);
+                }
+                OpenFileDialogChooserView {} => {
+                    self.open_file_chooser_dialog_view();
                 }
                 OpenInviteClientView {
                     channels_and_clients,
@@ -194,6 +194,9 @@ impl InterfaceController {
                 }
                 OpenNotificationsView {} => {
                     self.open_notifications_view();
+                }
+                OpenRegisterView { address } => {
+                    self.open_register_view(address);
                 }
                 OpenUserInfoView {} => {
                     self.open_user_info_view();
@@ -207,23 +210,30 @@ impl InterfaceController {
                 ReceiveJoin { message } => {
                     self.receive_join(message);
                 }
+                ReceiveJoinNotification { message } => {
+                    self.receive_join_notification(message);
+                }
                 ReceiveKick { message } => {
                     self.receive_kick(message);
-                }
-                ReceiveListEnd {} => {
-                    self.receive_list_end();
                 }
                 ReceiveListLine { message } => {
                     self.receive_list_line(message);
                 }
-                ReceiveNamesLine { message } => {
-                    self.receive_names_line(message);
-                }
                 ReceiveNamesEnd {} => {
                     self.receive_names_end();
                 }
+                ReceiveNamesLine { message } => {
+                    self.receive_names_line(message);
+                }
                 ReceivePrivMessage { message } => {
                     self.receive_priv_message(message);
+                }
+                ReceiveResult {
+                    sender,
+                    name,
+                    result,
+                } => {
+                    self.receive_result(sender, name, result);
                 }
                 ReceiveSafeMessage { client, message } => {
                     self.receive_safe_message(client, message);
@@ -242,8 +252,8 @@ impl InterfaceController {
                 RemoveConversation {} => {
                     self.remove_conversation();
                 }
-                SendSafeConversationRequest {} => {
-                    self.send_safe_conversation_request();
+                SendDccSend { path, target } => {
+                    self.send_dcc_send(target, path);
                 }
                 SendInviteMessage { channel } => {
                     self.send_invite_message(channel);
@@ -275,33 +285,14 @@ impl InterfaceController {
                 SendQuitMessage {} => {
                     self.send_quit_message();
                 }
-                SendSafeMessage { client, message } => {
-                    self.send_safe_message(client, message);
-                }
-                ToRegister { address } => {
-                    self.to_register(address);
-                }
-                OpenFileDialogChooserView {} => {
-                    self.open_file_chooser_dialog_view();
-                }
-                SendFile { path, target } => {
-                    self.send_dcc_send(target, path);
-                }
-                DownloadFile { sender, path } => {
-                    self.download_file(sender, path);
-                }
-                IgnoreFile { sender } => {
-                    self.ignore_file(sender);
-                }
                 SendResult { sender, result } => {
                     self.send_result(sender, result);
                 }
-                ReceiveResult {
-                    sender,
-                    name,
-                    result,
-                } => {
-                    self.receive_result(sender, name, result);
+                SendSafeConversationRequest {} => {
+                    self.send_safe_conversation_request();
+                }
+                SendSafeMessage { client, message } => {
+                    self.send_safe_message(client, message);
                 }
             }
             // Returning false here would close the receiver

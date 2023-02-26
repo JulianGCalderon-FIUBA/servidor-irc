@@ -2,8 +2,8 @@
 pub mod requests;
 
 use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
     Application, ApplicationWindow, Button, Entry, Label, Orientation, PasswordEntry,
 };
 use gtk4 as gtk;
@@ -19,7 +19,7 @@ use super::{
     USERNAME_LABEL_TEXT,
 };
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::controller::{controller_message::ControllerMessage, utils::is_not_empty};
 
 const LOGIN_BUTTON_TEXT: &str = "Login";
 const ERR_FIELDS_REQUIRED: &str = "¡All fields are required!";
@@ -112,10 +112,10 @@ impl RegisterView {
     ) {
         self.login_button.connect_clicked(move |_| {
             error_label.set_text("");
-            let pass = pass_entry.text();
-            let nickname = nick_entry.text();
-            let username = username_entry.text();
-            let realname = realname_entry.text();
+            let pass = pass_entry.text().to_string();
+            let nickname = nick_entry.text().to_string();
+            let username = username_entry.text().to_string();
+            let realname = realname_entry.text().to_string();
 
             if Self::register_fiels_are_valid(&pass, &nickname, &username, &realname) {
                 register_request(pass, nickname, username, realname, sender.clone());
@@ -137,15 +137,15 @@ impl RegisterView {
     ///
     /// Returns a bool.
     fn register_fiels_are_valid(
-        pass: &GString,
-        nickname: &GString,
-        username: &GString,
-        realname: &GString,
+        pass: &str,
+        nickname: &str,
+        username: &str,
+        realname: &str,
     ) -> bool {
-        !realname.is_empty()
-            && !pass.is_empty()
-            && !nickname.is_empty()
-            && !username.is_empty()
+        is_not_empty(realname)
+            && is_not_empty(pass)
+            && is_not_empty(nickname)
+            && is_not_empty(username)
             && pass.len() < FIELD_MAX_CHARACTERS
             && nickname.len() < FIELD_MAX_CHARACTERS
             && nickname.len() < FIELD_MAX_CHARACTERS

@@ -5,12 +5,17 @@ pub mod controller_handler;
 /// Definition of messages the controller can send and receive.
 pub mod controller_message;
 pub mod interface_controller;
+pub mod utils;
 
 use gtk4 as gtk;
 
 use crate::{client::Client, ADDRESS};
 use gtk::{
-    gdk::Display, gio::ApplicationFlags, glib, prelude::*, Application, CssProvider, StyleContext,
+    gdk::Display,
+    gio::ApplicationFlags,
+    glib,
+    prelude::{ApplicationExt, ApplicationExtManual},
+    Application, CssProvider, StyleContext,
 };
 
 use self::{controller_message::ControllerMessage, interface_controller::InterfaceController};

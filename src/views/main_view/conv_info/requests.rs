@@ -4,7 +4,7 @@ use gtk4 as gtk;
 use crate::{
     controller::controller_message::ControllerMessage::{
         self, OpenFileDialogChooserView, RemoveConversation, SendNamesMessageToInviteClient,
-        SendNamesMessageToKnowMembers, SendPartMessage,
+        SendNamesMessageToKnowMembers, SendPartMessage, SendSafeConversationRequest,
     },
     views::ERROR_TEXT,
 };
@@ -34,7 +34,7 @@ pub fn add_invite_view_request(sender: Sender<ControllerMessage>) {
 
 pub fn add_safe_conversation_view_request(sender: Sender<ControllerMessage>) {
     sender
-        .send(ControllerMessage::SendSafeConversationRequest {})
+        .send(SendSafeConversationRequest {})
         .expect(ERROR_TEXT);
 }
 

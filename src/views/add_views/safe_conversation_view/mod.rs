@@ -5,14 +5,14 @@ pub mod requests;
 pub mod widgets_creation;
 
 use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
     Application, ApplicationWindow, Box, Button, Entry, Label, ScrolledWindow,
 };
 use gtk4 as gtk;
 
 use crate::{
-    controller::controller_message::ControllerMessage,
+    controller::{controller_message::ControllerMessage, utils::is_not_empty},
     views::{
         main_view::{
             utils::{adjust_scrollbar, entry_is_valid},
@@ -84,7 +84,7 @@ impl SafeConversationView {
 
         self.connect_send_button(
             self.input.clone(),
-            self.current_chat.label(),
+            self.current_chat.label().to_string(),
             self.sender.clone(),
             self.error_label.clone(),
         );
@@ -105,7 +105,7 @@ impl SafeConversationView {
     fn connect_send_button(
         &self,
         input: Entry,
-        current_chat: GString,
+        current_chat: String,
         sender: Sender<ControllerMessage>,
         error_label: Label,
     ) {
@@ -113,7 +113,7 @@ impl SafeConversationView {
             error_label.set_text("");
             let input_text = input.text();
             if !entry_is_valid(&input_text, MESSAGE_MAX_CHARACTERS) {
-                if !input_text.is_empty() {
+                if is_not_empty(&input_text) {
                     error_label.set_text(&format!(
                         "{MESSAGE_MAX_CHARACTERS_ERROR} Max: {MESSAGE_MAX_CHARACTERS} characters"
                     ));

@@ -15,14 +15,18 @@ use std::collections::HashMap;
 
 use gtk::{
     glib::Sender,
-    prelude::*,
+    prelude::ApplicationExt,
+    traits::{BoxExt, GtkWindowExt, WidgetExt},
     Application, ApplicationWindow, Box, Button, Entry, Label,
     Orientation::{Horizontal, Vertical},
     ScrolledWindow,
 };
 use gtk4 as gtk;
 
-use crate::controller::controller_message::ControllerMessage;
+use crate::controller::{
+    controller_message::ControllerMessage,
+    utils::{first_word_of_button, is_channel},
+};
 
 use self::{
     requests::quit_request,
@@ -48,6 +52,7 @@ const INVITE_BUTTON_TEXT: &str = "Invite to channel";
 const MEMBERS_BUTTON_TEXT: &str = "Members";
 const NO_NOTIFICATIONS_CSS: &str = "notifications_button";
 const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
+const NOTIFICATION_ON_BUTTON_CSS: &str = "notifications_button_on";
 const QUIT_BUTTON_TEXT: &str = "x";
 const SAFE_CONVERSATION_BUTTON_TEXT: &str = "🔐 Safe conversation 🔐";
 const SEND_FILE_BUTTON_TEXT: &str = "Send File";
@@ -55,6 +60,7 @@ const WELCOME_MESSAGE_CSS: &str = "welcome_message";
 const WELCOME_MESSAGE: &str = "Open a new chat to start...";
 const WELCOME_TITLE_CSS: &str = "welcome_title";
 const WELCOME_TITLE: &str = "Welcome to Lemon Pie IRC!";
+const CHAT_BUTTON_SELECTED_CSS: &str = "selected_chat_button";
 
 /// Shows main view.
 /// Contains the sidebar, chat and features.
@@ -158,5 +164,20 @@ impl MainView {
             quit_request(sender.clone());
             app.quit();
         });
+    }
+
+    pub fn find_button_by_name(&mut self, conv_name: &str) -> (Option<Button>, String) {
+        let vector = if is_channel(conv_name) {
+            self.channels_buttons.clone()
+        } else {
+            self.clients_buttons.clone()
+        };
+        let mut name = String::new();
+        let button = vector.into_iter().find(|button| {
+            name = first_word_of_button(button);
+            name == conv_name
+        });
+
+        (button, name)
     }
 }

@@ -1,7 +1,5 @@
 use std::{collections::HashMap, io, net::SocketAddr, path::PathBuf};
 
-use gtk4::glib::GString;
-
 use crate::message::Message;
 
 /// Possible messages or requests a Controller can receive.
@@ -11,26 +9,23 @@ pub enum ControllerMessage {
         address: SocketAddr,
     },
     AddNewClient {
-        new_client: GString,
+        new_client: String,
     },
     ChangeConversation {
         nickname: String,
     },
+    DeclineDccChat {
+        client: String,
+    },
+    DownloadFile {
+        sender: String,
+        path: PathBuf,
+    },
     ErrorWhenAddingChannel {
         message: String,
     },
-    OpenDccInvitationView {
-        client: String,
-        message: SocketAddr,
-    },
-    DccreceiveAccept {
-        client: String,
-    },
-    DccreceiveDecline {
-        client: String,
-    },
-    DeclineDccChat {
-        client: String,
+    IgnoreFile {
+        sender: String,
     },
     JoinChannel {
         channel: String,
@@ -39,9 +34,15 @@ pub enum ControllerMessage {
         channel: String,
         member: String,
     },
+    OpenAddChannelView {},
     OpenAddClientView {
         channels_and_clients: HashMap<String, Vec<String>>,
     },
+    OpenDccInvitationView {
+        client: String,
+        message: SocketAddr,
+    },
+    OpenFileDialogChooserView {},
     OpenInviteClientView {
         channels_and_clients: HashMap<String, Vec<String>>,
     },
@@ -49,8 +50,9 @@ pub enum ControllerMessage {
         message: Message,
     },
     OpenNotificationsView {},
-    OpenFileDialogChooserView {},
-    SendSafeConversationRequest {},
+    OpenRegisterView {
+        address: String,
+    },
     OpenUserInfoView {},
     OpenWarningView {
         message: String,
@@ -61,36 +63,47 @@ pub enum ControllerMessage {
     ReceiveJoin {
         message: Message,
     },
-    ReceiveKick {
+    ReceiveJoinNotification {
         message: Message,
     },
-    ReceiveListEnd {},
-    ReceiveNamesEnd {},
-    ReceivePrivMessage {
+    ReceiveKick {
         message: Message,
     },
     ReceiveListLine {
         message: Message,
     },
+    ReceiveNamesEnd {},
     ReceiveNamesLine {
         message: Message,
     },
+    ReceivePrivMessage {
+        message: Message,
+    },
+    ReceiveResult {
+        sender: String,
+        name: String,
+        result: Result<(), std::io::Error>,
+    },
+    ReceiveSafeMessage {
+        client: String,
+        message: String,
+    },
     Register {
-        pass: GString,
-        nickname: GString,
-        username: GString,
-        realname: GString,
+        pass: String,
+        nickname: String,
+        username: String,
+        realname: String,
     },
     RegularMessage {
         message: String,
     },
     RemoveConversation {},
-    ReceiveSafeMessage {
-        client: String,
-        message: String,
+    SendDccSend {
+        target: String,
+        path: PathBuf,
     },
     SendInviteMessage {
-        channel: GString,
+        channel: String,
     },
     SendJoinMessage {
         channel: String,
@@ -105,34 +118,16 @@ pub enum ControllerMessage {
     SendNamesMessageToKnowMembers {},
     SendPartMessage {},
     SendPrivMessage {
-        message: GString,
-    },
-    SendQuitMessage {},
-    SendSafeMessage {
-        client: String,
         message: String,
     },
-    ToRegister {
-        address: String,
-    },
-    SendFile {
-        target: String,
-        path: PathBuf,
-    },
-    DownloadFile {
-        sender: String,
-        path: PathBuf,
-    },
-    IgnoreFile {
-        sender: String,
-    },
+    SendQuitMessage {},
     SendResult {
         sender: String,
         result: io::Result<()>,
     },
-    ReceiveResult {
-        sender: String,
-        name: String,
-        result: Result<(), std::io::Error>,
+    SendSafeConversationRequest {},
+    SendSafeMessage {
+        client: String,
+        message: String,
     },
 }

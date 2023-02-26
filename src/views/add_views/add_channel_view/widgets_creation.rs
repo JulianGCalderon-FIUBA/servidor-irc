@@ -1,4 +1,4 @@
-use gtk::{prelude::*, Box, Button, ComboBoxText, Orientation};
+use gtk::{traits::WidgetExt, Box, Button, ComboBoxText, Orientation};
 use gtk4 as gtk;
 
 use crate::views::widgets_creation::create_button;

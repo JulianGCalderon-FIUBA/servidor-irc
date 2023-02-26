@@ -1,4 +1,4 @@
-use gtk::{prelude::*, Box, Button};
+use gtk::{traits::WidgetExt, Box, Button};
 use gtk4 as gtk;
 
 use super::{ACTIVE_SELECT_BUTTON_CSS, DISABLE_SELECT_BUTTON_CSS, INACTIVE_SELECT_BUTTON_CSS};

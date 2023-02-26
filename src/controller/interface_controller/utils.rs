@@ -1,22 +1,28 @@
-use std::{collections::HashMap, net::TcpStream};
+use std::{collections::HashMap, net::TcpStream, thread};
 
-use gtk4::glib::{Receiver, Sender};
+use gtk4::traits::WidgetExt;
 
 use crate::{
     controller::{
-        glib::{MainContext, PRIORITY_DEFAULT},
+        utils::{
+            all_clients, client_channels, get_sender_and_receiver, push_if_absent, remove_element,
+            remove_operator_indicator, OPERATOR_CHARACTER,
+        },
         NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
     },
-    ctcp::dcc_message::DccMessage,
+    ctcp::dcc_message::DccMessage::{
+        self, Accept, Chat, ChatAccept, ChatDecline, Close, Resume, Send, SendAccept, SendDecline,
+    },
     message::Message,
     server::consts::commands::NAMES_COMMAND,
 };
 
-use super::{names_message_intention::NamesMessageIntention, InterfaceController};
+use super::{
+    names_message_intention::NamesMessageIntention, window_creation::safe_conversation_view,
+    InterfaceController,
+};
 
 use crate::controller::controller_message::ControllerMessage::OpenWarningView;
-
-const CHANNEL_FIRST_CHARACTER: &str = "#";
 
 impl InterfaceController {
     /// Returns all clients to add.
@@ -61,10 +67,96 @@ impl InterfaceController {
         client_channels(channels_and_clients, self.current_conv.clone())
     }
 
+    pub fn dcc_receive_accept(&mut self, client: String) {
+        let mut dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
+        let dcc_std_receiver = dcc_chat.async_read_message();
+        self.dcc_chats.insert(client.clone(), dcc_chat);
+
+        let (dcc_sender, dcc_receiver) = get_sender_and_receiver();
+
+        thread::spawn(move || {
+            while let Ok(message_received) = dcc_std_receiver.recv() {
+                dcc_sender.send(message_received).expect("error");
+            }
+        });
+
+        self.receiver_attach(client.clone(), dcc_receiver, self.sender.clone());
+
+        self.safe_conversation_view = safe_conversation_view(self.nickname.clone(), &self.sender);
+        self.safe_conversation_view
+            .get_view(&client, self.app.clone())
+            .show();
+    }
+
+    pub fn dcc_receive_decline(&mut self, client: String) {
+        self.dcc_senders.remove(&client).unwrap().close();
+    }
+
+    pub fn get_stream(&mut self) -> TcpStream {
+        self.client.get_stream().unwrap()
+    }
+
+    pub fn receive_dcc_message(&mut self, message: Message, content: String) {
+        let (_, _, sender_nickname) = self.decode_priv_message(message);
+
+        let dcc_message = if let Ok(dcc_message) = DccMessage::parse(content) {
+            dcc_message
+        } else {
+            return;
+        };
+
+        match dcc_message {
+            Accept {
+                filename,
+                port,
+                position,
+            } => self.receive_dcc_accept(sender_nickname, filename, port, position),
+            Chat { address } => {
+                self.open_dcc_invitation_view(sender_nickname, address);
+            }
+            ChatAccept => {
+                self.dcc_receive_accept(sender_nickname);
+            }
+            ChatDecline => {
+                self.dcc_receive_decline(sender_nickname);
+            }
+            Close => todo!(),
+            Resume {
+                filename,
+                port,
+                position,
+            } => self.receive_dcc_resume(sender_nickname, filename, port, position),
+            Send {
+                filename,
+                address,
+                filesize,
+            } => {
+                self.receive_dcc_send(sender_nickname, filename, address, filesize);
+            }
+            SendAccept => {
+                self.receive_dcc_send_accept(sender_nickname);
+            }
+            SendDecline => {
+                self.receive_dcc_send_decline(sender_nickname);
+            }
+        }
+    }
+
+    pub fn receive_regular_privmsg(&mut self, message: Message) {
+        let (channel, message, sender_nickname) = self.decode_priv_message(message);
+        if let Some(..) = channel {
+            self.main_view
+                .receive_priv_channel_message(message, sender_nickname, channel.unwrap());
+        } else {
+            self.main_view
+                .receive_priv_client_message(message, sender_nickname);
+        }
+    }
+
     pub fn remove_myself(&mut self, all_clients: &mut Vec<String>) {
         let nickname = self.nickname.clone();
         remove_element(all_clients, &nickname);
-        remove_element(all_clients, &format!("@{nickname}"));
+        remove_element(all_clients, &format!("{}{nickname}", OPERATOR_CHARACTER));
     }
 
     pub fn send_names_message(
@@ -84,150 +176,4 @@ impl InterfaceController {
         };
         self.sender.send(to_send).expect(OPEN_WARNING_ERROR_TEXT);
     }
-
-    pub fn receive_regular_privmsg(&mut self, message: Message) {
-        let (channel, message, sender_nickname) = self.decode_priv_message(message);
-        if let Some(..) = channel {
-            self.main_view.receive_priv_channel_message(
-                message,
-                sender_nickname,
-                channel.unwrap(),
-                self.current_conv.clone(),
-            );
-        } else {
-            self.main_view
-                .receive_priv_client_message(message, sender_nickname);
-        }
-    }
-
-    pub fn receive_dcc_message(&mut self, message: Message, content: String) {
-        let (_, _, sender_nickname) = self.decode_priv_message(message);
-
-        let dcc_message = if let Ok(dcc_message) = DccMessage::parse(content) {
-            dcc_message
-        } else {
-            return;
-        };
-
-        match dcc_message {
-            DccMessage::Send {
-                filename,
-                address,
-                filesize,
-            } => {
-                self.receive_dcc_send(sender_nickname, filename, address, filesize);
-            }
-            DccMessage::SendAccept => {
-                self.receive_dcc_send_accept(sender_nickname);
-            }
-            DccMessage::SendDecline => {
-                self.receive_dcc_send_decline(sender_nickname);
-            }
-            DccMessage::Chat { address } => {
-                self.open_dcc_invitation_view(sender_nickname, address);
-            }
-            DccMessage::ChatAccept => {
-                self.dcc_receive_accept(sender_nickname);
-            }
-            DccMessage::ChatDecline => {
-                self.dcc_receive_decline(sender_nickname);
-            }
-            DccMessage::Close => todo!(),
-            DccMessage::Resume {
-                filename,
-                port,
-                position,
-            } => self.receive_dcc_resume(sender_nickname, filename, port, position),
-            DccMessage::Accept {
-                filename,
-                port,
-                position,
-            } => self.receive_dcc_accept(sender_nickname, filename, port, position),
-        }
-    }
-
-    pub fn get_stream(&mut self) -> TcpStream {
-        self.client.get_stream().unwrap()
-    }
-
-}
-
-/// Returns all clients.
-///
-/// Receives a HashMap<String, Vec<String>>, returns a Vec<String>
-pub fn all_clients(channels_and_clients: HashMap<String, Vec<String>>) -> Vec<String> {
-    let mut clients_set: Vec<String> = vec![];
-    for clients_of_channel in channels_and_clients.values() {
-        for client in clients_of_channel {
-            push_if_absent(&clients_set.clone(), &mut clients_set, client.to_string());
-        }
-    }
-    clients_set
-}
-
-/// Returns channels that are not from the current user.
-///
-/// Receives a Vec<String> and a Vec<String>, returns a Vec<String>
-pub fn channels_not_mine(all: Vec<String>, mine: Vec<String>) -> Vec<String> {
-    let mut not_mine: Vec<String> = vec![];
-    for element in &all {
-        push_if_absent(&mine, &mut not_mine, element.to_string());
-    }
-    not_mine
-}
-
-/// Returns all channels from a client.
-///
-/// Receives a HashMap<String, Vec<String>> and a String, returns a Vec<String>
-pub fn client_channels(
-    channels_and_clients: HashMap<String, Vec<String>>,
-    client: String,
-) -> Vec<String> {
-    let mut client_channels_set: Vec<String> = vec![];
-    for channel in channels_and_clients.keys() {
-        let mut clients: Vec<String> = vec![];
-        for element in channels_and_clients.get(channel).unwrap() {
-            let element_without_operator_indicator: String = remove_operator_indicator(element);
-            clients.push(element_without_operator_indicator);
-        }
-        if clients.contains(&client) {
-            client_channels_set.push((&channel).to_string());
-        }
-    }
-    client_channels_set
-}
-
-/// Returns a bool indicating if the conversation is a channel or not.
-///
-/// Receives a String, returns a bool
-pub fn is_channel(parameter: String) -> bool {
-    parameter.starts_with(CHANNEL_FIRST_CHARACTER)
-}
-
-pub fn is_not_empty(vector: &Vec<String>) -> bool {
-    !vector.is_empty()
-}
-
-pub fn push_if_absent(original_vector: &[String], new_vector: &mut Vec<String>, element: String) {
-    if !original_vector.contains(&element) {
-        new_vector.push(element);
-    }
-}
-
-pub fn remove_element(vector: &mut Vec<String>, element: &String) {
-    if vector.contains(element) {
-        vector.remove(vector.iter().position(|x| x == element).unwrap());
-    }
-}
-
-pub fn remove_operator_indicator(element: &str) -> String {
-    if let Some(stripped) = element.strip_prefix('@') {
-        stripped.to_string()
-    } else {
-        element.to_string()
-    }
-}
-
-pub fn get_sender_and_receiver() -> (Sender<String>, Receiver<String>) {
-    MainContext::channel(PRIORITY_DEFAULT)
 }

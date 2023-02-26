@@ -1,5 +1,5 @@
 use gtk::{
-    prelude::*,
+    traits::WidgetExt,
     Align::{End, Start},
     Label,
 };

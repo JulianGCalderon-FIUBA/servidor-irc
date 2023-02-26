@@ -7,12 +7,17 @@ pub mod utils;
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
+use gtk::prelude::ComboBoxExtManual;
 use gtk::Label;
 use gtk::{
-    glib::Sender, prelude::*, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
+    glib::Sender, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
     Orientation::Horizontal, Orientation::Vertical,
 };
 use gtk4 as gtk;
+use gtk4::{
+    prelude::EditableExt,
+    traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
+};
 
 use self::requests::join_channel_request;
 use self::utils::{active_button, disable_button, disactive_button, switch_visibility};
@@ -27,6 +32,7 @@ use super::{
 };
 
 use crate::controller::controller_message::ControllerMessage;
+use crate::controller::utils::{is_channel, is_not_empty, vec_is_not_empty};
 use crate::views::widgets_creation::{
     build_application_window, create_center_button, create_error_label, create_label,
     create_label_input_box,
@@ -126,7 +132,7 @@ impl AddChannelView {
             self.error_label.clone(),
             self.sender.clone(),
         );
-        if !self.channels.is_empty() {
+        if vec_is_not_empty(&self.channels) {
             self.connect_add_existing_channel_button(
                 self.channel_combobox.clone(),
                 self.sender.clone(),
@@ -235,7 +241,7 @@ impl AddChannelView {
             error_label.set_text("");
 
             if !entry_is_valid(&text, CHANNEL_NAME_MAX_CHARACTERS) {
-                if !text.is_empty() {
+                if is_not_empty(&text) {
                     error_label.set_text(ERR_CHANNEL_NAME_TOO_LONG);
                 } else {
                     error_label.set_text(&format!(
@@ -244,7 +250,7 @@ impl AddChannelView {
                 }
                 return;
             }
-            if !text.starts_with(CHANNEL_FIRST_CHARACTER) {
+            if !is_channel(&text) {
                 text = format!("{CHANNEL_FIRST_CHARACTER}{text}");
             }
 

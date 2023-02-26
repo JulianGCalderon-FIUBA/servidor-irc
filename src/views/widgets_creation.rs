@@ -1,5 +1,5 @@
 use gtk::{
-    prelude::*,
+    traits::{BoxExt, WidgetExt},
     Align::{Center, End},
     ApplicationWindow, Box, Button, Entry, Label, Orientation,
     Orientation::{Horizontal, Vertical},
