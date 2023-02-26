@@ -23,7 +23,8 @@ use self::requests::{
 use super::{MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS};
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
-const SAFE_CONVERSATION_BUTTON_CSS: &str = "safe_conversation";
+pub const SAFE_CONVERSATION_BUTTON_CSS: &str = "safe_conversation";
+pub const DISABLE_SAFE_CONVERSATION_BUTTON_CSS: &str = "disable_safe_conversation";
 
 impl MainView {
     /// Creates conversation info widgets.
