@@ -4,13 +4,13 @@ use gtk4 as gtk;
 use super::{ACTIVE_SELECT_BUTTON_CSS, DISABLE_SELECT_BUTTON_CSS, INACTIVE_SELECT_BUTTON_CSS};
 
 /// Changes css to active button
-pub fn active_button(button: Button) {
+pub fn activate_button(button: Button) {
     button.remove_css_class(INACTIVE_SELECT_BUTTON_CSS);
     button.add_css_class(ACTIVE_SELECT_BUTTON_CSS);
 }
 
 /// Changes css to disactive button
-pub fn disactive_button(button: Button) {
+pub fn disactivate_button(button: Button) {
     button.remove_css_class(ACTIVE_SELECT_BUTTON_CSS);
     button.add_css_class(INACTIVE_SELECT_BUTTON_CSS);
     button.set_has_tooltip(false);
