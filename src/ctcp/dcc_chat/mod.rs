@@ -21,7 +21,7 @@ pub struct DccChat {
 }
 
 impl DccChat {
-    /// Creates new [`DccChat`]
+    /// Creates new [`DccChat`] containing the stream through which the clients comunicate with each other.
     pub fn new(stream: TcpStream) -> io::Result<Self> {
         let read_stream = Some(stream.try_clone()?);
         let magic_crypt = new_magic_crypt!("magickey", 256);
@@ -33,13 +33,14 @@ impl DccChat {
         })
     }
 
+    /// Connects to the received address and returns a connected [`DccChat`].
     pub fn connect(address: SocketAddr) -> io::Result<Self> {
         let stream = TcpStream::connect(address)?;
 
         Self::new(stream)
     }
 
-    /// Sends message to connected stream.
+    /// Sends encrypted message to connected stream.
     pub fn send_raw(&mut self, message: &str) -> io::Result<()> {
         let bytes = self.magic_crypt.encrypt_str_to_base64(message);
 
@@ -47,6 +48,7 @@ impl DccChat {
         self.stream.write_all(CRLF)
     }
 
+    /// In a separate thread, reads and decrypts messages received through connected stream. The messages are then sent through a channel and the receiver containing the message is returned.
     pub fn async_read_message(&mut self) -> Receiver<String> {
         let (sender, receiver) = mpsc::channel();
 
@@ -66,6 +68,7 @@ impl DccChat {
     }
 }
 
+/// Reads from stream one line at a time and removes CRLF.
 fn read_message(stream: &mut TcpStream) -> io::Result<String> {
     let mut content = String::new();
 
