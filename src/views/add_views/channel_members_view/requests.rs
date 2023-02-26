@@ -1,8 +1,6 @@
 use crate::controller::controller_message::ControllerMessage::{self, SendKickMessage};
 use crate::views::ERROR_TEXT;
-use gtk::glib::Sender;
-
-use gtk4 as gtk;
+use gtk4::glib::Sender;
 
 /// Sends a kick request to the controller.  
 ///

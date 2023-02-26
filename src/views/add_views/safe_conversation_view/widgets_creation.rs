@@ -1,9 +1,6 @@
-use gtk4 as gtk;
+use gtk4::{traits::WidgetExt, Align::Center, Label};
 
-use gtk::{ traits::WidgetExt, Align::Center, Label };
-
-const DCC_CHATS_DESCRIPTION: &str =
-    "𝘿𝙞𝙧𝙚𝙘𝙩 𝘾𝙡𝙞𝙚𝙣𝙩-𝙏𝙤-𝘾𝙡𝙞𝙚𝙣𝙩 𝙘𝙝𝙖𝙩𝙨:
+const DCC_CHATS_DESCRIPTION: &str = "𝘿𝙞𝙧𝙚𝙘𝙩 𝘾𝙡𝙞𝙚𝙣𝙩-𝙏𝙤-𝘾𝙡𝙞𝙚𝙣𝙩 𝙘𝙝𝙖𝙩𝙨:
 • Use end-to-end encryption.
 • Have no message length limit.
 • Avoid delays and saturation.
@@ -14,9 +11,7 @@ pub fn create_initial_message(nickname: &str, client: &str) -> Label {
         "This is a dcc chat between {} and {}
 
 {}",
-        nickname,
-        client,
-        DCC_CHATS_DESCRIPTION
+        nickname, client, DCC_CHATS_DESCRIPTION
     );
     let message = Label::builder()
         .label(&label_text)

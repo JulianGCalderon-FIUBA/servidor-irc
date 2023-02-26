@@ -7,15 +7,13 @@ pub mod controller_message;
 pub mod interface_controller;
 pub mod utils;
 
-use gtk4 as gtk;
-
 use crate::{client::Client, ADDRESS};
-use gtk::{
+use gtk4::{
     gdk::Display,
     gio::ApplicationFlags,
     glib,
     prelude::{ApplicationExt, ApplicationExtManual},
-    Application, CssProvider, StyleContext,
+    Application, CssProvider, StyleContext, STYLE_PROVIDER_PRIORITY_APPLICATION,
 };
 
 use self::{controller_message::ControllerMessage, interface_controller::InterfaceController};
@@ -76,7 +74,7 @@ impl Controller {
         StyleContext::add_provider_for_display(
             &Display::default().expect(DISPLAY_CONNECT_ERROR_TEXT),
             &provider,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+            STYLE_PROVIDER_PRIORITY_APPLICATION,
         );
     }
 

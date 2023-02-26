@@ -3,12 +3,11 @@ mod widgets_creation;
 
 use std::collections::{hash_map::RandomState, HashMap};
 
-use gtk::{
+use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
-    Box, Button, Label, Orientation::Vertical,
+    Box, Button, Label,
 };
-use gtk4 as gtk;
 
 use crate::{
     controller::{
@@ -29,7 +28,7 @@ use self::{
         add_notifications_view_request, add_user_info_view, add_view_to_add_client_request,
         send_list_request,
     },
-    widgets_creation::create_separator_sidebar,
+    widgets_creation::{create_separator_sidebar, create_sidebar_box},
 };
 
 use super::{
@@ -50,10 +49,7 @@ const CLIENTS_TITLE: &str = "Clients";
 impl MainView {
     /// Creates sidebar widgets.
     pub fn create_sidebar(&mut self) -> Box {
-        let sidebar = Box::builder()
-            .width_request(200)
-            .orientation(Vertical)
-            .build();
+        let sidebar = create_sidebar_box();
 
         //Channels box
         let channels_title = create_title(CHANNELS_TITLE);

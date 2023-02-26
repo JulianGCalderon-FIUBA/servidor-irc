@@ -3,21 +3,18 @@ pub mod requests;
 
 use std::{net::IpAddr, str::FromStr};
 
-use gtk::{
+use gtk4::{
     glib::Sender,
-    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
-    Application, ApplicationWindow, Button, Entry, Orientation::Vertical,
+    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt},
+    Application, ApplicationWindow, Button, Entry,
+    Orientation::Vertical,
 };
-use gtk4 as gtk;
 
 use self::requests::to_register_request;
 
-use super::{
-    widgets_creation::{
-        build_application_window, create_center_button, create_entry, create_label,
-        create_label_input_box, create_main_box,
-    },
-    MAIN_BOX_CSS,
+use super::widgets_creation::{
+    build_application_window, create_center_button, create_entry, create_label,
+    create_label_input_box, create_main_box,
 };
 
 use crate::{controller::controller_message::ControllerMessage, ADDRESS};
@@ -53,7 +50,6 @@ impl IpView {
         window.set_application(Some(&app));
 
         let main_box = create_main_box(Vertical, 150, 300);
-        main_box.add_css_class(MAIN_BOX_CSS);
 
         let address_box = create_label_input_box(ADDRESS_LABEL_TEXT);
         address_box.append(&self.address_entry);

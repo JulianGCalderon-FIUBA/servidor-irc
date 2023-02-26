@@ -4,12 +4,11 @@ pub mod requests;
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
-use gtk::{
+use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, GtkWindowExt},
-    Application, ApplicationWindow, Button,
+    Application, ApplicationWindow, Box, Button,
 };
-use gtk4 as gtk;
 
 use crate::{
     controller::controller_message::ControllerMessage,
@@ -90,7 +89,7 @@ impl ChannelMembersView {
     /// Lists all members of the channel for the operator.
     ///
     /// List members with a kick button next to them.
-    fn list_members(&mut self, main_box: gtk::Box, window: ApplicationWindow) {
+    fn list_members(&mut self, main_box: Box, window: ApplicationWindow) {
         let im_operator = self.nickname.clone() == self.get_operator();
 
         for client in self.clients.clone() {

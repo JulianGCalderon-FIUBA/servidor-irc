@@ -1,8 +1,6 @@
 use crate::controller::controller_message::ControllerMessage::{self, SendJoinMessage};
 use crate::views::ERROR_TEXT;
-use gtk::glib::Sender;
-
-use gtk4 as gtk;
+use gtk4::glib::Sender;
 
 /// Sends a join request to the controller.  
 ///

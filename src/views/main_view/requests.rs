@@ -1,5 +1,4 @@
-use gtk::glib::Sender;
-use gtk4 as gtk;
+use gtk4::glib::Sender;
 
 use crate::views::main_view::ControllerMessage::{ChangeConversation, SendQuitMessage};
 use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};

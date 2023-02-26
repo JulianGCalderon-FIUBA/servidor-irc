@@ -1,5 +1,4 @@
-use gtk4 as gtk;
-use gtk::{traits::WidgetExt, Box, Button, ComboBoxText, Orientation, Align::Center};
+use gtk4::{traits::WidgetExt, Align::Center, Box, Button, ComboBoxText, Orientation};
 
 use crate::views::widgets_creation::create_button;
 

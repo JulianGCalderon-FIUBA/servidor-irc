@@ -1,12 +1,13 @@
 /// Contains definition of used requests.
 pub mod requests;
 
-use gtk::{
+use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
-    Application, ApplicationWindow, Button, Entry, Label, Orientation::Vertical, PasswordEntry,
+    Application, ApplicationWindow, Button, Entry, Label,
+    Orientation::Vertical,
+    PasswordEntry,
 };
-use gtk4 as gtk;
 
 use self::requests::register_request;
 
@@ -15,8 +16,7 @@ use super::{
         build_application_window, create_center_button, create_entry, create_error_label,
         create_label_input_box, create_main_box, create_password_entry,
     },
-    MAIN_BOX_CSS, NICKNAME_LABEL_TEXT, PASSWORD_LABEL_TEXT, REALNAME_LABEL_TEXT,
-    USERNAME_LABEL_TEXT,
+    NICKNAME_LABEL_TEXT, PASSWORD_LABEL_TEXT, REALNAME_LABEL_TEXT, USERNAME_LABEL_TEXT,
 };
 
 use crate::controller::{controller_message::ControllerMessage, utils::is_not_empty};
@@ -61,7 +61,6 @@ impl RegisterView {
         window.set_application(Some(&app));
 
         let main_box = create_main_box(Vertical, 300, 300);
-        main_box.add_css_class(MAIN_BOX_CSS);
 
         let realname_box = create_label_input_box(REALNAME_LABEL_TEXT);
         realname_box.append(&self.realname_entry);

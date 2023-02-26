@@ -13,15 +13,14 @@ mod sidebar;
 
 use std::collections::HashMap;
 
-use gtk::{
+use gtk4::{
     glib::Sender,
     prelude::ApplicationExt,
     traits::{BoxExt, GtkWindowExt, WidgetExt},
     Application, ApplicationWindow, Box, Button, Entry, Label,
-    Orientation::{Horizontal, Vertical},
+    Orientation::Vertical,
     ScrolledWindow,
 };
-use gtk4 as gtk;
 
 use crate::controller::{
     controller_message::ControllerMessage,
@@ -31,8 +30,9 @@ use crate::controller::{
 use self::{
     requests::quit_request,
     widgets_creation::{
-        create_add_button, create_channels_and_client_box, create_current_chat, create_message_box,
-        create_notifications_button, create_scrollwindow, create_welcome_box,
+        create_add_button, create_channels_and_client_box, create_current_chat,
+        create_main_view_box, create_message_box, create_notifications_button, create_scrollwindow,
+        create_welcome_box,
     },
 };
 
@@ -41,7 +41,7 @@ use super::{
         build_application_window, create_button_with_margin, create_entry, create_error_label,
         create_scrollwindow_chat, create_separator,
     },
-    ENTRY_PLACEHOLDER, MAIN_BOX_CSS, SEND_BUTTON_TEXT,
+    ENTRY_PLACEHOLDER, SEND_BUTTON_TEXT,
 };
 
 const ADD_BUTTON_CSS: &str = "add";
@@ -132,12 +132,7 @@ impl MainView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = Box::builder()
-            .orientation(Horizontal)
-            .halign(gtk::Align::Center)
-            .width_request(600)
-            .build();
-        main_box.add_css_class(MAIN_BOX_CSS);
+        let main_box = create_main_view_box();
 
         let sidebar = self.create_sidebar();
         main_box.append(&sidebar);

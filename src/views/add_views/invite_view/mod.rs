@@ -1,13 +1,13 @@
 /// Contains definition of used requests.
 pub mod request;
 
-use gtk::prelude::ComboBoxExtManual;
-use gtk::traits::{BoxExt, ButtonExt, GtkWindowExt};
-use gtk::ComboBoxText;
-use gtk::{glib::Sender, Application, ApplicationWindow, Button};
-use gtk4 as gtk;
-
 use self::request::invite_request;
+use gtk4::{
+    glib::Sender,
+    prelude::ComboBoxExtManual,
+    traits::{BoxExt, ButtonExt, GtkWindowExt},
+    Application, ApplicationWindow, Button, ComboBoxText,
+};
 
 use super::add_channel_view::widgets_creation::create_combobox;
 use super::widgets_creation::create_main_box_add_view;
@@ -22,8 +22,8 @@ const CHANNEL_LABEL_TEXT: &str = "Channel:";
 const INVITE_BUTTON_TEXT: &str = "Send invite";
 const TITLE: &str = "Send invite";
 
-/// Shows invite view.  
-/// Contains a channel entry and an invite button.  
+/// Shows invite view.
+/// Contains a channel entry and an invite button.
 /// Uses sender to communicate with controller.
 pub struct InviteView {
     channel_combobox: ComboBoxText,

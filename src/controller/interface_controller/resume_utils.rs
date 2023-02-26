@@ -10,7 +10,7 @@ use gtk4::{
 
 use crate::{
     controller::controller_message::ControllerMessage::{
-        DownloadFile, IgnoreFile, ReceiveResult, SendResult, self,
+        self, DownloadFile, IgnoreFile, ReceiveResult, SendResult,
     },
     ctcp::dcc_send::{dcc_send_receiver::DccSendReceiver, file_transfer::TransferController},
     macros::{ok_or_return, some_or_return},

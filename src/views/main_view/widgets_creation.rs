@@ -1,18 +1,30 @@
-use gtk::{
+use gtk4::{
     traits::{BoxExt, WidgetExt},
     Align::{Center, Start},
     Box, Button, Label,
-    Orientation::Vertical,
+    Orientation::{Horizontal, Vertical},
     ScrolledWindow,
 };
-use gtk4 as gtk;
 
-use crate::views::widgets_creation::{create_button, create_button_with_margin};
+use crate::views::{
+    widgets_creation::{create_button, create_button_with_margin},
+    MAIN_BOX_CSS,
+};
 
 use super::{
     ADD_BUTTON_CSS, CURRENT_CHAT_TITLE_CSS, NO_NOTIFICATIONS_CSS, NO_NOTIFICATIONS_TEXT,
     WELCOME_MESSAGE, WELCOME_MESSAGE_CSS, WELCOME_TITLE, WELCOME_TITLE_CSS,
 };
+
+pub fn create_main_view_box() -> Box {
+    let main_box = Box::builder()
+        .orientation(Horizontal)
+        .halign(Center)
+        .width_request(600)
+        .build();
+    main_box.add_css_class(MAIN_BOX_CSS);
+    main_box
+}
 
 /// Creates gtk button with a label.
 ///

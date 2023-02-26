@@ -1,9 +1,4 @@
-use gtk::{
-    traits::WidgetExt,
-    Align::Start,
-    Label,
-};
-use gtk4 as gtk;
+use gtk4::{traits::WidgetExt, Align::Start, Label};
 
 use super::MESSAGE_SENDER_NAME_CSS;
 

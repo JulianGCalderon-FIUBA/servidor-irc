@@ -1,30 +1,27 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{
+use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
     Box, Entry, Label,
 };
-use gtk4 as gtk;
 
 use crate::{
     controller::{controller_message::ControllerMessage, utils::is_not_empty},
     views::{
         main_view::utils::entry_is_valid,
         utils::do_break_line,
-        widgets_creation::{create_chat_box, create_label, create_message_sender_box, create_send_message, create_received_message},
+        widgets_creation::{
+            create_chat_box, create_label, create_message_sender_box, create_received_message,
+            create_send_message,
+        },
         EMPTY_MESSAGE_ERROR, MESSAGE_MAX_CHARACTERS, MESSAGE_MAX_CHARACTERS_ERROR,
         MESSAGE_MAX_LINE_CHARACTERS,
     },
 };
 
-use self::{
-    requests::priv_message_request,
-    widgets_creation::{
-         create_sender_nickname_label,
-    },
-};
+use self::{requests::priv_message_request, widgets_creation::create_sender_nickname_label};
 
 use super::{
     utils::{add_notification_to_button, adjust_scrollbar},

@@ -1,11 +1,11 @@
 pub mod requests;
+pub mod widgets_creation;
 
-use gtk::{
+use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
-    Align::Start, Box, Button, Label, Orientation::Vertical,
+    Box, Button, Label,
 };
-use gtk4 as gtk;
 
 use crate::{
     controller::{
@@ -15,9 +15,12 @@ use crate::{
     server::consts::channel::MAX_CHANNELS,
 };
 
-use self::requests::{
-    add_invite_view_request, add_safe_conversation_view_request, quit_channel_request,
-    remove_conversation_request, send_file_request, send_names_request,
+use self::{
+    requests::{
+        add_invite_view_request, add_safe_conversation_view_request, quit_channel_request,
+        remove_conversation_request, send_file_request, send_names_request,
+    },
+    widgets_creation::create_conv_info_box,
 };
 
 use super::{MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS};
@@ -33,12 +36,7 @@ const INPUT_MESSAGE_TOOLTIP: &str =
 impl MainView {
     /// Creates conversation info widgets.
     pub fn create_conv_info(&mut self, nickname: &str) -> Box {
-        let conv_info = Box::builder()
-            .orientation(Vertical)
-            .width_request(250)
-            .margin_end(12)
-            .halign(Start)
-            .build();
+        let conv_info = create_conv_info_box();
 
         self.quit_channel_button
             .add_css_class(EXIT_CHANNEL_BUTTON_CSS);

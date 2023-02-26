@@ -7,16 +7,14 @@ pub mod utils;
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
-use gtk::prelude::ComboBoxExtManual;
-use gtk::Label;
-use gtk::{
-    glib::Sender, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
-    Orientation::Horizontal, Orientation::Vertical,
-};
-use gtk4 as gtk;
 use gtk4::{
+    glib::Sender,
+    prelude::ComboBoxExtManual,
     prelude::EditableExt,
     traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
+    Application, ApplicationWindow, Box, Button, ComboBoxText, Entry, Label,
+    Orientation::Horizontal,
+    Orientation::Vertical,
 };
 
 use self::requests::join_channel_request;
