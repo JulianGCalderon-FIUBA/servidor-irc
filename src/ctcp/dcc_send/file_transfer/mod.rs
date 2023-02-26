@@ -10,6 +10,8 @@ use std::{
 
 pub use transfer_controller::TransferController;
 
+/// Responsible of sending and receiving file via a TcpStream
+/// Can be cancelled using the corresponding controller
 pub struct FileTransferer {
     stream: TcpStream,
     filename: PathBuf,
@@ -18,6 +20,10 @@ pub struct FileTransferer {
 }
 
 impl FileTransferer {
+    /// Creates a file transferer
+    /// returns itself, and it's corresponding controller.
+    /// Each transferer is created from a stream and a file,
+    /// the desired operation is choosed with the corresponding method
     pub fn new(stream: TcpStream, filename: PathBuf, filesize: u64) -> (Self, TransferController) {
         let cancelled = Arc::new(AtomicBool::new(false));
         let file_transferer = Self {
@@ -31,17 +37,20 @@ impl FileTransferer {
 
         (file_transferer, controller)
     }
-
+    /// Sends file through the stream
+    /// File must exist
     pub fn upload_file(self) -> io::Result<()> {
         self.resume_upload_file(0)
     }
-
+    /// Reads file from the stream and saves to corresponding file
+    /// File will be created if not found, or truncated
     pub fn download_file(self) -> io::Result<()> {
         let file = File::create(self.filename.clone())?;
 
         self.send_to_file(file)
     }
 
+    /// Sends file through the stream, starting at position.
     pub fn resume_upload_file(mut self, position: u64) -> io::Result<()> {
         let mut file = File::open(self.filename.clone())?;
         file.seek(SeekFrom::Start(position))?;
@@ -51,6 +60,8 @@ impl FileTransferer {
         self.send_to_stream(file)
     }
 
+    /// Reads file through the stream, starting at position.
+    /// File must exist
     pub fn resume_download_file(mut self, position: u64) -> io::Result<()> {
         let mut file = OpenOptions::new()
             .append(true)
@@ -83,6 +94,8 @@ impl FileTransferer {
     }
 }
 
+/// Reads the entire content of 'from' and writes it to 'to' using buffer of size 1024.
+/// Operation can be interrupted storing 'true' in 'cancelled'.
 fn copy<R: Read, W: Write>(
     cancelled: Arc<AtomicBool>,
     from: &mut R,

@@ -24,11 +24,7 @@ const CHAT_DECLINE_PROTOCOL: &str = "decline";
 const SEND_ACCEPT_PROTOCOL: &str = "accept";
 const SEND_DECLINE_PROTOCOL: &str = "decline";
 
-/*
-   DCC CHAT accept
-   DCC CHAT decline
-*/
-
+/// This structure parses dcc messages into the corresponding variation, storing its parameters.
 #[derive(Debug)]
 pub enum DccMessage {
     Send {
@@ -57,6 +53,8 @@ pub enum DccMessage {
 }
 
 impl DccMessage {
+    /// Parses a String and creates de corresponding DccMessage.
+    /// Fails if encounters an invalid or missing parameter
     pub fn parse(message: String) -> Result<Self, DccParsingError> {
         let mut arguments: Vec<String> = message.split(' ').map(|s| s.to_string()).collect();
         arguments.reverse();
