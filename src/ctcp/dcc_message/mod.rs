@@ -114,11 +114,7 @@ fn parse_send_command(mut arguments: Vec<String>) -> Result<DccMessage, DccParsi
 
     let address = parse_address(&mut arguments)?;
 
-    let filesize = some_or_return!(arguments.pop(), Err(DccParsingError::NoFilesize));
-    let filesize = ok_or_return!(
-        filesize.parse::<u64>(),
-        Err(DccParsingError::InvalidFilesize)
-    );
+    let filesize = parse_filesize(&mut arguments)?;
 
     Ok(DccMessage::Send {
         filename,
@@ -127,23 +123,39 @@ fn parse_send_command(mut arguments: Vec<String>) -> Result<DccMessage, DccParsi
     })
 }
 
+fn parse_filesize(arguments: &mut Vec<String>) -> Result<u64, DccParsingError> {
+    let filesize = some_or_return!(arguments.pop(), Err(DccParsingError::NoFilesize));
+
+    let filesize = ok_or_return!(
+        filesize.parse::<u64>(),
+        Err(DccParsingError::InvalidFilesize)
+    );
+
+    Ok(filesize)
+}
+
 fn parse_resume_command(mut arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {
     let filename = some_or_return!(arguments.pop(), Err(DccParsingError::NoFilename));
 
     let port = some_or_return!(arguments.pop(), Err(DccParsingError::NoPort));
     let port = ok_or_return!(port.parse::<u16>(), Err(DccParsingError::InvalidPort));
 
-    let position = some_or_return!(arguments.pop(), Err(DccParsingError::NoPosition));
-    let position = ok_or_return!(
-        position.parse::<u64>(),
-        Err(DccParsingError::InvalidPosition)
-    );
+    let position = parse_position(&mut arguments)?;
 
     Ok(DccMessage::Resume {
         filename,
         port,
         position,
     })
+}
+
+fn parse_position(arguments: &mut Vec<String>) -> Result<u64, DccParsingError> {
+    let position = some_or_return!(arguments.pop(), Err(DccParsingError::NoPosition));
+    let position = ok_or_return!(
+        position.parse::<u64>(),
+        Err(DccParsingError::InvalidPosition)
+    );
+    Ok(position)
 }
 
 fn parse_accept_command(arguments: Vec<String>) -> Result<DccMessage, DccParsingError> {

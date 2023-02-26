@@ -3,7 +3,7 @@ pub mod decode_message;
 mod download;
 pub mod message_matcher;
 pub mod names_message_intention;
-mod resume_utils;
+mod send_utils;
 pub mod utils;
 pub mod window_creation;
 
