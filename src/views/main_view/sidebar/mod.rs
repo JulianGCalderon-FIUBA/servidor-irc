@@ -6,7 +6,7 @@ use std::collections::{hash_map::RandomState, HashMap};
 use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
-    Box, Button, Label,
+    Box, Button, Label, Orientation,
 };
 
 use crate::{
