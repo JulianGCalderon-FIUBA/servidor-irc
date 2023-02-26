@@ -7,6 +7,7 @@ use crate::message::CRLF;
 
 use super::DccChat;
 
+/// Handles the sending end of a DCC CHAT request.
 pub struct DccChatSender {
     _server: TcpStream,
     _client: String,
@@ -14,6 +15,7 @@ pub struct DccChatSender {
 }
 
 impl DccChatSender {
+    ///  Sends DCC CHAT request to a client and creates listener that waits for someone to connect. Returns a [`DccChatSender`] containing information about the client that will receive the request.
     pub fn send(mut server: TcpStream, client: String) -> io::Result<Self> {
         let listener = TcpListener::bind("127.0.0.1:9001")?;
 
@@ -32,10 +34,12 @@ impl DccChatSender {
         })
     }
 
+    /// Creates new [`DccChat`] with the stream that connected to the listener.
     pub fn accept(self) -> io::Result<DccChat> {
         let stream = self.listener.accept()?.0;
         DccChat::new(stream)
     }
 
+    /// Called when the request is rejected. Drops [`DccChatSender`].
     pub fn close(self) {}
 }
