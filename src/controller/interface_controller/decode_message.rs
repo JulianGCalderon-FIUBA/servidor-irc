@@ -42,28 +42,8 @@ impl InterfaceController {
         (channel, kicked)
     }
 
-    pub fn process_list_end_message(&mut self) -> Vec<String> {
-        let channels: Vec<String> = self.accumulated_channels_from_list.clone();
-        self.accumulated_channels_from_list = vec![];
-
-        channels
-    }
-
     pub fn decode_list_line_message(&mut self, message: Message) -> String {
         get_message_parameter(&message, 0) // channel
-    }
-
-    pub fn process_names_end_message(&mut self) -> HashMap<String, Vec<String>> {
-        let mut channels_and_clients: HashMap<String, Vec<String>> = HashMap::new();
-        for i in 0..self.accumulated_channels_from_names.len() {
-            let channel = self.accumulated_channels_from_names[i].clone();
-            let clients_in_channel = self.accumulated_clients_from_names[i].clone();
-            channels_and_clients.insert(channel, clients_in_channel);
-        }
-        self.accumulated_channels_from_names = vec![];
-        self.accumulated_clients_from_names = vec![];
-
-        channels_and_clients
     }
 
     pub fn decode_names_line_message(&mut self, message: Message) -> (String, Vec<String>) {
@@ -98,5 +78,25 @@ impl InterfaceController {
         let nickname = trailing_strings[4].to_string();
 
         (nickname, realname, servername, username)
+    }
+
+    pub fn process_list_end_message(&mut self) -> Vec<String> {
+        let channels: Vec<String> = self.accumulated_channels_from_list.clone();
+        self.accumulated_channels_from_list = vec![];
+
+        channels
+    }
+
+    pub fn process_names_end_message(&mut self) -> HashMap<String, Vec<String>> {
+        let mut channels_and_clients: HashMap<String, Vec<String>> = HashMap::new();
+        for i in 0..self.accumulated_channels_from_names.len() {
+            let channel = self.accumulated_channels_from_names[i].clone();
+            let clients_in_channel = self.accumulated_clients_from_names[i].clone();
+            channels_and_clients.insert(channel, clients_in_channel);
+        }
+        self.accumulated_channels_from_names = vec![];
+        self.accumulated_clients_from_names = vec![];
+
+        channels_and_clients
     }
 }

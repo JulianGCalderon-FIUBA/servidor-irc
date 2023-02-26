@@ -6,7 +6,7 @@ use crate::{
 use super::{
     controller_message::ControllerMessage::{
         self, ErrorWhenAddingChannel, OpenMainView, OpenWarningView, ReceiveInvite, ReceiveJoin,
-        ReceiveJoinNotification, ReceiveKick, ReceiveListEnd, ReceiveListLine, ReceiveNamesEnd,
+        ReceiveJoinNotification, ReceiveKick, OpenAddChannelView, ReceiveListLine, ReceiveNamesEnd,
         ReceiveNamesLine, ReceivePrivMessage, RegularMessage,
     },
     ERR_IS_ALREADY_ON_CHANNEL_WARNING_TEXT, ERR_NICK_COLLISION_WARNING_TEXT,
@@ -42,7 +42,7 @@ pub fn to_controller_message(message: Message) -> ControllerMessage {
         INVITE_COMMAND => ReceiveInvite { message },
         JOIN_COMMAND => ReceiveJoin { message },
         KICK_COMMAND => ReceiveKick { message },
-        LIST_END_COMMAND => ReceiveListEnd {},
+        LIST_END_COMMAND => OpenAddChannelView {},
         LIST_LINE_COMMAND => ReceiveListLine { message },
         LOGIN_OK => OpenMainView { message },
         NAMES_END_COMMAND => ReceiveNamesEnd {},

@@ -1,4 +1,8 @@
-use gtk4::{traits::ButtonExt, Button, glib::{MainContext, PRIORITY_DEFAULT, Sender, Receiver}};
+use gtk4::{
+    glib::{MainContext, Receiver, Sender, PRIORITY_DEFAULT},
+    traits::ButtonExt,
+    Button,
+};
 use std::collections::HashMap;
 
 const CHANNEL_FIRST_CHARACTER: &str = "#";
