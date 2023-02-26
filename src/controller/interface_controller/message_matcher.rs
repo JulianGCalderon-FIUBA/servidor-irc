@@ -24,8 +24,7 @@ use crate::{
     },
 };
 use gtk4::{
-    prelude::FileExt,
-    traits::{DialogExt, FileChooserExt, GtkWindowExt, WidgetExt},
+    traits::{DialogExt, GtkWindowExt, WidgetExt},
     FileChooserAction, FileChooserDialog, ResponseType,
 };
 
