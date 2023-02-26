@@ -1,5 +1,5 @@
-use gtk::{traits::WidgetExt, Box, Button, ComboBoxText, Orientation};
 use gtk4 as gtk;
+use gtk::{traits::WidgetExt, Box, Button, ComboBoxText, Orientation, Align::Center};
 
 use crate::views::widgets_creation::create_button;
 
@@ -13,7 +13,7 @@ pub fn create_box(orientation: Orientation) -> Box {
         .orientation(orientation)
         .margin_top(20)
         .margin_bottom(20)
-        .halign(gtk::Align::Center)
+        .halign(Center)
         .build()
 }
 

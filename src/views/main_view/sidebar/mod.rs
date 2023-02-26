@@ -6,7 +6,7 @@ use std::collections::{hash_map::RandomState, HashMap};
 use gtk::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
-    Box, Button, Label, Orientation,
+    Box, Button, Label, Orientation::Vertical,
 };
 use gtk4 as gtk;
 
@@ -52,7 +52,7 @@ impl MainView {
     pub fn create_sidebar(&mut self) -> Box {
         let sidebar = Box::builder()
             .width_request(200)
-            .orientation(Orientation::Vertical)
+            .orientation(Vertical)
             .build();
 
         //Channels box

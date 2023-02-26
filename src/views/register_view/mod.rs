@@ -4,7 +4,7 @@ pub mod requests;
 use gtk::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
-    Application, ApplicationWindow, Button, Entry, Label, Orientation, PasswordEntry,
+    Application, ApplicationWindow, Button, Entry, Label, Orientation::Vertical, PasswordEntry,
 };
 use gtk4 as gtk;
 
@@ -60,7 +60,7 @@ impl RegisterView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Orientation::Vertical, 300, 300);
+        let main_box = create_main_box(Vertical, 300, 300);
         main_box.add_css_class(MAIN_BOX_CSS);
 
         let realname_box = create_label_input_box(REALNAME_LABEL_TEXT);

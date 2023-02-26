@@ -113,8 +113,8 @@ pub fn build_application_window() -> ApplicationWindow {
 pub fn create_error_label() -> Label {
     let error_label = Label::builder()
         .label("")
-        .halign(gtk::Align::Center)
-        .valign(gtk::Align::Center)
+        .halign(Center)
+        .valign(Center)
         .build();
     error_label.add_css_class(WARNING_TEXT_CSS);
     error_label
@@ -142,7 +142,7 @@ pub fn create_message_sender_box() -> Box {
         .orientation(Horizontal)
         .margin_top(20)
         .margin_bottom(20)
-        .halign(gtk::Align::Center)
+        .halign(Center)
         .hexpand(true)
         .build()
 }

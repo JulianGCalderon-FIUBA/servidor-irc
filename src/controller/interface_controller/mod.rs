@@ -28,9 +28,9 @@ use crate::{
     },
 };
 use gtk::{
-    glib::{self, Receiver, Sender},
+    glib::{Receiver, Sender},
     traits::WidgetExt,
-    Application, ApplicationWindow, MessageDialog,
+    Application, ApplicationWindow, MessageDialog, prelude::Continue,
 };
 
 use crate::controller::ControllerMessage::*;
@@ -297,7 +297,7 @@ impl InterfaceController {
             }
             // Returning false here would close the receiver
             // and have senders fail
-            glib::Continue(true)
+            Continue(true)
         });
     }
 }

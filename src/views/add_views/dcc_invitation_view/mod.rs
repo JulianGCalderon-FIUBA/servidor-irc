@@ -6,7 +6,7 @@ use std::net::SocketAddr;
 use gtk::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
-    Application, ApplicationWindow, Button, Orientation,
+    Application, ApplicationWindow, Button, Orientation::{Vertical, Horizontal},
 };
 use gtk4 as gtk;
 
@@ -56,7 +56,7 @@ impl DccInvitationView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Orientation::Vertical, 300, 300);
+        let main_box = create_main_box(Vertical, 300, 300);
         main_box.add_css_class(MAIN_BOX_CSS);
 
         let message = format!("{client} {INVITATION}");
@@ -64,7 +64,7 @@ impl DccInvitationView {
 
         main_box.append(&invitation);
 
-        let button_box = create_main_box(Orientation::Horizontal, 150, 300);
+        let button_box = create_main_box(Horizontal, 150, 300);
         // main_box.add_css_class(MAIN_BOX_CSS);
         self.connect_accept_button(client.clone(), address, self.sender.clone());
         self.connect_decline_button(client, self.sender.clone());

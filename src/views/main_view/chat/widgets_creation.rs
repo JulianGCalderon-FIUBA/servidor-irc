@@ -48,7 +48,7 @@ pub fn create_sender_nickname_label(label: &str) -> Label {
         .label(label)
         .margin_top(12)
         .margin_start(12)
-        .halign(gtk::Align::Start)
+        .halign(Start)
         .build();
     sender_nickname_label.add_css_class(MESSAGE_SENDER_NAME_CSS);
     sender_nickname_label

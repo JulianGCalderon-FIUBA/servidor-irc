@@ -3,7 +3,7 @@ pub mod requests;
 use gtk::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
-    Align, Box, Button, Label, Orientation,
+    Align::Start, Box, Button, Label, Orientation::Vertical,
 };
 use gtk4 as gtk;
 
@@ -34,10 +34,10 @@ impl MainView {
     /// Creates conversation info widgets.
     pub fn create_conv_info(&mut self, nickname: &str) -> Box {
         let conv_info = Box::builder()
-            .orientation(Orientation::Vertical)
+            .orientation(Vertical)
             .width_request(250)
             .margin_end(12)
-            .halign(Align::Start)
+            .halign(Start)
             .build();
 
         self.quit_channel_button

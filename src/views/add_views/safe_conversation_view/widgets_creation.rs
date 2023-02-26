@@ -2,7 +2,7 @@ use gtk4 as gtk;
 
 use gtk::{
     traits::WidgetExt,
-    Align::{self, Start},
+    Align::{Start, End, Center},
     Label,
 };
 
@@ -32,7 +32,7 @@ pub fn create_message(label: &str) -> Label {
 /// Receives message, returns a Label.
 pub fn create_send_message(label: &str) -> Label {
     let message = create_message(label);
-    message.set_halign(gtk4::Align::End);
+    message.set_halign(End);
     message.add_css_class(SEND_MESSAGE_CSS);
     message
 }
@@ -48,7 +48,7 @@ pub fn create_initial_message(nickname: &str, client: &str) -> Label {
         .label(&label_text)
         .margin_top(5)
         .margin_bottom(20)
-        .halign(Align::Center)
+        .halign(Center)
         .hexpand(false)
         .build();
     message.add_css_class("send_message");

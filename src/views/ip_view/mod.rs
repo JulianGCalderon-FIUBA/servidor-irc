@@ -6,7 +6,7 @@ use std::{net::IpAddr, str::FromStr};
 use gtk::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
-    Application, ApplicationWindow, Button, Entry, Orientation,
+    Application, ApplicationWindow, Button, Entry, Orientation::Vertical,
 };
 use gtk4 as gtk;
 
@@ -52,7 +52,7 @@ impl IpView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Orientation::Vertical, 150, 300);
+        let main_box = create_main_box(Vertical, 150, 300);
         main_box.add_css_class(MAIN_BOX_CSS);
 
         let address_box = create_label_input_box(ADDRESS_LABEL_TEXT);
