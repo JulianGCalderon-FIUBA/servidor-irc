@@ -13,16 +13,21 @@ pub mod add_views;
 
 /// Contains multiple functions that create widgets for every view.
 pub mod widgets_creation;
+pub mod utils;
 
 const APP_TITLE: &str = "Lemon Pie IRC";
+const EMPTY_MESSAGE_ERROR: &str = "¡Message is empty!";
+const ENTRY_PLACEHOLDER: &str = "Message...";
 const ERROR_TEXT: &str = "ERROR";
+const MESSAGE_MAX_CHARACTERS_ERROR: &str = "¡Message too long!";
+const MESSAGE_MAX_LINE_CHARACTERS: usize = 60;
+const MESSAGE_MAX_CHARACTERS: usize = 510;
 const NICKNAME_LABEL_TEXT: &str = "Nickname:";
 const PASSWORD_LABEL_TEXT: &str = "Password:";
 const REALNAME_LABEL_TEXT: &str = "Your name:";
+const SEND_BUTTON_TEXT: &str = "➤";
 const SERVERNAME_LABEL_TEXT: &str = "Servername:";
 const USERNAME_LABEL_TEXT: &str = "Username:";
-const ENTRY_PLACEHOLDER: &str = "Message...";
-const SEND_BUTTON_TEXT: &str = "➤";
 
 const CHAT_CSS: &str = "chat";
 const MAIN_BOX_CSS: &str = "main_box";

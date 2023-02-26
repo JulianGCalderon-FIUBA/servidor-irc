@@ -12,7 +12,7 @@ use crate::{
     controller::{controller_message::ControllerMessage, utils::is_not_empty},
     views::{
         main_view::utils::entry_is_valid,
-        widgets_creation::{create_chat_box, create_label, create_message_sender_box},
+        widgets_creation::{create_chat_box, create_label, create_message_sender_box}, MESSAGE_MAX_LINE_CHARACTERS, EMPTY_MESSAGE_ERROR, MESSAGE_MAX_CHARACTERS_ERROR, utils::do_break_line, MESSAGE_MAX_CHARACTERS,
     },
 };
 
@@ -27,10 +27,6 @@ use super::{
     utils::{add_notification_to_button, adjust_scrollbar},
     MainView,
 };
-
-const MESSAGE_MAX_CHARACTERS: usize = 60;
-const MESSAGE_MAX_CHARACTERS_ERROR: &str = "¡Message too long!";
-const EMPTY_MESSAGE_ERROR: &str = "¡Message is empty!";
 
 const RECEIVED_MESSAGE_CSS: &str = "received_message";
 const SEND_MESSAGE_CSS: &str = "send_message";
@@ -75,7 +71,7 @@ impl MainView {
     ) {
         self.send_message.connect_clicked(move |_| {
             error_label.set_text("");
-            let input_text = input.text().to_string();
+            let mut input_text = input.text().to_string();
             if !entry_is_valid(&input_text, MESSAGE_MAX_CHARACTERS) {
                 if is_not_empty(&input_text) {
                     error_label.set_text(&format!(
@@ -85,6 +81,9 @@ impl MainView {
                     error_label.set_text(EMPTY_MESSAGE_ERROR);
                 }
                 return;
+            }
+            if input_text.len() > MESSAGE_MAX_LINE_CHARACTERS {
+                input_text = do_break_line(&input_text);
             }
 
             priv_message_request(input_text, sender.clone());

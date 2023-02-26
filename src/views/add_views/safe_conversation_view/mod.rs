@@ -6,34 +6,42 @@ pub mod widgets_creation;
 
 use gtk::{
     glib::Sender,
-    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
-    Application, ApplicationWindow, Box, Button, Entry, Label, ScrolledWindow,
+    traits::{ BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt },
+    Application,
+    ApplicationWindow,
+    Box,
+    Button,
+    Entry,
+    Label,
+    ScrolledWindow,
 };
 use gtk4 as gtk;
 
 use crate::{
-    controller::{controller_message::ControllerMessage, utils::is_not_empty},
+    controller::{ controller_message::ControllerMessage, utils::is_not_empty },
     views::{
         main_view::{
-            utils::{adjust_scrollbar, entry_is_valid},
-            widgets_creation::{create_current_chat, create_message_box},
+            utils::{ adjust_scrollbar, entry_is_valid },
+            widgets_creation::{ create_current_chat, create_message_box },
         },
         widgets_creation::{
-            build_application_window, create_button_with_margin, create_chat_box, create_entry,
-            create_error_label, create_message_sender_box, create_scrollwindow_chat,
+            build_application_window,
+            create_button_with_margin,
+            create_chat_box,
+            create_entry,
+            create_error_label,
+            create_message_sender_box,
+            create_scrollwindow_chat,
         },
-        ENTRY_PLACEHOLDER, SEND_BUTTON_TEXT,
+        ENTRY_PLACEHOLDER,
+        SEND_BUTTON_TEXT, EMPTY_MESSAGE_ERROR, MESSAGE_MAX_LINE_CHARACTERS, utils::do_break_line,
     },
 };
 
 use self::{
     requests::send_safe_message_request,
-    widgets_creation::{create_initial_message, create_received_message, create_send_message},
+    widgets_creation::{ create_initial_message, create_received_message, create_send_message },
 };
-
-const MESSAGE_MAX_CHARACTERS: usize = 60;
-const MESSAGE_MAX_CHARACTERS_ERROR: &str = "¡Message too long!";
-const EMPTY_MESSAGE_ERROR: &str = "¡Message is empty!";
 
 /// Shows channel members view.
 /// Contains an exit button.
@@ -86,7 +94,7 @@ impl SafeConversationView {
             self.input.clone(),
             self.current_chat.label().to_string(),
             self.sender.clone(),
-            self.error_label.clone(),
+            self.error_label.clone()
         );
         message_sender_box.append(&self.send_message);
 
@@ -107,26 +115,23 @@ impl SafeConversationView {
         input: Entry,
         current_chat: String,
         sender: Sender<ControllerMessage>,
-        error_label: Label,
+        error_label: Label
     ) {
         self.send_message.connect_clicked(move |_| {
             error_label.set_text("");
-            let input_text = input.text();
-            if !entry_is_valid(&input_text, MESSAGE_MAX_CHARACTERS) {
-                if is_not_empty(&input_text) {
-                    error_label.set_text(&format!(
-                        "{MESSAGE_MAX_CHARACTERS_ERROR} Max: {MESSAGE_MAX_CHARACTERS} characters"
-                    ));
-                } else {
-                    error_label.set_text(EMPTY_MESSAGE_ERROR);
-                }
+            let mut input_text = input.text().to_string();
+            if input_text.is_empty() {
+                error_label.set_text(EMPTY_MESSAGE_ERROR);
                 return;
+            }
+            if input_text.len() > MESSAGE_MAX_LINE_CHARACTERS {
+                input_text = do_break_line(&input_text);
             }
 
             send_safe_message_request(
                 input_text.to_string(),
                 current_chat.to_string(),
-                sender.clone(),
+                sender.clone()
             );
 
             input.set_text("");
