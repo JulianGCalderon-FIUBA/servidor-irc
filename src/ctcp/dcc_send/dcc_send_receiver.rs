@@ -1,18 +1,22 @@
 use std::{
     io::{self, Write},
     net::{SocketAddr, TcpStream},
+    path::PathBuf,
 };
 
-use crate::{ctcp::dcc_message::DccMessage, message::CRLF};
+use crate::message::CRLF;
 
-use super::{dcc_resume_sender::DccResumeSender, file_transfer::FileTransferer};
+use super::{
+    dcc_resume_sender::DccResumeSender,
+    file_transfer::{FileTransferer, TransferController},
+};
 
-struct DccSendReceiver {
+pub struct DccSendReceiver {
     server: TcpStream,
     client: String,
     address: SocketAddr,
-    filename: String,
     filesize: u64,
+    filename: String,
 }
 
 impl DccSendReceiver {
@@ -27,21 +31,24 @@ impl DccSendReceiver {
             server,
             client,
             address,
-            filename,
             filesize,
+            filename,
         }
     }
 
-    pub fn accept_send_command(mut self) -> io::Result<()> {
+    pub fn accept_send_command(
+        mut self,
+        filepath: PathBuf,
+    ) -> io::Result<(FileTransferer, TransferController)> {
         write!(self.server, "CTCP {} :DCC SEND accept", self.client)?;
         self.server.write_all(CRLF)?;
 
         let stream = TcpStream::connect(self.address)?;
 
-        FileTransferer::new(stream, self.filename, self.filesize).download_file()
+        Ok(FileTransferer::new(stream, filepath, self.filesize))
     }
 
-    pub fn resume_send_command(self, position: u64) -> io::Result<DccResumeSender> {
+    pub fn resume_send_command(self, position: u64, path: PathBuf) -> io::Result<DccResumeSender> {
         DccResumeSender::send(
             self.server,
             self.client,
@@ -49,11 +56,16 @@ impl DccSendReceiver {
             self.filename,
             self.filesize,
             position,
+            path,
         )
     }
 
     pub fn decline_send_command(mut self) -> io::Result<()> {
         write!(self.server, "CTCP {} :DCC SEND decline", self.client)?;
         self.server.write_all(CRLF)
+    }
+
+    pub fn original_name(&self) -> String {
+        self.filename.clone()
     }
 }

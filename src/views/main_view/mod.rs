@@ -54,6 +54,7 @@ const NO_NOTIFICATIONS_TEXT: &str = "🔔 notifications (0)";
 const NOTIFICATION_ON_BUTTON_CSS: &str = "notifications_button_on";
 const QUIT_BUTTON_TEXT: &str = "x";
 const SAFE_CONVERSATION_BUTTON_TEXT: &str = "🔐 Safe conversation 🔐";
+const SEND_FILE_BUTTON_TEXT: &str = "Send File";
 const WELCOME_MESSAGE_CSS: &str = "welcome_message";
 const WELCOME_MESSAGE: &str = "Open a new chat to start...";
 const WELCOME_TITLE_CSS: &str = "welcome_title";
@@ -81,6 +82,7 @@ pub struct MainView {
     notifications: Vec<String>,
     quit_channel_button: Button,
     safe_conversation_button: Button,
+    send_file_button: Button,
     scrollwindow_channels: ScrolledWindow,
     scrollwindow_chat: ScrolledWindow,
     scrollwindow_clients: ScrolledWindow,
@@ -118,6 +120,7 @@ impl MainView {
             sender,
             user_info: create_button_with_margin(""),
             welcome_box: create_welcome_box(),
+            send_file_button: create_button_with_margin(SEND_FILE_BUTTON_TEXT),
         }
     }
 

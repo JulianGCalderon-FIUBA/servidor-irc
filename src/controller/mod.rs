@@ -10,7 +10,9 @@ pub mod utils;
 use gtk4 as gtk;
 
 use crate::{client::Client, ADDRESS};
-use gtk::{gdk::Display, glib, prelude::*, Application, CssProvider, StyleContext};
+use gtk::{
+    gdk::Display, gio::ApplicationFlags, glib, prelude::*, Application, CssProvider, StyleContext,
+};
 
 use self::{controller_message::ControllerMessage, interface_controller::InterfaceController};
 
@@ -57,7 +59,7 @@ impl Default for Controller {
 impl Controller {
     /// Creates new [`Controller`]
     pub fn new() -> Self {
-        let app = Application::new(Some("com.lemon-pie.demo"), Default::default());
+        let app = Application::new(Some("com.lemon-pie.demo"), ApplicationFlags::NON_UNIQUE);
 
         Self { app }
     }

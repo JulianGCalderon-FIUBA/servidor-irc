@@ -1,13 +1,16 @@
 use gtk4::{glib::Sender, Application, ApplicationWindow};
 
+use std::net::SocketAddr;
+
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
         add_views::{
             add_channel_view::AddChannelView, add_client_view::AddClientView,
-            channel_members_view::ChannelMembersView, invite_view::InviteView,
-            notifications_view::NotificationsView, safe_conversation_view::SafeConversationView,
-            user_info_view::UserInfoView, warning_view::WarningView,
+            channel_members_view::ChannelMembersView, dcc_invitation_view::DccInvitationView,
+            invite_view::InviteView, notifications_view::NotificationsView,
+            safe_conversation_view::SafeConversationView, user_info_view::UserInfoView,
+            warning_view::WarningView,
         },
         ip_view::IpView,
         main_view::MainView,
@@ -37,6 +40,15 @@ pub fn channel_members_window(
     ChannelMembersView::new(channel, clients, nickname, sender.clone()).get_view(app.clone())
 }
 
+pub fn dcc_invitation_window(
+    app: &Application,
+    client: String,
+    address: SocketAddr,
+    sender: &Sender<ControllerMessage>,
+) -> ApplicationWindow {
+    DccInvitationView::new(sender.clone()).get_view(app.clone(), client, address)
+}
+
 pub fn invite_window(
     app: &Application,
     channels: Vec<String>,
@@ -61,11 +73,11 @@ pub fn register_window(app: &Application, sender: &Sender<ControllerMessage>) ->
     RegisterView::new(sender.clone()).get_view(app.clone())
 }
 
-pub fn safe_conversation_window(
-    app: &Application,
+pub fn safe_conversation_view(
+    nickname: String,
     sender: &Sender<ControllerMessage>,
-) -> ApplicationWindow {
-    SafeConversationView::new(sender.clone()).get_view(app.clone())
+) -> SafeConversationView {
+    SafeConversationView::new(nickname, sender.clone())
 }
 
 pub fn user_info_window(
