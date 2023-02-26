@@ -258,7 +258,10 @@ impl MainView {
         self.welcome_box.set_visible(false);
         self.scrollwindow_chat.set_visible(true);
         self.send_message.set_sensitive(true);
+        self.send_message.set_has_tooltip(false);
         self.input.set_sensitive(true);
+        self.input.set_has_tooltip(false);
+        
     }
 
     fn update_chat_button_when_clicked(&mut self, conversation_label: &str) {

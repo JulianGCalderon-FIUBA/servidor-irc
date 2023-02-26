@@ -47,6 +47,7 @@ const ERR_CHANNEL_NAME_EMPTY: &str = "¡Channel name is empty!";
 const ERR_CHANNEL_NAME_TOO_LONG: &str = "¡Channel name too long!";
 const JOIN_CHANNEL_BUTTON_TEXT: &str = "Join existing channel";
 const TITLE: &str = "Add channel";
+const CANT_JOIN_CHANNEL_TOOLTIP: &str = "There are no channels available to be joined";
 
 const ACTIVE_SELECT_BUTTON_CSS: &str = "active_select_button";
 const ADD_CHANNEL_ENTRY_CSS: &str = "add_channel_entry";
@@ -183,9 +184,8 @@ impl AddChannelView {
 
     /// Disables the join existing channel button.
     fn disable_join_channel_option(&mut self) {
-        self.join_channel_button.set_sensitive(false);
         active_button(self.create_channel_button.clone());
-        disable_button(self.join_channel_button.clone());
+        disable_button(self.join_channel_button.clone(), CANT_JOIN_CHANNEL_TOOLTIP);
         switch_visibility(
             self.create_channel_box.clone(),
             self.join_channel_box.clone(),
