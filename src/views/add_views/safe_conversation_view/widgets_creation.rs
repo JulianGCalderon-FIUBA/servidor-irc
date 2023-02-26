@@ -41,7 +41,9 @@ pub fn create_initial_message(nickname: &str, client: &str) -> Label {
     let label_text = format!(
         "This is a dcc chat between {} and {}
 
-{}", nickname, client, DCC_CHATS_DESCRIPTION);
+{}",
+        nickname, client, DCC_CHATS_DESCRIPTION
+    );
     let message = Label::builder()
         .label(&label_text)
         .margin_top(5)

@@ -2,33 +2,25 @@ pub mod requests;
 
 use gtk::{
     glib::Sender,
-    traits::{ BoxExt, ButtonExt, EditableExt, WidgetExt },
-    Align,
-    Box,
-    Button,
-    Label,
-    Orientation,
+    traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
+    Align, Box, Button, Label, Orientation,
 };
 use gtk4 as gtk;
 
 use crate::{
     controller::{
         controller_message::ControllerMessage,
-        utils::{ first_word_of_button, is_channel },
+        utils::{first_word_of_button, is_channel},
     },
     server::consts::channel::MAX_CHANNELS,
 };
 
 use self::requests::{
-    add_invite_view_request,
-    add_safe_conversation_view_request,
-    quit_channel_request,
-    remove_conversation_request,
-    send_file_request,
-    send_names_request,
+    add_invite_view_request, add_safe_conversation_view_request, quit_channel_request,
+    remove_conversation_request, send_file_request, send_names_request,
 };
 
-use super::{ MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS };
+use super::{MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS};
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 pub const SAFE_CONVERSATION_BUTTON_CSS: &str = "safe_conversation";
@@ -48,8 +40,10 @@ impl MainView {
             .halign(Align::Start)
             .build();
 
-        self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
-        self.safe_conversation_button.add_css_class(SAFE_CONVERSATION_BUTTON_CSS);
+        self.quit_channel_button
+            .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
+        self.safe_conversation_button
+            .add_css_class(SAFE_CONVERSATION_BUTTON_CSS);
 
         self.user_info.set_label(nickname);
         conv_info.append(&self.quit_channel_button);
@@ -75,7 +69,7 @@ impl MainView {
     fn connect_quit_channel(
         &mut self,
         current_conversation: Label,
-        sender: Sender<ControllerMessage>
+        sender: Sender<ControllerMessage>,
     ) {
         self.quit_channel_button.connect_clicked(move |_| {
             if is_channel(&current_conversation.label()) {
@@ -101,7 +95,8 @@ impl MainView {
     }
 
     fn connect_send_file_button(&self, sender: Sender<ControllerMessage>) {
-        self.send_file_button.connect_clicked(move |_| send_file_request(sender.clone()));
+        self.send_file_button
+            .connect_clicked(move |_| send_file_request(sender.clone()));
     }
 
     /// Connects members button.
@@ -157,10 +152,12 @@ impl MainView {
         self.error_label.set_text("");
         self.send_message.set_sensitive(false);
         self.send_message.set_has_tooltip(true);
-        self.send_message.set_tooltip_text(Some(SEND_MESSAGE_TOOLTIP));
+        self.send_message
+            .set_tooltip_text(Some(SEND_MESSAGE_TOOLTIP));
         self.welcome_box.set_visible(true);
         self.quit_channel_button.set_visible(true);
-        self.quit_channel_button.remove_css_class(EXIT_CHANNEL_BUTTON_CSS);
+        self.quit_channel_button
+            .remove_css_class(EXIT_CHANNEL_BUTTON_CSS);
         self.quit_channel_button.add_css_class(DISABLE_BUTTON_CSS);
         self.invite_button.set_visible(false);
         self.safe_conversation_button.set_visible(false);
@@ -195,8 +192,10 @@ impl MainView {
     pub fn set_client_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
         if self.quit_channel_button.has_css_class(DISABLE_BUTTON_CSS) {
-            self.quit_channel_button.remove_css_class(DISABLE_BUTTON_CSS);
-            self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
+            self.quit_channel_button
+                .remove_css_class(DISABLE_BUTTON_CSS);
+            self.quit_channel_button
+                .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         }
 
         self.invite_button.set_visible(true);
@@ -211,8 +210,10 @@ impl MainView {
     pub fn set_channel_chat_mode(&mut self) {
         self.quit_channel_button.set_visible(true);
         if self.quit_channel_button.has_css_class(DISABLE_BUTTON_CSS) {
-            self.quit_channel_button.remove_css_class(DISABLE_BUTTON_CSS);
-            self.quit_channel_button.add_css_class(EXIT_CHANNEL_BUTTON_CSS);
+            self.quit_channel_button
+                .remove_css_class(DISABLE_BUTTON_CSS);
+            self.quit_channel_button
+                .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         }
 
         self.invite_button.set_visible(false);

@@ -12,7 +12,10 @@ use crate::{
     controller::{controller_message::ControllerMessage, utils::is_not_empty},
     views::{
         main_view::utils::entry_is_valid,
-        widgets_creation::{create_chat_box, create_label, create_message_sender_box}, MESSAGE_MAX_LINE_CHARACTERS, EMPTY_MESSAGE_ERROR, MESSAGE_MAX_CHARACTERS_ERROR, utils::do_break_line, MESSAGE_MAX_CHARACTERS,
+        utils::do_break_line,
+        widgets_creation::{create_chat_box, create_label, create_message_sender_box},
+        EMPTY_MESSAGE_ERROR, MESSAGE_MAX_CHARACTERS, MESSAGE_MAX_CHARACTERS_ERROR,
+        MESSAGE_MAX_LINE_CHARACTERS,
     },
 };
 

@@ -6,41 +6,30 @@ pub mod widgets_creation;
 
 use gtk::{
     glib::Sender,
-    traits::{ BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt },
-    Application,
-    ApplicationWindow,
-    Box,
-    Button,
-    Entry,
-    Label,
-    ScrolledWindow,
+    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
+    Application, ApplicationWindow, Box, Button, Entry, Label, ScrolledWindow,
 };
 use gtk4 as gtk;
 
 use crate::{
-    controller::{ controller_message::ControllerMessage, utils::is_not_empty },
+    controller::controller_message::ControllerMessage,
     views::{
         main_view::{
-            utils::{ adjust_scrollbar, entry_is_valid },
-            widgets_creation::{ create_current_chat, create_message_box },
+            utils::adjust_scrollbar,
+            widgets_creation::{create_current_chat, create_message_box},
         },
+        utils::do_break_line,
         widgets_creation::{
-            build_application_window,
-            create_button_with_margin,
-            create_chat_box,
-            create_entry,
-            create_error_label,
-            create_message_sender_box,
-            create_scrollwindow_chat,
+            build_application_window, create_button_with_margin, create_chat_box, create_entry,
+            create_error_label, create_message_sender_box, create_scrollwindow_chat,
         },
-        ENTRY_PLACEHOLDER,
-        SEND_BUTTON_TEXT, EMPTY_MESSAGE_ERROR, MESSAGE_MAX_LINE_CHARACTERS, utils::do_break_line,
+        EMPTY_MESSAGE_ERROR, ENTRY_PLACEHOLDER, MESSAGE_MAX_LINE_CHARACTERS, SEND_BUTTON_TEXT,
     },
 };
 
 use self::{
     requests::send_safe_message_request,
-    widgets_creation::{ create_initial_message, create_received_message, create_send_message },
+    widgets_creation::{create_initial_message, create_received_message, create_send_message},
 };
 
 /// Shows channel members view.
@@ -94,7 +83,7 @@ impl SafeConversationView {
             self.input.clone(),
             self.current_chat.label().to_string(),
             self.sender.clone(),
-            self.error_label.clone()
+            self.error_label.clone(),
         );
         message_sender_box.append(&self.send_message);
 
@@ -115,7 +104,7 @@ impl SafeConversationView {
         input: Entry,
         current_chat: String,
         sender: Sender<ControllerMessage>,
-        error_label: Label
+        error_label: Label,
     ) {
         self.send_message.connect_clicked(move |_| {
             error_label.set_text("");
@@ -128,11 +117,7 @@ impl SafeConversationView {
                 input_text = do_break_line(&input_text);
             }
 
-            send_safe_message_request(
-                input_text.to_string(),
-                current_chat.to_string(),
-                sender.clone()
-            );
+            send_safe_message_request(input_text, current_chat.to_string(), sender.clone());
 
             input.set_text("");
         });

@@ -17,12 +17,12 @@ pub fn disactivate_button(button: Button) {
 }
 
 /// Changes css to disabled button
-pub fn disable_button(button: Button, tooltip_text:&str) {
+pub fn disable_button(button: Button, tooltip_text: &str) {
     button.remove_css_class(ACTIVE_SELECT_BUTTON_CSS);
     button.add_css_class(DISABLE_SELECT_BUTTON_CSS);
     button.set_sensitive(false);
     button.set_has_tooltip(true);
-    button.set_tooltip_text(Some(tooltip_text));      
+    button.set_tooltip_text(Some(tooltip_text));
 }
 
 /// Changes buttons visibility

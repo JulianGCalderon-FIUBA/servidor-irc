@@ -11,9 +11,9 @@ pub mod register_view;
 /// Contains multiples views that help use of the features.
 pub mod add_views;
 
+pub mod utils;
 /// Contains multiple functions that create widgets for every view.
 pub mod widgets_creation;
-pub mod utils;
 
 const APP_TITLE: &str = "Lemon Pie IRC";
 const EMPTY_MESSAGE_ERROR: &str = "¡Message is empty!";

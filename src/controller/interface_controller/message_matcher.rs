@@ -60,7 +60,7 @@ impl InterfaceController {
         });
 
         self.receiver_attach(client.clone(), dcc_receiver, self.sender.clone());
-        
+
         self.main_view.disable_safe_conversation_button();
 
         self.safe_conversation_view = safe_conversation_view(self.nickname.clone(), &self.sender);
