@@ -21,7 +21,7 @@ use crate::{
         utils::do_break_line,
         widgets_creation::{
             build_application_window, create_button_with_margin, create_chat_box, create_entry,
-            create_error_label, create_message_sender_box, create_scrollwindow_chat,
+            create_error_label, create_message_sender_box, create_scrollwindow_chat, create_send_message, create_received_message,
         },
         EMPTY_MESSAGE_ERROR, ENTRY_PLACEHOLDER, MESSAGE_MAX_LINE_CHARACTERS, SEND_BUTTON_TEXT,
     },
@@ -29,7 +29,7 @@ use crate::{
 
 use self::{
     requests::send_safe_message_request,
-    widgets_creation::{create_initial_message, create_received_message, create_send_message},
+    widgets_creation::{create_initial_message},
 };
 
 /// Shows channel members view.

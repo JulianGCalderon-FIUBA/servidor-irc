@@ -1,13 +1,13 @@
 use gtk::{
     traits::{BoxExt, WidgetExt},
-    Align::{Center, End},
+    Align::{Center, End, Start},
     ApplicationWindow, Box, Button, Entry, Label, Orientation,
     Orientation::{Horizontal, Vertical},
     PasswordEntry, ScrolledWindow, Separator,
 };
 use gtk4 as gtk;
 
-use super::{APP_TITLE, CHAT_CSS, MESSAGE_BOX_CSS, WARNING_TEXT_CSS};
+use super::{APP_TITLE, CHAT_CSS, MESSAGE_BOX_CSS, WARNING_TEXT_CSS, SEND_MESSAGE_CSS, RECEIVED_MESSAGE_CSS};
 
 /// Creates gtk entry with a placeholder.
 ///
@@ -161,4 +161,37 @@ pub fn create_scrollwindow_chat() -> ScrolledWindow {
         .build();
     scrolled_window.add_css_class(MESSAGE_BOX_CSS);
     scrolled_window
+}
+
+/// Creates a gtk message label.
+///
+/// Receives message, returns a Label.
+pub fn create_message(label: &str) -> Label {
+    Label::builder()
+        .label(label)
+        .margin_top(5)
+        .margin_bottom(5)
+        .margin_start(2)
+        .margin_end(12)
+        .build()
+}
+
+/// Creates a sent message.
+///
+/// Receives message, returns a Label.
+pub fn create_send_message(label: &str) -> Label {
+    let message = create_message(label);
+    message.set_halign(End);
+    message.add_css_class(SEND_MESSAGE_CSS);
+    message
+}
+
+/// Creates a received message.
+///
+/// Receives message, returns a Label.
+pub fn create_received_message(label: &str) -> Label {
+    let message = create_message(label);
+    message.set_halign(Start);
+    message.add_css_class(RECEIVED_MESSAGE_CSS);
+    message
 }

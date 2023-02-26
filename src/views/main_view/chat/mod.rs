@@ -13,7 +13,7 @@ use crate::{
     views::{
         main_view::utils::entry_is_valid,
         utils::do_break_line,
-        widgets_creation::{create_chat_box, create_label, create_message_sender_box},
+        widgets_creation::{create_chat_box, create_label, create_message_sender_box, create_send_message, create_received_message},
         EMPTY_MESSAGE_ERROR, MESSAGE_MAX_CHARACTERS, MESSAGE_MAX_CHARACTERS_ERROR,
         MESSAGE_MAX_LINE_CHARACTERS,
     },
@@ -22,7 +22,7 @@ use crate::{
 use self::{
     requests::priv_message_request,
     widgets_creation::{
-        create_received_message, create_send_message, create_sender_nickname_label,
+         create_sender_nickname_label,
     },
 };
 
@@ -31,8 +31,6 @@ use super::{
     MainView,
 };
 
-const RECEIVED_MESSAGE_CSS: &str = "received_message";
-const SEND_MESSAGE_CSS: &str = "send_message";
 const MESSAGE_SENDER_NAME_CSS: &str = "message_sender_name";
 
 impl MainView {
