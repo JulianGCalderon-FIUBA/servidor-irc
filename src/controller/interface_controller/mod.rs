@@ -29,12 +29,8 @@ use crate::{
 };
 use gtk::{
     glib::{self, Receiver, Sender},
-    prelude::*,
+    traits::WidgetExt,
     Application, ApplicationWindow, MessageDialog,
-};
-
-use crate::controller::controller_message::ControllerMessage::{
-    OpenAddClientView, OpenInviteClientView, OpenWarningView,
 };
 
 use crate::controller::ControllerMessage::*;
@@ -298,7 +294,6 @@ impl InterfaceController {
                 SendSafeMessage { client, message } => {
                     self.send_safe_message(client, message);
                 }
-
             }
             // Returning false here would close the receiver
             // and have senders fail

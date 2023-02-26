@@ -3,7 +3,11 @@ pub mod requests;
 
 use std::net::SocketAddr;
 
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Orientation};
+use gtk::{
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
+    Application, ApplicationWindow, Button, Orientation,
+};
 use gtk4 as gtk;
 
 use self::requests::{accept_request, decline_request};

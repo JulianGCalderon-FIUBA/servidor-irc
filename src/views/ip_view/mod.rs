@@ -3,7 +3,11 @@ pub mod requests;
 
 use std::{net::IpAddr, str::FromStr};
 
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Orientation};
+use gtk::{
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
+    Application, ApplicationWindow, Button, Entry, Orientation,
+};
 use gtk4 as gtk;
 
 use self::requests::to_register_request;

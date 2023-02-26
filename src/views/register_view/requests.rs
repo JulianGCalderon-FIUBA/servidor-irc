@@ -1,7 +1,10 @@
 use gtk::glib::Sender;
 use gtk4 as gtk;
 
-use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
+use crate::{
+    controller::controller_message::ControllerMessage::{self, Register},
+    views::ERROR_TEXT,
+};
 
 /// Sends a register request to the controller.  
 ///
@@ -13,7 +16,7 @@ pub fn register_request(
     realname: String,
     sender: Sender<ControllerMessage>,
 ) {
-    let register = ControllerMessage::Register {
+    let register = Register {
         pass,
         nickname,
         username,

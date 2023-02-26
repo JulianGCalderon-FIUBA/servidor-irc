@@ -9,7 +9,9 @@ use gtk4::{
 };
 
 use crate::{
-    controller::controller_message::ControllerMessage,
+    controller::controller_message::ControllerMessage::{
+        self, DownloadFile, IgnoreFile, ReceiveResult, SendResult,
+    },
     ctcp::dcc_send::{dcc_send_receiver::DccSendReceiver, file_transfer::TransferController},
     macros::{ok_or_return, some_or_return},
 };
@@ -30,7 +32,7 @@ impl InterfaceController {
         let sender_client = sender.clone();
         thread::spawn(move || {
             let result = transferer.upload_file();
-            let message = ControllerMessage::SendResult {
+            let message = SendResult {
                 sender: sender_client,
                 result,
             };
@@ -133,7 +135,7 @@ impl InterfaceController {
         thread::spawn(move || {
             let result = transferer.resume_upload_file(position);
 
-            let message = ControllerMessage::SendResult {
+            let message = SendResult {
                 sender: sender_client,
                 result,
             };
@@ -169,7 +171,7 @@ impl InterfaceController {
         thread::spawn(move || {
             let result = transferer.resume_download_file(position);
 
-            let message = ControllerMessage::ReceiveResult {
+            let message = ReceiveResult {
                 sender: sender_client,
                 result,
                 name,
@@ -227,7 +229,7 @@ impl InterfaceController {
                 build_file_download_chooser_dialog(main_window, sender, channel_sender);
             } else {
                 let sender = sender.clone();
-                let ignore_file_request = ControllerMessage::IgnoreFile { sender };
+                let ignore_file_request = IgnoreFile { sender };
 
                 channel_sender.send(ignore_file_request).unwrap();
             }
@@ -274,7 +276,7 @@ fn build_file_download_chooser_dialog(
         let path = some_or_return!(file.path());
 
         let sender = sender.clone();
-        let download_file_request = ControllerMessage::DownloadFile { path, sender };
+        let download_file_request = DownloadFile { path, sender };
 
         channel_sender.send(download_file_request).unwrap();
 

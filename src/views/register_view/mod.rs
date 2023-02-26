@@ -2,8 +2,9 @@
 pub mod requests;
 
 use gtk::{
-    glib::Sender, prelude::*, Application, ApplicationWindow, Button, Entry, Label, Orientation,
-    PasswordEntry,
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, WidgetExt},
+    Application, ApplicationWindow, Button, Entry, Label, Orientation, PasswordEntry,
 };
 use gtk4 as gtk;
 

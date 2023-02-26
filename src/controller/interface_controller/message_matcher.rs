@@ -5,7 +5,9 @@ use gtk4 as gtk;
 use crate::{
     client::Client,
     controller::{
-        controller_message::ControllerMessage::{self, OpenAddClientView, OpenInviteClientView},
+        controller_message::ControllerMessage::{
+            OpenAddClientView, OpenInviteClientView, ReceiveResult, SendDccSend,
+        },
         utils::{channels_not_mine, get_sender_and_receiver, vec_is_not_empty},
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
         KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
@@ -25,7 +27,11 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{prelude::*, FileChooserDialog, ResponseType};
+use gtk::{
+    prelude::FileExt,
+    traits::{DialogExt, FileChooserExt, GtkWindowExt, WidgetExt},
+    FileChooserDialog, ResponseType,
+};
 
 use super::{
     download::Download,
@@ -102,7 +108,7 @@ impl InterfaceController {
         let sender_client = sender.clone();
         thread::spawn(move || {
             let result = transferer.download_file();
-            let message = ControllerMessage::ReceiveResult {
+            let message = ReceiveResult {
                 sender: sender_client,
                 name,
                 result,
@@ -197,9 +203,7 @@ impl InterfaceController {
 
             let target = target.clone();
 
-            sender
-                .send(ControllerMessage::SendDccSend { path, target })
-                .unwrap();
+            sender.send(SendDccSend { path, target }).unwrap();
             file_chooser_dialog.destroy();
         });
     }

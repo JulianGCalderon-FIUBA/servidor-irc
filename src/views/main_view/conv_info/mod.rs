@@ -1,6 +1,10 @@
 pub mod requests;
 
-use gtk::{glib::Sender, prelude::*, Align, Box, Button, Label, Orientation};
+use gtk::{
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
+    Align, Box, Button, Label, Orientation,
+};
 use gtk4 as gtk;
 
 use crate::{

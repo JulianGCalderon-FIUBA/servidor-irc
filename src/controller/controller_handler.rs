@@ -5,9 +5,9 @@ use crate::{
 
 use super::{
     controller_message::ControllerMessage::{
-        self, ErrorWhenAddingChannel, OpenMainView, OpenWarningView, ReceiveInvite, ReceiveJoin,
-        ReceiveJoinNotification, ReceiveKick, OpenAddChannelView, ReceiveListLine, ReceiveNamesEnd,
-        ReceiveNamesLine, ReceivePrivMessage, RegularMessage,
+        self, ErrorWhenAddingChannel, OpenAddChannelView, OpenMainView, OpenWarningView,
+        ReceiveInvite, ReceiveJoin, ReceiveJoinNotification, ReceiveKick, ReceiveListLine,
+        ReceiveNamesEnd, ReceiveNamesLine, ReceivePrivMessage, RegularMessage,
     },
     ERR_IS_ALREADY_ON_CHANNEL_WARNING_TEXT, ERR_NICK_COLLISION_WARNING_TEXT,
 };

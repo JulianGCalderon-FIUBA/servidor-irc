@@ -1,8 +1,10 @@
 /// Contains definition of used requests.
 pub mod request;
 
+use gtk::prelude::ComboBoxExtManual;
+use gtk::traits::{BoxExt, ButtonExt, GtkWindowExt};
 use gtk::ComboBoxText;
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button};
+use gtk::{glib::Sender, Application, ApplicationWindow, Button};
 use gtk4 as gtk;
 
 use self::request::invite_request;

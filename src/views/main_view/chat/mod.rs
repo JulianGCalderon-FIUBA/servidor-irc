@@ -1,7 +1,11 @@
 pub mod requests;
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Box, Entry, Label};
+use gtk::{
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
+    Box, Entry, Label,
+};
 use gtk4 as gtk;
 
 use crate::{

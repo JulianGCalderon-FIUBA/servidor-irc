@@ -4,7 +4,11 @@ pub mod requests;
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
-use gtk::{glib::Sender, prelude::*, Application, ApplicationWindow, Button};
+use gtk::{
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, GtkWindowExt},
+    Application, ApplicationWindow, Button,
+};
 use gtk4 as gtk;
 
 use crate::{

@@ -1,4 +1,8 @@
-use gtk::{prelude::*, Align::Start, Application, ApplicationWindow, Button};
+use gtk::{
+    traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
+    Align::Start,
+    Application, ApplicationWindow, Button,
+};
 use gtk4 as gtk;
 
 use crate::views::widgets_creation::{

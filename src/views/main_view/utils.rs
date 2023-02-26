@@ -1,4 +1,7 @@
-use gtk4::{prelude::*, Button, ScrolledWindow};
+use gtk4::{
+    traits::{AdjustmentExt, ButtonExt, WidgetExt},
+    Button, ScrolledWindow,
+};
 
 use crate::controller::utils::is_not_empty;
 
@@ -19,7 +22,7 @@ pub fn entry_is_valid(entry_text: &str, max_characters: usize) -> bool {
     is_not_empty(entry_text) && entry_text.len() < max_characters
 }
 
-/// Get number of notifications.  
+/// Get number of notifications.
 ///
 /// Returns u32.
 pub fn get_notifications_number(button: &Button) -> u32 {
