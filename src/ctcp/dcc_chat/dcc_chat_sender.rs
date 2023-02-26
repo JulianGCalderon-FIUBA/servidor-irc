@@ -15,7 +15,7 @@ pub struct DccChatSender {
 }
 
 impl DccChatSender {
-    ///  Sends DCC CHAT request to a client and creates listener that waits for someone to connect. Returns a [`DccChatSender`] containing information about the client that will receive the request.
+    ///  Sends DCC CHAT request to a client and creates a listener that waits for someone to connect. Returns a [`DccChatSender`] containing information about the client that will receive the request.
     pub fn send(mut server: TcpStream, client: String) -> io::Result<Self> {
         let listener = TcpListener::bind("127.0.0.1:9001")?;
 
