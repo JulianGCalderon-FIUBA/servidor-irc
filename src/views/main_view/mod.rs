@@ -15,6 +15,7 @@ use std::collections::HashMap;
 
 use gtk::{
     glib::Sender,
+    prelude::ApplicationExt,
     traits::{BoxExt, GtkWindowExt, WidgetExt},
     Application, ApplicationWindow, Box, Button, Entry, Label,
     Orientation::{Horizontal, Vertical},
