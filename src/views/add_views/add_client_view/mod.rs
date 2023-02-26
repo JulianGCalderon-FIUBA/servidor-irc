@@ -1,13 +1,12 @@
 /// Contains definition of used requests.
 pub mod requests;
 
-use gtk::{
+use gtk4::{
     glib::Sender,
     prelude::ComboBoxExtManual,
     traits::{BoxExt, ButtonExt, GtkWindowExt},
     Application, ApplicationWindow, Button, ComboBoxText,
 };
-use gtk4 as gtk;
 
 use self::requests::add_client_button_request;
 

@@ -1,11 +1,11 @@
 pub mod requests;
+pub mod widgets_creation;
 
-use gtk::{
+use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
-    Align, Box, Button, Label, Orientation,
+    Box, Button, Label,
 };
-use gtk4 as gtk;
 
 use crate::{
     controller::{
@@ -15,9 +15,12 @@ use crate::{
     server::consts::channel::MAX_CHANNELS,
 };
 
-use self::requests::{
-    add_invite_view_request, add_safe_conversation_view_request, quit_channel_request,
-    remove_conversation_request, send_file_request, send_names_request,
+use self::{
+    requests::{
+        add_invite_view_request, add_safe_conversation_view_request, quit_channel_request,
+        remove_conversation_request, send_file_request, send_names_request,
+    },
+    widgets_creation::create_conv_info_box,
 };
 
 use super::{MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS};
@@ -25,16 +28,15 @@ use super::{MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS};
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
 pub const SAFE_CONVERSATION_BUTTON_CSS: &str = "safe_conversation";
 pub const DISABLE_SAFE_CONVERSATION_BUTTON_CSS: &str = "disable_safe_conversation";
+const SEND_MESSAGE_TOOLTIP: &str =
+    "Can't send message because there is no chat open! Please open a chat with a client or with a channel";
+const INPUT_MESSAGE_TOOLTIP: &str =
+    "Can't write a message because there is no chat open! Please open a chat with a client or with a channel";
 
 impl MainView {
     /// Creates conversation info widgets.
     pub fn create_conv_info(&mut self, nickname: &str) -> Box {
-        let conv_info = Box::builder()
-            .orientation(Orientation::Vertical)
-            .width_request(250)
-            .margin_end(12)
-            .halign(Align::Start)
-            .build();
+        let conv_info = create_conv_info_box();
 
         self.quit_channel_button
             .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
@@ -142,9 +144,14 @@ impl MainView {
         self.current_chat.set_label("");
         self.scrollwindow_chat.set_visible(false);
         self.input.set_sensitive(false);
+        self.input.set_has_tooltip(true);
+        self.input.set_tooltip_text(Some(INPUT_MESSAGE_TOOLTIP));
         self.input.set_text("");
         self.error_label.set_text("");
         self.send_message.set_sensitive(false);
+        self.send_message.set_has_tooltip(true);
+        self.send_message
+            .set_tooltip_text(Some(SEND_MESSAGE_TOOLTIP));
         self.welcome_box.set_visible(true);
         self.quit_channel_button.set_visible(true);
         self.quit_channel_button

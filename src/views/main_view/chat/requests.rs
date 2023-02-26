@@ -1,7 +1,6 @@
 use crate::views::main_view::ControllerMessage::SendPrivMessage;
 use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
-use gtk::glib::Sender;
-use gtk4 as gtk;
+use gtk4::glib::Sender;
 
 /// Sends a private message request to the controller.  
 ///

@@ -1,6 +1,4 @@
-use gtk4 as gtk;
-
-use gtk::{traits::WidgetExt, Align::Start, Box, Button, Orientation::Horizontal};
+use gtk4::{traits::WidgetExt, Align::Start, Box, Button, Orientation::Horizontal};
 
 use crate::views::widgets_creation::create_button;
 

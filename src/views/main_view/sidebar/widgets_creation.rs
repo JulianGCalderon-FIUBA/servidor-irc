@@ -1,5 +1,9 @@
-use gtk::{traits::WidgetExt, Orientation::Horizontal, Separator};
-use gtk4 as gtk;
+use gtk4::{
+    traits::WidgetExt,
+    Box,
+    Orientation::{Horizontal, Vertical},
+    Separator,
+};
 
 use crate::views::widgets_creation::create_separator;
 
@@ -11,4 +15,11 @@ pub fn create_separator_sidebar() -> Separator {
     separator.set_margin_top(20);
     separator.set_hexpand(true);
     separator
+}
+
+pub fn create_sidebar_box() -> Box {
+    Box::builder()
+        .width_request(200)
+        .orientation(Vertical)
+        .build()
 }

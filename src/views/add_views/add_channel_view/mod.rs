@@ -7,20 +7,18 @@ pub mod utils;
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
-use gtk::prelude::ComboBoxExtManual;
-use gtk::Label;
-use gtk::{
-    glib::Sender, Application, ApplicationWindow, Box, Button, ComboBoxText, Entry,
-    Orientation::Horizontal, Orientation::Vertical,
-};
-use gtk4 as gtk;
 use gtk4::{
+    glib::Sender,
+    prelude::ComboBoxExtManual,
     prelude::EditableExt,
     traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
+    Application, ApplicationWindow, Box, Button, ComboBoxText, Entry, Label,
+    Orientation::Horizontal,
+    Orientation::Vertical,
 };
 
 use self::requests::join_channel_request;
-use self::utils::{active_button, disable_button, disactive_button, switch_visibility};
+use self::utils::{activate_button, disable_button, disactivate_button, switch_visibility};
 use self::widgets_creation::{
     create_active_button, create_box, create_combobox, create_inactive_button,
 };
@@ -47,6 +45,7 @@ const ERR_CHANNEL_NAME_EMPTY: &str = "¡Channel name is empty!";
 const ERR_CHANNEL_NAME_TOO_LONG: &str = "¡Channel name too long!";
 const JOIN_CHANNEL_BUTTON_TEXT: &str = "Join existing channel";
 const TITLE: &str = "Add channel";
+const CANT_JOIN_CHANNEL_TOOLTIP: &str = "There are no channels available to be joined";
 
 const ACTIVE_SELECT_BUTTON_CSS: &str = "active_select_button";
 const ADD_CHANNEL_ENTRY_CSS: &str = "add_channel_entry";
@@ -183,9 +182,8 @@ impl AddChannelView {
 
     /// Disables the join existing channel button.
     fn disable_join_channel_option(&mut self) {
-        self.join_channel_button.set_sensitive(false);
-        active_button(self.create_channel_button.clone());
-        disable_button(self.join_channel_button.clone());
+        activate_button(self.create_channel_button.clone());
+        disable_button(self.join_channel_button.clone(), CANT_JOIN_CHANNEL_TOOLTIP);
         switch_visibility(
             self.create_channel_box.clone(),
             self.join_channel_box.clone(),
@@ -197,15 +195,15 @@ impl AddChannelView {
     /// Changes visibility of joining option.
     fn connect_select_button(
         &self,
-        _active_button: Button,
-        _disactive_button: Button,
+        active_button: Button,
+        disactive_button: Button,
         visible_box: Box,
         no_visible_box: Box,
     ) {
-        let create_channel_button_clone = _active_button.clone();
-        _active_button.connect_clicked(move |_| {
-            active_button(create_channel_button_clone.clone());
-            disactive_button(_disactive_button.clone());
+        let create_channel_button_clone = active_button.clone();
+        active_button.connect_clicked(move |_| {
+            activate_button(create_channel_button_clone.clone());
+            disactivate_button(disactive_button.clone());
             switch_visibility(visible_box.clone(), no_visible_box.clone());
         });
     }

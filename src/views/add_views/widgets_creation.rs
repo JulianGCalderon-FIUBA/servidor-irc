@@ -1,5 +1,4 @@
-use gtk::{traits::WidgetExt, Align::Center, Box, Label, Orientation::Vertical};
-use gtk4 as gtk;
+use gtk4::{traits::WidgetExt, Align::Center, Box, Label, Orientation::Vertical};
 
 use crate::views::{widgets_creation::create_label, MAIN_BOX_CSS};
 

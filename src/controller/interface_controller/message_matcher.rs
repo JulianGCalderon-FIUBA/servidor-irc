@@ -1,7 +1,5 @@
 use std::{collections::HashMap, io, net::SocketAddr, path::PathBuf, thread};
 
-use gtk4 as gtk;
-
 use crate::{
     client::Client,
     controller::{
@@ -25,9 +23,9 @@ use crate::{
         PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
-use gtk::{
+use gtk4::{
     traits::{DialogExt, GtkWindowExt, WidgetExt},
-    FileChooserDialog, ResponseType,
+    FileChooserAction, FileChooserDialog, ResponseType,
 };
 
 use super::{
@@ -58,7 +56,7 @@ impl InterfaceController {
         });
 
         self.receiver_attach(client.clone(), dcc_receiver, self.sender.clone());
-        
+
         self.main_view.disable_safe_conversation_button();
 
         self.safe_conversation_view = safe_conversation_view(self.nickname.clone(), &self.sender);
@@ -172,7 +170,7 @@ impl InterfaceController {
         let title = "Please, select which file you wish to send".to_string();
         let file_chooser_dialog = FileChooserDialog::builder()
             .transient_for(&self.main_window)
-            .action(gtk::FileChooserAction::Open)
+            .action(FileChooserAction::Open)
             .title(&title)
             .build();
         file_chooser_dialog.add_button("Send", ResponseType::Accept);

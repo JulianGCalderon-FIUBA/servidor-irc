@@ -1,4 +1,5 @@
-use gtk4::glib::{self, Receiver, Sender};
+use gtk4::glib::{Receiver, Sender};
+use gtk4::prelude::Continue;
 
 use crate::{client::async_reader::AsyncReader, controller::controller_message::ControllerMessage};
 
@@ -36,7 +37,7 @@ impl InterfaceController {
                     message,
                 })
                 .expect("error");
-            glib::Continue(true)
+            Continue(true)
         });
     }
 }

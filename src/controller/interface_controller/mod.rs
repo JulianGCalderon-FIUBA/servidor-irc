@@ -13,8 +13,6 @@ use std::{
     thread,
 };
 
-use gtk4 as gtk;
-
 use crate::{
     client::{async_reader::AsyncReader, Client},
     ctcp::dcc_send::dcc_resume_sender::DccResumeSender,
@@ -27,8 +25,9 @@ use crate::{
         add_views::safe_conversation_view::SafeConversationView, main_view::MainView,
     },
 };
-use gtk::{
-    glib::{self, Receiver, Sender},
+use gtk4::{
+    glib::{Receiver, Sender},
+    prelude::Continue,
     traits::WidgetExt,
     Application, ApplicationWindow, MessageDialog,
 };
@@ -297,7 +296,7 @@ impl InterfaceController {
             }
             // Returning false here would close the receiver
             // and have senders fail
-            glib::Continue(true)
+            Continue(true)
         });
     }
 }

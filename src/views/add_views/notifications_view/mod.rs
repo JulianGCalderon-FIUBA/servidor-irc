@@ -1,12 +1,11 @@
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
-use gtk::{
+use gtk4::{
     traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
     Application, ApplicationWindow, Button,
     Orientation::Horizontal,
 };
-use gtk4 as gtk;
 
 use crate::views::{
     add_views::notifications_view::widgets_creation::{

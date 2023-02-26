@@ -1,5 +1,4 @@
-use gtk::glib::Sender;
-use gtk4 as gtk;
+use gtk4::glib::Sender;
 
 use crate::{
     controller::controller_message::ControllerMessage::{self, Register},
