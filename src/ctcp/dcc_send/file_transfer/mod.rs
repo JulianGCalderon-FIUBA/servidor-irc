@@ -39,7 +39,7 @@ impl FileTransferer {
     pub fn download_file(self) -> io::Result<()> {
         let file = File::create(self.filename.clone())?;
 
-        self.to_file(file)
+        self.send_to_file(file)
     }
 
     pub fn resume_upload_file(mut self, position: u64) -> io::Result<()> {
@@ -48,7 +48,7 @@ impl FileTransferer {
 
         self.filesize -= position;
 
-        self.to_stream(file)
+        self.send_to_stream(file)
     }
 
     pub fn resume_download_file(mut self, position: u64) -> io::Result<()> {
@@ -59,11 +59,11 @@ impl FileTransferer {
 
         self.filesize -= position;
 
-        self.to_file(file)
+        self.send_to_file(file)
     }
 
-    pub fn to_stream(mut self, mut file: File) -> io::Result<()> {
-        let total_bytes_read = copy(self.cancelled, &mut file, &mut self.stream)?;
+    fn send_to_stream(mut self, mut file: File) -> io::Result<()> {
+        let total_bytes_read = copy(self.cancelled.clone(), &mut file, &mut self.stream)?;
 
         if total_bytes_read != self.filesize {
             return Err(eof());
@@ -72,7 +72,7 @@ impl FileTransferer {
         Ok(())
     }
 
-    pub fn to_file(mut self, mut file: File) -> io::Result<()> {
+    fn send_to_file(mut self, mut file: File) -> io::Result<()> {
         let total_bytes_read = copy(self.cancelled, &mut self.stream, &mut file)?;
 
         if total_bytes_read != self.filesize {
