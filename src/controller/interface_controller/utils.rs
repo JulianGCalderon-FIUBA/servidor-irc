@@ -6,11 +6,13 @@ use crate::{
     controller::{
         utils::{
             all_clients, client_channels, get_sender_and_receiver, push_if_absent, remove_element,
-            remove_operator_indicator,
+            remove_operator_indicator, OPERATOR_CHARACTER,
         },
         NAMES_ERROR_TEXT, OPEN_WARNING_ERROR_TEXT,
     },
-    ctcp::dcc_message::DccMessage,
+    ctcp::dcc_message::DccMessage::{
+        self, Accept, Chat, ChatAccept, ChatDecline, Close, Resume, Send, SendAccept, SendDecline,
+    },
     message::Message,
     server::consts::commands::NAMES_COMMAND,
 };
@@ -65,87 +67,6 @@ impl InterfaceController {
         client_channels(channels_and_clients, self.current_conv.clone())
     }
 
-    pub fn remove_myself(&mut self, all_clients: &mut Vec<String>) {
-        let nickname = self.nickname.clone();
-        remove_element(all_clients, &nickname);
-        remove_element(all_clients, &format!("@{nickname}"));
-    }
-
-    pub fn send_names_message(
-        &mut self,
-        intention: NamesMessageIntention,
-        parameter: Option<String>,
-    ) {
-        self.names_message_intention = intention;
-        let parameter_value = parameter.unwrap_or_default();
-        let message = format!("{NAMES_COMMAND} {}", parameter_value);
-        self.client.send(&message).expect(NAMES_ERROR_TEXT);
-    }
-
-    pub fn send_open_warning_view(&mut self, warning_text: &str) {
-        let to_send = OpenWarningView {
-            message: warning_text.to_string(),
-        };
-        self.sender.send(to_send).expect(OPEN_WARNING_ERROR_TEXT);
-    }
-
-    pub fn receive_regular_privmsg(&mut self, message: Message) {
-        let (channel, message, sender_nickname) = self.decode_priv_message(message);
-        if let Some(..) = channel {
-            self.main_view
-                .receive_priv_channel_message(message, sender_nickname, channel.unwrap());
-        } else {
-            self.main_view
-                .receive_priv_client_message(message, sender_nickname);
-        }
-    }
-
-    pub fn receive_dcc_message(&mut self, message: Message, content: String) {
-        let (_, _, sender_nickname) = self.decode_priv_message(message);
-
-        let dcc_message = if let Ok(dcc_message) = DccMessage::parse(content) {
-            dcc_message
-        } else {
-            return;
-        };
-
-        match dcc_message {
-            DccMessage::Send {
-                filename,
-                address,
-                filesize,
-            } => {
-                self.receive_dcc_send(sender_nickname, filename, address, filesize);
-            }
-            DccMessage::SendAccept => {
-                self.receive_dcc_send_accept(sender_nickname);
-            }
-            DccMessage::SendDecline => {
-                self.receive_dcc_send_decline(sender_nickname);
-            }
-            DccMessage::Chat { address } => {
-                self.open_dcc_invitation_view(sender_nickname, address);
-            }
-            DccMessage::ChatAccept => {
-                self.dcc_receive_accept(sender_nickname);
-            }
-            DccMessage::ChatDecline => {
-                self.dcc_receive_decline(sender_nickname);
-            }
-            DccMessage::Close => todo!(),
-            DccMessage::Resume {
-                filename,
-                port,
-                position,
-            } => self.receive_dcc_resume(sender_nickname, filename, port, position),
-            DccMessage::Accept {
-                filename,
-                port,
-                position,
-            } => self.receive_dcc_accept(sender_nickname, filename, port, position),
-        }
-    }
-
     pub fn dcc_receive_accept(&mut self, client: String) {
         let mut dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
         let dcc_std_receiver = dcc_chat.async_read_message();
@@ -173,5 +94,86 @@ impl InterfaceController {
 
     pub fn get_stream(&mut self) -> TcpStream {
         self.client.get_stream().unwrap()
+    }
+
+    pub fn receive_dcc_message(&mut self, message: Message, content: String) {
+        let (_, _, sender_nickname) = self.decode_priv_message(message);
+
+        let dcc_message = if let Ok(dcc_message) = DccMessage::parse(content) {
+            dcc_message
+        } else {
+            return;
+        };
+
+        match dcc_message {
+            Accept {
+                filename,
+                port,
+                position,
+            } => self.receive_dcc_accept(sender_nickname, filename, port, position),
+            Chat { address } => {
+                self.open_dcc_invitation_view(sender_nickname, address);
+            }
+            ChatAccept => {
+                self.dcc_receive_accept(sender_nickname);
+            }
+            ChatDecline => {
+                self.dcc_receive_decline(sender_nickname);
+            }
+            Close => todo!(),
+            Resume {
+                filename,
+                port,
+                position,
+            } => self.receive_dcc_resume(sender_nickname, filename, port, position),
+            Send {
+                filename,
+                address,
+                filesize,
+            } => {
+                self.receive_dcc_send(sender_nickname, filename, address, filesize);
+            }
+            SendAccept => {
+                self.receive_dcc_send_accept(sender_nickname);
+            }
+            SendDecline => {
+                self.receive_dcc_send_decline(sender_nickname);
+            }
+        }
+    }
+
+    pub fn receive_regular_privmsg(&mut self, message: Message) {
+        let (channel, message, sender_nickname) = self.decode_priv_message(message);
+        if let Some(..) = channel {
+            self.main_view
+                .receive_priv_channel_message(message, sender_nickname, channel.unwrap());
+        } else {
+            self.main_view
+                .receive_priv_client_message(message, sender_nickname);
+        }
+    }
+
+    pub fn remove_myself(&mut self, all_clients: &mut Vec<String>) {
+        let nickname = self.nickname.clone();
+        remove_element(all_clients, &nickname);
+        remove_element(all_clients, &format!("{}{nickname}", OPERATOR_CHARACTER));
+    }
+
+    pub fn send_names_message(
+        &mut self,
+        intention: NamesMessageIntention,
+        parameter: Option<String>,
+    ) {
+        self.names_message_intention = intention;
+        let parameter_value = parameter.unwrap_or_default();
+        let message = format!("{NAMES_COMMAND} {}", parameter_value);
+        self.client.send(&message).expect(NAMES_ERROR_TEXT);
+    }
+
+    pub fn send_open_warning_view(&mut self, warning_text: &str) {
+        let to_send = OpenWarningView {
+            message: warning_text.to_string(),
+        };
+        self.sender.send(to_send).expect(OPEN_WARNING_ERROR_TEXT);
     }
 }

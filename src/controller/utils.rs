@@ -6,7 +6,7 @@ use gtk4::{
 use std::collections::HashMap;
 
 const CHANNEL_FIRST_CHARACTER: &str = "#";
-const OPERATOR_CHARACTER: char = '@';
+pub const OPERATOR_CHARACTER: char = '@';
 
 /// Returns all clients.
 ///
@@ -53,15 +53,20 @@ pub fn client_channels(
     client_channels_set
 }
 
+pub fn first_word_of_button(button: &Button) -> String {
+    let text = button.label().unwrap().to_string();
+    text.split_whitespace().collect::<Vec<&str>>()[0].to_string()
+}
+
+pub fn get_sender_and_receiver() -> (Sender<String>, Receiver<String>) {
+    MainContext::channel(PRIORITY_DEFAULT)
+}
+
 /// Returns a bool indicating if the conversation is a channel or not.
 ///
 /// Receives a String, returns a bool
 pub fn is_channel(parameter: &str) -> bool {
     parameter.starts_with(CHANNEL_FIRST_CHARACTER)
-}
-
-pub fn vec_is_not_empty(vector: &Vec<String>) -> bool {
-    !vector.is_empty()
 }
 
 pub fn is_not_empty(text: &str) -> bool {
@@ -88,11 +93,6 @@ pub fn remove_operator_indicator(element: &str) -> String {
     }
 }
 
-pub fn first_word_of_button(button: &Button) -> String {
-    let text = button.label().unwrap().to_string();
-    text.split_whitespace().collect::<Vec<&str>>()[0].to_string()
-}
-
-pub fn get_sender_and_receiver() -> (Sender<String>, Receiver<String>) {
-    MainContext::channel(PRIORITY_DEFAULT)
+pub fn vec_is_not_empty(vector: &Vec<String>) -> bool {
+    !vector.is_empty()
 }
