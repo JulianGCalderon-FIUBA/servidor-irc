@@ -13,6 +13,7 @@ use magic_crypt::{new_magic_crypt, MagicCrypt256};
 
 use crate::message::{read_line, CRLF};
 
+/// Handles a connection created from a DCC CHAT request.
 pub struct DccChat {
     pub stream: TcpStream,
     pub read_stream: Option<TcpStream>,
@@ -20,6 +21,7 @@ pub struct DccChat {
 }
 
 impl DccChat {
+    /// Creates new [`DccChat`]
     pub fn new(stream: TcpStream) -> io::Result<Self> {
         let read_stream = Some(stream.try_clone()?);
         let magic_crypt = new_magic_crypt!("magickey", 256);
