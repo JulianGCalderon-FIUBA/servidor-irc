@@ -77,7 +77,7 @@ impl InterfaceController {
         let last_conv: String = self.current_conv.clone();
         self.current_conv = current_conversation;
         self.main_view
-            .change_conversation(last_conv, self.current_conv.clone());
+            .change_conversation(last_conv, self.current_conv.clone(), &self.dcc_chats);
     }
 
     pub fn decline_dcc_chat(&mut self, client: String) {

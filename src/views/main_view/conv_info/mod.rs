@@ -23,8 +23,8 @@ use self::requests::{
 use super::{MainView, ADD_BUTTON_CSS, DISABLE_BUTTON_CSS};
 
 const EXIT_CHANNEL_BUTTON_CSS: &str = "exit_channel";
-const SAFE_CONVERSATION_BUTTON_CSS: &str = "safe_conversation";
-const DISABLE_SAFE_CONVERSATION_BUTTON_CSS: &str = "disable_safe_conversation";
+pub const SAFE_CONVERSATION_BUTTON_CSS: &str = "safe_conversation";
+pub const DISABLE_SAFE_CONVERSATION_BUTTON_CSS: &str = "disable_safe_conversation";
 
 impl MainView {
     /// Creates conversation info widgets.
@@ -211,13 +211,5 @@ impl MainView {
         self.safe_conversation_button.set_visible(false);
         self.send_file_button.set_visible(false);
         self.channel_members_button.set_visible(true);
-    }
-
-    pub fn disable_safe_conversation_button(&mut self) {
-        self.safe_conversation_button
-            .remove_css_class(SAFE_CONVERSATION_BUTTON_CSS);
-        self.safe_conversation_button
-            .add_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS);
-        self.safe_conversation_button.set_sensitive(false);
     }
 }
