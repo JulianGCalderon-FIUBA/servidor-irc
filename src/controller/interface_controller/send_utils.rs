@@ -12,7 +12,10 @@ use crate::{
     controller::controller_message::ControllerMessage::{
         self, DownloadFile, IgnoreFile, ReceiveResult, SendResult,
     },
-    ctcp::dcc_send::{dcc_send_receiver::DccSendReceiver, file_transfer::TransferController},
+    ctcp::dcc_send::{
+        dcc_send_receiver::DccSendReceiver,
+        file_transfer::{FileTransferer, TransferController},
+    },
     macros::{ok_or_return, some_or_return},
 };
 
@@ -28,18 +31,18 @@ impl InterfaceController {
 
         let (transferer, controller) = dcc_send_sender.accept().unwrap();
 
-        let sender_channel = self.sender.clone();
-        let sender_client = sender.clone();
-        thread::spawn(move || {
-            let result = transferer.upload_file();
-            let message = SendResult {
-                sender: sender_client,
-                result,
-            };
-            sender_channel.send(message).unwrap();
-        });
+        self.start_file_upload(sender.clone(), transferer);
 
         self.cancel_transfer_dialog("Upload in progress", sender, controller);
+    }
+
+    fn start_file_upload(&mut self, sender: String, transferer: FileTransferer) {
+        let sender_channel = self.sender.clone();
+        thread::spawn(move || {
+            let result = transferer.upload_file();
+            let message = SendResult { sender, result };
+            sender_channel.send(message).unwrap();
+        });
     }
 
     pub fn receive_dcc_send(
@@ -130,20 +133,25 @@ impl InterfaceController {
 
         let (transferer, controller) = dcc_send_sender.resume(position).unwrap();
 
-        let sender_channel = self.sender.clone();
-        let sender_client = sender.clone();
-        thread::spawn(move || {
-            let result = transferer.resume_upload_file(position);
-
-            let message = SendResult {
-                sender: sender_client,
-                result,
-            };
-            sender_channel.send(message).unwrap();
-        });
+        self.start_resume_upload_file(sender.clone(), transferer, position);
 
         let dialog_message = "Upload in progress";
         self.cancel_transfer_dialog(dialog_message, sender, controller);
+    }
+
+    fn start_resume_upload_file(
+        &mut self,
+        sender: String,
+        transferer: FileTransferer,
+        position: u64,
+    ) {
+        let sender_channel = self.sender.clone();
+        thread::spawn(move || {
+            let result = transferer.resume_upload_file(position);
+
+            let message = SendResult { sender, result };
+            sender_channel.send(message).unwrap();
+        });
     }
 
     pub fn receive_dcc_accept(
@@ -166,21 +174,30 @@ impl InterfaceController {
         let name = dcc_resume_sender.original_name();
         let (transferer, controller) = dcc_resume_sender.accept().unwrap();
 
+        self.start_resume_download_file(sender.clone(), transferer, position, name);
+
+        let dialog_message = "Download in progress";
+        self.cancel_transfer_dialog(dialog_message, sender, controller);
+    }
+
+    fn start_resume_download_file(
+        &mut self,
+        sender: String,
+        transferer: FileTransferer,
+        position: u64,
+        name: String,
+    ) {
         let sender_channel = self.sender.clone();
-        let sender_client = sender.clone();
         thread::spawn(move || {
             let result = transferer.resume_download_file(position);
 
             let message = ReceiveResult {
-                sender: sender_client,
+                sender,
                 result,
                 name,
             };
             sender_channel.send(message).unwrap();
         });
-
-        let dialog_message = "Download in progress";
-        self.cancel_transfer_dialog(dialog_message, sender, controller);
     }
 
     pub fn cancel_transfer_dialog(
@@ -252,6 +269,24 @@ impl InterfaceController {
             dialog.destroy();
         }
     }
+
+    pub fn start_download_file(
+        &mut self,
+        sender: String,
+        transferer: FileTransferer,
+        name: String,
+    ) {
+        let sender_channel = self.sender.clone();
+        thread::spawn(move || {
+            let result = transferer.download_file();
+            let message = ReceiveResult {
+                sender,
+                name,
+                result,
+            };
+            sender_channel.send(message).unwrap();
+        });
+    }
 }
 
 fn build_file_download_chooser_dialog(
@@ -280,6 +315,29 @@ fn build_file_download_chooser_dialog(
 
         channel_sender.send(download_file_request).unwrap();
 
+        file_chooser_dialog.destroy();
+    });
+}
+
+pub fn connect_receiver_file_chooser(
+    file_chooser_dialog: FileChooserDialog,
+    target: String,
+    sender: Sender<ControllerMessage>,
+) {
+    file_chooser_dialog.connect_response(move |file_chooser_dialog, response| {
+        if response != ResponseType::Accept {
+            return;
+        }
+
+        let file = some_or_return!(file_chooser_dialog.file());
+
+        let path = some_or_return!(file.path());
+
+        let target = target.clone();
+
+        sender
+            .send(ControllerMessage::SendDccSend { path, target })
+            .unwrap();
         file_chooser_dialog.destroy();
     });
 }

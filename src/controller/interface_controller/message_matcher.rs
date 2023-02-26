@@ -5,9 +5,7 @@ use gtk4 as gtk;
 use crate::{
     client::Client,
     controller::{
-        controller_message::ControllerMessage::{
-            OpenAddClientView, OpenInviteClientView, ReceiveResult, SendDccSend,
-        },
+        controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
         utils::{channels_not_mine, get_sender_and_receiver, vec_is_not_empty},
         CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
         KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
@@ -28,13 +26,13 @@ use crate::{
     },
 };
 use gtk::{
-    prelude::FileExt,
-    traits::{DialogExt, FileChooserExt, GtkWindowExt, WidgetExt},
+    traits::{DialogExt, GtkWindowExt, WidgetExt},
     FileChooserDialog, ResponseType,
 };
 
 use super::{
     download::Download,
+    send_utils::connect_receiver_file_chooser,
     window_creation::{
         add_channel_view, add_client_window, channel_members_window, dcc_invitation_window,
         invite_window, main_view, notifications_window, safe_conversation_view, user_info_window,
@@ -104,17 +102,7 @@ impl InterfaceController {
 
         let (transferer, controller) = dcc_send_receiver.accept_send_command(path).unwrap();
 
-        let sender_channel = self.sender.clone();
-        let sender_client = sender.clone();
-        thread::spawn(move || {
-            let result = transferer.download_file();
-            let message = ReceiveResult {
-                sender: sender_client,
-                name,
-                result,
-            };
-            sender_channel.send(message).unwrap();
-        });
+        self.start_download_file(sender.clone(), transferer, name);
 
         self.cancel_transfer_dialog("Download in progress", sender, controller);
     }
@@ -185,27 +173,12 @@ impl InterfaceController {
             .action(gtk::FileChooserAction::Open)
             .title(&title)
             .build();
-
         file_chooser_dialog.add_button("Send", ResponseType::Accept);
-
         file_chooser_dialog.present();
 
         let sender = self.sender.clone();
 
-        file_chooser_dialog.connect_response(move |file_chooser_dialog, response| {
-            if response != ResponseType::Accept {
-                return;
-            }
-
-            let file = some_or_return!(file_chooser_dialog.file());
-
-            let path = some_or_return!(file.path());
-
-            let target = target.clone();
-
-            sender.send(SendDccSend { path, target }).unwrap();
-            file_chooser_dialog.destroy();
-        });
+        connect_receiver_file_chooser(file_chooser_dialog, target, sender);
     }
 
     pub fn open_invite_client_view(&mut self, channels_and_clients: HashMap<String, Vec<String>>) {
