@@ -1,4 +1,4 @@
-use gtk4::{traits::ButtonExt, Button};
+use gtk4::{traits::ButtonExt, Button, glib::{MainContext, PRIORITY_DEFAULT, Sender, Receiver}};
 use std::collections::HashMap;
 
 const CHANNEL_FIRST_CHARACTER: &str = "#";
@@ -87,4 +87,8 @@ pub fn remove_operator_indicator(element: &str) -> String {
 pub fn first_word_of_button(button: &Button) -> String {
     let text = button.label().unwrap().to_string();
     text.split_whitespace().collect::<Vec<&str>>()[0].to_string()
+}
+
+pub fn get_sender_and_receiver() -> (Sender<String>, Receiver<String>) {
+    MainContext::channel(PRIORITY_DEFAULT)
 }

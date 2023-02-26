@@ -1,7 +1,5 @@
 use std::{ collections::HashMap, net::TcpStream };
 
-use gtk4::glib::{ Receiver, Sender };
-
 use crate::{
     controller::{
         utils::{
