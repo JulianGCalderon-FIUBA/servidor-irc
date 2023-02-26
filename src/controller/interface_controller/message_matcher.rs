@@ -452,6 +452,7 @@ impl InterfaceController {
         let chat_sender = DccChatSender::send(stream, self.current_conv.clone()).unwrap();
         self.dcc_senders
             .insert(self.current_conv.clone(), chat_sender);
+        self.main_view.disable_safe_conversation_button();
     }
 
     pub fn send_safe_message(&mut self, receiver_client: String, message: String) {
