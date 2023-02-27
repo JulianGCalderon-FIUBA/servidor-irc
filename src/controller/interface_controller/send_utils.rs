@@ -22,10 +22,12 @@ use crate::{
 use super::{download::Download, InterfaceController};
 
 impl InterfaceController {
+    /// Discards [`DccSendSender`]. Called if connection was refused.
     pub fn receive_dcc_send_decline(&mut self, sender: String) {
         self.dcc_send_senders.remove(&sender);
     }
 
+    /// Sends file through stream. Called if connection was accepted.
     pub fn receive_dcc_send_accept(&mut self, sender: String) {
         let dcc_send_sender = some_or_return!(self.dcc_send_senders.remove(&sender));
 
@@ -44,7 +46,7 @@ impl InterfaceController {
             sender_channel.send(message).unwrap();
         });
     }
-
+    /// Creates a [`DccSendReceiver`] to handle the receiving end of a DCC SEND request.
     pub fn receive_dcc_send(
         &mut self,
         sender: String,
@@ -122,6 +124,7 @@ impl InterfaceController {
         self.dcc_send_receivers.insert(sender, dcc_send_receiver);
     }
 
+    /// Resumes the sending of a previously interrupted file.
     pub fn receive_dcc_resume(
         &mut self,
         sender: String,
@@ -154,6 +157,7 @@ impl InterfaceController {
         });
     }
 
+    /// Resumes the download of a previously interrupted file.
     pub fn receive_dcc_accept(
         &mut self,
         sender: String,
@@ -200,6 +204,7 @@ impl InterfaceController {
         });
     }
 
+    /// Creates a [`MessageDialog`] containing the dialog_message received. It contains a button to cancel the file transfer.
     pub fn cancel_transfer_dialog(
         &mut self,
         dialog_message: &str,
@@ -224,6 +229,7 @@ impl InterfaceController {
         self.cancel_dialogs.insert(sender_nickname, cancel_dialog);
     }
 
+    /// Creates a [`MessageDialog`] to inform the client the transfer has been completed.
     pub fn completed_transfer_dialog(&self, title: &str) {
         let completed_dialog = MessageDialog::builder()
             .title(title)
@@ -255,7 +261,8 @@ impl InterfaceController {
         });
     }
 
-    pub fn transfer_result(&mut self, result: Result<(), io::Error>, sender: String) {
+    /// Generates button to inform the client whether the transfer was completed successfully or not.
+    pub fn transfer_result(&mut self, result: io::Result<()>, sender: String) {
         match result {
             Ok(()) => self.completed_transfer_dialog("File transfer completed successfully"),
             Err(error) => {
@@ -270,6 +277,7 @@ impl InterfaceController {
         }
     }
 
+    /// Downloads file in a different thread and sends the result through a channel. This allows error handling.
     pub fn start_download_file(
         &mut self,
         sender: String,

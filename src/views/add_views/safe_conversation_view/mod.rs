@@ -13,10 +13,7 @@ use gtk4::{
 use crate::{
     controller::controller_message::ControllerMessage,
     views::{
-        main_view::{
-            utils::adjust_scrollbar,
-            widgets_creation::{create_current_chat},
-        },
+        main_view::{utils::adjust_scrollbar, widgets_creation::create_current_chat},
         utils::do_break_line,
         widgets_creation::{
             build_application_window, create_button_with_margin, create_chat_box, create_entry,
@@ -27,7 +24,10 @@ use crate::{
     },
 };
 
-use self::{requests::{send_safe_message_request, close_safe_view_request}, widgets_creation::{create_initial_message, create_safe_message_box}};
+use self::{
+    requests::{close_safe_view_request, send_safe_message_request},
+    widgets_creation::{create_initial_message, create_safe_message_box},
+};
 
 const QUIT_BUTTON_TEXT: &str = "x";
 const QUIT_BUTTON_CSS: &str = "exit_channel";
@@ -73,9 +73,7 @@ impl SafeConversationView {
         let top_box = create_message_sender_box();
 
         self.current_chat.set_width_request(550);
-        self.close_button
-            .add_css_class(QUIT_BUTTON_CSS);
-
+        self.close_button.add_css_class(QUIT_BUTTON_CSS);
 
         top_box.append(&self.current_chat);
         top_box.append(&self.close_button);
@@ -97,7 +95,7 @@ impl SafeConversationView {
         );
         message_sender_box.append(&self.send_message);
 
-        let initial_message = create_initial_message(&self.nickname, &self.current_chat.label().to_string());
+        let initial_message = create_initial_message(&self.nickname, &self.current_chat.label());
         self.message_box.append(&initial_message);
 
         chat.append(&top_box);
