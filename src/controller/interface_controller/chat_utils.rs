@@ -1,4 +1,3 @@
-// use gtk4::traits::WidgetExt;
 use std::{thread, net::SocketAddr};
 use gtk4::{
     traits::{GtkWindowExt, WidgetExt},

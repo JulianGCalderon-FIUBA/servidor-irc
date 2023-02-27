@@ -49,8 +49,7 @@ const DISPLAY_CONNECT_ERROR_TEXT: &str = "Could not connect to a display.";
 const SERVER_CONNECT_ERROR_TEXT: &str = "Error connecting to server";
 
 /// Has a reference to the application.
-/// Communicates with the views and the server.
-/// Handles server errors.
+/// Starts the Interface Controller.
 pub struct Controller {
     app: Application,
 }

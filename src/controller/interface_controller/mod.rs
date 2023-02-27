@@ -50,6 +50,9 @@ use super::{controller_handler::to_controller_message, controller_message::Contr
 
 const FAILED_TO_READ_MESSAGE_ERROR_TEXT: &str = "Failed to read message";
 
+/// Has a reference to views, windows and neccesary variables.
+/// Communicates with the views and the server.
+/// Handles server errors.
 pub struct InterfaceController {
     accumulated_channels_from_list: Vec<String>,
     accumulated_channels_from_names: Vec<String>,
@@ -127,6 +130,9 @@ impl InterfaceController {
         }
     }
 
+    /// Creates a receiver and starts listening thorugh the client's stream.
+    /// 
+    /// Receives nothing, returns nothing.
     pub fn start_listening(&mut self) {
         let sender_clone = self.sender.clone();
         let (_async_reader, message_receiver) =
@@ -144,6 +150,10 @@ impl InterfaceController {
         });
     }
 
+    /// Shows the starting view.
+    /// Handles all the received ControllerMessage.
+    /// 
+    /// Receives a ControllerMessage receiver, returns nothing. 
     pub fn build(mut self, receiver: Receiver<ControllerMessage>) {
         self.ip_window.show();
 
