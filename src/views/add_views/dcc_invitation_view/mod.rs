@@ -6,9 +6,9 @@ use std::net::SocketAddr;
 use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
+    Align::{Center, Start},
     Application, ApplicationWindow, Button,
     Orientation::{Horizontal, Vertical},
-    Align::{Start, Center}
 };
 
 use self::requests::{accept_request, decline_request};
@@ -67,7 +67,7 @@ impl DccInvitationView {
         let invitation = create_label(&message);
         invitation.set_halign(Start);
         invitation.set_margin_start(20);
-        
+
         main_box.append(&invitation);
 
         let button_box = create_main_box(Horizontal, 100, 100);

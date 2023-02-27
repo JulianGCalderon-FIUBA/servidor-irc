@@ -2,8 +2,8 @@ use gtk4::glib::Sender;
 
 use crate::{
     controller::controller_message::ControllerMessage::{
-        self, OpenFileDialogChooserView, RemoveConversation, SendNamesMessageToInviteClient,
-        SendNamesMessageToKnowMembers, SendPartMessage, SendSafeConversationRequest,
+        self, RemoveConversation, SendNamesMessageToInviteClient, SendNamesMessageToKnowMembers,
+        SendPartMessage, SendSafeConversationRequest,
     },
     views::ERROR_TEXT,
 };

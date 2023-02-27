@@ -21,7 +21,10 @@ use crate::{
     },
 };
 
-use self::{requests::{priv_message_request, send_file_request}, widgets_creation::create_sender_nickname_label};
+use self::{
+    requests::{priv_message_request, send_file_request},
+    widgets_creation::create_sender_nickname_label,
+};
 
 use super::{
     utils::{add_notification_to_button, adjust_scrollbar},

@@ -1,5 +1,5 @@
-use crate::views::main_view::ControllerMessage::{ SendPrivMessage, OpenFileDialogChooserView };
-use crate::{ controller::controller_message::ControllerMessage, views::ERROR_TEXT };
+use crate::views::main_view::ControllerMessage::{OpenFileDialogChooserView, SendPrivMessage};
+use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT};
 use gtk4::glib::Sender;
 
 /// Sends a private message request to the controller.
