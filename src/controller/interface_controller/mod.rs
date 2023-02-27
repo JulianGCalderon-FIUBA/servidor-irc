@@ -156,6 +156,9 @@ impl InterfaceController {
                 ChangeConversation { nickname } => {
                     self.change_conversation(nickname);
                 }
+                CloseDccChat { client } => {
+                    self.dcc_close(client);
+                }
                 CloseSafeView { client } => {
                     self.close_safe_view(client);
                 }

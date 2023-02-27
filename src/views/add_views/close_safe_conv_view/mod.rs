@@ -1,12 +1,16 @@
+/// Contains definition of used requests.
+pub mod requests;
+
 use gtk4::{
-    traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
-    Align::Start,
+    traits::{BoxExt, ButtonExt, GtkWindowExt},
     Application, ApplicationWindow, Button, glib::Sender,
 };
 
 use crate::{views::widgets_creation::{
-    build_application_window, create_center_button, create_label,
+    build_application_window, create_center_button,
 }, controller::controller_message::ControllerMessage};
+
+use self::requests::close_safe_conv_request;
 
 use super::{
     widgets_creation::{create_main_box_add_view, create_title},
@@ -44,7 +48,7 @@ impl CloseSafeConvView {
 
         main_box.append(&self.button);
 
-        self.connect_button(window.clone(), self.sender.clone());
+        self.connect_button(window.clone(), client, self.sender.clone());
 
         window.set_child(Some(&main_box));
         window
@@ -53,9 +57,9 @@ impl CloseSafeConvView {
     /// Connects exit button.
     ///
     /// Closes the window.
-    fn connect_button(&mut self, window: ApplicationWindow, sender: Sender<ControllerMessage>) {
+    fn connect_button(&mut self, window: ApplicationWindow, client: String, sender: Sender<ControllerMessage>) {
         self.button.connect_clicked(move |_| {
-
+            close_safe_conv_request(client.clone(), sender.clone());
             window.close();
         });
     }
