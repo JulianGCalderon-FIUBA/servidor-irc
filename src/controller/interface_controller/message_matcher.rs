@@ -80,6 +80,10 @@ impl InterfaceController {
             .change_conversation(last_conv, self.current_conv.clone(), &self.dcc_chats);
     }
 
+    pub fn close_safe_view(&mut self, _client: String) {
+
+    }
+
     pub fn decline_dcc_chat(&mut self, client: String) {
         self.dcc_invitation_window.close();
         self.dcc_receivers

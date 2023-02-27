@@ -39,7 +39,7 @@ use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
         add_channel_view, add_client_window, dcc_invitation_window, invite_window, ip_window,
-        main_view, register_window, safe_conversation_view,
+        main_view, register_window,
     },
 };
 
@@ -152,6 +152,9 @@ impl InterfaceController {
                 }
                 ChangeConversation { nickname } => {
                     self.change_conversation(nickname);
+                }
+                CloseSafeView { client } => {
+                    self.close_safe_view(client);
                 }
                 DeclineDccChat { client } => {
                     self.decline_dcc_chat(client);

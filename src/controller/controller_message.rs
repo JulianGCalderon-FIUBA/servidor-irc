@@ -14,6 +14,9 @@ pub enum ControllerMessage {
     ChangeConversation {
         nickname: String,
     },
+    CloseSafeView {
+        client: String,
+    },
     DeclineDccChat {
         client: String,
     },

@@ -27,7 +27,7 @@ use crate::{
     },
 };
 
-use self::{requests::send_safe_message_request, widgets_creation::create_initial_message};
+use self::{requests::{send_safe_message_request, close_safe_view_request}, widgets_creation::create_initial_message};
 
 /// Shows channel members view.
 /// Contains an exit button.
@@ -93,6 +93,9 @@ impl SafeConversationView {
         chat.append(&message_sender_box);
 
         window.set_child(Some(&chat));
+
+        Self::close_view(window.clone(), self.current_chat.label().to_string(), self.sender.clone());
+
         window
     }
 
@@ -132,5 +135,12 @@ impl SafeConversationView {
         let message = create_received_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
+    }
+
+    /// Closes the view.
+    fn close_view(window: ApplicationWindow, current_chat: String, sender: Sender<ControllerMessage>) {
+        window.connect_destroy(move |_| {
+            close_safe_view_request(current_chat.clone(), sender.clone());
+        });
     }
 }
