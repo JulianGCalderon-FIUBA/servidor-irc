@@ -37,10 +37,6 @@ pub fn add_safe_conversation_view_request(sender: Sender<ControllerMessage>) {
         .expect(ERROR_TEXT);
 }
 
-pub fn send_file_request(sender: Sender<ControllerMessage>) {
-    sender.send(OpenFileDialogChooserView {}).expect(ERROR_TEXT);
-}
-
 /// Sends a names request to the controller.
 ///
 /// Receives nothing.

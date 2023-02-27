@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-use self::{requests::priv_message_request, widgets_creation::create_sender_nickname_label};
+use self::{requests::{priv_message_request, send_file_request}, widgets_creation::create_sender_nickname_label};
 
 use super::{
     utils::{add_notification_to_button, adjust_scrollbar},
@@ -36,8 +36,10 @@ impl MainView {
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
 
+        message_sender_box.append(&self.send_file_button);
+        self.connect_send_file_button(self.sender.clone());
+
         self.input.set_width_request(600);
-        self.input.set_margin_start(15);
         message_sender_box.append(&self.input);
 
         self.scrollwindow_chat.set_child(Some(&self.message_box));
@@ -148,6 +150,11 @@ impl MainView {
         } else {
             self.add_notification_to_button(nickname.clone());
         }
+    }
+
+    fn connect_send_file_button(&self, sender: Sender<ControllerMessage>) {
+        self.send_file_button
+            .connect_clicked(move |_| send_file_request(sender.clone()));
     }
 
     /// Creates sent message label in the chat.
