@@ -1,9 +1,11 @@
 pub mod chat_utils;
 pub mod dcc_controller;
 pub mod decode_message;
+/// Contains the Download structure. It is used to store information about the files being sent.
 mod download;
 pub mod message_matcher;
 pub mod names_message_intention;
+/// Contains utils that implement the logic for DCC SEND request.
 mod send_utils;
 pub mod utils;
 pub mod window_creation;
