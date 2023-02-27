@@ -4,7 +4,9 @@ pub mod controller_handler;
 
 /// Definition of messages the controller can send and receive.
 pub mod controller_message;
+/// Implementation of the Interfac Controller.
 pub mod interface_controller;
+/// Utils needed.
 pub mod utils;
 
 use crate::{client::Client, ADDRESS};
