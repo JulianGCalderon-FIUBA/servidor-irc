@@ -84,10 +84,11 @@ impl InterfaceController {
 
         self.main_view.disable_safe_conversation_button();
 
-        self.safe_conversation_view = safe_conversation_view(self.nickname.clone(), &self.sender);
-        self.safe_conversation_view
+        let mut safe_conversation = safe_conversation_view(self.nickname.clone(), &self.sender);
+        safe_conversation
             .get_view(&client, self.app.clone())
             .show();
+        self.safe_conversation_view.insert(client, safe_conversation);
     }
 
     pub fn dcc_receive_decline(&mut self, client: String) {

@@ -59,10 +59,12 @@ impl InterfaceController {
 
         self.main_view.disable_safe_conversation_button();
 
-        self.safe_conversation_view = safe_conversation_view(self.nickname.clone(), &self.sender);
-        self.safe_conversation_view
+        let mut safe_conversation = safe_conversation_view(self.nickname.clone(), &self.sender);
+        safe_conversation
             .get_view(&client, self.app.clone())
             .show();
+
+        self.safe_conversation_view.insert(client, safe_conversation);
     }
 
     pub fn add_new_client(&mut self, new_client: String) {
@@ -333,8 +335,12 @@ impl InterfaceController {
         self.transfer_result(result, sender);
     }
 
-    pub fn receive_safe_message(&mut self, _client: String, message: String) {
-        self.safe_conversation_view.receive_message(message);
+    pub fn receive_safe_message(&mut self, client: String, message: String) {
+        let safe_conversation = self.safe_conversation_view.remove(&client);
+        if let Some(mut safe_view) = safe_conversation {
+            safe_view.receive_message(message);
+            self.safe_conversation_view.insert(client, safe_view);
+        }
     }
 
     pub fn register(&mut self, pass: String, nickname: String, username: String, realname: String) {
@@ -432,8 +438,13 @@ impl InterfaceController {
         if let Some(mut dcc_chat) = dcc {
             dcc_chat.send_raw(&message).unwrap();
             self.dcc_chats.insert(receiver_client.clone(), dcc_chat);
-            self.safe_conversation_view
-                .send_message(message, receiver_client);
+            let safe_conversation = self.safe_conversation_view.remove(&receiver_client);
+            if let Some(mut safe_view) = safe_conversation {
+                safe_view.send_message(message, receiver_client.clone());
+                self.safe_conversation_view.insert(receiver_client, safe_view);
+            }
+            // self.safe_conversation_view
+            //     .send_message(message, receiver_client);
         }
     }
 }
