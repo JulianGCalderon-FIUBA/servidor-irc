@@ -15,7 +15,7 @@ use crate::{
     views::{
         main_view::{
             utils::adjust_scrollbar,
-            widgets_creation::{create_current_chat, create_message_box},
+            widgets_creation::{create_current_chat},
         },
         utils::do_break_line,
         widgets_creation::{
@@ -27,7 +27,7 @@ use crate::{
     },
 };
 
-use self::{requests::{send_safe_message_request, close_safe_view_request}, widgets_creation::create_initial_message};
+use self::{requests::{send_safe_message_request, close_safe_view_request}, widgets_creation::{create_initial_message, create_safe_message_box}};
 
 const QUIT_BUTTON_TEXT: &str = "x";
 const QUIT_BUTTON_CSS: &str = "exit_channel";
@@ -52,7 +52,7 @@ impl SafeConversationView {
     pub fn new(client: &str, nickname: String, sender: Sender<ControllerMessage>) -> Self {
         Self {
             input: create_entry(ENTRY_PLACEHOLDER),
-            message_box: create_message_box(),
+            message_box: create_safe_message_box(),
             scrollwindow_chat: create_scrollwindow_chat(),
             error_label: create_error_label(),
             nickname,
