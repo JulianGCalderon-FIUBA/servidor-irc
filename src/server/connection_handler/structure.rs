@@ -78,6 +78,7 @@ pub trait ConnectionHandlerStructure<C: Connection>:
             QUIT_COMMAND => self.quit_command(arguments),
             SERVER_COMMAND => self.server_command(arguments),
             SQUIT_COMMAND => self.squit_command(arguments),
+            CTCP_COMMAND => self.ctcp_command(arguments),
             _ => self.on_unknown_command(command),
         }
     }

@@ -3,21 +3,18 @@ pub mod requests;
 
 use std::{net::IpAddr, str::FromStr};
 
-use gtk::{
-    glib::{GString, Sender},
-    prelude::*,
-    Application, ApplicationWindow, Button, Entry, Orientation,
+use gtk4::{
+    glib::Sender,
+    traits::{BoxExt, ButtonExt, EditableExt, GtkWindowExt},
+    Application, ApplicationWindow, Button, Entry,
+    Orientation::Vertical,
 };
-use gtk4 as gtk;
 
 use self::requests::to_register_request;
 
-use super::{
-    widgets_creation::{
-        build_application_window, create_center_button, create_entry, create_label,
-        create_label_input_box, create_main_box,
-    },
-    MAIN_BOX_CSS,
+use super::widgets_creation::{
+    build_application_window, create_center_button, create_entry, create_label,
+    create_label_input_box, create_main_box,
 };
 
 use crate::{controller::controller_message::ControllerMessage, ADDRESS};
@@ -30,8 +27,8 @@ const ADDRESS_MESSAGE: &str = "Leave it empty to use the default IP...";
 /// Contains an address entry.  
 /// Uses sender to communicate with controller.
 pub struct IpView {
-    pub address_entry: Entry,
-    pub ok_button: Button,
+    address_entry: Entry,
+    ok_button: Button,
     sender: Sender<ControllerMessage>,
 }
 
@@ -52,8 +49,7 @@ impl IpView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Orientation::Vertical, 150, 300);
-        main_box.add_css_class(MAIN_BOX_CSS);
+        let main_box = create_main_box(Vertical, 150, 300);
 
         let address_box = create_label_input_box(ADDRESS_LABEL_TEXT);
         address_box.append(&self.address_entry);
@@ -76,7 +72,7 @@ impl IpView {
     /// Sends to register request to the controller.
     fn connect_button(&self, address_entry: Entry, sender: Sender<ControllerMessage>) {
         self.ok_button.connect_clicked(move |_| {
-            let address = Self::unpack_entry(address_entry.text());
+            let address = Self::unpack_entry(address_entry.text().to_string());
 
             if Self::register_fiels_are_valid(&address) {
                 to_register_request(address, sender.clone());
@@ -101,11 +97,11 @@ impl IpView {
     /// Returns the input address.  
     ///
     /// If the address is empty, returns the default address.  
-    fn unpack_entry(address: GString) -> String {
+    fn unpack_entry(address: String) -> String {
         if address.is_empty() {
             ADDRESS.to_string()
         } else {
-            address.to_string()
+            address
         }
     }
 }

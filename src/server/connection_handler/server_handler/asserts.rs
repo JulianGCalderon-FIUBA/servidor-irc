@@ -259,6 +259,20 @@ impl<C: Connection> ConnectionHandlerAsserts<C> for ServerHandler<C> {
         }
         Ok(())
     }
+
+    fn assert_ctcp_command_is_valid(&self, arguments: &CommandArgs) -> Result<(), ErrorReply> {
+        let (prefix, params, trail) = arguments;
+        if params.is_empty() || prefix.is_none() || trail.is_none() {
+            return Err(ErrorReply::NoReply);
+        }
+
+        let target = &params[0];
+        if !self.database.contains_channel(target) && !self.database.contains_client(target) {
+            return Err(ErrorReply::NoReply);
+        }
+
+        Ok(())
+    }
 }
 
 impl<C: Connection> ServerHandler<C> {

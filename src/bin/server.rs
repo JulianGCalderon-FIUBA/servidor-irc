@@ -15,14 +15,14 @@ fn main() {
     let mut server = Server::start(servername, serverinfo);
 
     if let Err(error) = server.listen_to(address) {
-        return eprintln!("Error: Binding to address: {:?}", error);
+        return eprintln!("Error: Binding to address: {error:?}");
     }
 
     let reader = BufReader::new(stdin());
     for line in reader.lines() {
         let line = match line {
             Ok(line) => line,
-            Err(error) => return eprint!("Error reading from stdin: {}", error),
+            Err(error) => return eprint!("Error reading from stdin: {error}"),
         };
 
         let split: Vec<&str> = line.split_whitespace().collect();

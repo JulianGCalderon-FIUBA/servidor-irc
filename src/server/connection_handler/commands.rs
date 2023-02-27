@@ -181,4 +181,13 @@ pub trait ConnectionHandlerCommands<C: Connection>:
             .send(&ErrorReply::UnknownCommand421 { command })?;
         Ok(true)
     }
+
+    fn ctcp_command(&mut self, arguments: CommandArgs) -> io::Result<bool> {
+        if let Err(error) = self.assert_ctcp_command_is_valid(&arguments) {
+            self.stream().send(&error)?;
+            return Ok(true);
+        }
+
+        self.ctcp_logic(arguments)
+    }
 }

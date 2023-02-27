@@ -1,4 +1,4 @@
-.active_select_button{
+.active_select_button {
     background-color: rgb(222, 117, 52);
     border: solid 1px white;
     border-radius: 0px;
@@ -15,8 +15,8 @@
 }
 
 .add_view_title {
-    font-size: 20px;
     font-family: monospace;
+    font-size: 20px;
 }
 
 button {
@@ -28,9 +28,24 @@ button {
     font-size: 20px;
 }
 
+.chat{
+	background-color: black;
+}
+
 .current_chat {
     font-family: monospace;
     font-size: 20px;
+}
+
+.disabled_button {
+    background-color: rgb(43, 40, 40);
+    color: rgb(97, 95, 95);
+}
+
+.disable_safe_conversation{
+    background-color: rgb(43, 40, 40);
+    border: none;
+    color: rgb(97, 95, 95);
 }
 
 .disable_select_button {
@@ -38,11 +53,6 @@ button {
     border-color: transparent;
     border-radius: 0px;
     color: rgb(0, 0, 0);
-}
-
-.disabled_button {
-    background-color: rgb(43, 40, 40);
-    color: rgb(97, 95, 95);
 }
 
 .exit_channel {
@@ -55,6 +65,12 @@ button {
     border-color: transparent;
     border-radius: 0px;
     color: rgb(22, 21, 21);
+}
+
+.kick_button {
+    background-color: transparent;
+    border: solid 1px white;
+    font-size: 5px;
 }
 
 label {
@@ -76,17 +92,17 @@ label {
     font-size: 10px;
 }
 
-.notifications_button{
+.notifications_button {
     background-color: black;
     border-color: transparent;
     border-radius: 0px;
 }
 
-.notifications_button_on{
+.notifications_button_on {
     background-color: rgb(184, 45, 45);
 }
 
-.notifications_container{
+.notifications_container {
     background-color: #000103;
     border: 1px solid white;
     border-radius: 10px;
@@ -98,10 +114,25 @@ label {
     padding: 10px;
 }
 
+.safe_conversation {
+    background-color: #0b0b0b;
+    border: none;
+    color: rgb(255, 0, 0);
+}
+
+.selected_chat_button {
+    background-color: rgb(177,52,21);
+}
+
 .send_message {
     background-color: #767a75;
     border-radius: 5px;
     padding: 10px;
+}
+
+.warning_text {
+    color: red;
+    font-size: 12px;
 }
 
 .welcome_message {
@@ -110,13 +141,7 @@ label {
     font-size: 25px;
 }
 
-.warning_text{
-    color: red;
-    font-size: 12px;
-}
-
 .welcome_title {
     font-family: monospace;
     font-size: 30px;
 }
-

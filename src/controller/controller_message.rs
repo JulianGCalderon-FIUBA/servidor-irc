@@ -1,31 +1,37 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, io, net::SocketAddr, path::PathBuf};
 
-use gtk4::glib::GString;
+use crate::message::Message;
 
 /// Possible messages or requests a Controller can receive.
 pub enum ControllerMessage {
+    AcceptDccChat {
+        client: String,
+        address: SocketAddr,
+    },
     AddNewClient {
-        new_client: GString,
-    },
-    AddNotificationsView {},
-    AddUserInfoView {},
-    AddViewToAddClient {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
-    AddViewToInviteClient {
-        channels_and_clients: HashMap<String, Vec<String>>,
-    },
-    AddWarningView {
-        message: String,
+        new_client: String,
     },
     ChangeConversation {
         nickname: String,
     },
-    ChangeViewToMain {
-        realname: String,
-        servername: String,
-        nickname: String,
-        username: String,
+    CloseDccChat {
+        client: String,
+    },
+    CloseSafeView {
+        client: String,
+    },
+    DeclineDccChat {
+        client: String,
+    },
+    DownloadFile {
+        sender: String,
+        path: PathBuf,
+    },
+    ErrorWhenAddingChannel {
+        message: String,
+    },
+    IgnoreFile {
+        sender: String,
     },
     JoinChannel {
         channel: String,
@@ -34,48 +40,100 @@ pub enum ControllerMessage {
         channel: String,
         member: String,
     },
-    Quit {},
-    QuitChannel {},
-    RecieveInvite {
-        nickname: String,
-        channel: String,
-    },
-    ReceiveKick {
-        kicked: String,
-        channel: String,
-    },
-    ReceiveListChannels {
-        channels: Vec<String>,
-    },
-    ReceiveNamesChannels {
+    OpenAddChannelView {},
+    OpenAddClientView {
         channels_and_clients: HashMap<String, Vec<String>>,
     },
-    ReceivePrivMessage {
-        sender_nickname: String,
+    OpenDccInvitationView {
+        client: String,
+        message: SocketAddr,
+    },
+    OpenFileDialogChooserView {},
+    OpenInviteClientView {
+        channels_and_clients: HashMap<String, Vec<String>>,
+    },
+    OpenMainView {
+        message: Message,
+    },
+    OpenNotificationsView {},
+    OpenRegisterView {
+        address: String,
+    },
+    OpenUserInfoView {},
+    OpenWarningView {
         message: String,
-        channel: Option<String>,
+    },
+    ReceiveInvite {
+        message: Message,
+    },
+    ReceiveJoin {
+        message: Message,
+    },
+    ReceiveJoinNotification {
+        message: Message,
+    },
+    ReceiveKick {
+        message: Message,
+    },
+    ReceiveListLine {
+        message: Message,
+    },
+    ReceiveNamesEnd {},
+    ReceiveNamesLine {
+        message: Message,
+    },
+    ReceivePrivMessage {
+        message: Message,
+    },
+    ReceiveResult {
+        sender: String,
+        name: String,
+        result: Result<(), std::io::Error>,
+    },
+    ReceiveSafeMessage {
+        client: String,
+        message: String,
     },
     Register {
-        pass: GString,
-        nickname: GString,
-        username: GString,
-        realname: GString,
+        pass: String,
+        nickname: String,
+        username: String,
+        realname: String,
     },
     RegularMessage {
         message: String,
     },
     RemoveConversation {},
+    SendDccSend {
+        target: String,
+        path: PathBuf,
+    },
     SendInviteMessage {
-        channel: GString,
+        channel: String,
+    },
+    SendJoinMessage {
+        channel: String,
+    },
+    SendKickMessage {
+        channel: String,
+        member: String,
     },
     SendListMessage {},
     SendNamesMessageToAddClient {},
     SendNamesMessageToInviteClient {},
     SendNamesMessageToKnowMembers {},
+    SendPartMessage {},
     SendPrivMessage {
-        message: GString,
+        message: String,
     },
-    ToRegister {
-        address: String,
+    SendQuitMessage {},
+    SendResult {
+        sender: String,
+        result: io::Result<()>,
+    },
+    SendSafeConversationRequest {},
+    SendSafeMessage {
+        client: String,
+        message: String,
     },
 }

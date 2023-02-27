@@ -23,3 +23,5 @@ pub const WHO_COMMAND: &str = "WHO";
 
 pub const SERVER_COMMAND: &str = "SERVER";
 pub const SQUIT_COMMAND: &str = "SQUIT";
+
+pub const CTCP_COMMAND: &str = "CTCP";
