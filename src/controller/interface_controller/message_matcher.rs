@@ -59,12 +59,12 @@ impl InterfaceController {
 
         self.main_view.disable_safe_conversation_button();
 
-        let mut safe_conversation = safe_conversation_view(self.nickname.clone(), &self.sender);
-        safe_conversation
-            .get_view(&client, self.app.clone())
-            .show();
+        let mut safe_conversation = safe_conversation_view(&client, self.nickname.clone(), &self.sender);
+        let safe_view = safe_conversation.get_view(self.app.clone());
+        safe_view.show();
 
-        self.safe_conversation_view.insert(client, safe_conversation);
+        self.safe_conversation_view.insert(client.clone(), safe_conversation);
+        self.safe_conversation_window.insert(client, safe_view);
     }
 
     pub fn add_new_client(&mut self, new_client: String) {
@@ -86,6 +86,9 @@ impl InterfaceController {
 
         let dcc_close = format!("{CTCP_COMMAND} {client} :DCC CLOSE");
         self.client.send(&dcc_close).expect(CTCP_ERROR_TEXT);
+
+        let safe_conversation = self.safe_conversation_window.remove(&client).unwrap();
+        safe_conversation.close();
     }
 
     pub fn decline_dcc_chat(&mut self, client: String) {

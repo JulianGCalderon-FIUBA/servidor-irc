@@ -1,5 +1,8 @@
-use gtk4::traits::WidgetExt;
+// use gtk4::traits::WidgetExt;
 use std::{thread, net::SocketAddr};
+use gtk4::{
+    traits::{GtkWindowExt, WidgetExt},
+};
 
 use crate::{controller::utils::get_sender_and_receiver, ctcp::dcc_chat::dcc_chat_receiver::DccChatReceiver};
 
@@ -23,11 +26,12 @@ impl InterfaceController {
 
         self.main_view.disable_safe_conversation_button();
 
-        let mut safe_conversation = safe_conversation_view(self.nickname.clone(), &self.sender);
-        safe_conversation
-            .get_view(&client, self.app.clone())
-            .show();
-        self.safe_conversation_view.insert(client, safe_conversation);
+        let mut safe_conversation = safe_conversation_view(&client, self.nickname.clone(), &self.sender);
+        let safe_view = safe_conversation.get_view(self.app.clone());
+        safe_view.show();
+        
+        self.safe_conversation_view.insert(client.clone(), safe_conversation);
+        self.safe_conversation_window.insert(client, safe_view);
     }
 
     pub fn dcc_receive_decline(&mut self, client: String) {
@@ -44,7 +48,9 @@ impl InterfaceController {
         self.dcc_invitation_window.show();
     }
 
-    pub fn receive_dcc_close(&mut self, _client: String) {
-
+    pub fn receive_dcc_close(&mut self, client: String) {
+        println!("Close chat with {}", client);
+        let safe_conversation = self.safe_conversation_window.remove(&client).unwrap();
+        safe_conversation.close();
     }
 }

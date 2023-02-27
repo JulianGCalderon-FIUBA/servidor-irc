@@ -74,10 +74,11 @@ pub fn register_window(app: &Application, sender: &Sender<ControllerMessage>) ->
 }
 
 pub fn safe_conversation_view(
+    client: &str,
     nickname: String,
     sender: &Sender<ControllerMessage>,
 ) -> SafeConversationView {
-    SafeConversationView::new(nickname, sender.clone())
+    SafeConversationView::new(client, nickname, sender.clone())
 }
 
 pub fn user_info_window(
