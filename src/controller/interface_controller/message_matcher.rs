@@ -5,22 +5,21 @@ use crate::{
     controller::{
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
         utils::{channels_not_mine, get_sender_and_receiver, vec_is_not_empty},
-        CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, CTCP_ERROR_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
-        KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
-        NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT, OPEN_INVITE_VIEW_ERROR_TEXT,
-        PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT, QUIT_ERROR_TEXT,
-        SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
+        CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, CTCP_ERROR_TEXT, INVITE_ERROR_TEXT,
+        JOIN_ERROR_TEXT, KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT,
+        NO_CHANNELS_WARNING_TEXT, NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT,
+        OPEN_INVITE_VIEW_ERROR_TEXT, PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT,
+        QUIT_ERROR_TEXT, SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
     },
     ctcp::{
-        dcc_chat::dcc_chat_sender::DccChatSender,
-        dcc_send::dcc_send_sender::DccSendSender,
+        dcc_chat::dcc_chat_sender::DccChatSender, dcc_send::dcc_send_sender::DccSendSender,
         parse_ctcp,
     },
     macros::some_or_return,
     message::Message,
     server::consts::commands::{
-        CTCP_COMMAND, INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
-        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND, 
+        CTCP_COMMAND, INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND,
+        PART_COMMAND, PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
     },
 };
 use gtk4::{
@@ -32,9 +31,8 @@ use super::{
     download::Download,
     send_utils::connect_receiver_file_chooser,
     window_creation::{
-        add_channel_view, add_client_window, channel_members_window,
-        invite_window, main_view, notifications_window, safe_conversation_view, user_info_window,
-        warning_window,
+        add_channel_view, add_client_window, channel_members_window, invite_window, main_view,
+        notifications_window, safe_conversation_view, user_info_window, warning_window,
     },
     InterfaceController,
     NamesMessageIntention::*,
@@ -60,11 +58,13 @@ impl InterfaceController {
 
         self.main_view.disable_safe_conversation_button();
 
-        let mut safe_conversation = safe_conversation_view(&client, self.nickname.clone(), &self.sender);
+        let mut safe_conversation =
+            safe_conversation_view(&client, self.nickname.clone(), &self.sender);
         let safe_view = safe_conversation.get_view(self.app.clone());
         safe_view.show();
 
-        self.safe_conversation_view.insert(client.clone(), safe_conversation);
+        self.safe_conversation_view
+            .insert(client.clone(), safe_conversation);
         self.safe_conversation_window.insert(client, safe_view);
     }
 
@@ -94,7 +94,8 @@ impl InterfaceController {
         let safe_conversation = self.safe_conversation_window.remove(&client).unwrap();
         safe_conversation.close();
 
-        self.main_view.update_safe_conversation_button(&client, &self.dcc_chats);
+        self.main_view
+            .update_safe_conversation_button(&client, &self.dcc_chats);
     }
 
     /// Decline a new dcc chat.
@@ -490,7 +491,8 @@ impl InterfaceController {
             let safe_conversation = self.safe_conversation_view.remove(&receiver_client);
             if let Some(mut safe_view) = safe_conversation {
                 safe_view.send_message(message, receiver_client.clone());
-                self.safe_conversation_view.insert(receiver_client, safe_view);
+                self.safe_conversation_view
+                    .insert(receiver_client, safe_view);
             }
         }
     }

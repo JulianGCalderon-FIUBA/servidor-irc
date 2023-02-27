@@ -70,7 +70,6 @@ impl DccInvitationView {
 
         main_box.append(&invitation);
 
-
         let button_box = create_message_sender_box();
 
         self.connect_accept_button(client.clone(), address, self.sender.clone());

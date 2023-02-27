@@ -137,6 +137,9 @@ impl SafeConversationView {
         });
     }
 
+    /// Sends a message.
+    ///
+    /// Receives the message text and the receiver.
     pub fn send_message(&mut self, message: String, receiver: String) {
         if self.current_chat.label() == receiver {
             let message = create_send_message(&message);
@@ -145,6 +148,9 @@ impl SafeConversationView {
         }
     }
 
+    /// Receives a message.
+    ///
+    /// Receives the message text.
     pub fn receive_message(&mut self, message: String) {
         let message = create_received_message(&message);
         self.message_box.append(&message);

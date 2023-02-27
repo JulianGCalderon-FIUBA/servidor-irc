@@ -7,10 +7,10 @@ use crate::{
     views::{
         add_views::{
             add_channel_view::AddChannelView, add_client_view::AddClientView,
-            channel_members_view::ChannelMembersView, dcc_invitation_view::DccInvitationView,
-            invite_view::InviteView, notifications_view::NotificationsView,
-            safe_conversation_view::SafeConversationView, user_info_view::UserInfoView,
-            warning_view::WarningView, close_safe_conv_view::CloseSafeConvView,
+            channel_members_view::ChannelMembersView, close_safe_conv_view::CloseSafeConvView,
+            dcc_invitation_view::DccInvitationView, invite_view::InviteView,
+            notifications_view::NotificationsView, safe_conversation_view::SafeConversationView,
+            user_info_view::UserInfoView, warning_view::WarningView,
         },
         ip_view::IpView,
         main_view::MainView,
@@ -44,7 +44,11 @@ pub fn channel_members_window(
 }
 
 /// Creates new [`CloseSafeConvView`] window.
-pub fn close_safe_conv_window(app: &Application, client: String, sender: &Sender<ControllerMessage>) -> ApplicationWindow {
+pub fn close_safe_conv_window(
+    app: &Application,
+    client: String,
+    sender: &Sender<ControllerMessage>,
+) -> ApplicationWindow {
     CloseSafeConvView::new(sender.clone()).get_view(app.clone(), client)
 }
 

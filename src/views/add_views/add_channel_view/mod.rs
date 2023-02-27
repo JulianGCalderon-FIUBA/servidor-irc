@@ -256,6 +256,9 @@ impl AddChannelView {
         });
     }
 
+    /// Sets the error text
+    ///
+    /// Receives the error text.
     pub fn set_error_text(&mut self, text: String) {
         self.error_label.set_text(&text);
     }

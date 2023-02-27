@@ -2,13 +2,15 @@
 pub mod requests;
 
 use gtk4::{
+    glib::Sender,
     traits::{BoxExt, ButtonExt, GtkWindowExt},
-    Application, ApplicationWindow, Button, glib::Sender,
+    Application, ApplicationWindow, Button,
 };
 
-use crate::{views::widgets_creation::{
-    build_application_window, create_center_button,
-}, controller::controller_message::ControllerMessage};
+use crate::{
+    controller::controller_message::ControllerMessage,
+    views::widgets_creation::{build_application_window, create_center_button},
+};
 
 use self::requests::close_safe_conv_request;
 
@@ -57,7 +59,12 @@ impl CloseSafeConvView {
     /// Connects exit button.
     ///
     /// Closes the window.
-    fn connect_button(&mut self, window: ApplicationWindow, client: String, sender: Sender<ControllerMessage>) {
+    fn connect_button(
+        &mut self,
+        window: ApplicationWindow,
+        client: String,
+        sender: Sender<ControllerMessage>,
+    ) {
         self.button.connect_clicked(move |_| {
             close_safe_conv_request(client.clone(), sender.clone());
             window.close();

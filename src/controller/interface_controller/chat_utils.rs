@@ -1,16 +1,19 @@
-use std::{thread, net::SocketAddr};
-use gtk4::{
-    traits::{GtkWindowExt, WidgetExt},
+use gtk4::traits::{GtkWindowExt, WidgetExt};
+use std::{net::SocketAddr, thread};
+
+use crate::{
+    controller::utils::get_sender_and_receiver, ctcp::dcc_chat::dcc_chat_receiver::DccChatReceiver,
 };
 
-use crate::{controller::utils::get_sender_and_receiver, ctcp::dcc_chat::dcc_chat_receiver::DccChatReceiver};
-
-use super::{InterfaceController, window_creation::{safe_conversation_view, dcc_invitation_window, close_safe_conv_window}};
+use super::{
+    window_creation::{close_safe_conv_window, dcc_invitation_window, safe_conversation_view},
+    InterfaceController,
+};
 
 impl InterfaceController {
     /// Handles a dcc accept reception.
     /// Creates new safe conversation view and starts listening from that stream.
-    /// 
+    ///
     /// Receives a string, returns nothing.
     pub fn dcc_receive_accept(&mut self, client: String) {
         let mut dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
@@ -29,16 +32,18 @@ impl InterfaceController {
 
         self.main_view.disable_safe_conversation_button();
 
-        let mut safe_conversation = safe_conversation_view(&client, self.nickname.clone(), &self.sender);
+        let mut safe_conversation =
+            safe_conversation_view(&client, self.nickname.clone(), &self.sender);
         let safe_view = safe_conversation.get_view(self.app.clone());
         safe_view.show();
-        
-        self.safe_conversation_view.insert(client.clone(), safe_conversation);
+
+        self.safe_conversation_view
+            .insert(client.clone(), safe_conversation);
         self.safe_conversation_window.insert(client, safe_view);
     }
 
     /// Handles a dcc decline reception.
-    /// 
+    ///
     /// Receives a string, returns nothing.
     pub fn dcc_receive_decline(&mut self, client: String) {
         self.dcc_senders.remove(&client).unwrap().close();
@@ -46,7 +51,7 @@ impl InterfaceController {
 
     /// Handles a new dcc invitation.
     /// Opens the dcc invitation view.
-    /// 
+    ///
     /// Receives a string and an address, returns nothing.
     pub fn open_dcc_invitation_view(&mut self, client: String, message: SocketAddr) {
         let stream = self.get_stream();
@@ -60,14 +65,14 @@ impl InterfaceController {
 
     /// Handles a dcc close reception.
     /// Shows dcc close pop up.
-    /// 
+    ///
     /// Receives a string, returns nothing.
     pub fn receive_dcc_close(&mut self, client: String) {
         close_safe_conv_window(&self.app, client, &self.sender).show()
     }
 
     /// Closes dcc chat.
-    /// 
+    ///
     /// Receives a string, returns nothing.
     pub fn dcc_close(&mut self, client: String) {
         self.dcc_chats.remove(&client);
@@ -75,6 +80,7 @@ impl InterfaceController {
         let safe_conversation = self.safe_conversation_window.remove(&client).unwrap();
         safe_conversation.close();
 
-        self.main_view.update_safe_conversation_button(&client, &self.dcc_chats);
+        self.main_view
+            .update_safe_conversation_button(&client, &self.dcc_chats);
     }
 }

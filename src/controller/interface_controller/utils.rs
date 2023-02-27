@@ -15,10 +15,7 @@ use crate::{
     server::consts::commands::NAMES_COMMAND,
 };
 
-use super::{
-    names_message_intention::NamesMessageIntention,
-    InterfaceController,
-};
+use super::{names_message_intention::NamesMessageIntention, InterfaceController};
 
 use crate::controller::controller_message::ControllerMessage::OpenWarningView;
 
@@ -59,8 +56,8 @@ impl InterfaceController {
     }
 
     /// Returns my current channels.
-    /// 
-    /// Receives a hash map, returns a string vector with my channels. 
+    ///
+    /// Receives a hash map, returns a string vector with my channels.
     pub fn current_conv_channels(
         &mut self,
         channels_and_clients: HashMap<String, Vec<String>>,
@@ -69,7 +66,7 @@ impl InterfaceController {
     }
 
     /// Get stream from client.
-    /// 
+    ///
     /// Returns TcpStream.
     pub fn get_stream(&mut self) -> TcpStream {
         self.client.get_stream().unwrap()

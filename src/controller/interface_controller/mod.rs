@@ -131,7 +131,7 @@ impl InterfaceController {
     }
 
     /// Creates a receiver and starts listening thorugh the client's stream.
-    /// 
+    ///
     /// Receives nothing, returns nothing.
     pub fn start_listening(&mut self) {
         let sender_clone = self.sender.clone();
@@ -152,8 +152,8 @@ impl InterfaceController {
 
     /// Shows the starting view.
     /// Handles all the received ControllerMessage.
-    /// 
-    /// Receives a ControllerMessage receiver, returns nothing. 
+    ///
+    /// Receives a ControllerMessage receiver, returns nothing.
     pub fn build(mut self, receiver: Receiver<ControllerMessage>) {
         self.ip_window.show();
 

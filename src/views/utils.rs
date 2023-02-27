@@ -7,6 +7,8 @@ pub fn do_break_line(text: &str) -> String {
         .chunks(MESSAGE_MAX_LINE_CHARACTERS)
         .map(|c| c.iter().collect::<String>())
         .collect::<Vec<String>>()
-        .join("
-")
+        .join(
+            "
+",
+        )
 }

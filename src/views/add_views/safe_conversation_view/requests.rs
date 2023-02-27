@@ -1,4 +1,6 @@
-use crate::controller::controller_message::ControllerMessage::{self, SendSafeMessage, CloseSafeView};
+use crate::controller::controller_message::ControllerMessage::{
+    self, CloseSafeView, SendSafeMessage,
+};
 use crate::views::ERROR_TEXT;
 use gtk4::glib::Sender;
 
@@ -15,6 +17,9 @@ pub fn send_safe_message_request(
         .expect(ERROR_TEXT);
 }
 
+/// Sends a close safe view to the controller.  
+///
+/// Receives a client and the sender.
 pub fn close_safe_view_request(client: String, sender: Sender<ControllerMessage>) {
     sender.send(CloseSafeView { client }).expect(ERROR_TEXT);
 }

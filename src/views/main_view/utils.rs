@@ -1,8 +1,11 @@
-use gtk4::{ traits::{ AdjustmentExt, ButtonExt, WidgetExt }, Button, ScrolledWindow };
+use gtk4::{
+    traits::{AdjustmentExt, ButtonExt, WidgetExt},
+    Button, ScrolledWindow,
+};
 
 use crate::controller::utils::is_not_empty;
 
-use super::{ CHAT_BUTTON_SELECTED_CSS, NOTIFICATION_ON_BUTTON_CSS };
+use super::{CHAT_BUTTON_SELECTED_CSS, NOTIFICATION_ON_BUTTON_CSS};
 
 /// Adjusts scrollbar in a scrolled window.
 pub fn adjust_scrollbar(scrolled_window: ScrolledWindow) {
