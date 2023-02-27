@@ -5,9 +5,10 @@ use std::net::SocketAddr;
 
 use gtk4::{
     glib::Sender,
-    traits::{BoxExt, ButtonExt, GtkWindowExt},
+    traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
     Application, ApplicationWindow, Button,
     Orientation::{Horizontal, Vertical},
+    Align::{Start, Center}
 };
 
 use self::requests::{accept_request, decline_request};
@@ -17,6 +18,8 @@ use crate::views::widgets_creation::{
 };
 
 use crate::controller::controller_message::ControllerMessage;
+
+use super::widgets_creation::create_title;
 
 const ACCEPT_BUTTON_TEXT: &str = "Accept";
 const DECLINE_BUTTON_TEXT: &str = "Decline";
@@ -30,6 +33,8 @@ pub struct DccInvitationView {
     decline_button: Button,
     sender: Sender<ControllerMessage>,
 }
+
+const TITLE: &str = "Request to establish a DCC conversation";
 
 impl DccInvitationView {
     /// Creates new [`DccInvitationView`].
@@ -53,14 +58,20 @@ impl DccInvitationView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Vertical, 300, 300);
+        let main_box = create_main_box(Vertical, 100, 300);
+
+        let title = create_title(TITLE);
+        main_box.append(&title);
 
         let message = format!("{client} {INVITATION}");
         let invitation = create_label(&message);
-
+        invitation.set_halign(Start);
+        invitation.set_margin_start(20);
+        
         main_box.append(&invitation);
 
-        let button_box = create_main_box(Horizontal, 150, 300);
+        let button_box = create_main_box(Horizontal, 100, 100);
+        button_box.set_halign(Center);
         self.connect_accept_button(client.clone(), address, self.sender.clone());
         self.connect_decline_button(client, self.sender.clone());
 
