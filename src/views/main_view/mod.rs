@@ -7,8 +7,11 @@ pub mod utils;
 /// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
+/// Contains multiple functions for the chat box.
 mod chat;
+/// Contains multiple functions for the conv info box.
 mod conv_info;
+/// Contains multiple functions for the sidebar box.
 mod sidebar;
 
 use std::collections::HashMap;
@@ -161,6 +164,9 @@ impl MainView {
         });
     }
 
+    /// Finds button by name.
+    ///
+    /// Receives the conversation name, returns the button and the text of the button.
     pub fn find_button_by_name(&mut self, conv_name: &str) -> (Option<Button>, String) {
         let vector = if is_channel(conv_name) {
             self.channels_buttons.clone()

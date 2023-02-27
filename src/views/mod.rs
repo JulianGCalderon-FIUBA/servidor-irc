@@ -11,6 +11,7 @@ pub mod register_view;
 /// Contains multiples views that help use of the features.
 pub mod add_views;
 
+/// Contains useful functions.
 pub mod utils;
 /// Contains multiple functions that create widgets for every view.
 pub mod widgets_creation;

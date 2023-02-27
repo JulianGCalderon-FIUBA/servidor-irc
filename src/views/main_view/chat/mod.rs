@@ -1,4 +1,6 @@
+/// Contains definition of used requests.
 pub mod requests;
+/// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
 use gtk4::{
@@ -126,6 +128,9 @@ impl MainView {
             .push(vec![message, sender_nickname_label]);
     }
 
+    /// Add a notification to button.
+    ///
+    /// Receives the name of the button.
     pub fn add_notification_to_button(&mut self, conv_name: String) {
         let (finded_button, name) = self.find_button_by_name(&conv_name);
         if let Some(button) = finded_button {
@@ -155,6 +160,9 @@ impl MainView {
         }
     }
 
+    /// Connects send file button.
+    ///
+    /// Sends a send file request.
     fn connect_send_file_button(&self, sender: Sender<ControllerMessage>) {
         self.send_file_button
             .connect_clicked(move |_| send_file_request(sender.clone()));
@@ -191,10 +199,16 @@ impl MainView {
             && messages.unwrap().last().unwrap()[1].text() != sender_nickname
     }
 
+    /// Returns if the received name is the name of the current conversation.
+    ///
+    /// Receives the name of the conversation, returns a boolean.
     pub fn is_actual_conversation(&mut self, name: &str) -> bool {
         name == self.current_chat.label()
     }
 
+    /// Append a received or send message to the message box.
+    ///
+    /// Receives the text of the message.
     pub fn append_message(&mut self, message: &Label) {
         self.message_box.append(message);
         adjust_scrollbar(self.scrollwindow_chat.clone());

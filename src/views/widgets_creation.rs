@@ -18,6 +18,9 @@ pub fn create_entry(placeholder: &str) -> Entry {
     Entry::builder().placeholder_text(placeholder).build()
 }
 
+/// Creates password entry.
+///
+/// Receives a &str, returns an PasswordEntry.
 pub fn create_password_entry(placeholder: &str) -> PasswordEntry {
     PasswordEntry::builder()
         .placeholder_text(placeholder)

@@ -1,44 +1,51 @@
+/// Contains definition of used requests.
 pub mod requests;
+/// Contains multiple functions that create widgets for the view.
 mod widgets_creation;
 
-use std::collections::{hash_map::RandomState, HashMap};
+use std::collections::{ hash_map::RandomState, HashMap };
 
 use gtk4::{
     glib::Sender,
-    traits::{BoxExt, ButtonExt, EditableExt, WidgetExt},
-    Box, Button, Label,
+    traits::{ BoxExt, ButtonExt, EditableExt, WidgetExt },
+    Box,
+    Button,
+    Label,
 };
 
 use crate::{
-    controller::{
-        controller_message::ControllerMessage,
-        utils::{is_channel, is_not_empty},
-    },
+    controller::{ controller_message::ControllerMessage, utils::{ is_channel, is_not_empty } },
     ctcp::dcc_chat::DccChat,
     server::consts::channel::MAX_CHANNELS,
     views::{
         add_views::widgets_creation::create_title,
-        main_view::{ADD_BUTTON_CSS, DISABLE_BUTTON_CSS},
+        main_view::{ ADD_BUTTON_CSS, DISABLE_BUTTON_CSS },
         widgets_creation::create_button_with_margin,
     },
 };
 
 use self::{
     requests::{
-        add_notifications_view_request, add_user_info_view, add_view_to_add_client_request,
+        add_notifications_view_request,
+        add_user_info_view,
+        add_view_to_add_client_request,
         send_list_request,
     },
-    widgets_creation::{create_separator_sidebar, create_sidebar_box},
+    widgets_creation::{ create_separator_sidebar, create_sidebar_box },
 };
 
 use super::{
-    conv_info::{DISABLE_SAFE_CONVERSATION_BUTTON_CSS, SAFE_CONVERSATION_BUTTON_CSS},
+    conv_info::{ DISABLE_SAFE_CONVERSATION_BUTTON_CSS, SAFE_CONVERSATION_BUTTON_CSS },
     requests::change_conversation_request,
     utils::{
-        add_notification_to_button, adjust_scrollbar, deselect_conversation_button,
-        remove_button_notifications_if_any, select_conversation_button,
+        add_notification_to_button,
+        adjust_scrollbar,
+        deselect_conversation_button,
+        remove_button_notifications_if_any,
+        select_conversation_button,
     },
-    MainView, NO_NOTIFICATIONS_TEXT,
+    MainView,
+    NO_NOTIFICATIONS_TEXT,
 };
 
 const SAFE_BUTTON_TOOLTIP: &str =
@@ -53,8 +60,7 @@ impl MainView {
 
         //Channels box
         let channels_title = create_title(CHANNELS_TITLE);
-        self.scrollwindow_channels
-            .set_child(Some(&self.channels_box));
+        self.scrollwindow_channels.set_child(Some(&self.channels_box));
         self.connect_add_channel_button(self.add_channel.clone(), self.sender.clone());
 
         //Clients box
@@ -88,6 +94,9 @@ impl MainView {
         });
     }
 
+    /// Connects the user info button.
+    ///
+    /// Sends a add user info view request to the controller.
     fn connect_user_info_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
             add_user_info_view(sender.clone());
@@ -122,7 +131,7 @@ impl MainView {
         self.connect_channel_client_button(
             channel_button.clone(),
             channel.clone(),
-            self.sender.clone(),
+            self.sender.clone()
         );
         self.channels_box.append(&channel_button);
         self.channels_buttons.push(channel_button);
@@ -143,7 +152,7 @@ impl MainView {
         self.connect_channel_client_button(
             client_button.clone(),
             client.to_string(),
-            self.sender.clone(),
+            self.sender.clone()
         );
         self.clients_box.append(&client_button);
         self.clients_buttons.push(client_button);
@@ -160,7 +169,7 @@ impl MainView {
         &self,
         button: Button,
         channel_or_client: String,
-        sender: Sender<ControllerMessage>,
+        sender: Sender<ControllerMessage>
     ) {
         button.connect_clicked(move |_| {
             change_conversation_request(channel_or_client.clone(), sender.clone());
@@ -174,7 +183,7 @@ impl MainView {
         &mut self,
         last_conv: String,
         conversation_label: String,
-        dcc_chats: &HashMap<String, DccChat, RandomState>,
+        dcc_chats: &HashMap<String, DccChat, RandomState>
     ) {
         self.update_chat_view_when_change_conversation(&conversation_label);
         self.update_last_chat_button_when_change_conversation(&last_conv);
@@ -184,10 +193,11 @@ impl MainView {
         self.load_messages_on_chat(conversation_label);
     }
 
+    /// Update self conversation button when appropiate.
     pub fn update_safe_conversation_button(
         &mut self,
         conversation_label: &str,
-        dcc_chats: &HashMap<String, DccChat, RandomState>,
+        dcc_chats: &HashMap<String, DccChat, RandomState>
     ) {
         if self.safe_conversation_button_should_be_disable(conversation_label, dcc_chats) {
             self.disable_safe_conversation_button();
@@ -196,48 +206,44 @@ impl MainView {
         }
     }
 
+    /// Returns if the safe conversation button should be disabled.
     pub fn safe_conversation_button_should_be_disable(
         &mut self,
         conversation_label: &str,
-        dcc_chats: &HashMap<String, DccChat, RandomState>,
+        dcc_chats: &HashMap<String, DccChat, RandomState>
     ) -> bool {
-        dcc_chats.contains_key(conversation_label)
-            && self
-                .safe_conversation_button
-                .has_css_class(SAFE_CONVERSATION_BUTTON_CSS)
+        dcc_chats.contains_key(conversation_label) &&
+            self.safe_conversation_button.has_css_class(SAFE_CONVERSATION_BUTTON_CSS)
     }
 
+    /// Returns if the safe conversation button should be enables.
     pub fn safe_conversation_button_should_be_enable(
         &mut self,
         conversation_label: &str,
-        dcc_chats: &HashMap<String, DccChat, RandomState>,
+        dcc_chats: &HashMap<String, DccChat, RandomState>
     ) -> bool {
-        !dcc_chats.contains_key(conversation_label)
-            && self
-                .safe_conversation_button
-                .has_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS)
+        !dcc_chats.contains_key(conversation_label) &&
+            self.safe_conversation_button.has_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS)
     }
 
+    /// Disables the safe conversation button.
     pub fn disable_safe_conversation_button(&mut self) {
-        self.safe_conversation_button
-            .remove_css_class(SAFE_CONVERSATION_BUTTON_CSS);
-        self.safe_conversation_button
-            .add_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS);
+        self.safe_conversation_button.remove_css_class(SAFE_CONVERSATION_BUTTON_CSS);
+        self.safe_conversation_button.add_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS);
         self.safe_conversation_button.set_sensitive(false);
         self.safe_conversation_button.set_has_tooltip(true);
-        self.safe_conversation_button
-            .set_tooltip_text(Some(SAFE_BUTTON_TOOLTIP));
+        self.safe_conversation_button.set_tooltip_text(Some(SAFE_BUTTON_TOOLTIP));
     }
 
+    /// Enables the safe conversation button.
     pub fn enable_safe_conversation_button(&mut self) {
-        self.safe_conversation_button
-            .remove_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS);
-        self.safe_conversation_button
-            .add_css_class(SAFE_CONVERSATION_BUTTON_CSS);
+        self.safe_conversation_button.remove_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS);
+        self.safe_conversation_button.add_css_class(SAFE_CONVERSATION_BUTTON_CSS);
         self.safe_conversation_button.set_sensitive(true);
         self.safe_conversation_button.set_has_tooltip(false);
     }
 
+    /// Updates the chat view on changing conversation.
     fn update_chat_view_when_change_conversation(&mut self, conversation_label: &str) {
         self.quit_channel_button.set_visible(true);
         self.remove_welcome_view_if_any();
@@ -251,12 +257,14 @@ impl MainView {
         self.input.set_text("");
     }
 
+    /// If there is a welcome view, it is removed
     fn remove_welcome_view_if_any(&mut self) {
         if self.welcome_box.is_visible() {
             self.remove_welcome_view();
         }
     }
 
+    /// Removes the welcome view.
     fn remove_welcome_view(&mut self) {
         self.welcome_box.set_visible(false);
         self.scrollwindow_chat.set_visible(true);
@@ -266,6 +274,7 @@ impl MainView {
         self.input.set_has_tooltip(false);
     }
 
+    /// Updates the chat button when it's clicked.
     fn update_chat_button_when_clicked(&mut self, conversation_label: &str) {
         let (conversation_button, _) = self.find_button_by_name(conversation_label);
         if let Some(button) = conversation_button {
@@ -274,6 +283,7 @@ impl MainView {
         }
     }
 
+    /// Updates the last chat button when the conversation changes.
     fn update_last_chat_button_when_change_conversation(&mut self, conversation_label: &str) {
         let (conversation_button, _) = self.find_button_by_name(conversation_label);
         if let Some(button) = conversation_button {
@@ -318,8 +328,8 @@ impl MainView {
 
     /// Returns bool wether there is a sender or not.
     fn there_is_sender(message: Label, prev_message: Vec<Label>) -> bool {
-        message.text() != ""
-            && (prev_message.is_empty() || message.text() != prev_message[1].text())
+        message.text() != "" &&
+            (prev_message.is_empty() || message.text() != prev_message[1].text())
     }
 
     /// Creates new notification with message.

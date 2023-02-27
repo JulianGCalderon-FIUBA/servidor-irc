@@ -9,7 +9,7 @@ use crate::{controller::controller_message::ControllerMessage, views::ERROR_TEXT
 
 /// Sends a accept request to the controller.  
 ///
-/// Receives a cleint and an address.
+/// Receives a client, an address and the sender.
 pub fn accept_request(client: String, address: SocketAddr, sender: Sender<ControllerMessage>) {
     let accept_dcc_chat = AcceptDccChat { client, address };
     sender.send(accept_dcc_chat).expect(ERROR_TEXT);
@@ -17,7 +17,7 @@ pub fn accept_request(client: String, address: SocketAddr, sender: Sender<Contro
 
 /// Sends a decline request to the controller.  
 ///
-/// Receives a client.
+/// Receives a client and the sender.
 pub fn decline_request(client: String, sender: Sender<ControllerMessage>) {
     let decline_dcc_chat = DeclineDccChat { client };
     sender.send(decline_dcc_chat).expect(ERROR_TEXT);

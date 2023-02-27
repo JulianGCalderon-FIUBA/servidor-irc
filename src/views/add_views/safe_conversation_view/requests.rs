@@ -4,7 +4,7 @@ use gtk4::glib::Sender;
 
 /// Sends a safe message.  
 ///
-/// Receives a channel name and a member.
+/// Receives a channel name, a member and the sender.
 pub fn send_safe_message_request(
     message: String,
     client: String,

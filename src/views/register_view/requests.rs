@@ -7,7 +7,7 @@ use crate::{
 
 /// Sends a register request to the controller.  
 ///
-/// Receives a password, nickname, username and a realname
+/// Receives a password, nickname, username, a realname and the sender.
 pub fn register_request(
     pass: String,
     nickname: String,

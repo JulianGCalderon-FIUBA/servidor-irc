@@ -1,4 +1,6 @@
+/// Contains definition of used requests.
 pub mod requests;
+/// Contains multiple functions that create widgets for the view.
 pub mod widgets_creation;
 
 use gtk4::{
@@ -84,6 +86,9 @@ impl MainView {
         });
     }
 
+    /// Connects the safe conversation button.
+    ///
+    /// Sends a safe conversation view request to the controller.
     fn connect_safe_conversation_button(&mut self, sender: Sender<ControllerMessage>) {
         self.safe_conversation_button.connect_clicked(move |_| {
             add_safe_conversation_view_request(sender.clone());

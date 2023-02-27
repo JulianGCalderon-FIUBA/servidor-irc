@@ -80,8 +80,6 @@ impl DccInvitationView {
         button_box.append(&self.decline_button);
         main_box.append(&button_box);
 
-        // self.connect_button(self.address_entry.clone(), self.sender.clone());
-
         window.set_child(Some(&main_box));
 
         window

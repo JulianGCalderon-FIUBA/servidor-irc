@@ -7,7 +7,7 @@ use crate::{
 
 /// Sends a invite request to the controller.  
 ///
-/// Receives a channel name.
+/// Receives a channel name and the sender.
 pub fn invite_request(channel: String, sender: Sender<ControllerMessage>) {
     let invite = SendInviteMessage { channel };
     sender.send(invite).expect(ERROR_TEXT);

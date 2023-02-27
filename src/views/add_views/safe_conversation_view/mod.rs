@@ -110,6 +110,9 @@ impl SafeConversationView {
         window
     }
 
+    /// Connects send button.
+    ///
+    /// Sends a safe message request.
     fn connect_send_button(
         &self,
         input: Entry,
@@ -148,7 +151,9 @@ impl SafeConversationView {
         adjust_scrollbar(self.scrollwindow_chat.clone());
     }
 
-    /// Closes the view.
+    /// Connects the close button.
+    ///
+    /// Closes the window.
     fn connect_close_button(&mut self, current_chat: String, sender: Sender<ControllerMessage>) {
         self.close_button.connect_clicked(move |_| {
             close_safe_view_request(current_chat.clone(), sender.clone());

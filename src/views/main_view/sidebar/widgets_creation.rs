@@ -17,6 +17,9 @@ pub fn create_separator_sidebar() -> Separator {
     separator
 }
 
+/// Creates the sidebar box.
+///
+/// Returns the box.
 pub fn create_sidebar_box() -> Box {
     Box::builder()
         .width_request(200)
