@@ -7,16 +7,17 @@ use gtk4::{
     glib::Sender,
     traits::{BoxExt, ButtonExt, GtkWindowExt},
     Application, ApplicationWindow, Button,
-    Orientation::{Horizontal, Vertical},
 };
 
 use self::requests::{accept_request, decline_request};
 
 use crate::views::widgets_creation::{
-    build_application_window, create_center_button, create_label, create_main_box,
+    build_application_window, create_center_button, create_label, create_message_sender_box,
 };
 
 use crate::controller::controller_message::ControllerMessage;
+
+use super::widgets_creation::create_main_box_add_view;
 
 const ACCEPT_BUTTON_TEXT: &str = "Accept";
 const DECLINE_BUTTON_TEXT: &str = "Decline";
@@ -53,14 +54,14 @@ impl DccInvitationView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Vertical, 300, 300);
+        let main_box = create_main_box_add_view();
 
         let message = format!("{client} {INVITATION}");
         let invitation = create_label(&message);
 
         main_box.append(&invitation);
 
-        let button_box = create_main_box(Horizontal, 150, 300);
+        let button_box = create_message_sender_box();
         self.connect_accept_button(client.clone(), address, self.sender.clone());
         self.connect_decline_button(client, self.sender.clone());
 
