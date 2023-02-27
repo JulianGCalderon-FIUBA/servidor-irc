@@ -18,7 +18,7 @@ use crate::{
 use self::{
     requests::{
         add_invite_view_request, add_safe_conversation_view_request, quit_channel_request,
-        remove_conversation_request, send_file_request, send_names_request,
+        remove_conversation_request, send_names_request,
     },
     widgets_creation::create_conv_info_box,
 };
@@ -48,14 +48,12 @@ impl MainView {
         conv_info.append(&self.channel_members_button);
         conv_info.append(&self.invite_button);
         conv_info.append(&self.safe_conversation_button);
-        conv_info.append(&self.send_file_button);
 
         self.welcome_view();
 
         self.connect_quit_channel(self.current_chat.clone(), self.sender.clone());
         self.connect_invite_button(self.sender.clone());
         self.connect_safe_conversation_button(self.sender.clone());
-        self.connect_send_file_button(self.sender.clone());
         self.connect_members_button(self.sender.clone());
 
         conv_info
@@ -90,11 +88,6 @@ impl MainView {
         self.safe_conversation_button.connect_clicked(move |_| {
             add_safe_conversation_view_request(sender.clone());
         });
-    }
-
-    fn connect_send_file_button(&self, sender: Sender<ControllerMessage>) {
-        self.send_file_button
-            .connect_clicked(move |_| send_file_request(sender.clone()));
     }
 
     /// Connects members button.
@@ -159,9 +152,9 @@ impl MainView {
         self.quit_channel_button.add_css_class(DISABLE_BUTTON_CSS);
         self.invite_button.set_visible(false);
         self.safe_conversation_button.set_visible(false);
-        self.send_file_button.set_visible(false);
         self.channel_members_button.set_visible(false);
         self.safe_conversation_button.set_visible(false);
+        self.send_file_button.set_sensitive(false);
     }
 
     /// Returns users channels.
@@ -195,10 +188,9 @@ impl MainView {
             self.quit_channel_button
                 .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         }
-
+        self.send_file_button.set_sensitive(true);
         self.invite_button.set_visible(true);
         self.safe_conversation_button.set_visible(true);
-        self.send_file_button.set_visible(true);
         self.channel_members_button.set_visible(false);
     }
 
@@ -213,10 +205,9 @@ impl MainView {
             self.quit_channel_button
                 .add_css_class(EXIT_CHANNEL_BUTTON_CSS);
         }
-
+        self.send_file_button.set_sensitive(false);
         self.invite_button.set_visible(false);
         self.safe_conversation_button.set_visible(false);
-        self.send_file_button.set_visible(false);
         self.channel_members_button.set_visible(true);
     }
 }

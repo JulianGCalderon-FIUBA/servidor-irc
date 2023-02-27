@@ -2,8 +2,8 @@ use gtk4::glib::Sender;
 
 use crate::{
     controller::controller_message::ControllerMessage::{
-        self, OpenFileDialogChooserView, RemoveConversation, SendNamesMessageToInviteClient,
-        SendNamesMessageToKnowMembers, SendPartMessage, SendSafeConversationRequest,
+        self, RemoveConversation, SendNamesMessageToInviteClient, SendNamesMessageToKnowMembers,
+        SendPartMessage, SendSafeConversationRequest,
     },
     views::ERROR_TEXT,
 };
@@ -35,10 +35,6 @@ pub fn add_safe_conversation_view_request(sender: Sender<ControllerMessage>) {
     sender
         .send(SendSafeConversationRequest {})
         .expect(ERROR_TEXT);
-}
-
-pub fn send_file_request(sender: Sender<ControllerMessage>) {
-    sender.send(OpenFileDialogChooserView {}).expect(ERROR_TEXT);
 }
 
 /// Sends a names request to the controller.
