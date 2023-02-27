@@ -1,4 +1,6 @@
+/// Contains definition of used requests.
 pub mod requests;
+/// Contains multiple functions that create widgets for the view.
 mod widgets_creation;
 
 use std::collections::{hash_map::RandomState, HashMap};
@@ -88,6 +90,9 @@ impl MainView {
         });
     }
 
+    /// Connects the user info button.
+    ///
+    /// Sends a add user info view request to the controller.
     fn connect_user_info_button(&self, button: Button, sender: Sender<ControllerMessage>) {
         button.connect_clicked(move |_| {
             add_user_info_view(sender.clone());
@@ -184,6 +189,7 @@ impl MainView {
         self.load_messages_on_chat(conversation_label);
     }
 
+    /// Update self conversation button when appropiate.
     pub fn update_safe_conversation_button(
         &mut self,
         conversation_label: &str,
@@ -196,6 +202,7 @@ impl MainView {
         }
     }
 
+    /// Returns if the safe conversation button should be disabled.
     pub fn safe_conversation_button_should_be_disable(
         &mut self,
         conversation_label: &str,
@@ -207,6 +214,7 @@ impl MainView {
                 .has_css_class(SAFE_CONVERSATION_BUTTON_CSS)
     }
 
+    /// Returns if the safe conversation button should be enables.
     pub fn safe_conversation_button_should_be_enable(
         &mut self,
         conversation_label: &str,
@@ -218,6 +226,7 @@ impl MainView {
                 .has_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS)
     }
 
+    /// Disables the safe conversation button.
     pub fn disable_safe_conversation_button(&mut self) {
         self.safe_conversation_button
             .remove_css_class(SAFE_CONVERSATION_BUTTON_CSS);
@@ -229,6 +238,7 @@ impl MainView {
             .set_tooltip_text(Some(SAFE_BUTTON_TOOLTIP));
     }
 
+    /// Enables the safe conversation button.
     pub fn enable_safe_conversation_button(&mut self) {
         self.safe_conversation_button
             .remove_css_class(DISABLE_SAFE_CONVERSATION_BUTTON_CSS);
@@ -238,6 +248,7 @@ impl MainView {
         self.safe_conversation_button.set_has_tooltip(false);
     }
 
+    /// Updates the chat view on changing conversation.
     fn update_chat_view_when_change_conversation(&mut self, conversation_label: &str) {
         self.quit_channel_button.set_visible(true);
         self.remove_welcome_view_if_any();
@@ -251,12 +262,14 @@ impl MainView {
         self.input.set_text("");
     }
 
+    /// If there is a welcome view, it is removed
     fn remove_welcome_view_if_any(&mut self) {
         if self.welcome_box.is_visible() {
             self.remove_welcome_view();
         }
     }
 
+    /// Removes the welcome view.
     fn remove_welcome_view(&mut self) {
         self.welcome_box.set_visible(false);
         self.scrollwindow_chat.set_visible(true);
@@ -266,6 +279,7 @@ impl MainView {
         self.input.set_has_tooltip(false);
     }
 
+    /// Updates the chat button when it's clicked.
     fn update_chat_button_when_clicked(&mut self, conversation_label: &str) {
         let (conversation_button, _) = self.find_button_by_name(conversation_label);
         if let Some(button) = conversation_button {
@@ -274,6 +288,7 @@ impl MainView {
         }
     }
 
+    /// Updates the last chat button when the conversation changes.
     fn update_last_chat_button_when_change_conversation(&mut self, conversation_label: &str) {
         let (conversation_button, _) = self.find_button_by_name(conversation_label);
         if let Some(button) = conversation_button {

@@ -70,7 +70,6 @@ impl DccInvitationView {
 
         main_box.append(&invitation);
 
-
         let button_box = create_message_sender_box();
 
         self.connect_accept_button(client.clone(), address, self.sender.clone());
@@ -79,8 +78,6 @@ impl DccInvitationView {
         button_box.append(&self.accept_button);
         button_box.append(&self.decline_button);
         main_box.append(&button_box);
-
-        // self.connect_button(self.address_entry.clone(), self.sender.clone());
 
         window.set_child(Some(&main_box));
 

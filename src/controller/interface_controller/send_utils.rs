@@ -38,6 +38,7 @@ impl InterfaceController {
         self.cancel_transfer_dialog("Upload in progress", sender, controller);
     }
 
+    /// Starts file upload.
     fn start_file_upload(&mut self, sender: String, transferer: FileTransferer) {
         let sender_channel = self.sender.clone();
         thread::spawn(move || {
@@ -46,6 +47,7 @@ impl InterfaceController {
             sender_channel.send(message).unwrap();
         });
     }
+
     /// Creates a [`DccSendReceiver`] to handle the receiving end of a DCC SEND request.
     pub fn receive_dcc_send(
         &mut self,
@@ -70,6 +72,7 @@ impl InterfaceController {
         }
     }
 
+    /// Gets failed transfer
     fn get_failed_transfer_for(
         &mut self,
         sender: String,
@@ -91,6 +94,7 @@ impl InterfaceController {
         Some((path, filesize))
     }
 
+    /// Receives dcc send on failed transfer.
     fn receive_dcc_send_on_failed_transfer(
         &mut self,
         dcc_send_receiver: DccSendReceiver,
@@ -104,6 +108,7 @@ impl InterfaceController {
         self.dcc_resume_senders.insert(sender, dcc_resume_sender);
     }
 
+    /// Receives dcc send on new transfer.
     fn receive_dcc_send_on_new_transfer(
         &mut self,
         sender: String,
@@ -142,6 +147,7 @@ impl InterfaceController {
         self.cancel_transfer_dialog(dialog_message, sender, controller);
     }
 
+    /// Starts the sending of a previously interrupted file.
     fn start_resume_upload_file(
         &mut self,
         sender: String,
@@ -184,6 +190,7 @@ impl InterfaceController {
         self.cancel_transfer_dialog(dialog_message, sender, controller);
     }
 
+    /// Starts the download of a previously interrupted file.
     fn start_resume_download_file(
         &mut self,
         sender: String,
@@ -241,6 +248,7 @@ impl InterfaceController {
         completed_dialog.connect_response(move |completed_dialog, _| completed_dialog.destroy());
     }
 
+    /// Connects download with a message dialog.
     fn connect_download_request_dialog(&mut self, message_dialog: MessageDialog, sender: String) {
         let channel_sender = self.sender.clone();
         let main_window = self.main_window.clone();
@@ -297,6 +305,7 @@ impl InterfaceController {
     }
 }
 
+/// Builds the file chooser dialog.
 fn build_file_download_chooser_dialog(
     main_window: ApplicationWindow,
     sender: String,
@@ -327,6 +336,7 @@ fn build_file_download_chooser_dialog(
     });
 }
 
+/// Connects the file chooser dialog.
 pub fn connect_receiver_file_chooser(
     file_chooser_dialog: FileChooserDialog,
     target: String,

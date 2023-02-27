@@ -4,7 +4,7 @@ use gtk4::glib::Sender;
 
 /// Sends a join request to the controller.  
 ///
-/// Receives a channel name.
+/// Receives a channel name and the sender.
 pub fn join_channel_request(input: String, sender: Sender<ControllerMessage>) {
     sender
         .send(SendJoinMessage { channel: input })

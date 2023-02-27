@@ -4,7 +4,7 @@ use gtk4::glib::Sender;
 
 /// Sends a private message request to the controller.
 ///
-/// Receives the message.
+/// Receives the message and the sender.
 pub fn priv_message_request(input_text: String, sender: Sender<ControllerMessage>) {
     let priv_message = SendPrivMessage {
         message: input_text,
@@ -12,6 +12,9 @@ pub fn priv_message_request(input_text: String, sender: Sender<ControllerMessage
     sender.send(priv_message).expect(ERROR_TEXT);
 }
 
+/// Sends a file request to the controller.
+///
+/// Receives the sender.
 pub fn send_file_request(sender: Sender<ControllerMessage>) {
     sender.send(OpenFileDialogChooserView {}).expect(ERROR_TEXT);
 }

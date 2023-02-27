@@ -40,21 +40,33 @@ pub fn get_notifications_number(button: &Button) -> u32 {
     number_text.to_digit(RADIX).unwrap()
 }
 
+/// Returns if the button has notifications.
+///
+/// Receives a button, returns if there are any notifications.
 pub fn button_has_notifications(button: &Button) -> bool {
     button.has_css_class(NOTIFICATION_ON_BUTTON_CSS)
 }
 
+/// Remove button notifications.
+///
+/// Receives the button and the no notifications text.
 pub fn remove_button_notifications(button: &Button, no_notifications_text: &str) {
     button.set_label(no_notifications_text);
     button.remove_css_class(NOTIFICATION_ON_BUTTON_CSS);
 }
 
+/// Checks if there is any notification, and in that case, removes the notifications.
+///
+/// Receives the button and the no notifications text.
 pub fn remove_button_notifications_if_any(button: &Button, no_notifications_text: &str) {
     if button_has_notifications(button) {
         remove_button_notifications(button, no_notifications_text);
     }
 }
 
+/// Add notifications to button.
+///
+/// Receives the button and the button text without the notification.
 pub fn add_notification_to_button(button: &Button, button_text: String) {
     let mut notifications_number = 0;
     if button_has_notifications(button) {
@@ -66,10 +78,16 @@ pub fn add_notification_to_button(button: &Button, button_text: String) {
     button.set_label(&format!("{} ({})", button_text, notifications_number + 1));
 }
 
+/// Select the current conversation button.
+///
+/// Receives the button of the current conversation.
 pub fn select_conversation_button(button: &Button) {
     button.add_css_class(CHAT_BUTTON_SELECTED_CSS);
 }
 
+/// Deselect the current conversation button.
+///
+/// Receives the button of the current conversation.
 pub fn deselect_conversation_button(button: &Button) {
     button.remove_css_class(CHAT_BUTTON_SELECTED_CSS);
 }

@@ -16,6 +16,9 @@ use super::{
     WELCOME_MESSAGE, WELCOME_MESSAGE_CSS, WELCOME_TITLE, WELCOME_TITLE_CSS,
 };
 
+/// Creates the main view box.
+///
+/// Returns the box.
 pub fn create_main_view_box() -> Box {
     let main_box = Box::builder()
         .orientation(Horizontal)

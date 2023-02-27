@@ -15,10 +15,7 @@ use crate::{
     server::consts::commands::NAMES_COMMAND,
 };
 
-use super::{
-    names_message_intention::NamesMessageIntention,
-    InterfaceController,
-};
+use super::{names_message_intention::NamesMessageIntention, InterfaceController};
 
 use crate::controller::controller_message::ControllerMessage::OpenWarningView;
 
@@ -58,6 +55,9 @@ impl InterfaceController {
         not_mine
     }
 
+    /// Returns my current channels.
+    ///
+    /// Receives a hash map, returns a string vector with my channels.
     pub fn current_conv_channels(
         &mut self,
         channels_and_clients: HashMap<String, Vec<String>>,
@@ -65,38 +65,14 @@ impl InterfaceController {
         client_channels(channels_and_clients, self.current_conv.clone())
     }
 
-    // pub fn dcc_receive_accept(&mut self, client: String) {
-    //     let mut dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
-    //     let dcc_std_receiver = dcc_chat.async_read_message();
-    //     self.dcc_chats.insert(client.clone(), dcc_chat);
-
-    //     let (dcc_sender, dcc_receiver) = get_sender_and_receiver();
-
-    //     thread::spawn(move || {
-    //         while let Ok(message_received) = dcc_std_receiver.recv() {
-    //             dcc_sender.send(message_received).expect("error");
-    //         }
-    //     });
-
-    //     self.receiver_attach(client.clone(), dcc_receiver, self.sender.clone());
-
-    //     self.main_view.disable_safe_conversation_button();
-
-    //     let mut safe_conversation = safe_conversation_view(self.nickname.clone(), &self.sender);
-    //     safe_conversation
-    //         .get_view(&client, self.app.clone())
-    //         .show();
-    //     self.safe_conversation_view.insert(client, safe_conversation);
-    // }
-
-    // pub fn dcc_receive_decline(&mut self, client: String) {
-    //     self.dcc_senders.remove(&client).unwrap().close();
-    // }
-
+    /// Get stream from client.
+    ///
+    /// Returns TcpStream.
     pub fn get_stream(&mut self) -> TcpStream {
         self.client.get_stream().unwrap()
     }
 
+    /// Handles dcc message reception.
     pub fn receive_dcc_message(&mut self, message: Message, content: String) {
         let (_, _, sender_nickname) = self.decode_priv_message(message);
 
@@ -145,6 +121,7 @@ impl InterfaceController {
         }
     }
 
+    /// Handles reception of a private message.
     pub fn receive_regular_privmsg(&mut self, message: Message) {
         let (channel, message, sender_nickname) = self.decode_priv_message(message);
         if let Some(..) = channel {
@@ -156,12 +133,14 @@ impl InterfaceController {
         }
     }
 
+    /// Removes myself from clients list.
     pub fn remove_myself(&mut self, all_clients: &mut Vec<String>) {
         let nickname = self.nickname.clone();
         remove_element(all_clients, &nickname);
         remove_element(all_clients, &format!("{}{nickname}", OPERATOR_CHARACTER));
     }
 
+    /// Sends names message to the server.
     pub fn send_names_message(
         &mut self,
         intention: NamesMessageIntention,
@@ -173,6 +152,7 @@ impl InterfaceController {
         self.client.send(&message).expect(NAMES_ERROR_TEXT);
     }
 
+    /// Sends open warning controller message.
     pub fn send_open_warning_view(&mut self, warning_text: &str) {
         let to_send = OpenWarningView {
             message: warning_text.to_string(),

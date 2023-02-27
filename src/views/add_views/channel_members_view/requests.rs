@@ -4,7 +4,7 @@ use gtk4::glib::Sender;
 
 /// Sends a kick request to the controller.  
 ///
-/// Receives a channel name and a member.
+/// Receives a channel name, a member and the sender.
 pub fn kick_request(channel: String, member: String, sender: Sender<ControllerMessage>) {
     sender
         .send(SendKickMessage { channel, member })

@@ -10,6 +10,9 @@ use super::InterfaceController;
 use std::{net::TcpStream, thread};
 
 impl InterfaceController {
+    /// Starts listening a dcc chat
+    ///
+    /// Receives a stream and a string sender, returns nothing.
     pub fn start_listening_dcc(&mut self, dcc_chat: TcpStream, sender: Sender<String>) {
         let (_async_reader, message_receiver) = AsyncReader::spawn(dcc_chat);
         thread::spawn(move || {
@@ -24,6 +27,9 @@ impl InterfaceController {
         });
     }
 
+    /// Function to start sending whatever the receiver receives through the sender.
+    ///
+    /// Receives a string, string receiver and a controller message sender, returns nothing.
     pub fn receiver_attach(
         &mut self,
         client: String,
