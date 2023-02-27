@@ -72,8 +72,10 @@ impl SafeConversationView {
 
         let top_box = create_message_sender_box();
 
+        self.current_chat.set_width_request(550);
         self.close_button
             .add_css_class(QUIT_BUTTON_CSS);
+
 
         top_box.append(&self.current_chat);
         top_box.append(&self.close_button);
