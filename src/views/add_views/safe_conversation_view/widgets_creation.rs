@@ -1,4 +1,4 @@
-use gtk4::{traits::WidgetExt, Align::Center, Label};
+use gtk4::{traits::WidgetExt, Align::{Center, Start}, Orientation::Vertical, Label, Box};
 
 const DCC_CHATS_DESCRIPTION: &str = "𝘿𝙞𝙧𝙚𝙘𝙩 𝘾𝙡𝙞𝙚𝙣𝙩-𝙏𝙤-𝘾𝙡𝙞𝙚𝙣𝙩 𝙘𝙝𝙖𝙩𝙨:
 • Use end-to-end encryption.
@@ -22,4 +22,19 @@ pub fn create_initial_message(nickname: &str, client: &str) -> Label {
         .build();
     message.add_css_class("send_message");
     message
+}
+
+/// Creates gtk box.
+///
+/// Receives nothing, returns a Box.
+pub fn create_safe_message_box() -> Box {
+    Box::builder()
+        .orientation(Vertical)
+        .margin_top(10)
+        .margin_bottom(10)
+        .margin_start(10)
+        .margin_bottom(10)
+        .width_request(638)
+        .halign(Start)
+        .build()
 }
