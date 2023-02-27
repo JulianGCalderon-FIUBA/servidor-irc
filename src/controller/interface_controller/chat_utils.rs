@@ -8,6 +8,10 @@ use crate::{controller::utils::get_sender_and_receiver, ctcp::dcc_chat::dcc_chat
 use super::{InterfaceController, window_creation::{safe_conversation_view, dcc_invitation_window, close_safe_conv_window}};
 
 impl InterfaceController {
+    /// Handles a dcc accept reception.
+    /// Creates new safe conversation view and starts listening from that stream.
+    /// 
+    /// Receives a string, returns nothing.
     pub fn dcc_receive_accept(&mut self, client: String) {
         let mut dcc_chat = self.dcc_senders.remove(&client).unwrap().accept().unwrap();
         let dcc_std_receiver = dcc_chat.async_read_message();
@@ -33,10 +37,17 @@ impl InterfaceController {
         self.safe_conversation_window.insert(client, safe_view);
     }
 
+    /// Handles a dcc decline reception.
+    /// 
+    /// Receives a string, returns nothing.
     pub fn dcc_receive_decline(&mut self, client: String) {
         self.dcc_senders.remove(&client).unwrap().close();
     }
 
+    /// Handles a new dcc invitation.
+    /// Opens the dcc invitation view.
+    /// 
+    /// Receives a string and an address, returns nothing.
     pub fn open_dcc_invitation_view(&mut self, client: String, message: SocketAddr) {
         let stream = self.get_stream();
         let dcc_receiver = DccChatReceiver::new(stream, client.clone());
@@ -47,10 +58,17 @@ impl InterfaceController {
         self.dcc_invitation_window.show();
     }
 
+    /// Handles a dcc close reception.
+    /// Shows dcc close pop up.
+    /// 
+    /// Receives a string, returns nothing.
     pub fn receive_dcc_close(&mut self, client: String) {
         close_safe_conv_window(&self.app, client, &self.sender).show()
     }
 
+    /// Closes dcc chat.
+    /// 
+    /// Receives a string, returns nothing.
     pub fn dcc_close(&mut self, client: String) {
         self.dcc_chats.remove(&client);
         self.safe_conversation_view.remove(&client);
