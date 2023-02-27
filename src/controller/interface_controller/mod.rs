@@ -1,3 +1,4 @@
+pub mod chat_utils;
 pub mod dcc_controller;
 pub mod decode_message;
 mod download;

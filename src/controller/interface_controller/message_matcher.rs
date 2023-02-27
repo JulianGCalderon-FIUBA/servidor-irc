@@ -12,7 +12,7 @@ use crate::{
         SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
     },
     ctcp::{
-        dcc_chat::{dcc_chat_receiver::DccChatReceiver, dcc_chat_sender::DccChatSender},
+        dcc_chat::dcc_chat_sender::DccChatSender,
         dcc_send::dcc_send_sender::DccSendSender,
         parse_ctcp,
     },
@@ -32,7 +32,7 @@ use super::{
     download::Download,
     send_utils::connect_receiver_file_chooser,
     window_creation::{
-        add_channel_view, add_client_window, channel_members_window, dcc_invitation_window,
+        add_channel_view, add_client_window, channel_members_window,
         invite_window, main_view, notifications_window, safe_conversation_view, user_info_window,
         warning_window,
     },
@@ -161,15 +161,6 @@ impl InterfaceController {
         }
     }
 
-    pub fn open_dcc_invitation_view(&mut self, client: String, message: SocketAddr) {
-        let stream = self.get_stream();
-        let dcc_receiver = DccChatReceiver::new(stream, client.clone());
-        self.dcc_receivers.insert(client.clone(), dcc_receiver);
-
-        self.dcc_invitation_window =
-            dcc_invitation_window(&self.app, client, message, &self.sender);
-        self.dcc_invitation_window.show();
-    }
 
     pub fn open_file_chooser_dialog_view(&mut self) {
         let target = self.current_conv.clone();
