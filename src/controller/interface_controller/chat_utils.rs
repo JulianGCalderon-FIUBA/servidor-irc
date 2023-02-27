@@ -6,7 +6,7 @@ use gtk4::{
 
 use crate::{controller::utils::get_sender_and_receiver, ctcp::dcc_chat::dcc_chat_receiver::DccChatReceiver};
 
-use super::{InterfaceController, window_creation::{safe_conversation_view, dcc_invitation_window}};
+use super::{InterfaceController, window_creation::{safe_conversation_view, dcc_invitation_window, close_safe_conv_window}};
 
 impl InterfaceController {
     pub fn dcc_receive_accept(&mut self, client: String) {
@@ -49,6 +49,10 @@ impl InterfaceController {
     }
 
     pub fn receive_dcc_close(&mut self, client: String) {
+        close_safe_conv_window(&self.app, client, &self.sender).show()
+    }
+
+    pub fn dcc_close(&mut self, client: String) {
         self.dcc_chats.remove(&client);
         self.safe_conversation_view.remove(&client);
         let safe_conversation = self.safe_conversation_window.remove(&client).unwrap();
