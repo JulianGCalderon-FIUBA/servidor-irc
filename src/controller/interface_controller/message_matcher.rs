@@ -89,6 +89,8 @@ impl InterfaceController {
 
         let safe_conversation = self.safe_conversation_window.remove(&client).unwrap();
         safe_conversation.close();
+
+        self.main_view.update_safe_conversation_button(&client, &self.dcc_chats);
     }
 
     pub fn decline_dcc_chat(&mut self, client: String) {

@@ -49,8 +49,11 @@ impl InterfaceController {
     }
 
     pub fn receive_dcc_close(&mut self, client: String) {
-        println!("Close chat with {}", client);
+        self.dcc_chats.remove(&client);
+        self.safe_conversation_view.remove(&client);
         let safe_conversation = self.safe_conversation_window.remove(&client).unwrap();
         safe_conversation.close();
+
+        self.main_view.update_safe_conversation_button(&client, &self.dcc_chats);
     }
 }
