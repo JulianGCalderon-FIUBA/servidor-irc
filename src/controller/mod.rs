@@ -21,6 +21,7 @@ use self::{controller_message::ControllerMessage, interface_controller::Interfac
 const OPEN_ADD_CLIENT_VIEW_ERROR_TEXT: &str = "ERROR: Open add client view";
 const OPEN_INVITE_VIEW_ERROR_TEXT: &str = "ERROR: Open invite view";
 
+const CTCP_ERROR_TEXT: &str = "ERROR: CTCP command";
 const INVITE_ERROR_TEXT: &str = "ERROR: INVITE command";
 const JOIN_ERROR_TEXT: &str = "ERROR: JOIN command";
 const KICK_ERROR_TEXT: &str = "ERROR: KICK command";

@@ -8,17 +8,17 @@ use gtk4::{
     traits::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt},
     Align::{Center, Start},
     Application, ApplicationWindow, Button,
-    Orientation::{Horizontal, Vertical},
 };
 
 use self::requests::{accept_request, decline_request};
 
 use crate::views::widgets_creation::{
-    build_application_window, create_center_button, create_label, create_main_box,
+    build_application_window, create_center_button, create_label, create_message_sender_box,
 };
 
 use crate::controller::controller_message::ControllerMessage;
 
+use super::widgets_creation::create_main_box_add_view;
 use super::widgets_creation::create_title;
 
 const ACCEPT_BUTTON_TEXT: &str = "Accept";
@@ -58,7 +58,7 @@ impl DccInvitationView {
         let window = build_application_window();
         window.set_application(Some(&app));
 
-        let main_box = create_main_box(Vertical, 100, 300);
+        let main_box = create_main_box_add_view();
 
         let title = create_title(TITLE);
         main_box.append(&title);
@@ -70,8 +70,9 @@ impl DccInvitationView {
 
         main_box.append(&invitation);
 
-        let button_box = create_main_box(Horizontal, 100, 100);
-        button_box.set_halign(Center);
+
+        let button_box = create_message_sender_box();
+
         self.connect_accept_button(client.clone(), address, self.sender.clone());
         self.connect_decline_button(client, self.sender.clone());
 

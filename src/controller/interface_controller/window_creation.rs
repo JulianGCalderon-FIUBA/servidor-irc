@@ -10,7 +10,7 @@ use crate::{
             channel_members_view::ChannelMembersView, dcc_invitation_view::DccInvitationView,
             invite_view::InviteView, notifications_view::NotificationsView,
             safe_conversation_view::SafeConversationView, user_info_view::UserInfoView,
-            warning_view::WarningView,
+            warning_view::WarningView, close_safe_conv_view::CloseSafeConvView,
         },
         ip_view::IpView,
         main_view::MainView,
@@ -38,6 +38,10 @@ pub fn channel_members_window(
     sender: &Sender<ControllerMessage>,
 ) -> ApplicationWindow {
     ChannelMembersView::new(channel, clients, nickname, sender.clone()).get_view(app.clone())
+}
+
+pub fn close_safe_conv_window(app: &Application, client: String, sender: &Sender<ControllerMessage>) -> ApplicationWindow {
+    CloseSafeConvView::new(sender.clone()).get_view(app.clone(), client)
 }
 
 pub fn dcc_invitation_window(
@@ -74,10 +78,11 @@ pub fn register_window(app: &Application, sender: &Sender<ControllerMessage>) ->
 }
 
 pub fn safe_conversation_view(
+    client: &str,
     nickname: String,
     sender: &Sender<ControllerMessage>,
 ) -> SafeConversationView {
-    SafeConversationView::new(nickname, sender.clone())
+    SafeConversationView::new(client, nickname, sender.clone())
 }
 
 pub fn user_info_window(

@@ -5,22 +5,22 @@ use crate::{
     controller::{
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
         utils::{channels_not_mine, get_sender_and_receiver, vec_is_not_empty},
-        CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
+        CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, CTCP_ERROR_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
         KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
         NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT, OPEN_INVITE_VIEW_ERROR_TEXT,
         PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT, QUIT_ERROR_TEXT,
         SERVER_CONNECT_ERROR_TEXT, USER_ERROR_TEXT,
     },
     ctcp::{
-        dcc_chat::{dcc_chat_receiver::DccChatReceiver, dcc_chat_sender::DccChatSender},
+        dcc_chat::dcc_chat_sender::DccChatSender,
         dcc_send::dcc_send_sender::DccSendSender,
         parse_ctcp,
     },
     macros::some_or_return,
     message::Message,
     server::consts::commands::{
-        INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
-        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
+        CTCP_COMMAND, INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
+        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND, 
     },
 };
 use gtk4::{
@@ -32,7 +32,7 @@ use super::{
     download::Download,
     send_utils::connect_receiver_file_chooser,
     window_creation::{
-        add_channel_view, add_client_window, channel_members_window, dcc_invitation_window,
+        add_channel_view, add_client_window, channel_members_window,
         invite_window, main_view, notifications_window, safe_conversation_view, user_info_window,
         warning_window,
     },
@@ -59,10 +59,12 @@ impl InterfaceController {
 
         self.main_view.disable_safe_conversation_button();
 
-        self.safe_conversation_view = safe_conversation_view(self.nickname.clone(), &self.sender);
-        self.safe_conversation_view
-            .get_view(&client, self.app.clone())
-            .show();
+        let mut safe_conversation = safe_conversation_view(&client, self.nickname.clone(), &self.sender);
+        let safe_view = safe_conversation.get_view(self.app.clone());
+        safe_view.show();
+
+        self.safe_conversation_view.insert(client.clone(), safe_conversation);
+        self.safe_conversation_window.insert(client, safe_view);
     }
 
     pub fn add_new_client(&mut self, new_client: String) {
@@ -76,6 +78,19 @@ impl InterfaceController {
         self.current_conv = current_conversation;
         self.main_view
             .change_conversation(last_conv, self.current_conv.clone(), &self.dcc_chats);
+    }
+
+    pub fn close_safe_view(&mut self, client: String) {
+        self.dcc_chats.remove(&client);
+        self.safe_conversation_view.remove(&client);
+
+        let dcc_close = format!("{CTCP_COMMAND} {client} :DCC CLOSE");
+        self.client.send(&dcc_close).expect(CTCP_ERROR_TEXT);
+
+        let safe_conversation = self.safe_conversation_window.remove(&client).unwrap();
+        safe_conversation.close();
+
+        self.main_view.update_safe_conversation_button(&client, &self.dcc_chats);
     }
 
     pub fn decline_dcc_chat(&mut self, client: String) {
@@ -151,15 +166,6 @@ impl InterfaceController {
         }
     }
 
-    pub fn open_dcc_invitation_view(&mut self, client: String, message: SocketAddr) {
-        let stream = self.get_stream();
-        let dcc_receiver = DccChatReceiver::new(stream, client.clone());
-        self.dcc_receivers.insert(client.clone(), dcc_receiver);
-
-        self.dcc_invitation_window =
-            dcc_invitation_window(&self.app, client, message, &self.sender);
-        self.dcc_invitation_window.show();
-    }
 
     pub fn open_file_chooser_dialog_view(&mut self) {
         let target = self.current_conv.clone();
@@ -333,8 +339,12 @@ impl InterfaceController {
         self.transfer_result(result, sender);
     }
 
-    pub fn receive_safe_message(&mut self, _client: String, message: String) {
-        self.safe_conversation_view.receive_message(message);
+    pub fn receive_safe_message(&mut self, client: String, message: String) {
+        let safe_conversation = self.safe_conversation_view.remove(&client);
+        if let Some(mut safe_view) = safe_conversation {
+            safe_view.receive_message(message);
+            self.safe_conversation_view.insert(client, safe_view);
+        }
     }
 
     pub fn register(&mut self, pass: String, nickname: String, username: String, realname: String) {
@@ -432,8 +442,13 @@ impl InterfaceController {
         if let Some(mut dcc_chat) = dcc {
             dcc_chat.send_raw(&message).unwrap();
             self.dcc_chats.insert(receiver_client.clone(), dcc_chat);
-            self.safe_conversation_view
-                .send_message(message, receiver_client);
+            let safe_conversation = self.safe_conversation_view.remove(&receiver_client);
+            if let Some(mut safe_view) = safe_conversation {
+                safe_view.send_message(message, receiver_client.clone());
+                self.safe_conversation_view.insert(receiver_client, safe_view);
+            }
+            // self.safe_conversation_view
+            //     .send_message(message, receiver_client);
         }
     }
 }

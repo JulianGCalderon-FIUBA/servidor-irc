@@ -27,7 +27,10 @@ use crate::{
     },
 };
 
-use self::{requests::send_safe_message_request, widgets_creation::create_initial_message};
+use self::{requests::{send_safe_message_request, close_safe_view_request}, widgets_creation::create_initial_message};
+
+const QUIT_BUTTON_TEXT: &str = "x";
+const QUIT_BUTTON_CSS: &str = "exit_channel";
 
 /// Shows channel members view.
 /// Contains an exit button.
@@ -39,13 +42,14 @@ pub struct SafeConversationView {
     scrollwindow_chat: ScrolledWindow,
     error_label: Label,
     send_message: Button,
+    close_button: Button,
     current_chat: Label,
     sender: Sender<ControllerMessage>,
 }
 
 impl SafeConversationView {
     /// Creates new [`SafeConversationView`]
-    pub fn new(nickname: String, sender: Sender<ControllerMessage>) -> Self {
+    pub fn new(client: &str, nickname: String, sender: Sender<ControllerMessage>) -> Self {
         Self {
             input: create_entry(ENTRY_PLACEHOLDER),
             message_box: create_message_box(),
@@ -53,7 +57,8 @@ impl SafeConversationView {
             error_label: create_error_label(),
             nickname,
             send_message: create_button_with_margin(SEND_BUTTON_TEXT),
-            current_chat: create_current_chat(""),
+            close_button: create_button_with_margin(QUIT_BUTTON_TEXT),
+            current_chat: create_current_chat(client),
             sender,
         }
     }
@@ -61,9 +66,19 @@ impl SafeConversationView {
     /// Returns the view's window.
     ///
     /// Receives the controller's app.
-    pub fn get_view(&mut self, client: &str, app: Application) -> ApplicationWindow {
+    pub fn get_view(&mut self, app: Application) -> ApplicationWindow {
         let window = build_application_window();
         window.set_application(Some(&app));
+
+        let top_box = create_message_sender_box();
+
+        self.current_chat.set_width_request(550);
+        self.close_button
+            .add_css_class(QUIT_BUTTON_CSS);
+
+
+        top_box.append(&self.current_chat);
+        top_box.append(&self.close_button);
 
         let chat = create_chat_box();
         let message_sender_box = create_message_sender_box();
@@ -71,8 +86,6 @@ impl SafeConversationView {
         self.input.set_width_request(600);
         self.input.set_margin_start(15);
         message_sender_box.append(&self.input);
-
-        self.current_chat.set_label(client);
 
         self.scrollwindow_chat.set_child(Some(&self.message_box));
 
@@ -84,15 +97,18 @@ impl SafeConversationView {
         );
         message_sender_box.append(&self.send_message);
 
-        let initial_message = create_initial_message(&self.nickname, client);
+        let initial_message = create_initial_message(&self.nickname, &self.current_chat.label().to_string());
         self.message_box.append(&initial_message);
 
-        chat.append(&self.current_chat);
+        chat.append(&top_box);
         chat.append(&self.scrollwindow_chat);
         chat.append(&self.error_label);
         chat.append(&message_sender_box);
 
         window.set_child(Some(&chat));
+
+        self.connect_close_button(self.current_chat.label().to_string(), self.sender.clone());
+
         window
     }
 
@@ -132,5 +148,12 @@ impl SafeConversationView {
         let message = create_received_message(&message);
         self.message_box.append(&message);
         adjust_scrollbar(self.scrollwindow_chat.clone());
+    }
+
+    /// Closes the view.
+    fn connect_close_button(&mut self, current_chat: String, sender: Sender<ControllerMessage>) {
+        self.close_button.connect_clicked(move |_| {
+            close_safe_view_request(current_chat.clone(), sender.clone());
+        });
     }
 }

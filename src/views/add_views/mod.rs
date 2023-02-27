@@ -7,6 +7,9 @@ pub mod add_client_view;
 /// Contains channel members view.
 pub mod channel_members_view;
 
+/// Contains close safe conversation view.
+pub mod close_safe_conv_view;
+
 /// Contains dcc invitation view.
 pub mod dcc_invitation_view;
 

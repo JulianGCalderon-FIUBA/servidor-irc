@@ -1,3 +1,4 @@
+pub mod chat_utils;
 pub mod dcc_controller;
 pub mod decode_message;
 mod download;
@@ -39,7 +40,7 @@ use self::{
     names_message_intention::NamesMessageIntention::{self, Undefined},
     window_creation::{
         add_channel_view, add_client_window, dcc_invitation_window, invite_window, ip_window,
-        main_view, register_window, safe_conversation_view,
+        main_view, register_window,
     },
 };
 
@@ -74,7 +75,8 @@ pub struct InterfaceController {
     nickname: String,
     realname: String,
     register_window: ApplicationWindow,
-    safe_conversation_view: SafeConversationView,
+    safe_conversation_view: HashMap<String, SafeConversationView>,
+    safe_conversation_window: HashMap<String, ApplicationWindow>,
     sender: Sender<ControllerMessage>,
     servername: String,
     username: String,
@@ -110,7 +112,8 @@ impl InterfaceController {
             nickname: String::new(),
             realname: String::new(),
             register_window: register_window(&app, &sender),
-            safe_conversation_view: safe_conversation_view("".to_string(), &sender),
+            safe_conversation_view: HashMap::new(),
+            safe_conversation_window: HashMap::new(),
             sender,
             servername: String::new(),
             username: String::new(),
@@ -152,6 +155,12 @@ impl InterfaceController {
                 }
                 ChangeConversation { nickname } => {
                     self.change_conversation(nickname);
+                }
+                CloseDccChat { client } => {
+                    self.dcc_close(client);
+                }
+                CloseSafeView { client } => {
+                    self.close_safe_view(client);
                 }
                 DeclineDccChat { client } => {
                     self.decline_dcc_chat(client);
