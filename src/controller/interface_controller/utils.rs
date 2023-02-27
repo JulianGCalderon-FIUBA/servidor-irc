@@ -123,7 +123,7 @@ impl InterfaceController {
             ChatDecline => {
                 self.dcc_receive_decline(sender_nickname);
             }
-            Close => todo!(),
+            Close => println!("Close view with {}", sender_nickname),
             Resume {
                 filename,
                 port,

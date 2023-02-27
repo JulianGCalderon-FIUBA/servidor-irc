@@ -5,7 +5,7 @@ use crate::{
     controller::{
         controller_message::ControllerMessage::{OpenAddClientView, OpenInviteClientView},
         utils::{channels_not_mine, get_sender_and_receiver, vec_is_not_empty},
-        CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
+        CLIENT_IS_ALREADY_IN_CHANNELS_WARNING_TEXT, CTCP_ERROR_TEXT, INVITE_ERROR_TEXT, JOIN_ERROR_TEXT,
         KICK_ERROR_TEXT, LIST_ERROR_TEXT, NICK_ERROR_TEXT, NO_CHANNELS_WARNING_TEXT,
         NO_CLIENTS_WARNING_TEXT, OPEN_ADD_CLIENT_VIEW_ERROR_TEXT, OPEN_INVITE_VIEW_ERROR_TEXT,
         PART_ERROR_TEXT, PASS_ERROR_TEXT, PRIVMSG_ERROR_TEXT, QUIT_ERROR_TEXT,
@@ -19,8 +19,8 @@ use crate::{
     macros::some_or_return,
     message::Message,
     server::consts::commands::{
-        INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
-        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND,
+        CTCP_COMMAND, INVITE_COMMAND, JOIN_COMMAND, KICK_COMMAND, LIST_COMMAND, NICK_COMMAND, PART_COMMAND,
+        PASS_COMMAND, PRIVMSG_COMMAND, QUIT_COMMAND, USER_COMMAND, 
     },
 };
 use gtk4::{
@@ -80,8 +80,12 @@ impl InterfaceController {
             .change_conversation(last_conv, self.current_conv.clone(), &self.dcc_chats);
     }
 
-    pub fn close_safe_view(&mut self, _client: String) {
+    pub fn close_safe_view(&mut self, client: String) {
+        self.dcc_chats.remove(&client);
+        self.safe_conversation_view.remove(&client);
 
+        let dcc_close = format!("{CTCP_COMMAND} {client} :DCC CLOSE");
+        self.client.send(&dcc_close).expect(CTCP_ERROR_TEXT);
     }
 
     pub fn decline_dcc_chat(&mut self, client: String) {
