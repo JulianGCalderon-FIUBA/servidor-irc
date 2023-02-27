@@ -42,7 +42,7 @@ impl CloseSafeConvView {
 
         let main_box = create_main_box_add_view();
 
-        let message = format!("Hola");
+        let message = format!("{} closed this safe conversation", client);
         let title = create_title(&message);
         main_box.append(&title);
 
