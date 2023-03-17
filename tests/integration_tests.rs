@@ -112,24 +112,6 @@ fn client_can_register_in_server() {
     assert_eq!("353 #channel :nickname", response2.to_string());
 }
 
-//Corre pero está comentado para no hacer lentos los demás tests.
-
-// #[test]
-// fn client_connection_closes_after_timeout() {
-//     let address = "127.0.0.1:9008".to_string();
-//     let _server = create_lemonpie_server(address.clone());
-
-//     let client_thread = thread::spawn(|| {
-//         let mut client = Client::connect(address).unwrap();
-//         sleep(Duration::from_millis(101));
-
-//         let response = client.read().unwrap();
-//         assert_eq!("Registration timeout", response.to_string());
-//     });
-
-//     client_thread.join().unwrap();
-// }
-
 #[test]
 fn can_shutdown_server() {
     let address = "127.0.0.1:9009".to_string();
@@ -177,7 +159,7 @@ fn can_connect_two_servers() {
     );
 
     server2.connect_to(&address1);
-    thread::sleep(Duration::from_millis(10));
+    thread::sleep(Duration::from_millis(100));
 
     let thread1 = thread::spawn(move || {
         let privmsg = "PRIVMSG nickname2 :holaa";

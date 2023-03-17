@@ -21,17 +21,6 @@ pub mod message;
 /// This prevents an overflow attack on the server.
 pub mod thread_pool;
 
-/// This module contains the controller's functionality.
-/// The controller has the responsibility to communicate with both the server and the views.
-/// This gives a mvc pattern.
-pub mod controller;
-
-/// This module contains the views' functionality.
-/// The views module is responsible of creating all the views.
-/// This allows the user to use the application.
-pub mod views;
-
-pub mod ctcp;
 /// This module contains useful macros used across the project.
 pub mod macros;
 
