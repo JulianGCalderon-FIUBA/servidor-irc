@@ -2,7 +2,7 @@
 
 Trabajo practico grupal de la materia *Taller de Programacion I*, catedra *Deymonnaz*. El desarrollo se hizo junto a @solmoon16
 
-# irc-client
+# irc-server
 
 El servidor se implementó siguiendo el protocolo RFC 1459.
 
